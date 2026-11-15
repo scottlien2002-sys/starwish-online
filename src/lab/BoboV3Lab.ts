@@ -328,8 +328,8 @@ function createMaterials(scene: Scene, gltfMats: PBRMaterial[], useJelly: boolea
   const eyes = new StandardMaterial("BoboV3_Eyes", scene);
   eyes.diffuseTexture = eyeTex;
   if (eyes.diffuseTexture) eyes.diffuseTexture.hasAlpha = true;
-  eyes.useAlphaFromDiffuseTexture = false;
-  eyes.transparencyMode = 1; // ALPHATEST：不需排序、不造成過度繪製
+  eyes.useAlphaFromDiffuseTexture = true;
+  eyes.transparencyMode = 1; // ALPHATEST（只裁切、不混合）：不需排序、不造成過度繪製
   eyes.alphaCutOff = 0.45;
   eyes.emissiveColor = new Color3(0.55, 0.55, 0.6);
   eyes.specularColor = new Color3(0.9, 0.9, 1);
@@ -355,11 +355,12 @@ function createMaterials(scene: Scene, gltfMats: PBRMaterial[], useJelly: boolea
 
   const body = (_i: number): { material: StandardMaterial; jelly: JellyV3Plugin | null } => {
     const m = new StandardMaterial(`BoboV3_Body_${_i}`, scene);
-    m.diffuseColor = new Color3(0.9, 0.95, 1);
-    m.emissiveColor = new Color3(0.08, 0.13, 0.32);
+    // 頂點色（底部深藍紫 → 上方淡藍）× 偏藍紫的漫射；自發光補一點藍紫，避免受光後發白
+    m.diffuseColor = new Color3(0.72, 0.78, 1);
+    m.emissiveColor = new Color3(0.1, 0.09, 0.36);
     m.specularColor = new Color3(0.25, 0.25, 0.3);
     m.specularPower = 32;
-    m.alpha = 0.5;
+    m.alpha = 0.58;
     m.useSpecularOverAlpha = false;
     m.backFaceCulling = true;
     let jelly: JellyV3Plugin | null = null;

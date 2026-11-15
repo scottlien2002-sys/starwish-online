@@ -164,7 +164,7 @@ export const JELLY3_MAIN = `
   vec3 lp = (j3InvWorld * vec4(vPositionW, 1.0)).xyz / j3Params.x;
   float h = clamp(lp.y, 0.0, 1.0);
   vec3 body = mix(j3Deep, j3Top, smoothstep(0.05, 0.95, h));
-  color.rgb = mix(color.rgb, color.rgb * 0.55 + body * 0.55, jS * (0.18 + 0.32 * (1.0 - jNdV)));
+  color.rgb = mix(color.rgb, color.rgb * 0.5 + body * 0.6, jS * (0.3 + 0.35 * (1.0 - jNdV)));
 
   if (j3Params.z > 0.5) {
     // 沿折射後視線往內取兩個深度（視差 → 內部深度）
@@ -182,7 +182,7 @@ export const JELLY3_MAIN = `
     float pool = smoothstep(0.45, 0.0, length(p2.xz)) * (1.0 - smoothstep(0.0, 0.35, p2.y));
     vec3 inner = neb + vec3(0.85, 0.95, 1.0) * st + j3NebA * pool * 0.55;
     // 正面看進去最多、邊緣少（邊緣是表面反光）
-    color.rgb += inner * jS * (0.35 + 0.65 * jNdV);
+    color.rgb += inner * 1.6 * jS * (0.35 + 0.65 * jNdV);
     color.a = clamp(color.a + (st * 0.35 + n1 * 0.12) * jS * jNdV, 0.0, 1.0);
   }
 

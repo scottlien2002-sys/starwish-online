@@ -292,6 +292,14 @@ def mat_image(name, image_path, clip):
     tex.image = bpy.data.images.load(image_path)
     tex.interpolation = "Linear"
     nt.links.new(tex.outputs["Color"], bsdf.inputs["Base Color"])
+    # 透明處用 Transparent BSDF 混合（Cycles 下貼花的透明區不會變亮）
+    out = nt.nodes.get("Material Output")
+    mix = nt.nodes.new("ShaderNodeMixShader")
+    tr = nt.nodes.new("ShaderNodeBsdfTransparent")
+    nt.links.new(tex.outputs["Alpha"], mix.inputs["Fac"])
+    nt.links.new(tr.outputs["BSDF"], mix.inputs[1])
+    nt.links.new(bsdf.outputs["BSDF"], mix.inputs[2])
+    nt.links.new(mix.outputs["Shader"], out.inputs["Surface"])
     nt.links.new(tex.outputs["Alpha"], bsdf.inputs["Alpha"])
     nt.links.new(tex.outputs["Color"], bsdf.inputs["Emission Color"])
     bsdf.inputs["Emission Strength"].default_value = 0.35
@@ -369,7 +377,7 @@ def build():
     belly = soft_star_mesh("BellyStar", bs["outer"], bs["inner"], bs["depth"])
     hit = BVHTree.FromObject(full, bpy.context.evaluated_depsgraph_get()).ray_cast(Vector((0, -3, bs["height"])), Vector((0, 1, 0)))
     # 嵌在果凍表面下（從側面看不會突出身體）
-    by = hit[0].y + 0.05 if hit[0] is not None else -0.52
+    by = hit[0].y + 0.06 if hit[0] is not None else -0.52
     belly.location = (0.0, by, bs["height"])
     belly.rotation_euler = (math.radians(-12), 0, 0)
     for st in (head, belly):
@@ -481,11 +489,7 @@ def render_views(body):
     sc.cycles.transparent_max_bounces = 32
     sc.render.resolution_x = 720
     sc.render.resolution_y = 600
-    try:
-        sc.view_settings.view_transform = "AgX"
-        sc.view_settings.look = "AgX - Medium High Contrast"
-    except Exception:
-        sc.view_settings.view_transform = "Standard"
+    sc.view_settings.view_transform = "Standard"
     world = bpy.data.worlds.new("World")
     sc.world = world
     world.use_nodes = True
@@ -505,9 +509,14 @@ def render_views(body):
         lo.rotation_euler = rot
         return lo
 
-    light("Key", "AREA", (-2.0, -2.5, 3.0), 380, 1.2, (math.radians(50), 0, math.radians(-35)))
-    light("Rim", "AREA", (3.0, 1.2, 1.8), 160, 1.0, (math.radians(-60), 0, math.radians(110)))
-    light("Fill", "AREA", (0.5, -3.0, 0.8), 140, 1.5, (math.radians(80), 0, 0))
+    # 燈光掛在一個隨鏡頭旋轉的支點上：三個視角的打光相同（背面不會被前方的燈從身體後面透出來）
+    rig = link(bpy.data.objects.new("LightRig", None))
+    for lo in (
+        light("Key", "AREA", (-2.0, -2.5, 3.0), 380, 1.2, (math.radians(50), 0, math.radians(-35))),
+        light("Rim", "AREA", (2.2, 1.6, 2.0), 140, 1.0, (math.radians(-55), 0, math.radians(125))),
+        light("Fill", "AREA", (0.5, -3.0, 0.8), 140, 1.5, (math.radians(80), 0, 0)),
+    ):
+        lo.parent = rig
 
     # 地面（只接收陰影的柔和平面）
     bpy.ops.mesh.primitive_plane_add(size=8, location=(0, 0, 0))
@@ -531,6 +540,7 @@ def render_views(body):
     for name, (loc, rot) in views.items():
         cam.location = loc
         cam.rotation_euler = rot
+        rig.rotation_euler = (0, 0, rot[2])
         sc.render.filepath = os.path.join(OUT, f"render_{name}.png")
         bpy.ops.render.render(write_still=True)
 

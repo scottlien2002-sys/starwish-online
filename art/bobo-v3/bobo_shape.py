@@ -33,7 +33,7 @@ ANTENNA_POINTS = np.array(
 ANTENNA_R0 = 0.058  # 根部半徑
 ANTENNA_R1 = 0.024  # 尖端半徑
 HEAD_STAR = dict(center=(0.282, -0.375, 1.12), outer=0.135, inner=0.075, depth=0.05)
-BELLY_STAR = dict(height=0.15, outer=0.11, inner=0.062, depth=0.035)
+BELLY_STAR = dict(height=0.18, outer=0.105, inner=0.06, depth=0.03)
 EYE = dict(height=0.52, half_spacing=0.25, rx=0.092, rz=0.112)
 MOUTH = dict(height=0.405)
 BLUSH = dict(height=0.39, half_spacing=0.38)
