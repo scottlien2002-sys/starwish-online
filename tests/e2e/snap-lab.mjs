@@ -18,6 +18,9 @@ const browser = await pw[browserName].launch();
 const page = await browser.newPage({ viewport: { width: 852, height: 393 }, deviceScaleFactor: 2, hasTouch: true });
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
+page.on("console", (m) => {
+  if (m.type() === "error" || m.text().includes("[bobo]")) errors.push(`console.${m.type()}: ${m.text()}`);
+});
 
 await page.addInitScript(() => {
   let now = 0;
@@ -149,6 +152,16 @@ await run(900);
 await shot("10_respawn", "重生（凝聚中）");
 await run(1500);
 await shot("11_after_respawn", "重生完成");
+
+// V2：正面／側面／背面（僅新版實驗室有 setView；舊版基準略過）
+if (await page.evaluate(() => typeof window.__starwishLab.setView === "function")) {
+  for (const [view, label] of [["front", "正面"], ["side", "側面"], ["back", "背面"]]) {
+    await page.evaluate((v) => window.__starwishLab.setView(v, true), view);
+    await run(600);
+    await shot(`v_${view}`, `視角：${label}`);
+  }
+  await page.evaluate(() => window.__starwishLab.setView("front", true));
+}
 
 const perf = await page.evaluate(() => (window.__starwishLab.perf ? window.__starwishLab.perf() : null));
 writeFileSync(`${outDir}/shots.json`, JSON.stringify({ shots, errors, perf }, null, 2));

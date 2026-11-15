@@ -19,6 +19,7 @@ import {
 } from "@babylonjs/core";
 import type { MonsterEffect, MonsterFace, MonsterPose, MonsterView } from "../anim/types.ts";
 import { createSoftStar } from "../meshes/star.ts";
+import { JellyMaterialPlugin } from "./JellyMaterialPlugin.ts";
 import { type FaceExpression, buildFacePatch, faceTextureHeight, paintFace } from "./face.ts";
 import {
   ANTENNA_POINTS,
@@ -92,6 +93,10 @@ export class StarDewBoboModel implements MonsterView {
   private readonly rise: ParticleSystem;
   private readonly materials: StandardMaterial[] = [];
   private readonly height: number;
+  /** V2 果凍材質外掛（低畫質為 null） */
+  private readonly jelly: JellyMaterialPlugin | null;
+  /** 體內星光粒子倍率（高 1、中 0.6、低 0） */
+  private readonly ambientParticles: number;
   private currentFace: MonsterFace | null = null;
   private time = 0;
 
@@ -132,6 +137,25 @@ export class StarDewBoboModel implements MonsterView {
     emissiveFresnel.bias = 0.05;
     emissiveFresnel.power = 3;
     this.bodyMat.emissiveFresnelParameters = emissiveFresnel;
+
+    // V2：果凍材質外掛（高、中畫質）。編譯失敗時自動停用，回到上面的 V1.2 材質。
+    const quality = options.quality ?? "medium";
+    this.ambientParticles = quality === "high" ? 1 : quality === "medium" ? 0.6 : 0;
+    if (quality !== "low") {
+      const jelly = new JellyMaterialPlugin(this.bodyMat);
+      jelly.height = this.height;
+      this.jelly = jelly;
+      this.bodyMat.onError = () => {
+        if (jelly.jellyEnabled) {
+          console.warn("[bobo] jelly shader failed, falling back to standard material");
+          jelly.jellyEnabled = false;
+        }
+      };
+      // 外掛已有藍紫邊緣光，原本的 emissive Fresnel 收斂一些避免輪廓過曝
+      emissiveFresnel.leftColor = new Color3(0.28, 0.4, 0.75);
+    } else {
+      this.jelly = null;
+    }
 
     // 內層 1：星空（一般混色，不再用加法混色疊白）
     const galaxy = createGalaxyTexture(scene, options.seed ?? 11);
@@ -335,7 +359,11 @@ export class StarDewBoboModel implements MonsterView {
     const fz = featureCounterScale(sz, 1).x;
     for (const a of this.featureAnchors) a.scaling.set(fc.x, fc.y, fz);
     // 體內星光：身體可見時持續閃爍
-    this.inner.emitRate = p.bodyVisible ? 22 * p.opacity : 0;
+    this.inner.emitRate = p.bodyVisible ? 22 * p.opacity * this.ambientParticles : 0;
+    if (this.jelly) {
+      this.jelly.baseY = this.root.position.y + p.offsetY * (this.height / BODY_HEIGHT);
+      this.jelly.strength = p.opacity;
+    }
 
     const o = p.opacity;
     this.bodyMat.alpha = BODY_ALPHA * o;
