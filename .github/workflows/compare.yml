@@ -8,9 +8,9 @@ on:
   workflow_dispatch:
     inputs:
       baseline:
-        description: "比較基準 commit（預設：第二階段開始前 = 第一階段 8e80163）"
+        description: "比較基準 commit（預設：W2-1 開始前的正式版 main = a7b661d）"
         required: false
-        default: "8e80163646b13c6d22cd7b69b9ffe5bf75a60581"
+        default: "a7b661d7de0f55fac2a70461becf988fb96d9805"
   push:
     branches: [main, "feature/**"]
     paths:
@@ -27,7 +27,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  BASELINE: ${{ github.event.inputs.baseline || '8e80163646b13c6d22cd7b69b9ffe5bf75a60581' }}
+  BASELINE: ${{ github.event.inputs.baseline || 'a7b661d7de0f55fac2a70461becf988fb96d9805' }}
 
 jobs:
   compare:
@@ -78,6 +78,8 @@ jobs:
         run: |
           case "${GITHUB_REF_NAME}" in
             feature/render-bobo-v2) CB=compare-bobo-v2 ;;
+            feature/render-meadow) CB=compare-meadow ;;
+            feature/render-meadow-base) CB=compare-meadow-base ;;
             *) CB=compare ;;
           esac
           echo "比較圖分支：$CB"

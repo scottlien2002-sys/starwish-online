@@ -26,6 +26,7 @@ import { ThirdPersonCamera } from "../camera/ThirdPersonCamera.ts";
 import { SKY_COLORS, createEngine, createShadows, createSkyDome, pickQuality, setupRendering, type RenderSetup } from "../render/RenderQuality.ts";
 import { PerfOverlay, type PerfStats } from "../render/PerfOverlay.ts";
 import type { QualitySettings } from "../render/quality.ts";
+import { FrameRecorder, type BenchmarkSummary } from "../render/benchmark.ts";
 import { createMonsterRegistry, MonsterFactory, type MonsterController, type MonsterTarget } from "../monsters/framework/index.ts";
 import { registerBabylonVisuals } from "../monsters/babylon/registerVisuals.ts";
 import { PREVIEW_COMBAT, PreviewCombat, previewSpawnPoints, separate, type PlayerAttackResult } from "./previewCombat.ts";
@@ -54,6 +55,28 @@ export interface DebugApi {
   knockDown(): void;
   /** 預覽測試：直接設定玩家位置（x, z） */
   teleport(x: number, z: number): void;
+  /** 效能測試：鏡頭繞角色一圈，回傳實測結果（網址加 ?bench=1 會自動執行） */
+  benchmark(seconds?: number): Promise<GameBenchmarkResult>;
+  /** 場景物件數（檢查記憶體是否持續增加） */
+  sceneCounts(): SceneCounts;
+}
+
+export interface SceneCounts {
+  meshes: number;
+  materials: number;
+  textures: number;
+  particleSystems: number;
+  /** 只有 Chrome 系瀏覽器提供；Safari 為 null */
+  jsHeapMB: number | null;
+}
+
+export interface GameBenchmarkResult extends BenchmarkSummary {
+  activeMeshes: number;
+  pixelRatio: number;
+  quality: string;
+  countsBefore: SceneCounts;
+  countsAfter: SceneCounts;
+  userAgent: string;
 }
 
 declare global {
@@ -95,6 +118,9 @@ export class Game {
   private lockedId: string | null = null;
   /** 倒地動作進度 0..1 */
   private downT = 0;
+  private bench: { rec: FrameRecorder; before: SceneCounts; resolve: (r: GameBenchmarkResult) => void } | null = null;
+  private benchEl: HTMLDivElement | null = null;
+  private readonly hudRoot: HTMLElement;
   private now = 0;
 
   constructor(canvas: HTMLCanvasElement, hudRoot: HTMLElement) {
@@ -164,6 +190,7 @@ export class Game {
     this.lockRing.isPickable = false;
     this.lockRing.setEnabled(false);
 
+    this.hudRoot = hudRoot;
     this.hud = new Hud(hudRoot);
     this.hud.setLevel(1);
     // 經驗值與 MP 尚無系統：固定顯示；HP 由預覽測試戰鬥更新
@@ -198,6 +225,8 @@ export class Game {
     this.engine.runRenderLoop(this.frame);
     if (!this.welcomed) {
       this.welcomed = true;
+      // 網址加 ?bench=1：進場 3 秒後自動執行 10 秒效能測試
+      if (new URLSearchParams(location.search).get("bench") === "1") window.setTimeout(() => void this.runBenchmark(10), 3000);
       this.hud.toast("預覽測試：前方有 3 隻星露啵啵，靠近後按攻擊鍵（測試用數值）", 4500);
     }
   }
@@ -208,7 +237,8 @@ export class Game {
   }
 
   private frame = (): void => {
-    const dt = Math.min(this.engine.getDeltaTime() / 1000, 0.1);
+    const rawDt = this.engine.getDeltaTime() / 1000;
+    const dt = Math.min(rawDt, 0.1);
     this.timeFrames++;
     this.timeSum += dt;
     this.timeMax = Math.max(this.timeMax, dt);
@@ -247,7 +277,10 @@ export class Game {
       root.rotation.x = 0;
     }
 
-    this.camera.update(dt, this.position, this.input.consumeCamera());
+    const camInput = this.input.consumeCamera();
+    // 效能測試中：鏡頭以固定速度繞角色一圈（每次測試的畫面內容一致）
+    if (this.bench) camInput.yaw = (dt * Math.PI * 2) / 10;
+    this.camera.update(dt, this.position, camInput);
 
     // 陰影跟著角色，只算附近範圍
     this.sun.position.copyFrom(this.position).subtractInPlace(this.sun.direction.scale(45));
@@ -257,6 +290,7 @@ export class Game {
     this.world.update(dt);
     this.scene.render();
     this.perfOverlay.update(dt);
+    if (this.bench && this.bench.rec.record(rawDt, this.perfOverlay.stats().drawCalls)) this.finishBenchmark();
 
     this.fpsTimer += dt;
     if (this.fpsTimer >= 0.5) {
@@ -264,6 +298,58 @@ export class Game {
       this.hud.setFps(this.engine.getFps());
     }
   };
+
+  sceneCounts(): SceneCounts {
+    const mem = (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory;
+    return {
+      meshes: this.scene.meshes.length,
+      materials: this.scene.materials.length,
+      textures: this.scene.textures.length,
+      particleSystems: this.scene.particleSystems.length,
+      jsHeapMB: mem ? Math.round((mem.usedJSHeapSize / 1048576) * 10) / 10 : null,
+    };
+  }
+
+  runBenchmark(seconds = 10): Promise<GameBenchmarkResult> {
+    return new Promise((resolve) => {
+      if (this.bench) return;
+      this.input.moveOverride = null;
+      this.bench = { rec: new FrameRecorder(seconds), before: this.sceneCounts(), resolve };
+      this.hud.toast(`效能測試中（${seconds} 秒），請勿操作…`, (seconds + 0.5) * 1000);
+    });
+  }
+
+  private finishBenchmark(): void {
+    const b = this.bench;
+    if (!b) return;
+    this.bench = null;
+    const st = this.perfOverlay.stats();
+    const r: GameBenchmarkResult = {
+      ...b.rec.summary(),
+      activeMeshes: st.activeMeshes,
+      pixelRatio: st.pixelRatio,
+      quality: st.quality,
+      countsBefore: b.before,
+      countsAfter: this.sceneCounts(),
+      userAgent: navigator.userAgent,
+    };
+    if (!this.benchEl) {
+      this.benchEl = document.createElement("div");
+      this.benchEl.className = "game-bench-result";
+      this.benchEl.addEventListener("click", () => (this.benchEl!.hidden = true));
+      this.hudRoot.appendChild(this.benchEl);
+    }
+    const c0 = r.countsBefore, c1 = r.countsAfter;
+    this.benchEl.hidden = false;
+    this.benchEl.innerHTML =
+      `<b>新手草原效能測試（本機實測）</b><br>${r.seconds} 秒・畫質 ${r.quality}・${r.pixelRatio}x<br>` +
+      `平均 ${r.avgFps.toFixed(1)} FPS・最慢 1% ${r.low1Fps.toFixed(1)} FPS<br>` +
+      `最低 ${r.minFps.toFixed(1)} FPS・Draw Calls 平均 ${r.avgDrawCalls.toFixed(0)}（最高 ${r.maxDrawCalls}）<br>` +
+      `物件 ${c0.meshes}→${c1.meshes}・材質 ${c0.materials}→${c1.materials}・貼圖 ${c0.textures}→${c1.textures}` +
+      (c1.jsHeapMB !== null ? `<br>JS 記憶體 ${c0.jsHeapMB}→${c1.jsHeapMB} MB` : "") +
+      `<br><small>點此關閉</small>`;
+    b.resolve(r);
+  }
 
   private updateBars(): void {
     this.hud.setBars({ hp: this.combat.hp, maxHp: PREVIEW_COMBAT.playerMaxHp, mp: 50, maxMp: 50, exp: 0, expToNext: 100 });
@@ -447,6 +533,8 @@ export class Game {
         this.position.set(x, heightAt(x, z), z);
         this.player.root.position.copyFrom(this.position);
       },
+      benchmark: (seconds) => this.runBenchmark(seconds),
+      sceneCounts: () => this.sceneCounts(),
       renderer: () => ({
         webgl: this.engine.webGLVersion,
         hardwareScaling: this.engine.getHardwareScalingLevel(),

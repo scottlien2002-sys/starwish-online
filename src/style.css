@@ -518,3 +518,24 @@ body {
 .lab-bench-result[hidden] {
   display: none;
 }
+
+/* ---------- 新手草原：效能測試結果（?bench=1）---------- */
+.game-bench-result {
+  position: absolute;
+  top: calc(var(--safe-top) + 120px);
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: min(340px, 86vw);
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(40, 34, 70, 0.86);
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.55;
+  pointer-events: auto;
+  z-index: 20;
+}
+
+.game-bench-result[hidden] {
+  display: none;
+}

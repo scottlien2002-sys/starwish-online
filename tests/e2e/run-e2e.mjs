@@ -65,6 +65,7 @@ for (const name of browsers) {
         mons0.length === 3 && mons0.every((m) => m.hp === m.maxHp) && mons0.filter((m) => m.visible).length >= 2 && dists.every((d) => d >= 6 - 1e-6 && d <= 9 + 1e-6),
         { mons0, dists },
       );
+      const countsStart = await page.evaluate(() => window.__starwish.sceneCounts());
       if (vp === VIEWPORTS[0]) {
         const target = mons0[0].id;
         const near = async () => {
@@ -151,6 +152,16 @@ for (const name of browsers) {
         await page.waitForTimeout(200);
         const up = await page.evaluate(() => ({ c: window.__starwish.combat(), p: window.__starwish.getPlayer() }));
         check("草原：倒地後在出生點站起、HP 全滿", revived && up.c.hp === up.c.maxHp && up.c.tilt < 0.01 && Math.hypot(up.p.x, up.p.z) < 1.5, up);
+        // 擊殺、重生、倒地、復活一輪後，場景物件數不應增加（記憶體不持續累積）
+        const countsEnd = await page.evaluate(() => window.__starwish.sceneCounts());
+        check(
+          "草原：戰鬥一輪後場景物件數不增加",
+          countsEnd.meshes <= countsStart.meshes && countsEnd.materials <= countsStart.materials && countsEnd.textures <= countsStart.textures && countsEnd.particleSystems <= countsStart.particleSystems,
+          { countsStart, countsEnd },
+        );
+        // 效能測試功能（?bench=1 使用的同一套）：能跑完並回報數據
+        const bench = await page.evaluate(() => window.__starwish.benchmark(2));
+        check("草原：效能測試可執行", bench.frames > 10 && bench.avgFps > 0 && bench.avgDrawCalls > 0 && bench.countsAfter.meshes === bench.countsBefore.meshes, bench);
         // 確保後續移動測試時玩家不在倒地狀態
         await page.waitForFunction(() => !window.__starwish.combat().down, null, { timeout: 5000 }).catch(() => {});
         await page.evaluate(() => window.__starwish.teleport(0, 0));
