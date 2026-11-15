@@ -102,6 +102,17 @@ MonsterAnimator（動畫控制器，純邏輯，不依賴 Babylon）
 
 工具：`node tests/harness/bobo-face-preview.mjs`（在 Chromium 預覽三種表情貼圖）、`node tests/harness/bobo-blueprint.mjs`（比例藍圖）。
 
+### iPhone 實機初步效能驗收（2026-11-15，使用者實測）：通過
+
+iPhone Safari、高畫質、2x、10 秒「效能測試」：
+
+| 狀態 | 平均 FPS | 最慢 1% | 最低 | Draw Calls |
+|---|---|---|---|---|
+| 存活待機 | 60.0 | 50.0 | 34.5 | 22 |
+| 死亡 | 60.0 | 35.7 | 31.3 | 22 |
+
+僅涵蓋單隻怪物、10 秒短測；長時間（發熱降頻）與多隻同場景效能尚未測試。
+
 ### 仍未達設定圖品質（需 Blender / GLB 或手繪貼圖）
 
 - 身體、翅膀、觸角之間沒有真正的有機融合（目前是獨立網格疊合，根部以小鼓包遮接縫）。

@@ -56,6 +56,28 @@ const STAR_SHELL_ALPHA = 0.9;
 const WING_ALPHA = 0.38;
 const BODY_EMISSIVE = new Color3(0.1, 0.19, 0.42);
 const FLASH = new Color3(0.95, 0.95, 1);
+/** 已安裝星星光暈選擇器的 GlowLayer */
+const glowLayersWithStarTint = new WeakSet<GlowLayer>();
+
+function installStarGlowSelector(glow: GlowLayer): void {
+  if (glowLayersWithStarTint.has(glow)) return;
+  glowLayersWithStarTint.add(glow);
+  const prev = glow.customEmissiveColorSelector;
+  glow.customEmissiveColorSelector = (mesh, subMesh, material, result) => {
+    const tint = (mesh.metadata as { boboStarGlow?: () => number } | null)?.boboStarGlow;
+    if (tint) {
+      const k = tint() * 0.9;
+      result.set(k, 0.7 * k, 0.15 * k, 1);
+    } else if (prev) {
+      prev(mesh, subMesh, material, result);
+    } else {
+      const e = (material as StandardMaterial).emissiveColor;
+      if (e) result.set(e.r, e.g, e.b, 1);
+      else result.set(0, 0, 0, 1);
+    }
+  };
+}
+
 const STAR_GRADIENT = { center: [1, 0.97, 0.7] as [number, number, number], edge: [1, 0.72, 0.16] as [number, number, number] };
 
 /**
@@ -325,22 +347,11 @@ export class StarDewBoboModel implements MonsterView {
     if (options.glow) {
       for (const st of this.stars) options.glow.addIncludedOnlyMesh(st);
       options.glow.addIncludedOnlyMesh(this.ring);
-      // V2：星星光暈改為暖金色（否則中性亮度的 emissive 會讓光暈泛白、把星星洗成奶油色）
-      const glowLayer = options.glow;
-      const starSet = new Set<Mesh>(this.stars);
-      const prev = glowLayer.customEmissiveColorSelector;
-      glowLayer.customEmissiveColorSelector = (mesh, subMesh, material, result) => {
-        if (starSet.has(mesh)) {
-          const k = this.starMat.emissiveColor.r;
-          result.set(1 * k * 0.9, 0.7 * k * 0.9, 0.15 * k * 0.9, 1);
-        } else if (prev) {
-          prev(mesh, subMesh, material, result);
-        } else {
-          const e = (material as StandardMaterial).emissiveColor;
-          if (e) result.set(e.r, e.g, e.b, 1);
-          else result.set(0, 0, 0, 1);
-        }
-      };
+      // V2：星星光暈改為暖金色（否則中性亮度的 emissive 會讓光暈泛白、把星星洗成奶油色）。
+      // 每個 GlowLayer 只安裝一次共用選擇器，以網格 metadata 辨識星星：多隻怪物同場、
+      // 怪物銷毀後都不會累積包裝或殘留參照。
+      for (const st of this.stars) st.metadata = { ...(st.metadata ?? {}), boboStarGlow: () => this.starMat.emissiveColor.r };
+      installStarGlowSelector(options.glow);
     }
 
     this.setFace("normal");

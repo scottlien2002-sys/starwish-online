@@ -60,7 +60,8 @@ jobs:
 
       - name: Deploy to gh-pages branch
         # 只有 main 會部署到正式網址；部署前保留所有預覽版資料夾（preview*）
-        if: github.ref == 'refs/heads/main'
+        # 版面測試與端對端測試都必須通過才部署正式版（測試失敗時正式網站維持原狀）
+        if: github.ref == 'refs/heads/main' && steps.hud.outcome == 'success' && steps.e2e.outcome == 'success'
         run: |
           git clone -q --depth 1 -b gh-pages "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" /tmp/oldpages || true
           for d in /tmp/oldpages/preview*; do [ -d "$d" ] && cp -r "$d" dist/; done
