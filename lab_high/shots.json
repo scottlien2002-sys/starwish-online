@@ -1,0 +1,82 @@
+{
+  "shots": [
+    {
+      "name": "01_idle",
+      "caption": "待機",
+      "state": "idle"
+    },
+    {
+      "name": "02_move_a",
+      "caption": "移動（起跳）",
+      "state": "move"
+    },
+    {
+      "name": "03_move_b",
+      "caption": "移動（落地）",
+      "state": "move"
+    },
+    {
+      "name": "04_attack_charge",
+      "caption": "攻擊 0.25 秒（蓄力）",
+      "state": "attack"
+    },
+    {
+      "name": "05_attack_dash",
+      "caption": "攻擊 0.39 秒（衝撞）",
+      "state": "attack"
+    },
+    {
+      "name": "06_attack_impact",
+      "caption": "攻擊 0.45 秒（撞擊）",
+      "state": "attack"
+    },
+    {
+      "name": "07_attack_rebound",
+      "caption": "攻擊 0.70 秒（回彈）",
+      "state": "attack"
+    },
+    {
+      "name": "08_hit",
+      "caption": "受傷",
+      "state": "hit"
+    },
+    {
+      "name": "09_death",
+      "caption": "死亡（消散中）",
+      "state": "death"
+    },
+    {
+      "name": "10_respawn",
+      "caption": "重生（凝聚中）",
+      "state": "respawn"
+    },
+    {
+      "name": "11_after_respawn",
+      "caption": "重生完成",
+      "state": "idle"
+    },
+    {
+      "name": "v_front",
+      "caption": "視角：正面",
+      "state": "idle"
+    },
+    {
+      "name": "v_side",
+      "caption": "視角：側面",
+      "state": "idle"
+    },
+    {
+      "name": "v_back",
+      "caption": "視角：背面",
+      "state": "idle"
+    }
+  ],
+  "errors": [],
+  "perf": {
+    "fps": 60.00000000000205,
+    "drawCalls": 21,
+    "activeMeshes": 13,
+    "pixelRatio": 2,
+    "quality": "high"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "shots": [
+    {
+      "name": "g01_spawn",
+      "caption": "草原：出生點",
+      "state": "player z=0.00 x=0.00"
+    },
+    {
+      "name": "g02_walk",
+      "caption": "草原：前進 1.5 秒",
+      "state": "player z=7.58 x=-0.00"
+    },
+    {
+      "name": "g03_turn",
+      "caption": "草原：斜向移動後",
+      "state": "player z=12.08 x=6.00"
+    },
+    {
+      "name": "g04_bobo",
+      "caption": "草原：星露啵啵近照",
+      "state": "player z=2.15 x=0.28"
+    },
+    {
+      "name": "g05_bobo_hit",
+      "caption": "草原：攻擊蓄力",
+      "state": "player z=3.87 x=1.71"
+    },
+    {
+      "name": "g05b_attack_swing",
+      "caption": "草原：攻擊揮擊",
+      "state": "player z=3.87 x=1.71"
+    },
+    {
+      "name": "g06_player_down",
+      "caption": "草原：玩家 HP 歸零倒地",
+      "state": "player z=3.87 x=1.71"
+    }
+  ],
+  "errors": [],
+  "perf": {
+    "fps": 59.99999999999877,
+    "drawCalls": 79,
+    "activeMeshes": 62,
+    "pixelRatio": 1.25,
+    "quality": "low",
+    "postProcess": false,
+    "bloom": false,
+    "shadowFilter": "pcf",
+    "shadowMap": 512
+  },
+  "timing": {
+    "frames": 60,
+    "seconds": 0.9999999999999989,
+    "maxDt": 0.016666666666666743,
+    "minDt": 0.01666666666666663
+  }
+}

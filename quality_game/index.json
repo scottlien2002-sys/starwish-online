@@ -1,0 +1,58 @@
+{
+  "columns": [
+    {
+      "label": "高",
+      "errors": [],
+      "perf": {
+        "fps": 59.99999999999877,
+        "drawCalls": 93,
+        "activeMeshes": 62,
+        "pixelRatio": 2,
+        "quality": "high",
+        "postProcess": false,
+        "bloom": true,
+        "shadowFilter": "pcf",
+        "shadowMap": 2048
+      }
+    },
+    {
+      "label": "中",
+      "errors": [],
+      "perf": {
+        "fps": 59.99999999999877,
+        "drawCalls": 93,
+        "activeMeshes": 62,
+        "pixelRatio": 1.5,
+        "quality": "medium",
+        "postProcess": false,
+        "bloom": true,
+        "shadowFilter": "pcf",
+        "shadowMap": 1024
+      }
+    },
+    {
+      "label": "低",
+      "errors": [],
+      "perf": {
+        "fps": 59.99999999999877,
+        "drawCalls": 79,
+        "activeMeshes": 62,
+        "pixelRatio": 1.25,
+        "quality": "low",
+        "postProcess": false,
+        "bloom": false,
+        "shadowFilter": "pcf",
+        "shadowMap": 512
+      }
+    }
+  ],
+  "shots": [
+    "g01_spawn",
+    "g02_walk",
+    "g03_turn",
+    "g04_bobo",
+    "g05_bobo_hit",
+    "g05b_attack_swing",
+    "g06_player_down"
+  ]
+}
