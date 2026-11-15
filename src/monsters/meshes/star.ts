@@ -32,6 +32,7 @@ export function createPuffyStar(name: string, scene: Scene, outer = 0.5, inner =
   vd.positions = positions;
   vd.indices = indices;
   vd.normals = normals;
+  if (gradient) vd.colors = colors;
   const mesh = new Mesh(name, scene);
   vd.applyToMesh(mesh);
   return mesh;
@@ -50,12 +51,22 @@ export function createSoftStar(
   radiusFn: (a: number, outer: number, inner: number) => number,
   segments = 60,
   rings = 6,
+  /** 中心與邊緣的頂點色（做出中央亮黃、邊緣暖橘的圓潤立體感）；不給則不寫入頂點色 */
+  gradient?: { center: [number, number, number]; edge: [number, number, number] },
 ): Mesh {
+  const colors: number[] = [];
+  const pushColor = (s: number): void => {
+    if (!gradient) return;
+    const k = Math.pow(s, 1.6);
+    const c = gradient.center, e = gradient.edge;
+    colors.push(c[0] + (e[0] - c[0]) * k, c[1] + (e[1] - c[1]) * k, c[2] + (e[2] - c[2]) * k, 1);
+  };
   const positions: number[] = [];
   const indices: number[] = [];
   const ring = (side: 1 | -1): void => {
     const base = positions.length / 3;
     positions.push(0, 0, side * depth); // 中心
+    pushColor(0);
     for (let k = 1; k <= rings; k++) {
       const s = k / rings;
       // 鼓起曲線：中心最厚、邊緣變薄（邊緣保留一點厚度，看起來更像軟糖）
@@ -64,6 +75,7 @@ export function createSoftStar(
         const a = (i / segments) * Math.PI * 2;
         const r = radiusFn(a, outer, inner) * s;
         positions.push(Math.cos(a) * r, Math.sin(a) * r, z);
+        pushColor(s);
       }
     }
     const idx = (k: number, i: number): number => base + 1 + (k - 1) * segments + (i % segments);
@@ -87,6 +99,7 @@ export function createSoftStar(
   vd.positions = positions;
   vd.indices = indices;
   vd.normals = normals;
+  if (gradient) vd.colors = colors;
   const mesh = new Mesh(name, scene);
   vd.applyToMesh(mesh);
   return mesh;

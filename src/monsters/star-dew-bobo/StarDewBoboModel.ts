@@ -52,6 +52,7 @@ const STAR_SHELL_ALPHA = 0.9;
 const WING_ALPHA = 0.38;
 const BODY_EMISSIVE = new Color3(0.1, 0.19, 0.42);
 const FLASH = new Color3(0.95, 0.95, 1);
+const STAR_GRADIENT = { center: [1, 0.96, 0.62] as [number, number, number], edge: [1, 0.68, 0.12] as [number, number, number] };
 
 /**
  * 星露啵啵：程式化暫代 3D 模型（Babylon.js）。
@@ -160,8 +161,9 @@ export class StarDewBoboModel implements MonsterView {
     wingFresnel.power = 1.5;
     this.wingMat.opacityFresnelParameters = wingFresnel;
 
-    this.starMat = this.mat("PH_boboStar", new Color3(1, 0.9, 0.35));
-    this.starMat.emissiveColor = new Color3(1, 0.86, 0.3);
+    // V2：星星用頂點色（中央奶油黃 → 邊緣暖金），emissive 只負責發光暈
+    this.starMat = this.mat("PH_boboStar", Color3.White());
+    this.starMat.emissiveColor = new Color3(0.3, 0.2, 0.02);
     this.starMat.disableLighting = true;
     this.starMat.backFaceCulling = false;
 
@@ -184,7 +186,7 @@ export class StarDewBoboModel implements MonsterView {
 
     // ---------- 胸前星星 ----------
     const chest = surfacePoint(FACE_LAYOUT.chestStar.y, FACE_LAYOUT.chestStar.theta);
-    const chestStar = createSoftStar("PH_boboChestStar", scene, 0.11, 0.06, 0.035, softStarRadius);
+    const chestStar = createSoftStar("PH_boboChestStar", scene, 0.11, 0.06, 0.035, softStarRadius, 60, 6, STAR_GRADIENT);
     this.place(chestStar, chest, 0.01);
     chestStar.rotation.z = 0.25;
     chestStar.material = this.starMat;
@@ -220,11 +222,11 @@ export class StarDewBoboModel implements MonsterView {
     // 根部小鼓包：讓觸角像從果凍身體長出來，而非插在頭上
     const bulb = MeshBuilder.CreateSphere("PH_boboStalkRoot", { diameter: 1, segments: 12 }, scene);
     bulb.parent = this.antenna;
-    bulb.scaling.set(0.16, 0.1, 0.16);
-    bulb.position.y = 0.0;
+    bulb.scaling.set(0.13, 0.09, 0.13);
+    bulb.position.y = -0.035;
     bulb.material = this.bodyMat;
     bulb.alphaIndex = 2;
-    const headStar = createSoftStar("PH_boboHeadStar", scene, 0.15, 0.085, 0.05, softStarRadius);
+    const headStar = createSoftStar("PH_boboHeadStar", scene, 0.15, 0.085, 0.05, softStarRadius, 60, 6, STAR_GRADIENT);
     headStar.parent = this.antenna;
     headStar.position.set(HEAD_STAR_POS[0] * ANTENNA_SIDE, HEAD_STAR_POS[1], HEAD_STAR_POS[2]);
     headStar.rotation.set(0, -0.25 * ANTENNA_SIDE, 0.35 * ANTENNA_SIDE);
@@ -324,7 +326,9 @@ export class StarDewBoboModel implements MonsterView {
     const glow = Math.max(0, Math.min(1, p.starGlow));
     const starVis = Math.min(1, glow * 1.2);
     for (const st of this.stars) st.visibility = starVis;
-    this.starMat.emissiveColor.set(1 * (0.6 + 0.4 * glow), 0.86 * (0.6 + 0.4 * glow), 0.3 * (0.6 + 0.4 * glow));
+    const sk = 0.7 + 0.3 * glow;
+    this.starMat.diffuseColor.set(sk, sk, sk);
+    this.starMat.emissiveColor.set(0.3 * glow, 0.2 * glow, 0.02 * glow);
 
     Color3.LerpToRef(BODY_EMISSIVE, FLASH, Math.max(0, Math.min(1, p.hitFlash)) * 0.8, this.bodyMat.emissiveColor);
 
@@ -520,15 +524,16 @@ export class StarDewBoboModel implements MonsterView {
     const pivot = new TransformNode(`PH_boboWingPivot${side}`, this.scene);
     pivot.parent = this.squash;
     pivot.position.set(sp.x * 0.96, sp.y, sp.z * 0.96);
-    pivot.rotation.y = side * -0.25;
+    // V2：翅膀寬面朝前外側（正面與側面都看得到圓潤的翼面，而非細刺）
+    pivot.rotation.y = side * -0.55;
     // V2：圓潤的三瓣半透明小翅膀（依設定圖：大、中、小三片圓鰭向後上方展開，合併為單一網格）
     const lobes = [
-      { len: 0.34, wid: 0.2, th: 0.06, rx: 0, rz: 0.12, dy: 0.02, dz: 0 },
-      { len: 0.28, wid: 0.16, th: 0.05, rx: 0, rz: -0.28, dy: -0.04, dz: -0.04 },
-      { len: 0.2, wid: 0.12, th: 0.045, rx: 0, rz: -0.66, dy: -0.08, dz: -0.07 },
+      { len: 0.3, wid: 0.17, th: 0.035, rz: 0.32, dy: 0.03, dz: 0.004 },
+      { len: 0.27, wid: 0.15, th: 0.032, rz: 0.02, dy: -0.01, dz: 0 },
+      { len: 0.21, wid: 0.12, th: 0.03, rz: -0.3, dy: -0.04, dz: -0.004 },
     ];
     const parts = lobes.map((l, i) => {
-      const f = this.createFin(`PH_boboWingLobe${side}_${i}`, side, l.len, l.wid, l.th);
+      const f = this.createFin(`PH_boboWingLobe${side}_${i}`, side, l.len, l.wid, l.th, true);
       f.rotation.z = side * l.rz;
       f.position.set(0, l.dy, l.dz);
       return f;
@@ -543,17 +548,26 @@ export class StarDewBoboModel implements MonsterView {
   }
 
   /** 水滴鰭：沿 x 軸（向外）延伸，根部寬圓、尖端收細並下彎 */
-  private createFin(name: string, side: number, length: number, width: number, thickness: number): Mesh {
+  private createFin(name: string, side: number, length: number, width: number, thickness: number, broadFace = false): Mesh {
     const fin = MeshBuilder.CreateSphere(name, { diameter: 1, segments: 14, updatable: true }, this.scene);
     const pos = fin.getVerticesData(VertexBuffer.PositionKind);
     const idx = fin.getIndices();
     if (!pos || !idx) throw new Error("fin data missing");
     for (let i = 0; i < pos.length; i += 3) {
       const u = pos[i]! + 0.5; // 0 = 根部、1 = 尖端
-      const taper = 1 - 0.65 * u * u; // 尖端收細
       const x = u * length;
-      const y = pos[i + 1]! * thickness * taper - 0.06 * u * u; // 尖端微微下垂
-      const z = pos[i + 2]! * width * taper;
+      let y: number;
+      let z: number;
+      if (broadFace) {
+        // V2 翼瓣：寬面在 x-y 平面、前後很薄；尖端保持圓（不收成刺）
+        const taper = 1 - 0.3 * u * u;
+        y = pos[i + 1]! * width * taper;
+        z = pos[i + 2]! * thickness * (1 - 0.4 * u);
+      } else {
+        const taper = 1 - 0.65 * u * u; // 尖端收細
+        y = pos[i + 1]! * thickness * taper - 0.06 * u * u; // 尖端微微下垂
+        z = pos[i + 2]! * width * taper;
+      }
       pos[i] = side * x;
       pos[i + 1] = y;
       pos[i + 2] = z;
