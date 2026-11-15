@@ -39,9 +39,10 @@ export class PerfOverlay {
 
     this.el = document.createElement("div");
     this.el.className = "perf-panel";
-    this.el.dataset.layout = "perf-panel";
     this.text = document.createElement("div");
     this.text.className = "perf-text";
+    // 版面檢查標記放在文字與按鈕（兩個同層元件），不放在外框，避免外框與內部按鈕被判定重疊
+    this.text.dataset.layout = "perf-text";
     const btn = document.createElement("button");
     btn.className = "perf-quality";
     btn.dataset.layout = "btn-quality";
