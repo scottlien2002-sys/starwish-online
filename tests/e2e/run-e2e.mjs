@@ -114,10 +114,10 @@ for (const name of browsers) {
     if (run.fpsReference) console.log(`   FPS(參考): ${run.fpsReference.map((f) => f.toFixed(0)).join(", ")}`);
     await ctx.close();
   }
-  // ---------- 怪物測試場景：星露啵啵 ----------
-  {
+  // ---------- 單隻怪物測試頁：星露啵啵（程式化）、測試方塊（GLB）----------
+  for (const slug of ["bobo", "dummy"]) {
     const vp = VIEWPORTS[0];
-    const run = { browser: name, viewport: `${vp.name} / ?lab=bobo`, checks: {}, errors: [], screenshots: [] };
+    const run = { browser: name, viewport: `${vp.name} / ?lab=${slug}`, checks: {}, errors: [], screenshots: [] };
     const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
     const page = await ctx.newPage();
     page.on("pageerror", (e) => run.errors.push(`pageerror: ${e.message}`));
@@ -128,12 +128,12 @@ for (const name of browsers) {
     const req = (a) => page.evaluate((x) => window.__starwishLab.request(x), a);
     const state = () => page.evaluate(() => window.__starwishLab.state());
     const shot = async (label) => {
-      const f = `${outDir}${name}_bobo_${label}.png`;
+      const f = `${outDir}${name}_${slug}_${label}.png`;
       await page.screenshot({ path: f });
       run.screenshots.push(f.split("/test-results/")[1]);
     };
     try {
-      await page.goto(server.url + "/?lab=bobo", { waitUntil: "load" });
+      await page.goto(server.url + `/?lab=${slug}`, { waitUntil: "load" });
       await page.addStyleTag({ content: safeAreaCss(vp.safe) });
       const ready = await page
         .waitForFunction(() => window.__starwishLab?.ready === true, null, { timeout: 45000 })
@@ -199,6 +199,78 @@ for (const name of browsers) {
       run.errors.push(`exception: ${e.message}`);
     }
     run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 9;
+    if (!run.ok) failures++;
+    report.runs.push(run);
+    console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
+    for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}`);
+    for (const e of run.errors) console.log(`   ! ${e}`);
+    await ctx.close();
+  }
+
+  // ---------- 多怪物 AI 測試場（3 隻星露啵啵 + 2 隻 GLB 測試方塊）----------
+  {
+    const vp = VIEWPORTS[0];
+    const run = { browser: name, viewport: `${vp.name} / ?lab=field`, checks: {}, errors: [], screenshots: [] };
+    const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+    const page = await ctx.newPage();
+    page.on("pageerror", (e) => run.errors.push(`pageerror: ${e.message}`));
+    page.on("console", (m) => m.type() === "error" && run.errors.push(`console: ${m.text()}`));
+    const check = (key, ok, detail) => {
+      run.checks[key] = { ok, detail };
+    };
+    const list = () => page.evaluate(() => window.__starwishField.monsters());
+    try {
+      await page.goto(server.url + "/?lab=field", { waitUntil: "load" });
+      await page.addStyleTag({ content: safeAreaCss(vp.safe) });
+      const ready = await page
+        .waitForFunction(() => window.__starwishField?.ready === true, null, { timeout: 60000 })
+        .then(() => true)
+        .catch(() => false);
+      check("場景啟動（含 GLB 載入）", ready, null);
+      if (!ready) throw new Error("field 未啟動");
+      const ms = await list();
+      check("同時生成 5 隻怪物（3 程式化 + 2 GLB）", ms.length === 5 && ms.filter((m) => m.monsterId === "test_dummy").length === 2, ms.map((m) => m.id));
+      check("介面不重疊", (await page.evaluate((s) => window.__starwishField.hudIssues(s), vp.safe)).length === 0, null);
+
+      // 把目標放到第一隻星露啵啵旁邊 → 應追擊或攻擊
+      const bobo = ms.find((m) => m.monsterId === "star_dew_bobo");
+      await page.evaluate((p) => window.__starwishField.setTarget(p), { x: bobo.x + 3, z: bobo.z });
+      const engaged = await page
+        .waitForFunction((id) => ["chase", "attack"].includes(window.__starwishField.monsters().find((m) => m.id === id).mode), bobo.id, { timeout: 20000 })
+        .then(() => true)
+        .catch(() => false);
+      check("AI：目標靠近時追擊/攻擊", engaged, (await list()).find((m) => m.id === bobo.id));
+      await page.screenshot({ path: `${outDir}${name}_field_1_engage.png` });
+      run.screenshots.push(`e2e/${name}_field_1_engage.png`);
+
+      // 連續攻擊最近的怪物直到死亡
+      let killedId = null;
+      for (let i = 0; i < 10 && !killedId; i++) {
+        const id = await page.evaluate(() => window.__starwishField.damageNearest(30));
+        const m = (await list()).find((x) => x.id === id);
+        if (m && (m.state === "death" || m.state === "dead")) killedId = id;
+        await page.waitForTimeout(150);
+      }
+      check("受傷→死亡", killedId !== null, killedId);
+      const deadOk = await page
+        .waitForFunction((id) => window.__starwishField.monsters().find((m) => m.id === id).mode === "dead", killedId, { timeout: 10000 })
+        .then(() => true)
+        .catch(() => false);
+      check("AI：死亡後停止行動", deadOk, (await list()).find((m) => m.id === killedId));
+
+      // 目標移到遠處 → 其他怪物應返回或恢復待機/巡邏
+      await page.evaluate(() => window.__starwishField.setTarget({ x: 0, z: 40 }));
+      const calmed = await page
+        .waitForFunction(() => window.__starwishField.monsters().every((m) => !["chase", "attack"].includes(m.mode)), null, { timeout: 30000 })
+        .then(() => true)
+        .catch(() => false);
+      check("AI：目標離開後不再追擊", calmed, (await list()).map((m) => `${m.id}:${m.mode}`));
+      await page.screenshot({ path: `${outDir}${name}_field_2_after.png` });
+      run.screenshots.push(`e2e/${name}_field_2_after.png`);
+    } catch (e) {
+      run.errors.push(`exception: ${e.message}`);
+    }
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 7;
     if (!run.ok) failures++;
     report.runs.push(run);
     console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);

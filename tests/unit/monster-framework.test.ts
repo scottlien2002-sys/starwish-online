@@ -338,3 +338,19 @@ test("框架：純邏輯模式（不建立模型）", () => {
   assert.equal(c.visual, null);
   assert.equal(procedural.length, 0);
 });
+
+test("框架：測試方塊 GLB 檔的動畫名稱與長度和動畫設定一致", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { TEST_DUMMY_CLIP_LENGTHS } = await import("../../src/monsters/test-dummy/profile.ts");
+  const glb = readFileSync(new URL("../../public/models/test-dummy.glb", import.meta.url));
+  assert.equal(glb.readUInt32LE(0), 0x46546c67, "GLB magic");
+  assert.equal(glb.readUInt32LE(4), 2, "glTF 2.0");
+  const jsonLen = glb.readUInt32LE(12);
+  const gltf = JSON.parse(glb.subarray(20, 20 + jsonLen).toString("utf8"));
+  const lengths: Record<string, number> = {};
+  for (const a of gltf.animations) lengths[a.name] = gltf.accessors[a.samplers[0].input].max[0];
+  for (const [state, clip] of Object.entries(TEST_DUMMY_CLIPS)) {
+    assert.ok(clip.name in lengths, `GLB 缺少動畫 ${clip.name}`);
+    assert.equal(lengths[clip.name], TEST_DUMMY_CLIP_LENGTHS[state as keyof typeof TEST_DUMMY_CLIP_LENGTHS], clip.name);
+  }
+});

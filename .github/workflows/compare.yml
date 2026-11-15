@@ -6,13 +6,14 @@ on:
   workflow_dispatch:
     inputs:
       baseline:
-        description: "比較基準 commit（預設 V1.0）"
+        description: "比較基準 commit（預設 星露啵啵 V1.2）"
         required: false
-        default: "94a19b65d745f7315ebcc2ea83515346a7552e26"
+        default: "c9cb58888b5bd7e654ef199e1d38fb78d3eb1c05"
   push:
-    branches: [main]
+    branches: [main, "feature/**"]
     paths:
       - "src/monsters/**"
+      - "src/main.ts"
       - "src/lab/**"
       - "tests/e2e/snap-lab.mjs"
       - "tests/e2e/compose-compare.mjs"
@@ -26,7 +27,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  BASELINE: ${{ github.event.inputs.baseline || '94a19b65d745f7315ebcc2ea83515346a7552e26' }}
+  BASELINE: ${{ github.event.inputs.baseline || 'c9cb58888b5bd7e654ef199e1d38fb78d3eb1c05' }}
 
 jobs:
   compare:
@@ -60,7 +61,7 @@ jobs:
         run: |
           node cur/tests/e2e/snap-lab.mjs base/dist out/before webkit
           node cur/tests/e2e/snap-lab.mjs cur/dist out/after webkit
-          node cur/tests/e2e/compose-compare.mjs out/before out/after out/compare "V1.0（修改前）" "最新版（修改後）"
+          node cur/tests/e2e/compose-compare.mjs out/before out/after out/compare "V1.2 重構前" "通用怪物框架（重構後）"
           echo "{\"baseline\":\"${BASELINE}\",\"current\":\"${GITHUB_SHA}\"}" > out/meta.json
 
       - name: Push compare branch

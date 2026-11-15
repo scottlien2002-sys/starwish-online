@@ -3,14 +3,14 @@ name: CI & Deploy
 # 每次推送到 main：型別檢查 → 單元測試 → 建置 → 瀏覽器測試 → 部署到 gh-pages 分支（GitHub Pages）
 on:
   push:
-    branches: [main]
+    branches: [main, "feature/**"]
   workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: ci-deploy
+  group: ci-deploy-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -59,6 +59,8 @@ jobs:
           cp package-lock.json dist/ci-report/package-lock.json
 
       - name: Deploy to gh-pages branch
+        # 只有 main 會部署；功能分支只測試，不影響線上遊戲
+        if: github.ref == 'refs/heads/main'
         run: |
           cd dist
           touch .nojekyll
