@@ -468,3 +468,53 @@ body {
   pointer-events: auto;
   touch-action: manipulation;
 }
+
+/* ---------- 測試頁：三視圖與效能測試 ---------- */
+.lab-views {
+  position: absolute;
+  top: calc(var(--safe-top) + 100px);
+  left: calc(var(--safe-left) + var(--edge));
+  display: flex;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.lab-view-btn {
+  min-width: 52px;
+  min-height: 44px;
+  padding: 0 8px;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+.lab-view-btn.active,
+.lab-view-btn.on {
+  background: linear-gradient(180deg, #ffd36e, #ff9d4d);
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(40, 30, 70, 0.5);
+}
+
+.lab-bench-result {
+  position: absolute;
+  top: calc(var(--safe-top) + 152px);
+  left: calc(var(--safe-left) + var(--edge));
+  max-width: 260px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(40, 34, 70, 0.82);
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.5;
+  pointer-events: auto;
+}
+
+.lab-bench-result[hidden] {
+  display: none;
+}

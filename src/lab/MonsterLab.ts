@@ -72,7 +72,31 @@ export interface LabDebugApi {
   fps(): number;
   setAutoDemo(on: boolean): void;
   perf(): PerfStats;
+  /** 正面 / 側面 / 背面（instant = 立即轉到該角度，供截圖使用） */
+  setView(view: LabView, instant?: boolean): void;
+  /** 10 秒效能測試（自動示範六種動作），回傳實際量測結果 */
+  benchmark(seconds?: number): Promise<BenchmarkResult>;
 }
+
+export type LabView = "front" | "side" | "back";
+
+export interface BenchmarkResult {
+  seconds: number;
+  frames: number;
+  avgFps: number;
+  /** 最慢 1% 影格的 FPS */
+  low1Fps: number;
+  minFps: number;
+  avgDrawCalls: number;
+  activeMeshes: number;
+  pixelRatio: number;
+  quality: string;
+  userAgent: string;
+}
+
+/** 三視圖：怪物相對於鏡頭的朝向（側面＝臉朝畫面左側，與設定圖三視圖一致） */
+const VIEW_OFFSET: Record<LabView, number> = { front: 0, side: Math.PI / 2, back: Math.PI };
+const VIEW_LABEL: Record<LabView, string> = { front: "正面", side: "側面", back: "背面" };
 
 declare global {
   interface Window {
@@ -143,6 +167,11 @@ export async function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLEle
       <div class="lab-msg"></div>
     </div>
     <div class="lab-fps" data-layout="lab-fps">-- FPS</div>
+    <div class="lab-views">
+      ${(["front", "side", "back"] as const).map((v) => `<button class="lab-view-btn" data-view="${v}" data-layout="btn-view-${v}">${VIEW_LABEL[v]}</button>`).join("")}
+      <button class="lab-view-btn lab-bench" data-layout="btn-bench">效能測試</button>
+    </div>
+    <div class="lab-bench-result" hidden></div>
     <div class="lab-panel">
       ${ACTIONS.map((a) => `<button class="lab-btn" data-action="${a.action}" data-layout="btn-${a.action}">${a.label}</button>`).join("")}
       <button class="lab-btn lab-demo" data-layout="btn-demo">自動示範</button>
@@ -154,10 +183,42 @@ export async function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLEle
   const buttons = [...uiRoot.querySelectorAll<HTMLButtonElement>("[data-action]")];
 
   let messageTimer = 0;
-  const say = (text: string): void => {
-    messageTimer = 2;
+  const say = (text: string, seconds = 2): void => {
+    messageTimer = seconds;
     msgEl.textContent = text;
   };
+
+  // ---------- 三視圖 ----------
+  let view: LabView = "front";
+  let snapView = false;
+  const viewButtons = [...uiRoot.querySelectorAll<HTMLButtonElement>("[data-view]")];
+  const setView = (v: LabView, instant = false): void => {
+    view = v;
+    snapView = instant;
+    for (const b of viewButtons) b.classList.toggle("active", b.dataset.view === v);
+  };
+  for (const b of viewButtons) b.addEventListener("click", () => setView(b.dataset.view as LabView));
+  setView("front");
+
+  // ---------- 效能測試（實際量測，不估算） ----------
+  let bench: { elapsed: number; target: number; dts: number[]; draws: number; resolve: (r: BenchmarkResult) => void } | null = null;
+  const benchBtn = uiRoot.querySelector<HTMLButtonElement>(".lab-bench")!;
+  const benchResultEl = uiRoot.querySelector<HTMLDivElement>(".lab-bench-result")!;
+  const startBenchmark = (seconds = 10): Promise<BenchmarkResult> =>
+    new Promise((resolve) => {
+      if (bench) return;
+      autoDemo = true;
+      demoBtn.classList.add("on");
+      demoIndex = 0;
+      demoWait = 0;
+      benchBtn.classList.add("on");
+      say(`效能測試中（${seconds} 秒，自動播放六種動作）…`, seconds + 1);
+      benchResultEl.hidden = true;
+      bench = { elapsed: 0, target: seconds, dts: [], draws: 0, resolve };
+    });
+  benchBtn.addEventListener("click", () => {
+    void startBenchmark(10);
+  });
 
   const doRequest = (a: MonsterAction) => {
     const r = ctrl.request(a);
@@ -199,7 +260,8 @@ export async function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLEle
   const perf = new PerfOverlay(engine, scene, quality, uiRoot);
 
   engine.runRenderLoop(() => {
-    const dt = Math.min(engine.getDeltaTime() / 1000, 0.1);
+    const rawDt = engine.getDeltaTime() / 1000;
+    const dt = Math.min(rawDt, 0.1);
 
     if (autoDemo) {
       demoWait -= dt;
@@ -237,10 +299,12 @@ export async function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLEle
       // 攻擊（V1.2）：轉成 3/4 側面，讓蓄力、衝撞、回彈三階段看得清楚（原本正對鏡頭衝過來，會被按鈕擋住）
       const camYaw = Math.atan2(camera.position.x - inst.currentPosition.x, camera.position.z - inst.currentPosition.z);
       const attacking = frame.state === "attack";
-      const target = attacking ? camYaw + 1.05 : camYaw;
+      // 三視圖：正面時攻擊轉 3/4 側面；側面/背面時維持選定的角度
+      const target = camYaw + (attacking && view === "front" ? 1.05 : VIEW_OFFSET[view]);
       let d = target - inst.yaw;
       d = Math.atan2(Math.sin(d), Math.cos(d));
-      inst.yaw += d * Math.min(1, dt * (attacking ? 14 : 3));
+      inst.yaw += snapView ? d : d * Math.min(1, dt * (attacking ? 14 : 3));
+      snapView = false;
     }
     // 測試頁在框架更新後才移動/轉向，渲染前同步一次（與重構前相同：本幀立即生效）
     ctrl.visual?.setTransform(inst.currentPosition.x, inst.currentPosition.y, inst.currentPosition.z, inst.yaw);
@@ -251,6 +315,46 @@ export async function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLEle
     scene.render();
 
     perf.update(dt);
+
+    if (bench) {
+      bench.elapsed += rawDt;
+      if (bench.elapsed > 0.5) {
+        // 前 0.5 秒為暖機，不計入
+        bench.dts.push(rawDt);
+        bench.draws += perf.stats().drawCalls;
+      }
+      if (bench.elapsed >= bench.target + 0.5) {
+        const dts = [...bench.dts].sort((a, b) => a - b);
+        const total = dts.reduce((a, b) => a + b, 0);
+        const p99 = dts[Math.min(dts.length - 1, Math.floor(dts.length * 0.99))] ?? 0;
+        const st = perf.stats();
+        const r: BenchmarkResult = {
+          seconds: Math.round(total * 10) / 10,
+          frames: dts.length,
+          avgFps: dts.length / Math.max(total, 1e-6),
+          low1Fps: p99 > 0 ? 1 / p99 : 0,
+          minFps: dts.length ? 1 / dts[dts.length - 1]! : 0,
+          avgDrawCalls: dts.length ? bench.draws / dts.length : 0,
+          activeMeshes: st.activeMeshes,
+          pixelRatio: st.pixelRatio,
+          quality: st.quality,
+          userAgent: navigator.userAgent,
+        };
+        const done = bench;
+        bench = null;
+        autoDemo = false;
+        demoBtn.classList.remove("on");
+        benchBtn.classList.remove("on");
+        say("效能測試完成", 2);
+        benchResultEl.hidden = false;
+        benchResultEl.innerHTML =
+          `<b>效能測試（本機實測）</b><br>時間 ${r.seconds} 秒・畫質 ${r.quality}・${r.pixelRatio}x<br>` +
+          `平均 ${r.avgFps.toFixed(1)} FPS・最慢 1% ${r.low1Fps.toFixed(1)} FPS<br>最低 ${r.minFps.toFixed(1)} FPS・Draw Calls ${r.avgDrawCalls.toFixed(0)}` +
+          `<br><small>點此關閉</small>`;
+        benchResultEl.onclick = () => (benchResultEl.hidden = true);
+        done.resolve(r);
+      }
+    }
 
     if (messageTimer > 0) {
       messageTimer -= dt;
@@ -288,6 +392,8 @@ export async function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLEle
     hudIssues: (insets) => checkHud(document, insets),
     fps: () => engine.getFps(),
     perf: () => perf.stats(),
+    setView,
+    benchmark: (seconds) => startBenchmark(seconds),
     setAutoDemo: (on) => {
       autoDemo = on;
       demoBtn.classList.toggle("on", on);

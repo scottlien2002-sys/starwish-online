@@ -59,11 +59,11 @@ jobs:
           cp package-lock.json dist/ci-report/package-lock.json
 
       - name: Deploy to gh-pages branch
-        # 只有 main 會部署到正式網址；部署前保留既有的 /preview/ 預覽版
+        # 只有 main 會部署到正式網址；部署前保留所有預覽版資料夾（preview*）
         if: github.ref == 'refs/heads/main'
         run: |
           git clone -q --depth 1 -b gh-pages "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" /tmp/oldpages || true
-          if [ -d /tmp/oldpages/preview ]; then cp -r /tmp/oldpages/preview dist/preview; fi
+          for d in /tmp/oldpages/preview*; do [ -d "$d" ] && cp -r "$d" dist/; done
           cd dist
           touch .nojekyll
           git init -q -b gh-pages
@@ -73,21 +73,32 @@ jobs:
           git commit -qm "Deploy ${GITHUB_SHA::7}"
           git push -qf "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh-pages
 
-      - name: Deploy preview (/preview/ only)
-        # feature/render-* 分支：只更新網站的 /preview/ 子路徑，正式網址不受影響
+      - name: Deploy preview (own folder only)
+        # feature/render-* 分支各自部署到獨立子路徑，只替換自己的資料夾，不影響正式版與其他預覽版
+        #   feature/render-upgrade → /preview/          （第一階段）
+        #   feature/render-<名稱>  → /preview-<名稱>/    （例：render-bobo-v2 → /preview-bobo-v2/）
         if: startsWith(github.ref, 'refs/heads/feature/render')
         run: |
-          git clone -q --depth 1 -b gh-pages "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" /tmp/pages
-          rm -rf /tmp/pages/preview
-          mkdir -p /tmp/pages/preview
-          cp -r dist/. /tmp/pages/preview/
-          echo "{\"branch\":\"${GITHUB_REF_NAME}\",\"commit\":\"${GITHUB_SHA}\",\"builtAt\":\"$(date -u +%FT%TZ)\"}" > /tmp/pages/preview/preview.json
-          cd /tmp/pages
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -qm "Preview ${GITHUB_REF_NAME} ${GITHUB_SHA::7}"
-          git push -q origin gh-pages
+          if [ "${GITHUB_REF_NAME}" = "feature/render-upgrade" ]; then DIR=preview; else DIR="preview-${GITHUB_REF_NAME#feature/render-}"; fi
+          case "$DIR" in preview|preview-[a-z0-9-]*) ;; *) echo "invalid preview dir: $DIR"; exit 1;; esac
+          echo "預覽路徑：/$DIR/"
+          for attempt in 1 2 3 4 5; do
+            rm -rf /tmp/pages
+            git clone -q --depth 1 -b gh-pages "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" /tmp/pages
+            rm -rf "/tmp/pages/$DIR"
+            mkdir -p "/tmp/pages/$DIR"
+            cp -r dist/. "/tmp/pages/$DIR/"
+            echo "{\"branch\":\"${GITHUB_REF_NAME}\",\"commit\":\"${GITHUB_SHA}\",\"path\":\"/$DIR/\",\"builtAt\":\"$(date -u +%FT%TZ)\"}" > "/tmp/pages/$DIR/preview.json"
+            cd /tmp/pages
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -qm "Preview /$DIR/ ${GITHUB_REF_NAME} ${GITHUB_SHA::7}"
+            if git push -q origin gh-pages; then echo "deployed /$DIR/"; exit 0; fi
+            cd - >/dev/null
+            echo "push rejected (another deploy in progress), retry $attempt"; sleep $((attempt * 5))
+          done
+          exit 1
 
       - name: Fail job if browser tests failed
         if: steps.hud.outcome == 'failure' || steps.e2e.outcome == 'failure'
