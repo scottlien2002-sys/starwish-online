@@ -47,7 +47,7 @@ export class PreviewCombat {
   /** 找出攻擊範圍內最近的存活怪物 */
   nearestTarget<T extends CombatMonster>(px: number, pz: number, monsters: readonly T[]): T | null {
     let best: T | null = null;
-    let bestD = PREVIEW_COMBAT.playerAttackRange;
+    let bestD: number = PREVIEW_COMBAT.playerAttackRange;
     for (const m of monsters) {
       if (!m.isAlive) continue;
       const d = Math.hypot(m.currentPosition.x - px, m.currentPosition.z - pz);
