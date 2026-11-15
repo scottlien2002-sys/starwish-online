@@ -378,6 +378,44 @@ for (const name of browsers) {
     await ctx.close();
   }
 
+  // ---- 星露啵啵 V3 模型預覽（?lab=bobo3）：只檢查外觀頁可正常運作，不涉及戰鬥 ----
+  {
+    const vp = VIEWPORTS[0];
+    const run = { browser: name, viewport: `${vp.name} / ?lab=bobo3`, checks: {}, errors: [] };
+    const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+    const page = await ctx.newPage();
+    page.on("pageerror", (e) => run.errors.push(`pageerror: ${e.message}`));
+    page.on("console", (m) => (m.type() === "error" || m.text().includes("[bobo3]")) && run.errors.push(`console: ${m.text()}`));
+    const check = (key, ok, detail) => {
+      run.checks[key] = { ok, detail };
+    };
+    try {
+      await page.goto(server.url + "/?lab=bobo3", { waitUntil: "load" });
+      await page.addStyleTag({ content: safeAreaCss(vp.safe) });
+      const ready = await page.waitForFunction(() => window.__bobo3?.ready === true, null, { timeout: 60000 }).then(() => true).catch(() => false);
+      check("V3 模型載入（GLB）", ready, await page.evaluate(() => document.getElementById("boot-status")?.textContent ?? null));
+      if (!ready) throw new Error("bobo3 未啟動");
+      const info = await page.evaluate(() => window.__bobo3.info());
+      check("零件齊全（身體、眼睛、嘴、腮紅、星星）", info.meshes.length === 5 && info.meshes.every((m) => m.triangles > 0), info);
+      for (const e of ["normal", "happy", "curious", "angry", "scared", "dizzy", "sleepy", "hurt"]) await page.evaluate((x) => window.__bobo3.setExpression(x), e);
+      for (const v of ["front", "side", "back"]) await page.evaluate((x) => window.__bobo3.setView(x), v);
+      await page.evaluate(() => window.__bobo3.setCount(3));
+      await page.waitForTimeout(800);
+      const perf = await page.evaluate(() => window.__bobo3.perf());
+      check("8 種表情、三視圖、3 隻同場可切換且無錯誤", run.errors.length === 0, perf);
+      check("果凍材質著色器正常（中／高畫質）", perf.quality === "low" || perf.jelly === true, perf);
+    } catch (e) {
+      run.errors.push(`exception: ${e.message}`);
+    }
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 4;
+    if (!run.ok) failures++;
+    report.runs.push(run);
+    console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
+    for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}`);
+    for (const e of run.errors) console.log(`   ! ${e}`);
+    await ctx.close();
+  }
+
   await browser.close();
 }
 

@@ -71,6 +71,10 @@ jobs:
           node $C out/compare_lab "修改前=out/lab_before" "修改後（高畫質）=out/lab_high"
           node $C out/quality_game "高=out/game_high" "中=out/game_medium" "低=out/game_low"
           node $C out/quality_lab "高=out/lab_high" "中=out/lab_medium" "低=out/lab_low"
+          # 星露啵啵 V3 模型預覽（只有含 ?lab=bobo3 的版本才有）
+          if [ -f cur/src/lab/BoboV3Lab.ts ]; then
+            for q in high medium low; do node cur/tests/e2e/snap-bobo3.mjs cur/dist out/bobo3_$q webkit $q || true; done
+          fi
           echo "{\"baseline\":\"${BASELINE}\",\"current\":\"${GITHUB_SHA}\",\"branch\":\"${GITHUB_REF_NAME}\"}" > out/meta.json
 
       - name: Push compare branch
@@ -78,6 +82,7 @@ jobs:
         run: |
           case "${GITHUB_REF_NAME}" in
             feature/render-bobo-v2) CB=compare-bobo-v2 ;;
+            feature/render-bobo-v3) CB=compare-bobo-v3 ;;
             *) CB=compare ;;
           esac
           echo "比較圖分支：$CB"
