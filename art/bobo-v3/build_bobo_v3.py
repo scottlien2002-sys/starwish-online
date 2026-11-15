@@ -324,7 +324,7 @@ def mat_star():
     vc.layer_name = "Col"
     nt.links.new(vc.outputs["Color"], bsdf.inputs["Base Color"])
     nt.links.new(vc.outputs["Color"], bsdf.inputs["Emission Color"])
-    bsdf.inputs["Emission Strength"].default_value = 0.9
+    bsdf.inputs["Emission Strength"].default_value = 0.4
     bsdf.inputs["Roughness"].default_value = 0.35
     return m
 
@@ -377,7 +377,7 @@ def build():
     belly = soft_star_mesh("BellyStar", bs["outer"], bs["inner"], bs["depth"])
     hit = BVHTree.FromObject(full, bpy.context.evaluated_depsgraph_get()).ray_cast(Vector((0, -3, bs["height"])), Vector((0, 1, 0)))
     # 嵌在果凍表面下（從側面看不會突出身體）
-    by = hit[0].y + 0.06 if hit[0] is not None else -0.52
+    by = hit[0].y + 0.075 if hit[0] is not None else -0.5
     belly.location = (0.0, by, bs["height"])
     belly.rotation_euler = (math.radians(-12), 0, 0)
     for st in (head, belly):
@@ -517,6 +517,8 @@ def render_views(body):
         light("Fill", "AREA", (0.5, -3.0, 0.8), 140, 1.5, (math.radians(80), 0, 0)),
     ):
         lo.parent = rig
+        if lo.name.startswith("Fill"):
+            lo.visible_glossy = False  # 補光不在果凍表面留下大塊反光
 
     # 地面（只接收陰影的柔和平面）
     bpy.ops.mesh.primitive_plane_add(size=8, location=(0, 0, 0))
