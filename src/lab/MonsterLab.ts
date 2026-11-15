@@ -75,6 +75,8 @@ export function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLElement):
   engine.setHardwareScalingLevel(1 / Math.min(window.devicePixelRatio || 1, TUNING.render.maxDevicePixelRatio));
   const scene = new Scene(engine);
   scene.clearColor = new Color4(0, 0, 0, 0);
+  scene.skipPointerMovePicking = true;
+  scene.autoClearDepthAndStencil = true;
 
   const hemi = new HemisphericLight("sky", new Vector3(0.2, 1, 0.3), scene);
   hemi.intensity = 0.85;
@@ -82,11 +84,13 @@ export function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLElement):
   const sun = new DirectionalLight("sun", new Vector3(-0.4, -1, -0.5).normalize(), scene);
   sun.position = new Vector3(4, 10, 5);
   sun.intensity = 0.6;
-  const shadows = new ShadowGenerator(1024, sun);
+  // V1.2 效能：陰影貼圖 1024 → 512（只有一隻怪物，畫質差異不明顯）
+  const shadows = new ShadowGenerator(512, sun);
   shadows.usePercentageCloserFiltering = true;
   shadows.darkness = 0.4;
 
-  const glow = new GlowLayer("glow", scene, { mainTextureRatio: 0.5, blurKernelSize: 24 });
+  // V1.2 效能：光暈運算解析度 0.5 → 0.3、模糊半徑 24 → 16
+  const glow = new GlowLayer("glow", scene, { mainTextureRatio: 0.3, blurKernelSize: 16 });
   glow.intensity = 0.75;
 
   // 小草地
@@ -165,10 +169,19 @@ export function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLElement):
   // ---------- 迴圈 ----------
   const history: MonsterState[] = [];
   let lastPose: MonsterPose = STAR_DEW_BOBO_PROFILE.idle(0);
-  let circleAngle = -Math.PI / 2;
+  // V1.2：移動改為在鏡頭前左右來回（原本繞圓圈，身體一直旋轉）
+  let moveX = 0;
+  let moveDir = 1;
   let uiTimer = 0;
-  const CIRCLE_R = 1.1;
-  const SPEED = 1.1;
+  const MOVE_RANGE = 1.1;
+  const SPEED = 0.9;
+  // V1.2 效能：自動調整解析度（連續 2 秒低於 40 FPS 就降一級，最低為 1 倍像素）
+  const scaleSteps = [Math.min(window.devicePixelRatio || 1, TUNING.render.maxDevicePixelRatio), 1.5, 1.25, 1].filter(
+    (v, i, arr) => i === 0 || v < arr[0]!,
+  );
+  let scaleIndex = 0;
+  let lowFpsTime = 0;
+  let qualityCooldown = 3;
 
   engine.runRenderLoop(() => {
     const dt = Math.min(engine.getDeltaTime() / 1000, 0.1);
@@ -189,25 +202,46 @@ export function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLElement):
 
     // 移動狀態：沿小圓彈跳前進，面向前進方向
     if (frame.state === "move") {
-      circleAngle += (SPEED / CIRCLE_R) * dt;
-      model.root.position.set(Math.cos(circleAngle) * CIRCLE_R, 0, Math.sin(circleAngle) * CIRCLE_R);
-      // V1.1：測試場景中以 3/4 側面朝向鏡頭前進，方便觀察移動時的五官（原本完全面向前進方向，臉常轉成側面）
-      const moveYaw = Math.atan2(-Math.sin(circleAngle), Math.cos(circleAngle));
+      moveX += moveDir * SPEED * dt;
+      if (Math.abs(moveX) > MOVE_RANGE) {
+        moveX = Math.sign(moveX) * MOVE_RANGE;
+        moveDir = -moveDir;
+      }
+      model.root.position.x = moveX;
+      // 以 3/4 側面朝向鏡頭前進：轉身只在折返時發生，而且平滑轉動
+      const moveYaw = moveDir > 0 ? Math.PI / 2 : -Math.PI / 2;
       const camYaw = Math.atan2(camera.position.x - model.root.position.x, camera.position.z - model.root.position.z);
       const diff = Math.atan2(Math.sin(camYaw - moveYaw), Math.cos(camYaw - moveYaw));
-      model.root.rotation.y = moveYaw + diff * 0.6;
-    } else if (frame.state === "idle" || frame.state === "respawn") {
-      // 轉回面向鏡頭
-      const target = Math.atan2(camera.position.x - model.root.position.x, camera.position.z - model.root.position.z);
+      const target = moveYaw + diff * 0.65;
       let d = target - model.root.rotation.y;
       d = Math.atan2(Math.sin(d), Math.cos(d));
-      model.root.rotation.y += d * Math.min(1, dt * 3);
+      model.root.rotation.y += d * Math.min(1, dt * 6);
+    } else if (frame.state === "idle" || frame.state === "respawn" || frame.state === "attack") {
+      // 待機/重生：轉回面向鏡頭
+      // 攻擊（V1.2）：轉成 3/4 側面，讓蓄力、衝撞、回彈三階段看得清楚（原本正對鏡頭衝過來，會被按鈕擋住）
+      const camYaw = Math.atan2(camera.position.x - model.root.position.x, camera.position.z - model.root.position.z);
+      const attacking = frame.state === "attack";
+      const target = attacking ? camYaw + 1.05 : camYaw;
+      let d = target - model.root.rotation.y;
+      d = Math.atan2(Math.sin(d), Math.cos(d));
+      model.root.rotation.y += d * Math.min(1, dt * (attacking ? 14 : 3));
     }
     const tgt = model.root.position;
     camera.target.x += (tgt.x - camera.target.x) * Math.min(1, dt * 4);
     camera.target.z += (tgt.z - camera.target.z) * Math.min(1, dt * 4);
 
     scene.render();
+
+    // 自動解析度
+    qualityCooldown -= dt;
+    if (engine.getFps() < 40) lowFpsTime += dt;
+    else lowFpsTime = 0;
+    if (lowFpsTime > 2 && qualityCooldown <= 0 && scaleIndex < scaleSteps.length - 1) {
+      scaleIndex++;
+      engine.setHardwareScalingLevel(1 / scaleSteps[scaleIndex]!);
+      lowFpsTime = 0;
+      qualityCooldown = 3;
+    }
 
     if (messageTimer > 0) {
       messageTimer -= dt;
@@ -223,7 +257,7 @@ export function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLElement):
         b.classList.toggle("disabled", !ok);
         b.classList.toggle("active", (a === "idle" || a === "move") ? animator.sm.locomotion === a && (frame.state === "idle" || frame.state === "move") : frame.state === a);
       }
-      fpsEl.textContent = `${Math.round(engine.getFps())} FPS`;
+      fpsEl.textContent = `${Math.round(engine.getFps())} FPS · ${scaleSteps[scaleIndex]}x`;
     }
   });
 

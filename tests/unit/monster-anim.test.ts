@@ -208,6 +208,35 @@ test("曲線：攻擊向前衝撞後回到原位", () => {
   near(end.scaleY, 1, 1e-9, "結束縮放");
   near(end.lean, 0, 1e-9, "結束傾角");
   assert.equal(attackPose(0.3).face, "angry");
+  near(end.stretchZ, 1, 1e-9, "結束前後伸縮");
+});
+
+test("曲線（V1.2）：攻擊有清楚的蓄力、衝撞、回彈三階段", () => {
+  const charge = attackPose(0.28);
+  assert.ok(charge.offsetZ < -0.15, "蓄力應後退");
+  assert.ok(charge.scaleY < 0.9, "蓄力應壓低");
+  assert.ok(charge.lean < -0.1, "蓄力應後仰");
+  const dash = attackPose(0.4);
+  assert.ok(dash.offsetZ > 0.6, "衝撞應向前");
+  assert.ok(dash.stretchZ > 1.1, "衝撞應向前拉長");
+  const impact = attackPose(0.45);
+  assert.ok(impact.stretchZ < 0.9, "撞擊應前方壓扁");
+  const rebound = attackPose(0.7);
+  assert.ok(rebound.offsetY > 0.1, "回彈應往後小跳");
+  assert.ok(rebound.offsetZ > 0 && rebound.offsetZ < 1, "回彈途中");
+  // 體積大致守恆
+  for (let t = 0; t <= T.attack; t += 0.01) {
+    const p = attackPose(t);
+    near(p.scaleXZ * p.scaleXZ * p.scaleY * p.stretchZ, 1, 1e-9, `體積 t=${t}`);
+  }
+});
+
+test("曲線（V1.2）：移動傾角與觸角擺動降低", () => {
+  for (let t = 0; t < T.hopPeriod; t += 0.01) {
+    const p = movePose(t);
+    assert.ok(Math.abs(p.lean) <= 0.06);
+    assert.ok(Math.abs(p.antennaSway) <= 0.21);
+  }
 });
 
 test("曲線：受傷震動逐漸停止", () => {

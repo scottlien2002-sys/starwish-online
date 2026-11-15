@@ -12,10 +12,10 @@ export function createGalaxyTexture(scene: Scene, seed = 1): DynamicTexture {
   const rng = createRng(seed);
 
   const g = ctx.createLinearGradient(0, 0, 0, H);
-  // V1.1：深藍底色（以加法混色疊在身體內，暗色 = 較透明，星點才會清楚）
-  g.addColorStop(0, "#2a56b8");
-  g.addColorStop(0.45, "#13306f");
-  g.addColorStop(1, "#2f5cc4");
+  // V1.2：以一般混色顯示，使用設定圖的星空藍（上淺、中深、下淺），不再過暗或疊白
+  g.addColorStop(0, "#7fb2ff");
+  g.addColorStop(0.45, "#3b69d6");
+  g.addColorStop(1, "#6a9cf6");
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, W, H);
 
@@ -93,4 +93,31 @@ function drawSparkle(ctx: CanvasRenderingContext2D, x: number, y: number, r: num
   ctx.quadraticCurveTo(x, y, x - r, y);
   ctx.quadraticCurveTo(x, y, x, y - r);
   ctx.fill();
+}
+
+/** V1.2：只有星點的透明貼圖（加法混色層，與星空層產生視差） */
+export function createStarfieldTexture(scene: Scene, seed = 2): DynamicTexture {
+  const W = 512;
+  const H = 256;
+  const tex = new DynamicTexture("PH_boboStarfield", { width: W, height: H }, scene, true);
+  const ctx = tex.getContext() as unknown as CanvasRenderingContext2D;
+  const rng = createRng(seed);
+  ctx.clearRect(0, 0, W, H);
+  for (let i = 0; i < 140; i++) {
+    const x = rng.range(0, W);
+    const y = rng.range(0, H);
+    const r = rng.next() < 0.15 ? rng.range(2.4, 3.6) : rng.range(1, 2);
+    const glow = ctx.createRadialGradient(x, y, 0, x, y, r * 3);
+    glow.addColorStop(0, "rgba(255,255,255,1)");
+    glow.addColorStop(0.35, "rgba(200,225,255,0.6)");
+    glow.addColorStop(1, "rgba(160,200,255,0)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(x - r * 3, y - r * 3, r * 6, r * 6);
+  }
+  for (let i = 0; i < 16; i++) drawSparkle(ctx, rng.range(0, W), rng.range(0, H), rng.range(8, 15), "rgba(255,255,255,1)");
+  tex.hasAlpha = true;
+  tex.update();
+  tex.wrapU = Texture.WRAP_ADDRESSMODE;
+  tex.wrapV = Texture.CLAMP_ADDRESSMODE;
+  return tex;
 }

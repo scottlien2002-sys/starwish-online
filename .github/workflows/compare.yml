@@ -1,0 +1,74 @@
+name: Bobo before/after screenshots
+
+# 建置「比較基準版本」與目前 main，在相同動畫時間點截圖並排，結果推到 compare 分支。
+# 不影響遊戲網站（gh-pages）。
+on:
+  workflow_dispatch:
+    inputs:
+      baseline:
+        description: "比較基準 commit（預設 V1.0）"
+        required: false
+        default: "94a19b65d745f7315ebcc2ea83515346a7552e26"
+  push:
+    branches: [main]
+    paths:
+      - "src/monsters/**"
+      - "src/lab/**"
+      - "tests/e2e/snap-lab.mjs"
+      - "tests/e2e/compose-compare.mjs"
+      - ".github/workflows/compare.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: compare
+  cancel-in-progress: true
+
+env:
+  BASELINE: ${{ github.event.inputs.baseline || '94a19b65d745f7315ebcc2ea83515346a7552e26' }}
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: cur
+      - uses: actions/checkout@v5
+        with:
+          path: base
+          ref: ${{ env.BASELINE }}
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Build current
+        working-directory: cur
+        run: npm install --no-audit --no-fund && npm run build
+
+      - name: Build baseline
+        working-directory: base
+        run: npm install --no-audit --no-fund && npm run build
+
+      - name: Install WebKit
+        working-directory: cur
+        run: npx playwright install --with-deps webkit chromium
+
+      - name: Snapshots
+        run: |
+          node cur/tests/e2e/snap-lab.mjs base/dist out/before webkit
+          node cur/tests/e2e/snap-lab.mjs cur/dist out/after webkit
+          node cur/tests/e2e/compose-compare.mjs out/before out/after out/compare "V1.0（修改前）" "最新版（修改後）"
+          echo "{\"baseline\":\"${BASELINE}\",\"current\":\"${GITHUB_SHA}\"}" > out/meta.json
+
+      - name: Push compare branch
+        run: |
+          cd out
+          git init -q -b compare
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -qm "Compare ${BASELINE::7} vs ${GITHUB_SHA::7}"
+          git push -qf "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" compare

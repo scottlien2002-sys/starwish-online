@@ -23,6 +23,8 @@ export interface MonsterPose {
   /** 身體縮放：scaleY 為高度、scaleXZ 為寬度 */
   scaleY: number;
   scaleXZ: number;
+  /** 前後方向額外伸縮（1 = 不變；攻擊衝撞時拉長、撞擊時壓扁） */
+  stretchZ: number;
   /** 前傾角度（弧度，正值往前） */
   lean: number;
   /** 整體不透明度 0~1 */
@@ -49,6 +51,7 @@ export const BASE_POSE: Readonly<MonsterPose> = Object.freeze({
   shakeX: 0,
   scaleY: 1,
   scaleXZ: 1,
+  stretchZ: 1,
   lean: 0,
   opacity: 1,
   starGlow: 1,

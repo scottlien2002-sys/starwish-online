@@ -5,7 +5,7 @@ import { BASE_POSE, type EffectCue, type MonsterAnimTimings, type MonsterPose } 
  * 依設定圖「動作/戰鬥動畫參考」：待機（呼吸）、移動（彈跳）、攻擊（撞擊）、受傷、死亡（消散）、重生（凝聚）。
  */
 export const BOBO_TIMINGS: MonsterAnimTimings = Object.freeze({
-  attack: 0.8,
+  attack: 0.9,
   hit: 0.4,
   death: 1.5,
   respawn: 1.6,
@@ -14,7 +14,7 @@ export const BOBO_TIMINGS: MonsterAnimTimings = Object.freeze({
 });
 
 export const BOBO_EFFECT_CUES: readonly EffectCue[] = Object.freeze([
-  { state: "attack", at: 0.38, effect: "attackImpact" },
+  { state: "attack", at: 0.42, effect: "attackImpact" },
   { state: "death", at: 0.22, effect: "deathBurst" },
   { state: "respawn", at: 0, effect: "respawnStart" },
   { state: "respawn", at: 1.05, effect: "respawnPop" },
@@ -72,55 +72,78 @@ export function movePose(t: number, T = BOBO_TIMINGS): MonsterPose {
     offsetY,
     scaleY,
     scaleXZ: volumeXZ(scaleY),
-    lean: 0.08,
-    antennaSway: -0.35 * Math.sin(TAU * u),
+    lean: 0.05,
+    antennaSway: -0.2 * Math.sin(TAU * u),
     wingFlap: 0.45 * Math.sin(TAU * u * 2),
   });
 }
 
+/** V1.2 攻擊三階段時間點（秒） */
+export const ATTACK_PHASES = Object.freeze({ chargeEnd: 0.32, dashEnd: 0.42, impactEnd: 0.5 });
+
+/**
+ * V1.2 攻擊：蓄力 → 衝撞 → 回彈，三段清楚分開。
+ * 蓄力：後退、壓低、身體發抖；衝撞：向前拉長衝出；撞擊：前方壓扁；回彈：往後小跳回原位、落地輕壓。
+ */
 export function attackPose(t: number, T = BOBO_TIMINGS): MonsterPose {
   const D = T.attack;
-  const k = clamp01(t / D) * 0.8; // 以 0.8 秒為基準的時間軸
+  const P = ATTACK_PHASES;
+  const tt = Math.max(0, Math.min(D, t));
   let offsetZ = 0;
-  let scaleY = 1;
-  let lean = 0;
   let offsetY = 0;
-  if (k < 0.22) {
-    // 蓄力：後退壓低
-    const a = easeOut(k / 0.22);
-    offsetZ = -0.25 * a;
-    scaleY = 1 - 0.18 * a;
-    lean = -0.18 * a;
-  } else if (k < 0.38) {
-    // 衝刺
-    const a = easeOut((k - 0.22) / 0.16);
-    offsetZ = lerp(-0.25, 1.1, a);
-    scaleY = lerp(0.82, 0.92, a);
-    lean = lerp(-0.18, 0.38, a);
-    offsetY = 0.08 * Math.sin(Math.PI * a);
-  } else if (k < 0.48) {
-    // 撞擊：壓扁
-    const a = (k - 0.38) / 0.1;
-    offsetZ = 1.1;
-    scaleY = 0.78 + 0.1 * a;
-    lean = lerp(0.38, 0.1, a);
+  let scaleY = 1;
+  let stretchZ = 1;
+  let lean = 0;
+  let shakeX = 0;
+  let wingFlap = 0;
+  if (tt < P.chargeEnd) {
+    // ① 蓄力
+    const a = easeOut(tt / P.chargeEnd);
+    offsetZ = -0.22 * a;
+    scaleY = 1 - 0.16 * a;
+    lean = -0.2 * a;
+    shakeX = 0.012 * Math.sin(tt * 70) * a;
+    wingFlap = 0.25 * Math.sin(tt * 50) * a;
+  } else if (tt < P.dashEnd) {
+    // ② 衝撞：快速前衝並向前拉長
+    const a = easeOut((tt - P.chargeEnd) / (P.dashEnd - P.chargeEnd));
+    offsetZ = lerp(-0.22, 1.0, a);
+    scaleY = lerp(0.84, 0.92, a);
+    stretchZ = lerp(1, 1.18, a);
+    lean = lerp(-0.2, 0.3, a);
+    offsetY = 0.06 * Math.sin(Math.PI * a);
+    wingFlap = -0.4 * a;
+  } else if (tt < P.impactEnd) {
+    // 撞擊瞬間：前方壓扁
+    const a = (tt - P.dashEnd) / (P.impactEnd - P.dashEnd);
+    offsetZ = 1.0;
+    stretchZ = lerp(0.8, 0.92, a);
+    scaleY = lerp(1.06, 1.0, a);
+    lean = lerp(0.3, 0.2, a);
+    wingFlap = lerp(-0.4, 0, a);
   } else {
-    // 彈回原位
-    const a = easeInOut((k - 0.48) / 0.32);
-    offsetZ = lerp(1.1, 0, a);
-    scaleY = lerp(0.88, 1, a);
-    lean = lerp(0.1, 0, a);
-    offsetY = 0.18 * Math.sin(Math.PI * a);
+    // ③ 回彈：往後小跳回原位，落地輕壓後恢復
+    const a = clamp01((tt - P.impactEnd) / (D - P.impactEnd));
+    const e = easeInOut(a);
+    offsetZ = lerp(1.0, 0, e);
+    offsetY = a < 0.8 ? 0.22 * Math.sin((Math.PI * a) / 0.8) : 0;
+    scaleY = a < 0.8 ? 1 + 0.05 * Math.sin((Math.PI * a) / 0.8) : 1 - 0.08 * Math.sin((Math.PI * (a - 0.8)) / 0.2);
+    stretchZ = lerp(0.92, 1, clamp01(a / 0.4));
+    lean = lerp(0.2, 0, e) - 0.1 * Math.sin(Math.PI * a);
+    wingFlap = 0.35 * Math.sin(Math.PI * a);
   }
+  const scaleXZ = 1 / Math.sqrt(Math.max(0.05, scaleY * stretchZ));
   return pose({
     offsetY,
     offsetZ,
     scaleY,
-    scaleXZ: volumeXZ(scaleY),
+    scaleXZ,
+    stretchZ,
     lean,
+    shakeX,
     face: "angry",
-    antennaSway: -lean * 1.2,
-    wingFlap: 0.3 * Math.sin(k * 40) * (1 - clamp01(k / 0.8)),
+    antennaSway: -lean * 1.0,
+    wingFlap,
   });
 }
 

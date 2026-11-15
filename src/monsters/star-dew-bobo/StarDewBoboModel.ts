@@ -18,7 +18,7 @@ import {
 import type { MonsterEffect, MonsterFace, MonsterPose, MonsterView } from "../anim/types.ts";
 import { createPuffyStar } from "../meshes/star.ts";
 import { BODY_HEIGHT, FACE_LAYOUT, featureCounterScale, normalToRotation, profileR, profileY, surfacePoint } from "./shape.ts";
-import { createBlobShadowTexture, createGalaxyTexture, createSparkleTexture } from "./textures.ts";
+import { createBlobShadowTexture, createGalaxyTexture, createSparkleTexture, createStarfieldTexture } from "./textures.ts";
 
 export interface BoboModelOptions {
   /** 模型高度（公尺），預設 0.8 */
@@ -28,11 +28,12 @@ export interface BoboModelOptions {
   seed?: number;
 }
 
-// V1.1：更透明、自發光降低，讓體內星空透出來
-const BODY_ALPHA = 0.5;
-const CORE_ALPHA = 0.95;
+// V1.2：外層更透明、受光更低（避免頂部過曝），內層改一般混色讓星空真正看得見
+const BODY_ALPHA = 0.42;
+const CORE_ALPHA = 0.62;
+const STAR_SHELL_ALPHA = 0.9;
 const WING_ALPHA = 0.38;
-const BODY_EMISSIVE = new Color3(0.1, 0.2, 0.5);
+const BODY_EMISSIVE = new Color3(0.05, 0.1, 0.28);
 const FLASH = new Color3(0.95, 0.95, 1);
 
 /**
@@ -50,6 +51,7 @@ export class StarDewBoboModel implements MonsterView {
   private readonly wingR: TransformNode;
   private readonly bodyMat: StandardMaterial;
   private readonly coreMat: StandardMaterial;
+  private readonly starShellMat: StandardMaterial;
   private readonly wingMat: StandardMaterial;
   private readonly starMat: StandardMaterial;
   private readonly ringMat: StandardMaterial;
@@ -86,33 +88,45 @@ export class StarDewBoboModel implements MonsterView {
     this.squash.parent = this.motion;
 
     // ---------- 材質 ----------
-    this.bodyMat = this.mat("PH_boboBody", new Color3(0.5, 0.72, 1));
+    // V1.2：受光顏色降低（頂部受天光照射最強，原本會過曝發白）
+    this.bodyMat = this.mat("PH_boboBody", new Color3(0.36, 0.56, 0.95));
     this.bodyMat.emissiveColor = BODY_EMISSIVE.clone();
-    // V1.1：高光改為柔和、較寬、較暗（原本 0.9 / 64 會在中央形成刺眼白點）
-    this.bodyMat.specularColor = new Color3(0.28, 0.32, 0.38);
-    this.bodyMat.specularPower = 18;
+    this.bodyMat.specularColor = new Color3(0.18, 0.2, 0.24);
+    this.bodyMat.specularPower = 14;
+    this.bodyMat.useSpecularOverAlpha = false;
     this.bodyMat.alpha = BODY_ALPHA;
-    // 透明層次：中心約 30%、邊緣 100% → 中間通透、輪廓清楚的果凍感
+    // 透明層次：正面中心約 35%、輪廓 100%
     const opacityFresnel = new FresnelParameters();
     opacityFresnel.leftColor = Color3.White();
-    opacityFresnel.rightColor = new Color3(0.3, 0.3, 0.3);
+    opacityFresnel.rightColor = new Color3(0.35, 0.35, 0.35);
     opacityFresnel.bias = 0.05;
-    opacityFresnel.power = 1.8;
+    opacityFresnel.power = 2;
     this.bodyMat.opacityFresnelParameters = opacityFresnel;
-    // 柔和邊緣反光（模擬果凍表面反射天空）
+    // 只在輪廓出現柔和反光（果凍表面反射天空），中央不再發白
     const emissiveFresnel = new FresnelParameters();
-    emissiveFresnel.leftColor = new Color3(0.55, 0.75, 1);
+    emissiveFresnel.leftColor = new Color3(0.45, 0.65, 1);
     emissiveFresnel.rightColor = Color3.Black();
-    emissiveFresnel.bias = 0.15;
-    emissiveFresnel.power = 2;
+    emissiveFresnel.bias = 0.05;
+    emissiveFresnel.power = 3;
     this.bodyMat.emissiveFresnelParameters = emissiveFresnel;
 
+    // 內層 1：星空（一般混色，不再用加法混色疊白）
     const galaxy = createGalaxyTexture(scene, options.seed ?? 11);
     this.coreMat = this.mat("PH_boboCore", Color3.Black());
     this.coreMat.emissiveTexture = galaxy;
     this.coreMat.disableLighting = true;
     this.coreMat.alpha = CORE_ALPHA;
-    this.coreMat.alphaMode = 1; // ALPHA_ADD
+    this.coreMat.alphaMode = 2; // ALPHA_COMBINE
+
+    // 內層 2：星點殼（加法混色、反向緩慢流動 → 與星空層產生前後視差，增加立體深度）
+    const starfield = createStarfieldTexture(scene, (options.seed ?? 11) + 5);
+    this.starShellMat = this.mat("PH_boboStarShell", Color3.Black());
+    this.starShellMat.emissiveTexture = starfield;
+    this.starShellMat.opacityTexture = starfield;
+    this.starShellMat.disableLighting = true;
+    this.starShellMat.alpha = STAR_SHELL_ALPHA;
+    this.starShellMat.alphaMode = 1; // ALPHA_ADD
+    this.starShellMat.backFaceCulling = false;
 
     this.wingMat = this.mat("PH_boboWing", new Color3(0.6, 0.8, 1));
     this.wingMat.emissiveColor = new Color3(0.22, 0.38, 0.78);
@@ -137,10 +151,14 @@ export class StarDewBoboModel implements MonsterView {
     const body = this.createBodyMesh("PH_boboBody", 1);
     body.material = this.bodyMat;
     body.alphaIndex = 2;
-    const core = this.createBodyMesh("PH_boboCore", 0.84);
+    const core = this.createBodyMesh("PH_boboCore", 0.84, 20);
     core.position.y = 0.07;
     core.material = this.coreMat;
-    core.alphaIndex = 1;
+    core.alphaIndex = 0;
+    const shell = this.createBodyMesh("PH_boboStarShell", 0.62, 16);
+    shell.position.y = 0.17;
+    shell.material = this.starShellMat;
+    shell.alphaIndex = 1;
 
     // ---------- 臉 ----------
     this.faces = { normal: [], angry: [], hurt: [] };
@@ -268,16 +286,19 @@ export class StarDewBoboModel implements MonsterView {
     this.motion.setEnabled(p.bodyVisible);
     this.motion.position.set(p.shakeX, p.offsetY, p.offsetZ);
     this.motion.rotation.x = p.lean;
-    this.squash.scaling.set(p.scaleXZ, p.scaleY, p.scaleXZ);
-    // V1.1：五官跟著身體表面移動，但自身形狀不被壓扁
+    const sz = p.scaleXZ * p.stretchZ;
+    this.squash.scaling.set(p.scaleXZ, p.scaleY, sz);
+    // 五官跟著身體表面移動，但自身形狀不被壓扁
     const fc = featureCounterScale(p.scaleXZ, p.scaleY);
-    for (const a of this.featureAnchors) a.scaling.set(fc.x, fc.y, fc.z);
+    const fz = featureCounterScale(sz, 1).x;
+    for (const a of this.featureAnchors) a.scaling.set(fc.x, fc.y, fz);
     // 體內星光：身體可見時持續閃爍
-    this.inner.emitRate = p.bodyVisible ? 16 * p.opacity : 0;
+    this.inner.emitRate = p.bodyVisible ? 22 * p.opacity : 0;
 
     const o = p.opacity;
     this.bodyMat.alpha = BODY_ALPHA * o;
     this.coreMat.alpha = CORE_ALPHA * o;
+    this.starShellMat.alpha = STAR_SHELL_ALPHA * o;
     this.wingMat.alpha = WING_ALPHA * o;
     for (const m of this.faceMeshes) m.visibility = o;
 
@@ -328,6 +349,8 @@ export class StarDewBoboModel implements MonsterView {
     this.time += dt;
     const tex = this.coreMat.emissiveTexture;
     if (tex && "uOffset" in tex) (tex as { uOffset: number }).uOffset = (this.time * 0.015) % 1;
+    const shellTex = this.starShellMat.emissiveTexture;
+    if (shellTex && "uOffset" in shellTex) (shellTex as { uOffset: number }).uOffset = (1 - ((this.time * 0.028) % 1)) % 1;
   }
 
   dispose(): void {
@@ -349,8 +372,8 @@ export class StarDewBoboModel implements MonsterView {
   }
 
   /** 以球體變形成水滴圓頂輪廓（保證法線朝外） */
-  private createBodyMesh(name: string, scale: number): Mesh {
-    const mesh = MeshBuilder.CreateSphere(name, { diameter: 2, segments: 28, updatable: true }, this.scene);
+  private createBodyMesh(name: string, scale: number, segments = 24): Mesh {
+    const mesh = MeshBuilder.CreateSphere(name, { diameter: 2, segments, updatable: true }, this.scene);
     const pos = mesh.getVerticesData(VertexBuffer.PositionKind);
     const idx = mesh.getIndices();
     if (!pos || !idx) throw new Error("bobo body data missing");
