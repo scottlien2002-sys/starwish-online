@@ -13,9 +13,10 @@ export function createGalaxyTexture(scene: Scene, seed = 1): DynamicTexture {
 
   const g = ctx.createLinearGradient(0, 0, 0, H);
   // V1.2：以一般混色顯示，使用設定圖的星空藍（上淺、中深、下淺），不再過暗或疊白
-  g.addColorStop(0, "#7fb2ff");
-  g.addColorStop(0.45, "#3b69d6");
-  g.addColorStop(1, "#6a9cf6");
+  g.addColorStop(0, "#a3ccff");
+  g.addColorStop(0.45, "#5c8ff0");
+  g.addColorStop(0.85, "#8fc4ff");
+  g.addColorStop(1, "#b5ecff"); // 底部偏青白的柔光（設定圖身體下方較亮）
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, W, H);
 

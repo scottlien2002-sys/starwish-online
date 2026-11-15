@@ -48,6 +48,12 @@ for (let i = 0; i < 100 && !ready; i++) {
 if (!ready) throw new Error("lab not ready: " + errors.join("; "));
 
 const run = (ms) => page.evaluate((n) => window.__stepFrames(n), Math.round((ms * 60) / 1000));
+
+// 預熱：著色器在 GPU 上是非同步編譯，需要真實時間；先推幾幀並等待，避免第一張截圖空白
+for (let i = 0; i < 6; i++) {
+  await page.evaluate(() => window.__stepFrames(2));
+  await page.waitForTimeout(500);
+}
 const req = (a) => page.evaluate((x) => window.__starwishLab.request(x), a);
 const shots = [];
 const shot = async (name, caption) => {

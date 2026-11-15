@@ -33,7 +33,7 @@ const BODY_ALPHA = 0.42;
 const CORE_ALPHA = 0.62;
 const STAR_SHELL_ALPHA = 0.9;
 const WING_ALPHA = 0.38;
-const BODY_EMISSIVE = new Color3(0.05, 0.1, 0.28);
+const BODY_EMISSIVE = new Color3(0.1, 0.19, 0.42);
 const FLASH = new Color3(0.95, 0.95, 1);
 
 /**
@@ -89,7 +89,7 @@ export class StarDewBoboModel implements MonsterView {
 
     // ---------- 材質 ----------
     // V1.2：受光顏色降低（頂部受天光照射最強，原本會過曝發白）
-    this.bodyMat = this.mat("PH_boboBody", new Color3(0.36, 0.56, 0.95));
+    this.bodyMat = this.mat("PH_boboBody", new Color3(0.44, 0.66, 1));
     this.bodyMat.emissiveColor = BODY_EMISSIVE.clone();
     this.bodyMat.specularColor = new Color3(0.18, 0.2, 0.24);
     this.bodyMat.specularPower = 14;
