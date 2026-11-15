@@ -296,6 +296,22 @@ export class StarDewBoboModel implements MonsterView {
     if (options.glow) {
       for (const st of this.stars) options.glow.addIncludedOnlyMesh(st);
       options.glow.addIncludedOnlyMesh(this.ring);
+      // V2：星星光暈改為暖金色（否則中性亮度的 emissive 會讓光暈泛白、把星星洗成奶油色）
+      const glowLayer = options.glow;
+      const starSet = new Set<Mesh>(this.stars);
+      const prev = glowLayer.customEmissiveColorSelector;
+      glowLayer.customEmissiveColorSelector = (mesh, subMesh, material, result) => {
+        if (starSet.has(mesh)) {
+          const k = this.starMat.emissiveColor.r;
+          result.set(1 * k * 0.9, 0.7 * k * 0.9, 0.15 * k * 0.9, 1);
+        } else if (prev) {
+          prev(mesh, subMesh, material, result);
+        } else {
+          const e = (material as StandardMaterial).emissiveColor;
+          if (e) result.set(e.r, e.g, e.b, 1);
+          else result.set(0, 0, 0, 1);
+        }
+      };
     }
 
     this.setFace("normal");
