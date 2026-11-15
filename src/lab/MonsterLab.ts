@@ -191,7 +191,11 @@ export function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLElement):
     if (frame.state === "move") {
       circleAngle += (SPEED / CIRCLE_R) * dt;
       model.root.position.set(Math.cos(circleAngle) * CIRCLE_R, 0, Math.sin(circleAngle) * CIRCLE_R);
-      model.root.rotation.y = Math.atan2(-Math.sin(circleAngle), Math.cos(circleAngle));
+      // V1.1：測試場景中以 3/4 側面朝向鏡頭前進，方便觀察移動時的五官（原本完全面向前進方向，臉常轉成側面）
+      const moveYaw = Math.atan2(-Math.sin(circleAngle), Math.cos(circleAngle));
+      const camYaw = Math.atan2(camera.position.x - model.root.position.x, camera.position.z - model.root.position.z);
+      const diff = Math.atan2(Math.sin(camYaw - moveYaw), Math.cos(camYaw - moveYaw));
+      model.root.rotation.y = moveYaw + diff * 0.6;
     } else if (frame.state === "idle" || frame.state === "respawn") {
       // 轉回面向鏡頭
       const target = Math.atan2(camera.position.x - model.root.position.x, camera.position.z - model.root.position.z);

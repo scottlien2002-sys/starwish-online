@@ -17,7 +17,7 @@ import {
 } from "@babylonjs/core";
 import type { MonsterEffect, MonsterFace, MonsterPose, MonsterView } from "../anim/types.ts";
 import { createPuffyStar } from "../meshes/star.ts";
-import { BODY_HEIGHT, FACE_LAYOUT, normalToRotation, profileR, profileY, surfacePoint } from "./shape.ts";
+import { BODY_HEIGHT, FACE_LAYOUT, featureCounterScale, normalToRotation, profileR, profileY, surfacePoint } from "./shape.ts";
 import { createBlobShadowTexture, createGalaxyTexture, createSparkleTexture } from "./textures.ts";
 
 export interface BoboModelOptions {
@@ -28,9 +28,11 @@ export interface BoboModelOptions {
   seed?: number;
 }
 
-const BODY_ALPHA = 0.62;
-const WING_ALPHA = 0.5;
-const BODY_EMISSIVE = new Color3(0.2, 0.36, 0.78);
+// V1.1：更透明、自發光降低，讓體內星空透出來
+const BODY_ALPHA = 0.5;
+const CORE_ALPHA = 0.95;
+const WING_ALPHA = 0.38;
+const BODY_EMISSIVE = new Color3(0.1, 0.2, 0.5);
 const FLASH = new Color3(0.95, 0.95, 1);
 
 /**
@@ -57,6 +59,9 @@ export class StarDewBoboModel implements MonsterView {
   private readonly stars: Mesh[] = [];
   /** 臉部等不透明零件（淡出時調整 visibility） */
   private readonly faceMeshes: Mesh[] = [];
+  /** 需要反向補償縮放的五官節點 */
+  private readonly featureAnchors: TransformNode[] = [];
+  private readonly inner: ParticleSystem;
   private readonly faces: Record<MonsterFace, TransformNode[]>;
   private readonly brows: TransformNode[] = [];
   private readonly burst: ParticleSystem;
@@ -81,36 +86,47 @@ export class StarDewBoboModel implements MonsterView {
     this.squash.parent = this.motion;
 
     // ---------- 材質 ----------
-    this.bodyMat = this.mat("PH_boboBody", new Color3(0.55, 0.76, 1));
+    this.bodyMat = this.mat("PH_boboBody", new Color3(0.5, 0.72, 1));
     this.bodyMat.emissiveColor = BODY_EMISSIVE.clone();
-    this.bodyMat.specularColor = new Color3(0.9, 0.95, 1);
-    this.bodyMat.specularPower = 64;
+    // V1.1：高光改為柔和、較寬、較暗（原本 0.9 / 64 會在中央形成刺眼白點）
+    this.bodyMat.specularColor = new Color3(0.28, 0.32, 0.38);
+    this.bodyMat.specularPower = 18;
     this.bodyMat.alpha = BODY_ALPHA;
-    // 邊緣較不透明、中心較透明 → 果凍感；邊緣微亮
+    // 透明層次：中心約 30%、邊緣 100% → 中間通透、輪廓清楚的果凍感
     const opacityFresnel = new FresnelParameters();
     opacityFresnel.leftColor = Color3.White();
-    opacityFresnel.rightColor = new Color3(0.45, 0.45, 0.45);
-    opacityFresnel.bias = 0.1;
-    opacityFresnel.power = 2;
+    opacityFresnel.rightColor = new Color3(0.3, 0.3, 0.3);
+    opacityFresnel.bias = 0.05;
+    opacityFresnel.power = 1.8;
     this.bodyMat.opacityFresnelParameters = opacityFresnel;
+    // 柔和邊緣反光（模擬果凍表面反射天空）
     const emissiveFresnel = new FresnelParameters();
-    emissiveFresnel.leftColor = new Color3(0.75, 0.88, 1);
+    emissiveFresnel.leftColor = new Color3(0.55, 0.75, 1);
     emissiveFresnel.rightColor = Color3.Black();
-    emissiveFresnel.bias = 0.2;
-    emissiveFresnel.power = 2.5;
+    emissiveFresnel.bias = 0.15;
+    emissiveFresnel.power = 2;
     this.bodyMat.emissiveFresnelParameters = emissiveFresnel;
 
     const galaxy = createGalaxyTexture(scene, options.seed ?? 11);
     this.coreMat = this.mat("PH_boboCore", Color3.Black());
     this.coreMat.emissiveTexture = galaxy;
     this.coreMat.disableLighting = true;
-    this.coreMat.alpha = 0.75;
+    this.coreMat.alpha = CORE_ALPHA;
     this.coreMat.alphaMode = 1; // ALPHA_ADD
 
-    this.wingMat = this.mat("PH_boboWing", new Color3(0.62, 0.82, 1));
-    this.wingMat.emissiveColor = new Color3(0.3, 0.45, 0.85);
+    this.wingMat = this.mat("PH_boboWing", new Color3(0.6, 0.8, 1));
+    this.wingMat.emissiveColor = new Color3(0.22, 0.38, 0.78);
+    this.wingMat.specularColor = new Color3(0.2, 0.24, 0.3);
+    this.wingMat.specularPower = 16;
     this.wingMat.alpha = WING_ALPHA;
     this.wingMat.backFaceCulling = false;
+    // 翅膀邊緣較實、中間較透
+    const wingFresnel = new FresnelParameters();
+    wingFresnel.leftColor = Color3.White();
+    wingFresnel.rightColor = new Color3(0.45, 0.45, 0.45);
+    wingFresnel.bias = 0.1;
+    wingFresnel.power = 1.5;
+    this.wingMat.opacityFresnelParameters = wingFresnel;
 
     this.starMat = this.mat("PH_boboStar", new Color3(1, 0.9, 0.35));
     this.starMat.emissiveColor = new Color3(1, 0.86, 0.3);
@@ -137,6 +153,7 @@ export class StarDewBoboModel implements MonsterView {
     chestStar.rotation.z = 0.25;
     chestStar.material = this.starMat;
     this.stars.push(chestStar);
+    this.featureAnchors.push(chestStar);
 
     // ---------- 翅膀 ----------
     this.wingL = this.createWing(-1);
@@ -211,6 +228,29 @@ export class StarDewBoboModel implements MonsterView {
     this.rise.maxEmitPower = 1.1;
     this.rise.gravity = new Vector3(0, 0.3, 0);
 
+    // V1.1：體內星光粒子（跟著身體移動、伸縮）
+    const innerAnchor = MeshBuilder.CreateBox("PH_boboInnerAnchor", { size: 0.01 }, scene);
+    innerAnchor.parent = this.squash;
+    innerAnchor.position.y = 0.45;
+    innerAnchor.isVisible = false;
+    innerAnchor.isPickable = false;
+    this.inner = this.createParticles("PH_boboInner", sparkle, 40);
+    this.inner.emitter = innerAnchor;
+    this.inner.isLocal = true;
+    this.inner.createSphereEmitter(0.34, 1);
+    this.inner.minEmitPower = 0.01;
+    this.inner.maxEmitPower = 0.04;
+    this.inner.minLifeTime = 0.8;
+    this.inner.maxLifeTime = 1.6;
+    this.inner.minSize = 0.035 * (this.height / 0.8);
+    this.inner.maxSize = 0.075 * (this.height / 0.8);
+    this.inner.color1 = new Color4(1, 1, 1, 1);
+    this.inner.color2 = new Color4(0.75, 0.9, 1, 1);
+    this.inner.colorDead = new Color4(0.6, 0.75, 1, 0);
+    this.inner.gravity = Vector3.Zero();
+    this.inner.emitRate = 16;
+    this.inner.start();
+
     // ---------- 陰影與光暈 ----------
     for (const m of this.root.getChildMeshes(false)) m.isPickable = false;
     if (options.shadows) options.shadows.addShadowCaster(body, false);
@@ -229,10 +269,15 @@ export class StarDewBoboModel implements MonsterView {
     this.motion.position.set(p.shakeX, p.offsetY, p.offsetZ);
     this.motion.rotation.x = p.lean;
     this.squash.scaling.set(p.scaleXZ, p.scaleY, p.scaleXZ);
+    // V1.1：五官跟著身體表面移動，但自身形狀不被壓扁
+    const fc = featureCounterScale(p.scaleXZ, p.scaleY);
+    for (const a of this.featureAnchors) a.scaling.set(fc.x, fc.y, fc.z);
+    // 體內星光：身體可見時持續閃爍
+    this.inner.emitRate = p.bodyVisible ? 16 * o : 0;
 
     const o = p.opacity;
     this.bodyMat.alpha = BODY_ALPHA * o;
-    this.coreMat.alpha = 0.75 * o;
+    this.coreMat.alpha = CORE_ALPHA * o;
     this.wingMat.alpha = WING_ALPHA * o;
     for (const m of this.faceMeshes) m.visibility = o;
 
@@ -287,6 +332,7 @@ export class StarDewBoboModel implements MonsterView {
 
   dispose(): void {
     this.burst.dispose();
+    this.inner.dispose();
     this.rise.dispose();
     this.root.dispose(false, true);
     for (const m of this.materials) m.dispose(true, true);
@@ -369,6 +415,7 @@ export class StarDewBoboModel implements MonsterView {
     for (const side of [-1, 1]) {
       const anchor = new TransformNode(`PH_boboEyeAnchor${side}`, sc);
       this.place(anchor, surfacePoint(EYE_Y, side * EYE_THETA), 0.0);
+      this.featureAnchors.push(anchor);
 
       // 一般眼睛：深藍大眼 + 下方亮藍 + 兩個高光
       const normal = new TransformNode(`PH_boboEyeNormal${side}`, sc);
@@ -411,6 +458,7 @@ export class StarDewBoboModel implements MonsterView {
       const bl = MeshBuilder.CreateDisc(`PH_boboBlush${side}`, { radius: 0.06, tessellation: 20, sideOrientation: Mesh.DOUBLESIDE }, sc);
       const bAnchor = new TransformNode(`PH_boboBlushAnchor${side}`, sc);
       this.place(bAnchor, surfacePoint(FACE_LAYOUT.blush.y, side * FACE_LAYOUT.blush.theta), 0.012);
+      this.featureAnchors.push(bAnchor);
       this.part(bl.name, bl, bAnchor, blush, 0, 0, 0).scaling.set(1.45, 0.85, 1);
       bl.alphaIndex = 3;
     }
@@ -418,6 +466,7 @@ export class StarDewBoboModel implements MonsterView {
     // 嘴巴：張開的笑口（半圓）+ 舌頭
     const mAnchor = new TransformNode("PH_boboMouthAnchor", sc);
     this.place(mAnchor, surfacePoint(FACE_LAYOUT.mouth.y, FACE_LAYOUT.mouth.theta), 0.012);
+    this.featureAnchors.push(mAnchor);
     const m = MeshBuilder.CreateDisc("PH_boboMouth", { radius: 0.075, arc: 0.5, tessellation: 20, sideOrientation: Mesh.DOUBLESIDE }, sc);
     this.part(m.name, m, mAnchor, mouth, 0, 0, 0).rotation.z = Math.PI;
     const tg = MeshBuilder.CreateDisc("PH_boboTongue", { radius: 0.04, arc: 0.5, tessellation: 12, sideOrientation: Mesh.DOUBLESIDE }, sc);
@@ -430,20 +479,52 @@ export class StarDewBoboModel implements MonsterView {
     pivot.parent = this.squash;
     pivot.position.set(sp.x * 0.96, sp.y, sp.z * 0.96);
     pivot.rotation.y = side * -0.25;
-    const wing = MeshBuilder.CreateSphere(`PH_boboWing${side}`, { diameter: 1, segments: 12 }, this.scene);
-    wing.parent = pivot;
-    wing.scaling.set(0.34, 0.09, 0.2);
-    wing.position.x = side * 0.17;
-    wing.material = this.wingMat;
-    wing.alphaIndex = 2;
-    // 翅尖：小一點的第二片，做出分叉感
-    const tip = MeshBuilder.CreateSphere(`PH_boboWingTip${side}`, { diameter: 1, segments: 10 }, this.scene);
-    tip.parent = pivot;
-    tip.scaling.set(0.2, 0.07, 0.13);
-    tip.position.set(side * 0.27, -0.05, -0.05);
-    tip.material = this.wingMat;
-    tip.alphaIndex = 2;
+    // V1.1：單片柔和的水滴鰭（根部圓、尖端收細並微微下垂），取代兩顆橢圓
+    const main = this.createFin(`PH_boboWing${side}`, side, 0.36, 0.2, 0.07);
+    main.parent = pivot;
+    main.material = this.wingMat;
+    main.alphaIndex = 2;
+    // 後方較小的第二層，做出半透明疊層感
+    const back = this.createFin(`PH_boboWingBack${side}`, side, 0.26, 0.15, 0.05);
+    back.parent = pivot;
+    back.position.set(side * 0.02, -0.03, -0.06);
+    back.material = this.wingMat;
+    back.alphaIndex = 2;
     return pivot;
+  }
+
+  /** 水滴鰭：沿 x 軸（向外）延伸，根部寬圓、尖端收細並下彎 */
+  private createFin(name: string, side: number, length: number, width: number, thickness: number): Mesh {
+    const fin = MeshBuilder.CreateSphere(name, { diameter: 1, segments: 14, updatable: true }, this.scene);
+    const pos = fin.getVerticesData(VertexBuffer.PositionKind);
+    const idx = fin.getIndices();
+    if (!pos || !idx) throw new Error("fin data missing");
+    for (let i = 0; i < pos.length; i += 3) {
+      const u = pos[i]! + 0.5; // 0 = 根部、1 = 尖端
+      const taper = 1 - 0.65 * u * u; // 尖端收細
+      const x = u * length;
+      const y = pos[i + 1]! * thickness * taper - 0.06 * u * u; // 尖端微微下垂
+      const z = pos[i + 2]! * width * taper;
+      pos[i] = side * x;
+      pos[i + 1] = y;
+      pos[i + 2] = z;
+    }
+    // 左側為 x 鏡像，需翻轉三角形繞向，否則法線朝內、光照相反
+    const indices = Array.from(idx);
+    if (side < 0) {
+      for (let i = 0; i < indices.length; i += 3) {
+        const t = indices[i + 1]!;
+        indices[i + 1] = indices[i + 2]!;
+        indices[i + 2] = t;
+      }
+      fin.setIndices(indices);
+    }
+    const normals: number[] = [];
+    VertexData.ComputeNormals(pos, indices, normals);
+    fin.updateVerticesData(VertexBuffer.PositionKind, pos);
+    fin.updateVerticesData(VertexBuffer.NormalKind, normals);
+    fin.refreshBoundingInfo();
+    return fin;
   }
 
   private createParticles(name: string, texture: ReturnType<typeof createSparkleTexture>, capacity: number): ParticleSystem {

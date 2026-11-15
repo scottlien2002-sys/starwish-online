@@ -184,8 +184,19 @@ test("曲線：彈跳有離地、落地有擠壓", () => {
     maxY = Math.max(maxY, p.offsetY);
     if (p.offsetY === 0) minScale = Math.min(minScale, p.scaleY);
   }
-  assert.ok(maxY > 0.3, "跳躍高度不足");
-  assert.ok(minScale < 0.8, "落地擠壓不明顯");
+  assert.ok(maxY > 0.2, "跳躍高度不足");
+  assert.ok(minScale < 0.95, "落地擠壓不明顯");
+  assert.ok(minScale >= 0.88, "落地壓得太扁（V1.1：須保留圓潤外型）");
+});
+
+test("曲線（V1.1）：移動全程保持圓潤，不過度變形", () => {
+  for (let t = 0; t < T.hopPeriod * 2; t += 0.002) {
+    const p = movePose(t);
+    assert.ok(p.scaleY >= 0.88 && p.scaleY <= 1.07, `scaleY=${p.scaleY}`);
+    assert.ok(p.scaleXZ <= 1.07 && p.scaleXZ >= 0.96, `scaleXZ=${p.scaleXZ}`);
+    // 寬高比不超過 1.2 倍（原本會到 1.7 倍）
+    assert.ok(p.scaleXZ / p.scaleY <= 1.2);
+  }
 });
 
 test("曲線：攻擊向前衝撞後回到原位", () => {

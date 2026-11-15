@@ -12,14 +12,15 @@ export function createGalaxyTexture(scene: Scene, seed = 1): DynamicTexture {
   const rng = createRng(seed);
 
   const g = ctx.createLinearGradient(0, 0, 0, H);
-  g.addColorStop(0, "#9fd4ff");
-  g.addColorStop(0.45, "#4f86ef");
-  g.addColorStop(1, "#7fb9ff");
+  // V1.1：深藍底色（以加法混色疊在身體內，暗色 = 較透明，星點才會清楚）
+  g.addColorStop(0, "#2a56b8");
+  g.addColorStop(0.45, "#13306f");
+  g.addColorStop(1, "#2f5cc4");
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, W, H);
 
-  const nebula = ["rgba(170,120,255,0.35)", "rgba(110,220,255,0.35)", "rgba(255,170,240,0.22)"];
-  for (let i = 0; i < 14; i++) {
+  const nebula = ["rgba(170,120,255,0.55)", "rgba(110,220,255,0.5)", "rgba(255,170,240,0.35)"];
+  for (let i = 0; i < 18; i++) {
     const x = rng.range(0, W);
     const y = rng.range(H * 0.3, H);
     const r = rng.range(30, 90);
@@ -30,17 +31,17 @@ export function createGalaxyTexture(scene: Scene, seed = 1): DynamicTexture {
     ctx.fillRect(x - r, y - r, r * 2, r * 2);
   }
 
-  for (let i = 0; i < 260; i++) {
+  for (let i = 0; i < 320; i++) {
     const x = rng.range(0, W);
     const y = rng.range(0, H);
-    const s = rng.next() < 0.08 ? rng.range(1.6, 2.6) : rng.range(0.5, 1.2);
+    const s = rng.next() < 0.12 ? rng.range(2.2, 3.4) : rng.range(0.9, 1.7);
     ctx.fillStyle = `rgba(255,255,255,${rng.range(0.5, 1)})`;
     ctx.beginPath();
     ctx.arc(x, y, s, 0, Math.PI * 2);
     ctx.fill();
   }
   // 幾顆十字閃光
-  for (let i = 0; i < 10; i++) drawSparkle(ctx, rng.range(0, W), rng.range(H * 0.3, H), rng.range(5, 10), "rgba(255,255,255,0.9)");
+  for (let i = 0; i < 24; i++) drawSparkle(ctx, rng.range(0, W), rng.range(H * 0.2, H), rng.range(7, 14), "rgba(255,255,255,0.95)");
 
   tex.update();
   tex.wrapU = Texture.WRAP_ADDRESSMODE;

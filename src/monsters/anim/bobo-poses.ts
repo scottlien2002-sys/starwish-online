@@ -47,6 +47,11 @@ export function idlePose(t: number, T = BOBO_TIMINGS): MonsterPose {
   });
 }
 
+/** V1.1：降低移動變形（原本跳 0.42、拉長 14%、壓扁 30%，五官會被壓扁） */
+export const MOVE_HOP_HEIGHT = 0.3;
+export const MOVE_STRETCH = 0.06;
+export const MOVE_SQUASH = 0.1;
+
 export function movePose(t: number, T = BOBO_TIMINGS): MonsterPose {
   const P = T.hopPeriod;
   const u = (((t % P) + P) % P) / P; // 0~1
@@ -57,17 +62,17 @@ export function movePose(t: number, T = BOBO_TIMINGS): MonsterPose {
   let scaleY = 1;
   if (u >= AIR0 && u <= AIR1) {
     const a = (u - AIR0) / (AIR1 - AIR0);
-    offsetY = 0.42 * Math.sin(Math.PI * a);
-    scaleY = 1 + 0.14 * Math.sin(Math.PI * a); // 空中拉長
+    offsetY = MOVE_HOP_HEIGHT * Math.sin(Math.PI * a);
+    scaleY = 1 + MOVE_STRETCH * Math.sin(Math.PI * a); // 空中輕微拉長
   } else {
     const c = u > AIR1 ? (u - AIR1) / 0.3 : (u + 0.15) / 0.3; // 0~1 著地週期
-    scaleY = 1 - 0.3 * Math.sin(Math.PI * c); // 落地擠壓
+    scaleY = 1 - MOVE_SQUASH * Math.sin(Math.PI * c); // 落地輕微擠壓，保留圓潤外型
   }
   return pose({
     offsetY,
     scaleY,
     scaleXZ: volumeXZ(scaleY),
-    lean: 0.12,
+    lean: 0.08,
     antennaSway: -0.35 * Math.sin(TAU * u),
     wingFlap: 0.45 * Math.sin(TAU * u * 2),
   });

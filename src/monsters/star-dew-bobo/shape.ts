@@ -79,3 +79,13 @@ export function surfacePoint(y: number, theta: number): { x: number; y: number; 
 export function normalToRotation(nx: number, ny: number, nz: number): { x: number; y: number } {
   return { x: -Math.asin(Math.max(-1, Math.min(1, ny))), y: Math.atan2(nx, nz) };
 }
+
+/**
+ * 五官反向補償（V1.1）：身體伸縮時，五官位置仍貼著身體表面移動，
+ * 但五官本身只承受 (1 - strength) 的變形，避免眼睛、嘴巴被壓扁。
+ */
+export function featureCounterScale(scaleXZ: number, scaleY: number, strength = 0.8): { x: number; y: number; z: number } {
+  const sxz = Math.max(0.05, scaleXZ);
+  const sy = Math.max(0.05, scaleY);
+  return { x: Math.pow(sxz, -strength), y: Math.pow(sy, -strength), z: Math.pow(sxz, -strength) };
+}

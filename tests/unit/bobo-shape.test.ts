@@ -49,3 +49,18 @@ test("法線轉旋轉：正前方為 0，朝上時抬頭", () => {
   const side = normalToRotation(1, 0, 0);
   assert.ok(Math.abs(side.y - Math.PI / 2) < 1e-9);
 });
+
+import { featureCounterScale } from "../../src/monsters/star-dew-bobo/shape.ts";
+
+test("五官反向補償：身體壓扁時五官形狀變形量大幅降低", () => {
+  const sxz = 1.054;
+  const sy = 0.9;
+  const c = featureCounterScale(sxz, sy, 0.8);
+  // 五官最終形狀 = 身體縮放 × 補償
+  const eyeY = sy * c.y;
+  const eyeX = sxz * c.x;
+  assert.ok(Math.abs(eyeY - 1) < Math.abs(sy - 1) * 0.25, `高度變形 ${eyeY}`);
+  assert.ok(Math.abs(eyeX - 1) < Math.abs(sxz - 1) * 0.25, `寬度變形 ${eyeX}`);
+  const none = featureCounterScale(1, 1);
+  assert.deepEqual(none, { x: 1, y: 1, z: 1 });
+});

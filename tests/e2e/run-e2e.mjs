@@ -148,6 +148,8 @@ for (const name of browsers) {
       await req("move");
       await page.waitForTimeout(450);
       await shot("2_move");
+      await page.waitForTimeout(200);
+      await shot("2b_move");
       check("移動", (await state()) === "move", await state());
 
       // 注意：先檢查狀態、再截圖。軟體繪圖下截圖可能花 1~2 秒，期間動畫照常進行。
