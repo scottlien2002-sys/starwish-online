@@ -52,7 +52,7 @@ const STAR_SHELL_ALPHA = 0.9;
 const WING_ALPHA = 0.38;
 const BODY_EMISSIVE = new Color3(0.1, 0.19, 0.42);
 const FLASH = new Color3(0.95, 0.95, 1);
-const STAR_GRADIENT = { center: [1, 1, 0.84] as [number, number, number], edge: [1, 0.8, 0.3] as [number, number, number] };
+const STAR_GRADIENT = { center: [1, 0.97, 0.7] as [number, number, number], edge: [1, 0.72, 0.16] as [number, number, number] };
 
 /**
  * 星露啵啵：程式化暫代 3D 模型（Babylon.js）。
@@ -161,9 +161,9 @@ export class StarDewBoboModel implements MonsterView {
     wingFresnel.power = 1.5;
     this.wingMat.opacityFresnelParameters = wingFresnel;
 
-    // V2：星星用頂點色（中央奶油黃 → 邊緣暖金），emissive 只負責發光暈
+    // V2：星星用頂點色（中央奶油黃 → 邊緣暖金）；emissive 為中性亮度（同時決定光暈強度）
     this.starMat = this.mat("PH_boboStar", Color3.White());
-    this.starMat.emissiveColor = new Color3(0.45, 0.32, 0.05);
+    this.starMat.emissiveColor = Color3.White();
     this.starMat.disableLighting = true;
     this.starMat.backFaceCulling = false;
 
@@ -326,9 +326,9 @@ export class StarDewBoboModel implements MonsterView {
     const glow = Math.max(0, Math.min(1, p.starGlow));
     const starVis = Math.min(1, glow * 1.2);
     for (const st of this.stars) st.visibility = starVis;
-    const sk = 0.85 + 0.15 * glow;
-    this.starMat.diffuseColor.set(sk, sk, sk);
-    this.starMat.emissiveColor.set(0.45 * glow, 0.32 * glow, 0.05 * glow);
+    // disableLighting 時輸出 = emissive × 頂點色，故 emissive 用中性亮度、顏色交給頂點色漸層
+    const sk = 0.62 + 0.38 * glow;
+    this.starMat.emissiveColor.set(sk, sk, sk);
 
     Color3.LerpToRef(BODY_EMISSIVE, FLASH, Math.max(0, Math.min(1, p.hitFlash)) * 0.8, this.bodyMat.emissiveColor);
 
