@@ -28,6 +28,8 @@ export class PerfOverlay {
   private cooldown = 3;
   private uiTimer = 0;
   private last: PerfStats;
+  /** false = 暫停動態解析度（效能分析時避免測到一半解析度改變） */
+  adaptive = true;
 
   constructor(engine: Engine, scene: Scene, q: QualitySettings, parent: HTMLElement) {
     this.engine = engine;
@@ -67,7 +69,7 @@ export class PerfOverlay {
     const fps = this.engine.getFps();
     this.cooldown -= dt;
     this.lowFps = fps < 40 ? this.lowFps + dt : 0;
-    if (this.lowFps > 2 && this.cooldown <= 0 && this.stepIndex < this.steps.length - 1) {
+    if (this.adaptive && this.lowFps > 2 && this.cooldown <= 0 && this.stepIndex < this.steps.length - 1) {
       this.stepIndex++;
       this.engine.setHardwareScalingLevel(1 / this.steps[this.stepIndex]!);
       this.lowFps = 0;

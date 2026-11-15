@@ -115,3 +115,23 @@ export function resolutionSteps(devicePixelRatio: number, maxPixelRatio: number)
   const steps = [top, 1.5, 1.25, 1].filter((v, i) => i === 0 || v < top);
   return [...new Set(steps)];
 }
+
+/**
+ * 手機（觸控裝置）專用調整：畫面內容與特效不變，改用對手機 GPU 便宜很多的做法。
+ * - 不走 HDR 後製管線（少一張全螢幕浮點畫面＋一次全螢幕處理），改用畫布內建抗鋸齒；
+ *   色調映射改在材質內完成（與低畫質相同的作法，曲線與曝光不變）。
+ * - 柔和接觸陰影（PCSS，每個像素取樣數十次）改為高品質 PCF 柔邊陰影。
+ * - 發光層解析度與模糊核心縮小（星星光暈仍在）。
+ * 電腦維持原設定。
+ */
+export function mobileTuning(q: QualitySettings): QualitySettings {
+  return {
+    ...q,
+    postProcess: false,
+    msaaSamples: 1,
+    fxaa: false,
+    canvasAntialias: true,
+    bloom: q.bloom.enabled ? { ...q.bloom, textureRatio: Math.min(q.bloom.textureRatio, 0.3), kernel: Math.min(q.bloom.kernel, 20) } : q.bloom,
+    shadows: q.shadows.filter === "contact" ? { ...q.shadows, filter: "pcf", pcfQuality: "high" } : q.shadows,
+  };
+}

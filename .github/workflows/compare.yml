@@ -8,9 +8,9 @@ on:
   workflow_dispatch:
     inputs:
       baseline:
-        description: "比較基準 commit（預設：W2-1 開始前的正式版 main = a7b661d）"
+        description: "比較基準 commit（預設：效能優化前的草原美術版 = 53d1bab）"
         required: false
-        default: "a7b661d7de0f55fac2a70461becf988fb96d9805"
+        default: "53d1bab5620a0bb7fab447f314a4327ef765aa84"
   push:
     branches: [main, "feature/**"]
     paths:
@@ -27,7 +27,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  BASELINE: ${{ github.event.inputs.baseline || 'a7b661d7de0f55fac2a70461becf988fb96d9805' }}
+  BASELINE: ${{ github.event.inputs.baseline || '53d1bab5620a0bb7fab447f314a4327ef765aa84' }}
 
 jobs:
   compare:
@@ -79,6 +79,7 @@ jobs:
           case "${GITHUB_REF_NAME}" in
             feature/render-bobo-v2) CB=compare-bobo-v2 ;;
             feature/render-meadow) CB=compare-meadow ;;
+            feature/render-meadow-perf) CB=compare-meadow-perf ;;
             feature/render-meadow-base) CB=compare-meadow-base ;;
             *) CB=compare ;;
           esac

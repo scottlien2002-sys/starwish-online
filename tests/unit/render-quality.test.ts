@@ -8,6 +8,7 @@ import {
   resolutionSteps,
   resolveQuality,
 } from "../../src/render/quality.ts";
+import { mobileTuning } from "../../src/render/quality.ts";
 
 test("畫質：三種等級都存在", () => {
   assert.deepEqual([...QUALITY_LEVELS], ["high", "medium", "low"]);
@@ -73,4 +74,20 @@ test("動態解析度：從畫質上限往下，最低 1 倍", () => {
   assert.deepEqual(resolutionSteps(3, 1.5), [1.5, 1.25, 1]);
   assert.deepEqual(resolutionSteps(1, 2), [1]);
   assert.deepEqual(resolutionSteps(2, 1.25), [1.25, 1]);
+});
+
+test("手機調整：不走後製管線、改畫布抗鋸齒、PCSS 改 PCF，其餘不變", () => {
+  for (const l of ["high", "medium", "low"] as const) {
+    const base = qualitySettings(l);
+    const m = mobileTuning(base);
+    assert.equal(m.postProcess, false);
+    assert.equal(m.canvasAntialias, true);
+    assert.notEqual(m.shadows.filter, "contact");
+    assert.equal(m.shadows.mapSize, base.shadows.mapSize);
+    assert.equal(m.maxPixelRatio, base.maxPixelRatio);
+    assert.deepEqual(m.toneMapping, base.toneMapping);
+    assert.equal(m.bloom.enabled, base.bloom.enabled);
+    assert.equal(m.level, l);
+  }
+  assert.equal(mobileTuning(qualitySettings("high")).shadows.pcfQuality, "high");
 });

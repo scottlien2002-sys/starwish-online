@@ -34,6 +34,8 @@ import {
 export interface MeadowWorld {
   ground: Mesh;
   props: PropPlacement[];
+  /** 草叢網格（效能分析時可暫時關閉） */
+  grass: Mesh;
   update(dt: number): void;
 }
 
@@ -118,7 +120,8 @@ export function buildMeadow(scene: Scene, shadows: ShadowGenerator, quality: Mea
     });
     template.thinInstanceSetBuffer("matrix", buf, 16, true);
     template.thinInstanceRefreshBoundingInfo(false);
-    template.receiveShadows = true;
+    // 效能：小花不接收陰影（每朵只有幾個像素，陰影取樣是浪費）
+    template.receiveShadows = list[0]?.kind !== "flower";
     // 只有樹與岩石投射陰影（灌木、花、草不投射，省陰影貼圖的 draw call）
     if (list[0] && (list[0].kind === "tree" || list[0].kind === "rock")) shadows.addShadowCaster(template);
     template.freezeWorldMatrix();
@@ -129,8 +132,9 @@ export function buildMeadow(scene: Scene, shadows: ShadowGenerator, quality: Mea
     for (const t of options) if (!used.has(t) && !t.isDisposed()) t.dispose();
   }
 
+
   // ---------- 草叢（薄實例） ----------
-  buildGrass(scene, props, GRASS_COUNT[quality]);
+  const grass = buildGrass(scene, props, GRASS_COUNT[quality]);
 
   // ---------- 遠山與雲 ----------
   createDistantHills(scene, TUNING.world.seed + 21);
@@ -139,6 +143,7 @@ export function buildMeadow(scene: Scene, shadows: ShadowGenerator, quality: Mea
   return {
     ground,
     props,
+    grass,
     update(dt: number) {
       clouds.rotation.y += dt * 0.004;
     },
@@ -236,7 +241,8 @@ function buildGrass(scene: Scene, props: readonly PropPlacement[], count: number
   }
   tuft.thinInstanceSetBuffer("matrix", made === count ? buf : buf.slice(0, made * 16), 16, true);
   tuft.thinInstanceRefreshBoundingInfo(false);
-  tuft.receiveShadows = true;
+  // 效能：草叢不接收陰影（上千簇雙面草葉逐像素取樣陰影，是草地最貴的部分；視覺差異很小）
+  tuft.receiveShadows = false;
   tuft.freezeWorldMatrix();
   return tuft;
 }

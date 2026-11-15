@@ -20,6 +20,7 @@ import {
   type QualityLevel,
   type QualitySettings,
   defaultQuality,
+  mobileTuning,
   qualitySettings,
   resolveQuality,
 } from "./quality.ts";
@@ -37,7 +38,11 @@ export function pickQuality(): QualitySettings {
   const coarse = window.matchMedia?.("(pointer: coarse)").matches ?? false;
   const mem = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
   const level = resolveQuality(new URLSearchParams(location.search).get("quality"), stored, defaultQuality({ coarsePointer: coarse, deviceMemoryGB: mem }));
-  return qualitySettings(level);
+  // 手機專用調整（網址 ?mobile=1 / 0 可強制開關，供測試與比較）
+  const mobileParam = new URLSearchParams(location.search).get("mobile");
+  const mobile = mobileParam === "1" ? true : mobileParam === "0" ? false : coarse;
+  const base = qualitySettings(level);
+  return mobile ? mobileTuning(base) : base;
 }
 
 /** 切換畫質：記住選擇並重新載入（抗鋸齒方式需在建立引擎時決定） */

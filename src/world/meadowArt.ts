@@ -80,13 +80,26 @@ function displace(mesh: Mesh, amount: number, seed: number): void {
   }
   const idx = mesh.getIndices()!;
   const normals: number[] = [];
-  VertexData.ComputeNormals(pos, idx, normals);
+  if ((mesh.metadata as { smooth?: boolean } | null)?.smooth) {
+    // 放射狀法線：圓潤、無接縫
+    for (let i = 0; i < pos.length; i += 3) {
+      const l = Math.hypot(pos[i]!, pos[i + 1]!, pos[i + 2]!) || 1;
+      normals.push(pos[i]! / l, pos[i + 1]! / l, pos[i + 2]! / l);
+    }
+  } else {
+    VertexData.ComputeNormals(pos, idx, normals);
+  }
   mesh.updateVerticesData(VertexBuffer.PositionKind, pos);
   mesh.updateVerticesData(VertexBuffer.NormalKind, normals);
 }
 
-function blob(name: string, scene: Scene, r: number, x: number, y: number, z: number, sy = 1, subdiv = 3): Mesh {
-  const m = MeshBuilder.CreateIcoSphere(name, { radius: r, subdivisions: subdiv, flat: false, updatable: true }, scene);
+/**
+ * 圓球零件（樹冠、灌木、雲）。效能優化：改用共用頂點的 UV 球＋放射狀平滑法線，
+ * 三角形數約為原本二十面體細分的 1/3，而且表面是平滑的（原本每個小面各自一個法線，看起來有稜角）。
+ */
+function blob(name: string, scene: Scene, r: number, x: number, y: number, z: number, sy = 1, segments = 8): Mesh {
+  const m = MeshBuilder.CreateSphere(name, { diameter: r * 2, segments, updatable: true }, scene);
+  m.metadata = { smooth: true };
   m.scaling.y = sy;
   m.position.set(x, y, z);
   return m;
@@ -204,10 +217,10 @@ function rockPair(name: string, scene: Scene): Mesh {
 
 function bush(name: string, scene: Scene, berries: RGB | null): Mesh {
   const parts = [
-    blob(`${name}_0`, scene, 0.5, 0, 0.36, 0, 0.8, 2),
-    blob(`${name}_1`, scene, 0.38, 0.42, 0.3, 0.12, 0.85, 2),
-    blob(`${name}_2`, scene, 0.36, -0.38, 0.28, -0.1, 0.85, 2),
-    blob(`${name}_3`, scene, 0.3, 0.05, 0.55, 0.25, 0.85, 2),
+    blob(`${name}_0`, scene, 0.5, 0, 0.36, 0, 0.8, 6),
+    blob(`${name}_1`, scene, 0.38, 0.42, 0.3, 0.12, 0.85, 6),
+    blob(`${name}_2`, scene, 0.36, -0.38, 0.28, -0.1, 0.85, 6),
+    blob(`${name}_3`, scene, 0.3, 0.05, 0.55, 0.25, 0.85, 6),
   ];
   for (const [i, p] of parts.entries()) {
     displace(p, 0.08, i * 3.1 + 1.3);
@@ -486,7 +499,7 @@ export function createCloudLayer(scene: Scene, seed: number): TransformNode {
     const size = rng.range(6, 11);
     const puffs = 4 + Math.floor(rng.next() * 3);
     for (let p = 0; p < puffs; p++) {
-      const s = blob(`PH_cloud${c}_${p}`, scene, size * rng.range(0.55, 1), cx + (p - puffs / 2) * size * 0.7, cy + rng.range(-1, 2), cz + rng.range(-3, 3), 0.62, 1);
+      const s = blob(`PH_cloud${c}_${p}`, scene, size * rng.range(0.55, 1), cx + (p - puffs / 2) * size * 0.7, cy + rng.range(-1, 2), cz + rng.range(-3, 3), 0.62, 6);
       s.rotation.y = -a;
       bake(s);
       parts.push(s);

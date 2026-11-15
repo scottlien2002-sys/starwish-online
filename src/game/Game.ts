@@ -57,6 +57,8 @@ export interface DebugApi {
   teleport(x: number, z: number): void;
   /** 效能測試：鏡頭繞角色一圈，回傳實測結果（網址加 ?bench=1 會自動執行） */
   benchmark(seconds?: number): Promise<GameBenchmarkResult>;
+  /** 效能分析：逐項關閉功能量測（?bench=profile） */
+  profile(seconds?: number): Promise<{ name: string; avgFps: number; low1Fps: number; frameMs: number }[]>;
   /** 場景物件數（檢查記憶體是否持續增加） */
   sceneCounts(): SceneCounts;
 }
@@ -118,8 +120,9 @@ export class Game {
   private lockedId: string | null = null;
   /** 倒地動作進度 0..1 */
   private downT = 0;
-  private bench: { rec: FrameRecorder; before: SceneCounts; resolve: (r: GameBenchmarkResult) => void } | null = null;
+  private bench: { rec: FrameRecorder; before: SceneCounts; resolve: (r: GameBenchmarkResult) => void; silent: boolean } | null = null;
   private benchEl: HTMLDivElement | null = null;
+  private profiling = false;
   private readonly hudRoot: HTMLElement;
   private now = 0;
 
@@ -228,7 +231,9 @@ export class Game {
     if (!this.welcomed) {
       this.welcomed = true;
       // 網址加 ?bench=1：進場 3 秒後自動執行 10 秒效能測試
-      if (new URLSearchParams(location.search).get("bench") === "1") window.setTimeout(() => void this.runBenchmark(10), 3000);
+      const benchParam = new URLSearchParams(location.search).get("bench");
+      if (benchParam === "1") window.setTimeout(() => void this.runBenchmark(10), 3000);
+      if (benchParam === "profile") window.setTimeout(() => void this.runProfile(3), 3000);
       this.hud.toast("預覽測試：前方有 3 隻星露啵啵，靠近後按攻擊鍵（測試用數值）", 4500);
     }
   }
@@ -312,13 +317,65 @@ export class Game {
     };
   }
 
-  runBenchmark(seconds = 10): Promise<GameBenchmarkResult> {
+  runBenchmark(seconds = 10, silent = false): Promise<GameBenchmarkResult> {
     return new Promise((resolve) => {
       if (this.bench) return;
       this.input.moveOverride = null;
-      this.bench = { rec: new FrameRecorder(seconds), before: this.sceneCounts(), resolve };
-      this.hud.toast(`效能測試中（${seconds} 秒），請勿操作…`, (seconds + 0.5) * 1000);
+      this.bench = { rec: new FrameRecorder(seconds), before: this.sceneCounts(), resolve, silent };
+      this.hud.toast(silent ? "效能分析中，請勿操作…" : `效能測試中（${seconds} 秒），請勿操作…`, (seconds + 0.5) * 1000);
     });
+  }
+
+  /**
+   * 效能分析（網址 ?bench=profile）：依序暫時關閉一項功能、各量 3 秒，
+   * 用「每幀毫秒數」的差距找出這台裝置上最貴的項目。只在測試時暫時關閉，結束後全部恢復。
+   */
+  async runProfile(seconds = 3): Promise<{ name: string; avgFps: number; low1Fps: number; frameMs: number }[]> {
+    if (this.profiling || this.bench) return [];
+    this.profiling = true;
+    this.perfOverlay.adaptive = false;
+    const glow = this.render.glow;
+    const roots = this.monsters
+      .map((m) => (m.visual as unknown as { model?: { root?: TransformNode } } | null)?.model?.root)
+      .filter((r): r is TransformNode => !!r);
+    const scale0 = this.engine.getHardwareScalingLevel();
+    const cases: { name: string; on: () => void; off: () => void }[] = [
+      { name: "目前設定", on: () => {}, off: () => {} },
+      { name: "關閉陰影", on: () => (this.sun.shadowEnabled = false), off: () => (this.sun.shadowEnabled = true) },
+      { name: "關閉發光層", on: () => glow && (glow.isEnabled = false), off: () => glow && (glow.isEnabled = true) },
+      { name: "關閉草叢", on: () => this.world.grass.setEnabled(false), off: () => this.world.grass.setEnabled(true) },
+      { name: "隱藏星露啵啵", on: () => roots.forEach((r) => r.setEnabled(false)), off: () => roots.forEach((r) => r.setEnabled(true)) },
+      { name: "解析度 1x", on: () => this.engine.setHardwareScalingLevel(1), off: () => this.engine.setHardwareScalingLevel(scale0) },
+    ];
+    const out: { name: string; avgFps: number; low1Fps: number; frameMs: number }[] = [];
+    for (const c of cases) {
+      c.on();
+      const r = await this.runBenchmark(seconds, true);
+      c.off();
+      out.push({ name: c.name, avgFps: r.avgFps, low1Fps: r.low1Fps, frameMs: r.avgFps > 0 ? 1000 / r.avgFps : 0 });
+    }
+    this.perfOverlay.adaptive = true;
+    this.profiling = false;
+    const base = out[0]!;
+    this.showPanel(
+      `<b>效能分析（本機實測，各 ${seconds} 秒）</b><br>畫質 ${this.quality.level}・${this.perfOverlay.pixelRatio}x<br>` +
+        out
+          .map((o, i) => `${o.name}：${o.avgFps.toFixed(1)} FPS（最慢1% ${o.low1Fps.toFixed(0)}）` + (i ? `　省 ${(base.frameMs - o.frameMs).toFixed(1)} ms` : `　${o.frameMs.toFixed(1)} ms/幀`))
+          .join("<br>") +
+        `<br><small>FPS 上限為螢幕更新率；已達上限時差距會看不出來。點此關閉</small>`,
+    );
+    return out;
+  }
+
+  private showPanel(html: string): void {
+    if (!this.benchEl) {
+      this.benchEl = document.createElement("div");
+      this.benchEl.className = "game-bench-result";
+      this.benchEl.addEventListener("click", () => (this.benchEl!.hidden = true));
+      this.hudRoot.appendChild(this.benchEl);
+    }
+    this.benchEl.hidden = false;
+    this.benchEl.innerHTML = html;
   }
 
   private finishBenchmark(): void {
@@ -335,21 +392,16 @@ export class Game {
       countsAfter: this.sceneCounts(),
       userAgent: navigator.userAgent,
     };
-    if (!this.benchEl) {
-      this.benchEl = document.createElement("div");
-      this.benchEl.className = "game-bench-result";
-      this.benchEl.addEventListener("click", () => (this.benchEl!.hidden = true));
-      this.hudRoot.appendChild(this.benchEl);
-    }
     const c0 = r.countsBefore, c1 = r.countsAfter;
-    this.benchEl.hidden = false;
-    this.benchEl.innerHTML =
+    if (!b.silent)
+      this.showPanel(
       `<b>新手草原效能測試（本機實測）</b><br>${r.seconds} 秒・畫質 ${r.quality}・${r.pixelRatio}x<br>` +
       `平均 ${r.avgFps.toFixed(1)} FPS・最慢 1% ${r.low1Fps.toFixed(1)} FPS<br>` +
       `最低 ${r.minFps.toFixed(1)} FPS・Draw Calls 平均 ${r.avgDrawCalls.toFixed(0)}（最高 ${r.maxDrawCalls}）<br>` +
       `物件 ${c0.meshes}→${c1.meshes}・材質 ${c0.materials}→${c1.materials}・貼圖 ${c0.textures}→${c1.textures}` +
       (c1.jsHeapMB !== null ? `<br>JS 記憶體 ${c0.jsHeapMB}→${c1.jsHeapMB} MB` : "") +
-      `<br><small>點此關閉</small>`;
+      `<br><small>點此關閉</small>`,
+      );
     b.resolve(r);
   }
 
@@ -536,6 +588,7 @@ export class Game {
         this.player.root.position.copyFrom(this.position);
       },
       benchmark: (seconds) => this.runBenchmark(seconds),
+      profile: (seconds) => this.runProfile(seconds),
       sceneCounts: () => this.sceneCounts(),
       renderer: () => ({
         webgl: this.engine.webGLVersion,

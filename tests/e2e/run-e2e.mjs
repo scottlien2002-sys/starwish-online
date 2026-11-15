@@ -39,7 +39,8 @@ for (const name of browsers) {
     };
 
     try {
-      await page.goto(server.url + "/", { waitUntil: "load" });
+      // 草原以手機專用渲染路徑測試（iPhone 實機會走這條路徑）
+      await page.goto(server.url + "/?mobile=1", { waitUntil: "load" });
       await page.addStyleTag({ content: safeAreaCss(vp.safe) });
       const ready = await page
         .waitForFunction(() => window.__starwish?.ready === true || document.querySelector(".boot-status.error"), null, { timeout: 45000 })
@@ -163,6 +164,10 @@ for (const name of browsers) {
         const bench = await page.evaluate(() => window.__starwish.benchmark(2));
         // 關閉結果面板（避免擋住後面的拖曳測試）
         await page.evaluate(() => document.querySelectorAll(".game-bench-result").forEach((e) => (e.hidden = true)));
+        const prof = await page.evaluate(() => window.__starwish.profile(0.6));
+        await page.evaluate(() => document.querySelectorAll(".game-bench-result").forEach((e) => (e.hidden = true)));
+        const after = await page.evaluate(() => ({ m: window.__starwish.monsters().filter((x) => x.visible).length, r: window.__starwish.renderer().hardwareScaling, p: window.__starwish.perf() }));
+        check("草原：效能分析可執行且結束後全部恢復", prof.length === 6 && prof.every((x) => x.avgFps > 0) && after.p.postProcess === false && after.p.bloom === true, { prof, after });
         check("草原：效能測試可執行", bench.frames >= 5 && bench.avgFps > 0 && bench.avgDrawCalls > 0 && bench.countsAfter.meshes === bench.countsBefore.meshes, bench);
         // 確保後續移動測試時玩家不在倒地狀態
         await page.waitForFunction(() => !window.__starwish.combat().down, null, { timeout: 5000 }).catch(() => {});

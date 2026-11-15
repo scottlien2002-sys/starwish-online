@@ -44,7 +44,8 @@ await page.addInitScript(() => {
     }
   };
 });
-const q = quality ? `quality=${quality}` : "";
+// mobile=1：截圖走手機專用的渲染路徑（舊版本會忽略此參數）
+const q = quality ? `quality=${quality}&mobile=1` : "";
 const url = mode === "game" ? `/?${q}` : `/?lab=bobo${q ? "&" + q : ""}`;
 await page.goto(server.url + url, { waitUntil: "load" });
 
