@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { PREVIEW_COMBAT, PreviewCombat, previewSpawnPoints } from "../../src/game/previewCombat.ts";
+import { PREVIEW_COMBAT, PreviewCombat, previewSpawnPoints, separate } from "../../src/game/previewCombat.ts";
 import { MONSTER_DEFINITIONS } from "../../src/config/monsters.ts";
 import { MonsterInstance } from "../../src/monsters/framework/MonsterInstance.ts";
 import { createMonsterRegistry } from "../../src/monsters/framework/index.ts";
@@ -84,4 +84,28 @@ test("鎖定：已鎖定目標在範圍內就不換目標；離開範圍或死�
   // a 離開範圍 → 改鎖 b
   a.currentPosition.x = 10;
   assert.equal(c.lockTarget(0, 0, ms)?.instanceId, "b");
+});
+
+test("間距：重疊的怪物被推開到至少 minDist，且不進入玩家半徑", () => {
+  const pts = [{ x: 0, z: 1 }, { x: 0.05, z: 1 }, { x: 0, z: 1 }];
+  separate(pts, 1.0, { x: 0, z: 0, minDist: 0.85 }, 8);
+  for (let i = 0; i < pts.length; i++) {
+    assert.ok(Math.hypot(pts[i]!.x, pts[i]!.z) >= 0.85 - 1e-9, "不進玩家身體");
+    for (let j = i + 1; j < pts.length; j++) {
+      assert.ok(Math.hypot(pts[i]!.x - pts[j]!.x, pts[i]!.z - pts[j]!.z) >= 0.95, `pair ${i},${j}`);
+    }
+  }
+  // 已有足夠間距時不移動
+  const far = [{ x: 0, z: 3 }, { x: 2, z: 3 }];
+  separate(far, 1.0, { x: 0, z: 0, minDist: 0.85 });
+  assert.deepEqual(far, [{ x: 0, z: 3 }, { x: 2, z: 3 }]);
+});
+
+test("倒地：debugKnockDown 立即倒地，2 秒後滿血復活", () => {
+  const c = new PreviewCombat();
+  c.debugKnockDown(5);
+  assert.ok(c.isDown && c.hp === 0);
+  assert.equal(c.update(6.9), false);
+  assert.equal(c.update(7), true);
+  assert.ok(!c.isDown && c.hp === PREVIEW_COMBAT.playerMaxHp);
 });

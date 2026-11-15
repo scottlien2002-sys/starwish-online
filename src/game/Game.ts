@@ -28,7 +28,7 @@ import { PerfOverlay, type PerfStats } from "../render/PerfOverlay.ts";
 import type { QualitySettings } from "../render/quality.ts";
 import { createMonsterRegistry, MonsterFactory, type MonsterController, type MonsterTarget } from "../monsters/framework/index.ts";
 import { registerBabylonVisuals } from "../monsters/babylon/registerVisuals.ts";
-import { PREVIEW_COMBAT, PreviewCombat, previewSpawnPoints, type PlayerAttackResult } from "./previewCombat.ts";
+import { PREVIEW_COMBAT, PreviewCombat, previewSpawnPoints, separate, type PlayerAttackResult } from "./previewCombat.ts";
 
 export interface DebugApi {
   ready: boolean;
@@ -49,7 +49,9 @@ export interface DebugApi {
   /** 預覽測試：等同按下攻擊鍵 */
   attack(): PlayerAttackResult;
   /** 預覽測試：玩家戰鬥狀態 */
-  combat(): { hp: number; maxHp: number; down: boolean; hitsTaken: number; lockedId: string | null };
+  combat(): { hp: number; maxHp: number; down: boolean; hitsTaken: number; lockedId: string | null; tilt: number };
+  /** 預覽測試：直接讓玩家倒地 */
+  knockDown(): void;
   /** 預覽測試：直接設定玩家位置（x, z） */
   teleport(x: number, z: number): void;
 }
@@ -91,6 +93,8 @@ export class Game {
   private readonly combat = new PreviewCombat();
   private readonly lockRing: Mesh;
   private lockedId: string | null = null;
+  /** 倒地動作進度 0..1 */
+  private downT = 0;
   private now = 0;
 
   constructor(canvas: HTMLCanvasElement, hudRoot: HTMLElement) {
@@ -233,6 +237,15 @@ export class Game {
     root.position.copyFrom(this.position);
     root.rotation.y = this.yaw;
     this.player.update(dt, Math.min(1, Math.hypot(move.x, move.y)));
+    // 預覽測試：HP 歸零時角色往後倒在地上（0.4 秒倒下），復活時立刻站起
+    this.downT = this.combat.isDown ? Math.min(1, this.downT + dt / 0.4) : 0;
+    if (this.downT > 0) {
+      const e = 1 - Math.pow(1 - this.downT, 3);
+      root.rotation.x = -(Math.PI / 2) * 0.92 * e;
+      root.position.y += 0.18 * e;
+    } else {
+      root.rotation.x = 0;
+    }
 
     this.camera.update(dt, this.position, this.input.consumeCamera());
 
@@ -303,6 +316,10 @@ export class Game {
         }
       }
     }
+    // 怪物彼此保持間距、不擠進玩家身體（只調整位置，AI 與數值不變）
+    const alive = this.monsters.filter((m) => m.instance.isAlive).map((m) => m.instance.currentPosition);
+    separate(alive, 1.0, { x: this.position.x, z: this.position.z, minDist: 0.85 });
+    for (const p of alive) p.y = heightAt(p.x, p.z);
     // 鎖定標記
     const locked = this.combat.lockTarget(this.position.x, this.position.z, this.monsters.map((m) => m.instance));
     this.lockedId = locked?.instanceId ?? null;
@@ -413,7 +430,19 @@ export class Game {
         this.handleAttack(r);
         return r;
       },
-      combat: () => ({ hp: this.combat.hp, maxHp: PREVIEW_COMBAT.playerMaxHp, down: this.combat.isDown, hitsTaken: this.combat.hitsTaken, lockedId: this.lockedId }),
+      combat: () => ({
+        hp: this.combat.hp,
+        maxHp: PREVIEW_COMBAT.playerMaxHp,
+        down: this.combat.isDown,
+        hitsTaken: this.combat.hitsTaken,
+        lockedId: this.lockedId,
+        tilt: Math.abs(this.player.root.rotation.x),
+      }),
+      knockDown: () => {
+        this.combat.debugKnockDown(this.now);
+        this.updateBars();
+        this.hud.toast("你倒下了…（測試規則：2 秒後復活）", 1500);
+      },
       teleport: (x, z) => {
         this.position.set(x, heightAt(x, z), z);
         this.player.root.position.copyFrom(this.position);

@@ -122,6 +122,11 @@ if (mode === "game") {
     });
     await run(150);
     await shot("g05_bobo_hit", "草原：攻擊星露啵啵（受傷）");
+    if (await page.evaluate(() => typeof window.__starwish.knockDown === "function")) {
+      await page.evaluate(() => window.__starwish.knockDown());
+      await run(600);
+      await shot("g06_player_down", "草原：玩家 HP 歸零倒地");
+    }
   }
   const perf = await page.evaluate(() => (window.__starwish.perf ? window.__starwish.perf() : null));
   writeFileSync(`${outDir}/shots.json`, JSON.stringify({ shots, errors, perf, timing }, null, 2));

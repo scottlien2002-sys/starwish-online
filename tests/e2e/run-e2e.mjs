@@ -117,6 +117,40 @@ for (const name of browsers) {
         check("草原：怪物攻擊會打到玩家（扣暫定攻擊力 8）", cs.hitsTaken > 0, cs);
         const stuck = afterRespawn.filter((m) => !["idle", "move", "attack", "hit", "death", "dead", "respawn"].includes(m.state));
         check("草原：多隻同時存在、無異常狀態", afterRespawn.length === 3 && stuck.length === 0, afterRespawn);
+        // 怪物圍住玩家時彼此不重疊、不擠進玩家身體
+        await page.waitForFunction(() => !window.__starwish.combat().down, null, { timeout: 8000 }).catch(() => {});
+        const mid = afterRespawn[0];
+        await page.evaluate(([x, z]) => window.__starwish.teleport(x, z), [mid.spawnX * 0.6, mid.spawnZ * 0.6]);
+        await page.waitForTimeout(3500);
+        const pl = await page.evaluate(() => window.__starwish.getPlayer());
+        const ring = (await page.evaluate(() => window.__starwish.monsters())).filter((m) => m.state !== "death" && m.state !== "dead" && m.state !== "respawn");
+        let minPair = Infinity, minToPlayer = Infinity;
+        for (let i = 0; i < ring.length; i++) {
+          minToPlayer = Math.min(minToPlayer, Math.hypot(ring[i].x - pl.x, ring[i].z - pl.z));
+          for (let j = i + 1; j < ring.length; j++) minPair = Math.min(minPair, Math.hypot(ring[i].x - ring[j].x, ring[i].z - ring[j].z));
+        }
+        check("草原：多隻怪物不疊在一起、不擠進玩家", ring.length < 2 || (minPair >= 0.9 && minToPlayer >= 0.8), { minPair, minToPlayer, ring, pl });
+        // 玩家 HP 歸零：真的倒在地上、不能移動；2 秒後在出生點站起、HP 全滿
+        await page.evaluate(() => window.__starwish.knockDown());
+        await page.waitForTimeout(700);
+        const downA = await page.evaluate(() => ({ c: window.__starwish.combat(), p: window.__starwish.getPlayer() }));
+        await page.evaluate(() => window.__starwish.setMove({ x: 0, y: 1 }));
+        await page.waitForTimeout(400);
+        await page.evaluate(() => window.__starwish.setMove(null));
+        const downB = await page.evaluate(() => ({ c: window.__starwish.combat(), p: window.__starwish.getPlayer() }));
+        const stillDown = downB.c.down;
+        check(
+          "草原：玩家 HP 歸零時倒地且不能移動",
+          downA.c.down && downA.c.hp === 0 && downA.c.tilt > 1.2 && (!stillDown || Math.hypot(downB.p.x - downA.p.x, downB.p.z - downA.p.z) < 0.01),
+          { downA, downB },
+        );
+        const revived = await page
+          .waitForFunction(() => !window.__starwish.combat().down, null, { timeout: 10000, polling: 100 })
+          .then(() => true)
+          .catch(() => false);
+        await page.waitForTimeout(200);
+        const up = await page.evaluate(() => ({ c: window.__starwish.combat(), p: window.__starwish.getPlayer() }));
+        check("草原：倒地後在出生點站起、HP 全滿", revived && up.c.hp === up.c.maxHp && up.c.tilt < 0.01 && Math.hypot(up.p.x, up.p.z) < 1.5, up);
         // 確保後續移動測試時玩家不在倒地狀態
         await page.waitForFunction(() => !window.__starwish.combat().down, null, { timeout: 5000 }).catch(() => {});
         await page.evaluate(() => window.__starwish.teleport(0, 0));

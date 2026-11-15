@@ -103,6 +103,12 @@ export class PreviewCombat {
     return dmg;
   }
 
+  /** 測試用：直接讓玩家倒地（E2E 驗證倒地與復活流程） */
+  debugKnockDown(now: number): void {
+    this.hp = 0;
+    this.downUntil = now + PREVIEW_COMBAT.downSeconds;
+  }
+
   /** 每幀呼叫；回傳 true 表示本幀玩家復活（呼叫端把玩家送回出生點） */
   update(now: number): boolean {
     if (this.downUntil !== null && now >= this.downUntil) {
@@ -125,4 +131,51 @@ export function previewSpawnPoints(originX: number, originZ: number, forwardYaw:
   // 右方向（左手座標、y 向上）：(cos, -sin)
   const rx = fz, rz = -fx;
   return pts.map(([f, r]) => ({ x: originX + fx * f + rx * r, z: originZ + fz * f + rz * r }));
+}
+
+/**
+ * 預覽草原：讓存活怪物彼此保持間距、也不擠進玩家身體（每幀在 AI 移動之後套用）。
+ * 只調整位置，不改 AI 決策、狀態機或數值。points 會被原地修改。
+ */
+export function separate(
+  points: { x: number; z: number }[],
+  minDist: number,
+  player?: { x: number; z: number; minDist: number },
+  iterations = 2,
+): void {
+  for (let it = 0; it < iterations; it++) {
+    for (let i = 0; i < points.length; i++) {
+      for (let j = i + 1; j < points.length; j++) {
+        const a = points[i]!, b = points[j]!;
+        let dx = b.x - a.x, dz = b.z - a.z;
+        let d = Math.hypot(dx, dz);
+        if (d >= minDist) continue;
+        if (d < 1e-6) {
+          // 完全重疊：依索引給固定方向，避免隨機
+          const ang = (i * 2.399 + j) % (Math.PI * 2);
+          dx = Math.cos(ang);
+          dz = Math.sin(ang);
+          d = 1;
+        } else {
+          dx /= d;
+          dz /= d;
+        }
+        const push = (minDist - Math.min(d, minDist)) / 2;
+        a.x -= dx * push;
+        a.z -= dz * push;
+        b.x += dx * push;
+        b.z += dz * push;
+      }
+      if (player) {
+        const a = points[i]!;
+        const dx = a.x - player.x, dz = a.z - player.z;
+        const d = Math.hypot(dx, dz);
+        if (d < player.minDist) {
+          const ux = d > 1e-6 ? dx / d : 0, uz = d > 1e-6 ? dz / d : 1;
+          a.x = player.x + ux * player.minDist;
+          a.z = player.z + uz * player.minDist;
+        }
+      }
+    }
+  }
 }
