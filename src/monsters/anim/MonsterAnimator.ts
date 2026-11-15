@@ -18,6 +18,10 @@ export interface AnimFrame {
   pose: MonsterPose;
   effects: MonsterEffect[];
   state: MonsterState;
+  /** 本幀進入的狀態（依發生順序；含由 request 立即切換的狀態） */
+  entered: MonsterState[];
+  /** 本幀「正常播完」的一次性動作（被打斷的不算），即動畫完成事件 */
+  completed: MonsterState[];
 }
 
 /**
@@ -31,10 +35,13 @@ export class MonsterAnimator {
   /** 基礎動作的連續時間，讓呼吸/彈跳在切換時不跳格 */
   private loopTime = 0;
 
-  constructor(profile: AnimProfile, view: MonsterView | null = null) {
+  /**
+   * @param sm 可注入外部狀態機（通用怪物框架中由 MonsterInstance 擁有），省略時自行建立
+   */
+  constructor(profile: AnimProfile, view: MonsterView | null = null, sm?: MonsterStateMachine) {
     this.profile = profile;
     this.view = view;
-    this.sm = new MonsterStateMachine(profile.timings);
+    this.sm = sm ?? new MonsterStateMachine(profile.timings);
   }
 
   request(action: MonsterAction): RequestResult {
@@ -47,8 +54,12 @@ export class MonsterAnimator {
 
   update(dt: number): AnimFrame {
     const effects: MonsterEffect[] = [];
+    const entered: MonsterState[] = [];
+    const completed: MonsterState[] = [];
     const s0 = this.sm.state;
-    const t0 = this.sm.consumeEntered() ? -1 : this.sm.stateTime;
+    const enteredByRequest = this.sm.consumeEntered();
+    if (enteredByRequest) entered.push(s0);
+    const t0 = enteredByRequest ? -1 : this.sm.stateTime;
 
     const transitions = this.sm.update(dt);
     if (transitions.length === 0) {
@@ -57,6 +68,8 @@ export class MonsterAnimator {
       this.collect(s0, t0, Infinity, effects);
       this.collect(this.sm.state, -1, this.sm.stateTime, effects);
       this.sm.consumeEntered();
+      completed.push(s0, ...transitions.slice(0, -1));
+      entered.push(...transitions);
     }
 
     this.loopTime += dt;
@@ -66,7 +79,7 @@ export class MonsterAnimator {
       this.view.applyPose(pose);
       this.view.update(dt);
     }
-    return { pose, effects, state: this.sm.state };
+    return { pose, effects, state: this.sm.state, entered, completed };
   }
 
   private sample(): MonsterPose {

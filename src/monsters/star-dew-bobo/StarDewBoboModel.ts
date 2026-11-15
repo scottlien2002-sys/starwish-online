@@ -576,7 +576,7 @@ export class StarDewBoboModel implements MonsterView {
     if (!ps.isStarted()) ps.start();
   }
 
-  private setFace(face: MonsterFace): void {
+  setFace(face: MonsterFace): void {
     if (face === this.currentFace) return;
     this.currentFace = face;
     const show = new Set(this.faces[face]);

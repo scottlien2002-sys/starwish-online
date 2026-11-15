@@ -14,10 +14,12 @@
     "build": "vite build",
     "preview": "vite preview --host",
     "e2e": "node tests/e2e/run-e2e.mjs dist",
-    "ci": "npm run typecheck && npm test && npm run build && npm run e2e"
+    "ci": "npm run typecheck && npm test && npm run build && npm run e2e",
+    "make:test-glb": "node tools/make-test-dummy-glb.mjs public/models/test-dummy.glb"
   },
   "dependencies": {
-    "@babylonjs/core": "^9.0.0"
+    "@babylonjs/core": "^9.0.0",
+    "@babylonjs/loaders": "^9.0.0"
   },
   "devDependencies": {
     "playwright": "1.63.0",

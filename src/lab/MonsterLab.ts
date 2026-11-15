@@ -13,11 +13,10 @@ import {
   Vector3,
 } from "@babylonjs/core";
 import { TUNING } from "../config/tuning.ts";
-import { MonsterAnimator } from "../monsters/anim/MonsterAnimator.ts";
 import type { MonsterAction, MonsterPose, MonsterState } from "../monsters/anim/types.ts";
-import { StarDewBoboModel } from "../monsters/star-dew-bobo/StarDewBoboModel.ts";
-import { STAR_DEW_BOBO_PROFILE } from "../monsters/star-dew-bobo/profile.ts";
-import { MONSTER_CANON, MONSTER_CANON_EN } from "../core/canon.ts";
+import { MonsterFactory, createMonsterRegistry } from "../monsters/framework/index.ts";
+import { registerBabylonVisuals } from "../monsters/babylon/registerVisuals.ts";
+import { MONSTER_CANON_EN, type MonsterId } from "../core/canon.ts";
 import { checkHud, type Insets } from "../ui/layout-check.ts";
 
 const ACTIONS: { action: MonsterAction; label: string }[] = [
@@ -29,7 +28,18 @@ const ACTIONS: { action: MonsterAction; label: string }[] = [
   { action: "respawn", label: "重生" },
 ];
 
-const STATE_LABEL: Record<MonsterState, string> = {
+const GENERIC_LABEL: Record<MonsterState, string> = {
+  idle: "Idle 待機",
+  move: "Move 移動",
+  attack: "Attack 攻擊",
+  hit: "Hit 受傷",
+  death: "Death 死亡",
+  dead: "已死亡（等待重生）",
+  respawn: "Respawn 重生",
+};
+
+/** 星露啵啵專用說明（依設定圖動作名稱） */
+const BOBO_LABEL: Record<MonsterState, string> = {
   idle: "Idle 待機（呼吸）",
   move: "Move 移動（彈跳）",
   attack: "Attack 攻擊（撞擊）",
@@ -55,6 +65,8 @@ const DEMO: [number, MonsterAction][] = [
 
 export interface LabDebugApi {
   ready: boolean;
+  monsterId: string;
+  hp(): number;
   request(a: MonsterAction): { accepted: boolean; reason?: string; overlay?: boolean; queued?: boolean };
   state(): MonsterState;
   pose(): MonsterPose;
@@ -70,7 +82,11 @@ declare global {
   }
 }
 
-export function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLElement): void {
+/**
+ * 單隻怪物動作測試頁（?lab=bobo、?lab=dummy）。
+ * 通用怪物框架 V1.0 起，怪物由 MonsterFactory 建立（關閉 AI，以按鈕手動控制）。
+ */
+export async function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLElement, monsterId = "star_dew_bobo"): Promise<void> {
   const engine = new Engine(canvas, true, { stencil: true, premultipliedAlpha: false }, false);
   engine.setHardwareScalingLevel(1 / Math.min(window.devicePixelRatio || 1, TUNING.render.maxDevicePixelRatio));
   const scene = new Scene(engine);
@@ -102,8 +118,14 @@ export function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLElement):
   ground.material = grassMat;
   ground.receiveShadows = true;
 
-  const model = new StarDewBoboModel(scene, { height: 0.8, shadows, glow });
-  const animator = new MonsterAnimator(STAR_DEW_BOBO_PROFILE, model);
+  const registry = registerBabylonVisuals(createMonsterRegistry(), { scene, shadows, glow });
+  const def = registry.definition(monsterId);
+  const ctrl = new MonsterFactory(registry).create(monsterId, { x: 0, y: 0, z: 0 }, { ai: false, instanceId: "lab" });
+  await ctrl.visual?.load();
+  const inst = ctrl.instance;
+  const animator = ctrl.animator;
+  const STATE_LABEL = monsterId === "star_dew_bobo" ? BOBO_LABEL : GENERIC_LABEL;
+  const enName = MONSTER_CANON_EN[monsterId as MonsterId] ?? (def.testOnly ? "程式測試用" : "");
 
   const camera = new ArcRotateCamera("labCam", Math.PI / 2, 1.2, 3.4, new Vector3(0, 0.45, 0), scene);
   camera.attachControl(canvas, true);
@@ -119,7 +141,7 @@ export function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLElement):
   // ---------- UI ----------
   uiRoot.innerHTML = `
     <div class="lab-title" data-layout="lab-title">
-      <div class="lab-name">${MONSTER_CANON.star_dew_bobo} <small>${MONSTER_CANON_EN.star_dew_bobo}</small></div>
+      <div class="lab-name">${def.name} <small>${enName}</small></div>
       <div class="lab-state">-</div>
       <div class="lab-msg"></div>
     </div>
@@ -141,7 +163,7 @@ export function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLElement):
   };
 
   const doRequest = (a: MonsterAction) => {
-    const r = animator.request(a);
+    const r = ctrl.request(a);
     if (!r.accepted) say(`無法執行：${r.reason ?? ""}`);
     else if (r.overlay) say("攻擊中受擊：只閃白，不中斷攻擊");
     else if (r.queued) say("已排隊：目前動作結束後切換");
@@ -168,7 +190,8 @@ export function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLElement):
 
   // ---------- 迴圈 ----------
   const history: MonsterState[] = [];
-  let lastPose: MonsterPose = STAR_DEW_BOBO_PROFILE.idle(0);
+  let lastPose: MonsterPose = ctrl.profile.anim.idle(0);
+  let now = 0;
   // V1.2：移動改為在鏡頭前左右來回（原本繞圓圈，身體一直旋轉）
   let moveX = 0;
   let moveDir = 1;
@@ -196,7 +219,8 @@ export function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLElement):
       }
     }
 
-    const frame = animator.update(dt);
+    now += dt;
+    const frame = ctrl.update(dt, now);
     lastPose = frame.pose;
     if (history[history.length - 1] !== frame.state) history.push(frame.state);
 
@@ -207,26 +231,28 @@ export function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLElement):
         moveX = Math.sign(moveX) * MOVE_RANGE;
         moveDir = -moveDir;
       }
-      model.root.position.x = moveX;
+      inst.currentPosition.x = moveX;
       // 以 3/4 側面朝向鏡頭前進：轉身只在折返時發生，而且平滑轉動
       const moveYaw = moveDir > 0 ? Math.PI / 2 : -Math.PI / 2;
-      const camYaw = Math.atan2(camera.position.x - model.root.position.x, camera.position.z - model.root.position.z);
+      const camYaw = Math.atan2(camera.position.x - inst.currentPosition.x, camera.position.z - inst.currentPosition.z);
       const diff = Math.atan2(Math.sin(camYaw - moveYaw), Math.cos(camYaw - moveYaw));
       const target = moveYaw + diff * 0.65;
-      let d = target - model.root.rotation.y;
+      let d = target - inst.yaw;
       d = Math.atan2(Math.sin(d), Math.cos(d));
-      model.root.rotation.y += d * Math.min(1, dt * 6);
+      inst.yaw += d * Math.min(1, dt * 6);
     } else if (frame.state === "idle" || frame.state === "respawn" || frame.state === "attack") {
       // 待機/重生：轉回面向鏡頭
       // 攻擊（V1.2）：轉成 3/4 側面，讓蓄力、衝撞、回彈三階段看得清楚（原本正對鏡頭衝過來，會被按鈕擋住）
-      const camYaw = Math.atan2(camera.position.x - model.root.position.x, camera.position.z - model.root.position.z);
+      const camYaw = Math.atan2(camera.position.x - inst.currentPosition.x, camera.position.z - inst.currentPosition.z);
       const attacking = frame.state === "attack";
       const target = attacking ? camYaw + 1.05 : camYaw;
-      let d = target - model.root.rotation.y;
+      let d = target - inst.yaw;
       d = Math.atan2(Math.sin(d), Math.cos(d));
-      model.root.rotation.y += d * Math.min(1, dt * (attacking ? 14 : 3));
+      inst.yaw += d * Math.min(1, dt * (attacking ? 14 : 3));
     }
-    const tgt = model.root.position;
+    // 測試頁在框架更新後才移動/轉向，渲染前同步一次（與重構前相同：本幀立即生效）
+    ctrl.visual?.setTransform(inst.currentPosition.x, inst.currentPosition.y, inst.currentPosition.z, inst.yaw);
+    const tgt = inst.currentPosition;
     camera.target.x += (tgt.x - camera.target.x) * Math.min(1, dt * 4);
     camera.target.z += (tgt.z - camera.target.z) * Math.min(1, dt * 4);
 
@@ -270,6 +296,8 @@ export function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLElement):
 
   window.__starwishLab = {
     ready: true,
+    monsterId,
+    hp: () => inst.currentHp,
     request: (a) => doRequest(a),
     state: () => animator.sm.state,
     pose: () => lastPose,

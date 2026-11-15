@@ -38,14 +38,16 @@ function main(): void {
   }
   const lab = new URLSearchParams(location.search).get("lab");
   try {
-    if (lab === "bobo") {
-      // 怪物動作測試場景（只在需要時載入）
-      void import("./lab/MonsterLab.ts")
-        .then((m) => {
-          document.body.classList.add("lab-mode");
-          m.startMonsterLab(canvas, hudRoot);
-          hideBoot();
-        })
+    // 怪物測試頁（只在需要時載入）：?lab=bobo 星露啵啵、?lab=dummy 測試方塊、?lab=field 多怪物 AI
+    const LAB_MONSTER: Record<string, string> = { bobo: "star_dew_bobo", dummy: "test_dummy" };
+    if (lab && (lab in LAB_MONSTER || lab === "field")) {
+      const start =
+        lab === "field"
+          ? import("./lab/MonsterField.ts").then((m) => m.startMonsterField(canvas, hudRoot))
+          : import("./lab/MonsterLab.ts").then((m) => m.startMonsterLab(canvas, hudRoot, LAB_MONSTER[lab]));
+      document.body.classList.add("lab-mode");
+      void start
+        .then(() => hideBoot())
         .catch((err: unknown) => {
           console.error(err);
           fail(`測試場景載入失敗：${err instanceof Error ? err.message : String(err)}`);
