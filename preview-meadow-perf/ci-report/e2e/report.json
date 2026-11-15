@@ -1,0 +1,1820 @@
+{
+  "startedAt": "2026-11-15T12:04:58.573Z",
+  "runs": [
+    {
+      "browser": "chromium",
+      "viewport": "iPhone 15 橫向",
+      "checks": {
+        "啟動": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "3D 畫面有繪製": {
+          "ok": true,
+          "detail": {
+            "renderer": {
+              "webgl": 2,
+              "hardwareScaling": 0.6666666666666666,
+              "width": 1278,
+              "height": 589
+            },
+            "pixels": {
+              "samples": 3568,
+              "distinctColors": 344,
+              "opaqueRatio": 1
+            }
+          }
+        },
+        "HUD 不重疊/不超出安全區": {
+          "ok": true,
+          "detail": []
+        },
+        "草原：3 隻星露啵啵生成於出生點前方 6–9 公尺且看得到": {
+          "ok": true,
+          "detail": {
+            "mons0": [
+              {
+                "id": "star_dew_bobo#1",
+                "state": "move",
+                "mode": "chase",
+                "hp": 60,
+                "maxHp": 60,
+                "x": -1.2511303049625644,
+                "y": 0,
+                "z": 4.848129931729932,
+                "spawnX": -1.6000000000000005,
+                "spawnZ": 6.2,
+                "visible": true
+              },
+              {
+                "id": "star_dew_bobo#2",
+                "state": "idle",
+                "mode": "idle",
+                "hp": 60,
+                "maxHp": 60,
+                "x": -3.2000000000000006,
+                "y": 0,
+                "z": 8,
+                "spawnX": -3.2000000000000006,
+                "spawnZ": 8,
+                "visible": true
+              },
+              {
+                "id": "star_dew_bobo#3",
+                "state": "idle",
+                "mode": "idle",
+                "hp": 60,
+                "maxHp": 60,
+                "x": 2.3999999999999995,
+                "y": 0,
+                "z": 8.6,
+                "spawnX": 2.3999999999999995,
+                "spawnZ": 8.6,
+                "visible": true
+              }
+            ],
+            "dists": [
+              6.403124237432849,
+              8.616263691415208,
+              8.928605714219886
+            ]
+          }
+        },
+        "草原：鎖定並攻擊、冷卻內不重複攻擊": {
+          "ok": true,
+          "detail": {
+            "a1": {
+              "ok": true,
+              "targetId": "star_dew_bobo#1",
+              "killed": false,
+              "damage": 20
+            },
+            "a2": {
+              "ok": false,
+              "reason": "cooldown"
+            },
+            "afterOne": {
+              "id": "star_dew_bobo#1",
+              "state": "attack",
+              "mode": "attack",
+              "hp": 40,
+              "maxHp": 60,
+              "x": -1.131188855832115,
+              "y": 0,
+              "z": 4.383356816349439,
+              "spawnX": -1.6000000000000005,
+              "spawnZ": 6.2,
+              "visible": true
+            }
+          }
+        },
+        "草原：鎖定同一隻並擊敗（播放死亡）": {
+          "ok": true,
+          "detail": {
+            "log": [
+              {
+                "ok": true,
+                "targetId": "star_dew_bobo#1",
+                "killed": false,
+                "damage": 20
+              },
+              {
+                "ok": true,
+                "targetId": "star_dew_bobo#1",
+                "killed": true,
+                "damage": 20
+              }
+            ],
+            "dying": {
+              "id": "star_dew_bobo#1",
+              "state": "death",
+              "mode": "dead",
+              "hp": 0,
+              "maxHp": 60,
+              "x": -1.1515000786466565,
+              "y": 0,
+              "z": 4.32180718080717,
+              "spawnX": -1.6000000000000005,
+              "spawnZ": 6.2,
+              "visible": true
+            }
+          }
+        },
+        "草原：死亡中的怪物不會被重複攻擊": {
+          "ok": true,
+          "detail": {
+            "ok": false,
+            "reason": "cooldown"
+          }
+        },
+        "草原：死亡後重生並回到待機/移動": {
+          "ok": false,
+          "detail": [
+            {
+              "id": "star_dew_bobo#1",
+              "state": "dead",
+              "mode": "dead",
+              "hp": 0,
+              "maxHp": 60,
+              "x": -1.1515000786466565,
+              "y": 0,
+              "z": 4.32180718080717,
+              "spawnX": -1.6000000000000005,
+              "spawnZ": 6.2,
+              "visible": true
+            },
+            {
+              "id": "star_dew_bobo#2",
+              "state": "idle",
+              "mode": "attack",
+              "hp": 60,
+              "maxHp": 60,
+              "x": -0.565164609009215,
+              "y": 0,
+              "z": 0.7782307437589215,
+              "spawnX": -3.2000000000000006,
+              "spawnZ": 8,
+              "visible": true
+            },
+            {
+              "id": "star_dew_bobo#3",
+              "state": "idle",
+              "mode": "attack",
+              "hp": 60,
+              "maxHp": 60,
+              "x": 0.4084948608927841,
+              "y": 0,
+              "z": 1.0062378416093138,
+              "spawnX": 2.3999999999999995,
+              "spawnZ": 8.6,
+              "visible": true
+            }
+          ]
+        },
+        "草原：怪物攻擊會打到玩家（扣暫定攻擊力 8）": {
+          "ok": true,
+          "detail": {
+            "hp": 28,
+            "maxHp": 100,
+            "down": false,
+            "hitsTaken": 9,
+            "lockedId": "star_dew_bobo#2",
+            "tilt": 0
+          }
+        },
+        "草原：多隻同時存在、無異常狀態": {
+          "ok": true,
+          "detail": [
+            {
+              "id": "star_dew_bobo#1",
+              "state": "dead",
+              "mode": "dead",
+              "hp": 0,
+              "maxHp": 60,
+              "x": -1.1515000786466565,
+              "y": 0,
+              "z": 4.32180718080717,
+              "spawnX": -1.6000000000000005,
+              "spawnZ": 6.2,
+              "visible": true
+            },
+            {
+              "id": "star_dew_bobo#2",
+              "state": "idle",
+              "mode": "attack",
+              "hp": 60,
+              "maxHp": 60,
+              "x": -0.565164609009215,
+              "y": 0,
+              "z": 0.7782307437589215,
+              "spawnX": -3.2000000000000006,
+              "spawnZ": 8,
+              "visible": true
+            },
+            {
+              "id": "star_dew_bobo#3",
+              "state": "idle",
+              "mode": "attack",
+              "hp": 60,
+              "maxHp": 60,
+              "x": 0.4084948608927841,
+              "y": 0,
+              "z": 1.0062378416093138,
+              "spawnX": 2.3999999999999995,
+              "spawnZ": 8.6,
+              "visible": true
+            }
+          ]
+        },
+        "草原：多隻怪物不疊在一起、不擠進玩家": {
+          "ok": true,
+          "detail": {
+            "minPair": 0.9999999999999999,
+            "minToPlayer": 1.4175915581015865,
+            "ring": [
+              {
+                "id": "star_dew_bobo#2",
+                "state": "move",
+                "mode": "chase",
+                "hp": 60,
+                "maxHp": 60,
+                "x": -1.0295237054312971,
+                "y": 0,
+                "z": 2.3041143125294377,
+                "spawnX": -3.2000000000000006,
+                "spawnZ": 8,
+                "visible": true
+              },
+              {
+                "id": "star_dew_bobo#3",
+                "state": "move",
+                "mode": "chase",
+                "hp": 60,
+                "maxHp": 60,
+                "x": -0.041589455371097,
+                "y": 0,
+                "z": 2.4589881888223424,
+                "spawnX": 2.3999999999999995,
+                "spawnZ": 8.6,
+                "visible": true
+              }
+            ],
+            "pl": {
+              "x": -0.9600000000000003,
+              "y": 0,
+              "z": 3.7199999999999998,
+              "yaw": -1.6310476858263678
+            }
+          }
+        },
+        "草原：玩家 HP 歸零時倒地且不能移動": {
+          "ok": true,
+          "detail": {
+            "downA": {
+              "c": {
+                "hp": 0,
+                "maxHp": 100,
+                "down": true,
+                "hitsTaken": 9,
+                "lockedId": null,
+                "tilt": 1.2644910430698917
+              },
+              "p": {
+                "x": -0.9600000000000003,
+                "y": 0,
+                "z": 3.7199999999999998,
+                "yaw": -1.6310476858263678
+              }
+            },
+            "downB": {
+              "c": {
+                "hp": 0,
+                "maxHp": 100,
+                "down": true,
+                "hitsTaken": 9,
+                "lockedId": null,
+                "tilt": 1.4451326206513049
+              },
+              "p": {
+                "x": -0.9600000000000003,
+                "y": 0,
+                "z": 3.7199999999999998,
+                "yaw": -1.6310476858263678
+              }
+            }
+          }
+        },
+        "草原：倒地後在出生點站起、HP 全滿": {
+          "ok": true,
+          "detail": {
+            "c": {
+              "hp": 100,
+              "maxHp": 100,
+              "down": false,
+              "hitsTaken": 9,
+              "lockedId": null,
+              "tilt": 0
+            },
+            "p": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "yaw": -1.6310476858263678
+            }
+          }
+        },
+        "草原：戰鬥一輪後場景物件數不增加": {
+          "ok": true,
+          "detail": {
+            "countsStart": {
+              "meshes": 69,
+              "materials": 38,
+              "textures": 27,
+              "particleSystems": 9,
+              "jsHeapMB": 77.6
+            },
+            "countsEnd": {
+              "meshes": 69,
+              "materials": 38,
+              "textures": 27,
+              "particleSystems": 9,
+              "jsHeapMB": 77.6
+            }
+          }
+        },
+        "草原：效能分析可執行且結束後全部恢復": {
+          "ok": true,
+          "detail": {
+            "prof": [
+              {
+                "name": "目前設定",
+                "avgFps": 2.4648755237860667,
+                "low1Fps": 2.4218939210462924,
+                "frameMs": 405.69999999999703
+              },
+              {
+                "name": "關閉陰影",
+                "avgFps": 2.303616678184796,
+                "low1Fps": 1.95427008012514,
+                "frameMs": 434.0999999999913
+              },
+              {
+                "name": "關閉發光層",
+                "avgFps": 2.611989029646135,
+                "low1Fps": 2.603488674824225,
+                "frameMs": 382.84999999999127
+              },
+              {
+                "name": "關閉草叢",
+                "avgFps": 2.9027576197387517,
+                "low1Fps": 2.8985507246376816,
+                "frameMs": 344.5
+              },
+              {
+                "name": "隱藏星露啵啵",
+                "avgFps": 2.812148481439774,
+                "low1Fps": 2.805836139169289,
+                "frameMs": 355.6000000000058
+              },
+              {
+                "name": "解析度 1x",
+                "avgFps": 2.592688618096986,
+                "low1Fps": 2.5913449080072946,
+                "frameMs": 385.69999999999715
+              }
+            ],
+            "after": {
+              "m": 3,
+              "r": 1,
+              "p": {
+                "fps": 2.5765005968893155,
+                "drawCalls": 82,
+                "activeMeshes": 54,
+                "pixelRatio": 1,
+                "quality": "medium",
+                "postProcess": false,
+                "bloom": true,
+                "shadowFilter": "pcf",
+                "shadowMap": 1024
+              }
+            }
+          }
+        },
+        "草原：效能測試可執行": {
+          "ok": true,
+          "detail": {
+            "seconds": 2.4,
+            "frames": 6,
+            "avgFps": 2.4607308370585885,
+            "low1Fps": 2.43605359317905,
+            "minFps": 2.43605359317905,
+            "avgDrawCalls": 92,
+            "maxDrawCalls": 92,
+            "activeMeshes": 62,
+            "pixelRatio": 1,
+            "quality": "medium",
+            "countsBefore": {
+              "meshes": 69,
+              "materials": 38,
+              "textures": 27,
+              "particleSystems": 9,
+              "jsHeapMB": 77.6
+            },
+            "countsAfter": {
+              "meshes": 69,
+              "materials": 38,
+              "textures": 27,
+              "particleSystems": 9,
+              "jsHeapMB": 77.6
+            },
+            "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36"
+          }
+        },
+        "搖桿移動角色": {
+          "ok": true,
+          "detail": {
+            "from": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "yaw": -1.6310476858263678
+            },
+            "to": {
+              "x": 5.896318054403088,
+              "y": 0,
+              "z": -0.7448781949333219,
+              "yaw": -4.58672527410481
+            },
+            "moved": 5.943181818181818
+          }
+        },
+        "拖曳旋轉攝影機": {
+          "ok": true,
+          "detail": {
+            "before": -3.2672563597333872,
+            "after": -4.047256359733387
+          }
+        },
+        "攻擊按鈕可按": {
+          "ok": true,
+          "detail": null
+        }
+      },
+      "errors": [],
+      "fpsReference": [
+        2.7351300098464835,
+        2.7339086692243924,
+        2.7340581625306477,
+        2.7387255796969208,
+        2.7405769828074593,
+        2.7470263439826472
+      ],
+      "screenshot": "e2e/chromium_iPhone_15_橫向.png",
+      "ok": false
+    },
+    {
+      "browser": "chromium",
+      "viewport": "iPhone SE 直向",
+      "checks": {
+        "啟動": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "3D 畫面有繪製": {
+          "ok": true,
+          "detail": {
+            "renderer": {
+              "webgl": 2,
+              "hardwareScaling": 0.6666666666666666,
+              "width": 562,
+              "height": 1000
+            },
+            "pixels": {
+              "samples": 2664,
+              "distinctColors": 318,
+              "opaqueRatio": 1
+            }
+          }
+        },
+        "HUD 不重疊/不超出安全區": {
+          "ok": true,
+          "detail": []
+        },
+        "草原：3 隻星露啵啵生成於出生點前方 6–9 公尺且看得到": {
+          "ok": true,
+          "detail": {
+            "mons0": [
+              {
+                "id": "star_dew_bobo#1",
+                "state": "move",
+                "mode": "chase",
+                "hp": 60,
+                "maxHp": 60,
+                "x": -1.291230729455185,
+                "y": 0,
+                "z": 5.003519076638836,
+                "spawnX": -1.6000000000000005,
+                "spawnZ": 6.2,
+                "visible": true
+              },
+              {
+                "id": "star_dew_bobo#2",
+                "state": "idle",
+                "mode": "idle",
+                "hp": 60,
+                "maxHp": 60,
+                "x": -3.2000000000000006,
+                "y": 0,
+                "z": 8,
+                "spawnX": -3.2000000000000006,
+                "spawnZ": 8,
+                "visible": true
+              },
+              {
+                "id": "star_dew_bobo#3",
+                "state": "idle",
+                "mode": "idle",
+                "hp": 60,
+                "maxHp": 60,
+                "x": 2.3999999999999995,
+                "y": 0,
+                "z": 8.6,
+                "spawnX": 2.3999999999999995,
+                "spawnZ": 8.6,
+                "visible": true
+              }
+            ],
+            "dists": [
+              6.403124237432849,
+              8.616263691415208,
+              8.928605714219886
+            ]
+          }
+        },
+        "搖桿移動角色": {
+          "ok": true,
+          "detail": {
+            "from": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "yaw": 0
+            },
+            "to": {
+              "x": -3.3329875954067177e-16,
+              "y": 0,
+              "z": 5.443181818181818,
+              "yaw": -6.123233994591822e-17
+            },
+            "moved": 5.443181818181818
+          }
+        },
+        "拖曳旋轉攝影機": {
+          "ok": true,
+          "detail": {
+            "before": -1.5707963267948966,
+            "after": -2.350796326794896
+          }
+        },
+        "攻擊按鈕可按": {
+          "ok": true,
+          "detail": null
+        }
+      },
+      "errors": [],
+      "fpsReference": [
+        2.67603874904109,
+        2.6960960529153746,
+        2.7249193878014433,
+        2.7537336038111695,
+        2.800832780946858,
+        2.868699618462946
+      ],
+      "screenshot": "e2e/chromium_iPhone_SE_直向.png",
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "viewport": "iPhone 15 橫向 / ?lab=bobo",
+      "checks": {
+        "場景啟動": {
+          "ok": true,
+          "detail": null
+        },
+        "介面不重疊": {
+          "ok": true,
+          "detail": null
+        },
+        "移動": {
+          "ok": true,
+          "detail": "move"
+        },
+        "攻擊：可發動、攻擊中不可重複、移動排隊": {
+          "ok": true,
+          "detail": {
+            "a1": {
+              "accepted": true
+            },
+            "a2": {
+              "accepted": false,
+              "reason": "攻擊動作進行中"
+            },
+            "queued": {
+              "accepted": true,
+              "queued": true
+            },
+            "overlay": {
+              "accepted": true,
+              "overlay": true
+            },
+            "state": "attack"
+          }
+        },
+        "攻擊中受擊為疊加": {
+          "ok": true,
+          "detail": {
+            "accepted": true,
+            "overlay": true
+          }
+        },
+        "攻擊結束回到移動": {
+          "ok": true,
+          "detail": "move"
+        },
+        "受傷": {
+          "ok": true,
+          "detail": "hit"
+        },
+        "死亡：不可攻擊/移動/受擊，播完進入 dead": {
+          "ok": true,
+          "detail": [
+            {
+              "accepted": false,
+              "reason": "死亡中無法攻擊"
+            },
+            {
+              "accepted": false,
+              "reason": "死亡中無法移動"
+            },
+            {
+              "accepted": false,
+              "reason": "已死亡"
+            }
+          ]
+        },
+        "重生後恢復完整": {
+          "ok": true,
+          "detail": {
+            "state": "idle",
+            "pose": {
+              "offsetY": 0,
+              "offsetZ": 0,
+              "shakeX": 0,
+              "scaleY": 0.9790786310893953,
+              "scaleXZ": 1.010627738401321,
+              "stretchZ": 1,
+              "lean": 0,
+              "opacity": 1,
+              "starGlow": 0.7802621036313178,
+              "antennaSway": -0.11111400002877007,
+              "wingFlap": 0.14818238341687828,
+              "hitFlash": 0,
+              "face": "normal",
+              "ringScale": 0,
+              "ringOpacity": 0,
+              "bodyVisible": true
+            }
+          }
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "e2e/chromium_bobo_1_idle.png",
+        "e2e/chromium_bobo_2_move.png",
+        "e2e/chromium_bobo_2b_move.png",
+        "e2e/chromium_bobo_3_attack.png",
+        "e2e/chromium_bobo_4_hit.png",
+        "e2e/chromium_bobo_5_death.png",
+        "e2e/chromium_bobo_6_respawn.png"
+      ],
+      "fpsReference": [
+        11.704119850187235
+      ],
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "viewport": "iPhone 15 橫向 / ?lab=dummy",
+      "checks": {
+        "場景啟動": {
+          "ok": true,
+          "detail": null
+        },
+        "介面不重疊": {
+          "ok": true,
+          "detail": null
+        },
+        "移動": {
+          "ok": true,
+          "detail": "move"
+        },
+        "攻擊：可發動、攻擊中不可重複、移動排隊": {
+          "ok": true,
+          "detail": {
+            "a1": {
+              "accepted": true
+            },
+            "a2": {
+              "accepted": false,
+              "reason": "攻擊動作進行中"
+            },
+            "queued": {
+              "accepted": true,
+              "queued": true
+            },
+            "overlay": {
+              "accepted": true,
+              "overlay": true
+            },
+            "state": "attack"
+          }
+        },
+        "攻擊中受擊為疊加": {
+          "ok": true,
+          "detail": {
+            "accepted": true,
+            "overlay": true
+          }
+        },
+        "攻擊結束回到移動": {
+          "ok": true,
+          "detail": "move"
+        },
+        "受傷": {
+          "ok": true,
+          "detail": "hit"
+        },
+        "死亡：不可攻擊/移動/受擊，播完進入 dead": {
+          "ok": true,
+          "detail": [
+            {
+              "accepted": false,
+              "reason": "死亡中無法攻擊"
+            },
+            {
+              "accepted": false,
+              "reason": "死亡中無法移動"
+            },
+            {
+              "accepted": false,
+              "reason": "已死亡"
+            }
+          ]
+        },
+        "重生後恢復完整": {
+          "ok": true,
+          "detail": {
+            "state": "idle",
+            "pose": {
+              "offsetY": 0,
+              "offsetZ": 0,
+              "shakeX": 0,
+              "scaleY": 1,
+              "scaleXZ": 1,
+              "stretchZ": 1,
+              "lean": 0,
+              "opacity": 1,
+              "starGlow": 1,
+              "antennaSway": 0,
+              "wingFlap": 0,
+              "hitFlash": 0,
+              "face": "normal",
+              "ringScale": 0,
+              "ringOpacity": 0,
+              "bodyVisible": true
+            }
+          }
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "e2e/chromium_dummy_1_idle.png",
+        "e2e/chromium_dummy_2_move.png",
+        "e2e/chromium_dummy_2b_move.png",
+        "e2e/chromium_dummy_3_attack.png",
+        "e2e/chromium_dummy_4_hit.png",
+        "e2e/chromium_dummy_5_death.png",
+        "e2e/chromium_dummy_6_respawn.png"
+      ],
+      "fpsReference": [
+        15.85120997569501
+      ],
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "viewport": "iPhone 15 橫向 / ?lab=field",
+      "checks": {
+        "場景啟動（含 GLB 載入）": {
+          "ok": true,
+          "detail": null
+        },
+        "同時生成 5 隻怪物（3 程式化 + 2 GLB）": {
+          "ok": true,
+          "detail": [
+            "star_dew_bobo#1",
+            "star_dew_bobo#2",
+            "star_dew_bobo#3",
+            "test_dummy#4",
+            "test_dummy#5"
+          ]
+        },
+        "介面不重疊": {
+          "ok": true,
+          "detail": null
+        },
+        "AI：目標靠近時追擊/攻擊": {
+          "ok": true,
+          "detail": {
+            "id": "star_dew_bobo#1",
+            "monsterId": "star_dew_bobo",
+            "state": "move",
+            "mode": "chase",
+            "hp": 60,
+            "maxHp": 60,
+            "x": -4.120700437867111,
+            "z": -2.7856628297222947
+          }
+        },
+        "受傷→死亡": {
+          "ok": true,
+          "detail": "star_dew_bobo#2"
+        },
+        "AI：死亡後停止行動": {
+          "ok": true,
+          "detail": {
+            "id": "star_dew_bobo#2",
+            "monsterId": "star_dew_bobo",
+            "state": "death",
+            "mode": "dead",
+            "hp": 0,
+            "maxHp": 60,
+            "x": -1.3753902070857689,
+            "z": -3.776030389236279
+          }
+        },
+        "AI：目標離開後不再追擊": {
+          "ok": true,
+          "detail": [
+            "star_dew_bobo#1:return",
+            "star_dew_bobo#2:dead",
+            "star_dew_bobo#3:return",
+            "test_dummy#4:return",
+            "test_dummy#5:return"
+          ]
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "e2e/chromium_field_1_engage.png",
+        "e2e/chromium_field_2_after.png"
+      ],
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone 15 橫向",
+      "checks": {
+        "啟動": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "3D 畫面有繪製": {
+          "ok": true,
+          "detail": {
+            "renderer": {
+              "webgl": 2,
+              "hardwareScaling": 0.6666666666666666,
+              "width": 1278,
+              "height": 589
+            },
+            "pixels": {
+              "samples": 3568,
+              "distinctColors": 341,
+              "opaqueRatio": 1
+            }
+          }
+        },
+        "HUD 不重疊/不超出安全區": {
+          "ok": true,
+          "detail": []
+        },
+        "草原：3 隻星露啵啵生成於出生點前方 6–9 公尺且看得到": {
+          "ok": true,
+          "detail": {
+            "mons0": [
+              {
+                "id": "star_dew_bobo#1",
+                "state": "move",
+                "mode": "chase",
+                "hp": 60,
+                "maxHp": 60,
+                "x": -1.5200390339130343,
+                "y": 0,
+                "z": 5.890151256413005,
+                "spawnX": -1.6000000000000005,
+                "spawnZ": 6.2,
+                "visible": true
+              },
+              {
+                "id": "star_dew_bobo#2",
+                "state": "idle",
+                "mode": "idle",
+                "hp": 60,
+                "maxHp": 60,
+                "x": -3.2000000000000006,
+                "y": 0,
+                "z": 8,
+                "spawnX": -3.2000000000000006,
+                "spawnZ": 8,
+                "visible": true
+              },
+              {
+                "id": "star_dew_bobo#3",
+                "state": "idle",
+                "mode": "idle",
+                "hp": 60,
+                "maxHp": 60,
+                "x": 2.3999999999999995,
+                "y": 0,
+                "z": 8.6,
+                "spawnX": 2.3999999999999995,
+                "spawnZ": 8.6,
+                "visible": true
+              }
+            ],
+            "dists": [
+              6.403124237432849,
+              8.616263691415208,
+              8.928605714219886
+            ]
+          }
+        },
+        "草原：鎖定並攻擊、冷卻內不重複攻擊": {
+          "ok": true,
+          "detail": {
+            "a1": {
+              "ok": true,
+              "targetId": "star_dew_bobo#1",
+              "killed": false,
+              "damage": 20
+            },
+            "a2": {
+              "ok": false,
+              "reason": "cooldown"
+            },
+            "afterOne": {
+              "id": "star_dew_bobo#1",
+              "state": "attack",
+              "mode": "attack",
+              "hp": 40,
+              "maxHp": 60,
+              "x": -1.5200390339130343,
+              "y": 0,
+              "z": 5.890151256413005,
+              "spawnX": -1.6000000000000005,
+              "spawnZ": 6.2,
+              "visible": true
+            }
+          }
+        },
+        "草原：鎖定同一隻並擊敗（播放死亡）": {
+          "ok": true,
+          "detail": {
+            "log": [
+              {
+                "ok": true,
+                "targetId": "star_dew_bobo#1",
+                "killed": false,
+                "damage": 20
+              },
+              {
+                "ok": true,
+                "targetId": "star_dew_bobo#1",
+                "killed": true,
+                "damage": 20
+              }
+            ],
+            "dying": {
+              "id": "star_dew_bobo#1",
+              "state": "death",
+              "mode": "attack",
+              "hp": 0,
+              "maxHp": 60,
+              "x": -1.5564971607656155,
+              "y": 0,
+              "z": 5.6182143012033805,
+              "spawnX": -1.6000000000000005,
+              "spawnZ": 6.2,
+              "visible": true
+            }
+          }
+        },
+        "草原：死亡中的怪物不會被重複攻擊": {
+          "ok": true,
+          "detail": {
+            "ok": false,
+            "reason": "cooldown"
+          }
+        },
+        "草原：死亡後重生並回到待機/移動": {
+          "ok": true,
+          "detail": [
+            {
+              "id": "star_dew_bobo#1",
+              "state": "move",
+              "mode": "chase",
+              "hp": 60,
+              "maxHp": 60,
+              "x": -1.5600195169565174,
+              "y": 0,
+              "z": 6.045075628206503,
+              "spawnX": -1.6000000000000005,
+              "spawnZ": 6.2,
+              "visible": true
+            },
+            {
+              "id": "star_dew_bobo#2",
+              "state": "idle",
+              "mode": "attack",
+              "hp": 60,
+              "maxHp": 60,
+              "x": -0.664296469298498,
+              "y": 0,
+              "z": 0.7844767208384887,
+              "spawnX": -3.2000000000000006,
+              "spawnZ": 8,
+              "visible": true
+            },
+            {
+              "id": "star_dew_bobo#3",
+              "state": "attack",
+              "mode": "attack",
+              "hp": 60,
+              "maxHp": 60,
+              "x": 0.3283551830626302,
+              "y": 0,
+              "z": 0.9054837332994283,
+              "spawnX": 2.3999999999999995,
+              "spawnZ": 8.6,
+              "visible": true
+            }
+          ]
+        },
+        "草原：怪物攻擊會打到玩家（扣暫定攻擊力 8）": {
+          "ok": true,
+          "detail": {
+            "hp": 12,
+            "maxHp": 100,
+            "down": false,
+            "hitsTaken": 11,
+            "lockedId": "star_dew_bobo#2",
+            "tilt": 0
+          }
+        },
+        "草原：多隻同時存在、無異常狀態": {
+          "ok": true,
+          "detail": [
+            {
+              "id": "star_dew_bobo#1",
+              "state": "move",
+              "mode": "chase",
+              "hp": 60,
+              "maxHp": 60,
+              "x": -1.5600195169565174,
+              "y": 0,
+              "z": 6.045075628206503,
+              "spawnX": -1.6000000000000005,
+              "spawnZ": 6.2,
+              "visible": true
+            },
+            {
+              "id": "star_dew_bobo#2",
+              "state": "idle",
+              "mode": "attack",
+              "hp": 60,
+              "maxHp": 60,
+              "x": -0.664296469298498,
+              "y": 0,
+              "z": 0.7844767208384887,
+              "spawnX": -3.2000000000000006,
+              "spawnZ": 8,
+              "visible": true
+            },
+            {
+              "id": "star_dew_bobo#3",
+              "state": "attack",
+              "mode": "attack",
+              "hp": 60,
+              "maxHp": 60,
+              "x": 0.3283551830626302,
+              "y": 0,
+              "z": 0.9054837332994283,
+              "spawnX": 2.3999999999999995,
+              "spawnZ": 8.6,
+              "visible": true
+            }
+          ]
+        },
+        "草原：多隻怪物不疊在一起、不擠進玩家": {
+          "ok": true,
+          "detail": {
+            "minPair": 1.938373515162903,
+            "minToPlayer": 0.8499999999999999,
+            "ring": [
+              {
+                "id": "star_dew_bobo#1",
+                "state": "move",
+                "mode": "return",
+                "hp": 60,
+                "maxHp": 60,
+                "x": -1.4800585508695505,
+                "y": 0,
+                "z": 5.735226884619507,
+                "spawnX": -1.6000000000000005,
+                "spawnZ": 6.2,
+                "visible": true
+              },
+              {
+                "id": "star_dew_bobo#2",
+                "state": "move",
+                "mode": "return",
+                "hp": 60,
+                "maxHp": 60,
+                "x": -1.4869687720632228,
+                "y": 0,
+                "z": 3.0530637862057723,
+                "spawnX": -3.2000000000000006,
+                "spawnZ": 8,
+                "visible": true
+              },
+              {
+                "id": "star_dew_bobo#3",
+                "state": "move",
+                "mode": "return",
+                "hp": 60,
+                "maxHp": 60,
+                "x": 0.35067928154680933,
+                "y": 0,
+                "z": 3.6697821298183566,
+                "spawnX": 2.3999999999999995,
+                "spawnZ": 8.6,
+                "visible": true
+              }
+            ],
+            "pl": {
+              "x": -0.9600000000000003,
+              "y": 0,
+              "z": 3.7199999999999998,
+              "yaw": -1.5707963267948966
+            }
+          }
+        },
+        "草原：玩家 HP 歸零時倒地且不能移動": {
+          "ok": true,
+          "detail": {
+            "downA": {
+              "c": {
+                "hp": 0,
+                "maxHp": 100,
+                "down": true,
+                "hitsTaken": 13,
+                "lockedId": null,
+                "tilt": 1.4451326206513049
+              },
+              "p": {
+                "x": -0.9600000000000003,
+                "y": 0,
+                "z": 3.7199999999999998,
+                "yaw": -1.5707963267948966
+              }
+            },
+            "downB": {
+              "c": {
+                "hp": 0,
+                "maxHp": 100,
+                "down": true,
+                "hitsTaken": 13,
+                "lockedId": null,
+                "tilt": 1.4451326206513049
+              },
+              "p": {
+                "x": -0.9600000000000003,
+                "y": 0,
+                "z": 3.7199999999999998,
+                "yaw": -1.5707963267948966
+              }
+            }
+          }
+        },
+        "草原：倒地後在出生點站起、HP 全滿": {
+          "ok": true,
+          "detail": {
+            "c": {
+              "hp": 100,
+              "maxHp": 100,
+              "down": false,
+              "hitsTaken": 13,
+              "lockedId": null,
+              "tilt": 0
+            },
+            "p": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "yaw": -1.5707963267948966
+            }
+          }
+        },
+        "草原：戰鬥一輪後場景物件數不增加": {
+          "ok": true,
+          "detail": {
+            "countsStart": {
+              "meshes": 69,
+              "materials": 38,
+              "textures": 27,
+              "particleSystems": 9,
+              "jsHeapMB": null
+            },
+            "countsEnd": {
+              "meshes": 69,
+              "materials": 38,
+              "textures": 27,
+              "particleSystems": 9,
+              "jsHeapMB": null
+            }
+          }
+        },
+        "草原：效能分析可執行且結束後全部恢復": {
+          "ok": true,
+          "detail": {
+            "prof": [
+              {
+                "name": "目前設定",
+                "avgFps": 7.853403141361256,
+                "low1Fps": 7.692307692307692,
+                "frameMs": 127.33333333333334
+              },
+              {
+                "name": "關閉陰影",
+                "avgFps": 9.067357512953368,
+                "low1Fps": 8.695652173913043,
+                "frameMs": 110.28571428571428
+              },
+              {
+                "name": "關閉發光層",
+                "avgFps": 8.746355685131194,
+                "low1Fps": 8.474576271186441,
+                "frameMs": 114.33333333333336
+              },
+              {
+                "name": "關閉草叢",
+                "avgFps": 8.810572687224669,
+                "low1Fps": 8.547008547008547,
+                "frameMs": 113.50000000000001
+              },
+              {
+                "name": "隱藏星露啵啵",
+                "avgFps": 8.810572687224669,
+                "low1Fps": 8.333333333333334,
+                "frameMs": 113.50000000000001
+              },
+              {
+                "name": "解析度 1x",
+                "avgFps": 7.025761124121779,
+                "low1Fps": 6.289308176100628,
+                "frameMs": 142.33333333333334
+              }
+            ],
+            "after": {
+              "m": 3,
+              "r": 1,
+              "p": {
+                "fps": 8.282716731087788,
+                "drawCalls": 94,
+                "activeMeshes": 63,
+                "pixelRatio": 1,
+                "quality": "medium",
+                "postProcess": false,
+                "bloom": true,
+                "shadowFilter": "pcf",
+                "shadowMap": 1024
+              }
+            }
+          }
+        },
+        "草原：效能測試可執行": {
+          "ok": true,
+          "detail": {
+            "seconds": 2.2,
+            "frames": 16,
+            "avgFps": 7.386888273314865,
+            "low1Fps": 6.802721088435375,
+            "minFps": 6.802721088435375,
+            "avgDrawCalls": 92,
+            "maxDrawCalls": 92,
+            "activeMeshes": 62,
+            "pixelRatio": 1,
+            "quality": "medium",
+            "countsBefore": {
+              "meshes": 69,
+              "materials": 38,
+              "textures": 27,
+              "particleSystems": 9,
+              "jsHeapMB": null
+            },
+            "countsAfter": {
+              "meshes": 69,
+              "materials": 38,
+              "textures": 27,
+              "particleSystems": 9,
+              "jsHeapMB": null
+            },
+            "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15"
+          }
+        },
+        "搖桿移動角色": {
+          "ok": true,
+          "detail": {
+            "from": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "yaw": -1.5707963267948966
+            },
+            "to": {
+              "x": -4.491120277927224,
+              "y": 0,
+              "z": 0.282557337881864,
+              "yaw": -1.5079646855930768
+            },
+            "moved": 4.499999999999999
+          }
+        },
+        "拖曳旋轉攝影機": {
+          "ok": true,
+          "detail": {
+            "before": -6.346017160251372,
+            "after": -7.126017160251372
+          }
+        },
+        "攻擊按鈕可按": {
+          "ok": true,
+          "detail": null
+        }
+      },
+      "errors": [],
+      "fpsReference": [
+        7.258649891120242,
+        7.356547327121127,
+        7.511266900350513,
+        7.761966364812406,
+        7.991475759190185,
+        8.246289169873544
+      ],
+      "screenshot": "e2e/webkit_iPhone_15_橫向.png",
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone SE 直向",
+      "checks": {
+        "啟動": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "3D 畫面有繪製": {
+          "ok": true,
+          "detail": {
+            "renderer": {
+              "webgl": 2,
+              "hardwareScaling": 0.6666666666666666,
+              "width": 562,
+              "height": 1000
+            },
+            "pixels": {
+              "samples": 2664,
+              "distinctColors": 327,
+              "opaqueRatio": 1
+            }
+          }
+        },
+        "HUD 不重疊/不超出安全區": {
+          "ok": true,
+          "detail": []
+        },
+        "草原：3 隻星露啵啵生成於出生點前方 6–9 公尺且看得到": {
+          "ok": true,
+          "detail": {
+            "mons0": [
+              {
+                "id": "star_dew_bobo#1",
+                "state": "move",
+                "mode": "chase",
+                "hp": 60,
+                "maxHp": 60,
+                "x": -1.2001951695651694,
+                "y": 0,
+                "z": 4.650756282065024,
+                "spawnX": -1.6000000000000005,
+                "spawnZ": 6.2,
+                "visible": true
+              },
+              {
+                "id": "star_dew_bobo#2",
+                "state": "idle",
+                "mode": "idle",
+                "hp": 60,
+                "maxHp": 60,
+                "x": -3.2000000000000006,
+                "y": 0,
+                "z": 8,
+                "spawnX": -3.2000000000000006,
+                "spawnZ": 8,
+                "visible": true
+              },
+              {
+                "id": "star_dew_bobo#3",
+                "state": "idle",
+                "mode": "idle",
+                "hp": 60,
+                "maxHp": 60,
+                "x": 2.3999999999999995,
+                "y": 0,
+                "z": 8.6,
+                "spawnX": 2.3999999999999995,
+                "spawnZ": 8.6,
+                "visible": true
+              }
+            ],
+            "dists": [
+              6.403124237432849,
+              8.616263691415208,
+              8.928605714219886
+            ]
+          }
+        },
+        "搖桿移動角色": {
+          "ok": true,
+          "detail": {
+            "from": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "yaw": 0
+            },
+            "to": {
+              "x": -2.4492935982947064e-16,
+              "y": 0,
+              "z": 4,
+              "yaw": -6.123150265434552e-17
+            },
+            "moved": 4
+          }
+        },
+        "拖曳旋轉攝影機": {
+          "ok": true,
+          "detail": {
+            "before": -1.5707963267948966,
+            "after": -2.350796326794897
+          }
+        },
+        "攻擊按鈕可按": {
+          "ok": true,
+          "detail": null
+        }
+      },
+      "errors": [],
+      "fpsReference": [
+        6.791940230925968,
+        7.09891150023663,
+        7.518796992481203,
+        8.259911894273127,
+        9.416195856873824,
+        10.221465076660989
+      ],
+      "screenshot": "e2e/webkit_iPhone_SE_直向.png",
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone 15 橫向 / ?lab=bobo",
+      "checks": {
+        "場景啟動": {
+          "ok": true,
+          "detail": null
+        },
+        "介面不重疊": {
+          "ok": true,
+          "detail": null
+        },
+        "移動": {
+          "ok": true,
+          "detail": "move"
+        },
+        "攻擊：可發動、攻擊中不可重複、移動排隊": {
+          "ok": true,
+          "detail": {
+            "a1": {
+              "accepted": true
+            },
+            "a2": {
+              "accepted": false,
+              "reason": "攻擊動作進行中"
+            },
+            "queued": {
+              "accepted": true,
+              "queued": true
+            },
+            "overlay": {
+              "accepted": true,
+              "overlay": true
+            },
+            "state": "attack"
+          }
+        },
+        "攻擊中受擊為疊加": {
+          "ok": true,
+          "detail": {
+            "accepted": true,
+            "overlay": true
+          }
+        },
+        "攻擊結束回到移動": {
+          "ok": true,
+          "detail": "move"
+        },
+        "受傷": {
+          "ok": true,
+          "detail": "hit"
+        },
+        "死亡：不可攻擊/移動/受擊，播完進入 dead": {
+          "ok": true,
+          "detail": [
+            {
+              "accepted": false,
+              "reason": "死亡中無法攻擊"
+            },
+            {
+              "accepted": false,
+              "reason": "死亡中無法移動"
+            },
+            {
+              "accepted": false,
+              "reason": "已死亡"
+            }
+          ]
+        },
+        "重生後恢復完整": {
+          "ok": true,
+          "detail": {
+            "state": "idle",
+            "pose": {
+              "offsetY": 0,
+              "offsetZ": 0,
+              "shakeX": 0,
+              "scaleY": 1.000353425539992,
+              "scaleXZ": 0.9998233340573173,
+              "stretchZ": 1,
+              "lean": 0,
+              "opacity": 1,
+              "starGlow": 0.8511780851333063,
+              "antennaSway": -0.07658289879750148,
+              "wingFlap": -0.002827317116126807,
+              "hitFlash": 0,
+              "face": "normal",
+              "ringScale": 0,
+              "ringOpacity": 0,
+              "bodyVisible": true
+            }
+          }
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "e2e/webkit_bobo_1_idle.png",
+        "e2e/webkit_bobo_2_move.png",
+        "e2e/webkit_bobo_2b_move.png",
+        "e2e/webkit_bobo_3_attack.png",
+        "e2e/webkit_bobo_4_hit.png",
+        "e2e/webkit_bobo_5_death.png",
+        "e2e/webkit_bobo_6_respawn.png"
+      ],
+      "fpsReference": [
+        12.121212121212128
+      ],
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone 15 橫向 / ?lab=dummy",
+      "checks": {
+        "場景啟動": {
+          "ok": true,
+          "detail": null
+        },
+        "介面不重疊": {
+          "ok": true,
+          "detail": null
+        },
+        "移動": {
+          "ok": true,
+          "detail": "move"
+        },
+        "攻擊：可發動、攻擊中不可重複、移動排隊": {
+          "ok": true,
+          "detail": {
+            "a1": {
+              "accepted": true
+            },
+            "a2": {
+              "accepted": false,
+              "reason": "攻擊動作進行中"
+            },
+            "queued": {
+              "accepted": true,
+              "queued": true
+            },
+            "overlay": {
+              "accepted": true,
+              "overlay": true
+            },
+            "state": "attack"
+          }
+        },
+        "攻擊中受擊為疊加": {
+          "ok": true,
+          "detail": {
+            "accepted": true,
+            "overlay": true
+          }
+        },
+        "攻擊結束回到移動": {
+          "ok": true,
+          "detail": "move"
+        },
+        "受傷": {
+          "ok": true,
+          "detail": "hit"
+        },
+        "死亡：不可攻擊/移動/受擊，播完進入 dead": {
+          "ok": true,
+          "detail": [
+            {
+              "accepted": false,
+              "reason": "死亡中無法攻擊"
+            },
+            {
+              "accepted": false,
+              "reason": "死亡中無法移動"
+            },
+            {
+              "accepted": false,
+              "reason": "已死亡"
+            }
+          ]
+        },
+        "重生後恢復完整": {
+          "ok": true,
+          "detail": {
+            "state": "idle",
+            "pose": {
+              "offsetY": 0,
+              "offsetZ": 0,
+              "shakeX": 0,
+              "scaleY": 1,
+              "scaleXZ": 1,
+              "stretchZ": 1,
+              "lean": 0,
+              "opacity": 1,
+              "starGlow": 1,
+              "antennaSway": 0,
+              "wingFlap": 0,
+              "hitFlash": 0,
+              "face": "normal",
+              "ringScale": 0,
+              "ringOpacity": 0,
+              "bodyVisible": true
+            }
+          }
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "e2e/webkit_dummy_1_idle.png",
+        "e2e/webkit_dummy_2_move.png",
+        "e2e/webkit_dummy_2b_move.png",
+        "e2e/webkit_dummy_3_attack.png",
+        "e2e/webkit_dummy_4_hit.png",
+        "e2e/webkit_dummy_5_death.png",
+        "e2e/webkit_dummy_6_respawn.png"
+      ],
+      "fpsReference": [
+        15.756302521008418
+      ],
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone 15 橫向 / ?lab=field",
+      "checks": {
+        "場景啟動（含 GLB 載入）": {
+          "ok": true,
+          "detail": null
+        },
+        "同時生成 5 隻怪物（3 程式化 + 2 GLB）": {
+          "ok": true,
+          "detail": [
+            "star_dew_bobo#1",
+            "star_dew_bobo#2",
+            "star_dew_bobo#3",
+            "test_dummy#4",
+            "test_dummy#5"
+          ]
+        },
+        "介面不重疊": {
+          "ok": true,
+          "detail": null
+        },
+        "AI：目標靠近時追擊/攻擊": {
+          "ok": true,
+          "detail": {
+            "id": "star_dew_bobo#1",
+            "monsterId": "star_dew_bobo",
+            "state": "move",
+            "mode": "chase",
+            "hp": 60,
+            "maxHp": 60,
+            "x": -5,
+            "z": -3
+          }
+        },
+        "受傷→死亡": {
+          "ok": true,
+          "detail": "star_dew_bobo#1"
+        },
+        "AI：死亡後停止行動": {
+          "ok": true,
+          "detail": {
+            "id": "star_dew_bobo#1",
+            "monsterId": "star_dew_bobo",
+            "state": "death",
+            "mode": "dead",
+            "hp": 0,
+            "maxHp": 60,
+            "x": -4.84,
+            "z": -3
+          }
+        },
+        "AI：目標離開後不再追擊": {
+          "ok": true,
+          "detail": [
+            "star_dew_bobo#1:dead",
+            "star_dew_bobo#2:return",
+            "star_dew_bobo#3:return",
+            "test_dummy#4:return",
+            "test_dummy#5:idle"
+          ]
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "e2e/webkit_field_1_engage.png",
+        "e2e/webkit_field_2_after.png"
+      ],
+      "ok": true
+    }
+  ],
+  "finishedAt": "2026-11-15T12:09:51.697Z",
+  "failures": 1
+}
