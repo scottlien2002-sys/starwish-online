@@ -65,6 +65,12 @@ jobs:
         run: |
           git clone -q --depth 1 -b gh-pages "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" /tmp/oldpages || true
           for d in /tmp/oldpages/preview*; do [ -d "$d" ] && cp -r "$d" dist/; done
+          # 保留上一版的程式檔（只保留上一代）：手機或 CDN 若還拿著舊的 index.html，仍能下載到它引用的檔案
+          ls -1 dist/assets > /tmp/new-manifest
+          if [ -f /tmp/oldpages/assets/.manifest ]; then
+            while read -r f; do if [ -f "/tmp/oldpages/assets/$f" ]; then cp -n "/tmp/oldpages/assets/$f" dist/assets/ || true; fi; done < /tmp/oldpages/assets/.manifest
+          fi
+          cp /tmp/new-manifest dist/assets/.manifest
           cd dist
           touch .nojekyll
           git init -q -b gh-pages
@@ -86,9 +92,18 @@ jobs:
           for attempt in 1 2 3 4 5; do
             rm -rf /tmp/pages
             git clone -q --depth 1 -b gh-pages "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" /tmp/pages
+            # 保留上一版的程式檔（只保留上一代），避免舊快取的 index.html 找不到檔案而卡在載入畫面
+            rm -rf /tmp/prevassets && mkdir -p /tmp/prevassets
+            if [ -f "/tmp/pages/$DIR/assets/.manifest" ]; then
+              while read -r f; do if [ -f "/tmp/pages/$DIR/assets/$f" ]; then cp "/tmp/pages/$DIR/assets/$f" /tmp/prevassets/; fi; done < "/tmp/pages/$DIR/assets/.manifest"
+            elif [ -d "/tmp/pages/$DIR/assets" ]; then
+              cp -r "/tmp/pages/$DIR/assets/." /tmp/prevassets/
+            fi
             rm -rf "/tmp/pages/$DIR"
             mkdir -p "/tmp/pages/$DIR"
             cp -r dist/. "/tmp/pages/$DIR/"
+            ls -1 "/tmp/pages/$DIR/assets" > /tmp/new-manifest && cp /tmp/new-manifest "/tmp/pages/$DIR/assets/.manifest"
+            cp -n /tmp/prevassets/* "/tmp/pages/$DIR/assets/" 2>/dev/null || true
             echo "{\"branch\":\"${GITHUB_REF_NAME}\",\"commit\":\"${GITHUB_SHA}\",\"path\":\"/$DIR/\",\"builtAt\":\"$(date -u +%FT%TZ)\"}" > "/tmp/pages/$DIR/preview.json"
             cd /tmp/pages
             git config user.name "github-actions[bot]"

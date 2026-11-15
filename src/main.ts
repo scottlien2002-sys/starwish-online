@@ -4,7 +4,14 @@ import { Game } from "./game/Game.ts";
 const status = document.getElementById("boot-status");
 const boot = document.getElementById("boot-screen");
 
+declare global {
+  interface Window {
+    __starwishBooted?: () => void;
+  }
+}
+
 function fail(message: string): void {
+  window.__starwishBooted?.();
   if (status) {
     status.textContent = message;
     status.classList.add("error");
@@ -21,6 +28,7 @@ function hasWebGL(): boolean {
 }
 
 function hideBoot(): void {
+  window.__starwishBooted?.();
   boot?.classList.add("hidden");
   window.setTimeout(() => boot?.remove(), 600);
 }
@@ -54,9 +62,21 @@ function main(): void {
         });
       return;
     }
-    const game = new Game(canvas, hudRoot);
-    game.start();
-    hideBoot();
+    // 先顯示「建立 3D 場景中」並讓畫面更新一次，再建立場景（若卡住，可分辨是下載還是建立階段）
+    if (status) {
+      status.textContent = "建立 3D 場景中…";
+      status.dataset.step = "建立 3D 場景";
+    }
+    window.setTimeout(() => {
+      try {
+        const game = new Game(canvas, hudRoot);
+        game.start();
+        hideBoot();
+      } catch (err) {
+        console.error(err);
+        fail(`啟動失敗：${err instanceof Error ? err.message : String(err)}`);
+      }
+    }, 30);
   } catch (err) {
     console.error(err);
     fail(`啟動失敗：${err instanceof Error ? err.message : String(err)}`);
