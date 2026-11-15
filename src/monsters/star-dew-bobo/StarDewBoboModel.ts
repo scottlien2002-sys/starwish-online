@@ -273,7 +273,7 @@ export class StarDewBoboModel implements MonsterView {
     const fc = featureCounterScale(p.scaleXZ, p.scaleY);
     for (const a of this.featureAnchors) a.scaling.set(fc.x, fc.y, fc.z);
     // 體內星光：身體可見時持續閃爍
-    this.inner.emitRate = p.bodyVisible ? 16 * o : 0;
+    this.inner.emitRate = p.bodyVisible ? 16 * p.opacity : 0;
 
     const o = p.opacity;
     this.bodyMat.alpha = BODY_ALPHA * o;
