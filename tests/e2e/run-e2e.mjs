@@ -150,36 +150,46 @@ for (const name of browsers) {
       await shot("2_move");
       check("移動", (await state()) === "move", await state());
 
-      const a1 = await req("attack");
+      // 注意：先檢查狀態、再截圖。軟體繪圖下截圖可能花 1~2 秒，期間動畫照常進行。
+      // 用同一次 evaluate 連續送出請求，避免頁面往返時間讓 0.8 秒的攻擊提早結束。
+      const atk = await page.evaluate(() => {
+        const L = window.__starwishLab;
+        const a1 = L.request("attack");
+        const a2 = L.request("attack");
+        const queued = L.request("move");
+        const overlay = L.request("hit");
+        return { a1, a2, queued, overlay, state: L.state() };
+      });
+      check("攻擊：可發動、攻擊中不可重複、移動排隊", atk.a1.accepted && !atk.a2.accepted && atk.queued.queued === true, atk);
+      check("攻擊中受擊為疊加", atk.overlay.overlay === true && atk.state === "attack", atk.overlay);
       await page.waitForTimeout(330);
       await shot("3_attack");
-      const a2 = await req("attack");
-      const queued = await req("move");
-      check("攻擊：可發動、攻擊中不可重複、移動排隊", a1.accepted && !a2.accepted && queued.queued === true, { a1, a2, queued });
-      const overlay = await req("hit");
-      check("攻擊中受擊為疊加", overlay.overlay === true && (await state()) === "attack", overlay);
-      await page.waitForTimeout(800);
+      await page.waitForFunction(() => window.__starwishLab.state() === "move", null, { timeout: 8000 }).catch(() => {});
       check("攻擊結束回到移動", (await state()) === "move", await state());
 
       await req("idle");
       await page.waitForTimeout(300);
-      await req("hit");
+      const hitState = await page.evaluate(() => {
+        window.__starwishLab.request("hit");
+        return window.__starwishLab.state();
+      });
+      check("受傷", hitState === "hit", hitState);
       await page.waitForTimeout(80);
       await shot("4_hit");
-      check("受傷", (await state()) === "hit", await state());
-      await page.waitForTimeout(500);
+      await page.waitForFunction(() => window.__starwishLab.state() === "idle", null, { timeout: 8000 }).catch(() => {});
 
       await req("death");
       await page.waitForTimeout(700);
       await shot("5_death");
       const blocked = await Promise.all(["attack", "move", "hit"].map(req));
-      await page.waitForTimeout(1100);
+      await page.waitForFunction(() => window.__starwishLab.state() === "dead", null, { timeout: 10000 }).catch(() => {});
       check("死亡：不可攻擊/移動/受擊，播完進入 dead", blocked.every((r) => !r.accepted) && (await state()) === "dead", blocked);
 
       await req("respawn");
       await page.waitForTimeout(800);
       await shot("6_respawn");
-      await page.waitForTimeout(1100);
+      await page.waitForFunction(() => window.__starwishLab.state() === "idle", null, { timeout: 10000 }).catch(() => {});
+      await page.waitForTimeout(300);
       const pose = await page.evaluate(() => window.__starwishLab.pose());
       check("重生後恢復完整", (await state()) === "idle" && Math.abs(pose.opacity - 1) < 1e-6 && Math.abs(pose.scaleY - 1) < 0.06, { state: await state(), pose });
       run.fpsReference = [await page.evaluate(() => window.__starwishLab.fps())];
