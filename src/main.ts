@@ -20,6 +20,11 @@ function hasWebGL(): boolean {
   }
 }
 
+function hideBoot(): void {
+  boot?.classList.add("hidden");
+  window.setTimeout(() => boot?.remove(), 600);
+}
+
 function main(): void {
   const canvas = document.getElementById("game-canvas");
   const hudRoot = document.getElementById("hud-root");
@@ -31,11 +36,25 @@ function main(): void {
     fail("此瀏覽器不支援 WebGL，無法執行 3D 遊戲。請使用最新版 Safari。");
     return;
   }
+  const lab = new URLSearchParams(location.search).get("lab");
   try {
+    if (lab === "bobo") {
+      // 怪物動作測試場景（只在需要時載入）
+      void import("./lab/MonsterLab.ts")
+        .then((m) => {
+          document.body.classList.add("lab-mode");
+          m.startMonsterLab(canvas, hudRoot);
+          hideBoot();
+        })
+        .catch((err: unknown) => {
+          console.error(err);
+          fail(`測試場景載入失敗：${err instanceof Error ? err.message : String(err)}`);
+        });
+      return;
+    }
     const game = new Game(canvas, hudRoot);
     game.start();
-    boot?.classList.add("hidden");
-    window.setTimeout(() => boot?.remove(), 600);
+    hideBoot();
   } catch (err) {
     console.error(err);
     fail(`啟動失敗：${err instanceof Error ? err.message : String(err)}`);

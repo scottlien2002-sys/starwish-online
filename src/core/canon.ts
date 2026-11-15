@@ -24,3 +24,8 @@ export const MONSTER_CANON = Object.freeze({
 } as const);
 
 export type MonsterId = keyof typeof MONSTER_CANON;
+
+/** 設定圖上的英文名稱 */
+export const MONSTER_CANON_EN: Readonly<Partial<Record<MonsterId, string>>> = Object.freeze({
+  star_dew_bobo: "Star Slime",
+});

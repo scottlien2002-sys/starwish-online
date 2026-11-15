@@ -276,6 +276,106 @@ body {
   }
 }
 
+/* ---------- 怪物測試場景（?lab=bobo）---------- */
+.lab-title {
+  position: absolute;
+  top: calc(var(--safe-top) + 8px);
+  left: calc(var(--safe-left) + var(--edge));
+  max-width: calc(100% - var(--safe-left) - var(--safe-right) - 130px);
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: var(--panel);
+  border: 2px solid var(--panel-line);
+  box-shadow: 0 3px 10px rgba(80, 60, 140, 0.18);
+}
+
+.lab-name {
+  font-size: 16px;
+  font-weight: 900;
+  color: #4a5fd6;
+}
+
+.lab-name small {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink);
+  opacity: 0.7;
+  margin-left: 4px;
+}
+
+.lab-state {
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.lab-msg {
+  font-size: 11px;
+  color: #b0365a;
+  min-height: 14px;
+}
+
+.lab-fps {
+  position: absolute;
+  top: calc(var(--safe-top) + 8px);
+  right: calc(var(--safe-right) + var(--edge));
+  padding: 3px 8px;
+  border-radius: 10px;
+  background: var(--panel);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.lab-panel {
+  position: absolute;
+  left: calc(var(--safe-left) + var(--edge));
+  right: calc(var(--safe-right) + var(--edge));
+  bottom: calc(var(--safe-bottom) + 10px);
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.lab-btn {
+  min-height: 48px;
+  padding: 0 4px;
+  border-radius: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  background: linear-gradient(180deg, #a9c8ff, #6f8cf0);
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  text-shadow: 0 1px 2px rgba(40, 30, 70, 0.5);
+  box-shadow: 0 3px 8px rgba(80, 60, 140, 0.25);
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+.lab-btn.active {
+  background: linear-gradient(180deg, #ffd36e, #ff9d4d);
+}
+
+.lab-btn.disabled {
+  opacity: 0.45;
+}
+
+.lab-demo {
+  background: linear-gradient(180deg, #c9b8ff, #8b6cf0);
+}
+
+.lab-demo.on {
+  background: linear-gradient(180deg, #9ff0c5, #3fbf84);
+}
+
+@media (orientation: portrait) {
+  .lab-panel {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
 /* ---------- 開機畫面 ---------- */
 #boot-screen {
   position: fixed;

@@ -114,6 +114,87 @@ for (const name of browsers) {
     if (run.fpsReference) console.log(`   FPS(參考): ${run.fpsReference.map((f) => f.toFixed(0)).join(", ")}`);
     await ctx.close();
   }
+  // ---------- 怪物測試場景：星露啵啵 ----------
+  {
+    const vp = VIEWPORTS[0];
+    const run = { browser: name, viewport: `${vp.name} / ?lab=bobo`, checks: {}, errors: [], screenshots: [] };
+    const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+    const page = await ctx.newPage();
+    page.on("pageerror", (e) => run.errors.push(`pageerror: ${e.message}`));
+    page.on("console", (m) => m.type() === "error" && run.errors.push(`console: ${m.text()}`));
+    const check = (key, ok, detail) => {
+      run.checks[key] = { ok, detail };
+    };
+    const req = (a) => page.evaluate((x) => window.__starwishLab.request(x), a);
+    const state = () => page.evaluate(() => window.__starwishLab.state());
+    const shot = async (label) => {
+      const f = `${outDir}${name}_bobo_${label}.png`;
+      await page.screenshot({ path: f });
+      run.screenshots.push(f.split("/test-results/")[1]);
+    };
+    try {
+      await page.goto(server.url + "/?lab=bobo", { waitUntil: "load" });
+      await page.addStyleTag({ content: safeAreaCss(vp.safe) });
+      const ready = await page
+        .waitForFunction(() => window.__starwishLab?.ready === true, null, { timeout: 45000 })
+        .then(() => true)
+        .catch(() => false);
+      check("場景啟動", ready, null);
+      if (!ready) throw new Error("lab 未啟動");
+      await page.waitForTimeout(1200);
+      await shot("1_idle");
+      check("介面不重疊", (await page.evaluate((s) => window.__starwishLab.hudIssues(s), vp.safe)).length === 0, null);
+
+      await req("move");
+      await page.waitForTimeout(450);
+      await shot("2_move");
+      check("移動", (await state()) === "move", await state());
+
+      const a1 = await req("attack");
+      await page.waitForTimeout(330);
+      await shot("3_attack");
+      const a2 = await req("attack");
+      const queued = await req("move");
+      check("攻擊：可發動、攻擊中不可重複、移動排隊", a1.accepted && !a2.accepted && queued.queued === true, { a1, a2, queued });
+      const overlay = await req("hit");
+      check("攻擊中受擊為疊加", overlay.overlay === true && (await state()) === "attack", overlay);
+      await page.waitForTimeout(800);
+      check("攻擊結束回到移動", (await state()) === "move", await state());
+
+      await req("idle");
+      await page.waitForTimeout(300);
+      await req("hit");
+      await page.waitForTimeout(80);
+      await shot("4_hit");
+      check("受傷", (await state()) === "hit", await state());
+      await page.waitForTimeout(500);
+
+      await req("death");
+      await page.waitForTimeout(700);
+      await shot("5_death");
+      const blocked = await Promise.all(["attack", "move", "hit"].map(req));
+      await page.waitForTimeout(1100);
+      check("死亡：不可攻擊/移動/受擊，播完進入 dead", blocked.every((r) => !r.accepted) && (await state()) === "dead", blocked);
+
+      await req("respawn");
+      await page.waitForTimeout(800);
+      await shot("6_respawn");
+      await page.waitForTimeout(1100);
+      const pose = await page.evaluate(() => window.__starwishLab.pose());
+      check("重生後恢復完整", (await state()) === "idle" && Math.abs(pose.opacity - 1) < 1e-6 && Math.abs(pose.scaleY - 1) < 0.06, { state: await state(), pose });
+      run.fpsReference = [await page.evaluate(() => window.__starwishLab.fps())];
+    } catch (e) {
+      run.errors.push(`exception: ${e.message}`);
+    }
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 9;
+    if (!run.ok) failures++;
+    report.runs.push(run);
+    console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
+    for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}`);
+    for (const e of run.errors) console.log(`   ! ${e}`);
+    await ctx.close();
+  }
+
   await browser.close();
 }
 
