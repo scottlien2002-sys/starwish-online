@@ -195,7 +195,7 @@ def join(objs, name):
 # ----------------------------------------------------------------- 星星
 
 
-def soft_star_mesh(name, outer, inner, depth, segments=60, rings=6):
+def soft_star_mesh(name, outer, inner, depth, segments=40, rings=4):
     """圓角鼓起的五角星（與遊戲 V2 的軟星相同輪廓），面向 -Y"""
 
     def radius(a):
@@ -316,7 +316,7 @@ def mat_star():
     vc.layer_name = "Col"
     nt.links.new(vc.outputs["Color"], bsdf.inputs["Base Color"])
     nt.links.new(vc.outputs["Color"], bsdf.inputs["Emission Color"])
-    bsdf.inputs["Emission Strength"].default_value = 2.5
+    bsdf.inputs["Emission Strength"].default_value = 0.9
     bsdf.inputs["Roughness"].default_value = 0.35
     return m
 
@@ -368,7 +368,8 @@ def build():
     bs = S.BELLY_STAR
     belly = soft_star_mesh("BellyStar", bs["outer"], bs["inner"], bs["depth"])
     hit = BVHTree.FromObject(full, bpy.context.evaluated_depsgraph_get()).ray_cast(Vector((0, -3, bs["height"])), Vector((0, 1, 0)))
-    by = hit[0].y + 0.02 if hit[0] is not None else -0.55
+    # 嵌在果凍表面下（從側面看不會突出身體）
+    by = hit[0].y + 0.05 if hit[0] is not None else -0.52
     belly.location = (0.0, by, bs["height"])
     belly.rotation_euler = (math.radians(-12), 0, 0)
     for st in (head, belly):
@@ -434,8 +435,20 @@ def build():
         bpy.data.objects.remove(root, do_unlink=True)
         return parts
 
+    # 輸出 GLB 時不帶折射（KHR_materials_transmission 會讓 Babylon 多一次整個場景的繪製，手機吃不消）；
+    # 遊戲端身體材質由程式提供。輸出完再恢復，給 Blender 渲染使用。
+    bsdf = mats["body"].node_tree.nodes.get("Principled BSDF")
+    bsdf.inputs["Transmission Weight"].default_value = 0.0
+    out_node = mats["body"].node_tree.nodes.get("Material Output")
+    vol_link = [l for l in mats["body"].node_tree.links if l.to_socket == out_node.inputs["Volume"]]
+    vol_from = vol_link[0].from_socket if vol_link else None
+    for l in vol_link:
+        mats["body"].node_tree.links.remove(l)
     for lod in LODS:
         export(lod)
+    bsdf.inputs["Transmission Weight"].default_value = 0.88
+    if vol_from is not None:
+        mats["body"].node_tree.links.new(vol_from, out_node.inputs["Volume"])
 
     # 尺寸（遊戲單位）
     def bbox(objs):
@@ -465,30 +478,36 @@ def render_views(body):
     sc.cycles.max_bounces = 10
     sc.cycles.transmission_bounces = 10
     sc.cycles.volume_bounces = 2
+    sc.cycles.transparent_max_bounces = 32
     sc.render.resolution_x = 720
     sc.render.resolution_y = 600
-    sc.view_settings.view_transform = "Standard"
+    try:
+        sc.view_settings.view_transform = "AgX"
+        sc.view_settings.look = "AgX - Medium High Contrast"
+    except Exception:
+        sc.view_settings.view_transform = "Standard"
     world = bpy.data.worlds.new("World")
     sc.world = world
     world.use_nodes = True
     bg = world.node_tree.nodes.get("Background")
-    bg.inputs["Color"].default_value = (0.03, 0.035, 0.09, 1)
-    bg.inputs["Strength"].default_value = 1.0
+    bg.inputs["Color"].default_value = (0.05, 0.06, 0.14, 1)
+    bg.inputs["Strength"].default_value = 1.5
 
     # 燈光：左上主光、右後輪廓光、正面補光（類似設定圖的柔和打光）
     def light(name, kind, loc, energy, size, rot):
         ld = bpy.data.lights.new(name, kind)
         ld.energy = energy
         if kind == "AREA":
+            ld.shape = "DISK"
             ld.size = size
         lo = link(bpy.data.objects.new(name, ld))
         lo.location = loc
         lo.rotation_euler = rot
         return lo
 
-    light("Key", "AREA", (-2.0, -2.5, 3.0), 600, 2.5, (math.radians(50), 0, math.radians(-35)))
-    light("Rim", "AREA", (2.2, 2.5, 2.2), 450, 2.0, (math.radians(-55), 0, math.radians(140)))
-    light("Fill", "AREA", (0.5, -3.0, 0.8), 180, 3.0, (math.radians(80), 0, 0))
+    light("Key", "AREA", (-2.0, -2.5, 3.0), 380, 1.2, (math.radians(50), 0, math.radians(-35)))
+    light("Rim", "AREA", (3.0, 1.2, 1.8), 160, 1.0, (math.radians(-60), 0, math.radians(110)))
+    light("Fill", "AREA", (0.5, -3.0, 0.8), 140, 1.5, (math.radians(80), 0, 0))
 
     # 地面（只接收陰影的柔和平面）
     bpy.ops.mesh.primitive_plane_add(size=8, location=(0, 0, 0))

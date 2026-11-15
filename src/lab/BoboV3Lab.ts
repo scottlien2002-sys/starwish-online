@@ -1,0 +1,380 @@
+import "@babylonjs/loaders/glTF";
+import {
+  ArcRotateCamera,
+  type BaseTexture,
+  Color3,
+  DirectionalLight,
+  HemisphericLight,
+  type Mesh,
+  MeshBuilder,
+  PBRMaterial,
+  Scene,
+  SceneInstrumentation,
+  SceneLoader,
+  StandardMaterial,
+  Texture,
+  TransformNode,
+  Vector3,
+  VertexBuffer,
+} from "@babylonjs/core";
+import { createEngine, createShadows, createSkyDome, pickQuality, setupRendering } from "../render/RenderQuality.ts";
+import { PerfOverlay } from "../render/PerfOverlay.ts";
+import { FrameRecorder, type BenchmarkSummary } from "../render/benchmark.ts";
+import { JellyV3Plugin } from "../monsters/star-dew-bobo-v3/JellyV3Plugin.ts";
+
+/**
+ * 星露啵啵 V3 模型預覽（?lab=bobo3）。
+ * 只做外觀檢查：三視圖、8 種表情、三隻同場、效能測試。動畫與遊戲整合在模型外觀確認後才進行。
+ * 模型：Blender 雲端腳本產出的 GLB（public/models/bobo_v3_<畫質>.glb）。V2 不受影響。
+ */
+
+export const V3_EXPRESSIONS = ["normal", "happy", "curious", "angry", "scared", "dizzy", "sleepy", "hurt"] as const;
+export type V3Expression = (typeof V3_EXPRESSIONS)[number];
+const EXPRESSION_LABEL: Record<V3Expression, string> = {
+  normal: "一般",
+  happy: "開心",
+  curious: "好奇",
+  angry: "生氣",
+  scared: "害怕",
+  dizzy: "暈眩",
+  sleepy: "昏睡",
+  hurt: "受傷",
+};
+type View = "front" | "side" | "back";
+/** 鏡頭水平角：模型面向 +Z。側面依設定圖從角色左側看（臉朝畫面左） */
+const VIEW_ALPHA: Record<View, number> = { front: Math.PI / 2, side: Math.PI, back: -Math.PI / 2 };
+const VIEW_LABEL: Record<View, string> = { front: "正面", side: "側面", back: "背面" };
+
+export interface BoboV3Info {
+  quality: string;
+  meshes: { name: string; triangles: number; vertices: number }[];
+  trianglesTotal: number;
+  materials: number;
+}
+
+export interface BoboV3DebugApi {
+  ready: boolean;
+  error?: string;
+  setView(v: View): void;
+  setExpression(e: V3Expression): void;
+  setCount(n: 1 | 3): void;
+  info(): BoboV3Info;
+  perf(): { fps: number; drawCalls: number; activeMeshes: number; pixelRatio: number; quality: string; jelly: boolean };
+  benchmark(seconds?: number): Promise<BenchmarkSummary>;
+}
+
+declare global {
+  interface Window {
+    __bobo3?: BoboV3DebugApi;
+  }
+}
+
+interface BoboV3Instance {
+  root: TransformNode;
+  body: Mesh;
+  eyes: Mesh;
+  mouth: Mesh;
+  blush: Mesh;
+  stars: Mesh;
+  jelly: JellyV3Plugin | null;
+  eyeUV: Float32Array;
+  mouthUV: Float32Array;
+}
+
+export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElement): Promise<void> {
+  const quality = pickQuality();
+  const engine = createEngine(canvas, quality);
+  const scene = new Scene(engine);
+  createSkyDome(scene);
+  scene.skipPointerMovePicking = true;
+
+  const hemi = new HemisphericLight("sky", new Vector3(0.2, 1, 0.3), scene);
+  hemi.intensity = 0.85;
+  hemi.groundColor = new Color3(0.6, 0.68, 0.6);
+  const sun = new DirectionalLight("sun", new Vector3(-0.4, -1, -0.5).normalize(), scene);
+  sun.position = new Vector3(4, 10, 5);
+  sun.intensity = 0.6;
+  const shadows = createShadows(sun, { ...quality, shadows: { ...quality.shadows, mapSize: Math.min(1024, quality.shadows.mapSize) } });
+  shadows.darkness = 0.4;
+
+  const grassMat = new StandardMaterial("PH_labGrass", scene);
+  grassMat.diffuseColor = new Color3(0.55, 0.82, 0.45);
+  grassMat.specularColor = new Color3(0.03, 0.03, 0.03);
+  const ground = MeshBuilder.CreateCylinder("PH_labGround", { diameter: 9, height: 0.2, tessellation: 48 }, scene);
+  ground.position.y = -0.1;
+  ground.material = grassMat;
+  ground.receiveShadows = true;
+
+  const camera = new ArcRotateCamera("labCam", VIEW_ALPHA.front, 1.3, 2.6, new Vector3(0, 0.5, 0), scene);
+  camera.attachControl(canvas, true);
+  camera.lowerRadiusLimit = 1.2;
+  camera.upperRadiusLimit = 7;
+  camera.lowerBetaLimit = 0.35;
+  camera.upperBetaLimit = 1.55;
+  camera.panningSensibility = 0;
+  camera.minZ = 0.05;
+  const render = setupRendering(scene, camera, quality);
+
+  // ---------- 載入 GLB（依畫質選 LOD） ----------
+  const base = import.meta.env.BASE_URL;
+  const file = `bobo_v3_${quality.level}.glb`;
+  const container = await SceneLoader.LoadAssetContainerAsync(`${base}models/`, file, scene);
+
+  // 共用材質（三隻共用；每隻的表情以各自的 UV 緩衝切換）
+  const mats = createMaterials(scene, container.materials as PBRMaterial[], quality.level !== "low");
+  const instances: BoboV3Instance[] = [];
+  const spawn = (x: number, z: number, yaw: number): BoboV3Instance => {
+    const inst = container.instantiateModelsToScene((n) => `${n}_${instances.length}`, false, { doNotInstantiate: true });
+    const root = new TransformNode(`bobo3_${instances.length}`, scene);
+    for (const n of inst.rootNodes) n.parent = root;
+    root.position.set(x, 0, z);
+    root.rotation.y = yaw;
+    const meshes = root.getChildMeshes(false) as Mesh[];
+    const find = (prefix: string): Mesh => {
+      const m = meshes.find((mm) => mm.name.startsWith(prefix));
+      if (!m) throw new Error(`V3 模型缺少零件：${prefix}`);
+      return m;
+    };
+    const body = find("Body_");
+    const eyes = find("Eyes");
+    const mouth = find("Mouth");
+    const blush = find("Blush");
+    const stars = find("Stars");
+    // 各零件材質與繪製順序：眼睛／星星不透明先畫，身體（透明）再畫，嘴與腮紅最後疊在表面
+    const bodyMat = mats.body(instances.length);
+    body.material = bodyMat.material;
+    body.alphaIndex = 1;
+    eyes.material = mats.eyes;
+    stars.material = mats.stars;
+    blush.material = mats.blush;
+    blush.alphaIndex = 2;
+    mouth.material = mats.mouth;
+    mouth.alphaIndex = 3;
+    for (const m of [body, eyes, stars]) shadows.addShadowCaster(m, false);
+    render.glow?.addIncludedOnlyMesh(stars);
+    for (const m of meshes) {
+      m.isPickable = false;
+      m.receiveShadows = m === body;
+    }
+    const eyeUV = Float32Array.from(eyes.getVerticesData(VertexBuffer.UVKind) ?? []);
+    const mouthUV = Float32Array.from(mouth.getVerticesData(VertexBuffer.UVKind) ?? []);
+    const it: BoboV3Instance = { root, body, eyes, mouth, blush, stars, jelly: bodyMat.jelly, eyeUV, mouthUV };
+    instances.push(it);
+    return it;
+  };
+  spawn(0, 0, 0);
+
+  // 星星光暈：金色（與 V2 相同作法）
+  if (render.glow) {
+    render.glow.customEmissiveColorSelector = (mesh, _sub, material, result) => {
+      if (mesh.name.startsWith("Stars")) result.set(0.9, 0.62, 0.14, 1);
+      else {
+        const e = (material as StandardMaterial).emissiveColor;
+        if (e) result.set(e.r, e.g, e.b, 1);
+        else result.set(0, 0, 0, 1);
+      }
+    };
+  }
+
+  // ---------- 表情：改 UV（眼睛 4×2 格、嘴 4×2 格；glTF UV 原點在左上） ----------
+  let expression: V3Expression = "normal";
+  const setExpression = (e: V3Expression): void => {
+    expression = e;
+    const i = V3_EXPRESSIONS.indexOf(e);
+    const col = i % 4;
+    const row = Math.floor(i / 4);
+    for (const it of instances) {
+      const eu = new Float32Array(it.eyeUV.length);
+      for (let k = 0; k < eu.length; k += 2) {
+        eu[k] = it.eyeUV[k]! + col * 0.25;
+        eu[k + 1] = it.eyeUV[k + 1]! + row * 0.5;
+      }
+      it.eyes.updateVerticesData(VertexBuffer.UVKind, eu);
+      const mu = new Float32Array(it.mouthUV.length);
+      for (let k = 0; k < mu.length; k += 2) {
+        mu[k] = it.mouthUV[k]! + col * 0.25;
+        mu[k + 1] = it.mouthUV[k + 1]! + row * 0.25;
+      }
+      it.mouth.updateVerticesData(VertexBuffer.UVKind, mu);
+    }
+    for (const b of exprButtons) b.classList.toggle("active", b.dataset.expr === e);
+  };
+
+  const setCount = (n: 1 | 3): void => {
+    while (instances.length < n) {
+      const k = instances.length;
+      spawn(k === 1 ? -1.4 : 1.4, k === 1 ? -0.9 : -0.9, k === 1 ? 0.35 : -0.35);
+      setExpression(expression);
+    }
+    instances.forEach((it, i) => it.root.setEnabled(i < n));
+    for (const b of countButtons) b.classList.toggle("active", Number(b.dataset.count) === n);
+  };
+
+  // ---------- UI ----------
+  uiRoot.innerHTML = `
+    <div class="lab-title" data-layout="lab-title">
+      <div class="lab-name">星露啵啵 V3 <small>模型預覽（第一版，程式化建模）</small></div>
+      <div class="lab-state">畫質：${quality.level}・${file}</div>
+    </div>
+    <div class="lab-fps" data-layout="lab-fps">-- FPS</div>
+    <div class="lab-views">
+      ${(["front", "side", "back"] as const).map((v) => `<button class="lab-view-btn" data-view="${v}" data-layout="btn-view-${v}">${VIEW_LABEL[v]}</button>`).join("")}
+      <button class="lab-view-btn" data-count="1" data-layout="btn-count-1">1 隻</button>
+      <button class="lab-view-btn" data-count="3" data-layout="btn-count-3">3 隻</button>
+      <button class="lab-view-btn lab-bench" data-layout="btn-bench">效能測試</button>
+    </div>
+    <div class="lab-bench-result" hidden></div>
+    <div class="lab-panel v3-expr">
+      ${V3_EXPRESSIONS.map((e) => `<button class="lab-btn" data-expr="${e}" data-layout="btn-expr-${e}">${EXPRESSION_LABEL[e]}</button>`).join("")}
+    </div>`;
+  const viewButtons = [...uiRoot.querySelectorAll<HTMLButtonElement>("[data-view]")];
+  const exprButtons = [...uiRoot.querySelectorAll<HTMLButtonElement>("[data-expr]")];
+  const countButtons = [...uiRoot.querySelectorAll<HTMLButtonElement>("[data-count]")];
+  const fpsEl = uiRoot.querySelector<HTMLDivElement>(".lab-fps")!;
+  const benchBtn = uiRoot.querySelector<HTMLButtonElement>(".lab-bench")!;
+  const benchEl = uiRoot.querySelector<HTMLDivElement>(".lab-bench-result")!;
+
+  let targetAlpha = VIEW_ALPHA.front;
+  let snap = false;
+  const setView = (v: View, instant = false): void => {
+    targetAlpha = VIEW_ALPHA[v];
+    snap = instant;
+    for (const b of viewButtons) b.classList.toggle("active", b.dataset.view === v);
+  };
+  for (const b of viewButtons) b.addEventListener("click", () => setView(b.dataset.view as View));
+  for (const b of exprButtons) b.addEventListener("click", () => setExpression(b.dataset.expr as V3Expression));
+  for (const b of countButtons) b.addEventListener("click", () => setCount(Number(b.dataset.count) as 1 | 3));
+  setView("front", true);
+  setExpression("normal");
+  setCount(1);
+
+  const perf = new PerfOverlay(engine, scene, quality, uiRoot);
+  const instr = new SceneInstrumentation(scene);
+  let bench: { rec: FrameRecorder; resolve: (r: BenchmarkSummary) => void } | null = null;
+  const runBenchmark = (seconds = 10): Promise<BenchmarkSummary> =>
+    new Promise((resolve) => {
+      if (bench) return;
+      benchEl.hidden = true;
+      benchBtn.classList.add("on");
+      bench = { rec: new FrameRecorder(seconds), resolve };
+    });
+  benchBtn.addEventListener("click", () => void runBenchmark(10));
+
+  let uiTimer = 0;
+  engine.runRenderLoop(() => {
+    const rawDt = engine.getDeltaTime() / 1000;
+    const dt = Math.min(rawDt, 0.1);
+    // 鏡頭平滑轉到指定視角（效能測試時緩慢繞一圈）
+    if (bench) camera.alpha += (dt * Math.PI * 2) / 10;
+    else if (snap) {
+      camera.alpha = targetAlpha;
+      snap = false;
+    } else {
+      let d = targetAlpha - camera.alpha;
+      d = Math.atan2(Math.sin(d), Math.cos(d));
+      camera.alpha += d * Math.min(1, dt * 6);
+    }
+    for (const it of instances) {
+      if (it.jelly) it.body.getWorldMatrix().invertToRef(it.jelly.invWorld);
+    }
+    scene.render();
+    perf.update(dt);
+    if (bench && bench.rec.record(rawDt, instr.drawCallsCounter.current)) {
+      const r = bench.rec.summary();
+      const done = bench;
+      bench = null;
+      benchBtn.classList.remove("on");
+      benchEl.hidden = false;
+      const st = perf.stats();
+      benchEl.innerHTML =
+        `<b>V3 效能測試（本機實測）</b><br>${r.seconds} 秒・${instances.filter((i) => i.root.isEnabled()).length} 隻・畫質 ${st.quality}・${st.pixelRatio}x<br>` +
+        `平均 ${r.avgFps.toFixed(1)} FPS・最慢 1% ${r.low1Fps.toFixed(1)}・最低 ${r.minFps.toFixed(1)}<br>Draw Calls 平均 ${r.avgDrawCalls.toFixed(0)}（最高 ${r.maxDrawCalls}）<br><small>點此關閉</small>`;
+      benchEl.onclick = () => (benchEl.hidden = true);
+      done.resolve(r);
+    }
+    uiTimer += dt;
+    if (uiTimer > 0.25) {
+      uiTimer = 0;
+      fpsEl.textContent = `${Math.round(engine.getFps())} FPS`;
+    }
+  });
+  window.addEventListener("resize", () => engine.resize());
+
+  const info = (): BoboV3Info => {
+    const it = instances[0]!;
+    const parts = [it.body, it.eyes, it.mouth, it.blush, it.stars];
+    const meshes = parts.map((m) => ({ name: m.name, triangles: (m.getTotalIndices() || 0) / 3, vertices: m.getTotalVertices() }));
+    return { quality: quality.level, meshes, trianglesTotal: meshes.reduce((a, b) => a + b.triangles, 0), materials: 5 };
+  };
+
+  window.__bobo3 = {
+    ready: true,
+    setView: (v) => setView(v, true),
+    setExpression,
+    setCount,
+    info,
+    perf: () => ({ ...perf.stats(), jelly: !!instances[0]?.jelly?.jellyEnabled }),
+    benchmark: runBenchmark,
+  };
+}
+
+/** V3 材質：身體（單層果凍＋外掛）、眼睛（透明裁切）、嘴／腮紅（透明混合）、星星（自發光） */
+function createMaterials(scene: Scene, gltfMats: PBRMaterial[], useJelly: boolean) {
+  const tex = (name: string): BaseTexture | null => gltfMats.find((m) => m.name === name)?.albedoTexture ?? null;
+  const eyeTex = tex("Bobo_Eyes");
+  const faceTex = tex("Bobo_Face");
+  if (eyeTex instanceof Texture) eyeTex.anisotropicFilteringLevel = 4;
+
+  const eyes = new StandardMaterial("BoboV3_Eyes", scene);
+  eyes.diffuseTexture = eyeTex;
+  if (eyes.diffuseTexture) eyes.diffuseTexture.hasAlpha = true;
+  eyes.useAlphaFromDiffuseTexture = false;
+  eyes.transparencyMode = 1; // ALPHATEST：不需排序、不造成過度繪製
+  eyes.alphaCutOff = 0.45;
+  eyes.emissiveColor = new Color3(0.55, 0.55, 0.6);
+  eyes.specularColor = new Color3(0.9, 0.9, 1);
+  eyes.specularPower = 90; // 角膜弧面的反光
+
+  const decal = (name: string): StandardMaterial => {
+    const m = new StandardMaterial(name, scene);
+    m.diffuseTexture = faceTex;
+    if (m.diffuseTexture) m.diffuseTexture.hasAlpha = true;
+    m.useAlphaFromDiffuseTexture = true;
+    m.disableLighting = true;
+    m.emissiveColor = new Color3(0.95, 0.95, 0.95);
+    m.backFaceCulling = true;
+    m.zOffset = -2;
+    return m;
+  };
+  const mouth = decal("BoboV3_Mouth");
+  const blush = decal("BoboV3_Blush");
+
+  const stars = new StandardMaterial("BoboV3_Stars", scene);
+  stars.disableLighting = true;
+  stars.emissiveColor = Color3.White(); // × 頂點色（中央奶油黃 → 邊緣暖金）
+
+  const body = (_i: number): { material: StandardMaterial; jelly: JellyV3Plugin | null } => {
+    const m = new StandardMaterial(`BoboV3_Body_${_i}`, scene);
+    m.diffuseColor = new Color3(0.9, 0.95, 1);
+    m.emissiveColor = new Color3(0.08, 0.13, 0.32);
+    m.specularColor = new Color3(0.25, 0.25, 0.3);
+    m.specularPower = 32;
+    m.alpha = 0.5;
+    m.useSpecularOverAlpha = false;
+    m.backFaceCulling = true;
+    let jelly: JellyV3Plugin | null = null;
+    if (useJelly) {
+      jelly = new JellyV3Plugin(m);
+      jelly.height = 1; // 物件座標本身就以身高為 1（Blender 端尺寸）
+      const j = jelly;
+      m.onError = () => {
+        if (j.jellyEnabled) {
+          console.warn("[bobo3] jelly shader failed, fallback");
+          j.jellyEnabled = false;
+        }
+      };
+    }
+    return { material: m, jelly };
+  };
+  return { eyes, mouth, blush, stars, body };
+}

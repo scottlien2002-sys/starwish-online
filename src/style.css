@@ -518,3 +518,8 @@ body {
 .lab-bench-result[hidden] {
   display: none;
 }
+
+/* ---------- 星露啵啵 V3 預覽：8 種表情按鈕 ---------- */
+.lab-panel.v3-expr {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}

@@ -39,6 +39,18 @@ function main(): void {
   const lab = new URLSearchParams(location.search).get("lab");
   try {
     // 怪物測試頁（只在需要時載入）：?lab=bobo 星露啵啵、?lab=dummy 測試方塊、?lab=field 多怪物 AI
+    // ?lab=bobo3：星露啵啵 V3 模型預覽（只看外觀，不接戰鬥）
+    if (lab === "bobo3") {
+      document.body.classList.add("lab-mode");
+      void import("./lab/BoboV3Lab.ts")
+        .then((m) => m.startBoboV3Lab(canvas, hudRoot))
+        .then(() => hideBoot())
+        .catch((err: unknown) => {
+          console.error(err);
+          fail(`V3 預覽載入失敗：${err instanceof Error ? err.message : String(err)}`);
+        });
+      return;
+    }
     const LAB_MONSTER: Record<string, string> = { bobo: "star_dew_bobo", dummy: "test_dummy" };
     if (lab && (lab in LAB_MONSTER || lab === "field")) {
       const start =
