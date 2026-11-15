@@ -15,7 +15,7 @@ import {
 import { createRng } from "../core/rng.ts";
 import { TUNING } from "../config/tuning.ts";
 import { heightAt } from "./terrain.ts";
-import { scatterProps, type PropPlacement } from "./scatter.ts";
+import { scatterProps, type PropKind, type PropPlacement } from "./scatter.ts";
 import {
   createCloudLayer,
   createDistantHills,
@@ -88,6 +88,20 @@ export function buildMeadow(scene: Scene, shadows: ShadowGenerator, quality: Mea
     groups.set(t, list);
   }
 
+  // 岩石與灌木：體積小、數量多 → 把全部擺放烘焙成「每類一個靜態網格」（多種造型也只要 1 個 draw call）
+  const staticKinds: PropKind[] = ["rock", "bush"];
+  for (const kind of staticKinds) {
+    const entries = [...groups].filter(([, list]) => list[0]?.kind === kind);
+    if (entries.length === 0) continue;
+    const merged = bakePlacements(`PH_${kind}s`, scene, entries);
+    merged.material = propMat;
+    merged.isPickable = false;
+    merged.receiveShadows = true;
+    if (kind === "rock") shadows.addShadowCaster(merged);
+    merged.freezeWorldMatrix();
+    for (const [t] of entries) groups.delete(t);
+  }
+
   for (const [template, list] of groups) {
     template.material = propMat;
     template.isPickable = false;
@@ -109,6 +123,7 @@ export function buildMeadow(scene: Scene, shadows: ShadowGenerator, quality: Mea
     if (list[0] && (list[0].kind === "tree" || list[0].kind === "rock")) shadows.addShadowCaster(template);
     template.freezeWorldMatrix();
   }
+  // 沒有使用（或已烘焙成靜態網格）的模板釋放掉
   const used = new Set(groups.keys());
   for (const options of Object.values(templates)) {
     for (const t of options) if (!used.has(t) && !t.isDisposed()) t.dispose();
@@ -128,6 +143,52 @@ export function buildMeadow(scene: Scene, shadows: ShadowGenerator, quality: Mea
       clouds.rotation.y += dt * 0.004;
     },
   };
+}
+
+/** 把模板依擺放資料複製並合併成單一靜態網格（位置、法線、頂點色都烘焙進去） */
+function bakePlacements(name: string, scene: Scene, entries: [Mesh, PropPlacement[]][]): Mesh {
+  const positions: number[] = [];
+  const normals: number[] = [];
+  const colors: number[] = [];
+  const indices: number[] = [];
+  const m = new Matrix();
+  const v = new Vector3();
+  const out = new Vector3();
+  for (const [template, list] of entries) {
+    const tp = template.getVerticesData(VertexBuffer.PositionKind)!;
+    const tn = template.getVerticesData(VertexBuffer.NormalKind)!;
+    const tc = template.getVerticesData(VertexBuffer.ColorKind);
+    const ti = template.getIndices()!;
+    for (const p of list) {
+      Matrix.ComposeToRef(
+        new Vector3(p.scale, p.scale, p.scale),
+        Quaternion.RotationYawPitchRoll(p.rotation, 0, 0),
+        new Vector3(p.x, p.y - 0.05, p.z),
+        m,
+      );
+      const base = positions.length / 3;
+      for (let i = 0; i < tp.length; i += 3) {
+        v.set(tp[i]!, tp[i + 1]!, tp[i + 2]!);
+        Vector3.TransformCoordinatesToRef(v, m, out);
+        positions.push(out.x, out.y, out.z);
+        v.set(tn[i]!, tn[i + 1]!, tn[i + 2]!);
+        Vector3.TransformNormalToRef(v, m, out);
+        out.normalize();
+        normals.push(out.x, out.y, out.z);
+      }
+      if (tc) for (let i = 0; i < tc.length; i++) colors.push(tc[i]!);
+      else for (let i = 0; i < tp.length / 3; i++) colors.push(1, 1, 1, 1);
+      for (let i = 0; i < ti.length; i++) indices.push(ti[i]! + base);
+    }
+  }
+  const vd = new VertexData();
+  vd.positions = positions;
+  vd.normals = normals;
+  vd.colors = colors;
+  vd.indices = indices;
+  const mesh = new Mesh(name, scene);
+  vd.applyToMesh(mesh);
+  return mesh;
 }
 
 /** 草叢：叢聚分布（出生點附近較密），避開廣場與樹／岩石的碰撞範圍；只改外觀，不影響碰撞 */
