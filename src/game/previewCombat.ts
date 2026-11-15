@@ -99,8 +99,8 @@ export class PreviewCombat {
 /** 出生點前方 6–9 公尺的三個測試生成點（forwardYaw 為攝影機看向的水平角，前方 = (sin, cos)） */
 export function previewSpawnPoints(originX: number, originZ: number, forwardYaw: number): { x: number; z: number }[] {
   const pts: [number, number][] = [
-    [6, 0], // 正前方 6 公尺
-    [8, -2.4], // 左前 8 公尺
+    [6.2, -1.6], // 前方略偏左約 6.4 公尺（避免一進場被玩家角色擋住）
+    [8, -3.2], // 左前約 8.6 公尺
     [8.6, 2.4], // 右前約 8.9 公尺
   ];
   const fx = Math.sin(forwardYaw), fz = Math.cos(forwardYaw);
