@@ -52,7 +52,7 @@ const STAR_SHELL_ALPHA = 0.9;
 const WING_ALPHA = 0.38;
 const BODY_EMISSIVE = new Color3(0.1, 0.19, 0.42);
 const FLASH = new Color3(0.95, 0.95, 1);
-const STAR_GRADIENT = { center: [1, 0.96, 0.62] as [number, number, number], edge: [1, 0.68, 0.12] as [number, number, number] };
+const STAR_GRADIENT = { center: [1, 1, 0.84] as [number, number, number], edge: [1, 0.8, 0.3] as [number, number, number] };
 
 /**
  * 星露啵啵：程式化暫代 3D 模型（Babylon.js）。
@@ -163,7 +163,7 @@ export class StarDewBoboModel implements MonsterView {
 
     // V2：星星用頂點色（中央奶油黃 → 邊緣暖金），emissive 只負責發光暈
     this.starMat = this.mat("PH_boboStar", Color3.White());
-    this.starMat.emissiveColor = new Color3(0.3, 0.2, 0.02);
+    this.starMat.emissiveColor = new Color3(0.45, 0.32, 0.05);
     this.starMat.disableLighting = true;
     this.starMat.backFaceCulling = false;
 
@@ -222,8 +222,8 @@ export class StarDewBoboModel implements MonsterView {
     // 根部小鼓包：讓觸角像從果凍身體長出來，而非插在頭上
     const bulb = MeshBuilder.CreateSphere("PH_boboStalkRoot", { diameter: 1, segments: 12 }, scene);
     bulb.parent = this.antenna;
-    bulb.scaling.set(0.13, 0.09, 0.13);
-    bulb.position.y = -0.035;
+    bulb.scaling.set(0.11, 0.07, 0.11);
+    bulb.position.y = -0.03;
     bulb.material = this.bodyMat;
     bulb.alphaIndex = 2;
     const headStar = createSoftStar("PH_boboHeadStar", scene, 0.15, 0.085, 0.05, softStarRadius, 60, 6, STAR_GRADIENT);
@@ -326,9 +326,9 @@ export class StarDewBoboModel implements MonsterView {
     const glow = Math.max(0, Math.min(1, p.starGlow));
     const starVis = Math.min(1, glow * 1.2);
     for (const st of this.stars) st.visibility = starVis;
-    const sk = 0.7 + 0.3 * glow;
+    const sk = 0.85 + 0.15 * glow;
     this.starMat.diffuseColor.set(sk, sk, sk);
-    this.starMat.emissiveColor.set(0.3 * glow, 0.2 * glow, 0.02 * glow);
+    this.starMat.emissiveColor.set(0.45 * glow, 0.32 * glow, 0.05 * glow);
 
     Color3.LerpToRef(BODY_EMISSIVE, FLASH, Math.max(0, Math.min(1, p.hitFlash)) * 0.8, this.bodyMat.emissiveColor);
 
