@@ -68,6 +68,18 @@ const shot = async (name, caption) => {
   shots.push({ name, caption, state });
 };
 
+// 計時檢查：推進 60 幀（1 秒），遊戲內累積時間應為 1 秒（只有新版有此除錯介面）
+let timing = null;
+if (mode === "game") {
+  timing = await page.evaluate(async () => {
+    if (!window.__starwish.consumeTime) return null;
+    window.__starwish.consumeTime();
+    window.__stepFrames(60);
+    return window.__starwish.consumeTime();
+  });
+  console.log("timing(60 frames):", JSON.stringify(timing));
+}
+
 if (mode === "game") {
   // W1 新手草原：固定鏡頭（出生點）→ 往前走 → 斜向走，三個相同鏡頭
   await run(1500);
@@ -81,7 +93,7 @@ if (mode === "game") {
   await run(300);
   await shot("g03_turn", "草原：斜向移動後");
   const perf = await page.evaluate(() => (window.__starwish.perf ? window.__starwish.perf() : null));
-  writeFileSync(`${outDir}/shots.json`, JSON.stringify({ shots, errors, perf }, null, 2));
+  writeFileSync(`${outDir}/shots.json`, JSON.stringify({ shots, errors, perf, timing }, null, 2));
   console.log(`${shots.length} shots → ${outDir}` + (errors.length ? `\nerrors: ${errors.join("; ")}` : ""));
   await browser.close();
   await server.close();

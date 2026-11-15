@@ -33,6 +33,8 @@ export interface DebugApi {
   /** 讀取一幀畫面像素做統計，確認 3D 真的有畫出來 */
   pixelStats(): Promise<{ samples: number; distinctColors: number; opaqueRatio: number }>;
   renderer(): { webgl: number; hardwareScaling: number; width: number; height: number };
+  /** 測試用：自上次呼叫以來的幀數與遊戲時間總和（用於驗證各畫質下遊戲時間正確） */
+  consumeTime(): { frames: number; seconds: number; maxDt: number; minDt: number };
   /** 畫質與效能資訊（實際瀏覽器量測） */
   perf(): PerfStats & { postProcess: boolean; bloom: boolean; shadowFilter: string; shadowMap: number };
 }
@@ -65,6 +67,10 @@ export class Game {
   private fpsTimer = 0;
   private running = false;
   private welcomed = false;
+  private timeFrames = 0;
+  private timeSum = 0;
+  private timeMax = 0;
+  private timeMin = Infinity;
 
   constructor(canvas: HTMLCanvasElement, hudRoot: HTMLElement) {
     // 畫質（高/中/低）決定抗鋸齒方式、後製、陰影、解析度上限
@@ -152,6 +158,10 @@ export class Game {
 
   private frame = (): void => {
     const dt = Math.min(this.engine.getDeltaTime() / 1000, 0.1);
+    this.timeFrames++;
+    this.timeSum += dt;
+    this.timeMax = Math.max(this.timeMax, dt);
+    this.timeMin = Math.min(this.timeMin, dt);
     this.keyboard.update();
 
     const move = this.input.getMove();
@@ -247,6 +257,14 @@ export class Game {
               .catch(reject);
           });
         }),
+      consumeTime: () => {
+        const r = { frames: this.timeFrames, seconds: this.timeSum, maxDt: this.timeMax, minDt: this.timeFrames ? this.timeMin : 0 };
+        this.timeFrames = 0;
+        this.timeSum = 0;
+        this.timeMax = 0;
+        this.timeMin = Infinity;
+        return r;
+      },
       perf: () => ({
         ...this.perfOverlay.stats(),
         postProcess: this.render.pipeline !== null,
