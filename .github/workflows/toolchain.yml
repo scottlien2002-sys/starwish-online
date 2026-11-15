@@ -1,0 +1,43 @@
+name: Toolchain snapshot
+
+# 開發輔助：Claude 的雲端環境無法連線 npm，
+# 這個流程把 Linux 版 node_modules 打包到 toolchain 分支，讓開發環境可在本機做型別檢查與建置。
+# 只含開發工具與函式庫，不影響遊戲網站。
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [package.json]
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - name: Pack node_modules
+        run: |
+          mkdir -p /tmp/tc
+          tar czf /tmp/tc/node_modules.tgz node_modules
+          cp package-lock.json /tmp/tc/
+          ls -lh /tmp/tc
+          size=$(stat -c %s /tmp/tc/node_modules.tgz)
+          if [ "$size" -gt 95000000 ]; then
+            split -b 90m /tmp/tc/node_modules.tgz /tmp/tc/node_modules.tgz.part-
+            rm /tmp/tc/node_modules.tgz
+          fi
+      - name: Push toolchain branch
+        run: |
+          cd /tmp/tc
+          git init -q -b toolchain
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -qm "Toolchain snapshot ${GITHUB_SHA::7}"
+          git push -qf "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" toolchain

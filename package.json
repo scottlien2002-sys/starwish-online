@@ -1,0 +1,27 @@
+{
+  "name": "starwish-online-web",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Starwish Online 星願物語 — Web Edition (single-player prototype)",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "scripts": {
+    "dev": "vite --host",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "node --test \"tests/unit/**/*.test.ts\"",
+    "build": "vite build",
+    "preview": "vite preview --host",
+    "e2e": "node tests/e2e/run-e2e.mjs dist",
+    "ci": "npm run typecheck && npm test && npm run build && npm run e2e"
+  },
+  "dependencies": {
+    "@babylonjs/core": "^9.0.0"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0",
+    "typescript": "^6.0.0",
+    "vite": "^8.0.0"
+  }
+}

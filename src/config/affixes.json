@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "description": "裝備鑑定詞條設定。數值已由企劃確認；機率待提供（null = 尚未設定，程式不得自行假設）。",
+  "status": {
+    "values": "confirmed",
+    "statWeights": "pending",
+    "valueWeights": "pending"
+  },
+  "weapon": [
+    { "stat": "attackSpeed", "label": "攻速", "unit": "flat", "values": [4, 6, 8, 10], "statWeight": null, "valueWeights": null },
+    { "stat": "attack", "label": "攻擊力", "unit": "percent", "values": [10, 12, 15], "statWeight": null, "valueWeights": null },
+    { "stat": "hitRate", "label": "命中率", "unit": "percent", "values": [6, 8, 10], "statWeight": null, "valueWeights": null },
+    { "stat": "critRate", "label": "暴擊率", "unit": "percent", "values": [10, 20], "statWeight": null, "valueWeights": null }
+  ],
+  "armor": [
+    { "stat": "defense", "label": "防禦力", "unit": "percent", "values": [5, 10, 15, 20], "statWeight": null, "valueWeights": null },
+    { "stat": "maxHp", "label": "生命值", "unit": "flat", "values": [50, 100, 150, 200], "statWeight": null, "valueWeights": null },
+    { "stat": "blockRate", "label": "格擋率", "unit": "percent", "values": [2, 4, 6, 8], "statWeight": null, "valueWeights": null },
+    { "stat": "attackSpeed", "label": "攻速", "unit": "flat", "values": [4, 6, 8, 10], "statWeight": null, "valueWeights": null }
+  ]
+}
