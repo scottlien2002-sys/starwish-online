@@ -45,7 +45,7 @@ export interface DebugApi {
   /** 畫質與效能資訊（實際瀏覽器量測） */
   perf(): PerfStats & { postProcess: boolean; bloom: boolean; shadowFilter: string; shadowMap: number };
   /** 預覽測試：草原上的怪物狀態 */
-  monsters(): { id: string; state: string; mode: string; hp: number; maxHp: number; x: number; y: number; z: number; visible: boolean }[];
+  monsters(): { id: string; state: string; mode: string; hp: number; maxHp: number; x: number; y: number; z: number; spawnX: number; spawnZ: number; visible: boolean }[];
   /** 預覽測試：等同按下攻擊鍵 */
   attack(): PlayerAttackResult;
   /** 預覽測試：玩家戰鬥狀態 */
@@ -405,6 +405,8 @@ export class Game {
             x: i.currentPosition.x,
             y: i.currentPosition.y,
             z: i.currentPosition.z,
+            spawnX: i.spawnPosition.x,
+            spawnZ: i.spawnPosition.z,
             visible: inView,
           };
         }),

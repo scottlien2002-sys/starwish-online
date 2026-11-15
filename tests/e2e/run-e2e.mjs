@@ -59,10 +59,10 @@ for (const name of browsers) {
 
       // ---- 預覽測試：星露啵啵 V2 接入新手草原（只在第一個尺寸跑完整戰鬥，節省時間）----
       const mons0 = await page.evaluate(() => window.__starwish.monsters());
-      const dists = mons0.map((m) => Math.hypot(m.x, m.z));
+      const dists = mons0.map((m) => Math.hypot(m.spawnX, m.spawnZ)); // 生成點距出生點（怪物可能已開始巡邏/追擊）
       check(
-        "草原：3 隻星露啵啵在出生點前方且看得到",
-        mons0.length === 3 && mons0.every((m) => m.hp === m.maxHp) && mons0.filter((m) => m.visible).length >= 2 && dists.every((d) => d >= 5 && d <= 10),
+        "草原：3 隻星露啵啵生成於出生點前方 6–9 公尺且看得到",
+        mons0.length === 3 && mons0.every((m) => m.hp === m.maxHp) && mons0.filter((m) => m.visible).length >= 2 && dists.every((d) => d >= 6 - 1e-6 && d <= 9 + 1e-6),
         { mons0, dists },
       );
       if (vp === VIEWPORTS[0]) {
