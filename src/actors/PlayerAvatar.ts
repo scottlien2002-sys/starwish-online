@@ -1,5 +1,6 @@
 import { Color3, Mesh, MeshBuilder, Scene, StandardMaterial, TransformNode, type ShadowGenerator } from "@babylonjs/core";
 import { TUNING } from "../config/tuning.ts";
+import { AttackAnimator, type AttackPose } from "./attackAnim.ts";
 
 /**
  * 暫代角色：3.2 頭身 Q版比例，用基本幾何組成。
@@ -12,8 +13,12 @@ export class PlayerAvatar {
   private readonly legR: TransformNode;
   private readonly armL: TransformNode;
   private readonly armR: TransformNode;
+  private readonly torso: Mesh;
   private phase = 0;
+  private breath = 0;
   private walkAmount = 0;
+  private readonly attackAnim = new AttackAnimator();
+  private lastAttackPose: AttackPose = this.attackAnim.pose();
 
   constructor(scene: Scene, shadows: ShadowGenerator) {
     const H = TUNING.player.height;
@@ -64,7 +69,7 @@ export class PlayerAvatar {
 
     const torsoTop = headCenterY - headR * 0.85;
     const torsoH = torsoTop - hipY + 0.06;
-    const torso = MeshBuilder.CreateCapsule("PH_torso", { height: torsoH, radius: 0.17, tessellation: 12 }, scene);
+    const torso = (this.torso = MeshBuilder.CreateCapsule("PH_torso", { height: torsoH, radius: 0.17, tessellation: 12 }, scene));
     torso.position.y = hipY + torsoH / 2 - 0.04;
     add(torso, this.body, cloth);
 
@@ -101,17 +106,52 @@ export class PlayerAvatar {
     for (const m of meshes) shadows.addShadowCaster(m);
   }
 
+  /** 開始一次普通攻擊動作（每次從蓄力重新開始，不疊加） */
+  playAttack(): void {
+    this.attackAnim.start();
+  }
+
+  /** 目前攻擊動作（測試與除錯用） */
+  get attackPose(): AttackPose {
+    return this.lastAttackPose;
+  }
+
+  get attacking(): boolean {
+    return this.attackAnim.active;
+  }
+
+  /** 已開始的攻擊動作次數（測試用） */
+  get attacksStarted(): number {
+    return this.attackAnim.started;
+  }
+
   /** speed01：0 = 站立，1 = 全速奔跑 */
   update(dt: number, speed01: number): void {
     this.walkAmount += (speed01 - this.walkAmount) * Math.min(1, dt * 12);
     this.phase += dt * (6 + 6 * this.walkAmount);
+    this.breath += dt;
     const swing = Math.sin(this.phase) * 0.7 * this.walkAmount;
+    const a = (this.lastAttackPose = this.attackAnim.update(dt));
+    const w = a.weight;
+
+    // 腿：走路擺動照常（移動中攻擊時腳步不停）
     this.legL.rotation.x = swing;
     this.legR.rotation.x = -swing;
-    this.armL.rotation.x = -swing * 0.8;
-    this.armR.rotation.x = swing * 0.8;
-    // 走路彈跳 + 站立呼吸
-    const bob = Math.abs(Math.sin(this.phase)) * 0.05 * this.walkAmount + Math.sin(this.phase * 0.5) * 0.008 * (1 - this.walkAmount);
+    // 手：攻擊時右手由攻擊動作接管，左手在走路擺動上疊加平衡動作
+    this.armL.rotation.x = -swing * 0.8 * (1 - w * 0.6) + a.armLX;
+    this.armR.rotation.x = swing * 0.8 * (1 - w) + a.armRX;
+    this.armR.rotation.z = 0.18 + a.armRZ;
+
+    // 待機呼吸（約 3 秒一次）：身體微微起伏、胸口輕輕鼓起；走路時改為步伐彈跳
+    const idle = 1 - this.walkAmount;
+    const breathe = Math.sin(this.breath * 2.1);
+    const bob = Math.abs(Math.sin(this.phase)) * 0.05 * this.walkAmount + breathe * 0.012 * idle;
     this.body.position.y = bob;
+    this.torso.scaling.x = 1 + breathe * 0.025 * idle;
+    this.torso.scaling.z = 1 + breathe * 0.025 * idle;
+    // 攻擊：前傾、扭腰、向前踏
+    this.body.rotation.x = a.lean;
+    this.body.rotation.y = a.twist;
+    this.body.position.z = a.lunge;
   }
 }
