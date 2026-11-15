@@ -2,6 +2,7 @@ import {
   Color3,
   Color4,
   Curve3,
+  DynamicTexture,
   FresnelParameters,
   type GlowLayer,
   Mesh,
@@ -10,6 +11,7 @@ import {
   Scene,
   type ShadowGenerator,
   StandardMaterial,
+  Texture,
   TransformNode,
   Vector3,
   VertexBuffer,
@@ -17,6 +19,7 @@ import {
 } from "@babylonjs/core";
 import type { MonsterEffect, MonsterFace, MonsterPose, MonsterView } from "../anim/types.ts";
 import { createSoftStar } from "../meshes/star.ts";
+import { type FaceExpression, buildFacePatch, faceTextureHeight, paintFace } from "./face.ts";
 import {
   ANTENNA_POINTS,
   ANTENNA_SIDE,
@@ -82,8 +85,9 @@ export class StarDewBoboModel implements MonsterView {
   /** 需要反向補償縮放的五官節點 */
   private readonly featureAnchors: TransformNode[] = [];
   private readonly inner: ParticleSystem;
-  private readonly faces: Record<MonsterFace, TransformNode[]>;
-  private readonly brows: TransformNode[] = [];
+  /** V2：貼合曲面的臉部網格與三種表情貼圖 */
+  private readonly faceMat: StandardMaterial;
+  private readonly faceTextures: Record<FaceExpression, DynamicTexture>;
   private readonly burst: ParticleSystem;
   private readonly rise: ParticleSystem;
   private readonly materials: StandardMaterial[] = [];
@@ -181,8 +185,9 @@ export class StarDewBoboModel implements MonsterView {
     shell.alphaIndex = 1;
 
     // ---------- 臉 ----------
-    this.faces = { normal: [], angry: [], hurt: [] };
-    this.buildFace();
+    const faceBuilt = this.buildFace(options.quality ?? "medium");
+    this.faceMat = faceBuilt.material;
+    this.faceTextures = faceBuilt.textures;
 
     // ---------- 胸前星星 ----------
     const chest = surfacePoint(FACE_LAYOUT.chestStar.y, FACE_LAYOUT.chestStar.theta);
@@ -398,6 +403,7 @@ export class StarDewBoboModel implements MonsterView {
     this.rise.dispose();
     this.root.dispose(false, true);
     for (const m of this.materials) m.dispose(true, true);
+    for (const t of Object.values(this.faceTextures)) t.dispose();
   }
 
   // ======================= 建模 =======================
@@ -444,95 +450,48 @@ export class StarDewBoboModel implements MonsterView {
     node.rotation.set(r.x, r.y, 0);
   }
 
-  private part(name: string, mesh: Mesh, parent: TransformNode, material: StandardMaterial, x: number, y: number, z: number): Mesh {
-    mesh.parent = parent;
-    mesh.position.set(x, y, z);
-    mesh.material = material;
-    this.faceMeshes.push(mesh);
-    return mesh;
-  }
-
-  private buildFace(): void {
+  /**
+   * V2 臉部：一片貼合身體曲面的網格（每個頂點都在表面上），三種表情各一張手繪風貼圖。
+   * 取代 V1 浮在表面的球體眼睛／圓盤嘴巴／管狀符號（約 16 個 draw call → 1 個）。
+   */
+  private buildFace(quality: "high" | "medium" | "low"): { material: StandardMaterial; textures: Record<FaceExpression, DynamicTexture> } {
     const sc = this.scene;
-    const navy = this.mat("PH_boboEye", new Color3(0.06, 0.1, 0.32));
-    navy.specularColor = new Color3(0.6, 0.6, 0.7);
-    navy.specularPower = 48;
-    const iris = this.mat("PH_boboIris", new Color3(0.18, 0.45, 1));
-    iris.emissiveColor = new Color3(0.08, 0.2, 0.55);
-    const white = this.mat("PH_boboHighlight", Color3.White());
-    white.emissiveColor = Color3.White();
-    white.disableLighting = true;
-    const blush = this.mat("PH_boboBlush", new Color3(1, 0.55, 0.65));
-    blush.emissiveColor = new Color3(0.55, 0.22, 0.3);
-    blush.alpha = 0.75;
-    blush.backFaceCulling = false;
-    const mouth = this.mat("PH_boboMouth", new Color3(0.86, 0.3, 0.42));
-    mouth.emissiveColor = new Color3(0.3, 0.06, 0.12);
-    mouth.backFaceCulling = false;
-    const tongue = this.mat("PH_boboTongue", new Color3(1, 0.55, 0.62));
-    tongue.backFaceCulling = false;
+    const geo = buildFacePatch(quality === "low" ? 14 : 24, quality === "low" ? 18 : 32);
+    const vd = new VertexData();
+    vd.positions = geo.positions;
+    vd.normals = geo.normals;
+    vd.uvs = geo.uvs;
+    vd.indices = geo.indices;
+    const mesh = new Mesh("PH_boboFace", sc);
+    vd.applyToMesh(mesh);
+    mesh.parent = this.squash;
+    mesh.alphaIndex = 3;
+    mesh.isPickable = false;
 
-    const EYE_Y = FACE_LAYOUT.eye.y;
-    const EYE_THETA = FACE_LAYOUT.eye.theta;
-    for (const side of [-1, 1]) {
-      const anchor = new TransformNode(`PH_boboEyeAnchor${side}`, sc);
-      this.place(anchor, surfacePoint(EYE_Y, side * EYE_THETA), 0.0);
-      this.featureAnchors.push(anchor);
+    const tw = quality === "low" ? 512 : 1024;
+    const th = faceTextureHeight(tw, geo.halfWidth);
+    const make = (ex: FaceExpression): DynamicTexture => {
+      const tex = new DynamicTexture(`PH_boboFace_${ex}`, { width: tw, height: th }, sc, true);
+      paintFace(tex.getContext() as unknown as CanvasRenderingContext2D, tw, th, ex, geo.halfWidth);
+      tex.hasAlpha = true;
+      tex.wrapU = Texture.CLAMP_ADDRESSMODE;
+      tex.wrapV = Texture.CLAMP_ADDRESSMODE;
+      tex.anisotropicFilteringLevel = quality === "low" ? 1 : 4;
+      tex.update(true);
+      return tex;
+    };
+    const textures = { normal: make("normal"), angry: make("angry"), hurt: make("hurt") };
 
-      // 一般眼睛：深藍大眼 + 下方亮藍 + 兩個高光
-      const normal = new TransformNode(`PH_boboEyeNormal${side}`, sc);
-      normal.parent = anchor;
-      const ball = this.part(`PH_boboEyeBall${side}`, MeshBuilder.CreateSphere("e", { diameter: 1, segments: 12 }, sc), normal, navy, 0, 0, 0);
-      ball.scaling.set(0.19, 0.24, 0.07);
-      const ir = this.part(`PH_boboIris${side}`, MeshBuilder.CreateSphere("i", { diameter: 1, segments: 10 }, sc), normal, iris, 0, -0.055, 0.022);
-      ir.scaling.set(0.13, 0.09, 0.04);
-      const h1 = this.part(`PH_boboHL1${side}`, MeshBuilder.CreateSphere("h", { diameter: 1, segments: 8 }, sc), normal, white, -0.035, 0.05, 0.03);
-      h1.scaling.set(0.075, 0.075, 0.03);
-      const h2 = this.part(`PH_boboHL2${side}`, MeshBuilder.CreateSphere("h", { diameter: 1, segments: 6 }, sc), normal, white, 0.04, -0.045, 0.03);
-      h2.scaling.set(0.035, 0.035, 0.02);
-      this.faces.normal.push(normal);
-      this.faces.angry.push(normal);
-
-      // 受傷：> < 閉眼
-      const hurt = new TransformNode(`PH_boboEyeHurt${side}`, sc);
-      hurt.parent = anchor;
-      const dir = -side; // 左眼 >、右眼 <
-      const chevron = MeshBuilder.CreateTube(
-        `PH_boboHurt${side}`,
-        { path: [new Vector3(-0.06 * dir, 0.06, 0.02), new Vector3(0.06 * dir, 0, 0.02), new Vector3(-0.06 * dir, -0.06, 0.02)], radius: 0.016, tessellation: 6, cap: Mesh.CAP_ALL },
-        sc,
-      );
-      this.part(chevron.name, chevron, hurt, navy, 0, 0, 0);
-      this.faces.hurt.push(hurt);
-
-      // 生氣：斜眉
-      const brow = new TransformNode(`PH_boboBrow${side}`, sc);
-      brow.parent = anchor;
-      const browMesh = MeshBuilder.CreateTube(
-        `PH_boboBrowMesh${side}`,
-        { path: [new Vector3(-0.08 * side, 0.17, 0.02), new Vector3(0.07 * side, 0.12, 0.03)], radius: 0.016, tessellation: 6, cap: Mesh.CAP_ALL },
-        sc,
-      );
-      this.part(browMesh.name, browMesh, brow, navy, 0, 0, 0);
-      this.brows.push(brow);
-
-      // 腮紅
-      const bl = MeshBuilder.CreateDisc(`PH_boboBlush${side}`, { radius: 0.06, tessellation: 20, sideOrientation: Mesh.DOUBLESIDE }, sc);
-      const bAnchor = new TransformNode(`PH_boboBlushAnchor${side}`, sc);
-      this.place(bAnchor, surfacePoint(FACE_LAYOUT.blush.y, side * FACE_LAYOUT.blush.theta), 0.012);
-      this.featureAnchors.push(bAnchor);
-      this.part(bl.name, bl, bAnchor, blush, 0, 0, 0).scaling.set(1.45, 0.85, 1);
-      bl.alphaIndex = 3;
-    }
-
-    // 嘴巴：張開的笑口（半圓）+ 舌頭
-    const mAnchor = new TransformNode("PH_boboMouthAnchor", sc);
-    this.place(mAnchor, surfacePoint(FACE_LAYOUT.mouth.y, FACE_LAYOUT.mouth.theta), 0.012);
-    this.featureAnchors.push(mAnchor);
-    const m = MeshBuilder.CreateDisc("PH_boboMouth", { radius: 0.075, arc: 0.5, tessellation: 20, sideOrientation: Mesh.DOUBLESIDE }, sc);
-    this.part(m.name, m, mAnchor, mouth, 0, 0, 0).rotation.z = Math.PI;
-    const tg = MeshBuilder.CreateDisc("PH_boboTongue", { radius: 0.04, arc: 0.5, tessellation: 12, sideOrientation: Mesh.DOUBLESIDE }, sc);
-    this.part(tg.name, tg, mAnchor, tongue, 0, -0.04, 0.004);
+    const mat = this.mat("PH_boboFace", Color3.White());
+    // 不受光：貼圖顏色即最終顏色（日系平塗五官），emissive × 貼圖
+    mat.disableLighting = true;
+    mat.emissiveColor = Color3.White();
+    mat.diffuseTexture = textures.normal;
+    mat.useAlphaFromDiffuseTexture = true;
+    mat.backFaceCulling = true;
+    mesh.material = mat;
+    this.faceMeshes.push(mesh);
+    return { material: mat, textures };
   }
 
   private createWing(side: number): TransformNode {
@@ -635,8 +594,6 @@ export class StarDewBoboModel implements MonsterView {
   setFace(face: MonsterFace): void {
     if (face === this.currentFace) return;
     this.currentFace = face;
-    const show = new Set(this.faces[face]);
-    for (const n of [...this.faces.normal, ...this.faces.hurt]) n.setEnabled(show.has(n));
-    for (const b of this.brows) b.setEnabled(face === "angry");
+    this.faceMat.diffuseTexture = this.faceTextures[face];
   }
 }

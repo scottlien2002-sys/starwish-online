@@ -30,7 +30,7 @@ export function profileR(t: number): number {
 /** 五官與零件在身體表面的位置（高度 y、繞軸角 theta；模型與藍圖共用） */
 export const FACE_LAYOUT = Object.freeze({
   eye: { y: 0.55, theta: 0.36 },
-  blush: { y: 0.43, theta: 0.78 },
+  blush: { y: 0.44, theta: 0.64 }, // V2：腮紅往內收到眼睛外下方（設定圖位置）
   mouth: { y: 0.4, theta: 0 },
   chestStar: { y: 0.2, theta: 0.22 },
   wing: { y: 0.4, theta: Math.PI * 0.55 },
