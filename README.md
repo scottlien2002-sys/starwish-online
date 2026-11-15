@@ -22,7 +22,7 @@ tests/
   unit/        Node 內建測試（純邏輯）
   harness/     HUD 版面測試（不需 Babylon，可在任何瀏覽器跑）
   e2e/         完整遊戲端對端測試（需先 build）
-docs/          核心設定與文件
+docs/          核心設定與文件（怪物框架：docs/monsters/FRAMEWORK.md）
 ```
 
 ## 指令
@@ -40,6 +40,11 @@ node tests/e2e/run-e2e.mjs dist chromium,webkit  # 端對端
 ## 操作
 - 手機：左下拖曳＝移動；畫面空白處單指拖曳＝旋轉視角；雙指＝縮放
 - 電腦：WASD / 方向鍵移動，滑鼠拖曳旋轉，滾輪縮放
+
+## 測試頁
+- `?lab=bobo` 星露啵啵六種動作
+- `?lab=dummy` 測試方塊（GLB，非正式怪物）
+- `?lab=field` 多怪物 AI 測試場
 
 ## 開發階段
 | 階段 | 內容 | 狀態 |
