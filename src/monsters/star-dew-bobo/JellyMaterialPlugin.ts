@@ -23,9 +23,9 @@ export class JellyMaterialPlugin extends MaterialPluginBase {
   /** 邊緣光顏色（藍紫） */
   rim = new Color3(0.55, 0.5, 1.0);
   /** 下方內部顏色（深藍紫） */
-  deep = new Color3(0.2, 0.22, 0.75);
+  deep = new Color3(0.24, 0.18, 0.82);
   /** 上方內部顏色（青藍） */
-  top = new Color3(0.45, 0.85, 1.0);
+  top = new Color3(0.32, 0.78, 1.0);
   /** 天空反射顏色：低處／高處 */
   skyLow = new Color3(0.95, 0.88, 0.98);
   skyHigh = new Color3(0.55, 0.78, 1.0);
@@ -116,22 +116,23 @@ export const JELLY_GLSL = `
   vec3 jT = refract(-jV, jN, 0.75);
   float jPath = clamp(0.55 - jT.y * 0.6, 0.0, 1.0);
   vec3 jBody = mix(jInner, jellyDeep, jPath * 0.35);
-  color.rgb = mix(color.rgb, color.rgb * 0.55 + jBody * 0.6, jS * (0.35 + 0.4 * jNdV));
+  color.rgb = mix(color.rgb, color.rgb * 0.6 + jBody * 0.5, jS * (0.25 + 0.3 * jNdV));
 
   // 天空漸層反射（只在輪廓附近）
   vec3 jR = reflect(-jV, jN);
   vec3 jSky = mix(jellySkyLow, jellySkyHigh, clamp(jR.y * 0.5 + 0.5, 0.0, 1.0));
-  color.rgb += jSky * jFres * 0.35 * jS;
+  color.rgb += jSky * jFres * 0.22 * jS;
 
   // 藍紫邊緣光：輪廓較亮、較不透明
   color.rgb += jellyRim * jFres * 0.75 * jS;
   color.a = clamp(color.a + jFres * 0.3 * jS, 0.0, 1.0);
 
-  // 日系硬邊高光：主高光（左上大）＋ 副高光（右上小）
-  vec3 jL1 = normalize(vec3(-0.5, 0.85, 0.35));
-  vec3 jL2 = normalize(vec3(0.55, 0.7, 0.45));
-  float jHL1 = smoothstep(0.972, 0.982, dot(jN, normalize(jL1 + jV)));
-  float jHL2 = smoothstep(0.990, 0.995, dot(jN, normalize(jL2 + jV)));
+  // 日系硬邊高光：主高光（正面看左上，較大）＋ 副高光（右上小點）。
+  // 怪物面向 +z、正面看時 +x 在畫面左側，所以「畫面左上」是 +x。
+  vec3 jL1 = normalize(vec3(0.5, 0.85, 0.35));
+  vec3 jL2 = normalize(vec3(-0.6, 0.65, 0.45));
+  float jHL1 = smoothstep(0.9915, 0.995, dot(jN, normalize(jL1 + jV)));
+  float jHL2 = smoothstep(0.9975, 0.9988, dot(jN, normalize(jL2 + jV)));
   float jHL = (jHL1 * 0.85 + jHL2 * 0.6) * jS;
   color.rgb = mix(color.rgb, vec3(1.0), clamp(jHL, 0.0, 1.0));
   color.a = max(color.a, jHL * 0.9);
