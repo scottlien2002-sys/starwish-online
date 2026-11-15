@@ -304,9 +304,7 @@ export class Game {
       }
     }
     // 鎖定標記
-    const locked = this.combat.isDown
-      ? null
-      : this.combat.nearestTarget(this.position.x, this.position.z, this.monsters.map((m) => m.instance));
+    const locked = this.combat.lockTarget(this.position.x, this.position.z, this.monsters.map((m) => m.instance));
     this.lockedId = locked?.instanceId ?? null;
     if (locked) {
       const p = locked.currentPosition;

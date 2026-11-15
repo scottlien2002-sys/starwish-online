@@ -90,12 +90,19 @@ export class Hud {
     this.fpsEl.classList.toggle("low", fps < 30);
   }
 
+  private toastTimer: number | null = null;
+
   toast(message: string, ms = 2200): void {
     const el = this.root.querySelector<HTMLDivElement>(".hud-toast");
     if (!el) return;
     el.textContent = message;
     el.classList.add("show");
-    window.setTimeout(() => el.classList.remove("show"), ms);
+    // 新訊息取代舊訊息時，取消舊的隱藏計時，避免新訊息被提早收起
+    if (this.toastTimer !== null) window.clearTimeout(this.toastTimer);
+    this.toastTimer = window.setTimeout(() => {
+      el.classList.remove("show");
+      this.toastTimer = null;
+    }, ms);
   }
 }
 

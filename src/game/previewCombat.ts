@@ -37,6 +37,8 @@ export class PreviewCombat {
   hp: number = PREVIEW_COMBAT.playerMaxHp;
   private nextAttackAt = 0;
   private downUntil: number | null = null;
+  /** 目前鎖定的怪物 id */
+  lockedId: string | null = null;
   /** 累計：玩家受到的攻擊次數（測試用） */
   hitsTaken = 0;
 
@@ -59,11 +61,27 @@ export class PreviewCombat {
     return best;
   }
 
+  /**
+   * 目前鎖定的目標：已鎖定的怪物只要還活著且在攻擊範圍內就維持鎖定（不會因為別隻靠得更近而換目標），
+   * 否則改鎖範圍內最近的一隻。
+   */
+  lockTarget<T extends CombatMonster>(px: number, pz: number, monsters: readonly T[]): T | null {
+    if (this.isDown) {
+      this.lockedId = null;
+      return null;
+    }
+    const cur = this.lockedId ? monsters.find((m) => m.instanceId === this.lockedId) : undefined;
+    if (cur && cur.isAlive && Math.hypot(cur.currentPosition.x - px, cur.currentPosition.z - pz) <= PREVIEW_COMBAT.playerAttackRange) return cur;
+    const next = this.nearestTarget(px, pz, monsters);
+    this.lockedId = next?.instanceId ?? null;
+    return next;
+  }
+
   /** 玩家按下攻擊鍵 */
   playerAttack(now: number, px: number, pz: number, monsters: readonly CombatMonster[]): PlayerAttackResult {
     if (this.isDown) return { ok: false, reason: "down" };
     if (now < this.nextAttackAt) return { ok: false, reason: "cooldown" };
-    const target = this.nearestTarget(px, pz, monsters);
+    const target = this.lockTarget(px, pz, monsters);
     if (!target) return { ok: false, reason: "no-target" };
     this.nextAttackAt = now + PREVIEW_COMBAT.playerAttackInterval;
     const r = target.receiveDamage(PREVIEW_COMBAT.playerAttackDamage);

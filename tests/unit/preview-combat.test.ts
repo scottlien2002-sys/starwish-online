@@ -69,3 +69,19 @@ test("生成點：出生點前方 6–9 公尺、互相分開", () => {
     for (let i = 0; i < 3; i++) for (let j = i + 1; j < 3; j++) assert.ok(Math.hypot(pts[i]!.x - pts[j]!.x, pts[i]!.z - pts[j]!.z) > 2);
   }
 });
+
+test("鎖定：已鎖定目標在範圍內就不換目標；離開範圍或死亡才換", () => {
+  const c = new PreviewCombat();
+  const a = bobo(2, 0, "a");
+  const b = bobo(2.2, 0, "b");
+  const ms = [a, b];
+  assert.equal(c.lockTarget(0, 0, ms)?.instanceId, "a");
+  // b 靠得更近，但仍維持鎖定 a
+  b.currentPosition.x = 0.5;
+  assert.equal(c.lockTarget(0, 0, ms)?.instanceId, "a");
+  const r = c.playerAttack(0, 0, 0, ms);
+  assert.ok(r.ok && r.targetId === "a");
+  // a 離開範圍 → 改鎖 b
+  a.currentPosition.x = 10;
+  assert.equal(c.lockTarget(0, 0, ms)?.instanceId, "b");
+});

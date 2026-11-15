@@ -81,17 +81,19 @@ for (const name of browsers) {
         // 持續攻擊直到擊敗（每 1.05 秒一下，最多 8 次）
         let killed = false;
         const log = [];
-        for (let k = 0; k < 8 && !killed; k++) {
-          await page.waitForTimeout(1050);
+        // 軟體繪圖下遊戲時間可能比真實時間慢，冷卻中就稍候重試（冷卻回應本身也驗證了不會重複攻擊）
+        for (let k = 0; k < 40 && !killed; k++) {
+          await page.waitForTimeout(300);
           const st = await page.evaluate(() => window.__starwish.combat());
-          if (st.down) await page.waitForFunction(() => !window.__starwish.combat().down, null, { timeout: 5000 });
+          if (st.down) await page.waitForFunction(() => !window.__starwish.combat().down, null, { timeout: 8000 });
           await near();
           const r = await page.evaluate(() => window.__starwish.attack());
-          log.push(r);
-          if (r.ok && r.killed && r.targetId === target) killed = true;
+          if (r.ok || r.reason !== "cooldown") log.push(r);
+          if (r.ok && r.targetId !== target) break; // 鎖定應維持在同一隻
+          if (r.ok && r.killed) killed = true;
         }
         const dying = (await page.evaluate(() => window.__starwish.monsters())).find((x) => x.id === target);
-        check("草原：可擊敗星露啵啵（播放死亡）", killed && (dying.state === "death" || dying.state === "dead") && dying.hp === 0, { log, dying });
+        check("草原：鎖定同一隻並擊敗（播放死亡）", killed && log.filter((r) => r.ok).every((r) => r.targetId === target) && (dying.state === "death" || dying.state === "dead") && dying.hp === 0, { log, dying });
         // 死亡中不可再被攻擊（會改打其他怪或沒有目標，不會打到死亡的這隻）
         const again = await page.evaluate(() => window.__starwish.attack());
         check("草原：死亡中的怪物不會被重複攻擊", !(again.ok && again.targetId === target), again);
