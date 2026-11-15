@@ -1,0 +1,110 @@
+/**
+ * 預覽版「測試用」戰鬥（只在 V2 預覽分支，用於在新手草原驗收星露啵啵）。
+ *
+ * ⚠ 這不是正式戰鬥系統：正式的傷害公式、攻速（上限 160）、鎖定規則、經驗值、掉落、
+ *   玩家死亡規則都屬於 W2/W3，尚未由企劃定案。以下數值僅為測試，經使用者同意（2026-11-15）：
+ *   - 玩家攻擊：打 2.5 公尺內最近的存活怪物，每下固定 20，間隔 1 秒（沿用 ?lab=field 測試按鈕的值）
+ *   - 怪物攻擊：撞擊瞬間若玩家仍在攻擊範圍內，扣玩家 HP = 怪物定義的 attack（星露啵啵暫定 8）
+ *   - 玩家 HP 歸零：倒地 2 秒後回出生點、HP 全滿
+ *   - 不給經驗值、不掉寶
+ * 本檔不依賴 Babylon，可單元測試。怪物數值（MonsterDefinition）完全不修改。
+ */
+
+export const PREVIEW_COMBAT = Object.freeze({
+  playerMaxHp: 100,
+  playerAttackDamage: 20,
+  playerAttackInterval: 1.0,
+  playerAttackRange: 2.5,
+  /** 怪物撞擊判定：攻擊範圍再加上這個寬容值（玩家半徑＋怪物半徑） */
+  impactSlack: 0.6,
+  downSeconds: 2,
+});
+
+/** 戰鬥需要的怪物最小介面（MonsterInstance 已符合） */
+export interface CombatMonster {
+  readonly instanceId: string;
+  readonly isAlive: boolean;
+  readonly currentPosition: { x: number; z: number };
+  readonly definition: { attack: number; attackRange: number; name: string };
+  receiveDamage(amount: number): { applied: boolean; killed: boolean };
+}
+
+export type PlayerAttackResult =
+  | { ok: true; targetId: string; killed: boolean; damage: number }
+  | { ok: false; reason: "cooldown" | "no-target" | "down" };
+
+export class PreviewCombat {
+  hp: number = PREVIEW_COMBAT.playerMaxHp;
+  private nextAttackAt = 0;
+  private downUntil: number | null = null;
+  /** 累計：玩家受到的攻擊次數（測試用） */
+  hitsTaken = 0;
+
+  get isDown(): boolean {
+    return this.downUntil !== null;
+  }
+
+  /** 找出攻擊範圍內最近的存活怪物 */
+  nearestTarget<T extends CombatMonster>(px: number, pz: number, monsters: readonly T[]): T | null {
+    let best: T | null = null;
+    let bestD = PREVIEW_COMBAT.playerAttackRange;
+    for (const m of monsters) {
+      if (!m.isAlive) continue;
+      const d = Math.hypot(m.currentPosition.x - px, m.currentPosition.z - pz);
+      if (d <= bestD) {
+        bestD = d;
+        best = m;
+      }
+    }
+    return best;
+  }
+
+  /** 玩家按下攻擊鍵 */
+  playerAttack(now: number, px: number, pz: number, monsters: readonly CombatMonster[]): PlayerAttackResult {
+    if (this.isDown) return { ok: false, reason: "down" };
+    if (now < this.nextAttackAt) return { ok: false, reason: "cooldown" };
+    const target = this.nearestTarget(px, pz, monsters);
+    if (!target) return { ok: false, reason: "no-target" };
+    this.nextAttackAt = now + PREVIEW_COMBAT.playerAttackInterval;
+    const r = target.receiveDamage(PREVIEW_COMBAT.playerAttackDamage);
+    return { ok: true, targetId: target.instanceId, killed: r.killed, damage: PREVIEW_COMBAT.playerAttackDamage };
+  }
+
+  /**
+   * 怪物攻擊動畫的撞擊瞬間（attackImpact 特效事件）呼叫。
+   * 回傳實際扣的 HP（0 = 沒打中／玩家已倒地），並在 HP 歸零時讓玩家倒地。
+   */
+  monsterImpact(now: number, monster: CombatMonster, px: number, pz: number): number {
+    if (this.isDown || !monster.isAlive) return 0;
+    const d = Math.hypot(monster.currentPosition.x - px, monster.currentPosition.z - pz);
+    if (d > monster.definition.attackRange + PREVIEW_COMBAT.impactSlack) return 0;
+    const dmg = Math.max(0, Math.floor(monster.definition.attack));
+    this.hp = Math.max(0, this.hp - dmg);
+    this.hitsTaken++;
+    if (this.hp === 0) this.downUntil = now + PREVIEW_COMBAT.downSeconds;
+    return dmg;
+  }
+
+  /** 每幀呼叫；回傳 true 表示本幀玩家復活（呼叫端把玩家送回出生點） */
+  update(now: number): boolean {
+    if (this.downUntil !== null && now >= this.downUntil) {
+      this.downUntil = null;
+      this.hp = PREVIEW_COMBAT.playerMaxHp;
+      return true;
+    }
+    return false;
+  }
+}
+
+/** 出生點前方 6–9 公尺的三個測試生成點（forwardYaw 為攝影機看向的水平角，前方 = (sin, cos)） */
+export function previewSpawnPoints(originX: number, originZ: number, forwardYaw: number): { x: number; z: number }[] {
+  const pts: [number, number][] = [
+    [6, 0], // 正前方 6 公尺
+    [8, -2.4], // 左前 8 公尺
+    [8.6, 2.4], // 右前約 8.9 公尺
+  ];
+  const fx = Math.sin(forwardYaw), fz = Math.cos(forwardYaw);
+  // 右方向（左手座標、y 向上）：(cos, -sin)
+  const rx = fz, rz = -fx;
+  return pts.map(([f, r]) => ({ x: originX + fx * f + rx * r, z: originZ + fz * f + rz * r }));
+}

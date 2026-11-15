@@ -106,6 +106,23 @@ if (mode === "game") {
   await page.evaluate(() => window.__starwish.setMove(null));
   await run(300);
   await shot("g03_turn", "草原：斜向移動後");
+  // V2 預覽：草原上的星露啵啵近照（舊版基準沒有怪物 API，略過）
+  if (await page.evaluate(() => typeof window.__starwish.monsters === "function")) {
+    await page.evaluate(() => {
+      const m = window.__starwish.monsters()[0];
+      const d = Math.hypot(m.x, m.z) || 1;
+      window.__starwish.teleport(m.x * (1 - 3.2 / d), m.z * (1 - 3.2 / d));
+    });
+    await run(900);
+    await shot("g04_bobo", "草原：星露啵啵近照");
+    await page.evaluate(() => {
+      const m = window.__starwish.monsters()[0];
+      window.__starwish.teleport(m.x + 1.2, m.z);
+      window.__starwish.attack();
+    });
+    await run(150);
+    await shot("g05_bobo_hit", "草原：攻擊星露啵啵（受傷）");
+  }
   const perf = await page.evaluate(() => (window.__starwish.perf ? window.__starwish.perf() : null));
   writeFileSync(`${outDir}/shots.json`, JSON.stringify({ shots, errors, perf, timing }, null, 2));
   console.log(`${shots.length} shots → ${outDir}` + (errors.length ? `\nerrors: ${errors.join("; ")}` : ""));

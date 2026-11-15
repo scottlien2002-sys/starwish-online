@@ -57,6 +57,68 @@ for (const name of browsers) {
       const issues = await page.evaluate((s) => window.__starwish.hudIssues(s), vp.safe);
       check("HUD 不重疊/不超出安全區", issues.length === 0, issues);
 
+      // ---- 預覽測試：星露啵啵 V2 接入新手草原（只在第一個尺寸跑完整戰鬥，節省時間）----
+      const mons0 = await page.evaluate(() => window.__starwish.monsters());
+      const dists = mons0.map((m) => Math.hypot(m.x, m.z));
+      check(
+        "草原：3 隻星露啵啵在出生點前方且看得到",
+        mons0.length === 3 && mons0.every((m) => m.hp === m.maxHp) && mons0.filter((m) => m.visible).length >= 2 && dists.every((d) => d >= 5 && d <= 10),
+        { mons0, dists },
+      );
+      if (vp === VIEWPORTS[0]) {
+        const target = mons0[0].id;
+        const near = async () => {
+          const m = (await page.evaluate(() => window.__starwish.monsters())).find((x) => x.id === target);
+          await page.evaluate(([x, z]) => window.__starwish.teleport(x, z), [m.x + 1, m.z]);
+          return m;
+        };
+        await near();
+        await page.waitForTimeout(200);
+        const a1 = await page.evaluate(() => window.__starwish.attack());
+        const a2 = await page.evaluate(() => window.__starwish.attack());
+        const afterOne = (await page.evaluate(() => window.__starwish.monsters())).find((x) => x.id === target);
+        check("草原：鎖定並攻擊、冷卻內不重複攻擊", a1.ok === true && a1.targetId === target && a2.ok === false && a2.reason === "cooldown" && afterOne.hp === afterOne.maxHp - a1.damage, { a1, a2, afterOne });
+        // 持續攻擊直到擊敗（每 1.05 秒一下，最多 8 次）
+        let killed = false;
+        const log = [];
+        for (let k = 0; k < 8 && !killed; k++) {
+          await page.waitForTimeout(1050);
+          const st = await page.evaluate(() => window.__starwish.combat());
+          if (st.down) await page.waitForFunction(() => !window.__starwish.combat().down, null, { timeout: 5000 });
+          await near();
+          const r = await page.evaluate(() => window.__starwish.attack());
+          log.push(r);
+          if (r.ok && r.killed && r.targetId === target) killed = true;
+        }
+        const dying = (await page.evaluate(() => window.__starwish.monsters())).find((x) => x.id === target);
+        check("草原：可擊敗星露啵啵（播放死亡）", killed && (dying.state === "death" || dying.state === "dead") && dying.hp === 0, { log, dying });
+        // 死亡中不可再被攻擊（會改打其他怪或沒有目標，不會打到死亡的這隻）
+        const again = await page.evaluate(() => window.__starwish.attack());
+        check("草原：死亡中的怪物不會被重複攻擊", !(again.ok && again.targetId === target), again);
+        // 重生：死亡動畫 + respawnTime 10 秒 + 重生動畫
+        await page.evaluate(() => window.__starwish.teleport(0, 0));
+        const respawned = await page
+          .waitForFunction(
+            (id) => {
+              const m = window.__starwish.monsters().find((x) => x.id === id);
+              return m && m.hp === m.maxHp && (m.state === "idle" || m.state === "move");
+            },
+            target,
+            { timeout: 20000, polling: 250 },
+          )
+          .then(() => true)
+          .catch(() => false);
+        const afterRespawn = await page.evaluate(() => window.__starwish.monsters());
+        check("草原：死亡後重生並回到待機/移動", respawned, afterRespawn);
+        const cs = await page.evaluate(() => window.__starwish.combat());
+        check("草原：怪物攻擊會打到玩家（扣暫定攻擊力 8）", cs.hitsTaken > 0, cs);
+        const stuck = afterRespawn.filter((m) => !["idle", "move", "attack", "hit", "death", "dead", "respawn"].includes(m.state));
+        check("草原：多隻同時存在、無異常狀態", afterRespawn.length === 3 && stuck.length === 0, afterRespawn);
+        // 確保後續移動測試時玩家不在倒地狀態
+        await page.waitForFunction(() => !window.__starwish.combat().down, null, { timeout: 5000 }).catch(() => {});
+        await page.evaluate(() => window.__starwish.teleport(0, 0));
+      }
+
       // 搖桿往上推 1.2 秒，角色應前進
       const p0 = await page.evaluate(() => window.__starwish.getPlayer());
       const zone = await page.locator(".hud-joystick-zone").boundingBox();
