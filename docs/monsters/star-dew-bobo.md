@@ -84,3 +84,29 @@ MonsterAnimator（動畫控制器，純邏輯，不依賴 Babylon）
 - `src/monsters/star-dew-bobo/textures.ts` 程式繪製貼圖
 - `src/lab/MonsterLab.ts` 動作測試場景（網址加 `?lab=bobo`）
 - `tests/harness/bobo-blueprint.mjs` 用模型幾何畫正面/側面比例藍圖
+
+## V2 高品質樣板（分支 feature/render-bobo-v2）
+
+預覽：`/preview-bobo-v2/?lab=bobo`（實驗室有「正面／側面／背面」與「效能測試」按鈕）。
+
+| 項目 | 實作 | 檔案 |
+|---|---|---|
+| 身體 | 略扁的水滴圓頂（寬高比約 1.29）；細分數依畫質：高 40／中 32／低 24 | `shape.ts`、`StarDewBoboModel.ts` |
+| 觸角 | 依設定圖彎向角色左側（正面看畫面右側）；根部粗、尖端細（立方遞減）；根部小鼓包接入身體 | `shape.ts`（ANTENNA_*）|
+| 星星 | 圓角鼓起軟星（softStarRadius 輪廓 + 同心環鼓起、平滑法線）；頂點色中央奶油黃 → 邊緣暖金；光暈為金色 | `meshes/star.ts` createSoftStar |
+| 翅膀 | 三瓣圓潤半透明扇形翼，合併為單一網格，翼面朝前外側 | `StarDewBoboModel.ts` createWing |
+| 臉 | **貼合曲面**的單一網格（每個頂點都落在身體表面），正面投影 UV；三種表情各一張 Canvas 手繪貼圖（漸層虹膜、三層高光、上眼線、腮紅斜線、D 形笑口）| `face.ts` |
+| 果凍材質 | StandardMaterial + MaterialPlugin：藍紫 Fresnel 邊緣光、依高度的內部深度漸層、refract() 假折射、天空漸層反射、兩個硬邊動畫風高光；中央少染色讓星雲透出 | `JellyMaterialPlugin.ts` |
+| 畫質 | 高：外掛 + 體內粒子 100%；中：外掛 + 粒子 60%；低：不啟用外掛、無體內粒子（攻擊／死亡／重生特效保留）| |
+| 容錯 | 著色器編譯失敗時自動停用外掛，回到 V1.2 材質並輸出 `[bobo]` 警告 | |
+
+工具：`node tests/harness/bobo-face-preview.mjs`（在 Chromium 預覽三種表情貼圖）、`node tests/harness/bobo-blueprint.mjs`（比例藍圖）。
+
+### 仍未達設定圖品質（需 Blender / GLB 或手繪貼圖）
+
+- 身體、翅膀、觸角之間沒有真正的有機融合（目前是獨立網格疊合，根部以小鼓包遮接縫）。
+- 翅膀邊緣沒有設定圖的波浪狀切口與羽狀紋理。
+- 體內星雲是程式產生的漸層＋星點，層次與色彩豐富度不及手繪。
+- 表情是貼圖切換，沒有 morph target 的漸變（例如眨眼、嘴型過渡）。
+- 沒有真正的螢幕空間折射（看不到身體後方景物的扭曲），僅以 refract() 估算體內路徑長來調色。
+- 高光為世界空間固定方向，鏡頭轉到背面時高光位置會跟著光源而非畫面固定。
