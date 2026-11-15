@@ -116,7 +116,10 @@ export const JELLY_GLSL = `
   vec3 jT = refract(-jV, jN, 0.75);
   float jPath = clamp(0.55 - jT.y * 0.6, 0.0, 1.0);
   vec3 jBody = mix(jInner, jellyDeep, jPath * 0.35);
-  color.rgb = mix(color.rgb, color.rgb * 0.6 + jBody * 0.5, jS * (0.25 + 0.3 * jNdV));
+  // 中央少染色（讓體內星雲透出來），越靠輪廓越接近果凍本色
+  color.rgb = mix(color.rgb, color.rgb * 0.6 + jBody * 0.5, jS * (0.12 + 0.35 * (1.0 - jNdV)));
+  // 中央略為降低不透明度，看得更深
+  color.a *= mix(1.0, 0.82, jNdV * jS);
 
   // 天空漸層反射（只在輪廓附近）
   vec3 jR = reflect(-jV, jN);
