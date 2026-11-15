@@ -12,7 +12,52 @@
     <meta name="apple-mobile-web-app-title" content="星願物語" />
     <meta name="theme-color" content="#9fd8ff" />
     <title>星願物語 Starwish Online</title>
-    <script type="module" crossorigin src="./assets/index-DZDMBbzJ.js"></script>
+    <script>
+      // 啟動看門狗：若遊戲程式下載失敗、啟動出錯或超過 25 秒沒有完成，顯示原因與「重新載入」按鈕，
+      // 不再停在「載入中…」。重新載入會加上時間參數，避開舊的快取。
+      (function () {
+        var done = false;
+        window.__starwishBooted = function () {
+          done = true;
+        };
+        function show(msg) {
+          if (done) return;
+          done = true;
+          var s = document.getElementById("boot-status");
+          if (!s) return;
+          s.textContent = msg + "（" + (s.getAttribute("data-step") || "載入中") + "）";
+          s.classList.add("error");
+          var b = document.createElement("button");
+          b.className = "boot-reload";
+          b.textContent = "重新載入";
+          b.onclick = function () {
+            var u = new URL(location.href);
+            u.searchParams.set("v", String(Date.now()));
+            location.replace(u.toString());
+          };
+          s.appendChild(document.createElement("br"));
+          s.appendChild(b);
+        }
+        window.addEventListener(
+          "error",
+          function (e) {
+            var t = e.target;
+            if (t && t.tagName === "SCRIPT") show("遊戲程式下載失敗，可能是舊的快取");
+            else if (t && t.tagName === "LINK") show("樣式檔下載失敗，可能是舊的快取");
+            else if (e.message) show("啟動錯誤：" + e.message);
+          },
+          true,
+        );
+        window.addEventListener("unhandledrejection", function (e) {
+          var r = e.reason;
+          show("啟動錯誤：" + (r && r.message ? r.message : String(r)));
+        });
+        setTimeout(function () {
+          show("載入超過 25 秒仍未完成");
+        }, 25000);
+      })();
+    </script>
+    <script type="module" crossorigin src="./assets/index-DE6xrCcu.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/observable.pure-H-M_hi7F.js">
     <link rel="modulepreload" crossorigin href="./assets/performanceConfigurator-UtxC_Odd.js">
     <link rel="modulepreload" crossorigin href="./assets/engineStore-B_7KzytD.js">
@@ -551,7 +596,7 @@
     <link rel="modulepreload" crossorigin href="./assets/sprites.vertex-DsK_Qaex.js">
     <link rel="modulepreload" crossorigin href="./assets/workerPool-CDY4H29X.js">
     <link rel="modulepreload" crossorigin href="./assets/KHR_animation_pointer.data.pure-CYXncbX8.js">
-    <link rel="stylesheet" crossorigin href="./assets/index-DnxhDpdN.css">
+    <link rel="stylesheet" crossorigin href="./assets/index-BB3C1wjZ.css">
   </head>
   <body>
     <canvas id="game-canvas" aria-label="星願物語 3D 遊戲畫面"></canvas>
