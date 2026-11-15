@@ -6,6 +6,7 @@ import {
   Quaternion,
   Scene,
   StandardMaterial,
+  TransformNode,
   Vector3,
   VertexBuffer,
   VertexData,
@@ -14,11 +15,21 @@ import {
 import { createRng } from "../core/rng.ts";
 import { TUNING } from "../config/tuning.ts";
 import { heightAt } from "./terrain.ts";
-import { scatterProps, type PropKind, type PropPlacement } from "./scatter.ts";
+import { scatterProps, type PropPlacement } from "./scatter.ts";
+import {
+  createCloudLayer,
+  createDistantHills,
+  createGrassTuft,
+  createGroundDetailTexture,
+  createPlaza,
+  createPropTemplatesV2,
+} from "./meadowArt.ts";
 
 /**
- * W1 新手草原（程式化暫代美術）。
- * 所有模型名稱以 "PH_" 開頭，代表暫代物件，之後會以正式 GLB 模型替換。
+ * 新手草原（W2-1 美術升級：日系明亮奇幻風，仍為程式化暫代美術，名稱以 "PH_" 開頭）。
+ *
+ * 不變的遊戲資料：地形高度 heightAt、可行走範圍、裝飾物擺放與碰撞半徑（scatterProps 同一種子與數量），
+ * 因此角色移動、碰撞、怪物位置與升級前完全相同；只換外觀。
  */
 export interface MeadowWorld {
   ground: Mesh;
@@ -26,38 +37,35 @@ export interface MeadowWorld {
   update(dt: number): void;
 }
 
-export function buildMeadow(scene: Scene, shadows: ShadowGenerator): MeadowWorld {
+export type MeadowQuality = "high" | "medium" | "low";
+
+/** 草叢數量依畫質（全部共用一個網格＝1 個 draw call，不投射陰影） */
+export const GRASS_COUNT: Record<MeadowQuality, number> = { high: 3200, medium: 2000, low: 900 };
+
+export function buildMeadow(scene: Scene, shadows: ShadowGenerator, quality: MeadowQuality = "medium"): MeadowWorld {
   const half = TUNING.world.halfSize;
   const size = half * 2 + 30; // 外圍多留一圈山丘
 
+  // ---------- 地面：頂點色（色塊、小徑、坡度明暗）× 細碎草紋貼圖 ----------
   const groundMat = new StandardMaterial("PH_groundMat", scene);
   groundMat.diffuseColor = Color3.White();
-  groundMat.specularColor = new Color3(0.02, 0.02, 0.02);
+  groundMat.specularColor = Color3.Black();
+  const detail = createGroundDetailTexture(scene, TUNING.world.seed + 11);
+  detail.uScale = size / 4;
+  detail.vScale = size / 4;
+  groundMat.diffuseTexture = detail;
 
-  const ground = MeshBuilder.CreateGround("PH_ground", { width: size, height: size, subdivisions: 110, updatable: true }, scene);
+  const ground = MeshBuilder.CreateGround("PH_ground", { width: size, height: size, subdivisions: 140, updatable: true }, scene);
   shapeGround(ground);
   ground.material = groundMat;
   ground.receiveShadows = true;
   ground.isPickable = false;
   ground.freezeWorldMatrix();
 
-  // 出生點：星願廣場（暫代）
-  const plaza = MeshBuilder.CreateCylinder("PH_plaza", { diameter: 9, height: 0.12, tessellation: 40 }, scene);
-  plaza.position.y = heightAt(0, 0) + 0.04;
-  paint(plaza, new Color3(1, 0.93, 0.78));
-  const plazaMat = new StandardMaterial("PH_plazaMat", scene);
-  plazaMat.specularColor = new Color3(0.05, 0.05, 0.05);
-  plaza.material = plazaMat;
-  plaza.receiveShadows = true;
-  plaza.isPickable = false;
+  // ---------- 出生點：星願廣場 ----------
+  createPlaza(scene, heightAt(0, 0));
 
-  const star = MeshBuilder.CreateCylinder("PH_plazaStar", { diameter: 3.2, height: 0.14, tessellation: 5 }, scene);
-  star.position.y = plaza.position.y + 0.02;
-  paint(star, new Color3(1, 0.85, 0.45));
-  star.material = plazaMat;
-  star.isPickable = false;
-
-  // 裝飾物
+  // ---------- 裝飾物（擺放與碰撞資料與升級前相同） ----------
   const props = scatterProps({
     seed: TUNING.world.seed,
     halfSize: half - 4,
@@ -67,9 +75,9 @@ export function buildMeadow(scene: Scene, shadows: ShadowGenerator): MeadowWorld
 
   const propMat = new StandardMaterial("PH_propMat", scene);
   propMat.diffuseColor = Color3.White();
-  propMat.specularColor = new Color3(0.04, 0.04, 0.04);
+  propMat.specularColor = new Color3(0.03, 0.03, 0.03);
 
-  const templates = createPropTemplates(scene);
+  const templates = createPropTemplatesV2(scene);
   const groups = new Map<Mesh, PropPlacement[]>();
   const rng = createRng(TUNING.world.seed + 7);
   for (const p of props) {
@@ -97,25 +105,117 @@ export function buildMeadow(scene: Scene, shadows: ShadowGenerator): MeadowWorld
     template.thinInstanceSetBuffer("matrix", buf, 16, true);
     template.thinInstanceRefreshBoundingInfo(false);
     template.receiveShadows = true;
-    if (list[0] && list[0].kind !== "flower") shadows.addShadowCaster(template);
+    // 只有樹與岩石投射陰影（灌木、花、草不投射，省陰影貼圖的 draw call）
+    if (list[0] && (list[0].kind === "tree" || list[0].kind === "rock")) shadows.addShadowCaster(template);
+    template.freezeWorldMatrix();
   }
+  const used = new Set(groups.keys());
   for (const options of Object.values(templates)) {
-    for (const t of options) if (!groups.has(t)) t.dispose();
+    for (const t of options) if (!used.has(t) && !t.isDisposed()) t.dispose();
   }
 
-  // 天空中的雲（暫代）
-  const clouds = createClouds(scene);
+  // ---------- 草叢（薄實例） ----------
+  buildGrass(scene, props, GRASS_COUNT[quality]);
+
+  // ---------- 遠山與雲 ----------
+  createDistantHills(scene, TUNING.world.seed + 21);
+  const clouds: TransformNode = createCloudLayer(scene, TUNING.world.seed + 3);
 
   return {
     ground,
     props,
     update(dt: number) {
-      for (const c of clouds) {
-        c.position.x += dt * 0.8;
-        if (c.position.x > half + 40) c.position.x = -half - 40;
-      }
+      clouds.rotation.y += dt * 0.004;
     },
   };
+}
+
+/** 草叢：叢聚分布（出生點附近較密），避開廣場與樹／岩石的碰撞範圍；只改外觀，不影響碰撞 */
+function buildGrass(scene: Scene, props: readonly PropPlacement[], count: number): Mesh {
+  const tuft = createGrassTuft("PH_grassTuft", scene);
+  const mat = new StandardMaterial("PH_grassMat", scene);
+  mat.diffuseColor = Color3.White();
+  mat.specularColor = Color3.Black();
+  mat.backFaceCulling = false;
+  tuft.material = mat;
+  tuft.isPickable = false;
+
+  const half = TUNING.world.halfSize - 3;
+  const rng = createRng(TUNING.world.seed + 31);
+  const blockers = props.filter((p) => p.radius > 0);
+  const buf = new Float32Array(count * 16);
+  const m = new Matrix();
+  let made = 0;
+  let guard = 0;
+  while (made < count && guard < count * 6) {
+    guard++;
+    // 群聚中心：60% 在出生點 40 公尺內，其餘全圖
+    const near = rng.next() < 0.6;
+    const r = near ? Math.sqrt(rng.next()) * 40 : 0;
+    const a = rng.range(0, Math.PI * 2);
+    const cx = near ? Math.cos(a) * r : rng.range(-half, half);
+    const cz = near ? Math.sin(a) * r : rng.range(-half, half);
+    const clump = 2 + Math.floor(rng.next() * 4);
+    for (let k = 0; k < clump && made < count; k++) {
+      const x = cx + rng.range(-0.7, 0.7);
+      const z = cz + rng.range(-0.7, 0.7);
+      if (Math.abs(x) > half || Math.abs(z) > half) continue;
+      if (Math.hypot(x, z) < 5.2) continue; // 廣場
+      if (blockers.some((p) => Math.hypot(p.x - x, p.z - z) < p.radius + 0.15)) continue;
+      const s = rng.range(0.75, 1.35);
+      Matrix.ComposeToRef(
+        new Vector3(s, s * rng.range(0.8, 1.25), s),
+        Quaternion.RotationYawPitchRoll(rng.range(0, Math.PI * 2), 0, 0),
+        new Vector3(x, heightAt(x, z) - 0.02, z),
+        m,
+      );
+      m.copyToArray(buf, made * 16);
+      made++;
+    }
+  }
+  tuft.thinInstanceSetBuffer("matrix", made === count ? buf : buf.slice(0, made * 16), 16, true);
+  tuft.thinInstanceRefreshBoundingInfo(false);
+  tuft.receiveShadows = true;
+  tuft.freezeWorldMatrix();
+  return tuft;
+}
+
+/** 從出生廣場延伸出去的小徑（只影響地面顏色） */
+const PATHS: readonly [number, number][][] = [
+  [
+    [0, 4],
+    [3, 14],
+    [-2, 26],
+    [4, 40],
+    [0, 60],
+  ],
+  [
+    [-4, -1],
+    [-15, -4],
+    [-26, 2],
+    [-40, -3],
+    [-60, 4],
+  ],
+  [
+    [3, -3],
+    [12, -14],
+    [26, -18],
+    [40, -30],
+  ],
+];
+
+function distToPaths(x: number, z: number): number {
+  let best = Infinity;
+  for (const path of PATHS) {
+    for (let i = 0; i < path.length - 1; i++) {
+      const [ax, az] = path[i]!;
+      const [bx, bz] = path[i + 1]!;
+      const vx = bx - ax, vz = bz - az;
+      const t = Math.max(0, Math.min(1, ((x - ax) * vx + (z - az) * vz) / (vx * vx + vz * vz)));
+      best = Math.min(best, Math.hypot(x - (ax + vx * t), z - (az + vz * t)));
+    }
+  }
+  return best;
 }
 
 function shapeGround(ground: Mesh): void {
@@ -125,124 +225,53 @@ function shapeGround(ground: Mesh): void {
 
   const colors = new Float32Array((positions.length / 3) * 4);
   const rng = createRng(TUNING.world.seed + 1);
+  for (let i = 0; i < positions.length; i += 3) positions[i + 1] = heightAt(positions[i]!, positions[i + 2]!);
+  const normals: number[] = [];
+  VertexData.ComputeNormals(positions, indices, normals);
+
   for (let i = 0, c = 0; i < positions.length; i += 3, c += 4) {
     const x = positions[i]!;
     const z = positions[i + 2]!;
-    const y = heightAt(x, z);
-    positions[i + 1] = y;
-
-    // 草地色：低處偏嫩綠、高處偏黃綠，加一點斑駁
-    const n = rng.range(-0.035, 0.035);
-    const patch = 0.5 + 0.5 * Math.sin(x * 0.21) * Math.sin(z * 0.17);
-    colors[c] = 0.52 + y * 0.03 + patch * 0.06 + n;
-    colors[c + 1] = 0.82 + patch * 0.05 + n;
-    colors[c + 2] = 0.42 - y * 0.02 + n;
+    const y = positions[i + 1]!;
+    const ny = normals[i + 1]!;
+    const n = rng.range(-0.02, 0.02);
+    // 大小兩層色塊：嫩綠／黃綠／薄荷綠交錯，避免單調
+    const big = 0.5 + 0.5 * Math.sin(x * 0.07 + 1.3) * Math.sin(z * 0.06 - 0.4);
+    const small = 0.5 + 0.5 * Math.sin(x * 0.23 + z * 0.11) * Math.cos(z * 0.19 - x * 0.07);
+    let r = 0.5 + big * 0.1 + small * 0.05 + n;
+    let g = 0.8 + small * 0.06 + n;
+    let b = 0.36 + (1 - big) * 0.08 + n;
+    // 高處偏暖黃綠、低窪偏藍綠
+    r += y * 0.018;
+    b -= y * 0.012;
+    // 坡面略暗（假環境光遮蔽，讓起伏更立體）
+    const slope = 1 - (1 - ny) * 2.2;
+    r *= slope;
+    g *= slope;
+    b *= slope;
+    // 小徑：柔和的米色泥土路，邊緣漸變
+    const d = distToPaths(x, z);
+    const path = Math.max(0, 1 - Math.max(0, d - 0.6) / 1.1);
+    if (path > 0) {
+      const pr = 0.9 + n, pg = 0.8 + n, pb = 0.6 + n;
+      r += (pr - r) * path * 0.85;
+      g += (pg - g) * path * 0.85;
+      b += (pb - b) * path * 0.85;
+    }
+    // 出生廣場周圍一圈淡淡的亮草
+    const pr2 = Math.hypot(x, z);
+    if (pr2 > 4.5 && pr2 < 8) {
+      const k = 1 - Math.abs(pr2 - 6.2) / 1.8;
+      g += k * 0.04;
+      r += k * 0.03;
+    }
+    colors[c] = r;
+    colors[c + 1] = g;
+    colors[c + 2] = b;
     colors[c + 3] = 1;
   }
-  const normals: number[] = [];
-  VertexData.ComputeNormals(positions, indices, normals);
   ground.updateVerticesData(VertexBuffer.PositionKind, positions);
   ground.updateVerticesData(VertexBuffer.NormalKind, normals);
   ground.setVerticesData(VertexBuffer.ColorKind, colors);
   ground.refreshBoundingInfo();
-}
-
-/** 以頂點色上色，讓多個零件能合併為單一網格、共用一個材質（減少 draw call） */
-function paint(mesh: Mesh, color: Color3): void {
-  const count = mesh.getTotalVertices();
-  const colors = new Float32Array(count * 4);
-  for (let i = 0; i < count; i++) {
-    colors[i * 4] = color.r;
-    colors[i * 4 + 1] = color.g;
-    colors[i * 4 + 2] = color.b;
-    colors[i * 4 + 3] = 1;
-  }
-  mesh.setVerticesData(VertexBuffer.ColorKind, colors);
-}
-
-function merge(name: string, parts: Mesh[]): Mesh {
-  const merged = Mesh.MergeMeshes(parts, true, true);
-  if (!merged) throw new Error(`Merge failed: ${name}`);
-  merged.name = name;
-  return merged;
-}
-
-function createPropTemplates(scene: Scene): Record<PropKind, Mesh[]> {
-  const tree = (name: string, leaf: Color3): Mesh => {
-    const trunk = MeshBuilder.CreateCylinder(`${name}_trunk`, { height: 1.6, diameterTop: 0.28, diameterBottom: 0.42, tessellation: 8 }, scene);
-    trunk.position.y = 0.8;
-    paint(trunk, new Color3(0.62, 0.43, 0.3));
-    const a = MeshBuilder.CreateSphere(`${name}_a`, { diameter: 2.4, segments: 8 }, scene);
-    a.position.y = 2.2;
-    paint(a, leaf);
-    const b = MeshBuilder.CreateSphere(`${name}_b`, { diameter: 1.7, segments: 8 }, scene);
-    b.position.set(0.55, 2.85, 0.2);
-    paint(b, leaf.scale(1.08));
-    const c = MeshBuilder.CreateSphere(`${name}_c`, { diameter: 1.5, segments: 8 }, scene);
-    c.position.set(-0.5, 2.7, -0.3);
-    paint(c, leaf.scale(0.94));
-    return merge(name, [trunk, a, b, c]);
-  };
-
-  const rock = (name: string): Mesh => {
-    const r = MeshBuilder.CreateIcoSphere(name, { radius: 0.6, subdivisions: 1, flat: true }, scene);
-    r.scaling.set(1.2, 0.7, 1);
-    r.position.y = 0.25;
-    r.bakeCurrentTransformIntoVertices();
-    paint(r, new Color3(0.78, 0.76, 0.84));
-    return r;
-  };
-
-  const bush = (name: string): Mesh => {
-    const a = MeshBuilder.CreateSphere(`${name}_a`, { diameter: 0.9, segments: 6 }, scene);
-    a.position.y = 0.3;
-    const b = MeshBuilder.CreateSphere(`${name}_b`, { diameter: 0.7, segments: 6 }, scene);
-    b.position.set(0.4, 0.25, 0.1);
-    const parts = [a, b];
-    parts.forEach((p) => paint(p, new Color3(0.4, 0.72, 0.38)));
-    return merge(name, parts);
-  };
-
-  const flower = (name: string, petal: Color3): Mesh => {
-    const stem = MeshBuilder.CreateCylinder(`${name}_stem`, { height: 0.26, diameter: 0.03, tessellation: 4 }, scene);
-    stem.position.y = 0.13;
-    paint(stem, new Color3(0.35, 0.65, 0.3));
-    const head = MeshBuilder.CreateSphere(`${name}_head`, { diameter: 0.14, segments: 4 }, scene);
-    head.position.y = 0.28;
-    head.scaling.y = 0.6;
-    paint(head, petal);
-    return merge(name, [stem, head]);
-  };
-
-  return {
-    tree: [tree("PH_treeA", new Color3(0.45, 0.78, 0.42)), tree("PH_treeB", new Color3(0.56, 0.82, 0.45))],
-    rock: [rock("PH_rock")],
-    bush: [bush("PH_bush")],
-    flower: [
-      flower("PH_flowerPink", new Color3(1, 0.62, 0.78)),
-      flower("PH_flowerYellow", new Color3(1, 0.9, 0.45)),
-      flower("PH_flowerWhite", new Color3(0.98, 0.97, 1)),
-    ],
-  };
-}
-
-function createClouds(scene: Scene): Mesh[] {
-  const mat = new StandardMaterial("PH_cloudMat", scene);
-  mat.diffuseColor = Color3.White();
-  mat.emissiveColor = new Color3(0.85, 0.85, 0.9);
-  mat.specularColor = Color3.Black();
-  mat.disableLighting = true;
-  mat.fogEnabled = false;
-
-  const rng = createRng(TUNING.world.seed + 3);
-  const clouds: Mesh[] = [];
-  for (let i = 0; i < 9; i++) {
-    const c = MeshBuilder.CreateSphere(`PH_cloud${i}`, { diameter: 1, segments: 6 }, scene);
-    c.scaling.set(rng.range(10, 18), rng.range(2.5, 4), rng.range(6, 9));
-    c.position.set(rng.range(-90, 90), rng.range(32, 42), rng.range(-90, 90));
-    c.material = mat;
-    c.isPickable = false;
-    clouds.push(c);
-  }
-  return clouds;
 }

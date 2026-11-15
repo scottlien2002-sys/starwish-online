@@ -139,14 +139,16 @@ export class Game {
     scene.fogColor = SKY_COLORS.fog.clone();
     scene.skipPointerMovePicking = true;
 
+    // W2-1：柔和的天空光（略帶藍）＋草地反彈的綠色環境光
     const hemi = new HemisphericLight("skyLight", new Vector3(0.2, 1, 0.1), scene);
-    hemi.intensity = 0.78;
-    hemi.diffuse = new Color3(1, 0.98, 1);
-    hemi.groundColor = new Color3(0.62, 0.7, 0.6);
+    hemi.intensity = 0.8;
+    hemi.diffuse = new Color3(0.98, 0.98, 1);
+    hemi.groundColor = new Color3(0.56, 0.68, 0.54);
 
     this.sun = new DirectionalLight("sun", new Vector3(-0.45, -1, 0.35).normalize(), scene);
-    this.sun.intensity = 0.75;
-    this.sun.diffuse = new Color3(1, 0.95, 0.86);
+    // 暖色日照（午後陽光）
+    this.sun.intensity = 0.82;
+    this.sun.diffuse = new Color3(1, 0.93, 0.8);
     this.sun.autoUpdateExtends = false;
     this.sun.orthoLeft = -22;
     this.sun.orthoRight = 22;
@@ -159,7 +161,7 @@ export class Game {
     const shadows = createShadows(this.sun, this.quality);
     shadows.darkness = 0.35;
 
-    this.world = buildMeadow(scene, shadows);
+    this.world = buildMeadow(scene, shadows, this.quality.level);
     this.player = new PlayerAvatar(scene, shadows);
     this.position.set(0, heightAt(0, 0), 0);
     this.player.root.position.copyFrom(this.position);

@@ -128,12 +128,13 @@ export function createShadows(light: DirectionalLight, q: QualitySettings): Shad
 
 /** 天空顏色（依「星露啵啵」設定圖：晴朗藍天 → 淡藍地平線 → 微粉霞光） */
 export const SKY_COLORS = Object.freeze({
-  zenith: "#5aaeff",
-  upper: "#86cbff",
+  zenith: "#4ea7ff",
+  upper: "#7fc6ff",
   /** 地平線上方（平視鏡頭最常看到的區域）：維持清楚的天空藍，避免色調映射後偏灰 */
-  nearHorizon: "#a6dbff",
-  horizon: "#cbe8ff",
-  below: "#f6e6f4",
+  nearHorizon: "#a8dcff",
+  /** W2-1：地平線帶一點暖白霞光，和遠山的霧藍紫形成層次 */
+  horizon: "#d9efff",
+  below: "#f8e8f0",
   /** 與地平線一致，用於霧與清除色 */
   fog: new Color3(0.8, 0.9, 1),
 });
