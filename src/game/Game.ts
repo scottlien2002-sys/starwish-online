@@ -61,6 +61,8 @@ export interface DebugApi {
     facingError: number | null;
     lastHit: PlayerAttackResult | null;
     hits: number;
+    /** 最近一次攻擊：播放過的階段、右手最大後拉／前揮、最大前傾、結算傷害時的階段 */
+    trace: { phases: AttackPhase[]; maxBack: number; maxFwd: number; maxLean: number; hitPhase: AttackPhase | null };
   };
   /** 預覽測試：玩家戰鬥狀態 */
   combat(): { hp: number; maxHp: number; down: boolean; hitsTaken: number; lockedId: string | null; tilt: number };
@@ -137,6 +139,8 @@ export class Game {
   private attackTargetId: string | null = null;
   private lastHit: PlayerAttackResult | null = null;
   private hits = 0;
+  /** 最近一次攻擊動作逐幀紀錄（測試用：確認每個階段都有播放、揮中時才結算） */
+  private attackTrace = { phases: [] as AttackPhase[], maxBack: 0, maxFwd: 0, maxLean: 0, hitPhase: null as AttackPhase | null };
   private bench: { rec: FrameRecorder; before: SceneCounts; resolve: (r: GameBenchmarkResult) => void; silent: boolean } | null = null;
   private benchEl: HTMLDivElement | null = null;
   private profiling = false;
@@ -298,6 +302,16 @@ export class Game {
     root.position.copyFrom(this.position);
     root.rotation.y = this.yaw;
     this.player.update(dt, Math.min(1, Math.hypot(move.x, move.y)));
+    {
+      const a = this.player.attackPose;
+      const tr = this.attackTrace;
+      if (a.phase !== "idle") {
+        if (tr.phases[tr.phases.length - 1] !== a.phase) tr.phases.push(a.phase);
+        tr.maxBack = Math.max(tr.maxBack, a.armRX);
+        tr.maxFwd = Math.min(tr.maxFwd, a.armRX);
+        tr.maxLean = Math.max(tr.maxLean, a.lean);
+      }
+    }
     // 預覽測試：HP 歸零時角色往後倒在地上（0.4 秒倒下），復活時立刻站起
     this.downT = this.combat.isDown ? Math.min(1, this.downT + dt / 0.4) : 0;
     if (this.downT > 0) {
@@ -441,10 +455,11 @@ export class Game {
 
   /** 按下攻擊：通過冷卻與目標檢查後播放攻擊動作；傷害在動作揮中時（ATTACK_TIMING.hit）結算 */
   private playerAttack(): AttackStartResult {
-    const r = this.combat.startAttack(this.now, this.position.x, this.position.z, this.monsters.map((m) => m.instance), ATTACK_TIMING.hit);
+    const r = this.combat.startAttack(this.now, this.position.x, this.position.z, this.monsters.map((m) => m.instance), ATTACK_TIMING.hit - 1e-6);
     if (r.ok) {
       this.attackTargetId = r.targetId;
       this.player.playAttack();
+      this.attackTrace = { phases: [], maxBack: 0, maxFwd: 0, maxLean: 0, hitPhase: null };
     }
     return r;
   }
@@ -460,6 +475,7 @@ export class Game {
 
   private handleHit(r: PlayerAttackResult): void {
     this.lastHit = r;
+    this.attackTrace.hitPhase = this.player.attackPose.phase;
     if (r.ok) {
       this.hits++;
       const m = this.monsters.find((x) => x.instance.instanceId === r.targetId)!;
@@ -629,6 +645,7 @@ export class Game {
           facingError,
           lastHit: this.lastHit,
           hits: this.hits,
+          trace: { ...this.attackTrace, phases: [...this.attackTrace.phases] },
         };
       },
       combat: () => ({

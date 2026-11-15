@@ -78,10 +78,15 @@ for (const name of browsers) {
         await page.waitForTimeout(200);
         // ---- 玩家攻擊動作：按下 → 蓄力 → 揮擊（此時才扣血）→ 收招 → 回待機 ----
         const idle0 = await page.evaluate(() => window.__starwish.attackState());
-        const a1 = await page.evaluate(() => window.__starwish.attack());
-        const a2 = await page.evaluate(() => window.__starwish.attack());
-        const atPress = (await page.evaluate(() => window.__starwish.monsters())).find((x) => x.id === target);
-        // 取樣動作（遊戲時間在軟體繪圖下較慢，以實際動作階段為準）
+        // 按下攻擊的同一個瞬間讀取怪物血量（確認按下時還沒扣血）
+        const press = await page.evaluate((id) => {
+          const a1 = window.__starwish.attack();
+          const a2 = window.__starwish.attack();
+          const hp = window.__starwish.monsters().find((x) => x.id === id).hp;
+          return { a1, a2, hp };
+        }, target);
+        const { a1, a2 } = press;
+        // 取樣轉向（遊戲時間在軟體繪圖下較慢）
         const samples = [];
         for (let k = 0; k < 80; k++) {
           const st = await page.evaluate(() => window.__starwish.attackState());
@@ -89,23 +94,21 @@ for (const name of browsers) {
           if (!st.attacking && k > 2) break;
           await page.waitForTimeout(40);
         }
-        const phases = [...new Set(samples.map((x) => x.phase))];
-        const maxBack = Math.max(...samples.map((x) => x.armRX));
-        const maxFwd = Math.min(...samples.map((x) => x.armRX));
-        const maxLean = Math.max(...samples.map((x) => x.lean));
         const strikeFacing = samples.filter((x) => x.phase === "strike" && x.facingError !== null).map((x) => x.facingError);
+        await page.waitForFunction(() => !window.__starwish.attackState().attacking, null, { timeout: 10000 }).catch(() => {});
         const afterAnim = await page.evaluate(() => window.__starwish.attackState());
+        const tr = afterAnim.trace;
         const afterOne = (await page.evaluate(() => window.__starwish.monsters())).find((x) => x.id === target);
         check("草原：待機時呼吸、未攻擊時為待機姿勢", idle0.phase === "idle" && idle0.attacking === false, idle0);
         check(
           "草原：按下攻擊播放蓄力→揮擊→收招，右手明顯揮出、身體前傾",
-          a1.ok === true && phases.includes("strike") && (phases.includes("windup") || phases.includes("recover")) && maxBack > 0.8 && maxFwd < -1.2 && maxLean > 0.15,
-          { a1, phases, maxBack, maxFwd, maxLean, n: samples.length },
+          a1.ok === true && tr.phases.join(">") === "windup>strike>recover" && tr.maxBack > 0.8 && tr.maxFwd < -1.2 && tr.maxLean > 0.15,
+          { a1, tr },
         );
         check(
           "草原：傷害在揮中時結算（按下瞬間不扣血）、冷卻內不重複攻擊",
-          a2.ok === false && a2.reason === "cooldown" && atPress.hp === atPress.maxHp && afterOne.hp === afterOne.maxHp - 20 && afterAnim.lastHit?.ok === true && afterAnim.lastHit.targetId === target && afterAnim.started === idle0.started + 1,
-          { a2, atPress: atPress.hp, afterOne: afterOne.hp, lastHit: afterAnim.lastHit, started: afterAnim.started },
+          a2.ok === false && a2.reason === "cooldown" && press.hp === afterOne.maxHp && (tr.hitPhase === "strike" || tr.hitPhase === "recover") && afterOne.hp === afterOne.maxHp - 20 && afterAnim.lastHit?.ok === true && afterAnim.lastHit.targetId === target && afterAnim.started === idle0.started + 1,
+          { a2, atPress: press.hp, afterOne: afterOne.hp, hitPhase: tr.hitPhase, lastHit: afterAnim.lastHit, started: afterAnim.started },
         );
         check("草原：攻擊時轉向目標", strikeFacing.length === 0 || Math.min(...strikeFacing) < 0.35, { strikeFacing });
         check("草原：攻擊結束後回到待機姿勢", afterAnim.attacking === false && afterAnim.phase === "idle" && Math.abs(afterAnim.armRX) < 0.01, afterAnim);
