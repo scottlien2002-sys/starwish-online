@@ -63,7 +63,18 @@ for (let i = 0; i < 6; i++) {
 const req = (a) => page.evaluate((x) => window.__starwishLab.request(x), a);
 const shots = [];
 const shot = async (name, caption) => {
-  const state = mode === "game" ? "game" : await page.evaluate(() => window.__starwishLab.state());
+  // 等 GPU 把排隊中的繪圖做完，再推進 1 幀讓瀏覽器呈現最新畫面
+  // （一次推進大量影格時，開啟後製管線的 WebKit 可能還在顯示較早的畫面）
+  await page.waitForTimeout(800);
+  await page.evaluate(() => window.__stepFrames(1));
+  await page.waitForTimeout(400);
+  const state =
+    mode === "game"
+      ? await page.evaluate(() => {
+          const p = window.__starwish.getPlayer();
+          return `player z=${p.z.toFixed(2)} x=${p.x.toFixed(2)}`;
+        })
+      : await page.evaluate(() => window.__starwishLab.state());
   await page.screenshot({ path: `${outDir}/${name}.png` });
   shots.push({ name, caption, state });
 };
