@@ -1,0 +1,42 @@
+{
+  "columns": [
+    {
+      "label": "修改前",
+      "errors": [],
+      "perf": {
+        "fps": 59.99999999999877,
+        "drawCalls": 86,
+        "activeMeshes": 55,
+        "pixelRatio": 1.5,
+        "quality": "medium",
+        "postProcess": true,
+        "bloom": true,
+        "shadowFilter": "pcf",
+        "shadowMap": 1024
+      }
+    },
+    {
+      "label": "修改後（高畫質）",
+      "errors": [],
+      "perf": {
+        "fps": 59.99999999999877,
+        "drawCalls": 85,
+        "activeMeshes": 55,
+        "pixelRatio": 2,
+        "quality": "high",
+        "postProcess": true,
+        "bloom": true,
+        "shadowFilter": "contact",
+        "shadowMap": 2048
+      }
+    }
+  ],
+  "shots": [
+    "g01_spawn",
+    "g02_walk",
+    "g03_turn",
+    "g04_bobo",
+    "g05_bobo_hit",
+    "g06_player_down"
+  ]
+}
