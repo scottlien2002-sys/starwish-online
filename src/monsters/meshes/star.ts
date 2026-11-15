@@ -32,7 +32,6 @@ export function createPuffyStar(name: string, scene: Scene, outer = 0.5, inner =
   vd.positions = positions;
   vd.indices = indices;
   vd.normals = normals;
-  if (gradient) vd.colors = colors;
   const mesh = new Mesh(name, scene);
   vd.applyToMesh(mesh);
   return mesh;
