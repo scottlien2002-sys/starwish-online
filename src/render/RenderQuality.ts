@@ -128,12 +128,14 @@ export function createShadows(light: DirectionalLight, q: QualitySettings): Shad
 
 /** 天空顏色（依「星露啵啵」設定圖：晴朗藍天 → 淡藍地平線 → 微粉霞光） */
 export const SKY_COLORS = Object.freeze({
-  zenith: "#7cc4ff",
-  upper: "#a9dbff",
-  horizon: "#e2f1ff",
-  below: "#fbe9f3",
+  zenith: "#5aaeff",
+  upper: "#86cbff",
+  /** 地平線上方（平視鏡頭最常看到的區域）：維持清楚的天空藍，避免色調映射後偏灰 */
+  nearHorizon: "#a6dbff",
+  horizon: "#cbe8ff",
+  below: "#f6e6f4",
   /** 與地平線一致，用於霧與清除色 */
-  fog: new Color3(0.87, 0.93, 1),
+  fog: new Color3(0.8, 0.9, 1),
 });
 
 /** 3D 漸層天空球（取代原本的 CSS 背景，後製管線需要不透明畫面） */
@@ -142,9 +144,10 @@ export function createSkyDome(scene: Scene): Mesh {
   const ctx = tex.getContext() as unknown as CanvasRenderingContext2D;
   const g = ctx.createLinearGradient(0, 0, 0, 256);
   g.addColorStop(0, SKY_COLORS.zenith);
-  g.addColorStop(0.32, SKY_COLORS.upper);
+  g.addColorStop(0.3, SKY_COLORS.upper);
+  g.addColorStop(0.45, SKY_COLORS.nearHorizon);
   g.addColorStop(0.5, SKY_COLORS.horizon);
-  g.addColorStop(0.62, SKY_COLORS.below);
+  g.addColorStop(0.58, SKY_COLORS.below);
   g.addColorStop(1, SKY_COLORS.below);
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, 4, 256);
