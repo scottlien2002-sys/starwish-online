@@ -109,7 +109,7 @@ for (const name of browsers) {
             },
             target,
             // 遊戲時間約 13 秒（死亡 1.5 + 等待 10 + 重生 1.6）；軟體繪圖下遊戲時間比真實時間慢，留足餘裕
-            { timeout: 45000, polling: 250 },
+            { timeout: 120000, polling: 250 },
           )
           .then(() => true)
           .catch(() => false);
