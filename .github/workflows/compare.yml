@@ -1,20 +1,20 @@
-name: Bobo before/after screenshots
+name: Before/after screenshots
 
-# 建置「比較基準版本」與目前 main，在相同動畫時間點截圖並排，結果推到 compare 分支。
+# 建置「比較基準版本」與目前分支，在相同鏡頭、相同動畫時間點截圖並排，結果推到 compare 分支。
 # 不影響遊戲網站（gh-pages）。
+#   修改前 vs 修改後（高畫質）：W1 草原 3 張、星露啵啵 11 張
+#   修改後 高 / 中 / 低 畫質對照：同上
 on:
   workflow_dispatch:
     inputs:
       baseline:
-        description: "比較基準 commit（預設 星露啵啵 V1.2）"
+        description: "比較基準 commit（預設：渲染升級前的正式版 03098d2）"
         required: false
-        default: "c9cb58888b5bd7e654ef199e1d38fb78d3eb1c05"
+        default: "03098d2174276f3a390cb177fa0d19ec54bc5187"
   push:
     branches: [main, "feature/**"]
     paths:
-      - "src/monsters/**"
-      - "src/main.ts"
-      - "src/lab/**"
+      - "src/**"
       - "tests/e2e/snap-lab.mjs"
       - "tests/e2e/compose-compare.mjs"
       - ".github/workflows/compare.yml"
@@ -27,12 +27,12 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  BASELINE: ${{ github.event.inputs.baseline || 'c9cb58888b5bd7e654ef199e1d38fb78d3eb1c05' }}
+  BASELINE: ${{ github.event.inputs.baseline || '03098d2174276f3a390cb177fa0d19ec54bc5187' }}
 
 jobs:
   compare:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
         with:
@@ -53,16 +53,25 @@ jobs:
         working-directory: base
         run: npm install --no-audit --no-fund && npm run build
 
-      - name: Install WebKit
+      - name: Install browsers
         working-directory: cur
         run: npx playwright install --with-deps webkit chromium
 
       - name: Snapshots
         run: |
-          node cur/tests/e2e/snap-lab.mjs base/dist out/before webkit
-          node cur/tests/e2e/snap-lab.mjs cur/dist out/after webkit
-          node cur/tests/e2e/compose-compare.mjs out/before out/after out/compare "V1.2 重構前" "通用怪物框架（重構後）"
-          echo "{\"baseline\":\"${BASELINE}\",\"current\":\"${GITHUB_SHA}\"}" > out/meta.json
+          S=cur/tests/e2e/snap-lab.mjs
+          node $S base/dist out/game_before webkit game
+          node $S base/dist out/lab_before webkit lab
+          for q in high medium low; do
+            node $S cur/dist out/game_$q webkit game $q
+            node $S cur/dist out/lab_$q webkit lab $q
+          done
+          C=cur/tests/e2e/compose-compare.mjs
+          node $C out/compare_game "修改前=out/game_before" "修改後（高畫質）=out/game_high"
+          node $C out/compare_lab "修改前=out/lab_before" "修改後（高畫質）=out/lab_high"
+          node $C out/quality_game "高=out/game_high" "中=out/game_medium" "低=out/game_low"
+          node $C out/quality_lab "高=out/lab_high" "中=out/lab_medium" "低=out/lab_low"
+          echo "{\"baseline\":\"${BASELINE}\",\"current\":\"${GITHUB_SHA}\",\"branch\":\"${GITHUB_REF_NAME}\"}" > out/meta.json
 
       - name: Push compare branch
         run: |

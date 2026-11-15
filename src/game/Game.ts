@@ -1,11 +1,9 @@
 import {
   Color3,
-  Color4,
   DirectionalLight,
   Engine,
   HemisphericLight,
   Scene,
-  ShadowGenerator,
   Vector3,
 } from "@babylonjs/core";
 import { TUNING } from "../config/tuning.ts";
@@ -21,6 +19,9 @@ import { resolvePropCollisions } from "../world/scatter.ts";
 import { PlayerAvatar } from "../actors/PlayerAvatar.ts";
 import { moveStep, turnTowards } from "../actors/movement.ts";
 import { ThirdPersonCamera } from "../camera/ThirdPersonCamera.ts";
+import { SKY_COLORS, createEngine, createShadows, createSkyDome, pickQuality, setupRendering, type RenderSetup } from "../render/RenderQuality.ts";
+import { PerfOverlay, type PerfStats } from "../render/PerfOverlay.ts";
+import type { QualitySettings } from "../render/quality.ts";
 
 export interface DebugApi {
   ready: boolean;
@@ -32,6 +33,8 @@ export interface DebugApi {
   /** 讀取一幀畫面像素做統計，確認 3D 真的有畫出來 */
   pixelStats(): Promise<{ samples: number; distinctColors: number; opaqueRatio: number }>;
   renderer(): { webgl: number; hardwareScaling: number; width: number; height: number };
+  /** 畫質與效能資訊（實際瀏覽器量測） */
+  perf(): PerfStats & { postProcess: boolean; bloom: boolean; shadowFilter: string; shadowMap: number };
 }
 
 declare global {
@@ -54,6 +57,9 @@ export class Game {
   private readonly player: PlayerAvatar;
   private readonly camera: ThirdPersonCamera;
   private readonly sun: DirectionalLight;
+  private readonly quality: QualitySettings;
+  private readonly render: RenderSetup;
+  private readonly perfOverlay: PerfOverlay;
   private readonly position = new Vector3(0, 0, 0);
   private yaw = 0;
   private fpsTimer = 0;
@@ -61,24 +67,19 @@ export class Game {
   private welcomed = false;
 
   constructor(canvas: HTMLCanvasElement, hudRoot: HTMLElement) {
-    this.engine = new Engine(
-      canvas,
-      true,
-      { preserveDrawingBuffer: false, stencil: false, powerPreference: "high-performance", premultipliedAlpha: false },
-      false,
-    );
-    const dpr = Math.min(window.devicePixelRatio || 1, TUNING.render.maxDevicePixelRatio);
-    this.engine.setHardwareScalingLevel(1 / dpr);
+    // 畫質（高/中/低）決定抗鋸齒方式、後製、陰影、解析度上限
+    this.quality = pickQuality();
+    this.engine = createEngine(canvas, this.quality);
 
     const scene = new Scene(this.engine);
     this.scene = scene;
-    // 透明背景，天空漸層由 CSS 繪製（省效能）
-    scene.clearColor = new Color4(0, 0, 0, 0);
+    // 渲染升級：3D 漸層天空（後製管線需要不透明畫面，取代原本的 CSS 背景）
+    createSkyDome(scene);
     scene.ambientColor = new Color3(0.35, 0.33, 0.4);
     scene.fogMode = Scene.FOGMODE_LINEAR;
     scene.fogStart = 45;
     scene.fogEnd = 120;
-    scene.fogColor = new Color3(0.86, 0.92, 1);
+    scene.fogColor = SKY_COLORS.fog.clone();
     scene.skipPointerMovePicking = true;
 
     const hemi = new HemisphericLight("skyLight", new Vector3(0.2, 1, 0.1), scene);
@@ -97,11 +98,9 @@ export class Game {
     this.sun.shadowMinZ = 1;
     this.sun.shadowMaxZ = 90;
 
-    const shadows = new ShadowGenerator(TUNING.render.shadowMapSize, this.sun);
-    shadows.usePercentageCloserFiltering = true;
-    shadows.filteringQuality = ShadowGenerator.QUALITY_LOW;
+    // 陰影依畫質：高 = 柔和接觸陰影，中/低 = PCF
+    const shadows = createShadows(this.sun, this.quality);
     shadows.darkness = 0.35;
-    shadows.bias = 0.002;
 
     this.world = buildMeadow(scene, shadows);
     this.player = new PlayerAvatar(scene, shadows);
@@ -109,6 +108,8 @@ export class Game {
     this.player.root.position.copyFrom(this.position);
     this.camera = new ThirdPersonCamera(scene, this.position);
     scene.activeCamera = this.camera.camera;
+    // 色調映射、曝光、後製抗鋸齒、選擇性 Bloom
+    this.render = setupRendering(scene, this.camera.camera, this.quality);
 
     this.hud = new Hud(hudRoot);
     this.hud.setLevel(1);
@@ -127,6 +128,8 @@ export class Game {
       TUNING.camera.pinchSensitivity,
     );
     this.keyboard = new KeyboardInput(this.input, () => this.joystick.active);
+    // 效能資訊面板＋畫質切換＋動態解析度
+    this.perfOverlay = new PerfOverlay(this.engine, scene, this.quality, hudRoot);
 
     this.installPlatformGuards();
     this.installDebugApi();
@@ -178,6 +181,7 @@ export class Game {
 
     this.world.update(dt);
     this.scene.render();
+    this.perfOverlay.update(dt);
 
     this.fpsTimer += dt;
     if (this.fpsTimer >= 0.5) {
@@ -243,6 +247,13 @@ export class Game {
               .catch(reject);
           });
         }),
+      perf: () => ({
+        ...this.perfOverlay.stats(),
+        postProcess: this.render.pipeline !== null,
+        bloom: this.render.glow !== null,
+        shadowFilter: this.quality.shadows.filter,
+        shadowMap: this.quality.shadows.mapSize,
+      }),
       renderer: () => ({
         webgl: this.engine.webGLVersion,
         hardwareScaling: this.engine.getHardwareScalingLevel(),

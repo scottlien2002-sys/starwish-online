@@ -1,23 +1,20 @@
 import {
   ArcRotateCamera,
   Color3,
-  Color4,
   DirectionalLight,
-  Engine,
-  GlowLayer,
   HemisphericLight,
   MeshBuilder,
   Scene,
-  ShadowGenerator,
   StandardMaterial,
   Vector3,
 } from "@babylonjs/core";
-import { TUNING } from "../config/tuning.ts";
 import type { MonsterAction, MonsterPose, MonsterState } from "../monsters/anim/types.ts";
 import { MonsterFactory, createMonsterRegistry } from "../monsters/framework/index.ts";
 import { registerBabylonVisuals } from "../monsters/babylon/registerVisuals.ts";
 import { MONSTER_CANON_EN, type MonsterId } from "../core/canon.ts";
 import { checkHud, type Insets } from "../ui/layout-check.ts";
+import { createEngine, createShadows, createSkyDome, pickQuality, setupRendering } from "../render/RenderQuality.ts";
+import { PerfOverlay, type PerfStats } from "../render/PerfOverlay.ts";
 
 const ACTIONS: { action: MonsterAction; label: string }[] = [
   { action: "idle", label: "待機" },
@@ -74,6 +71,7 @@ export interface LabDebugApi {
   hudIssues(insets?: Insets): string[];
   fps(): number;
   setAutoDemo(on: boolean): void;
+  perf(): PerfStats;
 }
 
 declare global {
@@ -87,10 +85,11 @@ declare global {
  * 通用怪物框架 V1.0 起，怪物由 MonsterFactory 建立（關閉 AI，以按鈕手動控制）。
  */
 export async function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLElement, monsterId = "star_dew_bobo"): Promise<void> {
-  const engine = new Engine(canvas, true, { stencil: true, premultipliedAlpha: false }, false);
-  engine.setHardwareScalingLevel(1 / Math.min(window.devicePixelRatio || 1, TUNING.render.maxDevicePixelRatio));
+  // 渲染升級：依畫質建立引擎（抗鋸齒方式）、3D 天空
+  const quality = pickQuality();
+  const engine = createEngine(canvas, quality);
   const scene = new Scene(engine);
-  scene.clearColor = new Color4(0, 0, 0, 0);
+  createSkyDome(scene);
   scene.skipPointerMovePicking = true;
   scene.autoClearDepthAndStencil = true;
 
@@ -100,14 +99,9 @@ export async function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLEle
   const sun = new DirectionalLight("sun", new Vector3(-0.4, -1, -0.5).normalize(), scene);
   sun.position = new Vector3(4, 10, 5);
   sun.intensity = 0.6;
-  // V1.2 效能：陰影貼圖 1024 → 512（只有一隻怪物，畫質差異不明顯）
-  const shadows = new ShadowGenerator(512, sun);
-  shadows.usePercentageCloserFiltering = true;
+  // 陰影依畫質（高 = 柔和接觸陰影）；測試頁只有一隻怪物，陰影貼圖上限 1024
+  const shadows = createShadows(sun, { ...quality, shadows: { ...quality.shadows, mapSize: Math.min(1024, quality.shadows.mapSize) } });
   shadows.darkness = 0.4;
-
-  // V1.2 效能：光暈運算解析度 0.5 → 0.3、模糊半徑 24 → 16
-  const glow = new GlowLayer("glow", scene, { mainTextureRatio: 0.3, blurKernelSize: 16 });
-  glow.intensity = 0.75;
 
   // 小草地
   const grassMat = new StandardMaterial("PH_labGrass", scene);
@@ -118,6 +112,10 @@ export async function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLEle
   ground.material = grassMat;
   ground.receiveShadows = true;
 
+  const camera = new ArcRotateCamera("labCam", Math.PI / 2, 1.2, 3.4, new Vector3(0, 0.45, 0), scene);
+  // 色調映射、曝光、後製抗鋸齒、選擇性 Bloom（星星與光環）；低畫質沒有 Bloom
+  const render = setupRendering(scene, camera, quality);
+  const glow = render.glow ?? undefined;
   const registry = registerBabylonVisuals(createMonsterRegistry(), { scene, shadows, glow });
   const def = registry.definition(monsterId);
   const ctrl = new MonsterFactory(registry).create(monsterId, { x: 0, y: 0, z: 0 }, { ai: false, instanceId: "lab" });
@@ -127,7 +125,6 @@ export async function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLEle
   const STATE_LABEL = monsterId === "star_dew_bobo" ? BOBO_LABEL : GENERIC_LABEL;
   const enName = MONSTER_CANON_EN[monsterId as MonsterId] ?? (def.testOnly ? "程式測試用" : "");
 
-  const camera = new ArcRotateCamera("labCam", Math.PI / 2, 1.2, 3.4, new Vector3(0, 0.45, 0), scene);
   camera.attachControl(canvas, true);
   camera.lowerRadiusLimit = 1.6;
   camera.upperRadiusLimit = 7;
@@ -198,13 +195,8 @@ export async function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLEle
   let uiTimer = 0;
   const MOVE_RANGE = 1.1;
   const SPEED = 0.9;
-  // V1.2 效能：自動調整解析度（連續 2 秒低於 40 FPS 就降一級，最低為 1 倍像素）
-  const scaleSteps = [Math.min(window.devicePixelRatio || 1, TUNING.render.maxDevicePixelRatio), 1.5, 1.25, 1].filter(
-    (v, i, arr) => i === 0 || v < arr[0]!,
-  );
-  let scaleIndex = 0;
-  let lowFpsTime = 0;
-  let qualityCooldown = 3;
+  // 效能資訊＋畫質切換＋動態解析度（沿用 V1.2 機制：連續 2 秒低於 40 FPS 降一級）
+  const perf = new PerfOverlay(engine, scene, quality, uiRoot);
 
   engine.runRenderLoop(() => {
     const dt = Math.min(engine.getDeltaTime() / 1000, 0.1);
@@ -258,16 +250,7 @@ export async function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLEle
 
     scene.render();
 
-    // 自動解析度
-    qualityCooldown -= dt;
-    if (engine.getFps() < 40) lowFpsTime += dt;
-    else lowFpsTime = 0;
-    if (lowFpsTime > 2 && qualityCooldown <= 0 && scaleIndex < scaleSteps.length - 1) {
-      scaleIndex++;
-      engine.setHardwareScalingLevel(1 / scaleSteps[scaleIndex]!);
-      lowFpsTime = 0;
-      qualityCooldown = 3;
-    }
+    perf.update(dt);
 
     if (messageTimer > 0) {
       messageTimer -= dt;
@@ -283,7 +266,7 @@ export async function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLEle
         b.classList.toggle("disabled", !ok);
         b.classList.toggle("active", (a === "idle" || a === "move") ? animator.sm.locomotion === a && (frame.state === "idle" || frame.state === "move") : frame.state === a);
       }
-      fpsEl.textContent = `${Math.round(engine.getFps())} FPS · ${scaleSteps[scaleIndex]}x`;
+      fpsEl.textContent = `${Math.round(engine.getFps())} FPS · ${perf.pixelRatio}x`;
     }
   });
 
@@ -304,6 +287,7 @@ export async function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLEle
     history: () => [...history],
     hudIssues: (insets) => checkHud(document, insets),
     fps: () => engine.getFps(),
+    perf: () => perf.stats(),
     setAutoDemo: (on) => {
       autoDemo = on;
       demoBtn.classList.toggle("on", on);

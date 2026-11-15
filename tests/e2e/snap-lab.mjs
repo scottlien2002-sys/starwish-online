@@ -1,11 +1,14 @@
 // 星露啵啵動作截圖（用於版本前後比較）
 // 以「固定 1/60 秒逐幀推進」控制動畫時間（替換 requestAnimationFrame 與 performance.now），
 // 前後兩個版本會在完全相同的動畫時間點截圖，不受 CI 軟體繪圖速度影響。
-// 用法：node tests/e2e/snap-lab.mjs <distDir> <outDir> [webkit|chromium]
+// 用法：node tests/e2e/snap-lab.mjs <distDir> <outDir> [webkit|chromium] [lab|game] [quality]
+//   lab  = 星露啵啵測試頁（11 張動作）
+//   game = W1 新手草原（同一鏡頭 3 張）
+//   quality = high / medium / low（舊版本會忽略此參數）
 import { mkdirSync, writeFileSync } from "node:fs";
 import { loadPlaywright, serve } from "./static-server.mjs";
 
-const [distDir, outDir, browserName = "webkit"] = process.argv.slice(2);
+const [distDir, outDir, browserName = "webkit", mode = "lab", quality = ""] = process.argv.slice(2);
 if (!distDir || !outDir) throw new Error("usage: snap-lab.mjs <distDir> <outDir> [browser]");
 mkdirSync(outDir, { recursive: true });
 
@@ -38,12 +41,15 @@ await page.addInitScript(() => {
     }
   };
 });
-await page.goto(server.url + "/?lab=bobo", { waitUntil: "load" });
+const q = quality ? `quality=${quality}` : "";
+const url = mode === "game" ? `/?${q}` : `/?lab=bobo${q ? "&" + q : ""}`;
+await page.goto(server.url + url, { waitUntil: "load" });
 
+const readyExpr = mode === "game" ? "window.__starwish?.ready === true" : "window.__starwishLab?.ready === true";
 let ready = false;
 for (let i = 0; i < 100 && !ready; i++) {
   await page.waitForTimeout(100);
-  ready = await page.evaluate(() => window.__starwishLab?.ready === true);
+  ready = await page.evaluate(readyExpr);
 }
 if (!ready) throw new Error("lab not ready: " + errors.join("; "));
 
@@ -57,10 +63,30 @@ for (let i = 0; i < 6; i++) {
 const req = (a) => page.evaluate((x) => window.__starwishLab.request(x), a);
 const shots = [];
 const shot = async (name, caption) => {
-  const state = await page.evaluate(() => window.__starwishLab.state());
+  const state = mode === "game" ? "game" : await page.evaluate(() => window.__starwishLab.state());
   await page.screenshot({ path: `${outDir}/${name}.png` });
   shots.push({ name, caption, state });
 };
+
+if (mode === "game") {
+  // W1 新手草原：固定鏡頭（出生點）→ 往前走 → 斜向走，三個相同鏡頭
+  await run(1500);
+  await shot("g01_spawn", "草原：出生點");
+  await page.evaluate(() => window.__starwish.setMove({ x: 0, y: 1 }));
+  await run(1500);
+  await shot("g02_walk", "草原：前進 1.5 秒");
+  await page.evaluate(() => window.__starwish.setMove({ x: 0.8, y: 0.6 }));
+  await run(1500);
+  await page.evaluate(() => window.__starwish.setMove(null));
+  await run(300);
+  await shot("g03_turn", "草原：斜向移動後");
+  const perf = await page.evaluate(() => (window.__starwish.perf ? window.__starwish.perf() : null));
+  writeFileSync(`${outDir}/shots.json`, JSON.stringify({ shots, errors, perf }, null, 2));
+  console.log(`${shots.length} shots → ${outDir}` + (errors.length ? `\nerrors: ${errors.join("; ")}` : ""));
+  await browser.close();
+  await server.close();
+  process.exit(0);
+}
 
 await run(1500);
 await shot("01_idle", "待機");
@@ -101,7 +127,8 @@ await shot("10_respawn", "重生（凝聚中）");
 await run(1500);
 await shot("11_after_respawn", "重生完成");
 
-writeFileSync(`${outDir}/shots.json`, JSON.stringify({ shots, errors }, null, 2));
+const perf = await page.evaluate(() => (window.__starwishLab.perf ? window.__starwishLab.perf() : null));
+writeFileSync(`${outDir}/shots.json`, JSON.stringify({ shots, errors, perf }, null, 2));
 console.log(`${shots.length} shots → ${outDir}` + (errors.length ? `\nerrors: ${errors.join("; ")}` : ""));
 await browser.close();
 await server.close();
