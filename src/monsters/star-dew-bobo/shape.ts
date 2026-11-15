@@ -4,7 +4,8 @@
  * 身高 1 單位（模型座標），實際大小由外部縮放。
  */
 export const BODY_HEIGHT = 1.04;
-export const BODY_MAX_RADIUS = 0.62;
+/** V2：依設定圖「略微扁平」，寬高比約 1.29（V1.2 為 1.19） */
+export const BODY_MAX_RADIUS = 0.67;
 
 const TIP_HEIGHT = 0.05;
 
@@ -88,4 +89,42 @@ export function featureCounterScale(scaleXZ: number, scaleY: number, strength = 
   const sxz = Math.max(0.05, scaleXZ);
   const sy = Math.max(0.05, scaleY);
   return { x: Math.pow(sxz, -strength), y: Math.pow(sy, -strength), z: Math.pow(sxz, -strength) };
+}
+
+// ============================== V2 造型數據 ==============================
+
+/**
+ * 觸角彎曲方向：-1 = 角色自己的左側 = 正面觀看時在畫面右側（依設定圖三視圖與主圖）。
+ * Babylon 座標：怪物面向 +z，角色自己的右側為 +x。
+ */
+export const ANTENNA_SIDE = -1;
+
+/** 觸角中心線（未套用方向，x 為往側邊彎的量）：從頭頂直立升起 → 往側邊拱起 → 末端下垂 */
+export const ANTENNA_POINTS: readonly (readonly [number, number, number])[] = Object.freeze([
+  [0, 0, 0],
+  [0, 0.12, 0],
+  [0.02, 0.26, -0.01],
+  [0.09, 0.38, 0],
+  [0.2, 0.445, 0.03],
+  [0.31, 0.43, 0.06],
+  [0.385, 0.36, 0.08],
+  [0.415, 0.28, 0.09],
+]);
+
+/** 頭頂星星懸掛位置（觸角末端下方） */
+export const HEAD_STAR_POS = Object.freeze([0.425, 0.205, 0.1] as const);
+
+/** 觸角粗細：根部粗（與身體融合）→ 快速收細 → 末端細 */
+export function antennaRadius(t: number): number {
+  const k = Math.max(0, Math.min(1, t));
+  return 0.024 + 0.052 * Math.pow(1 - k, 3);
+}
+
+/**
+ * 圓潤五角星輪廓：角度 a（弧度）→ 半徑。尖端 = outer、凹處 = inner，兩者之間平滑過渡（沒有銳角）。
+ * a = PI/2 時為朝上的尖端。
+ */
+export function softStarRadius(a: number, outer: number, inner: number, points = 5, sharpness = 0.8): number {
+  const t = 0.5 + 0.5 * Math.cos(points * (a - Math.PI / 2));
+  return inner + (outer - inner) * Math.pow(t, sharpness);
 }

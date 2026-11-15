@@ -2,7 +2,7 @@
 // 用法：node tests/harness/bobo-blueprint.mjs → test-results/bobo-blueprint.png
 import { mkdirSync, writeFileSync } from "node:fs";
 import { loadPlaywright } from "../e2e/static-server.mjs";
-import { BODY_HEIGHT, FACE_LAYOUT as L, profileR, profileY, surfacePoint } from "../../src/monsters/star-dew-bobo/shape.ts";
+import { ANTENNA_POINTS, ANTENNA_SIDE, BODY_HEIGHT, FACE_LAYOUT as L, HEAD_STAR_POS, profileR, profileY, surfacePoint } from "../../src/monsters/star-dew-bobo/shape.ts";
 
 const S = 230; // 每單位像素
 const W = 1000;
@@ -16,8 +16,9 @@ const outline = (cx, axis) => {
   return `<path d="M${pts.map((p) => p.join(",")).join(" L")} Z" fill="url(#g)" stroke="#5b7fe0" stroke-width="3"/>` + axis;
 };
 
-// 觸角路徑（與模型相同的控制點，未做樣條平滑）
-const antenna = [[0, 0, 0], [0, 0.17, -0.04], [0.08, 0.35, 0], [0.22, 0.43, 0.07], [0.36, 0.39, 0.13], [0.42, 0.29, 0.16]];
+// 觸角路徑（與模型相同的控制點，未做樣條平滑）。
+// 正面藍圖以「觀看者畫面」繪製：世界 x 在正面看時左右相反，故畫面 x = -世界 x。
+const antenna = ANTENNA_POINTS.map(([x, y, z]) => [-(x * ANTENNA_SIDE), y, z]);
 const topY = profileY(1) - 0.04;
 
 const star = (x, y, r, fill = "#ffd84a") => {
@@ -34,7 +35,7 @@ const star = (x, y, r, fill = "#ffd84a") => {
 const FX = 260;
 let front = outline(FX, "");
 front += `<polyline points="${antenna.map(([x, y]) => `${FX + x * S},${base - (topY + y) * S}`).join(" ")}" fill="none" stroke="#7fa6f5" stroke-width="12" stroke-linecap="round"/>`;
-front += star(FX + 0.44 * S, base - (topY + 0.24) * S, 0.15 * S);
+front += star(FX - HEAD_STAR_POS[0] * ANTENNA_SIDE * S, base - (topY + HEAD_STAR_POS[1]) * S, 0.15 * S);
 for (const side of [-1, 1]) {
   const e = surfacePoint(L.eye.y, side * L.eye.theta);
   front += `<ellipse cx="${FX + e.x * S}" cy="${base - e.y * S}" rx="${0.095 * S}" ry="${0.12 * S}" fill="#101a52"/>`;
@@ -54,7 +55,7 @@ front += star(FX + c.x * S, base - c.y * S, 0.11 * S);
 const SX = 720;
 let side = outline(SX, "");
 side += `<polyline points="${antenna.map(([, y, z]) => `${SX + z * S},${base - (topY + y) * S}`).join(" ")}" fill="none" stroke="#7fa6f5" stroke-width="12" stroke-linecap="round"/>`;
-side += star(SX + 0.17 * S, base - (topY + 0.24) * S, 0.15 * S);
+side += star(SX + HEAD_STAR_POS[2] * S, base - (topY + HEAD_STAR_POS[1]) * S, 0.15 * S);
 const se = surfacePoint(L.eye.y, L.eye.theta);
 side += `<ellipse cx="${SX + se.z * S}" cy="${base - se.y * S}" rx="${0.04 * S}" ry="${0.12 * S}" fill="#101a52"/>`;
 

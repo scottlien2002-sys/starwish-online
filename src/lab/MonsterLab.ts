@@ -140,7 +140,7 @@ export async function startMonsterLab(canvas: HTMLCanvasElement, uiRoot: HTMLEle
   // 色調映射、曝光、後製抗鋸齒、選擇性 Bloom（星星與光環）；低畫質沒有 Bloom
   const render = setupRendering(scene, camera, quality);
   const glow = render.glow ?? undefined;
-  const registry = registerBabylonVisuals(createMonsterRegistry(), { scene, shadows, glow });
+  const registry = registerBabylonVisuals(createMonsterRegistry(), { scene, shadows, glow, quality: quality.level });
   const def = registry.definition(monsterId);
   const ctrl = new MonsterFactory(registry).create(monsterId, { x: 0, y: 0, z: 0 }, { ai: false, instanceId: "lab" });
   await ctrl.visual?.load();

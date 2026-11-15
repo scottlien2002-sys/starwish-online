@@ -16,8 +16,21 @@ import {
   VertexData,
 } from "@babylonjs/core";
 import type { MonsterEffect, MonsterFace, MonsterPose, MonsterView } from "../anim/types.ts";
-import { createPuffyStar } from "../meshes/star.ts";
-import { BODY_HEIGHT, FACE_LAYOUT, featureCounterScale, normalToRotation, profileR, profileY, surfacePoint } from "./shape.ts";
+import { createSoftStar } from "../meshes/star.ts";
+import {
+  ANTENNA_POINTS,
+  ANTENNA_SIDE,
+  BODY_HEIGHT,
+  FACE_LAYOUT,
+  HEAD_STAR_POS,
+  antennaRadius,
+  featureCounterScale,
+  normalToRotation,
+  profileR,
+  profileY,
+  softStarRadius,
+  surfacePoint,
+} from "./shape.ts";
 import { createBlobShadowTexture, createGalaxyTexture, createSparkleTexture, createStarfieldTexture } from "./textures.ts";
 
 export interface BoboModelOptions {
@@ -26,7 +39,11 @@ export interface BoboModelOptions {
   shadows?: ShadowGenerator;
   glow?: GlowLayer;
   seed?: number;
+  /** 畫質等級：決定身體細分數（高 40／中 32／低 24），預設 medium */
+  quality?: "high" | "medium" | "low";
 }
+
+const BODY_SEGMENTS = { high: 40, medium: 32, low: 24 } as const;
 
 // V1.2：外層更透明、受光更低（避免頂部過曝），內層改一般混色讓星空真正看得見
 const BODY_ALPHA = 0.42;
@@ -76,6 +93,7 @@ export class StarDewBoboModel implements MonsterView {
   constructor(scene: Scene, options: BoboModelOptions = {}) {
     this.scene = scene;
     this.height = options.height ?? 0.8;
+    const seg = BODY_SEGMENTS[options.quality ?? "medium"];
     const s = this.height / BODY_HEIGHT;
 
     this.root = new TransformNode("PH_bobo", scene);
@@ -148,14 +166,14 @@ export class StarDewBoboModel implements MonsterView {
     this.starMat.backFaceCulling = false;
 
     // ---------- 身體 ----------
-    const body = this.createBodyMesh("PH_boboBody", 1);
+    const body = this.createBodyMesh("PH_boboBody", 1, seg);
     body.material = this.bodyMat;
     body.alphaIndex = 2;
-    const core = this.createBodyMesh("PH_boboCore", 0.84, 20);
+    const core = this.createBodyMesh("PH_boboCore", 0.84, Math.round(seg * 0.75));
     core.position.y = 0.07;
     core.material = this.coreMat;
     core.alphaIndex = 0;
-    const shell = this.createBodyMesh("PH_boboStarShell", 0.62, 16);
+    const shell = this.createBodyMesh("PH_boboStarShell", 0.62, Math.round(seg * 0.6));
     shell.position.y = 0.17;
     shell.material = this.starShellMat;
     shell.alphaIndex = 1;
@@ -166,7 +184,7 @@ export class StarDewBoboModel implements MonsterView {
 
     // ---------- 胸前星星 ----------
     const chest = surfacePoint(FACE_LAYOUT.chestStar.y, FACE_LAYOUT.chestStar.theta);
-    const chestStar = createPuffyStar("PH_boboChestStar", scene, 0.11, 0.05, 0.035);
+    const chestStar = createSoftStar("PH_boboChestStar", scene, 0.11, 0.06, 0.035, softStarRadius);
     this.place(chestStar, chest, 0.01);
     chestStar.rotation.z = 0.25;
     chestStar.material = this.starMat;
@@ -181,34 +199,35 @@ export class StarDewBoboModel implements MonsterView {
     this.antenna = new TransformNode("PH_boboAntenna", scene);
     this.antenna.parent = this.squash;
     this.antenna.position.y = profileY(1) - 0.04;
+    // V2：依設定圖，觸角從頭頂往角色左側（正面看畫面右側）柔軟彎下，根部粗、尖端細
     const path = Curve3.CreateCatmullRomSpline(
-      [
-        new Vector3(0, 0, 0),
-        new Vector3(0, 0.17, -0.04),
-        new Vector3(0.08, 0.35, 0),
-        new Vector3(0.22, 0.43, 0.07),
-        new Vector3(0.36, 0.39, 0.13),
-        new Vector3(0.42, 0.29, 0.16),
-      ],
-      6,
+      ANTENNA_POINTS.map(([x, y, z]) => new Vector3(x * ANTENNA_SIDE, y, z)),
+      10,
     ).getPoints();
     const stalk = MeshBuilder.CreateTube(
       "PH_boboStalk",
       {
         path,
-        tessellation: 10,
+        tessellation: 16,
         cap: Mesh.CAP_ALL,
-        radiusFunction: (i: number) => 0.05 - (0.026 * i) / Math.max(1, path.length - 1),
+        radiusFunction: (i: number) => antennaRadius(i / Math.max(1, path.length - 1)),
       },
       scene,
     );
     stalk.parent = this.antenna;
     stalk.material = this.bodyMat;
     stalk.alphaIndex = 2;
-    const headStar = createPuffyStar("PH_boboHeadStar", scene, 0.15, 0.07, 0.05);
+    // 根部小鼓包：讓觸角像從果凍身體長出來，而非插在頭上
+    const bulb = MeshBuilder.CreateSphere("PH_boboStalkRoot", { diameter: 1, segments: 12 }, scene);
+    bulb.parent = this.antenna;
+    bulb.scaling.set(0.16, 0.1, 0.16);
+    bulb.position.y = 0.0;
+    bulb.material = this.bodyMat;
+    bulb.alphaIndex = 2;
+    const headStar = createSoftStar("PH_boboHeadStar", scene, 0.15, 0.085, 0.05, softStarRadius);
     headStar.parent = this.antenna;
-    headStar.position.set(0.44, 0.24, 0.17);
-    headStar.rotation.set(0, 0.25, -0.35);
+    headStar.position.set(HEAD_STAR_POS[0] * ANTENNA_SIDE, HEAD_STAR_POS[1], HEAD_STAR_POS[2]);
+    headStar.rotation.set(0, -0.25 * ANTENNA_SIDE, 0.35 * ANTENNA_SIDE);
     headStar.material = this.starMat;
     this.stars.push(headStar);
 
@@ -309,7 +328,7 @@ export class StarDewBoboModel implements MonsterView {
 
     Color3.LerpToRef(BODY_EMISSIVE, FLASH, Math.max(0, Math.min(1, p.hitFlash)) * 0.8, this.bodyMat.emissiveColor);
 
-    this.antenna.rotation.z = -p.antennaSway * 0.5;
+    this.antenna.rotation.z = p.antennaSway * 0.5 * ANTENNA_SIDE;
     this.antenna.rotation.x = p.antennaSway * 0.3;
     this.wingL.rotation.z = 0.45 + p.wingFlap;
     this.wingR.rotation.z = -0.45 - p.wingFlap;
@@ -502,17 +521,24 @@ export class StarDewBoboModel implements MonsterView {
     pivot.parent = this.squash;
     pivot.position.set(sp.x * 0.96, sp.y, sp.z * 0.96);
     pivot.rotation.y = side * -0.25;
-    // V1.1：單片柔和的水滴鰭（根部圓、尖端收細並微微下垂），取代兩顆橢圓
-    const main = this.createFin(`PH_boboWing${side}`, side, 0.36, 0.2, 0.07);
-    main.parent = pivot;
-    main.material = this.wingMat;
-    main.alphaIndex = 2;
-    // 後方較小的第二層，做出半透明疊層感
-    const back = this.createFin(`PH_boboWingBack${side}`, side, 0.26, 0.15, 0.05);
-    back.parent = pivot;
-    back.position.set(side * 0.02, -0.03, -0.06);
-    back.material = this.wingMat;
-    back.alphaIndex = 2;
+    // V2：圓潤的三瓣半透明小翅膀（依設定圖：大、中、小三片圓鰭向後上方展開，合併為單一網格）
+    const lobes = [
+      { len: 0.34, wid: 0.2, th: 0.06, rx: 0, rz: 0.12, dy: 0.02, dz: 0 },
+      { len: 0.28, wid: 0.16, th: 0.05, rx: 0, rz: -0.28, dy: -0.04, dz: -0.04 },
+      { len: 0.2, wid: 0.12, th: 0.045, rx: 0, rz: -0.66, dy: -0.08, dz: -0.07 },
+    ];
+    const parts = lobes.map((l, i) => {
+      const f = this.createFin(`PH_boboWingLobe${side}_${i}`, side, l.len, l.wid, l.th);
+      f.rotation.z = side * l.rz;
+      f.position.set(0, l.dy, l.dz);
+      return f;
+    });
+    const merged = Mesh.MergeMeshes(parts, true, true);
+    if (!merged) throw new Error("bobo wing merge failed");
+    merged.name = `PH_boboWing${side}`;
+    merged.parent = pivot;
+    merged.material = this.wingMat;
+    merged.alphaIndex = 2;
     return pivot;
   }
 

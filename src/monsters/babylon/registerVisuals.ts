@@ -25,6 +25,8 @@ export interface BabylonVisualContext {
   scene: Scene;
   shadows?: ShadowGenerator;
   glow?: GlowLayer;
+  /** 畫質等級（影響程式化模型細分數） */
+  quality?: "high" | "medium" | "low";
 }
 
 /**
@@ -34,7 +36,7 @@ export interface BabylonVisualContext {
 export function registerBabylonVisuals(registry: MonsterRegistry, ctx: BabylonVisualContext): MonsterRegistry {
   return registry
     .addVisual("star_dew_bobo_procedural", (def) => {
-      const model = new StarDewBoboModel(ctx.scene, { height: def.height ?? 0.8, shadows: ctx.shadows, glow: ctx.glow });
+      const model = new StarDewBoboModel(ctx.scene, { height: def.height ?? 0.8, shadows: ctx.shadows, glow: ctx.glow, quality: ctx.quality });
       return new ProceduralVisual(model, (x, y, z, yaw) => {
         model.root.position.set(x, y, z);
         model.root.rotation.y = yaw;

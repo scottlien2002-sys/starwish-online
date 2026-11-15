@@ -64,3 +64,39 @@ test("五官反向補償：身體壓扁時五官形狀變形量大幅降低", ()
   const none = featureCounterScale(1, 1);
   assert.deepEqual(none, { x: 1, y: 1, z: 1 });
 });
+
+import { ANTENNA_POINTS, ANTENNA_SIDE, HEAD_STAR_POS, antennaRadius, softStarRadius } from "../../src/monsters/star-dew-bobo/shape.ts";
+
+test("V2 造型：身體略微扁平（寬高比 1.25~1.35）", () => {
+  let maxR = 0;
+  for (let t = 0; t <= 1; t += 0.005) maxR = Math.max(maxR, profileR(t));
+  const ratio = (2 * maxR) / BODY_HEIGHT;
+  assert.ok(ratio >= 1.25 && ratio <= 1.35, `寬高比 ${ratio.toFixed(2)}`);
+});
+
+test("V2 造型：觸角朝角色左側（正面看在畫面右側），末端星星在同一側", () => {
+  assert.equal(ANTENNA_SIDE, -1);
+  const end = ANTENNA_POINTS[ANTENNA_POINTS.length - 1]!;
+  assert.ok(end[0] * ANTENNA_SIDE < 0, "觸角末端在 -x（角色左側）");
+  assert.ok(HEAD_STAR_POS[0] * ANTENNA_SIDE < 0);
+  assert.ok(HEAD_STAR_POS[1] < end[1], "星星懸掛在末端下方");
+  assert.ok(antennaRadius(0) > antennaRadius(0.3) && antennaRadius(0.3) > antennaRadius(1), "根部粗、末端細");
+});
+
+test("V2 造型：圓潤五角星輪廓（尖端=外徑、凹處=內徑、朝上、五個尖端）", () => {
+  const o = 0.15;
+  const i = 0.075;
+  assert.ok(Math.abs(softStarRadius(Math.PI / 2, o, i) - o) < 1e-9, "朝上為尖端");
+  assert.ok(Math.abs(softStarRadius(Math.PI / 2 + Math.PI / 5, o, i) - i) < 1e-9, "凹處");
+  let peaks = 0;
+  const N = 720;
+  for (let k = 0; k < N; k++) {
+    const a = (k / N) * Math.PI * 2;
+    const r = softStarRadius(a, o, i);
+    assert.ok(r >= i - 1e-9 && r <= o + 1e-9);
+    const prev = softStarRadius(a - (Math.PI * 2) / N, o, i);
+    const next = softStarRadius(a + (Math.PI * 2) / N, o, i);
+    if (r > prev && r >= next) peaks++;
+  }
+  assert.equal(peaks, 5);
+});
