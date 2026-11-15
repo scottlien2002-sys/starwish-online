@@ -85,7 +85,7 @@ function displace(mesh: Mesh, amount: number, seed: number): void {
   mesh.updateVerticesData(VertexBuffer.NormalKind, normals);
 }
 
-function blob(name: string, scene: Scene, r: number, x: number, y: number, z: number, sy = 1, subdiv = 2): Mesh {
+function blob(name: string, scene: Scene, r: number, x: number, y: number, z: number, sy = 1, subdiv = 3): Mesh {
   const m = MeshBuilder.CreateIcoSphere(name, { radius: r, subdivisions: subdiv, flat: false, updatable: true }, scene);
   m.scaling.y = sy;
   m.position.set(x, y, z);
@@ -204,10 +204,10 @@ function rockPair(name: string, scene: Scene): Mesh {
 
 function bush(name: string, scene: Scene, berries: RGB | null): Mesh {
   const parts = [
-    blob(`${name}_0`, scene, 0.5, 0, 0.36, 0, 0.8, 1),
-    blob(`${name}_1`, scene, 0.38, 0.42, 0.3, 0.12, 0.85, 1),
-    blob(`${name}_2`, scene, 0.36, -0.38, 0.28, -0.1, 0.85, 1),
-    blob(`${name}_3`, scene, 0.3, 0.05, 0.55, 0.25, 0.85, 1),
+    blob(`${name}_0`, scene, 0.5, 0, 0.36, 0, 0.8, 2),
+    blob(`${name}_1`, scene, 0.38, 0.42, 0.3, 0.12, 0.85, 2),
+    blob(`${name}_2`, scene, 0.36, -0.38, 0.28, -0.1, 0.85, 2),
+    blob(`${name}_3`, scene, 0.3, 0.05, 0.55, 0.25, 0.85, 2),
   ];
   for (const [i, p] of parts.entries()) {
     displace(p, 0.08, i * 3.1 + 1.3);
@@ -308,17 +308,18 @@ export function createGrassTuft(name: string, scene: Scene): Mesh {
   const indices: number[] = [];
   const colors: number[] = [];
   const normals: number[] = [];
-  const blades = 6;
+  // 柔和、可愛的草叢：較寬較短、底色接近地面（融入地面），尖端明亮
+  const blades = 7;
   const segs = 3;
-  const base: RGB = [0.26, 0.52, 0.26];
-  const tip: RGB = [0.66, 0.88, 0.44];
+  const base: RGB = [0.42, 0.72, 0.32];
+  const tip: RGB = [0.8, 0.95, 0.52];
   for (let b = 0; b < blades; b++) {
     const a = (b / blades) * Math.PI * 2 + b * 0.7;
     const r0 = 0.05 + (b % 3) * 0.03;
     const ox = Math.cos(a) * r0, oz = Math.sin(a) * r0;
-    const h = 0.26 + ((b * 37) % 7) * 0.025;
-    const w = 0.035;
-    const bend = 0.12 + (b % 2) * 0.06;
+    const h = 0.2 + ((b * 37) % 7) * 0.018;
+    const w = 0.055;
+    const bend = 0.09 + (b % 2) * 0.05;
     const px = -Math.sin(a), pz = Math.cos(a); // 葉片寬度方向
     const start = positions.length / 3;
     for (let s = 0; s <= segs; s++) {
@@ -326,7 +327,8 @@ export function createGrassTuft(name: string, scene: Scene): Mesh {
       const cx = ox + Math.cos(a) * bend * t * t;
       const cz = oz + Math.sin(a) * bend * t * t;
       const y = h * t;
-      const ww = w * (1 - t * 0.85);
+      // 葉尖圓鈍（不收成細針）
+      const ww = w * (1 - t * t * 0.75);
       positions.push(cx - px * ww, y, cz - pz * ww, cx + px * ww, y, cz + pz * ww);
       const c = mix(base, tip, t);
       colors.push(c[0], c[1], c[2], 1, c[0], c[1], c[2], 1);
@@ -349,6 +351,13 @@ export function createGrassTuft(name: string, scene: Scene): Mesh {
 
 // ---------------------------------------------------------------- 模板總表
 
+/** 花朵模板放大（原始尺寸在手機畫面上幾乎看不見） */
+function enlarge(m: Mesh, k: number): Mesh {
+  m.scaling.setAll(k);
+  m.bakeCurrentTransformIntoVertices();
+  return m;
+}
+
 export function createPropTemplatesV2(scene: Scene): Record<PropKind, Mesh[]> {
   const roundA = roundTree("PH_treeRound", scene, LEAF_PALETTES.green!);
   const roundB = roundTree("PH_treeRoundSpring", scene, LEAF_PALETTES.spring!);
@@ -360,12 +369,12 @@ export function createPropTemplatesV2(scene: Scene): Record<PropKind, Mesh[]> {
     rock: [rock("PH_rockA", scene, 1.7, [1.2, 0.72, 1]), rock("PH_rockB", scene, 5.2, [0.9, 0.9, 0.85]), rockPair("PH_rockPair", scene)],
     bush: [bush("PH_bush", scene, null), bush("PH_bushBerry", scene, [0.95, 0.42, 0.5]), bush("PH_bushBloom", scene, [1, 0.98, 1])],
     flower: [
-      daisy("PH_flowerDaisyWhite", scene, [1, 0.99, 0.97], [1, 0.84, 0.3]),
-      daisy("PH_flowerDaisyPink", scene, [1, 0.66, 0.8], [1, 0.9, 0.5], 5),
-      bellCluster("PH_flowerBellBlue", scene, [0.62, 0.78, 1]),
-      bellCluster("PH_flowerBellLavender", scene, [0.8, 0.68, 1]),
-      tulip("PH_flowerTulipYellow", scene, [1, 0.86, 0.32]),
-      tulip("PH_flowerTulipCoral", scene, [1, 0.56, 0.52]),
+      enlarge(daisy("PH_flowerDaisyWhite", scene, [1, 0.99, 0.97], [1, 0.84, 0.3]), 1.45),
+      enlarge(daisy("PH_flowerDaisyPink", scene, [1, 0.66, 0.8], [1, 0.9, 0.5], 5), 1.45),
+      enlarge(bellCluster("PH_flowerBellBlue", scene, [0.62, 0.78, 1]), 1.45),
+      enlarge(bellCluster("PH_flowerBellLavender", scene, [0.8, 0.68, 1]), 1.45),
+      enlarge(tulip("PH_flowerTulipYellow", scene, [1, 0.86, 0.32]), 1.45),
+      enlarge(tulip("PH_flowerTulipCoral", scene, [1, 0.56, 0.52]), 1.45),
     ],
   };
 }
