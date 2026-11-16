@@ -224,13 +224,13 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
       <div class="lab-state">畫質：${quality.level}・${file}</div>
     </div>
     <div class="lab-fps" data-layout="lab-fps">-- FPS</div>
-    <div class="lab-views">
+    <div class="lab-views v3-views">
       ${(["front", "side", "back"] as const).map((v) => `<button class="lab-view-btn" data-view="${v}" data-layout="btn-view-${v}">${VIEW_LABEL[v]}</button>`).join("")}
       <button class="lab-view-btn" data-count="1" data-layout="btn-count-1">1 隻</button>
       <button class="lab-view-btn" data-count="3" data-layout="btn-count-3">3 隻</button>
-      <button class="lab-view-btn lab-bench" data-layout="btn-bench">效能測試</button>
     </div>
-    <div class="lab-bench-result" hidden></div>
+    <button class="v3-bench lab-bench" data-layout="btn-bench">⏱ 效能測試（10 秒）</button>
+    <div class="lab-bench-result v3-bench-result" hidden></div>
     <div class="lab-panel v3-expr">
       ${V3_EXPRESSIONS.map((e) => `<button class="lab-btn" data-expr="${e}" data-layout="btn-expr-${e}">${EXPRESSION_LABEL[e]}</button>`).join("")}
     </div>`;
@@ -264,8 +264,13 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
       benchEl.hidden = true;
       benchBtn.classList.add("on");
       bench = { rec: new FrameRecorder(seconds), resolve };
+      benchBtn.textContent = "⏱ 測試中…請勿操作";
     });
   benchBtn.addEventListener("click", () => void runBenchmark(10));
+  // 網址參數：?lab=bobo3&count=3&bench=1 → 載入 3 秒後自動測試（不必點按鈕）
+  const params = new URLSearchParams(location.search);
+  if (params.get("count") === "3") setCount(3);
+  if (params.get("bench") === "1") window.setTimeout(() => void runBenchmark(10), 3000);
 
   let uiTimer = 0;
   engine.runRenderLoop(() => {
@@ -291,11 +296,14 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
       const done = bench;
       bench = null;
       benchBtn.classList.remove("on");
+      benchBtn.textContent = "⏱ 效能測試（10 秒）";
       benchEl.hidden = false;
       const st = perf.stats();
+      const shown = instances.filter((i) => i.root.isEnabled()).length;
       benchEl.innerHTML =
-        `<b>V3 效能測試（本機實測）</b><br>${r.seconds} 秒・${instances.filter((i) => i.root.isEnabled()).length} 隻・畫質 ${st.quality}・${st.pixelRatio}x<br>` +
-        `平均 ${r.avgFps.toFixed(1)} FPS・最慢 1% ${r.low1Fps.toFixed(1)}・最低 ${r.minFps.toFixed(1)}<br>Draw Calls 平均 ${r.avgDrawCalls.toFixed(0)}（最高 ${r.maxDrawCalls}）<br><small>點此關閉</small>`;
+        `<b>V3 效能測試（本機 WebGL 實測）</b><br>${file}・${shown} 隻・畫質 ${st.quality}・${st.pixelRatio}x・${r.seconds} 秒<br>` +
+        `平均 ${r.avgFps.toFixed(1)} FPS・最慢 1% ${r.low1Fps.toFixed(1)} FPS・最低 ${r.minFps.toFixed(1)} FPS<br>` +
+        `Draw Calls 平均 ${r.avgDrawCalls.toFixed(0)}（最高 ${r.maxDrawCalls}）・畫面物件 ${st.activeMeshes}<br><small>點此關閉</small>`;
       benchEl.onclick = () => (benchEl.hidden = true);
       done.resolve(r);
     }

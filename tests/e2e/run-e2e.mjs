@@ -379,8 +379,7 @@ for (const name of browsers) {
   }
 
   // ---- 星露啵啵 V3 模型預覽（?lab=bobo3）：只檢查外觀頁可正常運作，不涉及戰鬥 ----
-  {
-    const vp = VIEWPORTS[0];
+  for (const vp of VIEWPORTS) {
     const run = { browser: name, viewport: `${vp.name} / ?lab=bobo3`, checks: {}, errors: [] };
     const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
     const page = await ctx.newPage();
@@ -409,10 +408,37 @@ for (const name of browsers) {
       const perf = await page.evaluate(() => window.__bobo3.perf());
       check("8 種表情、三視圖、3 隻同場可切換且無錯誤", run.errors.length === 0, perf);
       check("果凍材質著色器正常（中／高畫質）", perf.quality === "low" || perf.jelly === true, perf);
+      // 按鈕不得互相覆蓋（含右上角畫質按鈕），效能測試按鈕必須點得到
+      const overlaps = await page.evaluate(() => {
+        const els = [...document.querySelectorAll("#hud-root button, .lab-title, .lab-fps")].filter((e) => {
+          const r = e.getBoundingClientRect();
+          return r.width > 0 && r.height > 0 && getComputedStyle(e).visibility !== "hidden";
+        });
+        const out = [];
+        const name = (e) => e.dataset.layout || e.className || e.textContent;
+        for (let i = 0; i < els.length; i++)
+          for (let j = i + 1; j < els.length; j++) {
+            if (els[i].contains(els[j]) || els[j].contains(els[i])) continue;
+            const a = els[i].getBoundingClientRect(), b = els[j].getBoundingClientRect();
+            const ox = Math.min(a.right, b.right) - Math.max(a.left, b.left);
+            const oy = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+            if (ox > 1 && oy > 1) out.push(`${name(els[i])} × ${name(els[j])}`);
+          }
+        const btn = document.querySelector(".v3-bench");
+        const r = btn.getBoundingClientRect();
+        const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+        return { overlaps: out, benchOnTop: top === btn || btn.contains(top), inView: r.bottom <= innerHeight && r.right <= innerWidth };
+      });
+      check("按鈕不重疊、效能測試按鈕可點", overlaps.overlaps.length === 0 && overlaps.benchOnTop && overlaps.inView, overlaps);
+      if (vp === VIEWPORTS[0]) {
+        await page.evaluate(() => document.querySelector(".v3-bench").click());
+        const r = await page.waitForFunction(() => !document.querySelector(".v3-bench-result").hidden, null, { timeout: 120000 }).then(() => page.evaluate(() => document.querySelector(".v3-bench-result").innerText)).catch(() => null);
+        check("點擊效能測試：10 秒後顯示平均／最慢 1%／最低 FPS 與 Draw Calls", !!r && /平均/.test(r) && /最慢 1%/.test(r) && /最低/.test(r) && /Draw Calls/.test(r) && /3 隻/.test(r), r);
+      }
     } catch (e) {
       run.errors.push(`exception: ${e.message}`);
     }
-    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 5;
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 6;
     if (!run.ok) failures++;
     report.runs.push(run);
     console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
