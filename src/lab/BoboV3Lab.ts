@@ -147,9 +147,10 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     body.material = bodyMat.material;
     body.alphaIndex = 1;
     eyes.material = mats.eyes;
-    // 星星網格同時含頭頂與腹部兩顆：整體在果凍之後畫（alphaIndex 4），飽和度不被果凍洗淡
-    stars.material = mats.bellyStars;
-    stars.alphaIndex = 4;
+    // 星星不透明先畫；腹部星星在果凍裡面，由果凍蓋過去＋著色器的暖光從內部透出
+    stars.material = mats.stars;
+    // 身體先寫入深度：只看得到最前面的果凍表面（另一側翅膀不會亂序地疊到前面）
+    bodyMat.material.needDepthPrePass = true;
     blush.material = mats.blush;
     blush.alphaIndex = 2;
     mouth.material = mats.mouth;
@@ -377,10 +378,7 @@ function createMaterials(scene: Scene, gltfMats: PBRMaterial[], useJelly: boolea
 
   const stars = new StandardMaterial("BoboV3_Stars", scene);
   stars.disableLighting = true;
-  stars.emissiveColor = new Color3(1.15, 1.08, 1.0); // × 頂點色（中央奶油黃 → 邊緣暖金），略提亮
-  // 腹部星星：在身體之後繪製並帶一點透明，不會被果凍洗白；光暈從果凍裡透出
-  const bellyStars = stars.clone("BoboV3_StarsInner");
-  bellyStars.alpha = 0.92;
+  stars.emissiveColor = new Color3(1.0, 0.86, 0.42); // × 頂點色：壓低藍色 → 飽和的金黃
 
   const body = (_i: number): { material: StandardMaterial; jelly: JellyV3Plugin | null } => {
     const m = new StandardMaterial(`BoboV3_Body_${_i}`, scene);
@@ -407,5 +405,5 @@ function createMaterials(scene: Scene, gltfMats: PBRMaterial[], useJelly: boolea
     }
     return { material: m, jelly };
   };
-  return { eyes, mouth, blush, stars, bellyStars, body };
+  return { eyes, mouth, blush, stars, body };
 }

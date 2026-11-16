@@ -189,6 +189,14 @@ export const JELLY3_MAIN = `
     color.a = clamp(color.a + (st * 0.35 + n1 * 0.12) * jS * jNdV, 0.0, 1.0);
   }
 
+  // 腹部星星的暖光從果凍內部透出（物件座標：高 0.2、往前 0.5）
+  {
+    vec3 jSd = lp - vec3(0.0, 0.2, 0.5);
+    jSd.z *= 1.6;
+    float jStarGlow = exp(-dot(jSd, jSd) / 0.016);
+    color.rgb += vec3(1.0, 0.72, 0.25) * jStarGlow * 0.55 * jS * (0.4 + 0.6 * jNdV);
+  }
+
   // 天空反射＋藍紫邊緣光
   vec3 jR = reflect(-jV, jN);
   color.rgb += mix(j3SkyLow, j3SkyHigh, clamp(jR.y * 0.5 + 0.5, 0.0, 1.0)) * jFres * 0.12 * jS;
