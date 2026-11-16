@@ -377,16 +377,18 @@ def build():
     bs = S.BELLY_STAR
     belly = soft_star_mesh("BellyStar", bs["outer"], bs["inner"], bs["depth"])
     hit = BVHTree.FromObject(full, bpy.context.evaluated_depsgraph_get()).ray_cast(Vector((0, -3, bs["height"])), Vector((0, 1, 0)))
-    # 嵌在果凍表面下（從側面看不會突出身體）
     # V3.1：靠近表面（只沉入一點），從正面看清楚又像在果凍裡
-    by = hit[0].y + 0.04 if hit[0] is not None else -0.52
-    belly.location = (0.0, by, bs["height"])
-    belly.rotation_euler = (math.radians(-12), 0, 0)
+    # 依表面法線擺正星星（腹部下方曲面往下彎，星星平面要跟著傾斜，否則下方星角會穿出身體）
+    nrm = hit[1].normalized() if hit[0] is not None else Vector((0, -1, 0))
+    belly.rotation_mode = "QUATERNION"
+    belly.rotation_quaternion = Vector((0, -1, 0)).rotation_difference(nrm)
+    surf = hit[0] if hit[0] is not None else Vector((0, -0.55, bs["height"]))
+    belly.location = surf - nrm * 0.045
     for st in (head, belly):
         activate(st)
         bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
     # 星星頂點色依各自中心計算
-    for st, c in ((head, hs["center"]), (belly, (0.0, by, bs["height"]))):
+    for st, c in ((head, hs["center"]), (belly, tuple(surf - nrm * 0.045))):
         set_point_colors(st, lambda x, y, z, nx, ny, nz, c=c: star_color(x - c[0], y - c[1], z - c[2], nx, ny, nz))
     stars = join([head, belly], "Stars")
     stars.data.materials.append(mats["star"])
