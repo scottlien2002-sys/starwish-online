@@ -182,7 +182,8 @@ export const JELLY3_MAIN = `
     // 細碎星光：近層細密、遠層較大（三種密度）
     float st = j3Stars(p1, 16.0) * 0.8 + j3Stars(p1 + 1.7, 9.0) * 0.9 + j3Stars(p2 + 3.3, 6.0) * 0.6;
     // 底部光池（設定圖：底部中央青色發亮）
-    float pool = smoothstep(0.45, 0.0, length(p2.xz)) * (1.0 - smoothstep(0.0, 0.35, p2.y));
+    // 只在身體中後段底部，避免正面把腹部星星洗白
+    float pool = smoothstep(0.45, 0.0, length(p2.xz)) * (1.0 - smoothstep(0.0, 0.3, p2.y)) * (1.0 - smoothstep(0.15, 0.45, p2.z));
     vec3 inner = neb + vec3(0.85, 0.95, 1.0) * st + j3NebA * pool * 0.85;
     // 正面看進去最多、邊緣少（邊緣是表面反光）
     color.rgb += inner * 1.6 * jS * (0.35 + 0.65 * jNdV);
@@ -191,10 +192,13 @@ export const JELLY3_MAIN = `
 
   // 腹部星星的暖光從果凍內部透出（物件座標：高 0.2、往前 0.5）
   {
-    vec3 jSd = lp - vec3(0.0, 0.2, 0.5);
+    vec3 jSd = lp - vec3(0.0, 0.23, 0.55);
     jSd.z *= 1.6;
     float jStarGlow = exp(-dot(jSd, jSd) / 0.016);
-    color.rgb += vec3(1.0, 0.72, 0.25) * jStarGlow * 0.55 * jS * (0.4 + 0.6 * jNdV);
+    // 星星前方的果凍變薄：看得到裡面的金色星星，帶一點藍紫色調，而不是貼在表面
+    color.rgb = mix(color.rgb, color.rgb * 0.6, jStarGlow * jS);
+    color.rgb += vec3(1.0, 0.72, 0.25) * jStarGlow * 0.3 * jS * (0.4 + 0.6 * jNdV);
+    color.a *= 1.0 - 0.6 * jStarGlow * jS;
   }
 
   // 天空反射＋藍紫邊緣光
