@@ -378,13 +378,14 @@ function createMaterials(scene: Scene, gltfMats: PBRMaterial[], useJelly: boolea
 
   const stars = new StandardMaterial("BoboV3_Stars", scene);
   stars.disableLighting = true;
-  stars.emissiveColor = new Color3(1.0, 0.86, 0.42); // × 頂點色：壓低藍色 → 飽和的金黃
+  stars.emissiveColor = new Color3(1.0, 0.8, 0.28); // × 頂點色：壓低藍色 → 飽和的金黃
+  stars.backFaceCulling = false; // 腹部星星的面向與身體相反時也要看得到（正面原本被剔除）
 
   const body = (_i: number): { material: StandardMaterial; jelly: JellyV3Plugin | null } => {
     const m = new StandardMaterial(`BoboV3_Body_${_i}`, scene);
     // 頂點色（底部深藍紫 → 上方淡藍）× 偏藍紫的漫射；自發光補一點藍紫，避免受光後發白
     // V3.1：降低漫射與一般高光（減少塑膠感與發白），顏色主要來自頂點色＋果凍外掛
-    m.diffuseColor = new Color3(0.55, 0.58, 0.95);
+    m.diffuseColor = new Color3(0.45, 0.5, 0.95);
     m.emissiveColor = new Color3(0.12, 0.08, 0.42);
     m.specularColor = new Color3(0.06, 0.06, 0.08);
     m.specularPower = 64;
