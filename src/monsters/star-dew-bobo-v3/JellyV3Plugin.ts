@@ -194,11 +194,10 @@ export const JELLY3_MAIN = `
   {
     vec3 jSd = lp - vec3(0.0, 0.23, 0.55);
     jSd.z *= 1.6;
-    float jStarGlow = exp(-dot(jSd, jSd) / 0.016);
+    float jStarGlow = exp(-dot(jSd, jSd) / 0.012);
     // 星星前方的果凍變薄：看得到裡面的金色星星，帶一點藍紫色調，而不是貼在表面
-    color.rgb = mix(color.rgb, color.rgb * 0.6, jStarGlow * jS);
-    color.rgb += vec3(1.0, 0.72, 0.25) * jStarGlow * 0.3 * jS * (0.4 + 0.6 * jNdV);
-    color.a *= 1.0 - 0.6 * jStarGlow * jS;
+    color.rgb = mix(color.rgb, j3Deep * 0.6, jStarGlow * jS * 0.5);
+    color.a *= 1.0 - 0.85 * jStarGlow * jS;
   }
 
   // 天空反射＋藍紫邊緣光
