@@ -524,16 +524,31 @@ body {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-/* V3 預覽：視角按鈕可換行、不伸到右上角效能面板底下；效能測試獨立一顆大按鈕 */
-.lab-views.v3-views {
+/* V3 預覽：左上角直向排列，避開右上角 FPS 與畫質面板 */
+.v3-top {
+  position: absolute;
+  top: calc(var(--safe-top) + 8px);
+  left: calc(var(--safe-left) + var(--edge));
+  max-width: calc(100% - var(--safe-left) - var(--safe-right) - var(--edge) * 2 - 112px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.v3-top .lab-title,
+.v3-top .lab-views,
+.v3-top .lab-bench-result {
+  position: static;
+  max-width: 100%;
+}
+
+.v3-top .lab-views {
   flex-wrap: wrap;
-  max-width: calc(100% - var(--safe-left) - var(--safe-right) - var(--edge) * 2 - 108px);
 }
 
 .v3-bench {
-  position: absolute;
-  top: calc(var(--safe-top) + 206px);
-  left: calc(var(--safe-left) + var(--edge));
   min-height: 48px;
   padding: 0 16px;
   border-radius: 14px;
@@ -546,14 +561,8 @@ body {
   text-shadow: 0 1px 2px rgba(20, 60, 40, 0.5);
   pointer-events: auto;
   touch-action: manipulation;
-  z-index: 5;
 }
 
 .v3-bench.on {
   background: linear-gradient(180deg, #ffd36e, #ff9d4d);
-}
-
-.lab-bench-result.v3-bench-result {
-  top: calc(var(--safe-top) + 262px);
-  z-index: 6;
 }

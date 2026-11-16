@@ -147,7 +147,9 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     body.material = bodyMat.material;
     body.alphaIndex = 1;
     eyes.material = mats.eyes;
-    stars.material = mats.stars;
+    // 星星網格同時含頭頂與腹部兩顆：整體在果凍之後畫（alphaIndex 4），飽和度不被果凍洗淡
+    stars.material = mats.bellyStars;
+    stars.alphaIndex = 4;
     blush.material = mats.blush;
     blush.alphaIndex = 2;
     mouth.material = mats.mouth;
@@ -174,7 +176,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
   // 星星光暈：金色（與 V2 相同作法）
   if (render.glow) {
     render.glow.customEmissiveColorSelector = (mesh, _sub, material, result) => {
-      if (mesh.name.startsWith("Stars")) result.set(0.9, 0.62, 0.14, 1);
+      if (mesh.name.startsWith("Stars")) result.set(1.0, 0.68, 0.12, 1);
       else {
         const e = (material as StandardMaterial).emissiveColor;
         if (e) result.set(e.r, e.g, e.b, 1);
@@ -218,12 +220,13 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
   };
 
   // ---------- UI ----------
+  // 左上角由上而下排列（標題 → 視角 → 效能測試 → 結果），不論直向或橫向都不會互相覆蓋
   uiRoot.innerHTML = `
-    <div class="lab-title" data-layout="lab-title">
-      <div class="lab-name">星露啵啵 V3 <small>模型預覽（第一版，程式化建模）</small></div>
+    <div class="v3-top">
+    <div class="lab-title v3-title" data-layout="lab-title">
+      <div class="lab-name">星露啵啵 V3 <small>模型預覽</small></div>
       <div class="lab-state">畫質：${quality.level}・${file}</div>
     </div>
-    <div class="lab-fps" data-layout="lab-fps">-- FPS</div>
     <div class="lab-views v3-views">
       ${(["front", "side", "back"] as const).map((v) => `<button class="lab-view-btn" data-view="${v}" data-layout="btn-view-${v}">${VIEW_LABEL[v]}</button>`).join("")}
       <button class="lab-view-btn" data-count="1" data-layout="btn-count-1">1 隻</button>
@@ -231,6 +234,8 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     </div>
     <button class="v3-bench lab-bench" data-layout="btn-bench">⏱ 效能測試（10 秒）</button>
     <div class="lab-bench-result v3-bench-result" hidden></div>
+    </div>
+    <div class="lab-fps" data-layout="lab-fps">-- FPS</div>
     <div class="lab-panel v3-expr">
       ${V3_EXPRESSIONS.map((e) => `<button class="lab-btn" data-expr="${e}" data-layout="btn-expr-${e}">${EXPRESSION_LABEL[e]}</button>`).join("")}
     </div>`;
@@ -350,9 +355,11 @@ function createMaterials(scene: Scene, gltfMats: PBRMaterial[], useJelly: boolea
   eyes.useAlphaFromDiffuseTexture = true;
   eyes.transparencyMode = 1; // ALPHATEST（只裁切、不混合）：不需排序、不造成過度繪製
   eyes.alphaCutOff = 0.45;
-  eyes.emissiveColor = new Color3(0.55, 0.55, 0.6);
-  eyes.specularColor = new Color3(0.9, 0.9, 1);
-  eyes.specularPower = 90; // 角膜弧面的反光
+  // V3.1：眼睛接近不受光（顏色忠於貼圖），角膜弧面保留一點清亮反光
+  eyes.emissiveColor = new Color3(0.78, 0.78, 0.82);
+  eyes.diffuseColor = new Color3(0.35, 0.35, 0.38);
+  eyes.specularColor = new Color3(1, 1, 1);
+  eyes.specularPower = 140;
 
   const decal = (name: string): StandardMaterial => {
     const m = new StandardMaterial(name, scene);
@@ -370,16 +377,20 @@ function createMaterials(scene: Scene, gltfMats: PBRMaterial[], useJelly: boolea
 
   const stars = new StandardMaterial("BoboV3_Stars", scene);
   stars.disableLighting = true;
-  stars.emissiveColor = Color3.White(); // × 頂點色（中央奶油黃 → 邊緣暖金）
+  stars.emissiveColor = new Color3(1.15, 1.08, 1.0); // × 頂點色（中央奶油黃 → 邊緣暖金），略提亮
+  // 腹部星星：在身體之後繪製並帶一點透明，不會被果凍洗白；光暈從果凍裡透出
+  const bellyStars = stars.clone("BoboV3_StarsInner");
+  bellyStars.alpha = 0.92;
 
   const body = (_i: number): { material: StandardMaterial; jelly: JellyV3Plugin | null } => {
     const m = new StandardMaterial(`BoboV3_Body_${_i}`, scene);
     // 頂點色（底部深藍紫 → 上方淡藍）× 偏藍紫的漫射；自發光補一點藍紫，避免受光後發白
-    m.diffuseColor = new Color3(0.72, 0.78, 1);
-    m.emissiveColor = new Color3(0.1, 0.09, 0.36);
-    m.specularColor = new Color3(0.25, 0.25, 0.3);
-    m.specularPower = 32;
-    m.alpha = 0.58;
+    // V3.1：降低漫射與一般高光（減少塑膠感與發白），顏色主要來自頂點色＋果凍外掛
+    m.diffuseColor = new Color3(0.55, 0.58, 0.95);
+    m.emissiveColor = new Color3(0.12, 0.08, 0.42);
+    m.specularColor = new Color3(0.06, 0.06, 0.08);
+    m.specularPower = 64;
+    m.alpha = 0.66;
     m.useSpecularOverAlpha = false;
     m.backFaceCulling = true;
     let jelly: JellyV3Plugin | null = null;
@@ -396,5 +407,5 @@ function createMaterials(scene: Scene, gltfMats: PBRMaterial[], useJelly: boolea
     }
     return { material: m, jelly };
   };
-  return { eyes, mouth, blush, stars, body };
+  return { eyes, mouth, blush, stars, bellyStars, body };
 }
