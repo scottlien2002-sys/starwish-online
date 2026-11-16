@@ -1,0 +1,71 @@
+name: Blender — Star Dew Bobo V3.1 model
+
+# 在雲端以 Blender（官方免費版，無介面）執行建模腳本，產出 GLB 與三視圖渲染圖。
+# 結果推到 art-bobo-v31 分支（不影響遊戲網站與 main）。原始設定圖不放進儲存庫。
+on:
+  workflow_dispatch:
+  push:
+    branches: ["feature/render-bobo-v31"]
+    paths:
+      - "art/bobo-v31/**"
+      - ".github/workflows/blender-bobo-v31.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: blender-bobo-v31
+  cancel-in-progress: true
+
+env:
+  BLENDER_VERSION: "4.2.3"
+  BLENDER_SERIES: "4.2"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: System libraries for Blender (headless)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libsm6 libxkbcommon0 >/dev/null
+
+      - name: Download Blender ${{ env.BLENDER_VERSION }} (official, free)
+        run: |
+          URL="https://download.blender.org/release/Blender${BLENDER_SERIES}/blender-${BLENDER_VERSION}-linux-x64.tar.xz"
+          echo "$URL"
+          curl -fsSL --retry 5 --retry-delay 10 "$URL" -o /tmp/blender.tar.xz || curl -fsSL --retry 5 "https://mirrors.ocf.berkeley.edu/blender/release/Blender${BLENDER_SERIES}/blender-${BLENDER_VERSION}-linux-x64.tar.xz" -o /tmp/blender.tar.xz
+          ls -la /tmp/blender.tar.xz
+          mkdir -p /opt/blender && tar -xf /tmp/blender.tar.xz -C /opt/blender --strip-components=1
+          /opt/blender/blender --version | head -2
+
+      - name: Generate expression textures
+        run: |
+          python3 -m pip install --quiet pillow
+          mkdir -p out
+          python3 art/bobo-v31/gen_textures.py out
+
+      - name: Build model, export GLB, render three views
+        run: |
+          /opt/blender/blender -b --factory-startup -noaudio -P art/bobo-v31/build_bobo_v31.py -- --out "$PWD/out" --textures "$PWD/out" 2>&1 | tail -60
+          ls -la out
+          test -f out/bobo_v31_high.glb && test -f out/render_front.png
+
+      - name: Validate GLB
+        run: |
+          npx --yes gltf-validator@2 out/bobo_v31_high.glb -o > out/validator_high.json || true
+          node -e "const r=require('./out/validator_high.json');console.log('errors',r.issues.numErrors,'warnings',r.issues.numWarnings)" || true
+
+      - name: Push results to art-bobo-v31 branch
+        run: |
+          echo "{\"commit\":\"${GITHUB_SHA}\",\"blender\":\"${BLENDER_VERSION}\",\"builtAt\":\"$(date -u +%FT%TZ)\"}" > out/build.json
+          cd out
+          git init -q -b work
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -qm "Bobo V3.1 model ${GITHUB_SHA::7}"
+          git push -qf "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" HEAD:art-bobo-v31
