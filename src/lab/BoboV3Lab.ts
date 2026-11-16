@@ -177,7 +177,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
   // 星星光暈：金色（與 V2 相同作法）
   if (render.glow) {
     render.glow.customEmissiveColorSelector = (mesh, _sub, material, result) => {
-      if (mesh.name.startsWith("Stars")) result.set(1.0, 0.68, 0.12, 1);
+      if (mesh.name.startsWith("Stars")) result.set(0.75, 0.45, 0.05, 1);
       else {
         const e = (material as StandardMaterial).emissiveColor;
         if (e) result.set(e.r, e.g, e.b, 1);
@@ -378,7 +378,7 @@ function createMaterials(scene: Scene, gltfMats: PBRMaterial[], useJelly: boolea
 
   const stars = new StandardMaterial("BoboV3_Stars", scene);
   stars.disableLighting = true;
-  stars.emissiveColor = new Color3(1.0, 0.8, 0.28); // × 頂點色：壓低藍色 → 飽和的金黃
+  stars.emissiveColor = new Color3(0.9, 0.62, 0.1); // × 頂點色：壓低藍色 → 飽和的金黃
   stars.backFaceCulling = false; // 腹部星星的面向與身體相反時也要看得到（正面原本被剔除）
 
   const body = (_i: number): { material: StandardMaterial; jelly: JellyV3Plugin | null } => {
