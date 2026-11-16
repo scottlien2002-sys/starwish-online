@@ -1,0 +1,37 @@
+{
+  "shots": [
+    {
+      "name": "g01_spawn",
+      "caption": "草原：出生點",
+      "state": "player z=0.00 x=0.00"
+    },
+    {
+      "name": "g02_walk",
+      "caption": "草原：前進 1.5 秒",
+      "state": "player z=7.58 x=-0.00"
+    },
+    {
+      "name": "g03_turn",
+      "caption": "草原：斜向移動後",
+      "state": "player z=12.08 x=6.00"
+    }
+  ],
+  "errors": [],
+  "perf": {
+    "fps": 59.99999999999877,
+    "drawCalls": 62,
+    "activeMeshes": 20,
+    "pixelRatio": 1.5,
+    "quality": "medium",
+    "postProcess": true,
+    "bloom": true,
+    "shadowFilter": "pcf",
+    "shadowMap": 1024
+  },
+  "timing": {
+    "frames": 60,
+    "seconds": 0.9999999999999989,
+    "maxDt": 0.016666666666666743,
+    "minDt": 0.01666666666666663
+  }
+}
