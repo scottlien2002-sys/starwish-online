@@ -28,6 +28,12 @@ if (ok) {
     await shot(`v_${v}`, v);
   }
   await page.evaluate(() => window.__bobo3.setView("front"));
+  // 正面近距離（腹部星星等細節對照）
+  if (await page.evaluate(() => typeof window.__bobo3.setClose === "function")) {
+    await page.evaluate(() => window.__bobo3.setClose(true));
+    await shot("c_front", "front close");
+    await page.evaluate(() => window.__bobo3.setClose(false));
+  }
   for (const e of ["normal", "happy", "curious", "angry", "scared", "dizzy", "sleepy", "hurt"]) {
     await page.evaluate((x) => window.__bobo3.setExpression(x), e);
     await shot(`e_${e}`, e);

@@ -80,6 +80,9 @@ jobs:
             if grep -q "bobo31" cur/src/main.ts; then
               for q in high medium low; do node cur/tests/e2e/snap-bobo3.mjs cur/dist out/bobo31_$q webkit $q bobo31 || true; done
             fi
+            if grep -q "bobo32" cur/src/main.ts; then
+              for q in high medium low; do node cur/tests/e2e/snap-bobo3.mjs cur/dist out/bobo32_$q webkit $q bobo32 || true; done
+            fi
           fi
           echo "{\"baseline\":\"${BASELINE}\",\"current\":\"${GITHUB_SHA}\",\"branch\":\"${GITHUB_REF_NAME}\"}" > out/meta.json
 
@@ -90,6 +93,7 @@ jobs:
             feature/render-bobo-v2) CB=compare-bobo-v2 ;;
             feature/render-bobo-v3) CB=compare-bobo-v3 ;;
             feature/render-bobo-v31) CB=compare-bobo-v31 ;;
+            feature/render-bobo-v32) CB=compare-bobo-v32 ;;
             *) CB=compare ;;
           esac
           echo "比較圖分支：$CB"

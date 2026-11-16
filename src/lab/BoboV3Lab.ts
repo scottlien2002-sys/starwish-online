@@ -22,10 +22,14 @@ import { PerfOverlay } from "../render/PerfOverlay.ts";
 import { FrameRecorder, type BenchmarkSummary } from "../render/benchmark.ts";
 import { JellyV3Plugin } from "../monsters/star-dew-bobo-v3/JellyV3Plugin.ts";
 import { createJellyNoiseTexture, JellyV31Plugin } from "../monsters/star-dew-bobo-v31/JellyV31Plugin.ts";
+import { createJellyNoiseTextureV32, JellyV32Plugin } from "../monsters/star-dew-bobo-v32/JellyV32Plugin.ts";
 
 /** v3 = 第一版（材質與模型保持不變，作為對照基準）；v31 = V3.1 美術精修 */
-export type BoboLabVariant = "v3" | "v31";
-type Jelly = JellyV3Plugin | JellyV31Plugin;
+export type BoboLabVariant = "v3" | "v31" | "v32";
+type Jelly = JellyV3Plugin | JellyV31Plugin | JellyV32Plugin;
+const VARIANT_LAB: Record<BoboLabVariant, string> = { v3: "bobo3", v31: "bobo31", v32: "bobo32" };
+const VARIANT_LABEL: Record<BoboLabVariant, string> = { v3: "V3", v31: "V3.1", v32: "V3.2" };
+const VARIANT_NEXT: Record<BoboLabVariant, BoboLabVariant> = { v3: "v31", v31: "v32", v32: "v3" };
 
 /**
  * 星露啵啵 V3 模型預覽（?lab=bobo3）。
@@ -63,6 +67,8 @@ export interface BoboV3DebugApi {
   setView(v: View): void;
   setExpression(e: V3Expression): void;
   setCount(n: 1 | 3): void;
+  /** 近距離（截圖對照用） */
+  setClose(on: boolean): void;
   info(): BoboV3Info;
   /** 第一隻的眼睛 UV 第一個座標（測試表情是否真的切換） */
   eyeUV0(): [number, number];
@@ -89,8 +95,9 @@ interface BoboV3Instance {
 }
 
 export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElement, variant: BoboLabVariant = "v3"): Promise<void> {
-  const v31 = variant === "v31";
-  const label = v31 ? "V3.1" : "V3";
+  // v31 = 「V3.1 或更新」的模型與材質流程；V3.2 第一步沿用 V3.1 模型檔（不修改它），只換果凍材質
+  const v31 = variant !== "v3";
+  const label = VARIANT_LABEL[variant];
   const quality = pickQuality();
   const engine = createEngine(canvas, quality);
   const scene = new Scene(engine);
@@ -131,7 +138,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
 
   // 共用材質（三隻共用；每隻的表情以各自的 UV 緩衝切換）
   const mats = v31
-    ? createMaterialsV31(scene, container.materials as PBRMaterial[], quality.level !== "low")
+    ? createMaterialsV31(scene, container.materials as PBRMaterial[], quality.level !== "low", variant === "v32")
     : createMaterials(scene, container.materials as PBRMaterial[], quality.level !== "low");
   const instances: BoboV3Instance[] = [];
   const spawn = (x: number, z: number, yaw: number): BoboV3Instance => {
@@ -246,7 +253,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
       ${(["front", "side", "back"] as const).map((v) => `<button class="lab-view-btn" data-view="${v}" data-layout="btn-view-${v}">${VIEW_LABEL[v]}</button>`).join("")}
       <button class="lab-view-btn" data-count="1" data-layout="btn-count-1">1 隻</button>
       <button class="lab-view-btn" data-count="3" data-layout="btn-count-3">3 隻</button>
-      <button class="lab-view-btn v3-switch" data-layout="btn-switch">${v31 ? "看 V3" : "看 V3.1"}</button>
+      <button class="lab-view-btn v3-switch" data-layout="btn-switch">看 ${VARIANT_LABEL[VARIANT_NEXT[variant]]}</button>
     </div>
     <button class="v3-bench lab-bench" data-layout="btn-bench">⏱ 效能測試（10 秒）</button>
     <div class="lab-bench-result v3-bench-result" hidden></div>
@@ -264,7 +271,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
   // V3 ↔ V3.1 切換：保留畫質等其他網址參數，同裝置、同條件比較
   uiRoot.querySelector<HTMLButtonElement>(".v3-switch")!.addEventListener("click", () => {
     const u = new URL(location.href);
-    u.searchParams.set("lab", v31 ? "bobo3" : "bobo31");
+    u.searchParams.set("lab", VARIANT_LAB[VARIANT_NEXT[variant]]);
     u.searchParams.delete("bench");
     location.href = u.toString();
   });
@@ -355,6 +362,10 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     setView: (v) => setView(v, true),
     setExpression,
     setCount,
+    setClose: (on) => {
+      camera.radius = on ? 1.45 : 2.6;
+      camera.target.y = on ? 0.36 : 0.5;
+    },
     info,
     perf: () => ({ ...perf.stats(), jelly: !!instances[0]?.jelly?.jellyEnabled, variant }),
     benchmark: runBenchmark,
@@ -436,7 +447,7 @@ function createMaterials(scene: Scene, gltfMats: PBRMaterial[], useJelly: boolea
  * 嘴／腮紅（與 V3 相同）、頭頂星星（清楚的金黃五角星，柔和不過曝）。
  * 低畫質仍使用外掛（關閉內部星雲），否則會看不到腹部星星。
  */
-function createMaterialsV31(scene: Scene, gltfMats: PBRMaterial[], fullJelly: boolean) {
+function createMaterialsV31(scene: Scene, gltfMats: PBRMaterial[], fullJelly: boolean, v32 = false) {
   const tex = (name: string): BaseTexture | null => gltfMats.find((m) => m.name === name)?.albedoTexture ?? null;
   const eyeTex = tex("Bobo_Eyes");
   const faceTex = tex("Bobo_Face");
@@ -473,8 +484,8 @@ function createMaterialsV31(scene: Scene, gltfMats: PBRMaterial[], fullJelly: bo
   stars.emissiveColor = new Color3(1.0, 0.96, 0.62);
   stars.backFaceCulling = false;
 
-  const noise = createJellyNoiseTexture(scene);
-  const body = (i: number): { material: StandardMaterial; jelly: JellyV31Plugin | null } => {
+  const noise = v32 ? createJellyNoiseTextureV32(scene) : createJellyNoiseTexture(scene);
+  const body = (i: number): { material: StandardMaterial; jelly: JellyV31Plugin | JellyV32Plugin | null } => {
     const m = new StandardMaterial(`BoboV31_Body_${i}`, scene);
     m.diffuseColor = new Color3(0.42, 0.48, 0.95);
     m.emissiveColor = new Color3(0.1, 0.07, 0.4);
@@ -483,7 +494,7 @@ function createMaterialsV31(scene: Scene, gltfMats: PBRMaterial[], fullJelly: bo
     m.alpha = 0.64;
     m.useSpecularOverAlpha = false;
     m.backFaceCulling = true;
-    const jelly = new JellyV31Plugin(m, noise);
+    const jelly = v32 ? new JellyV32Plugin(m, noise) : new JellyV31Plugin(m, noise);
     jelly.height = 1;
     jelly.nebula = fullJelly ? 1 : 0;
     m.onError = () => {
