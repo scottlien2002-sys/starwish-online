@@ -59,6 +59,8 @@ export interface BoboV3DebugApi {
   setExpression(e: V3Expression): void;
   setCount(n: 1 | 3): void;
   info(): BoboV3Info;
+  /** 第一隻的眼睛 UV 第一個座標（測試表情是否真的切換） */
+  eyeUV0(): [number, number];
   perf(): { fps: number; drawCalls: number; activeMeshes: number; pixelRatio: number; quality: string; jelly: boolean };
   benchmark(seconds?: number): Promise<BenchmarkSummary>;
 }
@@ -156,8 +158,13 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
       m.isPickable = false;
       m.receiveShadows = m === body;
     }
+    // glTF 載入的 UV 緩衝不可更新：各自複製一份並設為可更新，表情才能用改 UV 的方式切換
+    eyes.makeGeometryUnique();
+    mouth.makeGeometryUnique();
     const eyeUV = Float32Array.from(eyes.getVerticesData(VertexBuffer.UVKind) ?? []);
     const mouthUV = Float32Array.from(mouth.getVerticesData(VertexBuffer.UVKind) ?? []);
+    eyes.setVerticesData(VertexBuffer.UVKind, Float32Array.from(eyeUV), true);
+    mouth.setVerticesData(VertexBuffer.UVKind, Float32Array.from(mouthUV), true);
     const it: BoboV3Instance = { root, body, eyes, mouth, blush, stars, jelly: bodyMat.jelly, eyeUV, mouthUV };
     instances.push(it);
     return it;
@@ -315,6 +322,10 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     info,
     perf: () => ({ ...perf.stats(), jelly: !!instances[0]?.jelly?.jellyEnabled }),
     benchmark: runBenchmark,
+    eyeUV0: () => {
+      const uv = instances[0]!.eyes.getVerticesData(VertexBuffer.UVKind)!;
+      return [uv[0]!, uv[1]!];
+    },
   };
 }
 

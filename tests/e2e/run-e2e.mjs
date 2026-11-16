@@ -397,7 +397,12 @@ for (const name of browsers) {
       if (!ready) throw new Error("bobo3 未啟動");
       const info = await page.evaluate(() => window.__bobo3.info());
       check("零件齊全（身體、眼睛、嘴、腮紅、星星）", info.meshes.length === 5 && info.meshes.every((m) => m.triangles > 0), info);
-      for (const e of ["normal", "happy", "curious", "angry", "scared", "dizzy", "sleepy", "hurt"]) await page.evaluate((x) => window.__bobo3.setExpression(x), e);
+      const uvs = [];
+      for (const e of ["normal", "happy", "curious", "angry", "scared", "dizzy", "sleepy", "hurt"]) {
+        await page.evaluate((x) => window.__bobo3.setExpression(x), e);
+        uvs.push((await page.evaluate(() => window.__bobo3.eyeUV0())).map((v) => Math.round(v * 1000) / 1000).join(","));
+      }
+      check("表情切換確實改變眼睛貼圖（8 種各不相同）", new Set(uvs).size === 8, uvs);
       for (const v of ["front", "side", "back"]) await page.evaluate((x) => window.__bobo3.setView(x), v);
       await page.evaluate(() => window.__bobo3.setCount(3));
       await page.waitForTimeout(800);
@@ -407,7 +412,7 @@ for (const name of browsers) {
     } catch (e) {
       run.errors.push(`exception: ${e.message}`);
     }
-    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 4;
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 5;
     if (!run.ok) failures++;
     report.runs.push(run);
     console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
