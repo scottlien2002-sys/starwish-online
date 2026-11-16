@@ -43,10 +43,10 @@ export class JellyV31Plugin extends MaterialPluginBase {
    * 位置取自 Blender 建模輸出 bobo_v31_info.json 的 belly_star_babylon（身體表面往內 0.045）
    */
   // 高度比建模位置略高（設定圖：星星在嘴下方、身體下半部中央；從上往下看時折射會讓它偏低）
-  starCenter = new Vector3(0, 0.235, 0.54);
+  starCenter = new Vector3(0, 0.19, 0.55);
   starNormal = new Vector3(0, -0.48, 0.8773).normalize();
-  starOuter = 0.102;
-  starInner = 0.052;
+  starOuter = 0.122;
+  starInner = 0.06;
   height = 1;
   strength = 1;
   nebula = 1;
