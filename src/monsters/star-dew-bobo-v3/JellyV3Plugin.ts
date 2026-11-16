@@ -23,11 +23,12 @@ import {
  * 低畫質不使用本外掛；著色器編譯失敗時由呼叫端停用（回到基本材質）。
  */
 export class JellyV3Plugin extends MaterialPluginBase {
-  rim = new Color3(0.58, 0.52, 1.0);
-  deep = new Color3(0.2, 0.2, 0.78);
-  top = new Color3(0.42, 0.8, 1.0);
-  nebulaA = new Color3(0.25, 0.85, 1.0);
-  nebulaB = new Color3(0.55, 0.45, 1.0);
+  // V3.1：更飽和的藍紫、亮青色邊緣（設定圖的水晶輪廓光）
+  rim = new Color3(0.55, 0.8, 1.0);
+  deep = new Color3(0.2, 0.14, 0.78);
+  top = new Color3(0.3, 0.55, 1.0);
+  nebulaA = new Color3(0.2, 0.85, 1.0);
+  nebulaB = new Color3(0.6, 0.38, 1.0);
   skyLow = new Color3(0.95, 0.88, 0.98);
   skyHigh = new Color3(0.55, 0.78, 1.0);
   /** 模型高度（公尺，用來把世界座標換成以身高為 1 的物件座標） */
@@ -164,7 +165,8 @@ export const JELLY3_MAIN = `
   vec3 lp = (j3InvWorld * vec4(vPositionW, 1.0)).xyz / j3Params.x;
   float h = clamp(lp.y, 0.0, 1.0);
   vec3 body = mix(j3Deep, j3Top, smoothstep(0.05, 0.95, h));
-  color.rgb = mix(color.rgb, color.rgb * 0.5 + body * 0.6, jS * (0.3 + 0.35 * (1.0 - jNdV)));
+  // V3.1：以藍紫本色為主（壓低受光造成的發白），邊緣更深、更透
+  color.rgb = mix(color.rgb, color.rgb * 0.35 + body * 0.7, jS * (0.55 + 0.3 * (1.0 - jNdV)));
 
   if (j3Params.z > 0.5) {
     // 沿折射後視線往內取兩個深度（視差 → 內部深度）
@@ -174,13 +176,14 @@ export const JELLY3_MAIN = `
     vec3 p2 = lp + rd * 0.34;
     float low1 = 1.0 - smoothstep(0.15, 0.75, p1.y);
     float low2 = 1.0 - smoothstep(0.1, 0.7, p2.y);
-    float n1 = smoothstep(0.42, 0.85, j3Fbm(p1 * 3.2 + vec3(0.0, 1.3, 0.0)));
-    float n2 = smoothstep(0.38, 0.8, j3Fbm(p2 * 2.3 + vec3(4.1, 0.0, 2.2)));
-    vec3 neb = j3NebA * n1 * (0.35 + 0.65 * low1) * 0.65 + j3NebB * n2 * (0.3 + 0.7 * low2) * 0.55;
-    float st = j3Stars(p1, 9.0) * 0.9 + j3Stars(p2 + 3.3, 6.0) * 0.6;
+    float n1 = smoothstep(0.4, 0.82, j3Fbm(p1 * 3.2 + vec3(0.0, 1.3, 0.0)));
+    float n2 = smoothstep(0.36, 0.78, j3Fbm(p2 * 2.3 + vec3(4.1, 0.0, 2.2)));
+    vec3 neb = j3NebA * n1 * (0.35 + 0.65 * low1) * 0.7 + j3NebB * n2 * (0.3 + 0.7 * low2) * 0.6;
+    // 細碎星光：近層細密、遠層較大（三種密度）
+    float st = j3Stars(p1, 16.0) * 0.8 + j3Stars(p1 + 1.7, 9.0) * 0.9 + j3Stars(p2 + 3.3, 6.0) * 0.6;
     // 底部光池（設定圖：底部中央青色發亮）
     float pool = smoothstep(0.45, 0.0, length(p2.xz)) * (1.0 - smoothstep(0.0, 0.35, p2.y));
-    vec3 inner = neb + vec3(0.85, 0.95, 1.0) * st + j3NebA * pool * 0.55;
+    vec3 inner = neb + vec3(0.85, 0.95, 1.0) * st + j3NebA * pool * 0.85;
     // 正面看進去最多、邊緣少（邊緣是表面反光）
     color.rgb += inner * 1.6 * jS * (0.35 + 0.65 * jNdV);
     color.a = clamp(color.a + (st * 0.35 + n1 * 0.12) * jS * jNdV, 0.0, 1.0);
@@ -188,8 +191,8 @@ export const JELLY3_MAIN = `
 
   // 天空反射＋藍紫邊緣光
   vec3 jR = reflect(-jV, jN);
-  color.rgb += mix(j3SkyLow, j3SkyHigh, clamp(jR.y * 0.5 + 0.5, 0.0, 1.0)) * jFres * 0.22 * jS;
-  color.rgb += j3Rim * jFres * 0.8 * jS;
+  color.rgb += mix(j3SkyLow, j3SkyHigh, clamp(jR.y * 0.5 + 0.5, 0.0, 1.0)) * jFres * 0.12 * jS;
+  color.rgb += j3Rim * jFres * 0.95 * jS;
   color.a = clamp(color.a + jFres * 0.32 * jS, 0.0, 1.0);
 
   // 日系硬邊高光：正面看左上大、右上小（世界方向）

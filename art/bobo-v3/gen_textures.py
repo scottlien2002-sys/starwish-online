@@ -36,23 +36,54 @@ def eye_cell(kind):
         d.ellipse([c[0] - r[0], c[1] - r[1], c[0] + r[0], c[1] + r[1]], fill=fill)
 
     def open_eye(pupil_scale=1.0, iris_scale=1.0, cut=None, extra_shine=True):
-        # 外圈深藍 → 虹膜漸層 → 瞳孔 → 高光
+        """
+        V3.1 眼睛（依設定圖）：細深藍外框 → 虹膜由上方深靛藍漸變到下方明亮青藍（有深度）
+        → 虹膜外環與放射紋 → 深色瞳孔 → 上眼瞼投影 → 三層高光（右上大、左下小、閃點）
+        """
         ellipse((cx, cy), (rx, ry), NAVY)
-        # 虹膜：上深下亮的藍（以多層橢圓近似漸層）
-        for i in range(24):
-            t = i / 23
-            col = (int(30 + 40 * t), int(70 + 120 * t), int(200 + 55 * t), 255)
-            r = (rx * 0.82 * iris_scale * (1 - 0.35 * t), ry * 0.8 * iris_scale * (1 - 0.35 * t))
-            ellipse((cx, cy + ry * 0.12 + ry * 0.22 * t), r, col)
-        ellipse((cx, cy + ry * 0.04), (rx * 0.42 * pupil_scale, ry * 0.42 * pupil_scale), (8, 12, 44, 255))
-        # 高光：右上大、左下小、加一顆小點
-        ellipse((cx + rx * 0.3, cy - ry * 0.38), (rx * 0.36, ry * 0.3), (255, 255, 255, 255))
-        ellipse((cx - rx * 0.36, cy + ry * 0.42), (rx * 0.17, ry * 0.14), (255, 255, 255, 235))
+        irx, iry = rx * 0.9 * iris_scale, ry * 0.9 * iris_scale
+        icy = cy + ry * 0.04
+        # 虹膜漸層（上深下亮，越往下越青）
+        for i in range(40):
+            t = i / 39
+            col = (int(22 + 40 * t), int(40 + 170 * t), int(150 + 105 * t), 255)
+            k = 1 - 0.55 * t
+            ellipse((cx, icy + iry * 0.32 * t), (irx * k, iry * k), col)
+        # 虹膜外環（深一點，增加立體感）
+        ring = Image.new("RGBA", im.size, (0, 0, 0, 0))
+        ImageDraw.Draw(ring).ellipse([cx - irx, icy - iry, cx + irx, icy + iry], outline=(16, 26, 92, 200), width=int(7 * S))
+        im.alpha_composite(ring)
+        # 放射細紋
+        for k in range(18):
+            a = k / 18 * math.pi * 2
+            x0, y0 = cx + math.cos(a) * irx * 0.45, icy + math.sin(a) * iry * 0.45
+            x1, y1 = cx + math.cos(a) * irx * 0.85, icy + math.sin(a) * iry * 0.85
+            d.line([(x0, y0), (x1, y1)], fill=(120, 210, 255, 70), width=int(2 * S))
+        # 瞳孔
+        ellipse((cx, icy + iry * 0.02), (rx * 0.38 * pupil_scale, ry * 0.38 * pupil_scale), (6, 10, 40, 255))
+        # 上眼瞼投影（虹膜上緣一圈半透明深色，讓眼睛有凹凸）
+        shade = Image.new("RGBA", im.size, (0, 0, 0, 0))
+        sd = ImageDraw.Draw(shade)
+        sd.ellipse([cx - rx * 1.05, cy - ry * 1.25, cx + rx * 1.05, cy - ry * 0.15], fill=(6, 10, 50, 120))
+        shade = shade.filter(ImageFilter.GaussianBlur(10 * S))
+        mask = Image.new("L", im.size, 0)
+        ImageDraw.Draw(mask).ellipse([cx - rx, cy - ry, cx + rx, cy + ry], fill=255)
+        im.paste(Image.alpha_composite(im, shade), (0, 0), mask)
+        d2 = ImageDraw.Draw(im)
+        # 下緣反光帶（角膜的弧面感）
+        glow = Image.new("RGBA", im.size, (0, 0, 0, 0))
+        ImageDraw.Draw(glow).ellipse([cx - irx * 0.7, icy + iry * 0.38, cx + irx * 0.7, icy + iry * 0.92], fill=(150, 235, 255, 150))
+        glow = glow.filter(ImageFilter.GaussianBlur(6 * S))
+        im.paste(Image.alpha_composite(im, glow), (0, 0), mask)
+        d2 = ImageDraw.Draw(im)
+        # 高光：右上大、左下小、加閃點
+        d2.ellipse([cx + rx * 0.3 - rx * 0.34, cy - ry * 0.4 - ry * 0.28, cx + rx * 0.3 + rx * 0.34, cy - ry * 0.4 + ry * 0.28], fill=(255, 255, 255, 255))
+        d2.ellipse([cx - rx * 0.36 - rx * 0.16, cy + ry * 0.38 - ry * 0.13, cx - rx * 0.36 + rx * 0.16, cy + ry * 0.38 + ry * 0.13], fill=(255, 255, 255, 240))
         if extra_shine:
-            ellipse((cx - rx * 0.05, cy + ry * 0.08), (rx * 0.07, ry * 0.06), (210, 240, 255, 220))
+            d2.ellipse([cx - rx * 0.12 - rx * 0.07, cy - ry * 0.12 - ry * 0.06, cx - rx * 0.12 + rx * 0.07, cy - ry * 0.12 + ry * 0.06], fill=(220, 245, 255, 230))
         if cut is not None:
             # 生氣：眼睛上緣往內側斜切（以透明多邊形挖掉）
-            d.polygon(cut, fill=(0, 0, 0, 0))
+            d2.polygon(cut, fill=(0, 0, 0, 0))
 
     def line(points, width):
         d.line(points, fill=INK, width=int(width * S), joint="curve")

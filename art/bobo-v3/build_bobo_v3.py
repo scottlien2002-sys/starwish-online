@@ -120,15 +120,16 @@ def decimated_copy(src, name, target_tris):
 def body_color(x, y, z, nx, ny, nz):
     """頂點色：底部深藍紫 → 上方淡藍；翅膀與觸角末端更淡、更透亮"""
     h = max(0.0, min(1.0, z / 1.0))
-    deep = (0.33, 0.36, 0.92)
-    top = (0.6, 0.76, 1.0)
+    # V3.1：更飽和的藍紫（底部紫、上方藍）
+    deep = (0.3, 0.24, 0.9)
+    top = (0.46, 0.62, 1.0)
     c = [deep[i] + (top[i] - deep[i]) * h for i in range(3)]
     radial = math.hypot(x, y)
     if radial > 0.66 and z < 0.6:  # 翅膀
         k = min(1.0, (radial - 0.66) / 0.16)
-        c = [c[i] + ((0.78, 0.9, 1.0)[i] - c[i]) * k for i in range(3)]
+        c = [c[i] + ((0.6, 0.82, 1.0)[i] - c[i]) * k for i in range(3)]
     if z > 1.0:  # 觸角
-        c = [c[i] + ((0.72, 0.86, 1.0)[i] - c[i]) * 0.6 for i in range(3)]
+        c = [c[i] + ((0.55, 0.72, 1.0)[i] - c[i]) * 0.6 for i in range(3)]
     return tuple(c)
 
 
@@ -241,7 +242,7 @@ def soft_star_mesh(name, outer, inner, depth, segments=40, rings=4):
 def star_color(x, y, z, nx, ny, nz):
     r = math.hypot(x, z)
     k = min(1.0, r / 0.12)
-    return (1.0, 0.97 - 0.27 * k, 0.72 - 0.56 * k)
+    return (1.0, 0.93 - 0.3 * k, 0.55 - 0.5 * k)
 
 
 # ----------------------------------------------------------------- 材質（Blender 渲染用；遊戲端會換成自己的果凍材質）
@@ -352,8 +353,8 @@ def build():
     E = S.EYE
     eye_half = 0.128
     eye_uv = (0.0, 0.5, 0.25, 1.0)
-    eyeL = surface_patch("EyeL", bvh, E["half_spacing"], E["height"], eye_half, eye_half, eye_uv, lift=0.006, dome=0.02)
-    eyeR = surface_patch("EyeR", bvh, -E["half_spacing"], E["height"], eye_half, eye_half, eye_uv, lift=0.006, dome=0.02, mirror_u=True)
+    eyeL = surface_patch("EyeL", bvh, E["half_spacing"], E["height"], eye_half, eye_half, eye_uv, lift=0.006, dome=0.032, res=18)
+    eyeR = surface_patch("EyeR", bvh, -E["half_spacing"], E["height"], eye_half, eye_half, eye_uv, lift=0.006, dome=0.032, mirror_u=True, res=18)
     eyes = join([eyeL, eyeR], "Eyes")
     eyes.data.materials.append(mats["eyes"])
 
@@ -377,7 +378,8 @@ def build():
     belly = soft_star_mesh("BellyStar", bs["outer"], bs["inner"], bs["depth"])
     hit = BVHTree.FromObject(full, bpy.context.evaluated_depsgraph_get()).ray_cast(Vector((0, -3, bs["height"])), Vector((0, 1, 0)))
     # 嵌在果凍表面下（從側面看不會突出身體）
-    by = hit[0].y + 0.075 if hit[0] is not None else -0.5
+    # V3.1：靠近表面（只沉入一點），從正面看清楚又像在果凍裡
+    by = hit[0].y + 0.04 if hit[0] is not None else -0.52
     belly.location = (0.0, by, bs["height"])
     belly.rotation_euler = (math.radians(-12), 0, 0)
     for st in (head, belly):

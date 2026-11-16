@@ -33,7 +33,7 @@ ANTENNA_POINTS = np.array(
 ANTENNA_R0 = 0.058  # 根部半徑
 ANTENNA_R1 = 0.024  # 尖端半徑
 HEAD_STAR = dict(center=(0.282, -0.375, 1.12), outer=0.135, inner=0.075, depth=0.05)
-BELLY_STAR = dict(height=0.2, outer=0.105, inner=0.06, depth=0.03)
+BELLY_STAR = dict(height=0.2, outer=0.11, inner=0.062, depth=0.028)
 EYE = dict(height=0.52, half_spacing=0.25, rx=0.092, rz=0.112)
 MOUTH = dict(height=0.405)
 BLUSH = dict(height=0.39, half_spacing=0.38)
@@ -109,7 +109,7 @@ def wing_frames(side):
     """翅膀的根部位置與方向（side = +1 角色左翼 / -1 右翼）"""
     root = np.array([side * 0.5, 0.12, WING["height"]])
     # 往外、往後（約 45°）、略往下：正面與側面都看得到翼面（設定圖正面往外、側面往後）
-    d = _normalize([side * 0.70, 0.66, -0.2])
+    d = _normalize([side * 0.72, 0.64, 0.04])  # V3.1：設定圖翅膀略往上翹、不下垂
     nrm = _normalize(np.cross(d, [0, 0, 1]))  # 翼面法線（水平）
     up = np.cross(nrm, d)  # 翼面內與 d 垂直的方向
     return root, d, up, nrm
@@ -120,7 +120,8 @@ def sd_wing(p, side):
     out = None
     # 三片圓瓣（上、中、下扇形展開），尾緣自然形成圓弧切口
     # 三片圓瓣彼此大量重疊：外緣只留下 2～3 個淺圓弧切口（不是張開的手指）
-    for ang, length, width in [(0.34, 0.22, 0.1), (0.0, 0.27, 0.105), (-0.32, 0.23, 0.095)]:
+    # V3.1：瓣稍微分開（外緣出現清楚但柔和的圓弧切口），整體更圓潤
+    for ang, length, width in [(0.42, 0.245, 0.105), (0.0, 0.31, 0.115), (-0.4, 0.25, 0.1)]:
         dir_ = np.cos(ang) * d + np.sin(ang) * up
         side_dir = np.cross(nrm, dir_)
         c = root + dir_ * (length * 0.62)
@@ -129,12 +130,13 @@ def sd_wing(p, side):
         lx = q @ dir_
         ly = q @ side_dir
         lz = q @ nrm
-        th = 0.034
+        # V3.1：加厚並在根部更厚（柔軟、有份量的水晶果凍，而不是薄片）
+        th = 0.05 * (1.0 - 0.35 * np.clip(lx / length, 0, 1))
         qq = np.stack([lx / length, ly / width, lz / th], -1)
         k0 = np.linalg.norm(qq, axis=-1)
-        k1 = np.linalg.norm(qq / np.array([length, width, th]), axis=-1)
+        k1 = np.linalg.norm(qq / np.stack([np.full_like(th, length), np.full_like(th, width), th], -1), axis=-1)
         di = k0 * (k0 - 1) / np.maximum(k1, 1e-9)
-        out = di if out is None else smin(out, di, 0.03)
+        out = di if out is None else smin(out, di, 0.025)
     return out
 
 
