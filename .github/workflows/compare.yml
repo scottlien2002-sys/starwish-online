@@ -76,6 +76,10 @@ jobs:
           # 星露啵啵 V3 模型預覽（只有含 ?lab=bobo3 的版本才有）
           if [ -f cur/src/lab/BoboV3Lab.ts ]; then
             for q in high medium low; do node cur/tests/e2e/snap-bobo3.mjs cur/dist out/bobo3_$q webkit $q || true; done
+            # V3.1 美術精修（只有含 ?lab=bobo31 的版本才有；同一份程式同時截 V3 對照）
+            if grep -q "bobo31" cur/src/main.ts; then
+              for q in high medium low; do node cur/tests/e2e/snap-bobo3.mjs cur/dist out/bobo31_$q webkit $q bobo31 || true; done
+            fi
           fi
           echo "{\"baseline\":\"${BASELINE}\",\"current\":\"${GITHUB_SHA}\",\"branch\":\"${GITHUB_REF_NAME}\"}" > out/meta.json
 
@@ -85,6 +89,7 @@ jobs:
           case "${GITHUB_REF_NAME}" in
             feature/render-bobo-v2) CB=compare-bobo-v2 ;;
             feature/render-bobo-v3) CB=compare-bobo-v3 ;;
+            feature/render-bobo-v31) CB=compare-bobo-v31 ;;
             *) CB=compare ;;
           esac
           echo "比較圖分支：$CB"

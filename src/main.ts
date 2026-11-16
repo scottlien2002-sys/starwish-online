@@ -40,10 +40,11 @@ function main(): void {
   try {
     // 怪物測試頁（只在需要時載入）：?lab=bobo 星露啵啵、?lab=dummy 測試方塊、?lab=field 多怪物 AI
     // ?lab=bobo3：星露啵啵 V3 模型預覽（只看外觀，不接戰鬥）
-    if (lab === "bobo3") {
+    // ?lab=bobo31：星露啵啵 V3.1 美術精修預覽（V3 保留不變，可在頁面上切換對照）
+    if (lab === "bobo3" || lab === "bobo31") {
       document.body.classList.add("lab-mode");
       void import("./lab/BoboV3Lab.ts")
-        .then((m) => m.startBoboV3Lab(canvas, hudRoot))
+        .then((m) => m.startBoboV3Lab(canvas, hudRoot, lab === "bobo31" ? "v31" : "v3"))
         .then(() => hideBoot())
         .catch((err: unknown) => {
           console.error(err);

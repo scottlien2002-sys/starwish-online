@@ -21,6 +21,11 @@ import { createEngine, createShadows, createSkyDome, pickQuality, setupRendering
 import { PerfOverlay } from "../render/PerfOverlay.ts";
 import { FrameRecorder, type BenchmarkSummary } from "../render/benchmark.ts";
 import { JellyV3Plugin } from "../monsters/star-dew-bobo-v3/JellyV3Plugin.ts";
+import { createJellyNoiseTexture, JellyV31Plugin } from "../monsters/star-dew-bobo-v31/JellyV31Plugin.ts";
+
+/** v3 = 第一版（材質與模型保持不變，作為對照基準）；v31 = V3.1 美術精修 */
+export type BoboLabVariant = "v3" | "v31";
+type Jelly = JellyV3Plugin | JellyV31Plugin;
 
 /**
  * 星露啵啵 V3 模型預覽（?lab=bobo3）。
@@ -61,7 +66,7 @@ export interface BoboV3DebugApi {
   info(): BoboV3Info;
   /** 第一隻的眼睛 UV 第一個座標（測試表情是否真的切換） */
   eyeUV0(): [number, number];
-  perf(): { fps: number; drawCalls: number; activeMeshes: number; pixelRatio: number; quality: string; jelly: boolean };
+  perf(): { fps: number; drawCalls: number; activeMeshes: number; pixelRatio: number; quality: string; jelly: boolean; variant: BoboLabVariant };
   benchmark(seconds?: number): Promise<BenchmarkSummary>;
 }
 
@@ -78,12 +83,14 @@ interface BoboV3Instance {
   mouth: Mesh;
   blush: Mesh;
   stars: Mesh;
-  jelly: JellyV3Plugin | null;
+  jelly: Jelly | null;
   eyeUV: Float32Array;
   mouthUV: Float32Array;
 }
 
-export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElement): Promise<void> {
+export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElement, variant: BoboLabVariant = "v3"): Promise<void> {
+  const v31 = variant === "v31";
+  const label = v31 ? "V3.1" : "V3";
   const quality = pickQuality();
   const engine = createEngine(canvas, quality);
   const scene = new Scene(engine);
@@ -119,11 +126,13 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
 
   // ---------- 載入 GLB（依畫質選 LOD） ----------
   const base = import.meta.env.BASE_URL;
-  const file = `bobo_v3_${quality.level}.glb`;
+  const file = v31 ? `bobo_v31_${quality.level}.glb` : `bobo_v3_${quality.level}.glb`;
   const container = await SceneLoader.LoadAssetContainerAsync(`${base}models/`, file, scene);
 
   // 共用材質（三隻共用；每隻的表情以各自的 UV 緩衝切換）
-  const mats = createMaterials(scene, container.materials as PBRMaterial[], quality.level !== "low");
+  const mats = v31
+    ? createMaterialsV31(scene, container.materials as PBRMaterial[], quality.level !== "low")
+    : createMaterials(scene, container.materials as PBRMaterial[], quality.level !== "low");
   const instances: BoboV3Instance[] = [];
   const spawn = (x: number, z: number, yaw: number): BoboV3Instance => {
     const inst = container.instantiateModelsToScene((n) => `${n}_${instances.length}`, false, { doNotInstantiate: true });
@@ -155,6 +164,8 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     blush.alphaIndex = 2;
     mouth.material = mats.mouth;
     mouth.alphaIndex = 3;
+    // V3.1：眼睛改為透明混合（邊緣平滑、無鋸齒），在果凍之後、腮紅之前畫
+    if (v31) eyes.alphaIndex = 2;
     for (const m of [body, eyes, stars]) shadows.addShadowCaster(m, false);
     render.glow?.addIncludedOnlyMesh(stars);
     for (const m of meshes) {
@@ -177,7 +188,10 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
   // 星星光暈：金色（與 V2 相同作法）
   if (render.glow) {
     render.glow.customEmissiveColorSelector = (mesh, _sub, material, result) => {
-      if (mesh.name.startsWith("Stars")) result.set(0.75, 0.45, 0.05, 1);
+      if (mesh.name.startsWith("Stars")) {
+        if (v31) result.set(0.42, 0.32, 0.06, 1); // V3.1：柔和光暈，五角輪廓保持清楚
+        else result.set(0.75, 0.45, 0.05, 1);
+      }
       else {
         const e = (material as StandardMaterial).emissiveColor;
         if (e) result.set(e.r, e.g, e.b, 1);
@@ -225,13 +239,14 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
   uiRoot.innerHTML = `
     <div class="v3-top">
     <div class="lab-title v3-title" data-layout="lab-title">
-      <div class="lab-name">星露啵啵 V3 <small>模型預覽</small></div>
+      <div class="lab-name">星露啵啵 ${label} <small>模型預覽</small></div>
       <div class="lab-state">畫質：${quality.level}・${file}</div>
     </div>
     <div class="lab-views v3-views">
       ${(["front", "side", "back"] as const).map((v) => `<button class="lab-view-btn" data-view="${v}" data-layout="btn-view-${v}">${VIEW_LABEL[v]}</button>`).join("")}
       <button class="lab-view-btn" data-count="1" data-layout="btn-count-1">1 隻</button>
       <button class="lab-view-btn" data-count="3" data-layout="btn-count-3">3 隻</button>
+      <button class="lab-view-btn v3-switch" data-layout="btn-switch">${v31 ? "看 V3" : "看 V3.1"}</button>
     </div>
     <button class="v3-bench lab-bench" data-layout="btn-bench">⏱ 效能測試（10 秒）</button>
     <div class="lab-bench-result v3-bench-result" hidden></div>
@@ -246,6 +261,13 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
   const fpsEl = uiRoot.querySelector<HTMLDivElement>(".lab-fps")!;
   const benchBtn = uiRoot.querySelector<HTMLButtonElement>(".lab-bench")!;
   const benchEl = uiRoot.querySelector<HTMLDivElement>(".lab-bench-result")!;
+  // V3 ↔ V3.1 切換：保留畫質等其他網址參數，同裝置、同條件比較
+  uiRoot.querySelector<HTMLButtonElement>(".v3-switch")!.addEventListener("click", () => {
+    const u = new URL(location.href);
+    u.searchParams.set("lab", v31 ? "bobo3" : "bobo31");
+    u.searchParams.delete("bench");
+    location.href = u.toString();
+  });
 
   let targetAlpha = VIEW_ALPHA.front;
   let snap = false;
@@ -307,7 +329,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
       const st = perf.stats();
       const shown = instances.filter((i) => i.root.isEnabled()).length;
       benchEl.innerHTML =
-        `<b>V3 效能測試（本機 WebGL 實測）</b><br>${file}・${shown} 隻・畫質 ${st.quality}・${st.pixelRatio}x・${r.seconds} 秒<br>` +
+        `<b>${label} 效能測試（本機 WebGL 實測）</b><br>${file}・${shown} 隻・畫質 ${st.quality}・${st.pixelRatio}x・${r.seconds} 秒<br>` +
         `平均 ${r.avgFps.toFixed(1)} FPS・最慢 1% ${r.low1Fps.toFixed(1)} FPS・最低 ${r.minFps.toFixed(1)} FPS<br>` +
         `Draw Calls 平均 ${r.avgDrawCalls.toFixed(0)}（最高 ${r.maxDrawCalls}）・畫面物件 ${st.activeMeshes}<br><small>點此關閉</small>`;
       benchEl.onclick = () => (benchEl.hidden = true);
@@ -334,7 +356,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     setExpression,
     setCount,
     info,
-    perf: () => ({ ...perf.stats(), jelly: !!instances[0]?.jelly?.jellyEnabled }),
+    perf: () => ({ ...perf.stats(), jelly: !!instances[0]?.jelly?.jellyEnabled, variant }),
     benchmark: runBenchmark,
     eyeUV0: () => {
       const uv = instances[0]!.eyes.getVerticesData(VertexBuffer.UVKind)!;
@@ -404,6 +426,72 @@ function createMaterials(scene: Scene, gltfMats: PBRMaterial[], useJelly: boolea
         }
       };
     }
+    return { material: m, jelly };
+  };
+  return { eyes, mouth, blush, stars, body };
+}
+
+/**
+ * V3.1 材質：身體（JellyV31Plugin，含畫在果凍內的腹部星星）、眼睛（透明混合、邊緣平滑）、
+ * 嘴／腮紅（與 V3 相同）、頭頂星星（清楚的金黃五角星，柔和不過曝）。
+ * 低畫質仍使用外掛（關閉內部星雲），否則會看不到腹部星星。
+ */
+function createMaterialsV31(scene: Scene, gltfMats: PBRMaterial[], fullJelly: boolean) {
+  const tex = (name: string): BaseTexture | null => gltfMats.find((m) => m.name === name)?.albedoTexture ?? null;
+  const eyeTex = tex("Bobo_Eyes");
+  const faceTex = tex("Bobo_Face");
+  if (eyeTex instanceof Texture) eyeTex.anisotropicFilteringLevel = 4;
+
+  const eyes = new StandardMaterial("BoboV31_Eyes", scene);
+  eyes.diffuseTexture = eyeTex;
+  if (eyes.diffuseTexture) eyes.diffuseTexture.hasAlpha = true;
+  eyes.useAlphaFromDiffuseTexture = true;
+  eyes.transparencyMode = 2; // ALPHABLEND：邊緣柔和（V3 的透明裁切在 iPhone 上有鋸齒）
+  eyes.emissiveColor = new Color3(0.8, 0.8, 0.84);
+  eyes.diffuseColor = new Color3(0.3, 0.3, 0.33);
+  eyes.specularColor = new Color3(1, 1, 1);
+  eyes.specularPower = 160;
+  eyes.zOffset = -1;
+
+  const decal = (name: string): StandardMaterial => {
+    const m = new StandardMaterial(name, scene);
+    m.diffuseTexture = faceTex;
+    if (m.diffuseTexture) m.diffuseTexture.hasAlpha = true;
+    m.useAlphaFromDiffuseTexture = true;
+    m.disableLighting = true;
+    m.emissiveColor = new Color3(0.95, 0.95, 0.95);
+    m.backFaceCulling = true;
+    m.zOffset = -2;
+    return m;
+  };
+  const mouth = decal("BoboV31_Mouth");
+  const blush = decal("BoboV31_Blush");
+
+  const stars = new StandardMaterial("BoboV31_Stars", scene);
+  stars.disableLighting = true;
+  // × 頂點色（中央奶油黃 → 邊緣金黃）：保持在色調映射肩部以下，不會過曝成白色或橘粉色
+  stars.emissiveColor = new Color3(1.0, 0.9, 0.5);
+  stars.backFaceCulling = false;
+
+  const noise = createJellyNoiseTexture(scene);
+  const body = (i: number): { material: StandardMaterial; jelly: JellyV31Plugin | null } => {
+    const m = new StandardMaterial(`BoboV31_Body_${i}`, scene);
+    m.diffuseColor = new Color3(0.42, 0.48, 0.95);
+    m.emissiveColor = new Color3(0.1, 0.07, 0.4);
+    m.specularColor = new Color3(0.04, 0.04, 0.05);
+    m.specularPower = 64;
+    m.alpha = 0.64;
+    m.useSpecularOverAlpha = false;
+    m.backFaceCulling = true;
+    const jelly = new JellyV31Plugin(m, noise);
+    jelly.height = 1;
+    jelly.nebula = fullJelly ? 1 : 0;
+    m.onError = () => {
+      if (jelly.jellyEnabled) {
+        console.warn("[bobo3] jelly V3.1 shader failed, fallback");
+        jelly.jellyEnabled = false;
+      }
+    };
     return { material: m, jelly };
   };
   return { eyes, mouth, blush, stars, body };

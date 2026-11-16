@@ -3,7 +3,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { loadPlaywright, serve } from "./static-server.mjs";
 
-const [distDir, outDir, browserName = "webkit", quality = "high"] = process.argv.slice(2);
+const [distDir, outDir, browserName = "webkit", quality = "high", lab = "bobo3"] = process.argv.slice(2);
 mkdirSync(outDir, { recursive: true });
 const pw = await loadPlaywright();
 const server = await serve(distDir);
@@ -12,7 +12,7 @@ const page = await browser.newPage({ viewport: { width: 852, height: 393 }, devi
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
 page.on("console", (m) => (m.type() === "error" || m.text().includes("[bobo3]")) && errors.push(`console.${m.type()}: ${m.text()}`));
-await page.goto(`${server.url}/?lab=bobo3&quality=${quality}&mobile=1`, { waitUntil: "load" });
+await page.goto(`${server.url}/?lab=${lab}&quality=${quality}&mobile=1`, { waitUntil: "load" });
 const ok = await page.waitForFunction(() => window.__bobo3?.ready === true || document.querySelector(".boot-status.error"), null, { timeout: 60000 }).then(() => page.evaluate(() => window.__bobo3?.ready === true)).catch(() => false);
 const shots = [];
 const shot = async (name, label) => {

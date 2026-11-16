@@ -122,7 +122,7 @@ def sd_wing(p, side):
     # 三片圓瓣彼此大量重疊：外緣只留下 2～3 個淺圓弧切口（不是張開的手指）
     # V3.1：瓣稍微分開（外緣出現清楚但柔和的圓弧切口），整體更圓潤
     # V3.1 第二版：三瓣更圓、重疊較多（外緣只留柔和圓弧），整體變薄、變輕
-    for ang, length, width in [(0.36, 0.25, 0.11), (0.0, 0.31, 0.125), (-0.34, 0.245, 0.105)]:
+    for ang, length, width in [(0.5, 0.235, 0.1), (0.0, 0.31, 0.11), (-0.46, 0.235, 0.095)]:
         dir_ = np.cos(ang) * d + np.sin(ang) * up
         side_dir = np.cross(nrm, dir_)
         c = root + dir_ * (length * 0.62)
@@ -138,7 +138,7 @@ def sd_wing(p, side):
         k0 = np.linalg.norm(qq, axis=-1)
         k1 = np.linalg.norm(qq / np.stack([np.full_like(th, length), np.full_like(th, width), th], -1), axis=-1)
         di = k0 * (k0 - 1) / np.maximum(k1, 1e-9)
-        out = di if out is None else smin(out, di, 0.035)
+        out = di if out is None else smin(out, di, 0.022)
     return out
 
 
