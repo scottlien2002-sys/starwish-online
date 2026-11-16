@@ -127,7 +127,6 @@ uniform vec3 j31StarN;
 uniform vec4 j31Params;
 uniform vec4 j31Star;
 uniform mat4 j31InvWorld;
-uniform sampler2D j31Noise;
 #endif`,
     };
   }
@@ -239,6 +238,8 @@ export function createJellyNoiseTexture(scene: Scene, size = 256): RawTexture {
 
 export const JELLY31_FUNCS = `
 #ifdef JELLY31
+// 取樣器不能放在 UBO 宣告裡（WebGL2 會被略過），在這裡宣告
+uniform sampler2D j31Noise;
 /* 雙平面投影取樣（物件座標的 xy 與 zy 平面混合）：便宜的 3D 星雲 */
 vec4 j31Tex(vec3 p, vec3 n) {
   vec4 a = texture2D(j31Noise, p.xy);
