@@ -20,7 +20,13 @@ const shot = async (name, label) => {
   await page.screenshot({ path: `${outDir}/${name}.png` });
   shots.push({ name, label });
 };
-if (ok) {
+const closeOnly = process.env.CLOSE_ONLY === "1";
+if (ok && closeOnly) {
+  // 只截正面近距離（高畫質在 CI 的 WebKit 軟體繪圖下近距離會截到空白，改用 Chromium 補一張）
+  await page.addStyleTag({ content: "#hud-root{visibility:hidden}" });
+  await page.evaluate(() => { window.__bobo3.setView("front"); window.__bobo3.setClose(true); });
+  await shot("c_front", "front close");
+} else if (ok) {
   // 隱藏 UI，只看模型
   await page.addStyleTag({ content: "#hud-root{visibility:hidden}" });
   for (const v of ["front", "side", "back"]) {

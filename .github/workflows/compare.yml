@@ -82,6 +82,7 @@ jobs:
             fi
             if grep -q "bobo32" cur/src/main.ts; then
               for q in high medium low; do node cur/tests/e2e/snap-bobo3.mjs cur/dist out/bobo32_$q webkit $q bobo32 || true; done
+              for l in bobo31 bobo32; do CLOSE_ONLY=1 node cur/tests/e2e/snap-bobo3.mjs cur/dist out/close_$l chromium high $l || true; done
             fi
           fi
           echo "{\"baseline\":\"${BASELINE}\",\"current\":\"${GITHUB_SHA}\",\"branch\":\"${GITHUB_REF_NAME}\"}" > out/meta.json

@@ -44,8 +44,9 @@ export class JellyV32Plugin extends MaterialPluginBase {
    */
   // 高度比建模位置略高（設定圖：星星在嘴下方、身體下半部中央；從上往下看時折射會讓它偏低）
   // V3.2：尺寸為 V3.1 的 75%、位置略上移、水平正中央
-  starCenter = new Vector3(0, 0.265, 0.54);
-  starNormal = new Vector3(0, -0.48, 0.8773).normalize();
+  starCenter = new Vector3(0, 0.248, 0.545);
+  // V3.2：星星平面較正對前方（V3.1 跟著腹部曲面往下傾，從正面看被壓扁）
+  starNormal = new Vector3(0, -0.22, 0.975).normalize();
   starOuter = 0.084;
   starInner = 0.042;
   height = 1;
@@ -324,15 +325,17 @@ export const JELLY32_MAIN = `
       float fill = smoothstep(0.004, -0.004, d) * face;
       float core = 1.0 - smoothstep(0.0, j32Star.x * 0.9, length(uv));
       // V3.2：柔和金黃（邊緣暖金 → 中央奶油金），不偏橘
-      vec3 gold = mix(vec3(1.0, 0.8, 0.3), vec3(1.0, 0.93, 0.6), core);
+      vec3 gold = mix(vec3(1.0, 0.76, 0.2), vec3(1.0, 0.9, 0.5), core);
+      // 輪廓內側一圈略深的暖金：五角星邊界清楚
+      gold *= mix(0.84, 1.0, smoothstep(0.0, -0.012, d));
       // 星星邊緣微微的立體（上亮下暗）
       gold *= 0.9 + 0.18 * clamp(uv.y / j32Star.x + 0.5, 0.0, 1.0);
       // 光暈兩層：貼著輪廓的細緻亮邊＋往外暈開的柔光（在果凍內部擴散的感覺）
       float dd = max(d, 0.0);
       float halo = (exp(-dd / 0.01) * 0.5 + exp(-dd / 0.045) * 0.26) * (1.0 - fill) * face;
       // 星星隔著一層果凍：保留一點果凍本色，內部星光仍疊在上面
-      color.rgb = mix(color.rgb, gold * vec3(0.95, 0.96, 1.0), fill * 0.86);
-      color.rgb += vec3(1.0, 0.8, 0.34) * halo * 0.5;
+      color.rgb = mix(color.rgb, gold * vec3(0.96, 0.96, 1.0), fill * 0.92);
+      color.rgb += vec3(1.0, 0.78, 0.3) * halo * 0.55;
       color.a = max(color.a, fill * 0.94);
       color.a = clamp(color.a + halo * 0.14, 0.0, 1.0);
     }
