@@ -1,4 +1,4 @@
-import{n as e}from"./scene.pure-DkB5Fm2r.js";import{o as t,t as n}from"./math.vector.pure-DST8O3ID.js";import{t as r}from"./math.color.pure-DobtDy7H.js";import{r as i}from"./buffer.pure-CGFpq70F.js";import{n as a}from"./texture.pure-C2CI4GQj.js";import{l as o}from"./pbrMaterial.pure-C61IP4Pq.js";import{M as s,N as c,O as l,S as u,a as d,c as f,j as p,k as m,l as h,o as g,s as _,u as ee,w as te,x as v}from"./index-q90qpOi9.js";function y(e,t){let n=[...e].sort((e,t)=>e-t),r=n.reduce((e,t)=>e+t,0),i=n.length,a=i?n[Math.min(i-1,Math.floor(i*.99))]:0,o=t.length?t.reduce((e,t)=>e+t,0)/t.length:0;return{seconds:Math.round(r*10)/10,frames:i,avgFps:i?i/Math.max(r,1e-6):0,low1Fps:a>0?1/a:0,minFps:i?1/n[i-1]:0,avgDrawCalls:o,maxDrawCalls:t.length?Math.max(...t):0}}var ne=class{warmup;target;elapsed=0;dts=[];draws=[];constructor(e,t=.5){this.target=e,this.warmup=t}get progress(){return Math.min(1,this.elapsed/(this.target+this.warmup))}record(e,t){return this.elapsed+=e,this.elapsed>this.warmup&&(this.dts.push(e),this.draws.push(t)),this.elapsed>=this.target+this.warmup}summary(){return y(this.dts,this.draws)}},b=class extends o{rim=new r(.55,.8,1);deep=new r(.2,.14,.78);top=new r(.3,.55,1);nebulaA=new r(.2,.85,1);nebulaB=new r(.6,.38,1);skyLow=new r(.95,.88,.98);skyHigh=new r(.55,.78,1);height=.8;strength=1;invWorld=n.Identity();nebula=1;enabled=!1;constructor(e){super(e,`JellyV3Plugin`,200,{JELLY3:!1}),this._enable(!0),this.enabled=!0}get jellyEnabled(){return this.enabled}set jellyEnabled(e){this.enabled!==e&&(this.enabled=e,this.markAllDefinesAsDirty())}getClassName(){return`JellyV3Plugin`}prepareDefines(e,t,n){e.JELLY3=this.enabled}getUniforms(){return{ubo:[{name:`j3Rim`,size:3,type:`vec3`},{name:`j3Deep`,size:3,type:`vec3`},{name:`j3Top`,size:3,type:`vec3`},{name:`j3NebA`,size:3,type:`vec3`},{name:`j3NebB`,size:3,type:`vec3`},{name:`j3SkyLow`,size:3,type:`vec3`},{name:`j3SkyHigh`,size:3,type:`vec3`},{name:`j3Params`,size:4,type:`vec4`},{name:`j3InvWorld`,size:16,type:`mat4`}],fragment:`#ifdef JELLY3
+import{n as e}from"./scene.pure-DkB5Fm2r.js";import{o as t,t as n}from"./math.vector.pure-DST8O3ID.js";import{t as r}from"./math.color.pure-DobtDy7H.js";import{r as i}from"./buffer.pure-CGFpq70F.js";import{n as a}from"./texture.pure-C2CI4GQj.js";import{l as o}from"./pbrMaterial.pure-C61IP4Pq.js";import{M as s,N as c,O as l,S as u,a as d,c as f,j as p,k as m,l as h,o as g,s as _,u as ee,w as te,x as v}from"./index-SKsd9krl.js";function y(e,t){let n=[...e].sort((e,t)=>e-t),r=n.reduce((e,t)=>e+t,0),i=n.length,a=i?n[Math.min(i-1,Math.floor(i*.99))]:0,o=t.length?t.reduce((e,t)=>e+t,0)/t.length:0;return{seconds:Math.round(r*10)/10,frames:i,avgFps:i?i/Math.max(r,1e-6):0,low1Fps:a>0?1/a:0,minFps:i?1/n[i-1]:0,avgDrawCalls:o,maxDrawCalls:t.length?Math.max(...t):0}}var ne=class{warmup;target;elapsed=0;dts=[];draws=[];constructor(e,t=.5){this.target=e,this.warmup=t}get progress(){return Math.min(1,this.elapsed/(this.target+this.warmup))}record(e,t){return this.elapsed+=e,this.elapsed>this.warmup&&(this.dts.push(e),this.draws.push(t)),this.elapsed>=this.target+this.warmup}summary(){return y(this.dts,this.draws)}},b=class extends o{rim=new r(.55,.8,1);deep=new r(.2,.14,.78);top=new r(.3,.55,1);nebulaA=new r(.2,.85,1);nebulaB=new r(.6,.38,1);skyLow=new r(.95,.88,.98);skyHigh=new r(.55,.78,1);height=.8;strength=1;invWorld=n.Identity();nebula=1;enabled=!1;constructor(e){super(e,`JellyV3Plugin`,200,{JELLY3:!1}),this._enable(!0),this.enabled=!0}get jellyEnabled(){return this.enabled}set jellyEnabled(e){this.enabled!==e&&(this.enabled=e,this.markAllDefinesAsDirty())}getClassName(){return`JellyV3Plugin`}prepareDefines(e,t,n){e.JELLY3=this.enabled}getUniforms(){return{ubo:[{name:`j3Rim`,size:3,type:`vec3`},{name:`j3Deep`,size:3,type:`vec3`},{name:`j3Top`,size:3,type:`vec3`},{name:`j3NebA`,size:3,type:`vec3`},{name:`j3NebB`,size:3,type:`vec3`},{name:`j3SkyLow`,size:3,type:`vec3`},{name:`j3SkyHigh`,size:3,type:`vec3`},{name:`j3Params`,size:4,type:`vec4`},{name:`j3InvWorld`,size:16,type:`mat4`}],fragment:`#ifdef JELLY3
 uniform vec3 j3Rim;
 uniform vec3 j3Deep;
 uniform vec3 j3Top;
@@ -74,7 +74,8 @@ float j3Stars(vec3 p, float density) {
     // 細碎星光：近層細密、遠層較大（三種密度）
     float st = j3Stars(p1, 16.0) * 0.8 + j3Stars(p1 + 1.7, 9.0) * 0.9 + j3Stars(p2 + 3.3, 6.0) * 0.6;
     // 底部光池（設定圖：底部中央青色發亮）
-    float pool = smoothstep(0.45, 0.0, length(p2.xz)) * (1.0 - smoothstep(0.0, 0.35, p2.y));
+    // 只在身體中後段底部，避免正面把腹部星星洗白
+    float pool = smoothstep(0.45, 0.0, length(p2.xz)) * (1.0 - smoothstep(0.0, 0.3, p2.y)) * (1.0 - smoothstep(0.15, 0.45, p2.z));
     vec3 inner = neb + vec3(0.85, 0.95, 1.0) * st + j3NebA * pool * 0.85;
     // 正面看進去最多、邊緣少（邊緣是表面反光）
     color.rgb += inner * 1.6 * jS * (0.35 + 0.65 * jNdV);
@@ -83,10 +84,13 @@ float j3Stars(vec3 p, float density) {
 
   // 腹部星星的暖光從果凍內部透出（物件座標：高 0.2、往前 0.5）
   {
-    vec3 jSd = lp - vec3(0.0, 0.2, 0.5);
+    vec3 jSd = lp - vec3(0.0, 0.23, 0.55);
     jSd.z *= 1.6;
     float jStarGlow = exp(-dot(jSd, jSd) / 0.016);
-    color.rgb += vec3(1.0, 0.72, 0.25) * jStarGlow * 0.55 * jS * (0.4 + 0.6 * jNdV);
+    // 星星前方的果凍變薄：看得到裡面的金色星星，帶一點藍紫色調，而不是貼在表面
+    color.rgb = mix(color.rgb, color.rgb * 0.6, jStarGlow * jS);
+    color.rgb += vec3(1.0, 0.72, 0.25) * jStarGlow * 0.3 * jS * (0.4 + 0.6 * jNdV);
+    color.a *= 1.0 - 0.6 * jStarGlow * jS;
   }
 
   // 天空反射＋藍紫邊緣光
