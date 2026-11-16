@@ -470,7 +470,7 @@ function createMaterialsV31(scene: Scene, gltfMats: PBRMaterial[], fullJelly: bo
   const stars = new StandardMaterial("BoboV31_Stars", scene);
   stars.disableLighting = true;
   // × 頂點色（中央奶油黃 → 邊緣金黃）：保持在色調映射肩部以下，不會過曝成白色或橘粉色
-  stars.emissiveColor = new Color3(1.0, 0.9, 0.5);
+  stars.emissiveColor = new Color3(1.0, 0.96, 0.62);
   stars.backFaceCulling = false;
 
   const noise = createJellyNoiseTexture(scene);

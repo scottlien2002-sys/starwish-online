@@ -35,14 +35,15 @@ export class JellyV31Plugin extends MaterialPluginBase {
   top = new Color3(0.5, 0.66, 1.0);
   nebulaA = new Color3(0.25, 0.75, 1.0); // 青藍星雲
   nebulaB = new Color3(0.62, 0.36, 1.0); // 紫色星雲
-  wing = new Color3(0.62, 0.78, 1.0);
+  wing = new Color3(0.56, 0.66, 1.0);
   skyLow = new Color3(0.95, 0.88, 0.98);
   skyHigh = new Color3(0.55, 0.78, 1.0);
   /**
    * 腹部星星（物件座標，Blender 尺寸、glTF→Babylon 座標）。
    * 位置取自 Blender 建模輸出 bobo_v31_info.json 的 belly_star_babylon（身體表面往內 0.045）
    */
-  starCenter = new Vector3(0, 0.2216, 0.5457);
+  // 高度比建模位置略高（設定圖：星星在嘴下方、身體下半部中央；從上往下看時折射會讓它偏低）
+  starCenter = new Vector3(0, 0.27, 0.53);
   starNormal = new Vector3(0, -0.48, 0.8773).normalize();
   starOuter = 0.11;
   starInner = 0.056;
@@ -282,7 +283,7 @@ export const JELLY31_MAIN = `
   base = mix(base, j31Wing * (0.85 + 0.25 * jWingT), jWing);
   color.rgb = mix(color.rgb, color.rgb * 0.25 + base * 0.8, jS * 0.85);
   // 翅膀更透
-  color.a = mix(color.a, color.a * 0.62, jWing);
+  color.a = mix(color.a, color.a * 0.5, jWing);
 
   if (j31Params.z > 0.5) {
     // 兩層深度（視差）：近層 0.1、遠層 0.3
@@ -300,7 +301,8 @@ export const JELLY31_MAIN = `
     // 柔和內部發光（中下方）
     float glow = smoothstep(0.55, 0.0, length(p2.xz)) * (1.0 - smoothstep(0.0, 0.5, p2.y));
     vec3 inner = neb + vec3(0.88, 0.96, 1.0) * (st + dust) + j31NebA * glow * 0.45;
-    float into = (0.3 + 0.7 * jNdV) * (1.0 - 0.6 * jWing);
+    // 翅膀與細觸角上的星雲淡一點（太細的地方星點會變成雜訊）
+    float into = (0.3 + 0.7 * jNdV) * (1.0 - 0.7 * jWing) * (1.0 - 0.75 * smoothstep(0.92, 1.05, lp.y));
     color.rgb += inner * 1.25 * jS * into;
     color.a = clamp(color.a + (st * 0.4 + n2 * 0.1) * jS * jNdV, 0.0, 1.0);
   }
@@ -310,14 +312,14 @@ export const JELLY31_MAIN = `
     vec3 c = j31StarC;
     vec3 n = j31StarN;
     float dn = dot(rd, n);
-    if (dn < -0.05 && length(lp - c) < 0.45) {
+    if (dn < -0.01 && length(lp - c) < 0.45) {
       float t = dot(c - lp, n) / dn;
       vec3 q = lp + rd * max(t, 0.0);
       vec3 ax = normalize(cross(vec3(0.0, 1.0, 0.0), n));
       vec3 ay = cross(n, ax);
       vec2 uv = vec2(dot(q - c, ax), dot(q - c, ay));
       float d = j31StarDist(uv, j31Star.x, j31Star.y, j31Star.z);
-      float face = smoothstep(0.05, 0.45, -dn);
+      float face = smoothstep(0.0, 0.3, -dn);
       float fill = smoothstep(0.004, -0.004, d) * face;
       float core = 1.0 - smoothstep(0.0, j31Star.x * 0.9, length(uv));
       vec3 gold = mix(vec3(1.0, 0.72, 0.12), vec3(1.0, 0.95, 0.62), core);
