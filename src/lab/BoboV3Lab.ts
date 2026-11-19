@@ -789,10 +789,16 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
   let animHold: number | null = null;
   const STAR_Y = 1.19; // 頭頂星星中心高度（身體模型座標）
   const starW = antennaWeight(STAR_Y);
-  const PATH_HALF = 0.45; // 移動預覽：在出生點左右各 0.45 公尺之間來回彈跳
+  const PATH_HALF = 0.45;
+  // 效能測試用：&repeat=1 → 一次性動畫（攻擊、受傷）播完回待機 0.3 秒後自動再播，10 秒測試期間一直有動作
+  const repeatOneShot = v38r && new URLSearchParams(location.search).get("repeat") === "1"; // 移動預覽：在出生點左右各 0.45 公尺之間來回彈跳
   const applyAnim = (dt: number): void => {
     if (!v38r) return;
     for (const it of instances) {
+      if (repeatOneShot && animHold === null && (anim === "attack" || anim === "hurt") && it.player.current === "idle" && it.player.time > 0.3) {
+        if (anim === "hurt") it.player.hurt();
+        else it.player.request("attack");
+      }
       let p: BoboPose;
       let travel = 0;
       if (animHold !== null) {
