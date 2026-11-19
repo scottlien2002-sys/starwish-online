@@ -305,29 +305,28 @@ export function createGlassMatcapV37(scene: Scene, size = 256): DynamicTexture {
   // 左上大片弧形反光（沿球體邊緣的月牙）
   ctx.save();
   ctx.beginPath();
-  ctx.arc(0.5 * S, 0.5 * S, 0.47 * S, Math.PI * 1.02, Math.PI * 1.62);
-  ctx.arc(0.53 * S, 0.53 * S, 0.37 * S, Math.PI * 1.6, Math.PI * 1.04, true);
+  ctx.arc(0.5 * S, 0.5 * S, 0.475 * S, Math.PI * 1.05, Math.PI * 1.6);
+  ctx.arc(0.515 * S, 0.515 * S, 0.43 * S, Math.PI * 1.58, Math.PI * 1.07, true);
   ctx.closePath();
   const arcG = ctx.createLinearGradient(0.1 * S, 0.15 * S, 0.45 * S, 0.45 * S);
-  arcG.addColorStop(0, "rgba(255,255,255,0.95)");
-  arcG.addColorStop(1, "rgba(220,235,255,0.35)");
+  arcG.addColorStop(0, "rgba(255,255,255,0.9)");
+  arcG.addColorStop(1, "rgba(220,235,255,0.25)");
   ctx.fillStyle = arcG;
   soften(S * 0.012, "rgba(255,255,255,0.8)");
   ctx.fill();
   ctx.restore();
   // 窗格高光（兩塊圓角矩形）
   ctx.save();
-  soften(S * 0.008, "rgba(255,255,255,0.9)");
-  ctx.fillStyle = "rgba(255,255,255,0.95)";
+  soften(S * 0.012, "rgba(255,255,255,0.7)");
+  ctx.fillStyle = "rgba(255,255,255,0.62)";
   const pane = (x: number, y: number, w: number, h: number): void => {
     ctx.beginPath();
     if (typeof ctx.roundRect === "function") ctx.roundRect(x * S, y * S, w * S, h * S, 0.02 * S);
     else ctx.rect(x * S, y * S, w * S, h * S);
     ctx.fill();
   };
-  pane(0.27, 0.24, 0.07, 0.09);
-  pane(0.355, 0.24, 0.07, 0.09);
-  pane(0.27, 0.345, 0.07, 0.06);
+  pane(0.29, 0.25, 0.045, 0.06);
+  pane(0.345, 0.25, 0.045, 0.06);
   ctx.restore();
   // 右上柔和反光、頂部微光
   radial(0.72, 0.3, 0.1, [
@@ -344,8 +343,8 @@ export function createGlassMatcapV37(scene: Scene, size = 256): DynamicTexture {
   ctx.arc(0.5 * S, 0.5 * S, 0.49 * S, Math.PI * 0.2, Math.PI * 0.8);
   ctx.arc(0.5 * S, 0.44 * S, 0.43 * S, Math.PI * 0.78, Math.PI * 0.22, true);
   ctx.closePath();
-  soften(S * 0.02, "rgba(90,235,255,0.75)");
-  ctx.fillStyle = "rgba(90,235,255,0.75)";
+  soften(S * 0.02, "rgba(70,230,255,0.8)");
+  ctx.fillStyle = "rgba(70,230,255,0.8)";
   ctx.fill();
   ctx.restore();
   // 左右兩側淡粉紫
@@ -455,7 +454,8 @@ export const JELLY37_MAIN = `
     float srcGlow = exp(-d2 / 0.09) * body;
     float lower = (1.0 - smoothstep(0.0, 0.45, lp.y)) * smoothstep(0.8, 0.15, length(lp.xz)) * body;
     vec3 glowCol = mix(j37NebA, vec3(0.85, 1.0, 1.0), srcGlow * 0.6);
-    color.rgb += glowCol * (srcGlow * 0.75 + lower * 0.35) * j37Glass.w * jS;
+    color.rgb += glowCol * (srcGlow * 1.15 + lower * 0.4) * j37Glass.w * jS;
+    color.a = max(color.a, srcGlow * 0.85 * j37Glass.w * jS);
     float band = smoothstep(0.015, 0.06, lp.y) * (1.0 - smoothstep(0.07, 0.17, lp.y)) * (1.0 - jNdV) * body;
     color.rgb += vec3(0.6, 0.98, 1.0) * band * 0.5 * j37Glass.w * jS;
   }
@@ -501,7 +501,10 @@ export const JELLY37_MAIN = `
   color.a = clamp(color.a + mcL * 0.55 * j37Glass.x * jS, 0.0, 1.0);
   // 整圈明亮的邊緣光（主視覺的白色輪廓）
   float rimW = smoothstep(0.42, 0.0, jNdV);
-  color.rgb += j37Rim * (rimW * 0.62 + jFres * 0.25) * j37Glass.y * jS;
+  // 上半部白色邊緣光、下半部偏青（設定圖底部是亮青光，不是奶白）
+  float rimLow = 1.0 - smoothstep(-0.55, 0.1, nV.y);
+  vec3 rimCol = mix(j37Rim, vec3(0.35, 0.9, 1.0), rimLow * 0.8);
+  color.rgb += rimCol * (rimW * mix(0.62, 0.42, rimLow) + jFres * 0.22) * j37Glass.y * jS;
   color.a = clamp(color.a + rimW * 0.3 * j37Glass.y * jS, 0.0, 1.0);
   // 虹彩：邊緣附近粉紫 → 青色的薄膜色帶（隨角度變化）
   float irB = smoothstep(0.65, 0.2, jNdV) * smoothstep(0.0, 0.12, jNdV);

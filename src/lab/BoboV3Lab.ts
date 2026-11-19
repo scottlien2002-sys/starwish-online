@@ -446,7 +446,8 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     refMode = on;
     skyDome.setEnabled(!on);
     ground.setEnabled(!on);
-    scene.clearColor = on ? new Color4(0.2, 0.22, 0.34, 1) : clear0;
+    // 色調映射與曝光會把背景調亮，所以設定得比設定圖面板（約 #343a5a）更深
+    scene.clearColor = on ? new Color4(0.075, 0.085, 0.16, 1) : clear0;
     scene.fogMode = on ? 0 : fogMode0;
     camera.beta = on ? 1.5 : 1.3;
     camera.target.y = on ? 0.42 : 0.5;
