@@ -296,10 +296,11 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     {
       const ctx = haloCanvas.getContext("2d")!;
       const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
-      g.addColorStop(0, "rgba(255,226,140,0.9)");
-      g.addColorStop(0.3, "rgba(255,200,90,0.45)");
-      g.addColorStop(0.65, "rgba(255,180,70,0.12)");
-      g.addColorStop(1, "rgba(255,170,60,0)");
+      // 檸檬金黃（設定圖頭頂星星的柔光），不偏橘
+      g.addColorStop(0, "rgba(255,244,170,0.85)");
+      g.addColorStop(0.3, "rgba(255,232,130,0.42)");
+      g.addColorStop(0.65, "rgba(255,222,110,0.12)");
+      g.addColorStop(1, "rgba(255,215,100,0)");
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, 128, 128);
     }
@@ -320,7 +321,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
       blob.thinInstanceCount = shown.length;
       while (sprites.length < instances.length) {
         const sp = new Sprite(`BoboV35_Halo_${sprites.length}`, halo);
-        sp.width = sp.height = 0.34;
+        sp.width = sp.height = 0.42;
         sprites.push(sp);
       }
       instances.forEach((it, k) => {
@@ -687,6 +688,8 @@ function createMaterialsV31(scene: Scene, gltfMats: PBRMaterial[], fullJelly: bo
   stars.disableLighting = true;
   // × 頂點色（中央奶油黃 → 邊緣金黃）：保持在色調映射肩部以下，不會過曝成白色或橘粉色
   stars.emissiveColor = new Color3(1.0, 0.96, 0.62);
+  // V3.5：頭頂星星偏檸檬黃（模型頂點色邊緣是暖金，提高綠色讓整體不偏橘）；V3.4 以前不變
+  if (jellyVersion === "v35") stars.emissiveColor = new Color3(1.0, 1.1, 0.8);
   stars.backFaceCulling = false;
 
   const noise =

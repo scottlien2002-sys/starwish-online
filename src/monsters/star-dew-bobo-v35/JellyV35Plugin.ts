@@ -321,6 +321,12 @@ export const JELLY35_MAIN = `
     color.a = clamp(color.a + (st * 0.3 + n3 * 0.08) * jS * jNdV * (1.0 - jWing), 0.0, 1.0);
   }
 
+  // 內部亮青（設定圖：身體下半部從裡面透出的青色光）：不隨視角減弱，邊緣也看得到；低畫質也保留
+  {
+    float cyan = (1.0 - smoothstep(0.02, 0.42, lp.y)) * (1.0 - jWing) * smoothstep(0.75, 0.2, length(lp.xz));
+    color.rgb += j35NebA * cyan * (0.22 + 0.18 * jNdV) * jS;
+  }
+
   // 腹部星星：沿折射視線找到身體內的星星平面，在那裡畫一顆圓角金星＋光暈
   {
     vec3 c = j35StarC;
