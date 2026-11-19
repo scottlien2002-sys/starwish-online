@@ -1,0 +1,84 @@
+{
+  "lods": {
+    "high": {
+      "bytes": 425568,
+      "triangles": {
+        "Body_high": 6998,
+        "Eyes": 1296,
+        "Mouth": 200,
+        "Blush": 256,
+        "Stars": 864
+      },
+      "triangles_total": 9614,
+      "objects": 5,
+      "materials": 4
+    },
+    "medium": {
+      "bytes": 343972,
+      "triangles": {
+        "Body_medium": 3598,
+        "Eyes": 1296,
+        "Mouth": 200,
+        "Blush": 256,
+        "Stars": 864
+      },
+      "triangles_total": 6214,
+      "objects": 5,
+      "materials": 4
+    },
+    "low": {
+      "bytes": 298360,
+      "triangles": {
+        "Body_low": 1698,
+        "Eyes": 1296,
+        "Mouth": 200,
+        "Blush": 256,
+        "Stars": 864
+      },
+      "triangles_total": 4314,
+      "objects": 5,
+      "materials": 4
+    }
+  },
+  "game_height_m": 0.8,
+  "belly_star_blender": {
+    "center": [
+      -0.0001244162122020498,
+      -0.5202421545982361,
+      0.2020435631275177
+    ],
+    "normal": [
+      0.0027648047544062138,
+      -0.9989645481109619,
+      -0.0454125814139843
+    ],
+    "outer": 0.11,
+    "inner": 0.062
+  },
+  "belly_star_babylon": {
+    "center": [
+      0.0001244162122020498,
+      0.2020435631275177,
+      0.5202421545982361
+    ],
+    "normal": [
+      -0.0027648047544062138,
+      -0.0454125814139843,
+      0.9989645481109619
+    ]
+  },
+  "bbox_min_blender": [
+    -0.72,
+    -0.452,
+    0.014
+  ],
+  "bbox_max_blender": [
+    0.719,
+    0.452,
+    1.065
+  ],
+  "textures": {
+    "bobo_v38_eyes.png": 153551,
+    "bobo_v38_face.png": 33031
+  }
+}
