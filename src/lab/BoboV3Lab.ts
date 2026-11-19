@@ -569,10 +569,13 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
       <button class="lab-view-btn" data-count="3" data-layout="btn-count-3">3 隻</button>
       <button class="lab-view-btn v3-switch" data-layout="btn-switch">看 ${VARIANT_LABEL[VARIANT_NEXT[variant]]}</button>
       <button class="lab-view-btn v3-ref" data-layout="btn-ref">設定圖對照</button>
-      ${v38r ? `<button class="lab-view-btn" data-anim="none" data-layout="btn-anim-none">⏸ 靜止</button><button class="lab-view-btn" data-anim="idle" data-layout="btn-anim-idle">🫧 待機</button>` : ""}
     </div>
     <button class="v3-bench lab-bench" data-layout="btn-bench">⏱ 效能測試（10 秒）</button>
-    <button class="lab-view-btn v3-cost" data-layout="btn-cost">🔍 成本分析（約 35 秒）</button>
+    ${
+      v38r
+        ? `<div class="v3-row"><button class="lab-view-btn v3-cost" data-layout="btn-cost">🔍 成本分析（約 35 秒）</button><button class="lab-view-btn v3-anim" data-layout="btn-anim">🫧 待機</button></div>`
+        : `<button class="lab-view-btn v3-cost" data-layout="btn-cost">🔍 成本分析（約 35 秒）</button>`
+    }
     <div class="lab-bench-result v3-bench-result" hidden></div>
     </div>
     <div class="lab-fps" data-layout="lab-fps">-- FPS</div>
@@ -582,7 +585,9 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
   const viewButtons = [...uiRoot.querySelectorAll<HTMLButtonElement>("[data-view]")];
   const exprButtons = [...uiRoot.querySelectorAll<HTMLButtonElement>("[data-expr]")];
   const countButtons = [...uiRoot.querySelectorAll<HTMLButtonElement>("[data-count]")];
-  const animButtons = [...uiRoot.querySelectorAll<HTMLButtonElement>("[data-anim]")];
+  // V3.8R 第四階段：動畫切換按鈕（點一下輪流：待機 → 靜止 → 待機…；之後加入移動、攻擊等）
+  const animBtn = uiRoot.querySelector<HTMLButtonElement>(".v3-anim");
+  const ANIM_LABEL: Record<BoboAnimName, string> = { none: "⏸ 靜止", idle: "🫧 待機" };
   const fpsEl = uiRoot.querySelector<HTMLDivElement>(".lab-fps")!;
   const benchBtn = uiRoot.querySelector<HTMLButtonElement>(".lab-bench")!;
   const benchEl = uiRoot.querySelector<HTMLDivElement>(".lab-bench-result")!;
@@ -717,12 +722,12 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     anim = a;
     animTime = 0;
     animHold = null;
-    for (const b of animButtons) b.classList.toggle("active", b.dataset.anim === a);
+    if (animBtn) animBtn.textContent = ANIM_LABEL[a];
     if (a === "none") applyAnim(0);
   };
 
-  for (const b of animButtons) b.addEventListener("click", () => setAnim(b.dataset.anim as BoboAnimName));
-  for (const b of animButtons) b.classList.toggle("active", b.dataset.anim === anim);
+  animBtn?.addEventListener("click", () => setAnim(BOBO_ANIMS[(BOBO_ANIMS.indexOf(anim) + 1) % BOBO_ANIMS.length]!));
+  if (animBtn) animBtn.textContent = ANIM_LABEL[anim];
 
   let uiTimer = 0;
   engine.runRenderLoop(() => {

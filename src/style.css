@@ -548,6 +548,13 @@ body {
   flex-wrap: wrap;
 }
 
+/* V3.8R：成本分析與動畫切換同一列（直向、橫向都不會壓到下方表情按鈕） */
+.v3-top .v3-row {
+  display: flex;
+  gap: 6px;
+  pointer-events: none;
+}
+
 .v3-bench {
   min-height: 48px;
   padding: 0 16px;
