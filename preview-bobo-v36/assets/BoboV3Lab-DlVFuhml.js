@@ -1,4 +1,4 @@
-import{n as e}from"./scene.pure-BGKq890p.js";import{o as t,t as n}from"./math.vector.pure-DST8O3ID.js";import{t as r}from"./math.color.pure-D3LZPd96.js";import{r as i}from"./buffer.pure-BQQy_Hxi.js";import{n as a}from"./texture.pure-DMXFILnG.js";import{l as o}from"./pbrMaterial.pure-CwSCcVZ3.js";import{t as s}from"./constants-DlOANaVb.js";import{A as c,C as l,E as u,F as d,I as f,L as p,M as m,P as h,a as g,c as _,j as ee,l as te,o as ne,s as re,u as ie,v as ae,w as oe,y as se}from"./index-CQhYw77F.js";function v(e,t){let n=[...e].sort((e,t)=>e-t),r=n.reduce((e,t)=>e+t,0),i=n.length,a=i?n[Math.min(i-1,Math.floor(i*.99))]:0,o=t.length?t.reduce((e,t)=>e+t,0)/t.length:0;return{seconds:Math.round(r*10)/10,frames:i,avgFps:i?i/Math.max(r,1e-6):0,low1Fps:a>0?1/a:0,minFps:i?1/n[i-1]:0,avgDrawCalls:o,maxDrawCalls:t.length?Math.max(...t):0}}var ce=class{warmup;target;elapsed=0;dts=[];draws=[];constructor(e,t=.5){this.target=e,this.warmup=t}get progress(){return Math.min(1,this.elapsed/(this.target+this.warmup))}record(e,t){return this.elapsed+=e,this.elapsed>this.warmup&&(this.dts.push(e),this.draws.push(t)),this.elapsed>=this.target+this.warmup}summary(){return v(this.dts,this.draws)}},y=class extends o{rim=new r(.55,.8,1);deep=new r(.2,.14,.78);top=new r(.3,.55,1);nebulaA=new r(.2,.85,1);nebulaB=new r(.6,.38,1);skyLow=new r(.95,.88,.98);skyHigh=new r(.55,.78,1);height=.8;strength=1;invWorld=n.Identity();nebula=1;enabled=!1;constructor(e){super(e,`JellyV3Plugin`,200,{JELLY3:!1}),this._enable(!0),this.enabled=!0}get jellyEnabled(){return this.enabled}set jellyEnabled(e){this.enabled!==e&&(this.enabled=e,this.markAllDefinesAsDirty())}getClassName(){return`JellyV3Plugin`}prepareDefines(e,t,n){e.JELLY3=this.enabled}getUniforms(){return{ubo:[{name:`j3Rim`,size:3,type:`vec3`},{name:`j3Deep`,size:3,type:`vec3`},{name:`j3Top`,size:3,type:`vec3`},{name:`j3NebA`,size:3,type:`vec3`},{name:`j3NebB`,size:3,type:`vec3`},{name:`j3SkyLow`,size:3,type:`vec3`},{name:`j3SkyHigh`,size:3,type:`vec3`},{name:`j3Params`,size:4,type:`vec4`},{name:`j3InvWorld`,size:16,type:`mat4`}],fragment:`#ifdef JELLY3
+import{n as e}from"./scene.pure-BGKq890p.js";import{o as t,t as n}from"./math.vector.pure-DST8O3ID.js";import{t as r}from"./math.color.pure-D3LZPd96.js";import{r as i}from"./buffer.pure-BQQy_Hxi.js";import{n as a}from"./texture.pure-DMXFILnG.js";import{l as o}from"./pbrMaterial.pure-CwSCcVZ3.js";import{t as s}from"./constants-DlOANaVb.js";import{A as c,C as l,E as u,F as d,I as f,L as p,M as m,P as h,a as g,c as _,j as ee,l as te,o as ne,s as re,u as ie,v as ae,w as oe,y as se}from"./index-ZQi-Go4K.js";function v(e,t){let n=[...e].sort((e,t)=>e-t),r=n.reduce((e,t)=>e+t,0),i=n.length,a=i?n[Math.min(i-1,Math.floor(i*.99))]:0,o=t.length?t.reduce((e,t)=>e+t,0)/t.length:0;return{seconds:Math.round(r*10)/10,frames:i,avgFps:i?i/Math.max(r,1e-6):0,low1Fps:a>0?1/a:0,minFps:i?1/n[i-1]:0,avgDrawCalls:o,maxDrawCalls:t.length?Math.max(...t):0}}var ce=class{warmup;target;elapsed=0;dts=[];draws=[];constructor(e,t=.5){this.target=e,this.warmup=t}get progress(){return Math.min(1,this.elapsed/(this.target+this.warmup))}record(e,t){return this.elapsed+=e,this.elapsed>this.warmup&&(this.dts.push(e),this.draws.push(t)),this.elapsed>=this.target+this.warmup}summary(){return v(this.dts,this.draws)}},y=class extends o{rim=new r(.55,.8,1);deep=new r(.2,.14,.78);top=new r(.3,.55,1);nebulaA=new r(.2,.85,1);nebulaB=new r(.6,.38,1);skyLow=new r(.95,.88,.98);skyHigh=new r(.55,.78,1);height=.8;strength=1;invWorld=n.Identity();nebula=1;enabled=!1;constructor(e){super(e,`JellyV3Plugin`,200,{JELLY3:!1}),this._enable(!0),this.enabled=!0}get jellyEnabled(){return this.enabled}set jellyEnabled(e){this.enabled!==e&&(this.enabled=e,this.markAllDefinesAsDirty())}getClassName(){return`JellyV3Plugin`}prepareDefines(e,t,n){e.JELLY3=this.enabled}getUniforms(){return{ubo:[{name:`j3Rim`,size:3,type:`vec3`},{name:`j3Deep`,size:3,type:`vec3`},{name:`j3Top`,size:3,type:`vec3`},{name:`j3NebA`,size:3,type:`vec3`},{name:`j3NebB`,size:3,type:`vec3`},{name:`j3SkyLow`,size:3,type:`vec3`},{name:`j3SkyHigh`,size:3,type:`vec3`},{name:`j3Params`,size:4,type:`vec4`},{name:`j3InvWorld`,size:16,type:`mat4`}],fragment:`#ifdef JELLY3
 uniform vec3 j3Rim;
 uniform vec3 j3Deep;
 uniform vec3 j3Top;
@@ -654,7 +654,7 @@ float j35StarDist(vec2 uv, float outer, float inner, float sharp) {
   color.a = max(color.a, jHL * 0.9 * jS);
 }
 #endif
-`,R=class extends o{rim=new r(.78,.95,1);core=new r(.3,.6,1);shell=new r(.08,.2,.82);top=new r(.2,.42,.98);nebulaA=new r(.3,.9,1);nebulaB=new r(.42,.3,.95);wing=new r(.5,.72,1);wingTip=new r(.74,.96,1);skyLow=new r(.95,.88,.98);skyHigh=new r(.55,.78,1);starCenter=new t(0,.248,.545);starNormal=new t(0,-.22,.975).normalize();starOuter=.084;starInner=.042;height=1;strength=1;nebula=1;invWorld=n.Identity();enabled=!1;noise;constructor(e,t){super(e,`JellyV36Plugin`,200,{JELLY36:!1}),this.noise=t,this._enable(!0),this.enabled=!0}get jellyEnabled(){return this.enabled}set jellyEnabled(e){this.enabled!==e&&(this.enabled=e,this.markAllDefinesAsDirty())}getClassName(){return`JellyV36Plugin`}prepareDefines(e,t,n){e.JELLY36=this.enabled}isReadyForSubMesh(e,t,n,r){return!this.enabled||this.noise.isReady()}getSamplers(e){e.push(`j36Noise`)}getActiveTextures(e){e.push(this.noise)}hasTexture(e){return e===this.noise}getUniforms(){return{ubo:[{name:`j36Rim`,size:3,type:`vec3`},{name:`j36Core`,size:3,type:`vec3`},{name:`j36Shell`,size:3,type:`vec3`},{name:`j36Top`,size:3,type:`vec3`},{name:`j36NebA`,size:3,type:`vec3`},{name:`j36NebB`,size:3,type:`vec3`},{name:`j36Wing`,size:3,type:`vec3`},{name:`j36WingTip`,size:3,type:`vec3`},{name:`j36SkyLow`,size:3,type:`vec3`},{name:`j36SkyHigh`,size:3,type:`vec3`},{name:`j36StarC`,size:3,type:`vec3`},{name:`j36StarN`,size:3,type:`vec3`},{name:`j36Params`,size:4,type:`vec4`},{name:`j36Star`,size:4,type:`vec4`},{name:`j36InvWorld`,size:16,type:`mat4`}],fragment:`#ifdef JELLY36
+`,R=class extends o{rim=new r(.78,.95,1);core=new r(.3,.6,1);shell=new r(.05,.14,.7);top=new r(.2,.42,.98);nebulaA=new r(.3,.9,1);nebulaB=new r(.42,.3,.95);wing=new r(.5,.72,1);wingTip=new r(.74,.96,1);skyLow=new r(.95,.88,.98);skyHigh=new r(.55,.78,1);starCenter=new t(0,.248,.545);starNormal=new t(0,-.22,.975).normalize();starOuter=.084;starInner=.042;height=1;strength=1;nebula=1;invWorld=n.Identity();enabled=!1;noise;constructor(e,t){super(e,`JellyV36Plugin`,200,{JELLY36:!1}),this.noise=t,this._enable(!0),this.enabled=!0}get jellyEnabled(){return this.enabled}set jellyEnabled(e){this.enabled!==e&&(this.enabled=e,this.markAllDefinesAsDirty())}getClassName(){return`JellyV36Plugin`}prepareDefines(e,t,n){e.JELLY36=this.enabled}isReadyForSubMesh(e,t,n,r){return!this.enabled||this.noise.isReady()}getSamplers(e){e.push(`j36Noise`)}getActiveTextures(e){e.push(this.noise)}hasTexture(e){return e===this.noise}getUniforms(){return{ubo:[{name:`j36Rim`,size:3,type:`vec3`},{name:`j36Core`,size:3,type:`vec3`},{name:`j36Shell`,size:3,type:`vec3`},{name:`j36Top`,size:3,type:`vec3`},{name:`j36NebA`,size:3,type:`vec3`},{name:`j36NebB`,size:3,type:`vec3`},{name:`j36Wing`,size:3,type:`vec3`},{name:`j36WingTip`,size:3,type:`vec3`},{name:`j36SkyLow`,size:3,type:`vec3`},{name:`j36SkyHigh`,size:3,type:`vec3`},{name:`j36StarC`,size:3,type:`vec3`},{name:`j36StarN`,size:3,type:`vec3`},{name:`j36Params`,size:4,type:`vec4`},{name:`j36Star`,size:4,type:`vec4`},{name:`j36InvWorld`,size:16,type:`mat4`}],fragment:`#ifdef JELLY36
 uniform vec3 j36Rim;
 uniform vec3 j36Core;
 uniform vec3 j36Shell;
@@ -712,7 +712,7 @@ float j36StarDist(vec2 uv, float outer, float inner, float sharp) {
   // 本色：邊緣深藍 → 中央柔和青藍（設定圖中間亮、邊緣深）；頂部略淡
   float h = clamp(lp.y, 0.0, 1.0);
   vec3 shell = mix(j36Shell, j36Top, smoothstep(0.45, 1.0, h) * 0.6);
-  vec3 base = mix(shell, j36Core, smoothstep(0.15, 0.9, jNdV) * 0.85);
+  vec3 base = mix(shell, j36Core, smoothstep(0.3, 0.95, jNdV) * 0.8);
   vec3 wingCol = mix(j36Wing, j36WingTip, smoothstep(0.0, 1.0, jWingT));
   base = mix(base, wingCol, jWing);
   color.rgb = mix(color.rgb, color.rgb * 0.1 + base * 0.88, jS * 0.94);
@@ -735,9 +735,9 @@ float j36StarDist(vec2 uv, float outer, float inner, float sharp) {
     float n2 = smoothstep(0.46, 0.76, t2.r);
     float n3 = smoothstep(0.42, 0.72, t3.g);
     float low = 1.0 - smoothstep(0.05, 0.75, p3.y);
-    vec3 neb = j36NebA * n2 * 0.42 + j36NebB * n3 * (0.32 + 0.3 * low);
+    vec3 neb = j36NebA * n2 * 0.5 + j36NebB * n3 * (0.36 + 0.3 * low);
     // 星光：近層較稀疏但清楚、中層細光點、遠層暗
-    float st = pow(t1.b, 4.0) * 1.1 + pow(t2.b, 2.6) * 0.45 + pow(t3.b, 2.0) * 0.2;
+    float st = pow(t1.b, 3.5) * 1.45 + pow(t2.b, 2.4) * 0.6 + pow(t3.b, 2.0) * 0.24;
     float dust = smoothstep(0.7, 0.94, t2.a) * 0.12;
     float core = smoothstep(0.55, 0.0, length(p2.xz)) * (1.0 - smoothstep(0.1, 0.6, p2.y));
     vec3 inner = neb + vec3(0.88, 0.96, 1.0) * (st + dust) + j36NebA * core * 0.3;
@@ -751,9 +751,9 @@ float j36StarDist(vec2 uv, float outer, float inner, float sharp) {
   {
     float body = 1.0 - jWing;
     float cyan = (1.0 - smoothstep(0.0, 0.42, lp.y)) * smoothstep(0.8, 0.15, length(lp.xz)) * body;
-    color.rgb += j36NebA * cyan * (0.34 + 0.2 * jNdV) * jS;
+    color.rgb += j36NebA * cyan * (0.5 + 0.22 * jNdV) * jS;
     float band = smoothstep(0.015, 0.06, lp.y) * (1.0 - smoothstep(0.07, 0.17, lp.y)) * (1.0 - jNdV) * body;
-    color.rgb += vec3(0.6, 0.98, 1.0) * band * 0.35 * jS;
+    color.rgb += vec3(0.6, 0.98, 1.0) * band * 0.5 * jS;
   }
 
   // 腹部星星：沿折射視線找到身體內的星星平面，在那裡畫一顆圓角金星＋光暈
