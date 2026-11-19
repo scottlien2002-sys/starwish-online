@@ -84,6 +84,13 @@ jobs:
               for q in high medium low; do node cur/tests/e2e/snap-bobo3.mjs cur/dist out/bobo32_$q webkit $q bobo32 || true; done
               for l in bobo31 bobo32; do CLOSE_ONLY=1 node cur/tests/e2e/snap-bobo3.mjs cur/dist out/close_$l chromium high $l || true; done
             fi
+            if grep -q "bobo33" cur/src/main.ts; then
+              for q in high medium low; do node cur/tests/e2e/snap-bobo3.mjs cur/dist out/bobo33_$q webkit $q bobo33 || true; done
+              CLOSE_ONLY=1 node cur/tests/e2e/snap-bobo3.mjs cur/dist out/close_bobo33 chromium high bobo33 || true
+              # 正面、側面、背面（Chromium 高畫質，與近距離對照同一環境）
+              node cur/tests/e2e/snap-bobo3.mjs cur/dist out/chr_bobo33 chromium high bobo33 || true
+              node cur/tests/e2e/snap-bobo3.mjs cur/dist out/chr_bobo32 chromium high bobo32 || true
+            fi
           fi
           echo "{\"baseline\":\"${BASELINE}\",\"current\":\"${GITHUB_SHA}\",\"branch\":\"${GITHUB_REF_NAME}\"}" > out/meta.json
 
@@ -95,6 +102,7 @@ jobs:
             feature/render-bobo-v3) CB=compare-bobo-v3 ;;
             feature/render-bobo-v31) CB=compare-bobo-v31 ;;
             feature/render-bobo-v32) CB=compare-bobo-v32 ;;
+            feature/render-bobo-v33) CB=compare-bobo-v33 ;;
             *) CB=compare ;;
           esac
           echo "比較圖分支：$CB"

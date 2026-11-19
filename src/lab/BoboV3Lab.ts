@@ -1,5 +1,6 @@
 import "@babylonjs/loaders/glTF";
 import {
+  type AbstractMesh,
   ArcRotateCamera,
   type BaseTexture,
   Color3,
@@ -25,11 +26,27 @@ import { createJellyNoiseTexture, JellyV31Plugin } from "../monsters/star-dew-bo
 import { createJellyNoiseTextureV32, JellyV32Plugin } from "../monsters/star-dew-bobo-v32/JellyV32Plugin.ts";
 
 /** v3 = 第一版（材質與模型保持不變，作為對照基準）；v31 = V3.1 美術精修 */
-export type BoboLabVariant = "v3" | "v31" | "v32";
+export type BoboLabVariant = "v3" | "v31" | "v32" | "v33";
 type Jelly = JellyV3Plugin | JellyV31Plugin | JellyV32Plugin;
-const VARIANT_LAB: Record<BoboLabVariant, string> = { v3: "bobo3", v31: "bobo31", v32: "bobo32" };
-const VARIANT_LABEL: Record<BoboLabVariant, string> = { v3: "V3", v31: "V3.1", v32: "V3.2" };
-const VARIANT_NEXT: Record<BoboLabVariant, BoboLabVariant> = { v3: "v31", v31: "v32", v32: "v3" };
+const VARIANT_LAB: Record<BoboLabVariant, string> = { v3: "bobo3", v31: "bobo31", v32: "bobo32", v33: "bobo33" };
+const VARIANT_LABEL: Record<BoboLabVariant, string> = { v3: "V3", v31: "V3.1", v32: "V3.2", v33: "V3.3" };
+const VARIANT_NEXT: Record<BoboLabVariant, BoboLabVariant> = { v3: "v31", v31: "v32", v32: "v33", v33: "v3" };
+
+/** V3.3 起：腹部星星的定義寫在模型檔（根節點 extras.bellyStar），由頁面讀取後交給果凍著色器繪製 */
+interface BellyStarDef {
+  version: string;
+  outer: number;
+  inner: number;
+  center: [number, number, number];
+  normal: [number, number, number];
+}
+function readBellyStar(container: { transformNodes: TransformNode[]; meshes: AbstractMesh[] }): BellyStarDef | null {
+  for (const n of [...container.transformNodes, ...container.meshes]) {
+    const star = (n.metadata as { gltf?: { extras?: { bellyStar?: BellyStarDef } } } | null)?.gltf?.extras?.bellyStar;
+    if (star) return star;
+  }
+  return null;
+}
 
 /**
  * 星露啵啵 V3 模型預覽（?lab=bobo3）。
@@ -72,7 +89,18 @@ export interface BoboV3DebugApi {
   info(): BoboV3Info;
   /** 第一隻的眼睛 UV 第一個座標（測試表情是否真的切換） */
   eyeUV0(): [number, number];
-  perf(): { fps: number; drawCalls: number; activeMeshes: number; pixelRatio: number; quality: string; jelly: boolean; variant: BoboLabVariant };
+  perf(): {
+    fps: number;
+    drawCalls: number;
+    activeMeshes: number;
+    pixelRatio: number;
+    quality: string;
+    jelly: boolean;
+    variant: BoboLabVariant;
+    file: string;
+    bellyStar: { outer: number; inner: number; centerY: number } | null;
+    bellyStarVersion: string | null;
+  };
   benchmark(seconds?: number): Promise<BenchmarkSummary>;
 }
 
@@ -133,12 +161,16 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
 
   // ---------- 載入 GLB（依畫質選 LOD） ----------
   const base = import.meta.env.BASE_URL;
-  const file = v31 ? `bobo_v31_${quality.level}.glb` : `bobo_v3_${quality.level}.glb`;
+  // V3.3 載入自己的模型檔（含 V3.3 腹部星星定義）；V3.1／V3.2 共用 V3.1 模型；V3 用 V3 模型
+  const file =
+    variant === "v33" ? `bobo_v33_${quality.level}.glb` : v31 ? `bobo_v31_${quality.level}.glb` : `bobo_v3_${quality.level}.glb`;
   const container = await SceneLoader.LoadAssetContainerAsync(`${base}models/`, file, scene);
+  const bellyStar = variant === "v33" ? readBellyStar(container) : null;
+  if (variant === "v33" && !bellyStar) throw new Error(`${file} 缺少 V3.3 腹部星星資料（extras.bellyStar）`);
 
   // 共用材質（三隻共用；每隻的表情以各自的 UV 緩衝切換）
   const mats = v31
-    ? createMaterialsV31(scene, container.materials as PBRMaterial[], quality.level !== "low", variant === "v32")
+    ? createMaterialsV31(scene, container.materials as PBRMaterial[], quality.level !== "low", variant === "v32" || variant === "v33")
     : createMaterials(scene, container.materials as PBRMaterial[], quality.level !== "low");
   const instances: BoboV3Instance[] = [];
   const spawn = (x: number, z: number, yaw: number): BoboV3Instance => {
@@ -160,6 +192,13 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     const stars = find("Stars");
     // 各零件材質與繪製順序：眼睛／星星不透明先畫，身體（透明）再畫，嘴與腮紅最後疊在表面
     const bodyMat = mats.body(instances.length);
+    // V3.3：果凍材質與 V3.2 完全相同，只換成模型檔裡的腹部星星
+    if (bellyStar && bodyMat.jelly instanceof JellyV32Plugin) {
+      bodyMat.jelly.starOuter = bellyStar.outer;
+      bodyMat.jelly.starInner = bellyStar.inner;
+      bodyMat.jelly.starCenter.set(...bellyStar.center);
+      bodyMat.jelly.starNormal.set(...bellyStar.normal).normalize();
+    }
     body.material = bodyMat.material;
     body.alphaIndex = 1;
     eyes.material = mats.eyes;
@@ -247,7 +286,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     <div class="v3-top">
     <div class="lab-title v3-title" data-layout="lab-title">
       <div class="lab-name">星露啵啵 ${label} <small>模型預覽</small></div>
-      <div class="lab-state">畫質：${quality.level}・${file}</div>
+      <div class="lab-state">畫質：${quality.level}・${file}${bellyStar ? `・腹部星星 ${bellyStar.outer}（模型 V${bellyStar.version}）` : ""}</div>
     </div>
     <div class="lab-views v3-views">
       ${(["front", "side", "back"] as const).map((v) => `<button class="lab-view-btn" data-view="${v}" data-layout="btn-view-${v}">${VIEW_LABEL[v]}</button>`).join("")}
@@ -367,7 +406,11 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
       camera.target.y = on ? 0.36 : 0.5;
     },
     info,
-    perf: () => ({ ...perf.stats(), jelly: !!instances[0]?.jelly?.jellyEnabled, variant }),
+    perf: () => {
+      const j = instances[0]?.jelly;
+      const star = j instanceof JellyV32Plugin ? { outer: j.starOuter, inner: j.starInner, centerY: j.starCenter.y } : null;
+      return { ...perf.stats(), jelly: !!j?.jellyEnabled, variant, file, bellyStar: star, bellyStarVersion: bellyStar?.version ?? null };
+    },
     benchmark: runBenchmark,
     eyeUV0: () => {
       const uv = instances[0]!.eyes.getVerticesData(VertexBuffer.UVKind)!;
