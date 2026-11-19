@@ -71,7 +71,7 @@ export interface MonsterAssetSpec {
 
 const ASSET_ID = /^[a-z][a-z0-9_]*$/;
 const PASCAL = /^[A-Z][A-Za-z0-9]*$/;
-const VERSION = /^v\d+$/;
+const VERSION = /^v\d+[a-z]?$/; // 例 v36；重建版可加一個小寫字母（例 v38r）
 
 /** 命名規範：<assetId>_<版本>_<畫質>.glb，例 bobo_v36_high.glb */
 export function lodFileName(spec: Pick<MonsterAssetSpec, "assetId" | "version">, lod: MonsterLod): string {
@@ -89,7 +89,7 @@ export function validateAssetSpec(spec: MonsterAssetSpec): string[] {
   if (!spec.monsterId) e.push("缺少 monsterId");
   if (!ASSET_ID.test(spec.assetId)) e.push(`assetId「${spec.assetId}」須為小寫英數與底線`);
   if (!PASCAL.test(spec.pascalName)) e.push(`pascalName「${spec.pascalName}」須為 PascalCase`);
-  if (!VERSION.test(spec.version)) e.push(`version「${spec.version}」須為 v + 數字（例 v36）`);
+  if (!VERSION.test(spec.version)) e.push(`version「${spec.version}」須為 v + 數字，可再加一個小寫字母（例 v36、v38r）`);
   if (!(spec.heightM > 0 && spec.heightM < 50)) e.push(`heightM ${spec.heightM} 不合理`);
   if (!(spec.footprintRadiusM > 0)) e.push("footprintRadiusM 須大於 0");
   if (spec.requiredParts.length === 0) e.push("requiredParts 不可為空");
