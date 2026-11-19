@@ -43,10 +43,11 @@ function main(): void {
     // ?lab=bobo31：星露啵啵 V3.1 美術精修預覽（V3 保留不變，可在頁面上切換對照）
     // ?lab=bobo32：V3.2 材質與光影精修（V3、V3.1 保留不變）
     // ?lab=bobo33：V3.3（只改腹部星星；模型檔 bobo_v33_*.glb）
-    if (lab === "bobo3" || lab === "bobo31" || lab === "bobo32" || lab === "bobo33") {
+    // ?lab=bobo34：V3.4（羽翼＋星雲精修；模型檔 bobo_v34_*.glb）
+    if (lab === "bobo3" || lab === "bobo31" || lab === "bobo32" || lab === "bobo33" || lab === "bobo34") {
       document.body.classList.add("lab-mode");
       void import("./lab/BoboV3Lab.ts")
-        .then((m) => m.startBoboV3Lab(canvas, hudRoot, lab === "bobo33" ? "v33" : lab === "bobo32" ? "v32" : lab === "bobo31" ? "v31" : "v3"))
+        .then((m) => m.startBoboV3Lab(canvas, hudRoot, lab === "bobo34" ? "v34" : lab === "bobo33" ? "v33" : lab === "bobo32" ? "v32" : lab === "bobo31" ? "v31" : "v3"))
         .then(() => hideBoot())
         .catch((err: unknown) => {
           console.error(err);
