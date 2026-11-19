@@ -50,6 +50,11 @@ import {
   type BoboAnimName,
   type BoboPose,
   HURT_FACE_UNTIL,
+  DEATH_EYES_CLOSE_AT,
+  deathFx,
+  DUST_COLORS,
+  dustCount,
+  dustParticle,
   poseAt,
   poseScale,
   REST_POSE,
@@ -216,6 +221,15 @@ export interface BoboV3DebugApi {
     rz: number;
     scale: number[];
   };
+  /** V3.8R：死亡（index 省略 = 全部；死亡中或已死亡不會重播） */
+  death(index?: number): void;
+  /** V3.8R：重生（完整恢復原始外觀與待機；index 省略 = 全部） */
+  respawn(index?: number): void;
+  /** V3.8R：像遊戲一樣對某一隻下指令（不會讓死亡的角色復活；測試用） */
+  command(name: string, index?: number): void;
+  animStateOf(index: number): { anim: string; visibility: number; x: number; z: number };
+  /** V3.8R：場景資源數量（檢查反覆死亡不累積） */
+  resourceCounts(): { materials: number; textures: number; meshes: number; sprites: number; dust: number; starMatClones: number };
   /** V3.8R：換成靜止姿勢但不重設位置與朝向（外觀一致性檢查用） */
   freezeRest(): void;
   /** V3.8R：受傷（一次性；lethal = 生命值歸零 → 播完停在 down 等死亡動畫） */
@@ -256,6 +270,11 @@ interface BoboV3Instance {
   base: { x: number; z: number };
   /** 動畫暫時換的表情（攻擊 → 生氣、受傷 → 受傷）；結束後換回動畫前的表情 */
   faceOverride: V3Expression | null;
+  /** 死亡暫時效果：整隻透明度（1 = 正常）、星星變暗用的暫時材質、星塵粒子 */
+  vis: number;
+  starBright: number;
+  starMat: StandardMaterial | null;
+  dust: Sprite[];
   body: Mesh;
   /** 原本的身體材質（V3.8R 灰模切換回來時使用） */
   bodyMat: Material;
@@ -380,7 +399,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
   let anim: BoboAnimName = "none";
   if (v38r) {
     const a = new URLSearchParams(location.search).get("anim") as BoboAnimName | null;
-    anim = a && BOBO_ANIMS_ALL.includes(a) && a !== "down" ? a : "idle";
+    anim = a && BOBO_ANIMS_ALL.includes(a) ? a : "idle";
   }
   const spawn = (x: number, z: number, yaw: number): BoboV3Instance => {
     const assetInst = assetHandle ? assetHandle.instantiate(`bobo3_${instances.length}`) : null;
@@ -458,9 +477,14 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
       pose: REST_POSE,
       base: { x, z },
       faceOverride: null,
+      vis: 1,
+      starBright: 1,
+      starMat: null,
+      dust: [],
     };
     if (v38r) {
       if (anim === "hurt") it.player.hurt();
+      else if (anim === "death") it.player.death();
       else it.player.request(anim);
     }
     applyGrey(it, grey);
@@ -553,7 +577,8 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
         const shown = instances.filter((i) => i.root.isEnabled());
         shown.forEach((it, k) => {
           const q = it.root.position;
-          const sc = 1 - Math.min(0.45, q.y * 2.6);
+          // 離地時縮小；死亡淡出時跟著消失
+          const sc = (1 - Math.min(0.45, q.y * 2.6)) * it.vis;
           Matrix.ComposeToRef(new Vector3(sc, 1, sc), Quaternion.Identity(), new Vector3(q.x, 0.004, q.z), tmpM);
           tmpM.copyToArray(fxBuf, k * 16);
         });
@@ -565,6 +590,8 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
           it.stars.computeWorldMatrix(true);
           Vector3.TransformCoordinatesToRef(it.stars.getBoundingInfo().boundingSphere.center, it.stars.getWorldMatrix(), tmpV);
           sp.position.copyFrom(tmpV);
+          // 死亡：星星光暈跟著星星亮度與整體透明度變暗（加法混合，alpha 直接決定亮度）
+          sp.color.a = it.starBright * it.vis;
         });
       };
     }
@@ -664,7 +691,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     <button class="v3-bench lab-bench" data-layout="btn-bench">⏱ 效能測試（10 秒）</button>
     ${
       v38r
-        ? `<div class="v3-row"><button class="lab-view-btn v3-cost" data-layout="btn-cost">🔍 成本分析（約 35 秒）</button><button class="lab-view-btn v3-anim" data-layout="btn-anim">🫧 待機</button><button class="lab-view-btn v3-hurt" data-layout="btn-hurt">💢 受傷</button></div>`
+        ? `<div class="v3-row"><button class="lab-view-btn v3-cost" data-layout="btn-cost">🔍 成本分析（約 35 秒）</button><button class="lab-view-btn v3-anim" data-layout="btn-anim">🫧 待機</button><button class="lab-view-btn v3-hurt" data-layout="btn-hurt">💢 受傷</button><button class="lab-view-btn v3-death" data-layout="btn-death">💫 死亡</button></div>`
         : `<button class="lab-view-btn v3-cost" data-layout="btn-cost">🔍 成本分析（約 35 秒）</button>`
     }
     <div class="lab-bench-result v3-bench-result" hidden></div>
@@ -678,7 +705,14 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
   const countButtons = [...uiRoot.querySelectorAll<HTMLButtonElement>("[data-count]")];
   // V3.8R 第四階段：動畫切換按鈕（點一下輪流：待機 → 靜止 → 待機…；之後加入移動、攻擊等）
   const animBtn = uiRoot.querySelector<HTMLButtonElement>(".v3-anim");
-  const ANIM_LABEL: Record<BoboAnimName, string> = { none: "⏸ 靜止", idle: "🫧 待機", move: "🦘 移動", attack: "💥 攻擊", hurt: "💢 受傷中", down: "💤 倒下（待死亡動畫）" };
+  const ANIM_LABEL: Record<BoboAnimName, string> = { none: "⏸ 靜止", idle: "🫧 待機", move: "🦘 移動", attack: "💥 攻擊", hurt: "💢 受傷中", death: "💫 死亡中", dead: "💫 已死亡" };
+  // 死亡：每按一次讓下一隻還活著的角色播一次死亡（3 隻同場時各自獨立）；全部都死了再按 → 全部重生
+  uiRoot.querySelector<HTMLButtonElement>(".v3-death")?.addEventListener("click", () => {
+    const shown = instances.filter((i) => i.root.isEnabled());
+    const alive = shown.find((i) => !i.player.isDead);
+    if (alive) alive.player.death();
+    else for (const it of shown) respawnInstance(it);
+  });
   // 受傷：手動觸發（每按一次受擊一次；受傷中前 0.15 秒再按會被忽略）
   uiRoot.querySelector<HTMLButtonElement>(".v3-hurt")?.addEventListener("click", () => {
     for (const it of instances) if (it.root.isEnabled()) it.player.hurt();
@@ -792,9 +826,115 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
   const PATH_HALF = 0.45;
   // 效能測試用：&repeat=1 → 一次性動畫（攻擊、受傷）播完回待機 0.3 秒後自動再播，10 秒測試期間一直有動作
   const repeatOneShot = v38r && new URLSearchParams(location.search).get("repeat") === "1"; // 移動預覽：在出生點左右各 0.45 公尺之間來回彈跳
+  // ---------- 死亡的暫時性效果（只在死亡期間；重生時全部恢復、資源全部釋放） ----------
+  let dustMgr: SpriteManager | null = null;
+  const dustN = dustCount(quality.level);
+  const getDustMgr = (): SpriteManager => {
+    if (dustMgr) return dustMgr;
+    // 柔和的四芒小星光（白色，用粒子顏色染成淡藍／白／金黃）；整個預覽共用一張、一個 SpriteManager（1 次繪製）
+    const c = document.createElement("canvas");
+    c.width = c.height = 64;
+    const g = c.getContext("2d")!;
+    const rg = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    rg.addColorStop(0, "rgba(255,255,255,1)");
+    rg.addColorStop(0.18, "rgba(255,255,255,0.75)");
+    rg.addColorStop(0.5, "rgba(255,255,255,0.12)");
+    rg.addColorStop(1, "rgba(255,255,255,0)");
+    g.fillStyle = rg;
+    g.fillRect(0, 0, 64, 64);
+    g.globalCompositeOperation = "lighter";
+    g.fillStyle = "rgba(255,255,255,0.8)";
+    g.beginPath();
+    g.moveTo(32, 2); g.quadraticCurveTo(35, 29, 62, 32); g.quadraticCurveTo(35, 35, 32, 62); g.quadraticCurveTo(29, 35, 2, 32); g.quadraticCurveTo(29, 29, 32, 2);
+    g.fill();
+    dustMgr = new SpriteManager("BoboV38R_StarDust", c.toDataURL("image/png"), 30, { width: 64, height: 64 }, scene);
+    dustMgr.blendMode = Constants.ALPHA_ADD;
+    dustMgr.disableDepthWrite = true;
+    dustMgr.isPickable = false;
+    return dustMgr;
+  };
+  // 預先建立（沒有粒子時不會繪製）：反覆死亡不會一直新增資源
+  if (v38r) getDustMgr();
+  const setVis = (it: BoboV3Instance, v: number): void => {
+    if (it.vis === v) return;
+    it.vis = v;
+    for (const m of [it.body, it.eyes, it.mouth, it.blush, it.stars]) m.visibility = v;
+  };
+  const clearDust = (it: BoboV3Instance): void => {
+    for (const sp of it.dust) sp.dispose();
+    it.dust.length = 0;
+  };
+  const setStarBright = (it: BoboV3Instance, b: number): void => {
+    if (it.starBright === b) return;
+    it.starBright = b;
+    if (b >= 1) {
+      // 恢復共用的星星材質，釋放暫時材質
+      if (it.starMat) {
+        if (!grey) it.stars.material = mats.stars;
+        it.starMat.dispose();
+        it.starMat = null;
+      }
+      return;
+    }
+    if (grey) return;
+    if (!it.starMat) {
+      // 只有這一隻死亡時才複製一份星星材質（其他隻不受影響），重生時釋放
+      it.starMat = mats.stars.clone(`BoboV38R_StarDim_${instances.indexOf(it)}`) as StandardMaterial;
+      it.stars.material = it.starMat;
+    }
+    const base = mats.stars;
+    it.starMat.emissiveColor.copyFrom(base.emissiveColor).scaleInPlace(b);
+    it.starMat.specularColor.copyFrom(base.specularColor).scaleInPlace(0.3 + 0.7 * b);
+    it.starMat.diffuseColor.copyFrom(base.diffuseColor).scaleInPlace(0.6 + 0.4 * b);
+  };
+  const applyDeathFx = (it: BoboV3Instance, fx: ReturnType<typeof deathFx> | null): void => {
+    setVis(it, fx ? fx.visibility : 1);
+    setStarBright(it, fx ? fx.starBright : 1);
+    if (!fx || !fx.dust || grey) {
+      if (it.dust.length) clearDust(it);
+      return;
+    }
+    const tt = animHold ?? it.player.time;
+    const mgr = getDustMgr();
+    while (it.dust.length < dustN) {
+      const k = it.dust.length;
+      const sp = new Sprite(`BoboV38R_Dust_${instances.indexOf(it)}_${k}`, mgr);
+      const c = DUST_COLORS[k % DUST_COLORS.length]!;
+      sp.color = new Color4(c[0], c[1], c[2], 0);
+      it.dust.push(sp);
+    }
+    const q = it.root.position;
+    it.dust.forEach((sp, k) => {
+      const d = dustParticle(k, dustN, tt);
+      sp.position.set(q.x + d.x, d.y, q.z + d.z);
+      sp.width = sp.height = d.size;
+      sp.color.a = d.alpha;
+    });
+  };
+  /** 重生：完整恢復原始外觀與待機（位置、朝向、透明度、星星、表情、粒子全部歸位） */
+  const respawnInstance = (it: BoboV3Instance): void => {
+    it.player = new BoboAnimPlayer("none", it.animPhase);
+    it.player.request(anim === "none" || anim === "death" || anim === "hurt" ? (anim === "none" ? "none" : "idle") : anim);
+    it.base.x = it.home.x;
+    it.base.z = it.home.z;
+    it.yaw = it.home.yaw;
+    it.root.position.set(it.home.x, 0, it.home.z);
+    clearDust(it);
+    setVis(it, 1);
+    setStarBright(it, 1);
+    it.faceOverride = null;
+    it.blinkClosed = false;
+    it.expr?.set(V3_EXPRESSIONS.indexOf(expression));
+  };
+
   const applyAnim = (dt: number): void => {
     if (!v38r) return;
     for (const it of instances) {
+      // 死亡自動重播（只在預覽測試）：死亡後 0.6 秒重生、待機 0.6 秒後再死亡
+      if (repeatOneShot && animHold === null && anim === "death") {
+        if (it.player.current === "dead" && it.player.time > 0.6) respawnInstance(it);
+        else if (it.player.current === "idle" && it.player.time > 0.6) it.player.death();
+      }
       if (repeatOneShot && animHold === null && (anim === "attack" || anim === "hurt") && it.player.current === "idle" && it.player.time > 0.3) {
         if (anim === "hurt") it.player.hurt();
         else it.player.request("attack");
@@ -814,7 +954,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
         const moving = it.player.current === "move" && it.player.pending === "move";
         // 攻擊、受傷、倒下時不轉身
         const target =
-          it.player.current === "attack" || it.player.current === "hurt" || it.player.current === "down" ? it.yaw : moving || it.player.current === "move" ? (it.moveSign > 0 ? Math.PI / 2 : -Math.PI / 2) : it.home.yaw;
+          it.player.current === "attack" || it.player.current === "hurt" || it.player.isDead ? it.yaw : moving || it.player.current === "move" ? (it.moveSign > 0 ? Math.PI / 2 : -Math.PI / 2) : it.home.yaw;
         let d = target - it.yaw;
         d = Math.atan2(Math.sin(d), Math.cos(d));
         it.yaw += d * Math.min(1, dt * 7);
@@ -840,7 +980,20 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
       // 動畫暫時表情（八種表情之一）：攻擊 → 生氣；受傷 → 受傷（「> <」緊閉雙眼＋委屈眉），結束後換回動畫前的表情
       const cur = animHold !== null ? anim : it.player.current;
       const tt = animHold ?? it.player.time;
-      const want: V3Expression | null = grey ? null : cur === "attack" ? "angry" : (cur === "hurt" && tt < HURT_FACE_UNTIL) || cur === "down" ? "hurt" : null;
+      const dying = cur === "death" || cur === "dead";
+      const want: V3Expression | null = grey
+        ? null
+        : cur === "attack"
+          ? "angry"
+          : cur === "hurt" && tt < HURT_FACE_UNTIL
+            ? "hurt"
+            : dying
+              ? cur === "dead" || tt >= DEATH_EYES_CLOSE_AT
+                ? "sleepy" // 既有「昏睡」表情的閉眼（不新增表情）
+                : "hurt"
+              : null;
+      // 死亡的暫時性效果：整隻淡出、頭頂星星變暗、星塵粒子
+      applyDeathFx(it, dying ? deathFx(cur === "dead" ? 99 : tt) : null);
       if (want !== it.faceOverride && it.expr) {
         it.faceOverride = want;
         it.blinkClosed = false;
@@ -866,6 +1019,12 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     anim = a;
     animHold = null;
     for (const it of instances) {
+      if (a === "death") {
+        it.player.death();
+        continue;
+      }
+      // 預覽頁切換其他動畫時，死亡的角色先重生（正式遊戲由重生流程負責）
+      if (it.player.isDead) respawnInstance(it);
       if (a === "hurt") {
         it.player.hurt();
         continue;
@@ -873,6 +1032,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
       it.player.request(a);
       if (a === "none") {
         // 靜止：立刻回到出生位置與原本朝向（方便對照）
+        respawnInstance(it);
         it.player = new BoboAnimPlayer("none", it.animPhase);
         it.root.position.set(it.home.x, 0, it.home.z);
         it.base.x = it.home.x;
@@ -954,10 +1114,34 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     setCount,
     setRefMode,
     setGrey,
-    setAnim: (n) => setAnim(BOBO_ANIMS_ALL.includes(n as BoboAnimName) && n !== "down" ? (n as BoboAnimName) : "idle"),
+    setAnim: (n) => setAnim(BOBO_ANIMS_ALL.includes(n as BoboAnimName) ? (n as BoboAnimName) : "idle"),
+    death: (index) => {
+      if (index === undefined) {
+        for (const it of instances) if (it.root.isEnabled()) it.player.death();
+      } else instances[index]?.player.death();
+    },
+    respawn: (index) => {
+      for (const [k, it] of instances.entries()) if (index === undefined || index === k) respawnInstance(it);
+    },
+    command: (name, index = 0) => instances[index]?.player.request(name as BoboAnimName),
+    animStateOf: (index) => {
+      const it = instances[index]!;
+      return { anim: it.player.current, visibility: it.body.visibility, x: it.root.position.x, z: it.root.position.z };
+    },
+    resourceCounts: () => ({
+      materials: scene.materials.length,
+      textures: scene.textures.length,
+      meshes: scene.meshes.length,
+      sprites: scene.spriteManagers?.reduce((n, m) => n + m.sprites.length, 0) ?? 0,
+      dust: instances.reduce((n, it) => n + it.dust.length, 0),
+      starMatClones: instances.filter((it) => it.starMat).length,
+    }),
     freezeRest: () => {
       // 一致性檢查用：換成靜止姿勢，但不重設位置與朝向（若動畫留下位移殘留就看得出來）
-      for (const it of instances) it.player = new BoboAnimPlayer("none", it.animPhase);
+      for (const it of instances) {
+        it.player = new BoboAnimPlayer("none", it.animPhase);
+        applyDeathFx(it, null);
+      }
       anim = "none";
       animHold = null;
     },

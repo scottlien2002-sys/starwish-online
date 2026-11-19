@@ -8,19 +8,19 @@
  * - 頭頂星星：跟著觸角末端的位移一起移動（仍是真正的 3D 物件，不面向鏡頭）
  * - 眨眼：只換眼睛貼圖座標（和表情同一張貼圖），模型外型不變
  *
- * 目前完成：待機、移動、攻擊（皆已驗收）；受傷（hurt）。死亡之後再加入。
+ * 完成：待機、移動、攻擊、受傷（皆已驗收、鎖定）；死亡（death）。
  */
 
 /**
- * "down"：受傷時生命值已歸零 → 受傷播完後停住、不回待機，等死亡動畫接手（死亡動畫尚未製作）
+ * "death"：死亡動畫播放中（1.8 秒）；"dead"：死亡動畫播完，保持死亡狀態（不可見），等遊戲移除或重生
  */
-export type BoboAnimName = "none" | "idle" | "move" | "attack" | "hurt" | "down";
-/** 預覽頁「動畫」按鈕輪流切換的項目（受傷另有按鈕手動觸發） */
+export type BoboAnimName = "none" | "idle" | "move" | "attack" | "hurt" | "death" | "dead";
+/** 預覽頁「動畫」按鈕輪流切換的項目（受傷、死亡另有按鈕手動觸發） */
 export const BOBO_ANIMS: readonly BoboAnimName[] = ["none", "idle", "move", "attack"];
 /** 可用網址或 setAnim 指定的全部動畫 */
-export const BOBO_ANIMS_ALL: readonly BoboAnimName[] = ["none", "idle", "move", "attack", "hurt", "down"];
-/** 只播一次、播完自動回到待機的動畫 */
-export const ONE_SHOT: readonly BoboAnimName[] = ["attack", "hurt"];
+export const BOBO_ANIMS_ALL: readonly BoboAnimName[] = ["none", "idle", "move", "attack", "hurt", "death"];
+/** 只播一次的動畫（攻擊、受傷播完回待機；死亡播完保持死亡） */
+export const ONE_SHOT: readonly BoboAnimName[] = ["attack", "hurt", "death"];
 
 /** 一幀的姿勢（全部是相對於靜止姿勢的變化量） */
 export interface BoboPose {
@@ -249,11 +249,110 @@ export function hurtPose(t: number): BoboPose {
   };
 }
 
+// ---------------------------------------------------------------- 死亡：星光熄滅，化作星塵
+
+/** 死亡全長（秒）；五階段 */
+export const DEATH_DURATION = 1.8;
+export const DEATH_PHASES = {
+  impact: [0, 0.25], // 最後衝擊
+  slump: [0.25, 0.65], // 無力軟倒
+  dim: [0.65, 1.05], // 星光漸弱
+  dust: [1.05, 1.55], // 星塵消散
+  gone: [1.55, DEATH_DURATION], // 完全消失
+} as const;
+/** 受傷表情顯示到這個時間點，之後換成閉眼（既有「昏睡」表情的閉眼） */
+export const DEATH_EYES_CLOSE_AT = 0.8;
+
+// [時間, sy, sfwd, fwd, pitch(負 = 後仰、正 = 前傾), swayZ(觸角，正 = 往前), flap(負 = 翅膀下垂), roll]
+const DEATH_KEYS: readonly (readonly number[])[] = [
+  [0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+  [0.12, 0.9, 0.93, -0.02, -0.15, 0.06, 0.3, 0.0], // 最後衝擊
+  [0.25, 0.85, 0.94, -0.04, -0.21, 0.08, 0.2, 0.0], // 高度壓縮 15%、後仰 12°
+  [0.42, 0.88, 0.98, -0.04, -0.06, 0.03, 0.05, 0.045], // 無力：慢慢回正、輕晃
+  [0.55, 0.85, 1.0, -0.035, 0.04, 0.05, -0.12, -0.03],
+  [0.65, 0.81, 1.0, -0.03, 0.09, 0.07, -0.22, 0.015], // 軟倒：下沉（變矮但體積不變）、前傾、觸角前傾、翅膀下垂
+  [0.85, 0.79, 1.0, -0.03, 0.11, 0.085, -0.28, 0.0],
+  [1.05, 0.78, 1.0, -0.03, 0.12, 0.09, -0.3, 0.0], // 之後不再動（失去彈性），只剩淡出
+  [1.8, 0.78, 1.0, -0.03, 0.12, 0.09, -0.3, 0.0],
+];
+
+export function deathPose(t: number): BoboPose {
+  const k = DEATH_KEYS;
+  const sy = track(k, t, 1);
+  const sfwd = track(k, t, 2);
+  return {
+    sy,
+    sfwd,
+    sxz: 1 / Math.sqrt(sy * sfwd),
+    fwd: track(k, t, 3),
+    pitch: track(k, t, 4),
+    swayZ: track(k, t, 5),
+    flap: track(k, t, 6),
+    roll: track(k, t, 7),
+    swayX: 0,
+    lift: 0,
+  };
+}
+
+const smooth01 = (x: number): number => {
+  const c = Math.min(1, Math.max(0, x));
+  return c * c * (3 - 2 * c);
+};
+
+/**
+ * 死亡的暫時性視覺效果（全部只在死亡期間；重生時完全恢復）：
+ * - visibility：整隻（身體、臉、星星）透明度，1.05～1.55 秒淡出到 0
+ * - starBright：頭頂星星亮度（自發光與光暈），0.65～1.05 秒從 1 降到 0
+ * - eyesClosed：0.8 秒起閉眼
+ * - dust：1.05～1.8 秒顯示星塵粒子
+ */
+export function deathFx(t: number): { visibility: number; starBright: number; eyesClosed: boolean; dust: boolean } {
+  return {
+    visibility: 1 - smooth01((t - 1.05) / 0.5),
+    starBright: 1 - smooth01((t - 0.65) / 0.4),
+    eyesClosed: t >= DEATH_EYES_CLOSE_AT,
+    dust: t >= 1.05 && t < DEATH_DURATION,
+  };
+}
+
+/** 星塵粒子數：高 10、中 8、低 6 */
+export function dustCount(level: "high" | "medium" | "low"): number {
+  return level === "high" ? 10 : level === "medium" ? 8 : 6;
+}
+
+/** 星塵顏色（淡藍、白、柔和金黃，依序循環）RGB 0～1 */
+export const DUST_COLORS: readonly [number, number, number][] = [
+  [0.62, 0.86, 1.0],
+  [1.0, 1.0, 1.0],
+  [1.0, 0.88, 0.5],
+];
+
+/**
+ * 第 i 顆星塵在死亡時間 t 的狀態（相對角色腳下中心；公尺）：
+ * 從身體上半部出現，慢慢往上飄並微微往外散，柔和淡入淡出；1.8 秒時完全消失
+ */
+export function dustParticle(i: number, n: number, t: number): { x: number; y: number; z: number; alpha: number; size: number } {
+  const h = (k: number): number => {
+    const v = Math.sin((i + 1) * 12.9898 + k * 78.233) * 43758.5453;
+    return v - Math.floor(v);
+  };
+  const s = Math.min(1, Math.max(0, (t - 1.05) / 0.75)); // 0～1
+  const delay = h(1) * 0.25; // 粒子不同時出現
+  const u = Math.min(1, Math.max(0, (s - delay) / (1 - delay)));
+  const ang = ((i + h(2) * 0.6) / n) * Math.PI * 2;
+  const r0 = 0.12 + h(3) * 0.18;
+  const r = r0 + u * (0.06 + h(4) * 0.08);
+  const y = 0.25 + h(5) * 0.4 + u * (0.35 + h(6) * 0.2) * (1 - 0.35 * u);
+  const alpha = u <= 0 ? 0 : Math.sin(Math.PI * Math.min(1, u)) ** 0.8;
+  return { x: Math.cos(ang) * r, y, z: Math.sin(ang) * r, alpha: alpha * 0.9, size: 0.06 + h(7) * 0.04 };
+}
+
 export function poseAt(name: BoboAnimName, t: number, phase = 0): BoboPose {
   if (name === "idle") return idlePose(t, phase);
   if (name === "move") return hopPose(t / HOP_PERIOD + phase);
   if (name === "attack") return attackPose(Math.min(t, ATTACK_DURATION));
   if (name === "hurt") return hurtPose(Math.min(t, HURT_DURATION));
+  if (name === "death" || name === "dead") return deathPose(name === "dead" ? DEATH_DURATION : Math.min(t, DEATH_DURATION));
   return REST_POSE;
 }
 
@@ -310,21 +409,42 @@ export class BoboAnimPlayer {
 
   request(name: BoboAnimName): void {
     if (this.current === "attack" && name === "attack") return;
-    if (this.current === "down") return; // 已倒下：只等死亡動畫
+    if (this.current === "death" || this.current === "dead") return; // 死亡期間與死亡後不接受移動、攻擊等指令（只能由遊戲重生）
     this.requested = name;
     if (this.current !== "move" && this.current !== "attack" && this.current !== "hurt") this.switchNow();
   }
 
-  /** 生命值歸零：受傷播完後不回待機，停在 "down" 等死亡動畫 */
-  private lethal = false;
+  /** 是否已死亡（死亡動畫播放中或播完） */
+  get isDead(): boolean {
+    return this.current === "death" || this.current === "dead";
+  }
 
   /**
-   * 受傷（一次性）：立刻打斷待機、移動、攻擊；記下受傷後要回去的動畫（移動中被打則回待機）。
-   * 受傷期間再受擊：前 0.15 秒（衝擊階段）忽略，之後從頭重播。lethal = 生命值已歸零
+   * 死亡（生命值歸零）：立即打斷待機、移動、攻擊、受傷，播放一次死亡動畫，播完保持 "dead"、不回待機。
+   * 死亡期間或死亡後再呼叫不會重播
+   */
+  death(): void {
+    if (this.isDead) return;
+    this.requested = "death";
+    this.from = this.lastPose;
+    this.fade = 0;
+    this.fadeTime = 0.05;
+    this.current = "death";
+    this.t = 0;
+  }
+
+  /**
+   * 受傷（一次性）：立刻打斷待機、移動、攻擊；播完回待機。
+   * 受傷期間再受擊：前 0.15 秒（衝擊階段）忽略，之後從頭重播。
+   * lethal = 生命值已歸零 → 直接由死亡動畫接管（死亡動畫本身有「最後衝擊」），不回待機。
+   * 死亡期間再受擊：忽略（不重播死亡）
    */
   hurt(lethal = false): void {
-    if (this.current === "down") return;
-    this.lethal = this.lethal || lethal;
+    if (this.isDead) return;
+    if (lethal) {
+      this.death();
+      return;
+    }
     if (this.current === "hurt" && this.t < HURT_REHIT_LOCK) return;
     this.requested = "hurt";
     this.from = this.lastPose;
@@ -367,12 +487,19 @@ export class BoboAnimPlayer {
     } else if (this.current === "hurt") {
       this.t += dt;
       if (this.t >= HURT_DURATION) {
-        // 播完：生命值歸零 → 停住等死亡；否則回待機（不回到受傷前的移動／攻擊）
-        const next: BoboAnimName = this.lethal ? "down" : "idle";
-        this.requested = next;
+        // 播完回待機（不回到受傷前的移動／攻擊）
+        this.requested = "idle";
         this.lastPose = hurtPose(HURT_DURATION);
         this.switchNow();
-        if (next === "down") this.fade = 1;
+      }
+    } else if (this.current === "death") {
+      this.t += dt;
+      if (this.t >= DEATH_DURATION) {
+        // 播完：保持死亡狀態（不回待機）；時間改為「已死亡多久」
+        this.current = "dead";
+        this.requested = "dead";
+        this.t = 0;
+        this.fade = 1;
       }
     } else if (this.current === "attack") {
       this.t += dt;

@@ -161,7 +161,7 @@ test("V3.8R 受傷：衝擊壓縮 12%、後仰 10°、後退 0.08 公尺、回�
   assert.deepEqual([end.sy, end.sfwd, end.fwd, end.pitch, end.roll, end.swayZ, end.flap], [1, 1, 0, 0, 0, 0, 0], "結束時完全恢復");
 });
 
-test("V3.8R 受傷：打斷移動／攻擊、播完回待機；衝擊中再受擊忽略、之後重播；生命值歸零停在 down", () => {
+test("V3.8R 受傷：打斷移動／攻擊、播完回待機；衝擊中再受擊忽略、之後重播；生命值歸零由死亡接管", () => {
   const dt = 1 / 60;
   const run = (pl: BoboAnimPlayer, sec: number): void => {
     for (let i = 0; i < Math.round(sec / dt); i++) pl.update(dt);
@@ -190,8 +190,76 @@ test("V3.8R 受傷：打斷移動／攻擊、播完回待機；衝擊中再受�
   assert.equal(pl.current, "idle");
   const dead = new BoboAnimPlayer("idle");
   dead.hurt(true);
+  assert.equal(dead.current, "death", "生命值歸零：由死亡動畫接管");
   run(dead, HURT_DURATION + 0.5);
-  assert.equal(dead.current, "down", "生命值歸零：不回待機");
-  dead.request("idle");
-  assert.equal(dead.current, "down");
+  assert.notEqual(dead.current, "idle", "不回待機");
+});
+
+import { DEATH_DURATION, DEATH_PHASES, deathFx, deathPose, DUST_COLORS, dustCount, dustParticle } from "../../src/monsters/star-dew-bobo-v38r/animation.ts";
+
+test("V3.8R 死亡：最後衝擊（壓縮 15%、後仰 12°）→ 軟倒 → 星光漸弱 → 淡出；體積不變、不穿地不彈起", () => {
+  let minSy = 9, minPitch = 9;
+  for (let i = 0; i <= 360; i++) {
+    const t = (i / 360) * DEATH_DURATION;
+    const p = deathPose(t);
+    const [sx, sy, sz] = poseScale(p);
+    assert.ok(Math.abs(sx * sy * sz - 1) < 1e-9, "體積近似守恆");
+    assert.equal(p.lift, 0, "不彈起、不穿地");
+    assert.ok(Math.abs(p.fwd) <= 0.05, "不會飛走或瞬移");
+    assert.ok(Math.abs(p.roll) < 0.05, "只有輕微晃動");
+    minSy = Math.min(minSy, p.sy);
+    if (t <= 0.3) minPitch = Math.min(minPitch, p.pitch);
+  }
+  const imp = deathPose(DEATH_PHASES.impact[1]);
+  assert.ok(Math.abs(imp.sy - 0.85) < 0.005, `衝擊壓縮 ${(1 - imp.sy) * 100}%`);
+  assert.ok(Math.abs(minPitch + (12 * Math.PI) / 180) < 0.01, `後仰 ${(-minPitch * 180) / Math.PI}°`);
+  assert.ok(minSy > 0.75, "不會變成扁平硬球");
+  const slump = deathPose(1.05);
+  assert.ok(slump.pitch > 0.1 && slump.swayZ > 0.05 && slump.flap < -0.2, "軟倒：前傾、觸角前傾、翅膀下垂");
+  // 星光漸弱 → 淡出 → 粒子
+  assert.equal(deathFx(0.6).starBright, 1);
+  assert.equal(deathFx(1.05).starBright, 0);
+  assert.equal(deathFx(1.0).visibility, 1);
+  assert.equal(deathFx(1.55).visibility, 0);
+  assert.equal(deathFx(0.5).eyesClosed, false);
+  assert.equal(deathFx(0.9).eyesClosed, true);
+  assert.equal(deathFx(1.0).dust, false);
+  assert.equal(deathFx(1.3).dust, true);
+  assert.equal(deathFx(DEATH_DURATION).dust, false, "結束時粒子清除");
+});
+
+test("V3.8R 星塵：高 10／中 8／低 6 顆，往上飄、淡入淡出，結束時完全透明", () => {
+  assert.deepEqual([dustCount("high"), dustCount("medium"), dustCount("low")], [10, 8, 6]);
+  assert.equal(DUST_COLORS.length, 3);
+  for (let i = 0; i < 10; i++) {
+    const a = dustParticle(i, 10, 1.1);
+    const b = dustParticle(i, 10, 1.6);
+    assert.ok(b.y >= a.y, "往上飄");
+    assert.ok(dustParticle(i, 10, 1.05).alpha === 0 && dustParticle(i, 10, DEATH_DURATION).alpha < 1e-6, "淡入淡出");
+    assert.ok(b.y < 1.4 && Math.hypot(b.x, b.z) < 0.6, "緩慢飄散、不爆炸");
+  }
+});
+
+test("V3.8R 死亡狀態：打斷所有動畫、播完保持死亡、不接受指令、再受擊不重播", () => {
+  const dt = 1 / 60;
+  for (const start of ["idle", "move", "attack", "hurt"] as const) {
+    const pl = new BoboAnimPlayer("idle");
+    if (start === "hurt") pl.hurt();
+    else pl.request(start);
+    for (let i = 0; i < 10; i++) pl.update(dt);
+    pl.death();
+    assert.equal(pl.current, "death", `${start} 被打斷`);
+    for (let i = 0; i < 30; i++) pl.update(dt);
+    const t0 = pl.time;
+    pl.death();
+    pl.hurt();
+    pl.hurt(true);
+    pl.request("move");
+    pl.request("attack");
+    assert.equal(pl.current, "death");
+    assert.ok(Math.abs(pl.time - t0) < 1e-12, "再受擊、指令都不影響");
+    for (let i = 0; i < Math.round((DEATH_DURATION + 2) / dt); i++) pl.update(dt);
+    assert.equal(pl.current, "dead", "播完保持死亡，不回待機");
+    assert.ok(pl.isDead);
+  }
 });

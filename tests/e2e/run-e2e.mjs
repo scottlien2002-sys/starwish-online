@@ -626,9 +626,9 @@ for (const name of browsers) {
           const midMove = api.animState();
           await wait(1800);
           const afterMove = api.animState();
-          // 生命值歸零 → 停在 down
+          // 生命值歸零 → 由死亡接管
           api.hurt(true);
-          await wait(1800);
+          await wait(300);
           const down = api.animState();
           api.setAnim("none");
           api.setExpression("normal");
@@ -653,9 +653,71 @@ for (const name of browsers) {
             a,
           );
           check(
-            "V3.8R 第四階段：移動中受擊會被打斷並回待機；生命值歸零停住不回待機",
-            hu.midMove.anim === "hurt" && hu.afterMove.anim === "idle" && hu.afterMove.y === 0 && hu.down.anim === "down",
+            "V3.8R 第四階段：移動中受擊會被打斷並回待機；生命值歸零由死亡接管",
+            hu.midMove.anim === "hurt" && hu.afterMove.anim === "idle" && hu.afterMove.y === 0 && (hu.down.anim === "death" || hu.down.anim === "dead"),
             { midMove: hu.midMove.anim, afterMove: hu.afterMove.anim, down: hu.down.anim },
+          );
+        }
+        const de = await page.evaluate(async () => {
+          const api = window.__monsterLab;
+          const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+          api.setAnim("none");
+          api.setCount(3);
+          api.setAnim("idle");
+          await wait(400);
+          const res0 = api.resourceCounts();
+          // 只讓第 1 隻死亡：其他兩隻不受影響
+          api.death(0);
+          await wait(200);
+          const early = api.animStateOf(0);
+          const t0 = api.animState();
+          api.hurt(); // 死亡期間再受擊：不重播（只會讓另外兩隻受傷）
+          api.death(0);
+          api.command("move", 0); // 死亡期間不接受移動、攻擊
+          api.command("attack", 0);
+          const mid = [];
+          for (let i = 0; i < 10; i++) {
+            await wait(110);
+            mid.push(api.resourceCounts());
+          }
+          const midState = api.animStateOf(0);
+          await wait(2600); // 1.8 秒播完後保持死亡
+          const dead = api.animStateOf(0);
+          const others = [api.animStateOf(1), api.animStateOf(2)];
+          const resDead = api.resourceCounts();
+          // 反覆死亡／重生 3 次：資源不累積
+          for (let r = 0; r < 3; r++) {
+            api.respawn();
+            await wait(200);
+            api.death();
+            await wait(2300);
+          }
+          api.respawn();
+          await wait(400);
+          const res1 = api.resourceCounts();
+          const back = api.animStateOf(0);
+          api.setAnim("idle");
+          return { res0, early, t0, mid, midState, dead, others, resDead, res1, back };
+        });
+        {
+          const maxDust = Math.max(...de.mid.map((r) => r.dust));
+          check(
+            "V3.8R 第四階段：死亡（只有那一隻、打斷待機、再受擊與指令不影響、播完保持死亡且不可見、不回待機）",
+            de.early.anim === "death" &&
+              (de.midState.anim === "death" || de.midState.anim === "dead") &&
+              de.dead.anim === "dead" && de.dead.visibility === 0 &&
+              de.others.every((o) => o.anim !== "death" && o.anim !== "dead" && o.visibility === 1) &&
+              run.errors.length === 0,
+            { early: de.early, mid: de.midState, dead: de.dead, others: de.others },
+          );
+          check(
+            "V3.8R 第四階段：星塵粒子 6～10 顆、死亡結束後全部清除；重生後完整恢復；反覆死亡不累積資源",
+            maxDust >= 6 && maxDust <= 10 &&
+              de.resDead.dust === 0 && de.resDead.starMatClones === 1 &&
+              de.res1.dust === 0 && de.res1.starMatClones === 0 &&
+              de.res1.materials === de.res0.materials && de.res1.textures <= de.res0.textures + 1 && de.res1.meshes === de.res0.meshes && de.res1.sprites === de.res0.sprites &&
+              de.back.anim !== "dead" && de.back.visibility === 1,
+            { maxDust, res0: de.res0, resDead: de.resDead, res1: de.res1, back: de.back },
           );
         }
         const d38 = drawCalls3[`bobo38|${vp.name}`];

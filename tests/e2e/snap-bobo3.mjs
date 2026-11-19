@@ -145,6 +145,46 @@ if (ok && closeOnly) {
       await page.evaluate(() => window.__monsterLab.freezeRest()); // 換成靜止姿勢、不重設位置（有殘留就會看得出來）
       await shot("h_after", "受傷後（靜止）");
     }
+    // 死亡：停格 12 格涵蓋 1.8 秒（衝擊／軟倒／星光漸弱／星塵消散／消失），正面、側面、45 度
+    const hasDeath = await page.evaluate(() => typeof window.__monsterLab.death === "function");
+    if (hasDeath) {
+      await page.evaluate(() => {
+        window.__monsterLab.setAnim("none");
+        window.__monsterLab.setAnim("death");
+      });
+      for (const v of ["front", "side", "q45"]) {
+        await page.evaluate((x) => window.__monsterLab.setView(x), v);
+        await page.evaluate(() => window.__monsterLab.holdAnimAt(0));
+        await page.waitForTimeout(500);
+        for (let k = 0; k < 12; k++) {
+          await page.evaluate((t) => window.__monsterLab.holdAnimAt(t), (k * 1.8) / 11);
+          await page.waitForTimeout(250);
+          await page.screenshot({ path: `${outDir}/a_death_${v}_${String(k).padStart(2, "0")}.png` });
+          shots.push({ name: `a_death_${v}_${k}`, label: `死亡 ${v} ${k}` });
+        }
+      }
+      // 死亡前／重生後外觀一致性：靜止 → 實際播放一次死亡（2.5 秒）→ 重生 → 靜止，正面、45 度各截一張
+      for (const v of ["front", "q45"]) {
+        await page.evaluate((x) => {
+          window.__monsterLab.setView(x);
+          window.__monsterLab.setAnim("none");
+        }, v);
+        await shot(`d_before_${v}`, `死亡前 ${v}`);
+        await page.evaluate(() => window.__monsterLab.setAnim("idle"));
+        await page.evaluate(() => window.__monsterLab.death());
+        await page.waitForTimeout(2600);
+        await shot(`d_dead_${v}`, `死亡後（保持死亡）${v}`);
+        const st = await page.evaluate(() => ({ s: window.__monsterLab.animState(), r: window.__monsterLab.resourceCounts() }));
+        writeFileSync(`${outDir}/d_dead_${v}_state.json`, JSON.stringify(st, null, 2));
+        await page.evaluate(() => {
+          window.__monsterLab.respawn();
+          window.__monsterLab.freezeRest();
+        });
+        await shot(`d_after_${v}`, `重生後 ${v}`);
+        const st2 = await page.evaluate(() => window.__monsterLab.resourceCounts());
+        writeFileSync(`${outDir}/d_after_${v}_state.json`, JSON.stringify(st2, null, 2));
+      }
+    }
     await page.evaluate(() => {
       window.__monsterLab.setRefMode(false);
       window.__monsterLab.setView("front");
