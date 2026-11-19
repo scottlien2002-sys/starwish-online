@@ -558,30 +558,43 @@ for (const name of browsers) {
           api.setAnim("idle");
           await wait(500);
           const before = api.animState();
+          // 實際播放一次：檢查攻擊中換表情、播完回待機與原位
           api.setAnim("attack");
           const s = [];
-          for (let i = 0; i < 40; i++) {
-            await wait(50);
+          for (let i = 0; i < 30; i++) {
+            await wait(40);
             s.push(api.animState());
           }
-          await wait(1200);
+          await wait(1500);
           const after = api.animState();
+          // 三階段姿勢用停格檢查（軟體繪圖下幀率很低，實際播放可能剛好跳過蓄力最深那幾格）
+          const hold = async (t) => {
+            api.holdAnimAt(t);
+            await wait(150);
+            return api.animState();
+          };
+          api.setAnim("attack");
+          const windup = await hold(0.34);
+          const strike = await hold(0.48);
+          const end = await hold(0.95);
+          api.setAnim("idle");
           api.setCount(3);
-          return { before, s, after };
+          return { before, s, after, windup, strike, end };
         });
         {
           const atk = at.s.filter((q) => q.anim === "attack");
-          const minSy = Math.min(...atk.map((q) => q.sy));
-          const maxFwd = Math.max(...atk.map((q) => q.fwd));
-          const minFwd = Math.min(...atk.map((q) => q.fwd));
-          const maxSfwd = Math.max(...atk.map((q) => q.sfwd));
-          // 出招方向 = 朝向：彈出時根節點相對累積位置的位移與朝向同向
-          const hit = atk.reduce((b, q) => (q.fwd > b.fwd ? q : b), atk[0] ?? { fwd: 0 });
-          const dot = hit && hit.fwd > 0 ? ((hit.x - hit.bx) * Math.sin(hit.yaw) + (hit.z - hit.bz) * Math.cos(hit.yaw)) / hit.fwd : 0;
+          const w = at.windup;
+          const k = at.strike;
+          const dot = k.fwd > 0 ? ((k.x - k.bx) * Math.sin(k.yaw) + (k.z - k.bz) * Math.cos(k.yaw)) / k.fwd : 0;
           check(
             "V3.8R 第四階段：攻擊（蓄力壓扁後縮 → 往前拉長彈擊 → 回彈；攻擊中換生氣表情）",
-            atk.length > 3 && minSy < 0.9 && minFwd < -0.01 && maxFwd > 0.1 && maxSfwd > 1.05 && Math.abs(dot - 1) < 0.01 && atk.some((q) => q.angry) && run.errors.length === 0,
-            { n: atk.length, minSy, minFwd, maxFwd, maxSfwd, dot },
+            atk.length > 0 &&
+              atk.some((q) => q.angry) &&
+              w.sy < 0.85 && w.fwd < -0.05 &&
+              k.fwd > 0.18 && k.sfwd > 1.1 && Math.abs(dot - 1) < 0.01 &&
+              Math.abs(at.end.fwd) < 1e-9 && at.end.sy === 1 &&
+              run.errors.length === 0,
+            { n: atk.length, windup: { sy: w.sy, fwd: w.fwd }, strike: { fwd: k.fwd, sfwd: k.sfwd, dot }, end: { fwd: at.end.fwd, sy: at.end.sy } },
           );
           check(
             "V3.8R 第四階段：攻擊後回到待機、回到原位、換回原本表情",
