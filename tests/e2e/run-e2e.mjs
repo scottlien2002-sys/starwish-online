@@ -382,7 +382,7 @@ for (const name of browsers) {
   // V3（對照基準）與 V3.1（美術精修）都檢查
   // 3 隻同場的 Draw Calls（同一瀏覽器、同一畫面大小），用來確認 V3.5 不高於 V3.4
   const drawCalls3 = {};
-  for (const labName of ["bobo3", "bobo31", "bobo32", "bobo33", "bobo34", "bobo35", "bobo36", "bobo37", "bobo38"])
+  for (const labName of ["bobo3", "bobo31", "bobo32", "bobo33", "bobo34", "bobo35", "bobo36", "bobo37", "bobo38", "bobo38r"])
   for (const vp of VIEWPORTS) {
     const run = { browser: name, viewport: `${vp.name} / ?lab=${labName}`, checks: {}, errors: [] };
     const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
@@ -412,7 +412,7 @@ for (const name of browsers) {
       const perf = await page.evaluate(() => window.__bobo3.perf());
       check("8 種表情、三視圖、3 隻同場可切換且無錯誤", run.errors.length === 0, perf);
       check("果凍材質著色器正常（中／高畫質）", perf.quality === "low" || perf.jelly === true, perf);
-      check("載入的是正確版本", perf.variant === { bobo3: "v3", bobo31: "v31", bobo32: "v32", bobo33: "v33", bobo34: "v34", bobo35: "v35", bobo36: "v36", bobo37: "v37", bobo38: "v38" }[labName], perf.variant);
+      check("載入的是正確版本", perf.variant === { bobo3: "v3", bobo31: "v31", bobo32: "v32", bobo33: "v33", bobo34: "v34", bobo35: "v35", bobo36: "v36", bobo37: "v37", bobo38: "v38", bobo38r: "v38r" }[labName], perf.variant);
       if (labName === "bobo33") {
         // 必須真的載入 V3.3 模型檔，且腹部星星來自模型資料（V3.2 外徑 0.084 × 0.85 = 0.0714）
         check(
@@ -446,6 +446,31 @@ for (const name of browsers) {
           await page.evaluate(() => document.querySelector(".v3-bench-result") && (document.querySelector(".v3-bench-result").hidden = true));
           check("成本分析：6 項都有結果", rows.length === 6 && rows.every((r) => r.avg > 0), rows);
         }
+      }
+      if (labName === "bobo38r") {
+        check("V3.8R：載入 bobo_v38r 模型（共用載入器）", /^bobo_v38r_(high|medium|low)\.glb$/.test(perf.file), perf.file);
+        check("V3.8R：灰模模式（不顯示臉部、無陰影貼圖與 GlowLayer）", perf.grey === true && perf.faceVisible === false && perf.shadowMap === false && perf.glowLayer === false, perf);
+        const d38 = drawCalls3[`bobo38|${vp.name}`];
+        check("V3.8R：3 隻同場 Draw Calls 不高於 V3.8（≤25）", typeof d38 === "number" && perf.drawCalls <= d38 && perf.drawCalls <= 25, { v38r: perf.drawCalls, v38: d38 });
+        const views = await page.evaluate(async () => {
+          const api = window.__monsterLab;
+          api.setCount(1);
+          const out = [];
+          for (const v of ["front", "side", "back", "q45", "top"]) {
+            api.setView(v);
+            await new Promise((r) => setTimeout(r, 120));
+            out.push(v);
+          }
+          api.setRefMode(true);
+          await new Promise((r) => setTimeout(r, 200));
+          const on = api.perf().refMode;
+          api.setRefMode(false);
+          api.setView("front");
+          return { out, on, off: api.perf().refMode };
+        });
+        check("V3.8R：五個視角（正面、側面、背面、45 度、俯視）與對照模式可切換", views.out.length === 5 && views.on === true && views.off === false && run.errors.length === 0, views);
+        const btns = await page.evaluate(() => ["front", "side", "back", "q45", "top"].every((v) => !!document.querySelector(`[data-view="${v}"]`)));
+        check("V3.8R：頁面有五個視角按鈕", btns, btns);
       }
       if (labName === "bobo37") {
         check(
@@ -539,12 +564,12 @@ for (const name of browsers) {
       });
       check("按鈕不重疊、效能測試按鈕可點", overlaps.overlaps.length === 0 && overlaps.benchOnTop && overlaps.inView, overlaps);
       // 實際點擊 10 秒效能測試：只測目前驗收的兩版（舊版已在各自分支完整測過；避免 CI 超時）
-      if (vp === VIEWPORTS[0] && (labName === "bobo37" || labName === "bobo38")) {
+      if (vp === VIEWPORTS[0] && (labName === "bobo38" || labName === "bobo38r")) {
         await page.evaluate(() => document.querySelector(".v3-bench").click());
         const r = await page.waitForFunction(() => !document.querySelector(".v3-bench-result").hidden, null, { timeout: 120000 }).then(() => page.evaluate(() => document.querySelector(".v3-bench-result").innerText)).catch(() => null);
-        check("點擊效能測試：10 秒後顯示平均／最慢 1%／最低 FPS 與 Draw Calls", !!r && /平均/.test(r) && /最慢 1%/.test(r) && /最低/.test(r) && /Draw Calls/.test(r) && /3 隻/.test(r) && (labName === "bobo3" || (labName === "bobo38" ? /bobo_v38_/.test(r) : labName === "bobo37" ? /bobo_v37_/.test(r) : labName === "bobo36" ? /bobo_v36_/.test(r) : labName === "bobo35" ? /bobo_v35_/.test(r) : labName === "bobo34" ? /bobo_v34_/.test(r) : labName === "bobo33" ? /bobo_v33_/.test(r) : /bobo_v31_/.test(r))), r);
+        check("點擊效能測試：10 秒後顯示平均／最慢 1%／最低 FPS 與 Draw Calls", !!r && /平均/.test(r) && /最慢 1%/.test(r) && /最低/.test(r) && /Draw Calls/.test(r) && /3 隻/.test(r) && (labName === "bobo3" || (labName === "bobo38r" ? /bobo_v38r_/.test(r) : labName === "bobo38" ? /bobo_v38_/.test(r) : labName === "bobo37" ? /bobo_v37_/.test(r) : labName === "bobo36" ? /bobo_v36_/.test(r) : labName === "bobo35" ? /bobo_v35_/.test(r) : labName === "bobo34" ? /bobo_v34_/.test(r) : labName === "bobo33" ? /bobo_v33_/.test(r) : /bobo_v31_/.test(r))), r);
       }
-      if (labName === "bobo36" || labName === "bobo37" || labName === "bobo38") {
+      if (labName === "bobo36" || labName === "bobo37" || labName === "bobo38" || labName === "bobo38r") {
         // 共用載入器：釋放後場景中不應留下任何怪物零件
         const rel = await page.evaluate(() => window.__bobo3.releaseModels());
         check("共用載入器釋放資源：零件全部移除", !!rel && rel.before >= 5 && rel.after === 0, rel);
