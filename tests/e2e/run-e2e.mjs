@@ -551,6 +551,44 @@ for (const name of browsers) {
             { c: mv.c, d: mv.d },
           );
         }
+        const at = await page.evaluate(async () => {
+          const api = window.__monsterLab;
+          const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+          api.setCount(1);
+          api.setAnim("idle");
+          await wait(500);
+          const before = api.animState();
+          api.setAnim("attack");
+          const s = [];
+          for (let i = 0; i < 40; i++) {
+            await wait(50);
+            s.push(api.animState());
+          }
+          await wait(1200);
+          const after = api.animState();
+          api.setCount(3);
+          return { before, s, after };
+        });
+        {
+          const atk = at.s.filter((q) => q.anim === "attack");
+          const minSy = Math.min(...atk.map((q) => q.sy));
+          const maxFwd = Math.max(...atk.map((q) => q.fwd));
+          const minFwd = Math.min(...atk.map((q) => q.fwd));
+          const maxSfwd = Math.max(...atk.map((q) => q.sfwd));
+          // 出招方向 = 朝向：彈出時根節點相對累積位置的位移與朝向同向
+          const hit = atk.reduce((b, q) => (q.fwd > b.fwd ? q : b), atk[0] ?? { fwd: 0 });
+          const dot = hit && hit.fwd > 0 ? ((hit.x - hit.bx) * Math.sin(hit.yaw) + (hit.z - hit.bz) * Math.cos(hit.yaw)) / hit.fwd : 0;
+          check(
+            "V3.8R 第四階段：攻擊（蓄力壓扁後縮 → 往前拉長彈擊 → 回彈；攻擊中換生氣表情）",
+            atk.length > 3 && minSy < 0.9 && minFwd < -0.01 && maxFwd > 0.1 && maxSfwd > 1.05 && Math.abs(dot - 1) < 0.01 && atk.some((q) => q.angry) && run.errors.length === 0,
+            { n: atk.length, minSy, minFwd, maxFwd, maxSfwd, dot },
+          );
+          check(
+            "V3.8R 第四階段：攻擊後回到待機、回到原位、換回原本表情",
+            at.after.anim === "idle" && !at.after.angry && Math.abs(at.after.fwd) < 1e-6 && Math.hypot(at.after.x - at.before.x, at.after.z - at.before.z) < 1e-3,
+            at.after,
+          );
+        }
         const d38 = drawCalls3[`bobo38|${vp.name}`];
         check("V3.8R：3 隻同場 Draw Calls 不高於 V3.8（≤25）", typeof d38 === "number" && perf.drawCalls <= d38 && perf.drawCalls <= 25, { v38r: perf.drawCalls, v38: d38 });
         const views = await page.evaluate(async () => {

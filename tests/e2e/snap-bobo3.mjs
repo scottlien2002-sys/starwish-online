@@ -96,6 +96,23 @@ if (ok && closeOnly) {
         }
       }
     }
+    // 攻擊：停格 12 格涵蓋 0.95 秒（蓄力／出招／收招），側面與 45 度
+    const hasAttack = await page.evaluate(() => {
+      window.__monsterLab.setAnim("none"); // 停格模式下移動還沒跳完，先重設再切攻擊
+      window.__monsterLab.setAnim("attack");
+      return window.__monsterLab.perf().anim === "attack";
+    });
+    if (hasAttack) {
+      for (const v of ["side", "q45"]) {
+        await page.evaluate((x) => window.__monsterLab.setView(x), v);
+        for (let k = 0; k < 12; k++) {
+          await page.evaluate((t) => window.__monsterLab.holdAnimAt(t), (k * 0.95) / 11);
+          await page.waitForTimeout(250);
+          await page.screenshot({ path: `${outDir}/a_attack_${v}_${String(k).padStart(2, "0")}.png` });
+          shots.push({ name: `a_attack_${v}_${k}`, label: `攻擊 ${v} ${k}` });
+        }
+      }
+    }
     await page.evaluate(() => {
       window.__monsterLab.setRefMode(false);
       window.__monsterLab.setView("front");

@@ -93,3 +93,45 @@ test("V3.8R 移動：每跳前進固定距離；停止時先把這一跳跳完�
   assert.equal(p.lift, 0);
   assert.ok(Math.abs(p.sy - 1) < 0.04);
 });
+
+import { ATTACK_DURATION, ATTACK_HIT_TIME, ATTACK_PHASES, attackPose, poseScale } from "../../src/monsters/star-dew-bobo-v38r/animation.ts";
+
+test("V3.8R 攻擊：蓄力（壓扁後仰後退）→ 出招（往前拉長彈出）→ 收招（回彈回原位），體積不變", () => {
+  for (let i = 0; i <= 300; i++) {
+    const p = attackPose((i / 300) * ATTACK_DURATION);
+    const [sx, sy, sz] = poseScale(p);
+    assert.ok(Math.abs(sx * sy * sz - 1) < 1e-9, "體積不變（柔軟變形，不是縮小放大）");
+    assert.ok(p.sy > 0.75 && p.sy < 1.12 && p.sfwd > 0.85 && p.sfwd < 1.26, "柔軟但不誇張");
+    assert.ok(p.lift >= 0);
+  }
+  const w = attackPose(ATTACK_PHASES.windup[1]);
+  assert.ok(w.sy < 0.82 && w.pitch < -0.1 && w.fwd < -0.05, "蓄力：最扁、後仰、往後縮");
+  const h = attackPose(ATTACK_HIT_TIME);
+  assert.ok(h.sfwd > 1.05 && h.fwd > 0.2 && h.pitch > 0.1, "出招：往前拉長、彈出 0.2 公尺以上、前傾");
+  assert.ok(h.swayZ < 0, "出招時觸角因慣性往後");
+  const r = attackPose(0.68);
+  assert.ok(r.sy > 1.02 && r.swayZ > 0, "收招：回彈、觸角往前甩");
+  const e = attackPose(ATTACK_DURATION);
+  assert.deepEqual([e.sy, e.sfwd, e.fwd, e.pitch], [1, 1, 0, 0], "結束時回到站立原位");
+});
+
+test("V3.8R 攻擊：只播一次、播完平順接回待機；播放中重按不會重來", () => {
+  const pl = new BoboAnimPlayer("idle");
+  for (let i = 0; i < 30; i++) pl.update(1 / 60);
+  pl.request("attack");
+  assert.equal(pl.current, "attack");
+  let prev = pl.update(1 / 60).pose;
+  let maxJump = 0;
+  let back = -1;
+  for (let i = 0; i < 120; i++) {
+    if (i === 20) pl.request("attack"); // 重按
+    const r = pl.update(1 / 60);
+    maxJump = Math.max(maxJump, Math.abs(r.pose.sy - prev.sy), Math.abs(r.pose.fwd - prev.fwd));
+    prev = r.pose;
+    assert.equal(r.travel, 0, "攻擊不會累積位移");
+    if (pl.current === "idle" && back < 0) back = i;
+  }
+  assert.ok(back > 0 && Math.abs((back + 1) / 60 - ATTACK_DURATION) < 0.05, `約 ${ATTACK_DURATION} 秒後回待機（${(back + 1) / 60}）`);
+  assert.ok(maxJump < 0.06, `每幀變化平順（最大 ${maxJump}）`);
+  assert.ok(Math.abs(prev.fwd) < 1e-9 && Math.abs(prev.sy - 1) < 0.04);
+});

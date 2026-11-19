@@ -41,7 +41,7 @@ import { BOBO_V37_SPEC } from "../monsters/star-dew-bobo-v37/spec.ts";
 import { createGlassMatcapV38, createJellyNoiseTextureV38, JellyV38Plugin } from "../monsters/star-dew-bobo-v38/JellyV38Plugin.ts";
 import { BOBO_V38_SPEC } from "../monsters/star-dew-bobo-v38/spec.ts";
 import { BOBO_V38R_SPEC } from "../monsters/star-dew-bobo-v38r/spec.ts";
-import { antennaWeight, BlinkTimer, BOBO_ANIMS, BoboAnimPlayer, type BoboAnimName, type BoboPose, poseAt, REST_POSE } from "../monsters/star-dew-bobo-v38r/animation.ts";
+import { antennaWeight, BlinkTimer, BOBO_ANIMS, BoboAnimPlayer, type BoboAnimName, type BoboPose, poseAt, poseScale, REST_POSE } from "../monsters/star-dew-bobo-v38r/animation.ts";
 import { createGlassMatcapV38R, createJellyNoiseTextureV38R, JellyV38RPlugin } from "../monsters/star-dew-bobo-v38r/JellyV38RPlugin.ts";
 import { ExpressionAtlasController, loadMonsterAsset, type MonsterAssetHandle } from "../monsters/babylon/loadMonsterAsset.ts";
 import { formatCostRows, runCostSteps, type CostStep } from "../render/costAnalysis.ts";
@@ -179,12 +179,26 @@ export interface BoboV3DebugApi {
     /** 測試頁有 45 度角與俯視（V3.8R） */
     views5: boolean;
   };
-  /** V3.8R 第四階段：播放動畫（"none" 靜止、"idle" 待機、"move" 移動） */
+  /** V3.8R 第四階段：播放動畫（"none" 靜止、"idle" 待機、"move" 移動、"attack" 攻擊（播一次後回待機）） */
   setAnim(name: string): void;
   /** V3.8R：把動畫時間設定到指定秒數並停住（截圖用；之後呼叫 setAnim 恢復播放） */
   holdAnimAt(seconds: number): void;
   /** V3.8R：第一隻目前的動畫狀態與位置（測試用） */
-  animState(): { anim: string; pending: string; x: number; y: number; z: number; yaw: number; lift: number; sy: number };
+  animState(): {
+    anim: string;
+    pending: string;
+    x: number;
+    y: number;
+    z: number;
+    yaw: number;
+    lift: number;
+    sy: number;
+    sfwd: number;
+    fwd: number;
+    bx: number;
+    bz: number;
+    angry: boolean;
+  };
   /** V3.8R：第一隻目前的動畫姿勢（測試用） */
   animPose(): { sy: number; sxz: number; roll: number; swayX: number; flap: number; starX: number; scaleY: number };
   /** V3.8R：切換第二階段灰模（只有 V3.8R 有作用） */
@@ -217,6 +231,10 @@ interface BoboV3Instance {
   yaw: number;
   moveSign: 1 | -1;
   pose: BoboPose;
+  /** 移動累積的位置（攻擊的往前彈出是暫時位移，加在這個位置上、不累積） */
+  base: { x: number; z: number };
+  /** 攻擊中暫時換成「生氣」表情（結束後換回目前表情） */
+  attackFace: boolean;
   body: Mesh;
   /** 原本的身體材質（V3.8R 灰模切換回來時使用） */
   bodyMat: Material;
@@ -417,6 +435,8 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
       yaw,
       moveSign: n === 1 ? -1 : 1,
       pose: REST_POSE,
+      base: { x, z },
+      attackFace: false,
     };
     if (v38r) it.player.request(anim);
     applyGrey(it, grey);
@@ -634,7 +654,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
   const countButtons = [...uiRoot.querySelectorAll<HTMLButtonElement>("[data-count]")];
   // V3.8R 第四階段：動畫切換按鈕（點一下輪流：待機 → 靜止 → 待機…；之後加入移動、攻擊等）
   const animBtn = uiRoot.querySelector<HTMLButtonElement>(".v3-anim");
-  const ANIM_LABEL: Record<BoboAnimName, string> = { none: "⏸ 靜止", idle: "🫧 待機", move: "🦘 移動" };
+  const ANIM_LABEL: Record<BoboAnimName, string> = { none: "⏸ 靜止", idle: "🫧 待機", move: "🦘 移動", attack: "💥 攻擊" };
   const fpsEl = uiRoot.querySelector<HTMLDivElement>(".lab-fps")!;
   const benchBtn = uiRoot.querySelector<HTMLButtonElement>(".lab-bench")!;
   const benchEl = uiRoot.querySelector<HTMLDivElement>(".lab-bench-result")!;
@@ -749,7 +769,8 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
       let travel = 0;
       if (animHold !== null) {
         p = poseAt(anim, animHold, it.animPhase);
-        it.root.position.set(it.home.x, p.lift, it.home.z);
+        it.base.x = it.home.x;
+        it.base.z = it.home.z;
         it.yaw = it.home.yaw;
       } else {
         const r = it.player.update(dt);
@@ -757,27 +778,38 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
         travel = r.travel;
         // 朝向：移動時面向前進方向（沿 X 軸來回），停下後轉回原本朝向
         const moving = it.player.current === "move" && it.player.pending === "move";
-        const target = moving || it.player.current === "move" ? (it.moveSign > 0 ? Math.PI / 2 : -Math.PI / 2) : it.home.yaw;
+        // 攻擊中不轉身（朝目前方向出招）
+        const target =
+          it.player.current === "attack" ? it.yaw : moving || it.player.current === "move" ? (it.moveSign > 0 ? Math.PI / 2 : -Math.PI / 2) : it.home.yaw;
         let d = target - it.yaw;
         d = Math.atan2(Math.sin(d), Math.cos(d));
         it.yaw += d * Math.min(1, dt * 7);
         // 前進方向 = 角色目前朝向（轉身還沒轉好時原地彈跳）
         if (Math.abs(d) > 0.35) travel = 0;
-        const pos = it.root.position;
+        const pos = it.base;
         pos.x += Math.sin(it.yaw) * travel;
         pos.z += Math.cos(it.yaw) * travel;
-        pos.y = p.lift;
         if (it.moveSign > 0 && pos.x > it.home.x + PATH_HALF) it.moveSign = -1;
         else if (it.moveSign < 0 && pos.x < it.home.x - PATH_HALF) it.moveSign = 1;
       }
       it.pose = p;
+      // 位置 = 累積位置 + 沿朝向的暫時位移（攻擊彈出）＋離地高度
+      it.root.position.set(it.base.x + Math.sin(it.yaw) * p.fwd, p.lift, it.base.z + Math.cos(it.yaw) * p.fwd);
       it.root.rotation.y = it.yaw;
-      it.root.scaling.set(p.sxz, p.sy, p.sxz);
+      const [sx, sy, sz] = poseScale(p);
+      it.root.scaling.set(sx, sy, sz);
       it.root.rotation.z = p.roll;
       it.root.rotation.x = p.pitch;
       if (it.jelly instanceof JellyV38RPlugin) it.jelly.anim.set(p.swayX, p.swayZ, p.flap, 0);
       // 頭頂星星跟著觸角末端移動（真正的 3D 物件）
       it.stars.position.set(p.swayX * starW, 0, p.swayZ * starW);
+      // 攻擊：出招時暫時換成「生氣」表情（八種表情之一），結束後換回
+      const attacking = (animHold !== null ? anim : it.player.current) === "attack" && !grey;
+      if (attacking !== it.attackFace && it.expr) {
+        it.attackFace = attacking;
+        it.blinkClosed = false;
+        it.expr.set(V3_EXPRESSIONS.indexOf(attacking ? "angry" : expression));
+      }
       // 眨眼：只在待機、表情為「一般／好奇」時；只換眼睛貼圖
       const canBlink = it.player.current === "idle" && animHold === null && !grey && (expression === "normal" || expression === "curious");
       const closed = canBlink && it.blink.update(dt);
@@ -787,6 +819,12 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
       }
     }
     updateFxFrame?.();
+    // 按鈕顯示第一隻目前的動畫（攻擊播完會自動回到待機）
+    const shownAnim = instances[0] && animHold === null ? instances[0].player.current : anim;
+    if (animBtn && animBtn.dataset.anim !== shownAnim) {
+      animBtn.dataset.anim = shownAnim;
+      animBtn.textContent = ANIM_LABEL[shownAnim];
+    }
   };
   const setAnim = (a: BoboAnimName): void => {
     anim = a;
@@ -797,6 +835,8 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
         // 靜止：立刻回到出生位置與原本朝向（方便對照）
         it.player = new BoboAnimPlayer("none", it.animPhase);
         it.root.position.set(it.home.x, 0, it.home.z);
+        it.base.x = it.home.x;
+        it.base.z = it.home.z;
         it.yaw = it.home.yaw;
       }
     }
@@ -804,7 +844,10 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     if (a === "none") applyAnim(0);
   };
 
-  animBtn?.addEventListener("click", () => setAnim(BOBO_ANIMS[(BOBO_ANIMS.indexOf(anim) + 1) % BOBO_ANIMS.length]!));
+  animBtn?.addEventListener("click", () => {
+    const cur = (instances[0]?.player.current ?? anim) as BoboAnimName;
+    setAnim(BOBO_ANIMS[(BOBO_ANIMS.indexOf(cur) + 1) % BOBO_ANIMS.length]!);
+  });
   if (animBtn) animBtn.textContent = ANIM_LABEL[anim];
 
   let uiTimer = 0;
@@ -882,7 +925,21 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     animState: () => {
       const it = instances[0]!;
       const q = it.root.position;
-      return { anim: it.player.current, pending: it.player.pending, x: q.x, y: q.y, z: q.z, yaw: it.yaw, lift: it.pose.lift, sy: it.pose.sy };
+      return {
+        anim: it.player.current,
+        pending: it.player.pending,
+        x: q.x,
+        y: q.y,
+        z: q.z,
+        yaw: it.yaw,
+        lift: it.pose.lift,
+        sy: it.pose.sy,
+        sfwd: it.pose.sfwd,
+        fwd: it.pose.fwd,
+        bx: it.base.x,
+        bz: it.base.z,
+        angry: it.attackFace,
+      };
     },
     bodyExtent: () => {
       const b = instances[0]!.body;
@@ -910,7 +967,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
         refMode,
         glowLayer: !!render.glow,
         grey,
-        anim,
+        anim: v38r && instances[0] ? instances[0].player.current : anim,
         faceVisible: !!instances[0]?.eyes.isEnabled(),
         views5: v38r,
       };
