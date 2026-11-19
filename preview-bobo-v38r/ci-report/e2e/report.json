@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-11-19T09:39:41.651Z",
+  "startedAt": "2026-11-19T10:12:34.610Z",
   "runs": [
     {
       "browser": "chromium",
@@ -39,9 +39,9 @@
                 "mode": "chase",
                 "hp": 60,
                 "maxHp": 60,
-                "x": -0.86319967799164,
+                "x": -0.89866236645122,
                 "y": 0,
-                "z": 3.3448987522175995,
+                "z": 3.482316669998472,
                 "spawnX": -1.6000000000000005,
                 "spawnZ": 6.2,
                 "visible": true
@@ -99,9 +99,9 @@
               "mode": "attack",
               "hp": 40,
               "maxHp": 60,
-              "x": -0.7832387119046735,
+              "x": -0.8187014003642535,
               "y": 0,
-              "z": 3.035050008630605,
+              "z": 3.1724679264114775,
               "spawnX": -1.6000000000000005,
               "spawnZ": 6.2,
               "visible": true
@@ -131,9 +131,9 @@
               "mode": "dead",
               "hp": 0,
               "maxHp": 60,
-              "x": -0.7832387119046735,
+              "x": -0.8187014003642535,
               "y": 0,
-              "z": 3.035050008630605,
+              "z": 3.1724679264114775,
               "spawnX": -1.6000000000000005,
               "spawnZ": 6.2,
               "visible": true
@@ -169,9 +169,9 @@
               "mode": "return",
               "hp": 60,
               "maxHp": 60,
-              "x": -0.5199324169871651,
+              "x": -0.5180073199345513,
               "y": 0,
-              "z": 0.9621438990540812,
+              "z": 0.8085671393254308,
               "spawnX": -3.2000000000000006,
               "spawnZ": 8,
               "visible": true
@@ -182,9 +182,9 @@
               "mode": "return",
               "hp": 60,
               "maxHp": 60,
-              "x": 0.47977581827970817,
+              "x": 0.4804537774143389,
               "y": 0,
-              "z": 0.9862984915696675,
+              "z": 0.8640237627427468,
               "spawnX": 2.3999999999999995,
               "spawnZ": 8.6,
               "visible": true
@@ -224,9 +224,9 @@
               "mode": "return",
               "hp": 60,
               "maxHp": 60,
-              "x": -0.5199324169871651,
+              "x": -0.5180073199345513,
               "y": 0,
-              "z": 0.9621438990540812,
+              "z": 0.8085671393254308,
               "spawnX": -3.2000000000000006,
               "spawnZ": 8,
               "visible": true
@@ -237,9 +237,9 @@
               "mode": "return",
               "hp": 60,
               "maxHp": 60,
-              "x": 0.47977581827970817,
+              "x": 0.4804537774143389,
               "y": 0,
-              "z": 0.9862984915696675,
+              "z": 0.8640237627427468,
               "spawnX": 2.3999999999999995,
               "spawnZ": 8.6,
               "visible": true
@@ -249,31 +249,31 @@
         "草原：多隻怪物不疊在一起、不擠進玩家": {
           "ok": true,
           "detail": {
-            "minPair": 3.6515592993006627,
-            "minToPlayer": 0.971694101430649,
+            "minPair": 2.584324209682704,
+            "minToPlayer": 0.9723634774116753,
             "ring": [
               {
                 "id": "star_dew_bobo#1",
-                "state": "attack",
+                "state": "idle",
                 "mode": "attack",
                 "hp": 60,
                 "maxHp": 60,
-                "x": -1.155706728733694,
+                "x": -1.1541307488787185,
                 "y": 0,
-                "z": 4.6717816467464965,
+                "z": 4.6727874813115005,
                 "spawnX": -1.6000000000000005,
                 "spawnZ": 6.2,
                 "visible": true
               },
               {
                 "id": "star_dew_bobo#2",
-                "state": "idle",
-                "mode": "idle",
+                "state": "move",
+                "mode": "return",
                 "hp": 60,
                 "maxHp": 60,
-                "x": -3.124088664200482,
+                "x": -2.7985248693324074,
                 "y": 0,
-                "z": 7.747388557981606,
+                "z": 6.666452347172729,
                 "spawnX": -3.2000000000000006,
                 "spawnZ": 8,
                 "visible": true
@@ -284,9 +284,9 @@
                 "mode": "return",
                 "hp": 60,
                 "maxHp": 60,
-                "x": 2.240526129454796,
+                "x": 1.906162810135694,
                 "y": 0,
-                "z": 7.967685054545308,
+                "z": 6.6097833952036105,
                 "spawnX": 2.3999999999999995,
                 "spawnZ": 8.6,
                 "visible": true
@@ -366,12 +366,12 @@
               "yaw": -1.5707963267948966
             },
             "to": {
-              "x": -5.782281193701423e-16,
-              "y": 0.009939884061871572,
-              "z": 9.443181818181818,
-              "yaw": -4.0775243853035e-15
+              "x": -5.169957794127747e-16,
+              "y": 0,
+              "z": 8.443181818181818,
+              "yaw": -6.610773635524142e-14
             },
-            "moved": 9.443181818181818
+            "moved": 8.443181818181818
           }
         },
         "拖曳旋轉攝影機": {
@@ -388,12 +388,12 @@
       },
       "errors": [],
       "fpsReference": [
-        8.857657444861024,
-        8.864462370357119,
-        8.925383791503162,
-        9.111894059045014,
-        9.268413247651875,
-        9.386146048432657
+        6.720430107526875,
+        6.712460564294194,
+        6.717871778220677,
+        6.808587898869793,
+        6.88073394495412,
+        6.981127684825366
       ],
       "screenshot": "e2e/chromium_iPhone_15_橫向.png",
       "ok": true
@@ -436,9 +436,9 @@
                 "mode": "chase",
                 "hp": 60,
                 "maxHp": 60,
-                "x": -0.8231392339820417,
+                "x": -0.899262073696878,
                 "y": 0,
-                "z": 3.189664531680407,
+                "z": 3.484640535575397,
                 "spawnX": -1.6000000000000005,
                 "spawnZ": 6.2,
                 "visible": true
@@ -487,12 +487,12 @@
               "yaw": 0
             },
             "to": {
-              "x": -5.476119493914585e-16,
+              "x": -4.863796094340909e-16,
               "y": 0,
-              "z": 8.943181818181818,
-              "yaw": -6.123233995736702e-17
+              "z": 7.943181818181818,
+              "yaw": -6.123233995735722e-17
             },
-            "moved": 8.943181818181818
+            "moved": 7.943181818181818
           }
         },
         "拖曳旋轉攝影機": {
@@ -509,12 +509,12 @@
       },
       "errors": [],
       "fpsReference": [
-        10.535927512818642,
-        10.539999297333656,
-        10.815097876636164,
-        11.115639705064948,
-        11.667703795893202,
-        12.214983713355068
+        7.860605266605534,
+        7.870503974604488,
+        7.910557958021323,
+        8.056070248932588,
+        8.27974498385453,
+        8.493530760737231
       ],
       "screenshot": "e2e/chromium_iPhone_SE_直向.png",
       "ok": true
@@ -596,14 +596,14 @@
               "offsetY": 0,
               "offsetZ": 0,
               "shakeX": 0,
-              "scaleY": 1.0299968885244242,
-              "scaleXZ": 0.9853307664336762,
+              "scaleY": 1.018764764927455,
+              "scaleXZ": 0.9907476297201269,
               "stretchZ": 1,
               "lean": 0,
               "opacity": 1,
-              "starGlow": 0.9499896284147472,
-              "antennaSway": 0.0035556667551894295,
-              "wingFlap": -0.17888172462421084,
+              "starGlow": 0.9125492164248495,
+              "antennaSway": -0.031991997779055835,
+              "wingFlap": -0.1364436921616624,
               "hitFlash": 0,
               "face": "normal",
               "ringScale": 0,
@@ -624,7 +624,7 @@
         "e2e/chromium_bobo_6_respawn.png"
       ],
       "fpsReference": [
-        15.048154093098093
+        12.230421134167747
       ],
       "ok": true
     },
@@ -733,7 +733,7 @@
         "e2e/chromium_dummy_6_respawn.png"
       ],
       "fpsReference": [
-        18.164204407847187
+        13.590033975084925
       ],
       "ok": true
     },
@@ -768,8 +768,8 @@
             "mode": "chase",
             "hp": 60,
             "maxHp": 60,
-            "x": -4.197531991617015,
-            "z": -2.787985004044001
+            "x": -4.149991216024802,
+            "z": -2.7827024387149417
           }
         },
         "受傷→死亡": {
@@ -785,8 +785,8 @@
             "mode": "dead",
             "hp": 0,
             "maxHp": 60,
-            "x": -2.963740839551709,
-            "z": -2.907019551487924
+            "x": -3.0628894549436625,
+            "z": -2.892574776699832
           }
         },
         "AI：目標離開後不再追擊": {
@@ -866,7 +866,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 7.368421052631579,
+            "fps": 5.515156467031646,
             "drawCalls": 36,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -880,13 +880,14 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 7.368421052631579,
+            "fps": 5.515156467031646,
             "drawCalls": 36,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -900,7 +901,8 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -978,7 +980,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 8.149272185690787,
+            "fps": 6.133714986710291,
             "drawCalls": 36,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -992,13 +994,14 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 8.149272185690787,
+            "fps": 6.133714986710291,
             "drawCalls": 36,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -1012,7 +1015,8 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -1090,7 +1094,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 7.352340495057502,
+            "fps": 5.524744480567768,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -1104,13 +1108,14 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 7.352340495057502,
+            "fps": 5.524744480567768,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -1124,7 +1129,8 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -1202,7 +1208,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 8.035244243717322,
+            "fps": 5.937458767647416,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -1216,13 +1222,14 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 8.035244243717322,
+            "fps": 5.937458767647416,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -1236,7 +1243,8 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -1314,7 +1322,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 7.031250000000001,
+            "fps": 5.516539008296021,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -1332,13 +1340,14 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 7.031250000000001,
+            "fps": 5.516539008296021,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -1356,7 +1365,8 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -1445,7 +1455,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 8.170855404034818,
+            "fps": 5.949233209941839,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -1463,13 +1473,14 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 8.170855404034818,
+            "fps": 5.949233209941839,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -1487,7 +1498,8 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -1576,7 +1588,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 7.319255062484935,
+            "fps": 5.484075089643535,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -1594,13 +1606,14 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 7.319255062484935,
+            "fps": 5.484075089643535,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -1618,7 +1631,8 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -1708,7 +1722,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 7.718719224934173,
+            "fps": 5.928463210592203,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -1726,13 +1740,14 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 7.718719224934173,
+            "fps": 5.928463210592203,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -1750,7 +1765,8 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -1840,7 +1856,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 7.403345215245409,
+            "fps": 5.432625002611846,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -1858,13 +1874,14 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 7.403345215245409,
+            "fps": 5.432625002611846,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -1882,7 +1899,8 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -1972,7 +1990,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 8.414203174959553,
+            "fps": 5.975963347424757,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -1990,13 +2008,14 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 8.414203174959553,
+            "fps": 5.975963347424757,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -2014,7 +2033,8 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -2104,7 +2124,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 9.134433665112967,
+            "fps": 6.7518567606091295,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -2122,13 +2142,14 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 9.134433665112967,
+            "fps": 6.7518567606091295,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -2146,7 +2167,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -2167,7 +2189,7 @@
         "V3.5：不使用陰影貼圖與 GlowLayer（改用接觸陰影與星星光暈）": {
           "ok": true,
           "detail": {
-            "fps": 9.134433665112967,
+            "fps": 6.7518567606091295,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -2185,7 +2207,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "V3.5：3 隻同場 Draw Calls 不高於 V3.4": {
@@ -2200,45 +2223,45 @@
           "detail": [
             {
               "name": "目前設定",
-              "avg": 12.972572275758981,
-              "low1": 12.360939431393229,
+              "avg": 9.33794005042518,
+              "low1": 9.01713255185135,
               "draws": 24,
               "gain": 0
             },
             {
               "name": "關閉果凍內部星雲",
-              "avg": 20.90459901178213,
-              "low1": 19.01140684411488,
+              "avg": 13.57509938912068,
+              "low1": 10.030090270811266,
               "draws": 24,
-              "gain": 7.932026736023147
+              "gain": 4.2371593386955
             },
             {
               "name": "關閉果凍材質（純透明）",
-              "avg": 22.380072005450074,
-              "low1": 21.27659574468085,
+              "avg": 16.226018898539476,
+              "low1": 15.2439024390298,
               "draws": 24,
-              "gain": 9.407499729691093
+              "gain": 6.888078848114295
             },
             {
               "name": "關閉 MSAA 抗鋸齒",
-              "avg": 19.303156066017227,
-              "low1": 17.211703958698806,
+              "avg": 14.022623165373316,
+              "low1": 13.386880856758287,
               "draws": 24,
-              "gain": 6.330583790258245
+              "gain": 4.684683114948136
             },
             {
               "name": "解析度 1.5x",
-              "avg": 9.7725657427152,
-              "low1": 9.487666034153502,
+              "avg": 6.849901532665331,
+              "low1": 6.706908115359867,
               "draws": 24,
-              "gain": -3.2000065330437817
+              "gain": -2.4880385177598487
             },
             {
               "name": "隱藏啵啵（只剩場景）",
-              "avg": 12.319939347991445,
-              "low1": 11.454753722804124,
+              "avg": 8.904719501335707,
+              "low1": 8.650519031139256,
               "draws": 5,
-              "gain": -0.6526329277675362
+              "gain": -0.43322054908947294
             }
           ]
         },
@@ -2313,7 +2336,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 9.271277582050674,
+            "fps": 7.269627995588069,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -2331,13 +2354,14 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 9.271277582050674,
+            "fps": 7.269627995588069,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -2355,7 +2379,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -2376,7 +2401,7 @@
         "V3.5：不使用陰影貼圖與 GlowLayer（改用接觸陰影與星星光暈）": {
           "ok": true,
           "detail": {
-            "fps": 9.271277582050674,
+            "fps": 7.269627995588069,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -2394,7 +2419,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "V3.5：3 隻同場 Draw Calls 不高於 V3.4": {
@@ -2475,7 +2501,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 9.226266225502808,
+            "fps": 6.682341294394259,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -2493,13 +2519,14 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 9.226266225502808,
+            "fps": 6.682341294394259,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -2517,7 +2544,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -2538,7 +2566,7 @@
         "V3.6：不使用陰影貼圖與 GlowLayer（沿用 V3.5 繪製方式）": {
           "ok": true,
           "detail": {
-            "fps": 9.226266225502808,
+            "fps": 6.682341294394259,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -2556,7 +2584,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "V3.6：3 隻同場 Draw Calls 不高於 V3.5": {
@@ -2575,45 +2604,45 @@
           "detail": [
             {
               "name": "目前設定",
-              "avg": 13.235016071090362,
-              "low1": 12.59445843828346,
+              "avg": 9.356287425149802,
+              "low1": 8.873114463180242,
               "draws": 24,
               "gain": 0
             },
             {
               "name": "關閉果凍內部星雲",
-              "avg": 20.801815431165355,
-              "low1": 19.083969465640376,
+              "avg": 14.332123065162909,
+              "low1": 10.020040080155646,
               "draws": 24,
-              "gain": 7.566799360074993
+              "gain": 4.975835640013107
             },
             {
               "name": "關閉果凍材質（純透明）",
-              "avg": 22.77472006073158,
-              "low1": 19.960079840328635,
+              "avg": 16.471272163549486,
+              "low1": 15.948963317381411,
               "draws": 24,
-              "gain": 9.539703989641216
+              "gain": 7.114984738399684
             },
             {
               "name": "關閉 MSAA 抗鋸齒",
-              "avg": 19.55671447196786,
-              "low1": 18.34862385321101,
+              "avg": 13.841469041247429,
+              "low1": 13.10615989515272,
               "draws": 24,
-              "gain": 6.3216984008775
+              "gain": 4.485181616097627
             },
             {
               "name": "解析度 1.5x",
-              "avg": 9.603631918980074,
-              "low1": 9.276437847862413,
+              "avg": 6.835269993164594,
+              "low1": 6.618133686301483,
               "draws": 24,
-              "gain": -3.6313841521102876
+              "gain": -2.5210174319852072
             },
             {
               "name": "隱藏啵啵（只剩場景）",
-              "avg": 17.676062889572652,
-              "low1": 17.00680272107497,
+              "avg": 8.652764558276283,
+              "low1": 8.417508417509243,
               "draws": 5,
-              "gain": 4.44104681848229
+              "gain": -0.7035228668735183
             }
           ]
         },
@@ -2695,7 +2724,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 10.300429184549355,
+            "fps": 7.075241534107564,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -2713,13 +2742,14 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 10.300429184549355,
+            "fps": 7.075241534107564,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -2737,7 +2767,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -2758,7 +2789,7 @@
         "V3.6：不使用陰影貼圖與 GlowLayer（沿用 V3.5 繪製方式）": {
           "ok": true,
           "detail": {
-            "fps": 10.300429184549355,
+            "fps": 7.075241534107564,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -2776,7 +2807,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "V3.6：3 隻同場 Draw Calls 不高於 V3.5": {
@@ -2868,7 +2900,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 9.15461834711774,
+            "fps": 6.40173339242622,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -2886,13 +2918,14 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 9.15461834711774,
+            "fps": 6.40173339242622,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -2910,7 +2943,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -2931,7 +2965,7 @@
         "V3.7：不使用陰影貼圖與 GlowLayer": {
           "ok": true,
           "detail": {
-            "fps": 9.15461834711774,
+            "fps": 6.40173339242622,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -2949,7 +2983,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "V3.7：3 隻同場 Draw Calls 不高於 V3.6（≤25）": {
@@ -2971,45 +3006,45 @@
           "detail": [
             {
               "name": "目前設定",
-              "avg": 12.704174228675136,
-              "low1": 10.40582726326995,
+              "avg": 8.991188635137942,
+              "low1": 8.665511265167268,
               "draws": 24,
               "gain": 0
             },
             {
               "name": "關閉果凍內部星雲",
-              "avg": 20.837279787839986,
-              "low1": 19.801980198019802,
+              "avg": 14.185654756627066,
+              "low1": 13.003901170347168,
               "draws": 24,
-              "gain": 8.13310555916485
+              "gain": 5.194466121489125
             },
             {
               "name": "關閉果凍材質（純透明）",
-              "avg": 23.27385570209307,
-              "low1": 21.598272138207218,
+              "avg": 16.14741641337404,
+              "low1": 14.367816091958828,
               "draws": 24,
-              "gain": 10.569681473417933
+              "gain": 7.156227778236097
             },
             {
               "name": "關閉 MSAA 抗鋸齒",
-              "avg": 19.415680473373197,
-              "low1": 17.636684303365456,
+              "avg": 13.07067500700243,
+              "low1": 12.23990208078161,
               "draws": 24,
-              "gain": 6.711506244698061
+              "gain": 4.079486371864489
             },
             {
               "name": "解析度 1.5x",
-              "avg": 9.430727023320369,
-              "low1": 9.017132551856085,
+              "avg": 6.527415143602991,
+              "low1": 6.353240152479174,
               "draws": 24,
-              "gain": -3.273447205354767
+              "gain": -2.4637734915349503
             },
             {
               "name": "隱藏啵啵（只剩場景）",
-              "avg": 17.309356668910084,
-              "low1": 15.898251192362954,
+              "avg": 12.737694477299877,
+              "low1": 11.91895113229705,
               "draws": 5,
-              "gain": 4.605182440234948
+              "gain": 3.7465058421619357
             }
           ]
         },
@@ -3091,7 +3126,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 10.129659643435662,
+            "fps": 6.799371644275577,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -3109,13 +3144,14 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 10.129659643435662,
+            "fps": 6.799371644275577,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -3133,7 +3169,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -3154,7 +3191,7 @@
         "V3.7：不使用陰影貼圖與 GlowLayer": {
           "ok": true,
           "detail": {
-            "fps": 10.129659643435662,
+            "fps": 6.799371644275577,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -3172,7 +3209,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "V3.7：3 隻同場 Draw Calls 不高於 V3.6（≤25）": {
@@ -3267,7 +3305,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 9.141055949566589,
+            "fps": 6.511201678443081,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -3285,13 +3323,14 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 9.141055949566589,
+            "fps": 6.511201678443081,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -3309,7 +3348,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -3330,7 +3370,7 @@
         "V3.8：不使用陰影貼圖與 GlowLayer": {
           "ok": true,
           "detail": {
-            "fps": 9.141055949566589,
+            "fps": 6.511201678443081,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -3348,7 +3388,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "V3.8：3 隻同場 Draw Calls 不高於 V3.7（≤25）": {
@@ -3370,45 +3411,45 @@
           "detail": [
             {
               "name": "目前設定",
-              "avg": 13.059701492537313,
-              "low1": 12.150668286748896,
+              "avg": 8.966197435667626,
+              "low1": 8.665511265167268,
               "draws": 24,
               "gain": 0
             },
             {
               "name": "關閉果凍內部星雲",
-              "avg": 20.84715246849145,
-              "low1": 20.04008016031129,
+              "avg": 14.144271570014148,
+              "low1": 13.440860215049558,
               "draws": 24,
-              "gain": 7.787450975954139
+              "gain": 5.178074134346522
             },
             {
               "name": "關閉果凍材質（純透明）",
-              "avg": 23.01275290056521,
-              "low1": 21.69197396964219,
+              "avg": 16.471272163550417,
+              "low1": 15.748031496062993,
               "draws": 24,
-              "gain": 9.953051408027898
+              "gain": 7.505074727882791
             },
             {
               "name": "關閉 MSAA 抗鋸齒",
-              "avg": 19.180972475305357,
-              "low1": 17.95332136442991,
+              "avg": 13.12335958005192,
+              "low1": 12.722646310436339,
               "draws": 24,
-              "gain": 6.121270982768044
+              "gain": 4.157162144384294
             },
             {
               "name": "解析度 1.5x",
-              "avg": 9.474590869939707,
-              "low1": 9.174311926605505,
+              "avg": 6.5237651444548,
+              "low1": 6.321112515802317,
               "draws": 24,
-              "gain": -3.5851106225976057
+              "gain": -2.4424322912128256
             },
             {
               "name": "隱藏啵啵（只剩場景）",
-              "avg": 17.705712421955468,
-              "low1": 16.920473773272317,
+              "avg": 12.690355329949776,
+              "low1": 12.15066828675749,
               "draws": 5,
-              "gain": 4.646010929418155
+              "gain": 3.7241578942821505
             }
           ]
         },
@@ -3422,7 +3463,7 @@
         },
         "點擊效能測試：10 秒後顯示平均／最慢 1%／最低 FPS 與 Draw Calls": {
           "ok": true,
-          "detail": "V3.8 效能測試（本機 WebGL 實測）\nbobo_v38_medium.glb・3 隻・畫質 medium・1x・10 秒\n平均 13.3 FPS・最慢 1% 11.9 FPS・最低 11.8 FPS\nDraw Calls 平均 24（最高 24）・畫面物件 21\n點此關閉"
+          "detail": "V3.8 效能測試（本機 WebGL 實測）\nbobo_v38_medium.glb・3 隻・畫質 medium・1x・10.1 秒\n平均 9.3 FPS・最慢 1% 8.7 FPS・最低 8.7 FPS\nDraw Calls 平均 24（最高 24）・畫面物件 21\n點此關閉"
         },
         "共用載入器釋放資源：零件全部移除": {
           "ok": true,
@@ -3494,7 +3535,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 10.04352192835621,
+            "fps": 6.749679972070288,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -3512,13 +3553,14 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 10.04352192835621,
+            "fps": 6.749679972070288,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -3536,7 +3578,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -3557,7 +3600,7 @@
         "V3.8：不使用陰影貼圖與 GlowLayer": {
           "ok": true,
           "detail": {
-            "fps": 10.04352192835621,
+            "fps": 6.749679972070288,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -3575,7 +3618,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "V3.8：3 隻同場 Draw Calls 不高於 V3.7（≤25）": {
@@ -3631,8 +3675,8 @@
               },
               {
                 "name": "Eyes_0",
-                "triangles": 1296,
-                "vertices": 722
+                "triangles": 1152,
+                "vertices": 650
               },
               {
                 "name": "Mouth_0",
@@ -3650,7 +3694,7 @@
                 "vertices": 482
               }
             ],
-            "trianglesTotal": 6216,
+            "trianglesTotal": 6072,
             "materials": 5
           }
         },
@@ -3670,9 +3714,9 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 11.121821012827072,
-            "drawCalls": 11,
-            "activeMeshes": 12,
+            "fps": 6.436693923284127,
+            "drawCalls": 24,
+            "activeMeshes": 21,
             "pixelRatio": 1.5,
             "quality": "medium",
             "jelly": true,
@@ -3687,16 +3731,17 @@
             "shadowMap": false,
             "refMode": false,
             "glowLayer": false,
-            "grey": true,
-            "faceVisible": false
+            "grey": false,
+            "faceVisible": true,
+            "views5": true
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 11.121821012827072,
-            "drawCalls": 11,
-            "activeMeshes": 12,
+            "fps": 6.436693923284127,
+            "drawCalls": 24,
+            "activeMeshes": 21,
             "pixelRatio": 1.5,
             "quality": "medium",
             "jelly": true,
@@ -3711,8 +3756,9 @@
             "shadowMap": false,
             "refMode": false,
             "glowLayer": false,
-            "grey": true,
-            "faceVisible": false
+            "grey": false,
+            "faceVisible": true,
+            "views5": true
           }
         },
         "載入的是正確版本": {
@@ -3723,12 +3769,12 @@
           "ok": true,
           "detail": "bobo_v38r_medium.glb"
         },
-        "V3.8R：灰模模式（不顯示臉部、無陰影貼圖與 GlowLayer）": {
+        "V3.8R 第三階段：果凍材質與臉部顯示、腹部星星 0.0714、無陰影貼圖與 GlowLayer": {
           "ok": true,
           "detail": {
-            "fps": 11.121821012827072,
-            "drawCalls": 11,
-            "activeMeshes": 12,
+            "fps": 6.436693923284127,
+            "drawCalls": 24,
+            "activeMeshes": 21,
             "pixelRatio": 1.5,
             "quality": "medium",
             "jelly": true,
@@ -3743,14 +3789,28 @@
             "shadowMap": false,
             "refMode": false,
             "glowLayer": false,
-            "grey": true,
-            "faceVisible": false
+            "grey": false,
+            "faceVisible": true,
+            "views5": true
           }
+        },
+        "V3.8R：第二階段灰模可切換並恢復": {
+          "ok": true,
+          "detail": {
+            "onGrey": true,
+            "onFace": false,
+            "offGrey": false,
+            "offFace": true
+          }
+        },
+        "V3.8R：8 種表情切換時身體外型不變": {
+          "ok": true,
+          "detail": "-0.6567,-0.0001,-0.4956,0.6594,1.1029,0.4945"
         },
         "V3.8R：3 隻同場 Draw Calls 不高於 V3.8（≤25）": {
           "ok": true,
           "detail": {
-            "v38r": 11,
+            "v38r": 24,
             "v38": 24
           }
         },
@@ -3782,7 +3842,7 @@
         },
         "點擊效能測試：10 秒後顯示平均／最慢 1%／最低 FPS 與 Draw Calls": {
           "ok": true,
-          "detail": "V3.8R 灰模 效能測試（本機 WebGL 實測）\nbobo_v38r_medium.glb・3 隻・畫質 medium・1x・10 秒\n平均 23.7 FPS・最慢 1% 16.1 FPS・最低 15.4 FPS\nDraw Calls 平均 11（最高 11）・畫面物件 12\n點此關閉"
+          "detail": "V3.8R 效能測試（本機 WebGL 實測）\nbobo_v38r_medium.glb・3 隻・畫質 medium・1x・10 秒\n平均 13.5 FPS・最慢 1% 12.4 FPS・最低 9.7 FPS\nDraw Calls 平均 24（最高 24）・畫面物件 21\n點此關閉"
         },
         "共用載入器釋放資源：零件全部移除": {
           "ok": true,
@@ -3815,8 +3875,8 @@
               },
               {
                 "name": "Eyes_0",
-                "triangles": 1296,
-                "vertices": 722
+                "triangles": 1152,
+                "vertices": 650
               },
               {
                 "name": "Mouth_0",
@@ -3834,7 +3894,7 @@
                 "vertices": 482
               }
             ],
-            "trianglesTotal": 6216,
+            "trianglesTotal": 6072,
             "materials": 5
           }
         },
@@ -3854,9 +3914,9 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 14.581510644502607,
-            "drawCalls": 9,
-            "activeMeshes": 8,
+            "fps": 6.667279749862004,
+            "drawCalls": 20,
+            "activeMeshes": 15,
             "pixelRatio": 1.5,
             "quality": "medium",
             "jelly": true,
@@ -3871,16 +3931,17 @@
             "shadowMap": false,
             "refMode": false,
             "glowLayer": false,
-            "grey": true,
-            "faceVisible": false
+            "grey": false,
+            "faceVisible": true,
+            "views5": true
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 14.581510644502607,
-            "drawCalls": 9,
-            "activeMeshes": 8,
+            "fps": 6.667279749862004,
+            "drawCalls": 20,
+            "activeMeshes": 15,
             "pixelRatio": 1.5,
             "quality": "medium",
             "jelly": true,
@@ -3895,8 +3956,9 @@
             "shadowMap": false,
             "refMode": false,
             "glowLayer": false,
-            "grey": true,
-            "faceVisible": false
+            "grey": false,
+            "faceVisible": true,
+            "views5": true
           }
         },
         "載入的是正確版本": {
@@ -3907,12 +3969,12 @@
           "ok": true,
           "detail": "bobo_v38r_medium.glb"
         },
-        "V3.8R：灰模模式（不顯示臉部、無陰影貼圖與 GlowLayer）": {
+        "V3.8R 第三階段：果凍材質與臉部顯示、腹部星星 0.0714、無陰影貼圖與 GlowLayer": {
           "ok": true,
           "detail": {
-            "fps": 14.581510644502607,
-            "drawCalls": 9,
-            "activeMeshes": 8,
+            "fps": 6.667279749862004,
+            "drawCalls": 20,
+            "activeMeshes": 15,
             "pixelRatio": 1.5,
             "quality": "medium",
             "jelly": true,
@@ -3927,14 +3989,28 @@
             "shadowMap": false,
             "refMode": false,
             "glowLayer": false,
-            "grey": true,
-            "faceVisible": false
+            "grey": false,
+            "faceVisible": true,
+            "views5": true
           }
+        },
+        "V3.8R：第二階段灰模可切換並恢復": {
+          "ok": true,
+          "detail": {
+            "onGrey": true,
+            "onFace": false,
+            "offGrey": false,
+            "offFace": true
+          }
+        },
+        "V3.8R：8 種表情切換時身體外型不變": {
+          "ok": true,
+          "detail": "-0.6567,-0.0001,-0.4956,0.6594,1.1029,0.4945"
         },
         "V3.8R：3 隻同場 Draw Calls 不高於 V3.8（≤25）": {
           "ok": true,
           "detail": {
-            "v38r": 9,
+            "v38r": 20,
             "v38": 23
           }
         },
@@ -3994,7 +4070,7 @@
             },
             "pixels": {
               "samples": 3568,
-              "distinctColors": 161,
+              "distinctColors": 159,
               "opaqueRatio": 1
             }
           }
@@ -4013,9 +4089,9 @@
                 "mode": "chase",
                 "hp": 60,
                 "maxHp": 60,
-                "x": -1.248171749217349,
+                "x": -1.368912808008668,
                 "y": 0,
-                "z": 4.836665528217224,
+                "z": 5.304537131033585,
                 "spawnX": -1.6000000000000005,
                 "spawnZ": 6.2,
                 "visible": true
@@ -4073,9 +4149,9 @@
               "mode": "attack",
               "hp": 40,
               "maxHp": 60,
-              "x": -1.248171749217349,
+              "x": -1.368912808008668,
               "y": 0,
-              "z": 4.836665528217224,
+              "z": 5.304537131033585,
               "spawnX": -1.6000000000000005,
               "spawnZ": 6.2,
               "visible": true
@@ -4105,9 +4181,9 @@
               "mode": "attack",
               "hp": 0,
               "maxHp": 60,
-              "x": -1.2827373178534698,
+              "x": -1.4005736226569065,
               "y": 0,
-              "z": 4.716394458509895,
+              "z": 5.149852143395301,
               "spawnX": -1.6000000000000005,
               "spawnZ": 6.2,
               "visible": true
@@ -4130,9 +4206,9 @@
               "mode": "chase",
               "hp": 60,
               "maxHp": 60,
-              "x": -1.5820087826304332,
+              "x": -1.5756119053434758,
               "y": 0,
-              "z": 6.130284032692926,
+              "z": 6.105496133205967,
               "spawnX": -1.6000000000000005,
               "spawnZ": 6.2,
               "visible": true
@@ -4143,9 +4219,9 @@
               "mode": "attack",
               "hp": 60,
               "maxHp": 60,
-              "x": -0.5982314588458005,
+              "x": -0.6313217975948302,
               "y": 0,
-              "z": 0.876941179351076,
+              "z": 0.8781980620173264,
               "spawnX": -3.2000000000000006,
               "spawnZ": 8,
               "visible": true
@@ -4156,9 +4232,9 @@
               "mode": "attack",
               "hp": 60,
               "maxHp": 60,
-              "x": 0.39294010310616434,
+              "x": 0.36220107047945294,
               "y": 0,
-              "z": 1.0095267546513416,
+              "z": 0.9918304104637555,
               "spawnX": 2.3999999999999995,
               "spawnZ": 8.6,
               "visible": true
@@ -4168,10 +4244,10 @@
         "草原：怪物攻擊會打到玩家（扣暫定攻擊力 8）": {
           "ok": true,
           "detail": {
-            "hp": 12,
+            "hp": 4,
             "maxHp": 100,
             "down": false,
-            "hitsTaken": 11,
+            "hitsTaken": 12,
             "lockedId": "star_dew_bobo#2",
             "tilt": 0
           }
@@ -4185,9 +4261,9 @@
               "mode": "chase",
               "hp": 60,
               "maxHp": 60,
-              "x": -1.5820087826304332,
+              "x": -1.5756119053434758,
               "y": 0,
-              "z": 6.130284032692926,
+              "z": 6.105496133205967,
               "spawnX": -1.6000000000000005,
               "spawnZ": 6.2,
               "visible": true
@@ -4198,9 +4274,9 @@
               "mode": "attack",
               "hp": 60,
               "maxHp": 60,
-              "x": -0.5982314588458005,
+              "x": -0.6313217975948302,
               "y": 0,
-              "z": 0.876941179351076,
+              "z": 0.8781980620173264,
               "spawnX": -3.2000000000000006,
               "spawnZ": 8,
               "visible": true
@@ -4211,9 +4287,9 @@
               "mode": "attack",
               "hp": 60,
               "maxHp": 60,
-              "x": 0.39294010310616434,
+              "x": 0.36220107047945294,
               "y": 0,
-              "z": 1.0095267546513416,
+              "z": 0.9918304104637555,
               "spawnX": 2.3999999999999995,
               "spawnZ": 8.6,
               "visible": true
@@ -4223,18 +4299,18 @@
         "草原：多隻怪物不疊在一起、不擠進玩家": {
           "ok": true,
           "detail": {
-            "minPair": 1.430545727641724,
-            "minToPlayer": 1.5348752689885465,
+            "minPair": 1.107590611402065,
+            "minToPlayer": 5.108745759044187,
             "ring": [
               {
                 "id": "star_dew_bobo#1",
-                "state": "idle",
-                "mode": "idle",
+                "state": "move",
+                "mode": "chase",
                 "hp": 60,
                 "maxHp": 60,
-                "x": -1.5424281044173846,
+                "x": -1.4124915345260647,
                 "y": 0,
-                "z": 5.976908904617363,
+                "z": 5.473404696288498,
                 "spawnX": -1.6000000000000005,
                 "spawnZ": 6.2,
                 "visible": true
@@ -4245,9 +4321,9 @@
                 "mode": "return",
                 "hp": 60,
                 "maxHp": 60,
-                "x": -2.1544626261999253,
+                "x": -2.140513321506723,
                 "y": 0,
-                "z": 4.683898918955842,
+                "z": 4.638694423111338,
                 "spawnX": -3.2000000000000006,
                 "spawnZ": 8,
                 "visible": true
@@ -4258,18 +4334,18 @@
                 "mode": "return",
                 "hp": 60,
                 "maxHp": 60,
-                "x": 0.5753627164829569,
+                "x": 1.3142137027705694,
                 "y": 0,
-                "z": 4.663790841710476,
+                "z": 6.075366471150517,
                 "spawnX": 2.3999999999999995,
                 "spawnZ": 8.6,
                 "visible": true
               }
             ],
             "pl": {
-              "x": -0.9600000000000003,
+              "x": 0,
               "y": 0,
-              "z": 3.7199999999999998,
+              "z": 0,
               "yaw": -1.5707963267948966
             }
           }
@@ -4287,9 +4363,9 @@
                 "tilt": 1.4451326206513049
               },
               "p": {
-                "x": -0.9600000000000003,
+                "x": 0,
                 "y": 0,
-                "z": 3.7199999999999998,
+                "z": 0,
                 "yaw": -1.5707963267948966
               }
             },
@@ -4303,9 +4379,9 @@
                 "tilt": 1.4451326206513049
               },
               "p": {
-                "x": -0.9600000000000003,
+                "x": 0,
                 "y": 0,
-                "z": 3.7199999999999998,
+                "z": 0,
                 "yaw": -1.5707963267948966
               }
             }
@@ -4340,12 +4416,12 @@
               "yaw": -1.5707963267948966
             },
             "to": {
-              "x": -3.8147747793440046e-16,
+              "x": -3.643324227463375e-16,
               "y": 0,
-              "z": 6.229999999999999,
-              "yaw": -4.1714489718114625e-8
+              "z": 5.949999999999999,
+              "yaw": -9.136372728980159e-8
             },
-            "moved": 6.229999999999999
+            "moved": 5.949999999999999
           }
         },
         "拖曳旋轉攝影機": {
@@ -4362,12 +4438,12 @@
       },
       "errors": [],
       "fpsReference": [
-        19.64636542239686,
-        20.935101186322402,
-        21.398002853067055,
-        22.865853658536597,
-        24.07704654895668,
-        26.01908065915007
+        15.44799176107104,
+        15.471892728210392,
+        16.366612111292937,
+        16.71309192200555,
+        17.70956316410859,
+        18.159806295399488
       ],
       "screenshot": "e2e/webkit_iPhone_15_橫向.png",
       "ok": true
@@ -4391,7 +4467,7 @@
             },
             "pixels": {
               "samples": 2664,
-              "distinctColors": 165,
+              "distinctColors": 166,
               "opaqueRatio": 1
             }
           }
@@ -4410,9 +4486,9 @@
                 "mode": "chase",
                 "hp": 60,
                 "maxHp": 60,
-                "x": -0.979902707995577,
+                "x": -0.9994931446868831,
                 "y": 0,
-                "z": 3.797122993482859,
+                "z": 3.873035935661673,
                 "spawnX": -1.6000000000000005,
                 "spawnZ": 6.2,
                 "visible": true
@@ -4461,12 +4537,12 @@
               "yaw": 0
             },
             "to": {
-              "x": -3.6923100994292705e-16,
+              "x": -3.716803035412217e-16,
               "y": 0,
-              "z": 6.030000000000001,
-              "yaw": -6.123233711059476e-17
+              "z": 6.069999999999999,
+              "yaw": -6.123233741222669e-17
             },
-            "moved": 6.030000000000001
+            "moved": 6.069999999999999
           }
         },
         "拖曳旋轉攝影機": {
@@ -4483,12 +4559,12 @@
       },
       "errors": [],
       "fpsReference": [
-        19.45525291828793,
-        22.607385079125834,
-        22.69288956127079,
-        25.21008403361342,
-        27.752081406105425,
-        30.64351378958117
+        14.025245441795226,
+        14.87357461576598,
+        16.268980477223415,
+        17.07455890722822,
+        18.40490797546011,
+        20.533880903490743
       ],
       "screenshot": "e2e/webkit_iPhone_SE_直向.png",
       "ok": true
@@ -4570,14 +4646,14 @@
               "offsetY": 0,
               "offsetZ": 0,
               "shakeX": 0,
-              "scaleY": 0.9594856552869012,
-              "scaleXZ": 1.0208942479881802,
+              "scaleY": 0.9590354734390046,
+              "scaleXZ": 1.0211338293960217,
               "stretchZ": 1,
               "lean": 0,
               "opacity": 1,
-              "starGlow": 0.7149521842896709,
-              "antennaSway": -0.04898618473451772,
-              "wingFlap": -0.1410648223186507,
+              "starGlow": 0.7134515781300153,
+              "antennaSway": -0.11554732123013284,
+              "wingFlap": 0.13564141061429855,
               "hitFlash": 0,
               "face": "normal",
               "ringScale": 0,
@@ -4598,7 +4674,7 @@
         "e2e/webkit_bobo_6_respawn.png"
       ],
       "fpsReference": [
-        29.498525073746265
+        20.519835841313252
       ],
       "ok": true
     },
@@ -4707,7 +4783,7 @@
         "e2e/webkit_dummy_6_respawn.png"
       ],
       "fpsReference": [
-        28.571428571428566
+        21.723388848660395
       ],
       "ok": true
     },
@@ -4840,7 +4916,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 9.765625,
+            "fps": 5.736137667304015,
             "drawCalls": 36,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -4854,13 +4930,14 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 9.765625,
+            "fps": 5.736137667304015,
             "drawCalls": 36,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -4874,7 +4951,8 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -4952,7 +5030,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 18.75,
+            "fps": 13.360739979445016,
             "drawCalls": 36,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -4966,13 +5044,14 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 18.75,
+            "fps": 13.360739979445016,
             "drawCalls": 36,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -4986,7 +5065,8 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -5064,7 +5144,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 10.75268817204301,
+            "fps": 6.979062811565303,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -5078,13 +5158,14 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 10.75268817204301,
+            "fps": 6.979062811565303,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -5098,7 +5179,8 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -5176,7 +5258,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 18.31896551724138,
+            "fps": 13.131313131313135,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -5190,13 +5272,14 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 18.31896551724138,
+            "fps": 13.131313131313135,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -5210,7 +5293,8 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -5288,7 +5372,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 11.375387797311273,
+            "fps": 7.936507936507937,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -5306,13 +5390,14 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 11.375387797311273,
+            "fps": 7.936507936507937,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -5330,7 +5415,8 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -5419,7 +5505,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 18.27956989247312,
+            "fps": 13.388259526261583,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -5437,13 +5523,14 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 18.27956989247312,
+            "fps": 13.388259526261583,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -5461,7 +5548,8 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -5550,7 +5638,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 13.541666666666663,
+            "fps": 10.1010101010101,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -5568,13 +5656,14 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 13.541666666666663,
+            "fps": 10.1010101010101,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -5592,7 +5681,8 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -5682,7 +5772,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 17.72679874869656,
+            "fps": 12.909632571996028,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -5700,13 +5790,14 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 17.72679874869656,
+            "fps": 12.909632571996028,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -5724,7 +5815,8 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -5814,7 +5906,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 9.384775808133472,
+            "fps": 7.007007007007006,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -5832,13 +5924,14 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 9.384775808133472,
+            "fps": 7.007007007007006,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -5856,7 +5949,8 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -5946,7 +6040,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 17.708333333333332,
+            "fps": 13.171225937183381,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -5964,13 +6058,14 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 17.708333333333332,
+            "fps": 13.171225937183381,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -5988,7 +6083,8 @@
             "refMode": false,
             "glowLayer": true,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -6078,7 +6174,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 11.530398322851154,
+            "fps": 7.1138211382113825,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -6096,13 +6192,14 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 11.530398322851154,
+            "fps": 7.1138211382113825,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -6120,7 +6217,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -6141,7 +6239,7 @@
         "V3.5：不使用陰影貼圖與 GlowLayer（改用接觸陰影與星星光暈）": {
           "ok": true,
           "detail": {
-            "fps": 11.530398322851154,
+            "fps": 7.1138211382113825,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -6159,7 +6257,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "V3.5：3 隻同場 Draw Calls 不高於 V3.4": {
@@ -6174,45 +6273,45 @@
           "detail": [
             {
               "name": "目前設定",
-              "avg": 25.46523016650342,
-              "low1": 23.255813953488374,
+              "avg": 19.102196752626543,
+              "low1": 15.873015873015873,
               "draws": 24,
               "gain": 0
             },
             {
               "name": "關閉果凍內部星雲",
-              "avg": 35.2941176470588,
-              "low1": 30.3030303030303,
+              "avg": 27.13178294573643,
+              "low1": 20.833333333333332,
               "draws": 24,
-              "gain": 9.828887480555377
+              "gain": 8.029586193109886
             },
             {
               "name": "關閉果凍材質（純透明）",
-              "avg": 43.137254901960766,
-              "low1": 33.333333333333336,
+              "avg": 31.311154598825812,
+              "low1": 21.73913043478261,
               "draws": 24,
-              "gain": 17.672024735457345
+              "gain": 12.208957846199269
             },
             {
               "name": "關閉 MSAA 抗鋸齒",
-              "avg": 38.19784524975512,
-              "low1": 31.25,
+              "avg": 29.013539651837505,
+              "low1": 24.390243902439025,
               "draws": 24,
-              "gain": 12.732615083251698
+              "gain": 9.911342899210961
             },
             {
               "name": "解析度 1.5x",
-              "avg": 25.717111770524223,
-              "low1": 21.27659574468085,
+              "avg": 20.231213872832367,
+              "low1": 18.181818181818183,
               "draws": 24,
-              "gain": 0.2518816040208023
+              "gain": 1.1290171202058232
             },
             {
               "name": "隱藏啵啵（只剩場景）",
-              "avg": 34.917555771096005,
-              "low1": 29.41176470588235,
+              "avg": 27.158098933074676,
+              "low1": 23.809523809523807,
               "draws": 5,
-              "gain": 9.452325604592584
+              "gain": 8.055902180448133
             }
           ]
         },
@@ -6287,7 +6386,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 25.13661202185792,
+            "fps": 18.348623853211013,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -6305,13 +6404,14 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 25.13661202185792,
+            "fps": 18.348623853211013,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -6329,7 +6429,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -6350,7 +6451,7 @@
         "V3.5：不使用陰影貼圖與 GlowLayer（改用接觸陰影與星星光暈）": {
           "ok": true,
           "detail": {
-            "fps": 25.13661202185792,
+            "fps": 18.348623853211013,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -6368,7 +6469,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "V3.5：3 隻同場 Draw Calls 不高於 V3.4": {
@@ -6449,7 +6551,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 12.987012987012987,
+            "fps": 8.15494393476045,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -6467,13 +6569,14 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 12.987012987012987,
+            "fps": 8.15494393476045,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -6491,7 +6594,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -6512,7 +6616,7 @@
         "V3.6：不使用陰影貼圖與 GlowLayer（沿用 V3.5 繪製方式）": {
           "ok": true,
           "detail": {
-            "fps": 12.987012987012987,
+            "fps": 8.15494393476045,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -6530,7 +6634,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "V3.6：3 隻同場 Draw Calls 不高於 V3.5": {
@@ -6549,45 +6654,45 @@
           "detail": [
             {
               "name": "目前設定",
-              "avg": 25.515210991167802,
-              "low1": 21.73913043478261,
+              "avg": 19.083969465648845,
+              "low1": 16.39344262295082,
               "draws": 24,
               "gain": 0
             },
             {
               "name": "關閉果凍內部星雲",
-              "avg": 36.13281249999998,
-              "low1": 33.333333333333336,
+              "avg": 26.367187499999993,
+              "low1": 22.72727272727273,
               "draws": 24,
-              "gain": 10.617601508832177
+              "gain": 7.2832180343511475
             },
             {
               "name": "關閉果凍材質（純透明）",
-              "avg": 44.92187499999997,
-              "low1": 40,
+              "avg": 33.49753694581279,
+              "low1": 26.315789473684212,
               "draws": 24,
-              "gain": 19.40666400883217
+              "gain": 14.413567480163945
             },
             {
               "name": "關閉 MSAA 抗鋸齒",
-              "avg": 36.2595419847328,
-              "low1": 33.333333333333336,
+              "avg": 30.067895247332668,
+              "low1": 25.641025641025642,
               "draws": 24,
-              "gain": 10.744330993564997
+              "gain": 10.983925781683823
             },
             {
               "name": "解析度 1.5x",
-              "avg": 24.83285577841451,
-              "low1": 20.833333333333332,
+              "avg": 20.25072324011571,
+              "low1": 18.51851851851852,
               "draws": 24,
-              "gain": -0.6823552127532935
+              "gain": 1.1667537744668657
             },
             {
               "name": "隱藏啵啵（只剩場景）",
-              "avg": 33.63006923837783,
-              "low1": 30.3030303030303,
+              "avg": 27.695351137487627,
+              "low1": 24.390243902439025,
               "draws": 5,
-              "gain": 8.114858247210027
+              "gain": 8.611381671838782
             }
           ]
         },
@@ -6669,7 +6774,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 20.3862660944206,
+            "fps": 18.65284974093264,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -6687,13 +6792,14 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 20.3862660944206,
+            "fps": 18.65284974093264,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -6711,7 +6817,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -6732,7 +6839,7 @@
         "V3.6：不使用陰影貼圖與 GlowLayer（沿用 V3.5 繪製方式）": {
           "ok": true,
           "detail": {
-            "fps": 20.3862660944206,
+            "fps": 18.65284974093264,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -6750,7 +6857,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "V3.6：3 隻同場 Draw Calls 不高於 V3.5": {
@@ -6842,7 +6950,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 12.958963282937365,
+            "fps": 8.602150537634408,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -6860,13 +6968,14 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 12.958963282937365,
+            "fps": 8.602150537634408,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -6884,7 +6993,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -6905,7 +7015,7 @@
         "V3.7：不使用陰影貼圖與 GlowLayer": {
           "ok": true,
           "detail": {
-            "fps": 12.958963282937365,
+            "fps": 8.602150537634408,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -6923,7 +7033,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "V3.7：3 隻同場 Draw Calls 不高於 V3.6（≤25）": {
@@ -6945,45 +7056,45 @@
           "detail": [
             {
               "name": "目前設定",
-              "avg": 25.590551181102356,
-              "low1": 20,
+              "avg": 20.153550863723602,
+              "low1": 18.181818181818183,
               "draws": 24,
               "gain": 0
             },
             {
               "name": "關閉果凍內部星雲",
-              "avg": 33.333333333333314,
-              "low1": 28.57142857142857,
+              "avg": 26.845637583892607,
+              "low1": 23.809523809523807,
               "draws": 24,
-              "gain": 7.742782152230959
+              "gain": 6.692086720169005
             },
             {
               "name": "關閉果凍材質（純透明）",
-              "avg": 41.74950298210734,
-              "low1": 34.48275862068965,
+              "avg": 34.849951597289426,
+              "low1": 32.25806451612903,
               "draws": 24,
-              "gain": 16.15895180100498
+              "gain": 14.696400733565824
             },
             {
               "name": "關閉 MSAA 抗鋸齒",
-              "avg": 34.78260869565215,
-              "low1": 30.3030303030303,
+              "avg": 29.013539651837505,
+              "low1": 26.315789473684212,
               "draws": 24,
-              "gain": 9.192057514549795
+              "gain": 8.859988788113903
             },
             {
               "name": "解析度 1.5x",
-              "avg": 23.57563850687622,
-              "low1": 21.27659574468085,
+              "avg": 19.436345966958203,
+              "low1": 17.241379310344826,
               "draws": 24,
-              "gain": -2.014912674226135
+              "gain": -0.7172048967653986
             },
             {
               "name": "隱藏啵啵（只剩場景）",
-              "avg": 33.268101761252424,
-              "low1": 29.41176470588235,
+              "avg": 27.55905511811023,
+              "low1": 23.809523809523807,
               "draws": 5,
-              "gain": 7.6775505801500685
+              "gain": 7.405504254386628
             }
           ]
         },
@@ -7065,7 +7176,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 22.629310344827587,
+            "fps": 18.085106382978722,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -7083,13 +7194,14 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 22.629310344827587,
+            "fps": 18.085106382978722,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -7107,7 +7219,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -7128,7 +7241,7 @@
         "V3.7：不使用陰影貼圖與 GlowLayer": {
           "ok": true,
           "detail": {
-            "fps": 22.629310344827587,
+            "fps": 18.085106382978722,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -7146,7 +7259,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "V3.7：3 隻同場 Draw Calls 不高於 V3.6（≤25）": {
@@ -7241,7 +7355,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 12.684989429175477,
+            "fps": 9.146341463414636,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -7259,13 +7373,14 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 12.684989429175477,
+            "fps": 9.146341463414636,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -7283,7 +7398,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -7304,7 +7420,7 @@
         "V3.8：不使用陰影貼圖與 GlowLayer": {
           "ok": true,
           "detail": {
-            "fps": 12.684989429175477,
+            "fps": 9.146341463414636,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -7322,7 +7438,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "V3.8：3 隻同場 Draw Calls 不高於 V3.7（≤25）": {
@@ -7344,45 +7461,45 @@
           "detail": [
             {
               "name": "目前設定",
-              "avg": 24.928092042185995,
-              "low1": 20,
+              "avg": 19.943019943019937,
+              "low1": 17.543859649122805,
               "draws": 24,
               "gain": 0
             },
             {
               "name": "關閉果凍內部星雲",
-              "avg": 32.69230769230767,
-              "low1": 27.77777777777778,
+              "avg": 26.09506057781919,
+              "low1": 20.833333333333332,
               "draws": 24,
-              "gain": 7.7642156501216775
+              "gain": 6.152040634799253
             },
             {
               "name": "關閉果凍材質（純透明）",
-              "avg": 44.33497536945811,
-              "low1": 37.03703703703704,
+              "avg": 35.22504892367904,
+              "low1": 31.25,
               "draws": 24,
-              "gain": 19.406883327272112
+              "gain": 15.282028980659103
             },
             {
               "name": "關閉 MSAA 抗鋸齒",
-              "avg": 36.19047619047617,
-              "low1": 29.41176470588235,
+              "avg": 29.29687499999998,
+              "low1": 25.641025641025642,
               "draws": 24,
-              "gain": 11.262384148290174
+              "gain": 9.353855056980041
             },
             {
               "name": "解析度 1.5x",
-              "avg": 23.85496183206106,
-              "low1": 20.408163265306122,
+              "avg": 19.379844961240305,
+              "low1": 17.241379310344826,
               "draws": 24,
-              "gain": -1.0731302101249334
+              "gain": -0.5631749817796319
             },
             {
               "name": "隱藏啵啵（只剩場景）",
-              "avg": 31.48854961832059,
-              "low1": 17.241379310344826,
+              "avg": 26.315789473684205,
+              "low1": 19.607843137254903,
               "draws": 5,
-              "gain": 6.560457576134596
+              "gain": 6.372769530664268
             }
           ]
         },
@@ -7396,7 +7513,7 @@
         },
         "點擊效能測試：10 秒後顯示平均／最慢 1%／最低 FPS 與 Draw Calls": {
           "ok": true,
-          "detail": "V3.8 效能測試（本機 WebGL 實測）\nbobo_v38_medium.glb・3 隻・畫質 medium・1x・10 秒\n平均 23.8 FPS・最慢 1% 20.4 FPS・最低 19.2 FPS\nDraw Calls 平均 24（最高 24）・畫面物件 21\n點此關閉"
+          "detail": "V3.8 效能測試（本機 WebGL 實測）\nbobo_v38_medium.glb・3 隻・畫質 medium・1x・10.1 秒\n平均 19.5 FPS・最慢 1% 16.1 FPS・最低 16.1 FPS\nDraw Calls 平均 24（最高 24）・畫面物件 21\n點此關閉"
         },
         "共用載入器釋放資源：零件全部移除": {
           "ok": true,
@@ -7468,7 +7585,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 23.55460385438972,
+            "fps": 18.76955161626694,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -7486,13 +7603,14 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 23.55460385438972,
+            "fps": 18.76955161626694,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -7510,7 +7628,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "載入的是正確版本": {
@@ -7531,7 +7650,7 @@
         "V3.8：不使用陰影貼圖與 GlowLayer": {
           "ok": true,
           "detail": {
-            "fps": 23.55460385438972,
+            "fps": 18.76955161626694,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -7549,7 +7668,8 @@
             "refMode": false,
             "glowLayer": false,
             "grey": false,
-            "faceVisible": true
+            "faceVisible": true,
+            "views5": false
           }
         },
         "V3.8：3 隻同場 Draw Calls 不高於 V3.7（≤25）": {
@@ -7605,8 +7725,8 @@
               },
               {
                 "name": "Eyes_0",
-                "triangles": 1296,
-                "vertices": 722
+                "triangles": 1152,
+                "vertices": 650
               },
               {
                 "name": "Mouth_0",
@@ -7624,7 +7744,7 @@
                 "vertices": 482
               }
             ],
-            "trianglesTotal": 6216,
+            "trianglesTotal": 6072,
             "materials": 5
           }
         },
@@ -7644,9 +7764,9 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 20.713463751438432,
-            "drawCalls": 11,
-            "activeMeshes": 12,
+            "fps": 8.583690987124463,
+            "drawCalls": 24,
+            "activeMeshes": 21,
             "pixelRatio": 1.5,
             "quality": "medium",
             "jelly": true,
@@ -7661,16 +7781,17 @@
             "shadowMap": false,
             "refMode": false,
             "glowLayer": false,
-            "grey": true,
-            "faceVisible": false
+            "grey": false,
+            "faceVisible": true,
+            "views5": true
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 20.713463751438432,
-            "drawCalls": 11,
-            "activeMeshes": 12,
+            "fps": 8.583690987124463,
+            "drawCalls": 24,
+            "activeMeshes": 21,
             "pixelRatio": 1.5,
             "quality": "medium",
             "jelly": true,
@@ -7685,8 +7806,9 @@
             "shadowMap": false,
             "refMode": false,
             "glowLayer": false,
-            "grey": true,
-            "faceVisible": false
+            "grey": false,
+            "faceVisible": true,
+            "views5": true
           }
         },
         "載入的是正確版本": {
@@ -7697,12 +7819,12 @@
           "ok": true,
           "detail": "bobo_v38r_medium.glb"
         },
-        "V3.8R：灰模模式（不顯示臉部、無陰影貼圖與 GlowLayer）": {
+        "V3.8R 第三階段：果凍材質與臉部顯示、腹部星星 0.0714、無陰影貼圖與 GlowLayer": {
           "ok": true,
           "detail": {
-            "fps": 20.713463751438432,
-            "drawCalls": 11,
-            "activeMeshes": 12,
+            "fps": 8.583690987124463,
+            "drawCalls": 24,
+            "activeMeshes": 21,
             "pixelRatio": 1.5,
             "quality": "medium",
             "jelly": true,
@@ -7717,14 +7839,28 @@
             "shadowMap": false,
             "refMode": false,
             "glowLayer": false,
-            "grey": true,
-            "faceVisible": false
+            "grey": false,
+            "faceVisible": true,
+            "views5": true
           }
+        },
+        "V3.8R：第二階段灰模可切換並恢復": {
+          "ok": true,
+          "detail": {
+            "onGrey": true,
+            "onFace": false,
+            "offGrey": false,
+            "offFace": true
+          }
+        },
+        "V3.8R：8 種表情切換時身體外型不變": {
+          "ok": true,
+          "detail": "-0.6567,-0.0001,-0.4956,0.6594,1.1029,0.4945"
         },
         "V3.8R：3 隻同場 Draw Calls 不高於 V3.8（≤25）": {
           "ok": true,
           "detail": {
-            "v38r": 11,
+            "v38r": 24,
             "v38": 24
           }
         },
@@ -7756,7 +7892,7 @@
         },
         "點擊效能測試：10 秒後顯示平均／最慢 1%／最低 FPS 與 Draw Calls": {
           "ok": true,
-          "detail": "V3.8R 灰模 效能測試（本機 WebGL 實測）\nbobo_v38r_medium.glb・3 隻・畫質 medium・1x・10 秒\n平均 42.4 FPS・最慢 1% 29.4 FPS・最低 27.8 FPS\nDraw Calls 平均 11（最高 11）・畫面物件 12\n點此關閉"
+          "detail": "V3.8R 效能測試（本機 WebGL 實測）\nbobo_v38r_medium.glb・3 隻・畫質 medium・1x・10 秒\n平均 27.2 FPS・最慢 1% 20.0 FPS・最低 17.2 FPS\nDraw Calls 平均 24（最高 24）・畫面物件 21\n點此關閉"
         },
         "共用載入器釋放資源：零件全部移除": {
           "ok": true,
@@ -7789,8 +7925,8 @@
               },
               {
                 "name": "Eyes_0",
-                "triangles": 1296,
-                "vertices": 722
+                "triangles": 1152,
+                "vertices": 650
               },
               {
                 "name": "Mouth_0",
@@ -7808,7 +7944,7 @@
                 "vertices": 482
               }
             ],
-            "trianglesTotal": 6216,
+            "trianglesTotal": 6072,
             "materials": 5
           }
         },
@@ -7828,9 +7964,9 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 28.985507246376823,
-            "drawCalls": 9,
-            "activeMeshes": 8,
+            "fps": 16.546018614270945,
+            "drawCalls": 20,
+            "activeMeshes": 15,
             "pixelRatio": 1.5,
             "quality": "medium",
             "jelly": true,
@@ -7845,16 +7981,17 @@
             "shadowMap": false,
             "refMode": false,
             "glowLayer": false,
-            "grey": true,
-            "faceVisible": false
+            "grey": false,
+            "faceVisible": true,
+            "views5": true
           }
         },
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 28.985507246376823,
-            "drawCalls": 9,
-            "activeMeshes": 8,
+            "fps": 16.546018614270945,
+            "drawCalls": 20,
+            "activeMeshes": 15,
             "pixelRatio": 1.5,
             "quality": "medium",
             "jelly": true,
@@ -7869,8 +8006,9 @@
             "shadowMap": false,
             "refMode": false,
             "glowLayer": false,
-            "grey": true,
-            "faceVisible": false
+            "grey": false,
+            "faceVisible": true,
+            "views5": true
           }
         },
         "載入的是正確版本": {
@@ -7881,12 +8019,12 @@
           "ok": true,
           "detail": "bobo_v38r_medium.glb"
         },
-        "V3.8R：灰模模式（不顯示臉部、無陰影貼圖與 GlowLayer）": {
+        "V3.8R 第三階段：果凍材質與臉部顯示、腹部星星 0.0714、無陰影貼圖與 GlowLayer": {
           "ok": true,
           "detail": {
-            "fps": 28.985507246376823,
-            "drawCalls": 9,
-            "activeMeshes": 8,
+            "fps": 16.546018614270945,
+            "drawCalls": 20,
+            "activeMeshes": 15,
             "pixelRatio": 1.5,
             "quality": "medium",
             "jelly": true,
@@ -7901,14 +8039,28 @@
             "shadowMap": false,
             "refMode": false,
             "glowLayer": false,
-            "grey": true,
-            "faceVisible": false
+            "grey": false,
+            "faceVisible": true,
+            "views5": true
           }
+        },
+        "V3.8R：第二階段灰模可切換並恢復": {
+          "ok": true,
+          "detail": {
+            "onGrey": true,
+            "onFace": false,
+            "offGrey": false,
+            "offFace": true
+          }
+        },
+        "V3.8R：8 種表情切換時身體外型不變": {
+          "ok": true,
+          "detail": "-0.6567,-0.0001,-0.4956,0.6594,1.1029,0.4945"
         },
         "V3.8R：3 隻同場 Draw Calls 不高於 V3.8（≤25）": {
           "ok": true,
           "detail": {
-            "v38r": 9,
+            "v38r": 20,
             "v38": 23
           }
         },
@@ -7950,6 +8102,6 @@
       "ok": true
     }
   ],
-  "finishedAt": "2026-11-19T09:46:54.357Z",
+  "finishedAt": "2026-11-19T10:20:58.470Z",
   "failures": 0
 }
