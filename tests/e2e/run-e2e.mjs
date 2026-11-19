@@ -382,7 +382,7 @@ for (const name of browsers) {
   // V3（對照基準）與 V3.1（美術精修）都檢查
   // 3 隻同場的 Draw Calls（同一瀏覽器、同一畫面大小），用來確認 V3.5 不高於 V3.4
   const drawCalls3 = {};
-  for (const labName of ["bobo3", "bobo31", "bobo32", "bobo33", "bobo34", "bobo35"])
+  for (const labName of ["bobo3", "bobo31", "bobo32", "bobo33", "bobo34", "bobo35", "bobo36"])
   for (const vp of VIEWPORTS) {
     const run = { browser: name, viewport: `${vp.name} / ?lab=${labName}`, checks: {}, errors: [] };
     const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
@@ -412,7 +412,7 @@ for (const name of browsers) {
       const perf = await page.evaluate(() => window.__bobo3.perf());
       check("8 種表情、三視圖、3 隻同場可切換且無錯誤", run.errors.length === 0, perf);
       check("果凍材質著色器正常（中／高畫質）", perf.quality === "low" || perf.jelly === true, perf);
-      check("載入的是正確版本", perf.variant === { bobo3: "v3", bobo31: "v31", bobo32: "v32", bobo33: "v33", bobo34: "v34", bobo35: "v35" }[labName], perf.variant);
+      check("載入的是正確版本", perf.variant === { bobo3: "v3", bobo31: "v31", bobo32: "v32", bobo33: "v33", bobo34: "v34", bobo35: "v35", bobo36: "v36" }[labName], perf.variant);
       if (labName === "bobo33") {
         // 必須真的載入 V3.3 模型檔，且腹部星星來自模型資料（V3.2 外徑 0.084 × 0.85 = 0.0714）
         check(
@@ -422,6 +422,23 @@ for (const name of browsers) {
         );
       }
       drawCalls3[`${labName}|${vp.name}`] = perf.drawCalls;
+      if (labName === "bobo36") {
+        check(
+          "V3.6：載入 bobo_v36 模型（共用載入器），腹部星星維持 0.0714",
+          /^bobo_v36_(high|medium|low)\.glb$/.test(perf.file) && Math.abs(perf.bellyStar?.outer - 0.0714) < 1e-6 && Math.abs(perf.bellyStar?.centerY - 0.24) < 1e-6,
+          { file: perf.file, star: perf.bellyStar },
+        );
+        check("V3.6：不使用陰影貼圖與 GlowLayer（沿用 V3.5 繪製方式）", perf.shadowMap === false && perf.glowLayer === false, perf);
+        const d35 = drawCalls3[`bobo35|${vp.name}`];
+        check("V3.6：3 隻同場 Draw Calls 不高於 V3.5", typeof d35 === "number" && perf.drawCalls <= d35, { v36: perf.drawCalls, v35: d35 });
+        const alias = await page.evaluate(() => window.__monsterLab === window.__bobo3);
+        check("共用測試介面 __monsterLab 可用", alias, alias);
+        if (vp === VIEWPORTS[0]) {
+          const rows = await page.evaluate(() => window.__bobo3.costAnalysis(1));
+          await page.evaluate(() => document.querySelector(".v3-bench-result") && (document.querySelector(".v3-bench-result").hidden = true));
+          check("成本分析（共用流程）：6 項都有結果與差值", rows.length === 6 && rows.every((r) => r.avg > 0 && typeof r.gain === "number"), rows);
+        }
+      }
       if (labName === "bobo35") {
         check(
           "V3.5：載入 bobo_v35 模型，腹部星星維持 0.0714",
@@ -473,7 +490,12 @@ for (const name of browsers) {
       if (vp === VIEWPORTS[0]) {
         await page.evaluate(() => document.querySelector(".v3-bench").click());
         const r = await page.waitForFunction(() => !document.querySelector(".v3-bench-result").hidden, null, { timeout: 120000 }).then(() => page.evaluate(() => document.querySelector(".v3-bench-result").innerText)).catch(() => null);
-        check("點擊效能測試：10 秒後顯示平均／最慢 1%／最低 FPS 與 Draw Calls", !!r && /平均/.test(r) && /最慢 1%/.test(r) && /最低/.test(r) && /Draw Calls/.test(r) && /3 隻/.test(r) && (labName === "bobo3" || (labName === "bobo35" ? /bobo_v35_/.test(r) : labName === "bobo34" ? /bobo_v34_/.test(r) : labName === "bobo33" ? /bobo_v33_/.test(r) : /bobo_v31_/.test(r))), r);
+        check("點擊效能測試：10 秒後顯示平均／最慢 1%／最低 FPS 與 Draw Calls", !!r && /平均/.test(r) && /最慢 1%/.test(r) && /最低/.test(r) && /Draw Calls/.test(r) && /3 隻/.test(r) && (labName === "bobo3" || (labName === "bobo36" ? /bobo_v36_/.test(r) : labName === "bobo35" ? /bobo_v35_/.test(r) : labName === "bobo34" ? /bobo_v34_/.test(r) : labName === "bobo33" ? /bobo_v33_/.test(r) : /bobo_v31_/.test(r))), r);
+      }
+      if (labName === "bobo36") {
+        // 共用載入器：釋放後場景中不應留下任何怪物零件
+        const rel = await page.evaluate(() => window.__bobo3.releaseModels());
+        check("共用載入器釋放資源：零件全部移除", !!rel && rel.before >= 5 && rel.after === 0, rel);
       }
     } catch (e) {
       run.errors.push(`exception: ${e.message}`);

@@ -31,16 +31,21 @@ import { createJellyNoiseTexture, JellyV31Plugin } from "../monsters/star-dew-bo
 import { createJellyNoiseTextureV32, JellyV32Plugin } from "../monsters/star-dew-bobo-v32/JellyV32Plugin.ts";
 import { createJellyNoiseTextureV34, JellyV34Plugin } from "../monsters/star-dew-bobo-v34/JellyV34Plugin.ts";
 import { createJellyNoiseTextureV35, JellyV35Plugin } from "../monsters/star-dew-bobo-v35/JellyV35Plugin.ts";
+import { createJellyNoiseTextureV36, JellyV36Plugin } from "../monsters/star-dew-bobo-v36/JellyV36Plugin.ts";
+import { BOBO_V36_SPEC } from "../monsters/star-dew-bobo-v36/spec.ts";
+import { ExpressionAtlasController, loadMonsterAsset, type MonsterAssetHandle } from "../monsters/babylon/loadMonsterAsset.ts";
+import { formatCostRows, runCostSteps, type CostStep } from "../render/costAnalysis.ts";
 
 /** v3 = 第一版（材質與模型保持不變，作為對照基準）；v31 = V3.1 美術精修 */
-export type BoboLabVariant = "v3" | "v31" | "v32" | "v33" | "v34" | "v35";
-type Jelly = JellyV3Plugin | JellyV31Plugin | JellyV32Plugin | JellyV34Plugin | JellyV35Plugin;
-type StarJelly = JellyV32Plugin | JellyV34Plugin | JellyV35Plugin;
-const isStarJelly = (j: unknown): j is StarJelly => j instanceof JellyV32Plugin || j instanceof JellyV34Plugin || j instanceof JellyV35Plugin;
-const VARIANT_LAB: Record<BoboLabVariant, string> = { v3: "bobo3", v31: "bobo31", v32: "bobo32", v33: "bobo33", v34: "bobo34", v35: "bobo35" };
-const VARIANT_LABEL: Record<BoboLabVariant, string> = { v3: "V3", v31: "V3.1", v32: "V3.2", v33: "V3.3", v34: "V3.4", v35: "V3.5" };
-// 頁面切換按鈕：V3.4 ↔ V3.5（目前驗收的兩版）；更早的版本仍可用網址 ?lab= 開啟
-const VARIANT_NEXT: Record<BoboLabVariant, BoboLabVariant> = { v3: "v31", v31: "v32", v32: "v33", v33: "v34", v34: "v35", v35: "v34" };
+export type BoboLabVariant = "v3" | "v31" | "v32" | "v33" | "v34" | "v35" | "v36";
+type Jelly = JellyV3Plugin | JellyV31Plugin | JellyV32Plugin | JellyV34Plugin | JellyV35Plugin | JellyV36Plugin;
+type StarJelly = JellyV32Plugin | JellyV34Plugin | JellyV35Plugin | JellyV36Plugin;
+const isStarJelly = (j: unknown): j is StarJelly =>
+  j instanceof JellyV32Plugin || j instanceof JellyV34Plugin || j instanceof JellyV35Plugin || j instanceof JellyV36Plugin;
+const VARIANT_LAB: Record<BoboLabVariant, string> = { v3: "bobo3", v31: "bobo31", v32: "bobo32", v33: "bobo33", v34: "bobo34", v35: "bobo35", v36: "bobo36" };
+const VARIANT_LABEL: Record<BoboLabVariant, string> = { v3: "V3", v31: "V3.1", v32: "V3.2", v33: "V3.3", v34: "V3.4", v35: "V3.5", v36: "V3.6" };
+// 頁面切換按鈕：V3.5 ↔ V3.6（目前驗收的兩版）；更早的版本仍可用網址 ?lab= 開啟
+const VARIANT_NEXT: Record<BoboLabVariant, BoboLabVariant> = { v3: "v31", v31: "v32", v32: "v33", v33: "v34", v34: "v35", v35: "v36", v36: "v35" };
 
 /** V3.3 起：腹部星星的定義寫在模型檔（根節點 extras.bellyStar），由頁面讀取後交給果凍著色器繪製 */
 interface BellyStarDef {
@@ -114,12 +119,15 @@ export interface BoboV3DebugApi {
     glowLayer: boolean;
   };
   costAnalysis(seconds?: number): Promise<{ name: string; avg: number; low1: number; draws: number }[]>;
+  releaseModels(): { before: number; after: number } | null;
   benchmark(seconds?: number): Promise<BenchmarkSummary>;
 }
 
 declare global {
   interface Window {
     __bobo3?: BoboV3DebugApi;
+    /** 共用怪物測試頁介面（截圖、效能工具使用） */
+    __monsterLab?: BoboV3DebugApi;
   }
 }
 
@@ -133,6 +141,8 @@ interface BoboV3Instance {
   jelly: Jelly | null;
   eyeUV: Float32Array;
   mouthUV: Float32Array;
+  /** V3.6 起：共用表情控制器 */
+  expr: ExpressionAtlasController | null;
 }
 
 export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElement, variant: BoboLabVariant = "v3"): Promise<void> {
@@ -143,7 +153,10 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
    * - 不用陰影貼圖（啵啵不再畫進陰影貼圖、地面與果凍不做柔和陰影取樣），改用設定圖那樣的柔和圓形接觸陰影（3 隻共 1 次繪製）
    * - 不用 GlowLayer（省掉發光貼圖與兩次全畫面模糊），頭頂星星改用光暈貼片（3 隻共 1 次繪製）；腹部星星光暈本來就在果凍著色器裡
    */
-  const v35 = variant === "v35";
+  // V3.5 的繪製方式（接觸陰影＋光暈貼片，不用陰影貼圖與 GlowLayer）V3.6 沿用
+  const v35 = variant === "v35" || variant === "v36";
+  /** V3.6 起改用共用模組：loadMonsterAsset（載入／釋放）、ExpressionAtlasController（表情） */
+  const v36 = variant === "v36";
   const label = VARIANT_LABEL[variant];
   const quality = pickQuality();
   const engine = createEngine(canvas, quality);
@@ -181,8 +194,11 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
   // ---------- 載入 GLB（依畫質選 LOD） ----------
   const base = import.meta.env.BASE_URL;
   // V3.3 載入自己的模型檔（含 V3.3 腹部星星定義）；V3.1／V3.2 共用 V3.1 模型；V3 用 V3 模型
-  const file =
-    variant === "v35"
+  let assetHandle: MonsterAssetHandle | null = null;
+  if (v36) assetHandle = await loadMonsterAsset(scene, `${base}models/`, BOBO_V36_SPEC, quality.level);
+  const file = assetHandle
+    ? assetHandle.file
+    : variant === "v35"
       ? `bobo_v35_${quality.level}.glb`
       : variant === "v34"
       ? `bobo_v34_${quality.level}.glb`
@@ -191,9 +207,13 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
         : v31
           ? `bobo_v31_${quality.level}.glb`
           : `bobo_v3_${quality.level}.glb`;
-  const container = await SceneLoader.LoadAssetContainerAsync(`${base}models/`, file, scene);
-  const starFromModel = variant === "v33" || variant === "v34" || variant === "v35";
-  const bellyStar = starFromModel ? readBellyStar(container) : null;
+  const container = assetHandle ? assetHandle.container : await SceneLoader.LoadAssetContainerAsync(`${base}models/`, file, scene);
+  const starFromModel = variant === "v33" || variant === "v34" || variant === "v35" || v36;
+  const bellyStar = assetHandle
+    ? ((assetHandle.extras as { bellyStar?: BellyStarDef }).bellyStar ?? null)
+    : starFromModel
+      ? readBellyStar(container)
+      : null;
   if (starFromModel && !bellyStar) throw new Error(`${file} 缺少腹部星星資料（extras.bellyStar）`);
 
   // 共用材質（三隻共用；每隻的表情以各自的 UV 緩衝切換）
@@ -202,14 +222,19 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
         scene,
         container.materials as PBRMaterial[],
         quality.level !== "low",
-        variant === "v35" ? "v35" : variant === "v34" ? "v34" : variant === "v32" || variant === "v33" ? "v32" : "v31",
+        v36 ? "v36" : variant === "v35" ? "v35" : variant === "v34" ? "v34" : variant === "v32" || variant === "v33" ? "v32" : "v31",
       )
     : createMaterials(scene, container.materials as PBRMaterial[], quality.level !== "low");
   const instances: BoboV3Instance[] = [];
   const spawn = (x: number, z: number, yaw: number): BoboV3Instance => {
-    const inst = container.instantiateModelsToScene((n) => `${n}_${instances.length}`, false, { doNotInstantiate: true });
-    const root = new TransformNode(`bobo3_${instances.length}`, scene);
-    for (const n of inst.rootNodes) n.parent = root;
+    const assetInst = assetHandle ? assetHandle.instantiate(`bobo3_${instances.length}`) : null;
+    let root: TransformNode;
+    if (assetInst) root = assetInst.root;
+    else {
+      const inst = container.instantiateModelsToScene((n) => `${n}_${instances.length}`, false, { doNotInstantiate: true });
+      root = new TransformNode(`bobo3_${instances.length}`, scene);
+      for (const n of inst.rootNodes) n.parent = root;
+    }
     root.position.set(x, 0, z);
     root.rotation.y = yaw;
     const meshes = root.getChildMeshes(false) as Mesh[];
@@ -251,14 +276,20 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
       m.isPickable = false;
       m.receiveShadows = !v35 && m === body;
     }
-    // glTF 載入的 UV 緩衝不可更新：各自複製一份並設為可更新，表情才能用改 UV 的方式切換
-    eyes.makeGeometryUnique();
-    mouth.makeGeometryUnique();
-    const eyeUV = Float32Array.from(eyes.getVerticesData(VertexBuffer.UVKind) ?? []);
-    const mouthUV = Float32Array.from(mouth.getVerticesData(VertexBuffer.UVKind) ?? []);
-    eyes.setVerticesData(VertexBuffer.UVKind, Float32Array.from(eyeUV), true);
-    mouth.setVerticesData(VertexBuffer.UVKind, Float32Array.from(mouthUV), true);
-    const it: BoboV3Instance = { root, body, eyes, mouth, blush, stars, jelly: bodyMat.jelly, eyeUV, mouthUV };
+    // V3.6：共用表情控制器（改 UV）；V3.5 以前保持原本寫法
+    const expr = assetInst && BOBO_V36_SPEC.expressions ? new ExpressionAtlasController(BOBO_V36_SPEC.expressions, assetInst) : null;
+    let eyeUV = new Float32Array(0);
+    let mouthUV = new Float32Array(0);
+    if (!expr) {
+      // glTF 載入的 UV 緩衝不可更新：各自複製一份並設為可更新，表情才能用改 UV 的方式切換
+      eyes.makeGeometryUnique();
+      mouth.makeGeometryUnique();
+      eyeUV = Float32Array.from(eyes.getVerticesData(VertexBuffer.UVKind) ?? []);
+      mouthUV = Float32Array.from(mouth.getVerticesData(VertexBuffer.UVKind) ?? []);
+      eyes.setVerticesData(VertexBuffer.UVKind, Float32Array.from(eyeUV), true);
+      mouth.setVerticesData(VertexBuffer.UVKind, Float32Array.from(mouthUV), true);
+    }
+    const it: BoboV3Instance = { root, body, eyes, mouth, blush, stars, jelly: bodyMat.jelly, eyeUV, mouthUV, expr };
     instances.push(it);
     return it;
   };
@@ -357,6 +388,10 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     const col = i % 4;
     const row = Math.floor(i / 4);
     for (const it of instances) {
+      if (it.expr) {
+        it.expr.set(i);
+        continue;
+      }
       const eu = new Float32Array(it.eyeUV.length);
       for (let k = 0; k < eu.length; k += 2) {
         eu[k] = it.eyeUV[k]! + col * 0.25;
@@ -455,41 +490,48 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
    * 只是暫時切換，測完全部還原；不改變正式設定。
    */
   const costBtn = uiRoot.querySelector<HTMLButtonElement>(".v3-cost")!;
-  const runCostAnalysis = async (seconds = 5): Promise<{ name: string; avg: number; low1: number; draws: number }[]> => {
+  // 共用成本分析流程（src/render/costAnalysis.ts）；這裡只定義星露啵啵頁面要測的項目
+  const runCostAnalysis = async (seconds = 5): Promise<{ name: string; avg: number; low1: number; draws: number; gain: number }[]> => {
     if (bench) return [];
-    const rows: { name: string; avg: number; low1: number; draws: number }[] = [];
     const scale0 = engine.getHardwareScalingLevel();
     const samples0 = render.pipeline?.samples ?? 1;
     const jellies = instances.map((i) => i.jelly).filter((j): j is Jelly => !!j);
     const neb0 = jellies.map((j) => ("nebula" in j ? j.nebula : 0));
     const countNow = (instances.filter((i) => i.root.isEnabled()).length === 3 ? 3 : 1) as 1 | 3;
-    const steps: { name: string; on: () => void; off: () => void }[] = [
-      { name: "目前設定", on: () => {}, off: () => {} },
-      { name: "關閉果凍內部星雲", on: () => jellies.forEach((j) => "nebula" in j && (j.nebula = 0)), off: () => jellies.forEach((j, k) => "nebula" in j && (j.nebula = neb0[k]!)) },
-      { name: "關閉果凍材質（純透明）", on: () => jellies.forEach((j) => (j.jellyEnabled = false)), off: () => jellies.forEach((j) => (j.jellyEnabled = true)) },
-      { name: "關閉 MSAA 抗鋸齒", on: () => render.pipeline && (render.pipeline.samples = 1), off: () => render.pipeline && (render.pipeline.samples = samples0) },
-      { name: "解析度 1.5x", on: () => engine.setHardwareScalingLevel(1 / 1.5), off: () => engine.setHardwareScalingLevel(scale0) },
-      { name: "隱藏啵啵（只剩場景）", on: () => instances.forEach((i) => i.root.setEnabled(false)), off: () => {} },
+    const step = (name: string, apply: () => void, restore: () => void): CostStep => ({
+      name,
+      apply: () => {
+        apply();
+        updateFx();
+      },
+      restore: () => {
+        restore();
+        setCount(countNow);
+      },
+    });
+    const steps: CostStep[] = [
+      step("目前設定", () => {}, () => {}),
+      step("關閉果凍內部星雲", () => jellies.forEach((j) => "nebula" in j && (j.nebula = 0)), () => jellies.forEach((j, k) => "nebula" in j && (j.nebula = neb0[k]!))),
+      step("關閉果凍材質（純透明）", () => jellies.forEach((j) => (j.jellyEnabled = false)), () => jellies.forEach((j) => (j.jellyEnabled = true))),
+      step("關閉 MSAA 抗鋸齒", () => render.pipeline && (render.pipeline.samples = 1), () => render.pipeline && (render.pipeline.samples = samples0)),
+      step("解析度 1.5x", () => engine.setHardwareScalingLevel(1 / 1.5), () => engine.setHardwareScalingLevel(scale0)),
+      step("隱藏啵啵（只剩場景）", () => instances.forEach((i) => i.root.setEnabled(false)), () => {}),
     ];
     costBtn.disabled = true;
-    for (const st of steps) {
-      costBtn.textContent = `🔍 測試中：${st.name}`;
-      st.on();
-      updateFx();
-      await new Promise((r) => window.setTimeout(r, 600));
-      const r = await runBenchmark(seconds);
-      rows.push({ name: st.name, avg: r.avgFps, low1: r.low1Fps, draws: r.avgDrawCalls });
-      st.off();
-      setCount(countNow);
-    }
+    const rows = await runCostSteps(
+      steps,
+      () => runBenchmark(seconds),
+      (name) => (costBtn.textContent = `🔍 測試中：${name}`),
+      () => new Promise((r) => window.setTimeout(r, 600)),
+    );
     costBtn.disabled = false;
     costBtn.textContent = "🔍 成本分析（約 35 秒）";
     const st = perf.stats();
     benchEl.hidden = false;
     benchEl.innerHTML =
       `<b>${label} 成本分析（本機 WebGL 實測，每項 ${seconds} 秒）</b><br>${file}・${countNow} 隻・畫質 ${st.quality}・${Math.round(10 / scale0) / 10}x<br>` +
-      rows.map((r) => `${r.name}：平均 ${r.avg.toFixed(1)}・1% ${r.low1.toFixed(1)}・Draw ${r.draws.toFixed(0)}`).join("<br>") +
-      `<br><small>某項關掉後 FPS 上升越多 → 那一項越吃效能。點此關閉</small>`;
+      formatCostRows(rows).join("<br>") +
+      `<br><small>括號內為與「目前設定」相比的 FPS 變化；越多 → 那一項越吃效能。點此關閉</small>`;
     benchEl.onclick = () => (benchEl.hidden = true);
     return rows;
   };
@@ -549,7 +591,8 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     return { quality: quality.level, meshes, trianglesTotal: meshes.reduce((a, b) => a + b.triangles, 0), materials: 5 };
   };
 
-  window.__bobo3 = {
+  // 共用名稱 __monsterLab（三視圖截圖、效能測試工具使用）；__bobo3 保留相容
+  window.__bobo3 = window.__monsterLab = {
     ready: true,
     setView: (v) => setView(v, true),
     setExpression,
@@ -575,6 +618,15 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     },
     benchmark: runBenchmark,
     costAnalysis: runCostAnalysis,
+    // V3.6：測試共用載入器的資源釋放（釋放後回傳場景中還剩幾個怪物零件與幾何）
+    releaseModels: () => {
+      if (!assetHandle) return null;
+      const before = scene.meshes.filter((m) => BOBO_V36_SPEC.requiredParts.some((p) => m.name.startsWith(p))).length;
+      assetHandle.dispose();
+      instances.length = 0;
+      const after = scene.meshes.filter((m) => BOBO_V36_SPEC.requiredParts.some((p) => m.name.startsWith(p))).length;
+      return { before, after };
+    },
     eyeUV0: () => {
       const uv = instances[0]!.eyes.getVerticesData(VertexBuffer.UVKind)!;
       return [uv[0]!, uv[1]!];
@@ -653,7 +705,7 @@ function createMaterials(scene: Scene, gltfMats: PBRMaterial[], useJelly: boolea
  * 嘴／腮紅（與 V3 相同）、頭頂星星（清楚的金黃五角星，柔和不過曝）。
  * 低畫質仍使用外掛（關閉內部星雲），否則會看不到腹部星星。
  */
-function createMaterialsV31(scene: Scene, gltfMats: PBRMaterial[], fullJelly: boolean, jellyVersion: "v31" | "v32" | "v34" | "v35" = "v31") {
+function createMaterialsV31(scene: Scene, gltfMats: PBRMaterial[], fullJelly: boolean, jellyVersion: "v31" | "v32" | "v34" | "v35" | "v36" = "v31") {
   const tex = (name: string): BaseTexture | null => gltfMats.find((m) => m.name === name)?.albedoTexture ?? null;
   const eyeTex = tex("Bobo_Eyes");
   const faceTex = tex("Bobo_Face");
@@ -690,17 +742,27 @@ function createMaterialsV31(scene: Scene, gltfMats: PBRMaterial[], fullJelly: bo
   stars.emissiveColor = new Color3(1.0, 0.96, 0.62);
   // V3.5：頭頂星星偏檸檬黃（模型頂點色邊緣是暖金，提高綠色讓整體不偏橘）；V3.4 以前不變
   if (jellyVersion === "v35") stars.emissiveColor = new Color3(1.0, 1.1, 0.8);
+  if (jellyVersion === "v36") {
+    // V3.6：模型頂點色已改為檸檬金黃（中央亮黃 → 邊緣暖金）；開啟受光只為了柔和的水晶光澤（高光不乘頂點色 → 白色光澤）
+    stars.disableLighting = false;
+    stars.emissiveColor = new Color3(0.92, 0.92, 0.86);
+    stars.diffuseColor = new Color3(0.12, 0.12, 0.1);
+    stars.specularColor = new Color3(0.55, 0.55, 0.5);
+    stars.specularPower = 36;
+  }
   stars.backFaceCulling = false;
 
   const noise =
-    jellyVersion === "v35"
+    jellyVersion === "v36"
+      ? createJellyNoiseTextureV36(scene)
+      : jellyVersion === "v35"
       ? createJellyNoiseTextureV35(scene)
       : jellyVersion === "v34"
       ? createJellyNoiseTextureV34(scene)
       : jellyVersion === "v32"
         ? createJellyNoiseTextureV32(scene)
         : createJellyNoiseTexture(scene);
-  const body = (i: number): { material: StandardMaterial; jelly: JellyV31Plugin | JellyV32Plugin | JellyV34Plugin | JellyV35Plugin | null } => {
+  const body = (i: number): { material: StandardMaterial; jelly: JellyV31Plugin | JellyV32Plugin | JellyV34Plugin | JellyV35Plugin | JellyV36Plugin | null } => {
     const m = new StandardMaterial(`BoboV31_Body_${i}`, scene);
     m.diffuseColor = new Color3(0.42, 0.48, 0.95);
     m.emissiveColor = new Color3(0.1, 0.07, 0.4);
@@ -710,7 +772,9 @@ function createMaterialsV31(scene: Scene, gltfMats: PBRMaterial[], fullJelly: bo
     m.useSpecularOverAlpha = false;
     m.backFaceCulling = true;
     const jelly =
-      jellyVersion === "v35"
+      jellyVersion === "v36"
+        ? new JellyV36Plugin(m, noise)
+        : jellyVersion === "v35"
         ? new JellyV35Plugin(m, noise)
         : jellyVersion === "v34"
         ? new JellyV34Plugin(m, noise)
