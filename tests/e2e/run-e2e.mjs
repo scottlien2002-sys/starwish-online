@@ -589,6 +589,62 @@ for (const name of browsers) {
             at.after,
           );
         }
+        const hu = await page.evaluate(async () => {
+          const api = window.__monsterLab;
+          const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+          api.setCount(1);
+          api.setExpression("curious"); // 受傷後要換回受傷前的表情（不是一般）
+          api.setAnim("idle");
+          await wait(500);
+          const before = api.animState();
+          api.hurt();
+          const s = [];
+          for (let i = 0; i < 24; i++) {
+            await wait(40);
+            s.push(api.animState());
+          }
+          await wait(1500);
+          const after = api.animState();
+          // 移動中受擊 → 受傷 → 回待機
+          api.setAnim("move");
+          await wait(400);
+          api.hurt();
+          await wait(80);
+          const midMove = api.animState();
+          await wait(1800);
+          const afterMove = api.animState();
+          // 生命值歸零 → 停在 down
+          api.hurt(true);
+          await wait(1800);
+          const down = api.animState();
+          api.setAnim("none");
+          api.setExpression("normal");
+          api.setAnim("idle");
+          api.setCount(3);
+          return { before, s, after, midMove, afterMove, down };
+        });
+        {
+          const h = hu.s.filter((q) => q.anim === "hurt");
+          const minSy = Math.min(...h.map((q) => q.sy));
+          const minFwd = Math.min(...h.map((q) => q.fwd));
+          const minY = Math.min(...hu.s.map((q) => q.y));
+          check(
+            "V3.8R 第四階段：受傷（壓縮 ≤12%、後退、不穿地、受傷表情）",
+            h.length > 2 && minSy >= 0.875 && minSy < 0.97 && minFwd < -0.02 && minFwd >= -0.081 && minY >= 0 && h.some((q) => q.face === "hurt") && run.errors.length === 0,
+            { n: h.length, minSy, minFwd, minY },
+          );
+          const a = hu.after;
+          check(
+            "V3.8R 第四階段：受傷後回待機、回原位、無位移殘留、換回受傷前表情（好奇）",
+            a.anim === "idle" && a.face === "curious" && a.fwd === 0 && a.sfwd === 1 && Math.hypot(a.bx - hu.before.bx, a.bz - hu.before.bz) < 1e-9 && Math.hypot(a.x - a.bx, a.z - a.bz) < 1e-9,
+            a,
+          );
+          check(
+            "V3.8R 第四階段：移動中受擊會被打斷並回待機；生命值歸零停住不回待機",
+            hu.midMove.anim === "hurt" && hu.afterMove.anim === "idle" && hu.afterMove.y === 0 && hu.down.anim === "down",
+            { midMove: hu.midMove.anim, afterMove: hu.afterMove.anim, down: hu.down.anim },
+          );
+        }
         const d38 = drawCalls3[`bobo38|${vp.name}`];
         check("V3.8R：3 隻同場 Draw Calls 不高於 V3.8（≤25）", typeof d38 === "number" && perf.drawCalls <= d38 && perf.drawCalls <= 25, { v38r: perf.drawCalls, v38: d38 });
         const views = await page.evaluate(async () => {

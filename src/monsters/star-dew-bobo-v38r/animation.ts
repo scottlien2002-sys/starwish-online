@@ -8,13 +8,19 @@
  * - 頭頂星星：跟著觸角末端的位移一起移動（仍是真正的 3D 物件，不面向鏡頭）
  * - 眨眼：只換眼睛貼圖座標（和表情同一張貼圖），模型外型不變
  *
- * 目前完成：待機（idle）、移動（move，果凍彈跳）— 皆已驗收；攻擊（attack，果凍彈擊）。受傷、死亡之後依序加入。
+ * 目前完成：待機、移動、攻擊（皆已驗收）；受傷（hurt）。死亡之後再加入。
  */
 
-export type BoboAnimName = "none" | "idle" | "move" | "attack";
+/**
+ * "down"：受傷時生命值已歸零 → 受傷播完後停住、不回待機，等死亡動畫接手（死亡動畫尚未製作）
+ */
+export type BoboAnimName = "none" | "idle" | "move" | "attack" | "hurt" | "down";
+/** 預覽頁「動畫」按鈕輪流切換的項目（受傷另有按鈕手動觸發） */
 export const BOBO_ANIMS: readonly BoboAnimName[] = ["none", "idle", "move", "attack"];
+/** 可用網址或 setAnim 指定的全部動畫 */
+export const BOBO_ANIMS_ALL: readonly BoboAnimName[] = ["none", "idle", "move", "attack", "hurt", "down"];
 /** 只播一次、播完自動回到待機的動畫 */
-export const ONE_SHOT: readonly BoboAnimName[] = ["attack"];
+export const ONE_SHOT: readonly BoboAnimName[] = ["attack", "hurt"];
 
 /** 一幀的姿勢（全部是相對於靜止姿勢的變化量） */
 export interface BoboPose {
@@ -201,10 +207,53 @@ export function attackPose(t: number): BoboPose {
   };
 }
 
+// ---------------------------------------------------------------- 受傷：衝擊 → 後退 → 果凍回彈 → 恢復
+
+/** 受傷全長（秒）；四階段：衝擊 0～0.15、後退 0.15～0.32、回彈 0.32～0.55、恢復 0.55～0.75 */
+export const HURT_DURATION = 0.75;
+export const HURT_PHASES = { impact: [0, 0.15], recoil: [0.15, 0.32], rebound: [0.32, 0.55], recover: [0.55, HURT_DURATION] } as const;
+/** 受傷表情顯示到這個時間點，之後換回受傷前的表情 */
+export const HURT_FACE_UNTIL = 0.6;
+/** 受傷期間再次受擊：衝擊階段（前 0.15 秒）內忽略，之後從頭重播（每一擊都有反應，但不會抖動卡住） */
+export const HURT_REHIT_LOCK = 0.15;
+
+// [時間, sy, sfwd, fwd(公尺；負 = 往後退), lift, pitch(負 = 後仰), swayZ(觸角，正 = 往前), flap(正 = 翅膀張開), roll]
+const HURT_KEYS: readonly (readonly number[])[] = [
+  [0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+  [0.06, 0.92, 0.9, -0.015, 0.0, -0.11, 0.05, 0.3, 0.0], // 衝擊：突然被正面壓縮
+  [0.15, 0.88, 0.9, -0.035, 0.0, -0.175, 0.075, 0.38, 0.0], // 壓縮最大 12%、後仰 10°、觸角往前、翅膀張開
+  [0.24, 0.92, 1.03, -0.065, 0.0, -0.12, 0.01, 0.05, 0.0], // 後退：果凍延遲變形（前後回彈）、觸角翅膀回擺
+  [0.32, 0.95, 1.04, -0.08, 0.0, -0.07, -0.03, -0.1, 0.0], // 退到最遠 0.08 公尺
+  [0.42, 1.04, 0.98, -0.075, 0.0, 0.03, 0.03, 0.06, 0.03], // 果凍回彈一次，小幅左右晃
+  [0.5, 0.99, 1.0, -0.06, 0.0, 0.0, -0.015, -0.03, -0.02],
+  [0.55, 1.0, 1.0, -0.05, 0.0, 0.01, 0.005, 0.0, 0.008],
+  [0.66, 1.0, 1.0, -0.015, 0.0, 0.0, 0.0, 0.0, 0.0], // 恢復：回到原位
+  [0.75, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+];
+
+export function hurtPose(t: number): BoboPose {
+  const k = HURT_KEYS;
+  const sy = track(k, t, 1);
+  const sfwd = track(k, t, 2);
+  return {
+    sy,
+    sfwd,
+    sxz: 1 / Math.sqrt(sy * sfwd),
+    fwd: track(k, t, 3),
+    lift: Math.max(0, track(k, t, 4)),
+    pitch: track(k, t, 5),
+    swayZ: track(k, t, 6),
+    flap: track(k, t, 7),
+    roll: track(k, t, 8),
+    swayX: 0,
+  };
+}
+
 export function poseAt(name: BoboAnimName, t: number, phase = 0): BoboPose {
   if (name === "idle") return idlePose(t, phase);
   if (name === "move") return hopPose(t / HOP_PERIOD + phase);
   if (name === "attack") return attackPose(Math.min(t, ATTACK_DURATION));
+  if (name === "hurt") return hurtPose(Math.min(t, HURT_DURATION));
   return REST_POSE;
 }
 
@@ -254,10 +303,35 @@ export class BoboAnimPlayer {
     return this.requested;
   }
 
+  /** 動畫已播放的時間（秒） */
+  get time(): number {
+    return this.t;
+  }
+
   request(name: BoboAnimName): void {
     if (this.current === "attack" && name === "attack") return;
+    if (this.current === "down") return; // 已倒下：只等死亡動畫
     this.requested = name;
-    if (this.current !== "move" && this.current !== "attack") this.switchNow();
+    if (this.current !== "move" && this.current !== "attack" && this.current !== "hurt") this.switchNow();
+  }
+
+  /** 生命值歸零：受傷播完後不回待機，停在 "down" 等死亡動畫 */
+  private lethal = false;
+
+  /**
+   * 受傷（一次性）：立刻打斷待機、移動、攻擊；記下受傷後要回去的動畫（移動中被打則回待機）。
+   * 受傷期間再受擊：前 0.15 秒（衝擊階段）忽略，之後從頭重播。lethal = 生命值已歸零
+   */
+  hurt(lethal = false): void {
+    if (this.current === "down") return;
+    this.lethal = this.lethal || lethal;
+    if (this.current === "hurt" && this.t < HURT_REHIT_LOCK) return;
+    this.requested = "hurt";
+    this.from = this.lastPose;
+    this.fade = 0;
+    this.fadeTime = 0.05; // 衝擊要立刻發生
+    this.current = "hurt";
+    this.t = 0;
   }
 
   private fadeTime = BoboAnimPlayer.FADE;
@@ -267,6 +341,7 @@ export class BoboAnimPlayer {
     this.from = this.lastPose;
     this.fade = 0;
     this.fadeTime = this.requested === "attack" ? 0.12 : BoboAnimPlayer.FADE;
+    if (this.requested === "hurt") this.fadeTime = 0.05;
     this.current = this.requested;
     this.t = 0;
   }
@@ -288,6 +363,15 @@ export class BoboAnimPlayer {
         this.switchNow();
       } else if (crossed) {
         travel += hopProgress(u1 - Math.floor(u1)) * HOP_DISTANCE;
+      }
+    } else if (this.current === "hurt") {
+      this.t += dt;
+      if (this.t >= HURT_DURATION) {
+        // 播完：生命值歸零 → 停住等死亡；否則回待機（不回到受傷前的移動／攻擊）
+        this.requested = this.lethal ? "down" : "idle";
+        this.lastPose = hurtPose(HURT_DURATION);
+        this.switchNow();
+        if (this.current === "down") this.fade = 1;
       }
     } else if (this.current === "attack") {
       this.t += dt;

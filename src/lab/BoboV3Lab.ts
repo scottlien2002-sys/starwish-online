@@ -41,7 +41,19 @@ import { BOBO_V37_SPEC } from "../monsters/star-dew-bobo-v37/spec.ts";
 import { createGlassMatcapV38, createJellyNoiseTextureV38, JellyV38Plugin } from "../monsters/star-dew-bobo-v38/JellyV38Plugin.ts";
 import { BOBO_V38_SPEC } from "../monsters/star-dew-bobo-v38/spec.ts";
 import { BOBO_V38R_SPEC } from "../monsters/star-dew-bobo-v38r/spec.ts";
-import { antennaWeight, BlinkTimer, BOBO_ANIMS, BoboAnimPlayer, type BoboAnimName, type BoboPose, poseAt, poseScale, REST_POSE } from "../monsters/star-dew-bobo-v38r/animation.ts";
+import {
+  antennaWeight,
+  BlinkTimer,
+  BOBO_ANIMS,
+  BOBO_ANIMS_ALL,
+  BoboAnimPlayer,
+  type BoboAnimName,
+  type BoboPose,
+  HURT_FACE_UNTIL,
+  poseAt,
+  poseScale,
+  REST_POSE,
+} from "../monsters/star-dew-bobo-v38r/animation.ts";
 import { createGlassMatcapV38R, createJellyNoiseTextureV38R, JellyV38RPlugin } from "../monsters/star-dew-bobo-v38r/JellyV38RPlugin.ts";
 import { ExpressionAtlasController, loadMonsterAsset, type MonsterAssetHandle } from "../monsters/babylon/loadMonsterAsset.ts";
 import { formatCostRows, runCostSteps, type CostStep } from "../render/costAnalysis.ts";
@@ -198,7 +210,16 @@ export interface BoboV3DebugApi {
     bx: number;
     bz: number;
     angry: boolean;
+    /** 目前顯示的表情 */
+    face: string;
+    rx: number;
+    rz: number;
+    scale: number[];
   };
+  /** V3.8R：換成靜止姿勢但不重設位置與朝向（外觀一致性檢查用） */
+  freezeRest(): void;
+  /** V3.8R：受傷（一次性；lethal = 生命值歸零 → 播完停在 down 等死亡動畫） */
+  hurt(lethal?: boolean): void;
   /** V3.8R：第一隻目前的動畫姿勢（測試用） */
   animPose(): { sy: number; sxz: number; roll: number; swayX: number; flap: number; starX: number; scaleY: number };
   /** V3.8R：切換第二階段灰模（只有 V3.8R 有作用） */
@@ -233,8 +254,8 @@ interface BoboV3Instance {
   pose: BoboPose;
   /** 移動累積的位置（攻擊的往前彈出是暫時位移，加在這個位置上、不累積） */
   base: { x: number; z: number };
-  /** 攻擊中暫時換成「生氣」表情（結束後換回目前表情） */
-  attackFace: boolean;
+  /** 動畫暫時換的表情（攻擊 → 生氣、受傷 → 受傷）；結束後換回動畫前的表情 */
+  faceOverride: V3Expression | null;
   body: Mesh;
   /** 原本的身體材質（V3.8R 灰模切換回來時使用） */
   bodyMat: Material;
@@ -359,7 +380,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
   let anim: BoboAnimName = "none";
   if (v38r) {
     const a = new URLSearchParams(location.search).get("anim") as BoboAnimName | null;
-    anim = a && BOBO_ANIMS.includes(a) ? a : "idle";
+    anim = a && BOBO_ANIMS_ALL.includes(a) && a !== "down" ? a : "idle";
   }
   const spawn = (x: number, z: number, yaw: number): BoboV3Instance => {
     const assetInst = assetHandle ? assetHandle.instantiate(`bobo3_${instances.length}`) : null;
@@ -436,9 +457,12 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
       moveSign: n === 1 ? -1 : 1,
       pose: REST_POSE,
       base: { x, z },
-      attackFace: false,
+      faceOverride: null,
     };
-    if (v38r) it.player.request(anim);
+    if (v38r) {
+      if (anim === "hurt") it.player.hurt();
+      else it.player.request(anim);
+    }
     applyGrey(it, grey);
     instances.push(it);
     return it;
@@ -640,7 +664,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     <button class="v3-bench lab-bench" data-layout="btn-bench">⏱ 效能測試（10 秒）</button>
     ${
       v38r
-        ? `<div class="v3-row"><button class="lab-view-btn v3-cost" data-layout="btn-cost">🔍 成本分析（約 35 秒）</button><button class="lab-view-btn v3-anim" data-layout="btn-anim">🫧 待機</button></div>`
+        ? `<div class="v3-row"><button class="lab-view-btn v3-cost" data-layout="btn-cost">🔍 成本分析（約 35 秒）</button><button class="lab-view-btn v3-anim" data-layout="btn-anim">🫧 待機</button><button class="lab-view-btn v3-hurt" data-layout="btn-hurt">💢 受傷</button></div>`
         : `<button class="lab-view-btn v3-cost" data-layout="btn-cost">🔍 成本分析（約 35 秒）</button>`
     }
     <div class="lab-bench-result v3-bench-result" hidden></div>
@@ -654,7 +678,11 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
   const countButtons = [...uiRoot.querySelectorAll<HTMLButtonElement>("[data-count]")];
   // V3.8R 第四階段：動畫切換按鈕（點一下輪流：待機 → 靜止 → 待機…；之後加入移動、攻擊等）
   const animBtn = uiRoot.querySelector<HTMLButtonElement>(".v3-anim");
-  const ANIM_LABEL: Record<BoboAnimName, string> = { none: "⏸ 靜止", idle: "🫧 待機", move: "🦘 移動", attack: "💥 攻擊" };
+  const ANIM_LABEL: Record<BoboAnimName, string> = { none: "⏸ 靜止", idle: "🫧 待機", move: "🦘 移動", attack: "💥 攻擊", hurt: "💢 受傷中", down: "💤 倒下（待死亡動畫）" };
+  // 受傷：手動觸發（每按一次受擊一次；受傷中前 0.15 秒再按會被忽略）
+  uiRoot.querySelector<HTMLButtonElement>(".v3-hurt")?.addEventListener("click", () => {
+    for (const it of instances) if (it.root.isEnabled()) it.player.hurt();
+  });
   const fpsEl = uiRoot.querySelector<HTMLDivElement>(".lab-fps")!;
   const benchBtn = uiRoot.querySelector<HTMLButtonElement>(".lab-bench")!;
   const benchEl = uiRoot.querySelector<HTMLDivElement>(".lab-bench-result")!;
@@ -778,9 +806,9 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
         travel = r.travel;
         // 朝向：移動時面向前進方向（沿 X 軸來回），停下後轉回原本朝向
         const moving = it.player.current === "move" && it.player.pending === "move";
-        // 攻擊中不轉身（朝目前方向出招）
+        // 攻擊、受傷、倒下時不轉身
         const target =
-          it.player.current === "attack" ? it.yaw : moving || it.player.current === "move" ? (it.moveSign > 0 ? Math.PI / 2 : -Math.PI / 2) : it.home.yaw;
+          it.player.current === "attack" || it.player.current === "hurt" || it.player.current === "down" ? it.yaw : moving || it.player.current === "move" ? (it.moveSign > 0 ? Math.PI / 2 : -Math.PI / 2) : it.home.yaw;
         let d = target - it.yaw;
         d = Math.atan2(Math.sin(d), Math.cos(d));
         it.yaw += d * Math.min(1, dt * 7);
@@ -803,12 +831,14 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
       if (it.jelly instanceof JellyV38RPlugin) it.jelly.anim.set(p.swayX, p.swayZ, p.flap, 0);
       // 頭頂星星跟著觸角末端移動（真正的 3D 物件）
       it.stars.position.set(p.swayX * starW, 0, p.swayZ * starW);
-      // 攻擊：出招時暫時換成「生氣」表情（八種表情之一），結束後換回
-      const attacking = (animHold !== null ? anim : it.player.current) === "attack" && !grey;
-      if (attacking !== it.attackFace && it.expr) {
-        it.attackFace = attacking;
+      // 動畫暫時表情（八種表情之一）：攻擊 → 生氣；受傷 → 受傷（「> <」緊閉雙眼＋委屈眉），結束後換回動畫前的表情
+      const cur = animHold !== null ? anim : it.player.current;
+      const tt = animHold ?? it.player.time;
+      const want: V3Expression | null = grey ? null : cur === "attack" ? "angry" : (cur === "hurt" && tt < HURT_FACE_UNTIL) || cur === "down" ? "hurt" : null;
+      if (want !== it.faceOverride && it.expr) {
+        it.faceOverride = want;
         it.blinkClosed = false;
-        it.expr.set(V3_EXPRESSIONS.indexOf(attacking ? "angry" : expression));
+        it.expr.set(V3_EXPRESSIONS.indexOf(want ?? expression));
       }
       // 眨眼：只在待機、表情為「一般／好奇」時；只換眼睛貼圖
       const canBlink = it.player.current === "idle" && animHold === null && !grey && (expression === "normal" || expression === "curious");
@@ -830,6 +860,10 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     anim = a;
     animHold = null;
     for (const it of instances) {
+      if (a === "hurt") {
+        it.player.hurt();
+        continue;
+      }
       it.player.request(a);
       if (a === "none") {
         // 靜止：立刻回到出生位置與原本朝向（方便對照）
@@ -846,7 +880,8 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
 
   animBtn?.addEventListener("click", () => {
     const cur = (instances[0]?.player.current ?? anim) as BoboAnimName;
-    setAnim(BOBO_ANIMS[(BOBO_ANIMS.indexOf(cur) + 1) % BOBO_ANIMS.length]!);
+    const i = BOBO_ANIMS.indexOf(cur);
+    setAnim(BOBO_ANIMS[(i < 0 ? 0 : i + 1) % BOBO_ANIMS.length]!);
   });
   if (animBtn) animBtn.textContent = ANIM_LABEL[anim];
 
@@ -913,7 +948,16 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     setCount,
     setRefMode,
     setGrey,
-    setAnim: (n) => setAnim(BOBO_ANIMS.includes(n as BoboAnimName) ? (n as BoboAnimName) : "idle"),
+    setAnim: (n) => setAnim(BOBO_ANIMS_ALL.includes(n as BoboAnimName) && n !== "down" ? (n as BoboAnimName) : "idle"),
+    freezeRest: () => {
+      // 一致性檢查用：換成靜止姿勢，但不重設位置與朝向（若動畫留下位移殘留就看得出來）
+      for (const it of instances) it.player = new BoboAnimPlayer("none", it.animPhase);
+      anim = "none";
+      animHold = null;
+    },
+    hurt: (lethal) => {
+      for (const it of instances) if (it.root.isEnabled()) it.player.hurt(!!lethal);
+    },
     holdAnimAt: (sec) => {
       animHold = sec;
     },
@@ -938,7 +982,11 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
         fwd: it.pose.fwd,
         bx: it.base.x,
         bz: it.base.z,
-        angry: it.attackFace,
+        angry: it.faceOverride === "angry",
+        face: it.faceOverride ?? expression,
+        rx: it.root.rotation.x,
+        rz: it.root.rotation.z,
+        scale: it.root.scaling.asArray(),
       };
     },
     bodyExtent: () => {

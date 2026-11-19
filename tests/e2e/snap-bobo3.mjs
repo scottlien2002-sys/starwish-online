@@ -113,6 +113,38 @@ if (ok && closeOnly) {
         }
       }
     }
+    // 受傷：停格 12 格涵蓋 0.75 秒（衝擊／後退／回彈／恢復），正面、側面、45 度
+    const hasHurt = await page.evaluate(() => typeof window.__monsterLab.hurt === "function");
+    if (hasHurt) {
+      await page.evaluate(() => {
+        window.__monsterLab.setAnim("none");
+        window.__monsterLab.setAnim("hurt");
+      });
+      for (const v of ["front", "side", "q45"]) {
+        await page.evaluate((x) => window.__monsterLab.setView(x), v);
+        await page.evaluate(() => window.__monsterLab.holdAnimAt(0.75));
+        await page.waitForTimeout(500); // 換視角後先等畫面更新，避免第一格截到舊畫面
+        for (let k = 0; k < 12; k++) {
+          await page.evaluate((t) => window.__monsterLab.holdAnimAt(t), (k * 0.75) / 11);
+          await page.waitForTimeout(250);
+          await page.screenshot({ path: `${outDir}/a_hurt_${v}_${String(k).padStart(2, "0")}.png` });
+          shots.push({ name: `a_hurt_${v}_${k}`, label: `受傷 ${v} ${k}` });
+        }
+      }
+      // 受傷前後外觀一致性：靜止姿勢 → 實際播放一次受傷 → 播完後切回靜止姿勢，正面各截一張
+      await page.evaluate(() => {
+        window.__monsterLab.setView("front");
+        window.__monsterLab.setAnim("none");
+      });
+      await shot("h_before", "受傷前（靜止）");
+      await page.evaluate(() => window.__monsterLab.setAnim("idle"));
+      await page.evaluate(() => window.__monsterLab.hurt());
+      await page.waitForTimeout(2500);
+      const st = await page.evaluate(() => window.__monsterLab.animState());
+      writeFileSync(`${outDir}/h_after_state.json`, JSON.stringify(st, null, 2));
+      await page.evaluate(() => window.__monsterLab.freezeRest()); // 換成靜止姿勢、不重設位置（有殘留就會看得出來）
+      await shot("h_after", "受傷後（靜止）");
+    }
     await page.evaluate(() => {
       window.__monsterLab.setRefMode(false);
       window.__monsterLab.setView("front");

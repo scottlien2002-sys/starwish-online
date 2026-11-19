@@ -135,3 +135,63 @@ test("V3.8R 攻擊：只播一次、播完平順接回待機；播放中重按�
   assert.ok(maxJump < 0.06, `每幀變化平順（最大 ${maxJump}）`);
   assert.ok(Math.abs(prev.fwd) < 1e-9 && Math.abs(prev.sy - 1) < 0.04);
 });
+
+import { HURT_DURATION, HURT_PHASES, HURT_REHIT_LOCK, hurtPose } from "../../src/monsters/star-dew-bobo-v38r/animation.ts";
+
+test("V3.8R 受傷：衝擊壓縮 12%、後仰 10°、後退 0.08 公尺、回彈一次，體積不變、不離地不穿地", () => {
+  let minSy = 9, minFwd = 9, minPitch = 9, maxRoll = 0;
+  for (let i = 0; i <= 300; i++) {
+    const p = hurtPose((i / 300) * HURT_DURATION);
+    const [sx, sy, sz] = poseScale(p);
+    assert.ok(Math.abs(sx * sy * sz - 1) < 1e-9);
+    assert.equal(p.lift, 0);
+    minSy = Math.min(minSy, p.sy);
+    minFwd = Math.min(minFwd, p.fwd);
+    minPitch = Math.min(minPitch, p.pitch);
+    maxRoll = Math.max(maxRoll, Math.abs(p.roll));
+  }
+  assert.ok(minSy >= 0.875 && minSy <= 0.885, `最大壓縮 ${(1 - minSy) * 100}%`);
+  assert.ok(Math.abs(minPitch + (10 * Math.PI) / 180) < 0.01, `後仰 ${(-minPitch * 180) / Math.PI}°`);
+  assert.ok(Math.abs(minFwd + 0.08) < 0.005, `後退 ${-minFwd}`);
+  assert.ok(maxRoll < 0.04, "左右晃很小");
+  const imp = hurtPose(HURT_PHASES.impact[1]);
+  assert.ok(imp.swayZ > 0.05 && imp.flap > 0.3, "衝擊：觸角往前、翅膀張開");
+  assert.ok(hurtPose(0.42).sy > 1.02, "果凍回彈一次");
+  const end = hurtPose(HURT_DURATION);
+  assert.deepEqual([end.sy, end.sfwd, end.fwd, end.pitch, end.roll, end.swayZ, end.flap], [1, 1, 0, 0, 0, 0, 0], "結束時完全恢復");
+});
+
+test("V3.8R 受傷：打斷移動／攻擊、播完回待機；衝擊中再受擊忽略、之後重播；生命值歸零停在 down", () => {
+  const dt = 1 / 60;
+  const run = (pl: BoboAnimPlayer, sec: number): void => {
+    for (let i = 0; i < Math.round(sec / dt); i++) pl.update(dt);
+  };
+  for (const start of ["move", "attack", "idle"] as const) {
+    const pl = new BoboAnimPlayer("idle");
+    pl.request(start);
+    run(pl, 0.2);
+    pl.hurt();
+    assert.equal(pl.current, "hurt", `${start} 被打斷`);
+    run(pl, HURT_DURATION + 0.4);
+    assert.equal(pl.current, "idle", `${start} → 受傷 → 待機`);
+    const p = pl.update(dt).pose;
+    assert.equal(p.fwd, 0);
+    assert.equal(p.sfwd, 1);
+  }
+  const pl = new BoboAnimPlayer("idle");
+  pl.hurt();
+  run(pl, HURT_REHIT_LOCK / 2);
+  pl.hurt();
+  assert.ok(pl.time > 0.05, "衝擊階段內再受擊：忽略（不重來）");
+  run(pl, 0.2);
+  pl.hurt();
+  assert.ok(pl.time < 0.02, "衝擊後再受擊：從頭重播");
+  run(pl, HURT_DURATION + 0.4);
+  assert.equal(pl.current, "idle");
+  const dead = new BoboAnimPlayer("idle");
+  dead.hurt(true);
+  run(dead, HURT_DURATION + 0.5);
+  assert.equal(dead.current, "down", "生命值歸零：不回待機");
+  dead.request("idle");
+  assert.equal(dead.current, "down");
+});
