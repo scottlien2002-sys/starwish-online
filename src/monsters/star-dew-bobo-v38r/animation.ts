@@ -368,10 +368,11 @@ export class BoboAnimPlayer {
       this.t += dt;
       if (this.t >= HURT_DURATION) {
         // 播完：生命值歸零 → 停住等死亡；否則回待機（不回到受傷前的移動／攻擊）
-        this.requested = this.lethal ? "down" : "idle";
+        const next: BoboAnimName = this.lethal ? "down" : "idle";
+        this.requested = next;
         this.lastPose = hurtPose(HURT_DURATION);
         this.switchNow();
-        if (this.current === "down") this.fade = 1;
+        if (next === "down") this.fade = 1;
       }
     } else if (this.current === "attack") {
       this.t += dt;
