@@ -111,6 +111,17 @@ export class ExpressionAtlasController {
     }
   }
 
+  /**
+   * 只把其中一個零件換成另一格（例：眨眼時只換眼睛、嘴巴不動）；index 省略 = 回到目前表情。
+   * 不改目前表情（index 讀取值不變）
+   */
+  setPart(meshName: string, index?: number): void {
+    const p = this.parts.find((pp) => pp.part.mesh === meshName);
+    if (!p) return;
+    offsetUVs(p.base, p.part, index ?? this.current, p.buf);
+    p.mesh.updateVerticesData(VertexBuffer.UVKind, p.buf);
+  }
+
   /** 第 0 個零件目前第一個 UV（測試用） */
   firstUV(): [number, number] {
     const p = this.parts[0]!;

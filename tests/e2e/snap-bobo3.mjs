@@ -37,6 +37,9 @@ if (ok && closeOnly) {
   const grey = await page.evaluate(() => !!window.__monsterLab.perf().grey);
   const views5 = await page.evaluate(() => !!window.__monsterLab.perf().views5);
   const VIEWS = views5 ? ["front", "side", "back", "q45", "top"] : ["front", "side", "back"];
+  // V3.8R 第四階段：靜態截圖一律用靜止姿勢（和前幾版可直接比較）；動畫另外截連續畫格
+  const hasAnim = await page.evaluate(() => typeof window.__monsterLab.setAnim === "function");
+  if (hasAnim) await page.evaluate(() => window.__monsterLab.setAnim("none"));
   for (const v of VIEWS) {
     await page.evaluate((x) => window.__monsterLab.setView(x), v);
     await shot(`v_${v}`, v);
@@ -60,6 +63,28 @@ if (ok && closeOnly) {
   for (const e of grey ? [] : ["normal", "happy", "curious", "angry", "scared", "dizzy", "sleepy", "hurt"]) {
     await page.evaluate((x) => window.__monsterLab.setExpression(x), e);
     await shot(`e_${e}`, e);
+  }
+  // 動畫畫格（Chromium）：對照模式正面與 45 度，各 12 格涵蓋一個待機週期（2.6 秒）
+  if (hasAnim && browserName === "chromium") {
+    await page.evaluate(() => {
+      window.__monsterLab.setExpression("normal");
+      window.__monsterLab.setRefMode(true);
+      window.__monsterLab.setAnim("idle");
+    });
+    for (const v of ["front", "q45"]) {
+      await page.evaluate((x) => window.__monsterLab.setView(x), v);
+      for (let k = 0; k < 12; k++) {
+        await page.evaluate((t) => window.__monsterLab.holdAnimAt(t), (k * 2.6) / 12);
+        await page.waitForTimeout(250);
+        await page.screenshot({ path: `${outDir}/a_idle_${v}_${String(k).padStart(2, "0")}.png` });
+        shots.push({ name: `a_idle_${v}_${k}`, label: `待機 ${v} ${k}` });
+      }
+    }
+    await page.evaluate(() => {
+      window.__monsterLab.setRefMode(false);
+      window.__monsterLab.setView("front");
+      window.__monsterLab.setAnim("idle");
+    });
   }
   await page.evaluate(() => {
     window.__monsterLab.setExpression("normal");

@@ -463,6 +463,8 @@ for (const name of browsers) {
         check("V3.8R：第二階段灰模可切換並恢復", greyT.onGrey === true && greyT.onFace === false && greyT.offGrey === false && greyT.offFace === true && run.errors.length === 0, greyT);
         const shape = await page.evaluate(async () => {
           const api = window.__monsterLab;
+          api.setAnim("none"); // 動畫會改變外框，比較表情前先靜止
+          await new Promise((r) => setTimeout(r, 100));
           const out = [];
           for (const e of ["normal", "happy", "curious", "angry", "scared", "dizzy", "sleepy", "hurt"]) {
             api.setExpression(e);
@@ -473,6 +475,32 @@ for (const name of browsers) {
           return out;
         });
         check("V3.8R：8 種表情切換時身體外型不變", new Set(shape).size === 1, shape[0]);
+        const an = await page.evaluate(async () => {
+          const api = window.__monsterLab;
+          const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+          api.setAnim("idle");
+          await wait(400);
+          const p1 = api.animPose();
+          await wait(700);
+          const p2 = api.animPose();
+          const live = api.perf().anim;
+          api.setAnim("none");
+          await wait(200);
+          const rest = api.animPose();
+          api.setAnim("idle");
+          return { p1, p2, live, rest };
+        });
+        check(
+          "V3.8R 第四階段：待機動畫播放中（伸縮維持體積、星星跟著觸角、可切回靜止）",
+          an.live === "idle" &&
+            Math.abs(an.p1.sy - an.p2.sy) > 1e-4 &&
+            Math.abs(an.p1.sy * an.p1.sxz * an.p1.sxz - 1) < 1e-6 &&
+            Math.abs(an.p2.sy - 1) < 0.05 &&
+            Math.abs(an.rest.scaleY - 1) < 1e-9 &&
+            an.rest.starX === 0 &&
+            run.errors.length === 0,
+          an,
+        );
         const d38 = drawCalls3[`bobo38|${vp.name}`];
         check("V3.8R：3 隻同場 Draw Calls 不高於 V3.8（≤25）", typeof d38 === "number" && perf.drawCalls <= d38 && perf.drawCalls <= 25, { v38r: perf.drawCalls, v38: d38 });
         const views = await page.evaluate(async () => {

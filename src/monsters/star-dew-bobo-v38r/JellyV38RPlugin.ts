@@ -15,6 +15,7 @@ import {
   Texture,
   type UniformBuffer,
   Vector3,
+  Vector4,
 } from "@babylonjs/core";
 
 /**
@@ -69,6 +70,11 @@ export class JellyV38RPlugin extends MaterialPluginBase {
   iridescence = 1;
   baseGlow = 1;
   readonly invWorld = Matrix.Identity();
+  /**
+   * 第四階段動畫（頂點著色器）：x、y = 觸角末端位移（身體模型座標的 x、z），z = 翅膀拍動量。
+   * 全部為 0 時和第三階段完全相同
+   */
+  readonly anim = new Vector4(0, 0, 0, 0);
   /** 視角矩陣（每幀由頁面寫入；用來算反射貼圖的取樣座標） */
   readonly view = Matrix.Identity();
   private enabled = false;
@@ -117,7 +123,7 @@ export class JellyV38RPlugin extends MaterialPluginBase {
     return texture === this.noise || texture === this.matcap;
   }
 
-  override getUniforms(): { ubo: { name: string; size: number; type: string }[]; fragment: string } {
+  override getUniforms(): { ubo: { name: string; size: number; type: string }[]; vertex: string; fragment: string } {
     return {
       ubo: [
         { name: "j38Rim", size: 3, type: "vec3" },
@@ -137,7 +143,11 @@ export class JellyV38RPlugin extends MaterialPluginBase {
         { name: "j38InvWorld", size: 16, type: "mat4" },
         { name: "j38View", size: 16, type: "mat4" },
         { name: "j38Glass", size: 4, type: "vec4" },
+        { name: "j38Anim", size: 4, type: "vec4" },
       ],
+      vertex: `#ifdef JELLY38R
+uniform vec4 j38Anim;
+#endif`,
       fragment: `#ifdef JELLY38R
 uniform vec3 j38Rim;
 uniform vec3 j38Core;
@@ -156,6 +166,7 @@ uniform vec4 j38Star;
 uniform mat4 j38InvWorld;
 uniform mat4 j38View;
 uniform vec4 j38Glass;
+uniform vec4 j38Anim;
 #endif`,
     };
   }
@@ -179,11 +190,30 @@ uniform vec4 j38Glass;
     uniformBuffer.updateMatrix("j38InvWorld", this.invWorld);
     uniformBuffer.updateMatrix("j38View", this.view);
     uniformBuffer.updateFloat4("j38Glass", this.reflect, this.rimStrength, this.iridescence, this.baseGlow);
+    uniformBuffer.updateVector4("j38Anim", this.anim);
     uniformBuffer.setTexture("j38Noise", this.noise);
     uniformBuffer.setTexture("j38Matcap", this.matcap);
   }
 
   override getCustomCode(shaderType: string): { [pointName: string]: string } | null {
+    if (shaderType === "vertex") {
+      // 第四階段：只位移觸角（小瓶口以上）與翅膀（身體外側中段）；臉部、身體表面不動
+      return {
+        CUSTOM_VERTEX_UPDATE_POSITION: `#ifdef JELLY38R
+{
+  float jaT = clamp((positionUpdated.y - 1.02) / 0.35, 0.0, 1.0);
+  float jaW = jaT * jaT * (3.0 - 2.0 * jaT);
+  jaW *= jaW;
+  positionUpdated.xz += j38Anim.xy * jaW;
+  float jwX = abs(positionUpdated.x);
+  float jwW = smoothstep(0.6, 0.8, jwX) * smoothstep(0.16, 0.26, positionUpdated.y) * (1.0 - smoothstep(0.6, 0.7, positionUpdated.y));
+  float jwR = max(jwX - 0.6, 0.0);
+  positionUpdated.z += j38Anim.z * jwR * jwW;
+  positionUpdated.y += j38Anim.z * 0.6 * jwR * jwW;
+}
+#endif`,
+      };
+    }
     if (shaderType !== "fragment") return null;
     return {
       CUSTOM_FRAGMENT_DEFINITIONS: JELLY38R_FUNCS,

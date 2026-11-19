@@ -40,6 +40,7 @@ import { BOBO_V37_SPEC } from "../monsters/star-dew-bobo-v37/spec.ts";
 import { createGlassMatcapV38, createJellyNoiseTextureV38, JellyV38Plugin } from "../monsters/star-dew-bobo-v38/JellyV38Plugin.ts";
 import { BOBO_V38_SPEC } from "../monsters/star-dew-bobo-v38/spec.ts";
 import { BOBO_V38R_SPEC } from "../monsters/star-dew-bobo-v38r/spec.ts";
+import { antennaWeight, BlinkTimer, BOBO_ANIMS, type BoboAnimName, poseAt } from "../monsters/star-dew-bobo-v38r/animation.ts";
 import { createGlassMatcapV38R, createJellyNoiseTextureV38R, JellyV38RPlugin } from "../monsters/star-dew-bobo-v38r/JellyV38RPlugin.ts";
 import { ExpressionAtlasController, loadMonsterAsset, type MonsterAssetHandle } from "../monsters/babylon/loadMonsterAsset.ts";
 import { formatCostRows, runCostSteps, type CostStep } from "../render/costAnalysis.ts";
@@ -172,9 +173,17 @@ export interface BoboV3DebugApi {
     /** V3.8R 灰模模式（無材質、無臉部） */
     grey: boolean;
     faceVisible: boolean;
+    /** V3.8R 第四階段：目前播放的動畫 */
+    anim: string;
     /** 測試頁有 45 度角與俯視（V3.8R） */
     views5: boolean;
   };
+  /** V3.8R 第四階段：播放動畫（"none" 靜止、"idle" 待機） */
+  setAnim(name: string): void;
+  /** V3.8R：把動畫時間設定到指定秒數並停住（截圖用；之後呼叫 setAnim 恢復播放） */
+  holdAnimAt(seconds: number): void;
+  /** V3.8R：第一隻目前的動畫姿勢（測試用） */
+  animPose(): { sy: number; sxz: number; roll: number; swayX: number; flap: number; starX: number; scaleY: number };
   /** V3.8R：切換第二階段灰模（只有 V3.8R 有作用） */
   setGrey(on: boolean): void;
   /** 第一隻身體的外框（世界座標，小數 4 位）；用來確認切換表情不改變外型 */
@@ -194,6 +203,10 @@ declare global {
 
 interface BoboV3Instance {
   root: TransformNode;
+  /** V3.8R 第四階段：動畫相位（同場多隻不同步）、眨眼計時、頭頂星星靜止位置 */
+  animPhase: number;
+  blink: BlinkTimer;
+  blinkClosed: boolean;
   body: Mesh;
   /** 原本的身體材質（V3.8R 灰模切換回來時使用） */
   bodyMat: Material;
@@ -377,7 +390,13 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
       eyes.setVerticesData(VertexBuffer.UVKind, Float32Array.from(eyeUV), true);
       mouth.setVerticesData(VertexBuffer.UVKind, Float32Array.from(mouthUV), true);
     }
-    const it: BoboV3Instance = { root, body, eyes, mouth, blush, stars, jelly: bodyMat.jelly, eyeUV, mouthUV, expr, bodyMat: bodyMat.material };
+    const n = instances.length;
+    const it: BoboV3Instance = {
+      root, body, eyes, mouth, blush, stars, jelly: bodyMat.jelly, eyeUV, mouthUV, expr, bodyMat: bodyMat.material,
+      animPhase: [0, 0.37, 0.71][n % 3]!,
+      blink: new BlinkTimer(17 + n * 101),
+      blinkClosed: false,
+    };
     applyGrey(it, grey);
     instances.push(it);
     return it;
@@ -550,6 +569,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
       <button class="lab-view-btn" data-count="3" data-layout="btn-count-3">3 隻</button>
       <button class="lab-view-btn v3-switch" data-layout="btn-switch">看 ${VARIANT_LABEL[VARIANT_NEXT[variant]]}</button>
       <button class="lab-view-btn v3-ref" data-layout="btn-ref">設定圖對照</button>
+      ${v38r ? `<button class="lab-view-btn" data-anim="none" data-layout="btn-anim-none">⏸ 靜止</button><button class="lab-view-btn" data-anim="idle" data-layout="btn-anim-idle">🫧 待機</button>` : ""}
     </div>
     <button class="v3-bench lab-bench" data-layout="btn-bench">⏱ 效能測試（10 秒）</button>
     <button class="lab-view-btn v3-cost" data-layout="btn-cost">🔍 成本分析（約 35 秒）</button>
@@ -562,6 +582,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
   const viewButtons = [...uiRoot.querySelectorAll<HTMLButtonElement>("[data-view]")];
   const exprButtons = [...uiRoot.querySelectorAll<HTMLButtonElement>("[data-expr]")];
   const countButtons = [...uiRoot.querySelectorAll<HTMLButtonElement>("[data-count]")];
+  const animButtons = [...uiRoot.querySelectorAll<HTMLButtonElement>("[data-anim]")];
   const fpsEl = uiRoot.querySelector<HTMLDivElement>(".lab-fps")!;
   const benchBtn = uiRoot.querySelector<HTMLButtonElement>(".lab-bench")!;
   const benchEl = uiRoot.querySelector<HTMLDivElement>(".lab-bench-result")!;
@@ -663,6 +684,46 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
   if (params.get("ref") === "1") setRefMode(true);
   if (params.get("bench") === "1") window.setTimeout(() => void runBenchmark(10), 3000);
 
+  // ---------- V3.8R 第四階段動畫（預設待機；&anim=none 為靜止） ----------
+  let anim: BoboAnimName = v38r ? ((params.get("anim") as BoboAnimName) ?? "idle") : "none";
+  if (!BOBO_ANIMS.includes(anim)) anim = "idle";
+  let animTime = 0;
+  /** 截圖用：停在固定的動畫時間 */
+  let animHold: number | null = null;
+  const STAR_Y = 1.19; // 頭頂星星中心高度（身體模型座標）
+  const starW = antennaWeight(STAR_Y);
+  const applyAnim = (dt: number): void => {
+    if (!v38r) return;
+    animTime += dt;
+    const t = animHold ?? animTime;
+    for (const it of instances) {
+      const p = poseAt(anim, t, it.animPhase);
+      it.root.scaling.set(p.sxz, p.sy, p.sxz);
+      it.root.rotation.z = p.roll;
+      it.root.rotation.x = p.pitch;
+      if (it.jelly instanceof JellyV38RPlugin) it.jelly.anim.set(p.swayX, p.swayZ, p.flap, 0);
+      // 頭頂星星跟著觸角末端移動（模型根節點縮放 0.8 → 位移在同一個身體座標）
+      it.stars.position.set(p.swayX * starW, 0, p.swayZ * starW);
+      // 眨眼：只有待機、表情為「一般／好奇／開心以外的睜眼表情」時才眨；只換眼睛貼圖
+      const canBlink = anim === "idle" && animHold === null && !grey && (expression === "normal" || expression === "curious");
+      const closed = canBlink && it.blink.update(dt);
+      if (closed !== it.blinkClosed && it.expr) {
+        it.blinkClosed = closed;
+        it.expr.setPart("Eyes", closed ? V3_EXPRESSIONS.indexOf("sleepy") : undefined);
+      }
+    }
+  };
+  const setAnim = (a: BoboAnimName): void => {
+    anim = a;
+    animTime = 0;
+    animHold = null;
+    for (const b of animButtons) b.classList.toggle("active", b.dataset.anim === a);
+    if (a === "none") applyAnim(0);
+  };
+
+  for (const b of animButtons) b.addEventListener("click", () => setAnim(b.dataset.anim as BoboAnimName));
+  for (const b of animButtons) b.classList.toggle("active", b.dataset.anim === anim);
+
   let uiTimer = 0;
   engine.runRenderLoop(() => {
     const rawDt = engine.getDeltaTime() / 1000;
@@ -677,7 +738,10 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
       d = Math.atan2(Math.sin(d), Math.cos(d));
       camera.alpha += d * Math.min(1, dt * 6);
     }
+    applyAnim(dt);
     for (const it of instances) {
+      // 動畫每幀改根節點縮放／旋轉 → 先更新世界矩陣，果凍內部的星雲才會黏在身體上
+      if (v38r) it.body.computeWorldMatrix(true);
       if (it.jelly) it.body.getWorldMatrix().invertToRef(it.jelly.invWorld);
       // 視角矩陣取自鏡頭（scene.getViewMatrix() 在第一次 render 之前是空的）
       if (it.jelly instanceof JellyV37Plugin || it.jelly instanceof JellyV38Plugin || it.jelly instanceof JellyV38RPlugin) it.jelly.view.copyFrom(camera.getViewMatrix());
@@ -723,6 +787,15 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     setCount,
     setRefMode,
     setGrey,
+    setAnim: (n) => setAnim(BOBO_ANIMS.includes(n as BoboAnimName) ? (n as BoboAnimName) : "idle"),
+    holdAnimAt: (sec) => {
+      animHold = sec;
+    },
+    animPose: () => {
+      const it = instances[0]!;
+      const p = poseAt(anim, animHold ?? animTime, it.animPhase);
+      return { sy: p.sy, sxz: p.sxz, roll: p.roll, swayX: p.swayX, flap: p.flap, starX: it.stars.position.x, scaleY: it.root.scaling.y };
+    },
     bodyExtent: () => {
       const b = instances[0]!.body;
       b.computeWorldMatrix(true);
@@ -749,6 +822,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
         refMode,
         glowLayer: !!render.glow,
         grey,
+        anim,
         faceVisible: !!instances[0]?.eyes.isEnabled(),
         views5: v38r,
       };
