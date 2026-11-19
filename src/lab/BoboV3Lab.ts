@@ -892,6 +892,8 @@ function createMaterialsV31(
     stars.diffuseColor = new Color3(0.14, 0.14, 0.12);
     stars.specularColor = new Color3(0.75, 0.75, 0.68);
     stars.specularPower = 28;
+    // V3.8R：設定圖的亮檸檬黃（綠色略提高 → 不偏橘），仍在色調映射肩部以下、不過曝
+    if (jellyVersion === "v38r") stars.emissiveColor = new Color3(0.98, 1.02, 0.82);
   } else if (jellyVersion === "v36" || jellyVersion === "v37") {
     // V3.6：模型頂點色已改為檸檬金黃（中央亮黃 → 邊緣暖金）；開啟受光只為了柔和的水晶光澤（高光不乘頂點色 → 白色光澤）
     stars.disableLighting = false;

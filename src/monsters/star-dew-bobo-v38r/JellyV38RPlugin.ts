@@ -25,6 +25,11 @@ import {
  * - 中央更透明（0.74 → 0.64），底部青白光源更亮，虹彩去紫
  * - 依 V3.8R 新造型調整區域判斷：羽翼只在身體外側的中段高度、觸角從小瓶口以上才變成玻璃管
  *
+ * V3.8R 第三階段最終優化（使用者 2026-11-19）：
+ * - 星雲：中層／遠層星雲更清楚、多一層柔和雲光；貼圖多一層細小星點（成本不變：同一張貼圖、同樣取樣次數）
+ * - 透明：羽翼更透明（根部 0.58 → 尖端 0.32）、外緣白光更亮
+ * - 光效：腹部星星多一圈較大的柔光；身體略深一點的中央藍讓星雲與星點看得出來
+ *
  * 以下為 V3.8 原說明：
  *
  * 與 V3.7 相同：烘焙反射貼圖、整圈邊緣光、虹彩、底部亮青光源、三層星雲、十字閃光。
@@ -35,8 +40,8 @@ import {
  */
 export class JellyV38RPlugin extends MaterialPluginBase {
   rim = new Color3(0.86, 0.96, 1.0); // 整圈邊緣光（白帶一點青）
-  core = new Color3(0.56, 0.8, 1.0); // 中央：清澈亮天藍（主視覺）
-  shell = new Color3(0.2, 0.46, 1.0); // 邊緣：明亮寶藍（不偏紫）
+  core = new Color3(0.5, 0.75, 1.0); // 中央：清澈天藍（略深一點，星雲與星點才看得出來）
+  shell = new Color3(0.16, 0.4, 0.98); // 邊緣：明亮寶藍（不偏紫）
   top = new Color3(0.52, 0.76, 1.0);
   nebulaA = new Color3(0.34, 0.94, 1.0); // 亮青（底部光源、中層星雲）
   nebulaB = new Color3(0.4, 0.52, 1.0); // 遠層：藍（V3.8 偏紫 → 去紫）
@@ -260,6 +265,26 @@ export function createJellyNoiseTextureV38R(scene: Scene, size = 256): RawTextur
       }
     }
   }
+  // V3.8R：再加一層細小星點（設定圖果凍裡的細碎星塵；同一張貼圖，不增加成本）
+  const fineCells = 52;
+  for (let cy = 0; cy < fineCells; cy++) {
+    for (let cx = 0; cx < fineCells; cx++) {
+      if (hash(cx, cy, 191) > 0.5) continue;
+      const px = ((cx + 0.1 + 0.8 * hash(cx, cy, 192)) / fineCells) * size;
+      const py = ((cy + 0.1 + 0.8 * hash(cx, cy, 193)) / fineCells) * size;
+      const bright = 0.3 + 0.45 * hash(cx, cy, 194);
+      const rad = 0.55 + 0.45 * hash(cx, cy, 195);
+      for (let dy = -2; dy <= 2; dy++) {
+        for (let dx = -2; dx <= 2; dx++) {
+          const x = (Math.round(px) + dx + size) % size;
+          const y = (Math.round(py) + dy + size) % size;
+          const d = Math.hypot(Math.round(px) + dx - px, Math.round(py) + dy - py);
+          const v = bright * Math.exp(-(d * d) / (rad * rad));
+          if (v > stars[y * size + x]!) stars[y * size + x] = v;
+        }
+      }
+    }
+  }
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       const u = x / size;
@@ -408,7 +433,7 @@ export const JELLY38R_MAIN = `
   float jThick = smoothstep(0.35, 0.95, jNdV) * (1.0 - jWing);
   color.a = mix(color.a, 0.64, jThick * jS);
   color.a = mix(color.a, color.a * 0.82, (1.0 - jNdV) * (1.0 - jWing) * jS);
-  color.a = mix(color.a, mix(0.75, 0.5, jWingT), jWing * jS);
+  color.a = mix(color.a, mix(0.58, 0.32, jWingT), jWing * jS);
   // 觸角（身體頂端以上）：透明玻璃管，淡藍、較透明
   // V3.8R：圓頂 0.99、小瓶口到 1.075 → 觸角玻璃管從 1.06 以上
   float jAnt = smoothstep(1.05, 1.1, lp.y) * (1.0 - jWing);
@@ -428,17 +453,19 @@ export const JELLY38R_MAIN = `
     float n2 = smoothstep(0.46, 0.76, t2.r);
     float n3 = smoothstep(0.42, 0.72, t3.g);
     float low = 1.0 - smoothstep(0.05, 0.75, p3.y);
-    vec3 neb = j38NebA * n2 * 0.45 + j38NebB * n3 * (0.26 + 0.24 * low);
+    vec3 neb = j38NebA * n2 * 0.6 + j38NebB * n3 * (0.32 + 0.34 * low);
+    // 柔和雲光（遠層較大的亮雲，讓內部有深淺層次）
+    neb += mix(j38NebB, j38NebA, 0.6) * smoothstep(0.55, 0.9, t3.r) * 0.2;
     // 星光：近層較稀疏但清楚、中層細光點、遠層暗
     // 星光：越往下越多（設定圖星塵集中在下半部）；十字閃光已畫在貼圖裡
     float stW = 0.55 + 0.75 * (1.0 - smoothstep(0.1, 0.7, lp.y));
-    float st = (pow(t1.b, 3.0) * 1.5 + pow(t2.b, 2.4) * 0.6 + pow(t3.b, 2.0) * 0.24) * stW;
+    float st = (pow(t1.b, 3.0) * 1.8 + pow(t2.b, 2.4) * 0.6 + pow(t3.b, 2.0) * 0.24) * stW;
     float dust = smoothstep(0.7, 0.94, t2.a) * 0.12;
     float core = smoothstep(0.55, 0.0, length(p2.xz)) * (1.0 - smoothstep(0.1, 0.6, p2.y));
     vec3 inner = neb + vec3(0.88, 0.96, 1.0) * (st + dust) + j38NebA * core * 0.3;
     // 羽翼與細觸角不畫星雲
     float into = (0.35 + 0.65 * jNdV) * (1.0 - jWing) * (1.0 - 0.8 * smoothstep(1.0, 1.1, lp.y));
-    color.rgb += inner * 1.15 * jS * into;
+    color.rgb += inner * 1.3 * jS * into;
     color.a = clamp(color.a + (st * 0.25 + n3 * 0.06) * jS * jNdV * (1.0 - jWing), 0.0, 1.0);
   }
 
@@ -480,10 +507,10 @@ export const JELLY38R_MAIN = `
       gold *= 0.9 + 0.18 * clamp(uv.y / j38Star.x + 0.5, 0.0, 1.0);
       // 光暈兩層：貼著輪廓的細緻亮邊＋往外暈開的柔光（在果凍內部擴散的感覺）
       float dd = max(d, 0.0);
-      float halo = (exp(-dd / 0.01) * 0.5 + exp(-dd / 0.045) * 0.26) * (1.0 - fill) * face;
+      float halo = (exp(-dd / 0.01) * 0.5 + exp(-dd / 0.045) * 0.3 + exp(-dd / 0.1) * 0.14) * (1.0 - fill) * face;
       // 星星隔著一層果凍：保留一點果凍本色，內部星光仍疊在上面
       color.rgb = mix(color.rgb, gold * vec3(0.96, 0.96, 1.0), fill * 0.92);
-      color.rgb += vec3(1.0, 0.78, 0.3) * halo * 0.55;
+      color.rgb += vec3(1.0, 0.84, 0.4) * halo * 0.75;
       color.a = max(color.a, fill * 0.94);
       color.a = clamp(color.a + halo * 0.14, 0.0, 1.0);
     }
@@ -512,7 +539,7 @@ export const JELLY38R_MAIN = `
   irid = mix(irid, vec3(0.75, 0.9, 1.0), 0.4);
   color.rgb += irid * irB * 0.22 * j38Glass.z * jS;
   // 羽翼：外緣柔和白色高光＋細的水晶光澤
-  color.rgb += vec3(0.9, 0.97, 1.0) * pow(1.0 - jNdV, 1.6) * jWing * 0.5 * jS;
+  color.rgb += vec3(0.9, 0.97, 1.0) * pow(1.0 - jNdV, 1.6) * jWing * 0.75 * jS;
   // 天空反射（很淡，讓上半部有一點環境色）
   vec3 jR = reflect(-jV, jN);
   color.rgb += mix(j38SkyLow, j38SkyHigh, clamp(jR.y * 0.5 + 0.5, 0.0, 1.0)) * jFres * 0.1 * jS;

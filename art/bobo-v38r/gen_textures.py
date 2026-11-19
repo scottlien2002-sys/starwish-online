@@ -50,7 +50,8 @@ def eye_cell(kind):
         for i in range(40):
             t = i / 39
             # V3.1：上方更深邃的靛藍 → 中段寶藍 → 下方亮青
-            col = (int(12 + 50 * t), int(22 + 190 * t * t + 10 * t), int(105 + 150 * t), 255)
+            # V3.8R 最終優化（依設定圖）：上方深海軍藍 → 中段寶藍 → 下方明亮青藍，漸層更平滑
+            col = (int(10 + 40 * t * t), int(20 + 70 * t + 140 * t * t), int(90 + 165 * t), 255)
             k = 1 - 0.55 * t
             ellipse((cx, icy + iry * 0.32 * t), (irx * k, iry * k), col)
         # 虹膜外環（深一點，增加立體感）
@@ -65,7 +66,7 @@ def eye_cell(kind):
             r1 = 0.88 if k % 2 == 0 else 0.72
             x0, y0 = cx + math.cos(a) * irx * r0, icy + math.sin(a) * iry * r0
             x1, y1 = cx + math.cos(a) * irx * r1, icy + math.sin(a) * iry * r1
-            col = (140, 220, 255, 90) if k % 2 == 0 else (10, 20, 90, 60)
+            col = (140, 220, 255, 34) if k % 2 == 0 else (10, 20, 90, 26)  # 放射紋變淡（設定圖是平滑漸層）
             d.line([(x0, y0), (x1, y1)], fill=col, width=int(2 * S))
         # 瞳孔：外圈深藍光環 → 黑色核心（明確層次）
         ellipse((cx, icy + iry * 0.02), (rx * 0.44 * pupil_scale, ry * 0.44 * pupil_scale), (20, 30, 110, 255))
@@ -85,6 +86,14 @@ def eye_cell(kind):
         glow = glow.filter(ImageFilter.GaussianBlur(6 * S))
         im.paste(Image.alpha_composite(im, glow), (0, 0), mask)
         d2 = ImageDraw.Draw(im)
+        # 高光外圈柔光（像設定圖：大高光周圍有一點霧白）
+        soft = Image.new("RGBA", im.size, (0, 0, 0, 0))
+        ImageDraw.Draw(soft).ellipse([cx + rx * 0.3 - rx * 0.5, cy - ry * 0.4 - ry * 0.4, cx + rx * 0.3 + rx * 0.5, cy - ry * 0.4 + ry * 0.4], fill=(220, 240, 255, 90))
+        soft = soft.filter(ImageFilter.GaussianBlur(9 * S))
+        im.paste(Image.alpha_composite(im, soft), (0, 0), mask)
+        d2 = ImageDraw.Draw(im)
+        # 下方弧形反光（角膜反射的細月牙）
+        d2.arc([cx - rx * 0.62, cy + ry * 0.05, cx + rx * 0.62, cy + ry * 0.82], start=25, end=155, fill=(190, 245, 255, 170), width=int(5 * S))
         # 高光：右上大、左下小、加閃點
         d2.ellipse([cx + rx * 0.3 - rx * 0.34, cy - ry * 0.4 - ry * 0.28, cx + rx * 0.3 + rx * 0.34, cy - ry * 0.4 + ry * 0.28], fill=(255, 255, 255, 255))
         d2.ellipse([cx - rx * 0.36 - rx * 0.16, cy + ry * 0.38 - ry * 0.13, cx - rx * 0.36 + rx * 0.16, cy + ry * 0.38 + ry * 0.13], fill=(255, 255, 255, 240))
