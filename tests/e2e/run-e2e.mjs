@@ -380,7 +380,9 @@ for (const name of browsers) {
 
   // ---- 星露啵啵 V3 模型預覽（?lab=bobo3）：只檢查外觀頁可正常運作，不涉及戰鬥 ----
   // V3（對照基準）與 V3.1（美術精修）都檢查
-  for (const labName of ["bobo3", "bobo31", "bobo32", "bobo33", "bobo34"])
+  // 3 隻同場的 Draw Calls（同一瀏覽器、同一畫面大小），用來確認 V3.5 不高於 V3.4
+  const drawCalls3 = {};
+  for (const labName of ["bobo3", "bobo31", "bobo32", "bobo33", "bobo34", "bobo35"])
   for (const vp of VIEWPORTS) {
     const run = { browser: name, viewport: `${vp.name} / ?lab=${labName}`, checks: {}, errors: [] };
     const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
@@ -410,7 +412,7 @@ for (const name of browsers) {
       const perf = await page.evaluate(() => window.__bobo3.perf());
       check("8 種表情、三視圖、3 隻同場可切換且無錯誤", run.errors.length === 0, perf);
       check("果凍材質著色器正常（中／高畫質）", perf.quality === "low" || perf.jelly === true, perf);
-      check("載入的是正確版本", perf.variant === { bobo3: "v3", bobo31: "v31", bobo32: "v32", bobo33: "v33", bobo34: "v34" }[labName], perf.variant);
+      check("載入的是正確版本", perf.variant === { bobo3: "v3", bobo31: "v31", bobo32: "v32", bobo33: "v33", bobo34: "v34", bobo35: "v35" }[labName], perf.variant);
       if (labName === "bobo33") {
         // 必須真的載入 V3.3 模型檔，且腹部星星來自模型資料（V3.2 外徑 0.084 × 0.85 = 0.0714）
         check(
@@ -418,6 +420,22 @@ for (const name of browsers) {
           /^bobo_v33_(high|medium|low)\.glb$/.test(perf.file) && perf.bellyStarVersion === "3.3" && Math.abs(perf.bellyStar?.outer - 0.0714) < 1e-6,
           { file: perf.file, star: perf.bellyStar, v: perf.bellyStarVersion },
         );
+      }
+      drawCalls3[`${labName}|${vp.name}`] = perf.drawCalls;
+      if (labName === "bobo35") {
+        check(
+          "V3.5：載入 bobo_v35 模型，腹部星星維持 0.0714",
+          /^bobo_v35_(high|medium|low)\.glb$/.test(perf.file) && Math.abs(perf.bellyStar?.outer - 0.0714) < 1e-6,
+          { file: perf.file, star: perf.bellyStar },
+        );
+        check("V3.5：不使用陰影貼圖與 GlowLayer（改用接觸陰影與星星光暈）", perf.shadowMap === false && perf.glowLayer === false, perf);
+        const d34 = drawCalls3[`bobo34|${vp.name}`];
+        check("V3.5：3 隻同場 Draw Calls 不高於 V3.4", typeof d34 === "number" && perf.drawCalls <= d34, { v35: perf.drawCalls, v34: d34 });
+        if (vp === VIEWPORTS[0]) {
+          const rows = await page.evaluate(() => window.__bobo3.costAnalysis(1));
+          await page.evaluate(() => document.querySelector(".v3-bench-result") && (document.querySelector(".v3-bench-result").hidden = true));
+          check("成本分析：6 項都有結果", rows.length === 6 && rows.every((r) => r.avg > 0), rows);
+        }
       }
       if (labName === "bobo34") {
         // V3.4 必須載入自己的模型檔，腹部星星固定 V3.3 尺寸 0.0714（不得放大）
@@ -455,7 +473,7 @@ for (const name of browsers) {
       if (vp === VIEWPORTS[0]) {
         await page.evaluate(() => document.querySelector(".v3-bench").click());
         const r = await page.waitForFunction(() => !document.querySelector(".v3-bench-result").hidden, null, { timeout: 120000 }).then(() => page.evaluate(() => document.querySelector(".v3-bench-result").innerText)).catch(() => null);
-        check("點擊效能測試：10 秒後顯示平均／最慢 1%／最低 FPS 與 Draw Calls", !!r && /平均/.test(r) && /最慢 1%/.test(r) && /最低/.test(r) && /Draw Calls/.test(r) && /3 隻/.test(r) && (labName === "bobo3" || (labName === "bobo34" ? /bobo_v34_/.test(r) : labName === "bobo33" ? /bobo_v33_/.test(r) : /bobo_v31_/.test(r))), r);
+        check("點擊效能測試：10 秒後顯示平均／最慢 1%／最低 FPS 與 Draw Calls", !!r && /平均/.test(r) && /最慢 1%/.test(r) && /最低/.test(r) && /Draw Calls/.test(r) && /3 隻/.test(r) && (labName === "bobo3" || (labName === "bobo35" ? /bobo_v35_/.test(r) : labName === "bobo34" ? /bobo_v34_/.test(r) : labName === "bobo33" ? /bobo_v33_/.test(r) : /bobo_v31_/.test(r))), r);
       }
     } catch (e) {
       run.errors.push(`exception: ${e.message}`);

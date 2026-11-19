@@ -84,7 +84,12 @@ jobs:
               for q in high medium low; do node cur/tests/e2e/snap-bobo3.mjs cur/dist out/bobo32_$q webkit $q bobo32 || true; done
               for l in bobo31 bobo32; do CLOSE_ONLY=1 node cur/tests/e2e/snap-bobo3.mjs cur/dist out/close_$l chromium high $l || true; done
             fi
-            if grep -q "bobo34" cur/src/main.ts; then
+            if grep -q "bobo35" cur/src/main.ts; then
+              # V3.4／V3.5 對照（Chromium 高畫質，同鏡頭同光照）＋ V3.5 WebKit 三種畫質
+              for l in bobo34 bobo35; do node cur/tests/e2e/snap-bobo3.mjs cur/dist out/chr_$l chromium high $l || true; done
+              for l in bobo34 bobo35; do CLOSE_ONLY=1 node cur/tests/e2e/snap-bobo3.mjs cur/dist out/close_$l chromium high $l || true; done
+              for q in high medium low; do node cur/tests/e2e/snap-bobo3.mjs cur/dist out/bobo35_$q webkit $q bobo35 || true; done
+            elif grep -q "bobo34" cur/src/main.ts; then
               # V3.3／V3.4 對照（Chromium 高畫質，同鏡頭同光照）＋ V3.4 WebKit 三種畫質
               for l in bobo33 bobo34; do node cur/tests/e2e/snap-bobo3.mjs cur/dist out/chr_$l chromium high $l || true; done
               for l in bobo33 bobo34; do CLOSE_ONLY=1 node cur/tests/e2e/snap-bobo3.mjs cur/dist out/close_$l chromium high $l || true; done
@@ -109,6 +114,7 @@ jobs:
             feature/render-bobo-v32) CB=compare-bobo-v32 ;;
             feature/render-bobo-v33) CB=compare-bobo-v33 ;;
             feature/render-bobo-v34) CB=compare-bobo-v34 ;;
+            feature/render-bobo-v35) CB=compare-bobo-v35 ;;
             *) CB=compare ;;
           esac
           echo "比較圖分支：$CB"
