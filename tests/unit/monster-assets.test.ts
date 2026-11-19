@@ -5,6 +5,7 @@ import { checkLodBudgets, lodFileName, rootNodeName, TRIANGLE_BUDGET, validateAs
 import { formatCostRows, runCostSteps } from "../../src/render/costAnalysis.ts";
 import { BOBO_V36_SPEC } from "../../src/monsters/star-dew-bobo-v36/spec.ts";
 import { BOBO_V37_SPEC } from "../../src/monsters/star-dew-bobo-v37/spec.ts";
+import { BOBO_V38_SPEC } from "../../src/monsters/star-dew-bobo-v38/spec.ts";
 
 test("命名規範：檔名與根節點", () => {
   assert.equal(lodFileName(BOBO_V36_SPEC, "high"), "bobo_v36_high.glb");
@@ -14,6 +15,7 @@ test("命名規範：檔名與根節點", () => {
 test("星露啵啵 V3.6／V3.7 規範本身通過檢查", () => {
   assert.deepEqual(validateAssetSpec(BOBO_V36_SPEC), []);
   assert.deepEqual(validateAssetSpec(BOBO_V37_SPEC), []);
+  assert.deepEqual(validateAssetSpec(BOBO_V38_SPEC), []);
   assert.equal(lodFileName(BOBO_V37_SPEC, "medium"), "bobo_v37_medium.glb");
 });
 

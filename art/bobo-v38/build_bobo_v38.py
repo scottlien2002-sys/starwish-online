@@ -373,7 +373,8 @@ def build():
     # 星星：頭頂（觸角末端，朝左前方斜 45° 讓正面與側面都看得到）＋ 腹部（嵌在果凍表面下）
     hs = S.HEAD_STAR
     # V3.8：角較圓胖（sharp 1.6 → 1.0）、網格加密（側面輪廓圓滑）
-    head = soft_star_mesh("HeadStar", hs["outer"], hs["inner"], hs["depth"], segments=60, rings=6, sharp=1.0)
+    # 48 段 × 5 圈 ≈ 860 三角形（60×6 會讓低畫質超過一般怪 4,500 預算）
+    head = soft_star_mesh("HeadStar", hs["outer"], hs["inner"], hs["depth"], segments=48, rings=5, sharp=1.0)
     head.location = hs["center"]
     head.rotation_euler = (0.0, 0.0, math.radians(35))
     bs = S.BELLY_STAR

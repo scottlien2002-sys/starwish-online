@@ -36,19 +36,22 @@ import { createJellyNoiseTextureV36, JellyV36Plugin } from "../monsters/star-dew
 import { BOBO_V36_SPEC } from "../monsters/star-dew-bobo-v36/spec.ts";
 import { createGlassMatcapV37, createJellyNoiseTextureV37, JellyV37Plugin } from "../monsters/star-dew-bobo-v37/JellyV37Plugin.ts";
 import { BOBO_V37_SPEC } from "../monsters/star-dew-bobo-v37/spec.ts";
+import { createGlassMatcapV38, createJellyNoiseTextureV38, JellyV38Plugin } from "../monsters/star-dew-bobo-v38/JellyV38Plugin.ts";
+import { BOBO_V38_SPEC } from "../monsters/star-dew-bobo-v38/spec.ts";
 import { ExpressionAtlasController, loadMonsterAsset, type MonsterAssetHandle } from "../monsters/babylon/loadMonsterAsset.ts";
 import { formatCostRows, runCostSteps, type CostStep } from "../render/costAnalysis.ts";
 
 /** v3 = 第一版（材質與模型保持不變，作為對照基準）；v31 = V3.1 美術精修 */
-export type BoboLabVariant = "v3" | "v31" | "v32" | "v33" | "v34" | "v35" | "v36" | "v37";
-type Jelly = JellyV3Plugin | JellyV31Plugin | JellyV32Plugin | JellyV34Plugin | JellyV35Plugin | JellyV36Plugin | JellyV37Plugin;
-type StarJelly = JellyV32Plugin | JellyV34Plugin | JellyV35Plugin | JellyV36Plugin | JellyV37Plugin;
+export type BoboLabVariant = "v3" | "v31" | "v32" | "v33" | "v34" | "v35" | "v36" | "v37" | "v38";
+type Jelly = JellyV3Plugin | JellyV31Plugin | JellyV32Plugin | JellyV34Plugin | JellyV35Plugin | JellyV36Plugin | JellyV37Plugin | JellyV38Plugin;
+type StarJelly = JellyV32Plugin | JellyV34Plugin | JellyV35Plugin | JellyV36Plugin | JellyV37Plugin | JellyV38Plugin;
 const isStarJelly = (j: unknown): j is StarJelly =>
   j instanceof JellyV32Plugin ||
   j instanceof JellyV34Plugin ||
   j instanceof JellyV35Plugin ||
   j instanceof JellyV36Plugin ||
-  j instanceof JellyV37Plugin;
+  j instanceof JellyV37Plugin ||
+  j instanceof JellyV38Plugin;
 const VARIANT_LAB: Record<BoboLabVariant, string> = {
   v3: "bobo3",
   v31: "bobo31",
@@ -58,9 +61,20 @@ const VARIANT_LAB: Record<BoboLabVariant, string> = {
   v35: "bobo35",
   v36: "bobo36",
   v37: "bobo37",
+  v38: "bobo38",
 };
-const VARIANT_LABEL: Record<BoboLabVariant, string> = { v3: "V3", v31: "V3.1", v32: "V3.2", v33: "V3.3", v34: "V3.4", v35: "V3.5", v36: "V3.6", v37: "V3.7" };
-// 頁面切換按鈕：V3.6 ↔ V3.7（目前驗收的兩版）；更早的版本仍可用網址 ?lab= 開啟
+const VARIANT_LABEL: Record<BoboLabVariant, string> = {
+  v3: "V3",
+  v31: "V3.1",
+  v32: "V3.2",
+  v33: "V3.3",
+  v34: "V3.4",
+  v35: "V3.5",
+  v36: "V3.6",
+  v37: "V3.7",
+  v38: "V3.8",
+};
+// 頁面切換按鈕：V3.7 ↔ V3.8（目前驗收的兩版）；更早的版本仍可用網址 ?lab= 開啟
 const VARIANT_NEXT: Record<BoboLabVariant, BoboLabVariant> = {
   v3: "v31",
   v31: "v32",
@@ -69,7 +83,8 @@ const VARIANT_NEXT: Record<BoboLabVariant, BoboLabVariant> = {
   v34: "v35",
   v35: "v36",
   v36: "v37",
-  v37: "v36",
+  v37: "v38",
+  v38: "v37",
 };
 
 /** V3.3 起：腹部星星的定義寫在模型檔（根節點 extras.bellyStar），由頁面讀取後交給果凍著色器繪製 */
@@ -182,9 +197,9 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
    * - 不用 GlowLayer（省掉發光貼圖與兩次全畫面模糊），頭頂星星改用光暈貼片（3 隻共 1 次繪製）；腹部星星光暈本來就在果凍著色器裡
    */
   // V3.5 的繪製方式（接觸陰影＋光暈貼片，不用陰影貼圖與 GlowLayer）V3.6 沿用
-  const v35 = variant === "v35" || variant === "v36" || variant === "v37";
+  const v35 = variant === "v35" || variant === "v36" || variant === "v37" || variant === "v38";
   /** V3.6 起改用共用模組：loadMonsterAsset（載入／釋放）、ExpressionAtlasController（表情） */
-  const assetSpec = variant === "v37" ? BOBO_V37_SPEC : variant === "v36" ? BOBO_V36_SPEC : null;
+  const assetSpec = variant === "v38" ? BOBO_V38_SPEC : variant === "v37" ? BOBO_V37_SPEC : variant === "v36" ? BOBO_V36_SPEC : null;
   const v36 = !!assetSpec;
   const label = VARIANT_LABEL[variant];
   const quality = pickQuality();
@@ -251,7 +266,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
         scene,
         container.materials as PBRMaterial[],
         quality.level !== "low",
-        variant === "v37" ? "v37" : variant === "v36" ? "v36" : variant === "v35" ? "v35" : variant === "v34" ? "v34" : variant === "v32" || variant === "v33" ? "v32" : "v31",
+        variant === "v38" ? "v38" : variant === "v37" ? "v37" : variant === "v36" ? "v36" : variant === "v35" ? "v35" : variant === "v34" ? "v34" : variant === "v32" || variant === "v33" ? "v32" : "v31",
       )
     : createMaterials(scene, container.materials as PBRMaterial[], quality.level !== "low");
   const instances: BoboV3Instance[] = [];
@@ -610,7 +625,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     for (const it of instances) {
       if (it.jelly) it.body.getWorldMatrix().invertToRef(it.jelly.invWorld);
       // 視角矩陣取自鏡頭（scene.getViewMatrix() 在第一次 render 之前是空的）
-      if (it.jelly instanceof JellyV37Plugin) it.jelly.view.copyFrom(camera.getViewMatrix());
+      if (it.jelly instanceof JellyV37Plugin || it.jelly instanceof JellyV38Plugin) it.jelly.view.copyFrom(camera.getViewMatrix());
     }
     scene.render();
     perf.update(dt);
@@ -766,7 +781,7 @@ function createMaterialsV31(
   scene: Scene,
   gltfMats: PBRMaterial[],
   fullJelly: boolean,
-  jellyVersion: "v31" | "v32" | "v34" | "v35" | "v36" | "v37" = "v31",
+  jellyVersion: "v31" | "v32" | "v34" | "v35" | "v36" | "v37" | "v38" = "v31",
 ) {
   const tex = (name: string): BaseTexture | null => gltfMats.find((m) => m.name === name)?.albedoTexture ?? null;
   const eyeTex = tex("Bobo_Eyes");
@@ -804,7 +819,14 @@ function createMaterialsV31(
   stars.emissiveColor = new Color3(1.0, 0.96, 0.62);
   // V3.5：頭頂星星偏檸檬黃（模型頂點色邊緣是暖金，提高綠色讓整體不偏橘）；V3.4 以前不變
   if (jellyVersion === "v35") stars.emissiveColor = new Color3(1.0, 1.1, 0.8);
-  if (jellyVersion === "v36" || jellyVersion === "v37") {
+  if (jellyVersion === "v38") {
+    // V3.8：飽滿的檸檬金黃水晶星（模型頂點色：中央亮黃 → 邊緣暖金）；較明顯的水晶光澤
+    stars.disableLighting = false;
+    stars.emissiveColor = new Color3(0.9, 0.9, 0.84);
+    stars.diffuseColor = new Color3(0.14, 0.14, 0.12);
+    stars.specularColor = new Color3(0.75, 0.75, 0.68);
+    stars.specularPower = 28;
+  } else if (jellyVersion === "v36" || jellyVersion === "v37") {
     // V3.6：模型頂點色已改為檸檬金黃（中央亮黃 → 邊緣暖金）；開啟受光只為了柔和的水晶光澤（高光不乘頂點色 → 白色光澤）
     stars.disableLighting = false;
     stars.emissiveColor = new Color3(0.92, 0.92, 0.86);
@@ -814,9 +836,11 @@ function createMaterialsV31(
   }
   stars.backFaceCulling = false;
 
-  const matcap = jellyVersion === "v37" ? createGlassMatcapV37(scene) : null;
+  const matcap = jellyVersion === "v38" ? createGlassMatcapV38(scene) : jellyVersion === "v37" ? createGlassMatcapV37(scene) : null;
   const noise =
-    jellyVersion === "v37"
+    jellyVersion === "v38"
+      ? createJellyNoiseTextureV38(scene)
+      : jellyVersion === "v37"
       ? createJellyNoiseTextureV37(scene)
       : jellyVersion === "v36"
       ? createJellyNoiseTextureV36(scene)
@@ -837,7 +861,9 @@ function createMaterialsV31(
     m.useSpecularOverAlpha = false;
     m.backFaceCulling = true;
     const jelly =
-      jellyVersion === "v37"
+      jellyVersion === "v38"
+        ? new JellyV38Plugin(m, noise, matcap!)
+        : jellyVersion === "v37"
         ? new JellyV37Plugin(m, noise, matcap!)
         : jellyVersion === "v36"
         ? new JellyV36Plugin(m, noise)
