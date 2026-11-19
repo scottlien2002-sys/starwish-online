@@ -46,10 +46,20 @@ function main(): void {
     // ?lab=bobo34：V3.4（羽翼＋星雲精修；模型檔 bobo_v34_*.glb）
     // ?lab=bobo35：V3.5（羽翼、色彩對比、效能；模型檔 bobo_v35_*.glb）
     // ?lab=bobo36：V3.6（美術強化；使用共用怪物資源模組；模型檔 bobo_v36_*.glb）
-    if (lab === "bobo3" || lab === "bobo31" || lab === "bobo32" || lab === "bobo33" || lab === "bobo34" || lab === "bobo35" || lab === "bobo36") {
+    // ?lab=bobo37：V3.7（玻璃果凍材質；設定圖對照模式 &ref=1；模型檔 bobo_v37_*.glb，幾何同 V3.6）
+    if (
+      lab === "bobo3" ||
+      lab === "bobo31" ||
+      lab === "bobo32" ||
+      lab === "bobo33" ||
+      lab === "bobo34" ||
+      lab === "bobo35" ||
+      lab === "bobo36" ||
+      lab === "bobo37"
+    ) {
       document.body.classList.add("lab-mode");
       void import("./lab/BoboV3Lab.ts")
-        .then((m) => m.startBoboV3Lab(canvas, hudRoot, lab === "bobo36" ? "v36" : lab === "bobo35" ? "v35" : lab === "bobo34" ? "v34" : lab === "bobo33" ? "v33" : lab === "bobo32" ? "v32" : lab === "bobo31" ? "v31" : "v3"))
+        .then((m) => m.startBoboV3Lab(canvas, hudRoot, lab === "bobo37" ? "v37" : lab === "bobo36" ? "v36" : lab === "bobo35" ? "v35" : lab === "bobo34" ? "v34" : lab === "bobo33" ? "v33" : lab === "bobo32" ? "v32" : lab === "bobo31" ? "v31" : "v3"))
         .then(() => hideBoot())
         .catch((err: unknown) => {
           console.error(err);

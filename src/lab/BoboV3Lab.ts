@@ -2,6 +2,7 @@ import "@babylonjs/loaders/glTF";
 import {
   type AbstractMesh,
   ArcRotateCamera,
+  Color4,
   type BaseTexture,
   Color3,
   Constants,
@@ -33,19 +34,43 @@ import { createJellyNoiseTextureV34, JellyV34Plugin } from "../monsters/star-dew
 import { createJellyNoiseTextureV35, JellyV35Plugin } from "../monsters/star-dew-bobo-v35/JellyV35Plugin.ts";
 import { createJellyNoiseTextureV36, JellyV36Plugin } from "../monsters/star-dew-bobo-v36/JellyV36Plugin.ts";
 import { BOBO_V36_SPEC } from "../monsters/star-dew-bobo-v36/spec.ts";
+import { createGlassMatcapV37, createJellyNoiseTextureV37, JellyV37Plugin } from "../monsters/star-dew-bobo-v37/JellyV37Plugin.ts";
+import { BOBO_V37_SPEC } from "../monsters/star-dew-bobo-v37/spec.ts";
 import { ExpressionAtlasController, loadMonsterAsset, type MonsterAssetHandle } from "../monsters/babylon/loadMonsterAsset.ts";
 import { formatCostRows, runCostSteps, type CostStep } from "../render/costAnalysis.ts";
 
 /** v3 = 第一版（材質與模型保持不變，作為對照基準）；v31 = V3.1 美術精修 */
-export type BoboLabVariant = "v3" | "v31" | "v32" | "v33" | "v34" | "v35" | "v36";
-type Jelly = JellyV3Plugin | JellyV31Plugin | JellyV32Plugin | JellyV34Plugin | JellyV35Plugin | JellyV36Plugin;
-type StarJelly = JellyV32Plugin | JellyV34Plugin | JellyV35Plugin | JellyV36Plugin;
+export type BoboLabVariant = "v3" | "v31" | "v32" | "v33" | "v34" | "v35" | "v36" | "v37";
+type Jelly = JellyV3Plugin | JellyV31Plugin | JellyV32Plugin | JellyV34Plugin | JellyV35Plugin | JellyV36Plugin | JellyV37Plugin;
+type StarJelly = JellyV32Plugin | JellyV34Plugin | JellyV35Plugin | JellyV36Plugin | JellyV37Plugin;
 const isStarJelly = (j: unknown): j is StarJelly =>
-  j instanceof JellyV32Plugin || j instanceof JellyV34Plugin || j instanceof JellyV35Plugin || j instanceof JellyV36Plugin;
-const VARIANT_LAB: Record<BoboLabVariant, string> = { v3: "bobo3", v31: "bobo31", v32: "bobo32", v33: "bobo33", v34: "bobo34", v35: "bobo35", v36: "bobo36" };
-const VARIANT_LABEL: Record<BoboLabVariant, string> = { v3: "V3", v31: "V3.1", v32: "V3.2", v33: "V3.3", v34: "V3.4", v35: "V3.5", v36: "V3.6" };
-// 頁面切換按鈕：V3.5 ↔ V3.6（目前驗收的兩版）；更早的版本仍可用網址 ?lab= 開啟
-const VARIANT_NEXT: Record<BoboLabVariant, BoboLabVariant> = { v3: "v31", v31: "v32", v32: "v33", v33: "v34", v34: "v35", v35: "v36", v36: "v35" };
+  j instanceof JellyV32Plugin ||
+  j instanceof JellyV34Plugin ||
+  j instanceof JellyV35Plugin ||
+  j instanceof JellyV36Plugin ||
+  j instanceof JellyV37Plugin;
+const VARIANT_LAB: Record<BoboLabVariant, string> = {
+  v3: "bobo3",
+  v31: "bobo31",
+  v32: "bobo32",
+  v33: "bobo33",
+  v34: "bobo34",
+  v35: "bobo35",
+  v36: "bobo36",
+  v37: "bobo37",
+};
+const VARIANT_LABEL: Record<BoboLabVariant, string> = { v3: "V3", v31: "V3.1", v32: "V3.2", v33: "V3.3", v34: "V3.4", v35: "V3.5", v36: "V3.6", v37: "V3.7" };
+// 頁面切換按鈕：V3.6 ↔ V3.7（目前驗收的兩版）；更早的版本仍可用網址 ?lab= 開啟
+const VARIANT_NEXT: Record<BoboLabVariant, BoboLabVariant> = {
+  v3: "v31",
+  v31: "v32",
+  v32: "v33",
+  v33: "v34",
+  v34: "v35",
+  v35: "v36",
+  v36: "v37",
+  v37: "v36",
+};
 
 /** V3.3 起：腹部星星的定義寫在模型檔（根節點 extras.bellyStar），由頁面讀取後交給果凍著色器繪製 */
 interface BellyStarDef {
@@ -101,6 +126,8 @@ export interface BoboV3DebugApi {
   setCount(n: 1 | 3): void;
   /** 近距離（截圖對照用） */
   setClose(on: boolean): void;
+  /** 設定圖對照模式（平視、深藍灰背景）；只用於美術比對 */
+  setRefMode(on: boolean): void;
   info(): BoboV3Info;
   /** 第一隻的眼睛 UV 第一個座標（測試表情是否真的切換） */
   eyeUV0(): [number, number];
@@ -117,6 +144,7 @@ export interface BoboV3DebugApi {
     bellyStarVersion: string | null;
     shadowMap: boolean;
     glowLayer: boolean;
+    refMode: boolean;
   };
   costAnalysis(seconds?: number): Promise<{ name: string; avg: number; low1: number; draws: number }[]>;
   releaseModels(): { before: number; after: number } | null;
@@ -154,14 +182,15 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
    * - 不用 GlowLayer（省掉發光貼圖與兩次全畫面模糊），頭頂星星改用光暈貼片（3 隻共 1 次繪製）；腹部星星光暈本來就在果凍著色器裡
    */
   // V3.5 的繪製方式（接觸陰影＋光暈貼片，不用陰影貼圖與 GlowLayer）V3.6 沿用
-  const v35 = variant === "v35" || variant === "v36";
+  const v35 = variant === "v35" || variant === "v36" || variant === "v37";
   /** V3.6 起改用共用模組：loadMonsterAsset（載入／釋放）、ExpressionAtlasController（表情） */
-  const v36 = variant === "v36";
+  const assetSpec = variant === "v37" ? BOBO_V37_SPEC : variant === "v36" ? BOBO_V36_SPEC : null;
+  const v36 = !!assetSpec;
   const label = VARIANT_LABEL[variant];
   const quality = pickQuality();
   const engine = createEngine(canvas, quality);
   const scene = new Scene(engine);
-  createSkyDome(scene);
+  const skyDome = createSkyDome(scene);
   scene.skipPointerMovePicking = true;
 
   const hemi = new HemisphericLight("sky", new Vector3(0.2, 1, 0.3), scene);
@@ -195,7 +224,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
   const base = import.meta.env.BASE_URL;
   // V3.3 載入自己的模型檔（含 V3.3 腹部星星定義）；V3.1／V3.2 共用 V3.1 模型；V3 用 V3 模型
   let assetHandle: MonsterAssetHandle | null = null;
-  if (v36) assetHandle = await loadMonsterAsset(scene, `${base}models/`, BOBO_V36_SPEC, quality.level);
+  if (assetSpec) assetHandle = await loadMonsterAsset(scene, `${base}models/`, assetSpec, quality.level);
   const file = assetHandle
     ? assetHandle.file
     : variant === "v35"
@@ -222,7 +251,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
         scene,
         container.materials as PBRMaterial[],
         quality.level !== "low",
-        v36 ? "v36" : variant === "v35" ? "v35" : variant === "v34" ? "v34" : variant === "v32" || variant === "v33" ? "v32" : "v31",
+        variant === "v37" ? "v37" : variant === "v36" ? "v36" : variant === "v35" ? "v35" : variant === "v34" ? "v34" : variant === "v32" || variant === "v33" ? "v32" : "v31",
       )
     : createMaterials(scene, container.materials as PBRMaterial[], quality.level !== "low");
   const instances: BoboV3Instance[] = [];
@@ -277,7 +306,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
       m.receiveShadows = !v35 && m === body;
     }
     // V3.6：共用表情控制器（改 UV）；V3.5 以前保持原本寫法
-    const expr = assetInst && BOBO_V36_SPEC.expressions ? new ExpressionAtlasController(BOBO_V36_SPEC.expressions, assetInst) : null;
+    const expr = assetInst && assetSpec?.expressions ? new ExpressionAtlasController(assetSpec.expressions, assetInst) : null;
     let eyeUV = new Float32Array(0);
     let mouthUV = new Float32Array(0);
     if (!expr) {
@@ -408,6 +437,23 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     for (const b of exprButtons) b.classList.toggle("active", b.dataset.expr === e);
   };
 
+  // ---------- 設定圖對照模式（只用於美術比對；效能測試一律用一般遊戲鏡頭） ----------
+  // 設定圖：平視、略仰視，深藍灰面板背景，腳下深色柔和陰影
+  let refMode = false;
+  const clear0 = scene.clearColor.clone();
+  const fogMode0 = scene.fogMode;
+  const setRefMode = (on: boolean): void => {
+    refMode = on;
+    skyDome.setEnabled(!on);
+    ground.setEnabled(!on);
+    scene.clearColor = on ? new Color4(0.2, 0.22, 0.34, 1) : clear0;
+    scene.fogMode = on ? 0 : fogMode0;
+    camera.beta = on ? 1.5 : 1.3;
+    camera.target.y = on ? 0.42 : 0.5;
+    camera.radius = on ? 2.7 : instances.filter((i) => i.root.isEnabled()).length === 3 ? 4.6 : 2.6;
+    for (const b of uiRoot.querySelectorAll<HTMLButtonElement>(".v3-ref")) b.classList.toggle("active", on);
+  };
+
   const setCount = (n: 1 | 3): void => {
     while (instances.length < n) {
       const k = instances.length;
@@ -435,6 +481,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
       <button class="lab-view-btn" data-count="1" data-layout="btn-count-1">1 隻</button>
       <button class="lab-view-btn" data-count="3" data-layout="btn-count-3">3 隻</button>
       <button class="lab-view-btn v3-switch" data-layout="btn-switch">看 ${VARIANT_LABEL[VARIANT_NEXT[variant]]}</button>
+      <button class="lab-view-btn v3-ref" data-layout="btn-ref">設定圖對照</button>
     </div>
     <button class="v3-bench lab-bench" data-layout="btn-bench">⏱ 效能測試（10 秒）</button>
     <button class="lab-view-btn v3-cost" data-layout="btn-cost">🔍 成本分析（約 35 秒）</button>
@@ -450,6 +497,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
   const fpsEl = uiRoot.querySelector<HTMLDivElement>(".lab-fps")!;
   const benchBtn = uiRoot.querySelector<HTMLButtonElement>(".lab-bench")!;
   const benchEl = uiRoot.querySelector<HTMLDivElement>(".lab-bench-result")!;
+  uiRoot.querySelector<HTMLButtonElement>(".v3-ref")!.addEventListener("click", () => setRefMode(!refMode));
   // V3 ↔ V3.1 切換：保留畫質等其他網址參數，同裝置、同條件比較
   uiRoot.querySelector<HTMLButtonElement>(".v3-switch")!.addEventListener("click", () => {
     const u = new URL(location.href);
@@ -478,6 +526,8 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
   const runBenchmark = (seconds = 10): Promise<BenchmarkSummary> =>
     new Promise((resolve) => {
       if (bench) return;
+      // 效能測試一律用一般遊戲鏡頭與場景（對照模式只用於美術比對）
+      if (refMode) setRefMode(false);
       benchEl.hidden = true;
       benchBtn.classList.add("on");
       bench = { rec: new FrameRecorder(seconds), resolve };
@@ -539,6 +589,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
   // 網址參數：?lab=bobo3&count=3&bench=1 → 載入 3 秒後自動測試（不必點按鈕）
   const params = new URLSearchParams(location.search);
   if (params.get("count") === "3") setCount(3);
+  if (params.get("ref") === "1") setRefMode(true);
   if (params.get("bench") === "1") window.setTimeout(() => void runBenchmark(10), 3000);
 
   let uiTimer = 0;
@@ -557,6 +608,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     }
     for (const it of instances) {
       if (it.jelly) it.body.getWorldMatrix().invertToRef(it.jelly.invWorld);
+      if (it.jelly instanceof JellyV37Plugin) it.jelly.view.copyFrom(scene.getViewMatrix());
     }
     scene.render();
     perf.update(dt);
@@ -597,6 +649,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     setView: (v) => setView(v, true),
     setExpression,
     setCount,
+    setRefMode,
     setClose: (on) => {
       camera.radius = on ? 1.45 : 2.6;
       camera.target.y = on ? 0.36 : 0.5;
@@ -613,6 +666,7 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
         bellyStar: star,
         bellyStarVersion: bellyStar?.version ?? null,
         shadowMap: !!shadows,
+        refMode,
         glowLayer: !!render.glow,
       };
     },
@@ -621,10 +675,11 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     // V3.6：測試共用載入器的資源釋放（釋放後回傳場景中還剩幾個怪物零件與幾何）
     releaseModels: () => {
       if (!assetHandle) return null;
-      const before = scene.meshes.filter((m) => BOBO_V36_SPEC.requiredParts.some((p) => m.name.startsWith(p))).length;
+      const parts = assetHandle.spec.requiredParts;
+      const before = scene.meshes.filter((m) => parts.some((p) => m.name.startsWith(p))).length;
       assetHandle.dispose();
       instances.length = 0;
-      const after = scene.meshes.filter((m) => BOBO_V36_SPEC.requiredParts.some((p) => m.name.startsWith(p))).length;
+      const after = scene.meshes.filter((m) => parts.some((p) => m.name.startsWith(p))).length;
       return { before, after };
     },
     eyeUV0: () => {
@@ -705,7 +760,12 @@ function createMaterials(scene: Scene, gltfMats: PBRMaterial[], useJelly: boolea
  * 嘴／腮紅（與 V3 相同）、頭頂星星（清楚的金黃五角星，柔和不過曝）。
  * 低畫質仍使用外掛（關閉內部星雲），否則會看不到腹部星星。
  */
-function createMaterialsV31(scene: Scene, gltfMats: PBRMaterial[], fullJelly: boolean, jellyVersion: "v31" | "v32" | "v34" | "v35" | "v36" = "v31") {
+function createMaterialsV31(
+  scene: Scene,
+  gltfMats: PBRMaterial[],
+  fullJelly: boolean,
+  jellyVersion: "v31" | "v32" | "v34" | "v35" | "v36" | "v37" = "v31",
+) {
   const tex = (name: string): BaseTexture | null => gltfMats.find((m) => m.name === name)?.albedoTexture ?? null;
   const eyeTex = tex("Bobo_Eyes");
   const faceTex = tex("Bobo_Face");
@@ -742,7 +802,7 @@ function createMaterialsV31(scene: Scene, gltfMats: PBRMaterial[], fullJelly: bo
   stars.emissiveColor = new Color3(1.0, 0.96, 0.62);
   // V3.5：頭頂星星偏檸檬黃（模型頂點色邊緣是暖金，提高綠色讓整體不偏橘）；V3.4 以前不變
   if (jellyVersion === "v35") stars.emissiveColor = new Color3(1.0, 1.1, 0.8);
-  if (jellyVersion === "v36") {
+  if (jellyVersion === "v36" || jellyVersion === "v37") {
     // V3.6：模型頂點色已改為檸檬金黃（中央亮黃 → 邊緣暖金）；開啟受光只為了柔和的水晶光澤（高光不乘頂點色 → 白色光澤）
     stars.disableLighting = false;
     stars.emissiveColor = new Color3(0.92, 0.92, 0.86);
@@ -752,8 +812,11 @@ function createMaterialsV31(scene: Scene, gltfMats: PBRMaterial[], fullJelly: bo
   }
   stars.backFaceCulling = false;
 
+  const matcap = jellyVersion === "v37" ? createGlassMatcapV37(scene) : null;
   const noise =
-    jellyVersion === "v36"
+    jellyVersion === "v37"
+      ? createJellyNoiseTextureV37(scene)
+      : jellyVersion === "v36"
       ? createJellyNoiseTextureV36(scene)
       : jellyVersion === "v35"
       ? createJellyNoiseTextureV35(scene)
@@ -762,7 +825,7 @@ function createMaterialsV31(scene: Scene, gltfMats: PBRMaterial[], fullJelly: bo
       : jellyVersion === "v32"
         ? createJellyNoiseTextureV32(scene)
         : createJellyNoiseTexture(scene);
-  const body = (i: number): { material: StandardMaterial; jelly: JellyV31Plugin | JellyV32Plugin | JellyV34Plugin | JellyV35Plugin | JellyV36Plugin | null } => {
+  const body = (i: number): { material: StandardMaterial; jelly: Exclude<Jelly, JellyV3Plugin> | null } => {
     const m = new StandardMaterial(`BoboV31_Body_${i}`, scene);
     m.diffuseColor = new Color3(0.42, 0.48, 0.95);
     m.emissiveColor = new Color3(0.1, 0.07, 0.4);
@@ -772,7 +835,9 @@ function createMaterialsV31(scene: Scene, gltfMats: PBRMaterial[], fullJelly: bo
     m.useSpecularOverAlpha = false;
     m.backFaceCulling = true;
     const jelly =
-      jellyVersion === "v36"
+      jellyVersion === "v37"
+        ? new JellyV37Plugin(m, noise, matcap!)
+        : jellyVersion === "v36"
         ? new JellyV36Plugin(m, noise)
         : jellyVersion === "v35"
         ? new JellyV35Plugin(m, noise)

@@ -37,6 +37,15 @@ if (ok && closeOnly) {
     await page.evaluate((x) => window.__monsterLab.setView(x), v);
     await shot(`v_${v}`, v);
   }
+  // 設定圖對照模式（有提供 setRefMode 的測試頁）：同樣三個視角，平視＋設定圖背景色
+  if (await page.evaluate(() => typeof window.__monsterLab.setRefMode === "function")) {
+    await page.evaluate(() => window.__monsterLab.setRefMode(true));
+    for (const v of ["front", "side", "back"]) {
+      await page.evaluate((x) => window.__monsterLab.setView(x), v);
+      await shot(`r_${v}`, `對照 ${v}`);
+    }
+    await page.evaluate(() => window.__monsterLab.setRefMode(false));
+  }
   await page.evaluate(() => window.__monsterLab.setView("front"));
   // 正面近距離（腹部星星等細節對照）
   if (await page.evaluate(() => typeof window.__monsterLab.setClose === "function")) {

@@ -4,14 +4,17 @@ import { atlasCell, expressionIndex, offsetUVs } from "../../src/monsters/assets
 import { checkLodBudgets, lodFileName, rootNodeName, TRIANGLE_BUDGET, validateAssetSpec, type MonsterAssetSpec } from "../../src/monsters/assets/spec.ts";
 import { formatCostRows, runCostSteps } from "../../src/render/costAnalysis.ts";
 import { BOBO_V36_SPEC } from "../../src/monsters/star-dew-bobo-v36/spec.ts";
+import { BOBO_V37_SPEC } from "../../src/monsters/star-dew-bobo-v37/spec.ts";
 
 test("命名規範：檔名與根節點", () => {
   assert.equal(lodFileName(BOBO_V36_SPEC, "high"), "bobo_v36_high.glb");
   assert.equal(rootNodeName(BOBO_V36_SPEC, "low"), "StarDewBoboV36_low");
 });
 
-test("星露啵啵 V3.6 規範本身通過檢查", () => {
+test("星露啵啵 V3.6／V3.7 規範本身通過檢查", () => {
   assert.deepEqual(validateAssetSpec(BOBO_V36_SPEC), []);
+  assert.deepEqual(validateAssetSpec(BOBO_V37_SPEC), []);
+  assert.equal(lodFileName(BOBO_V37_SPEC, "medium"), "bobo_v37_medium.glb");
 });
 
 test("規範檢查能找出錯誤（命名、版本、表情格數）", () => {

@@ -10,6 +10,9 @@
 命令列：
   python3 art/common/glb_tools.py check <資料夾> <assetId> <版本 例 v36> <預算等級 normal|elite|boss>
   python3 art/common/glb_tools.py inspect <檔案.glb>
+  python3 art/common/glb_tools.py derive <來源.glb> <新檔.glb> <新根節點名稱> [extras JSON]
+    → 只換版本、不改幾何時使用（例：V3.7 只改材質，模型沿用 V3.6）：
+      幾何與貼圖二進位完全相同，只改根節點名稱與 extras
 
 規範說明：docs/monsters/ASSET_PIPELINE.md
 """
@@ -69,6 +72,22 @@ def write_extras(path: Path, expected_root: str, root_extras: dict, asset_extras
     return path.stat().st_size
 
 
+def derive(src: Path, dst: Path, new_root: str, root_extras: dict | None = None, asset_extras: dict | None = None) -> int:
+    """複製 GLB 成新版本：二進位區塊原封不動，只改根節點名稱與 extras。回傳新檔大小。"""
+    b, j, rest = _read(src)
+    root = root_node(j)
+    root["name"] = new_root
+    if root_extras:
+        ex = dict(root.get("extras", {}))
+        for k, v in root_extras.items():
+            ex[k] = {**ex[k], **v} if isinstance(v, dict) and isinstance(ex.get(k), dict) else v
+        root["extras"] = ex
+    if asset_extras:
+        j["asset"]["extras"] = {**j["asset"].get("extras", {}), **asset_extras}
+    _write(dst, b, j, rest)
+    return dst.stat().st_size
+
+
 def inspect(path: Path) -> dict:
     b, j, _ = _read(path)
     meshes = []
@@ -126,6 +145,10 @@ if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else ""
     if cmd == "inspect":
         print(json.dumps(inspect(Path(sys.argv[2])), ensure_ascii=False, indent=1))
+    elif cmd == "derive":
+        extra = json.loads(sys.argv[5]) if len(sys.argv) > 5 else {}
+        n = derive(Path(sys.argv[2]), Path(sys.argv[3]), sys.argv[4], extra.get("root"), extra.get("asset"))
+        print(sys.argv[3], n, "bytes")
     elif cmd == "check":
         errs = check_lods(Path(sys.argv[2]), sys.argv[3], sys.argv[4], sys.argv[5] if len(sys.argv) > 5 else "normal")
         for e in errs:
