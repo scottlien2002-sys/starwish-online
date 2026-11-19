@@ -513,7 +513,8 @@ for (const name of browsers) {
         return { overlaps: out, benchOnTop: top === btn || btn.contains(top), inView: r.bottom <= innerHeight && r.right <= innerWidth };
       });
       check("按鈕不重疊、效能測試按鈕可點", overlaps.overlaps.length === 0 && overlaps.benchOnTop && overlaps.inView, overlaps);
-      if (vp === VIEWPORTS[0]) {
+      // 實際點擊 10 秒效能測試：只測目前驗收的兩版（舊版已在各自分支完整測過；避免 CI 超時）
+      if (vp === VIEWPORTS[0] && (labName === "bobo36" || labName === "bobo37")) {
         await page.evaluate(() => document.querySelector(".v3-bench").click());
         const r = await page.waitForFunction(() => !document.querySelector(".v3-bench-result").hidden, null, { timeout: 120000 }).then(() => page.evaluate(() => document.querySelector(".v3-bench-result").innerText)).catch(() => null);
         check("點擊效能測試：10 秒後顯示平均／最慢 1%／最低 FPS 與 Draw Calls", !!r && /平均/.test(r) && /最慢 1%/.test(r) && /最低/.test(r) && /Draw Calls/.test(r) && /3 隻/.test(r) && (labName === "bobo3" || (labName === "bobo37" ? /bobo_v37_/.test(r) : labName === "bobo36" ? /bobo_v36_/.test(r) : labName === "bobo35" ? /bobo_v35_/.test(r) : labName === "bobo34" ? /bobo_v34_/.test(r) : labName === "bobo33" ? /bobo_v33_/.test(r) : /bobo_v31_/.test(r))), r);
