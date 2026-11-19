@@ -20,7 +20,7 @@ import {
  * 星露啵啵 V3.4 果凍材質（V3.2／V3.3 的 JellyV32Plugin 保持不變，本檔為獨立版本）。
  *
  * 與 V3.2 的差別：
- * - 星雲改為三層深度（0.07／0.2／0.38），每層只取 1 次貼圖（V3.2 每層 2 次、共 4 次 → 共 3 次）；
+ * - 星雲改為三層深度（0.07／0.2／0.38），雙平面取樣依視線方向選面，大部分像素每層只取 1 次貼圖；
  *   越深的層越暗、越藍紫、越模糊（取較低解析度的 mip），近層只留細小、不刺眼的星光 → 星雲在身體「裡面」。
  * - 中央（正對鏡頭、最厚）提高不透明度：不會再看穿到背景地平線；邊緣仍然透明、透光。
  * - 底部青色內部光（設定圖身體下方的亮青光）。
@@ -246,9 +246,15 @@ export const JELLY34_FUNCS = `
 #ifdef JELLY34
 // 取樣器不能放在 UBO 宣告裡（WebGL2 會被略過），在這裡宣告
 uniform sampler2D j34Noise;
-/* 單次取樣的斜投影：把深度（z）斜向混進貼圖座標，前後不同深度取到不同圖樣（1 次取樣／層） */
-vec4 j34Tex(vec3 p, float bias) {
-  return texture2D(j34Noise, p.xy + p.z * vec2(0.47, 0.29), bias);
+/*
+ * 雙平面取樣（物件座標的 xy 面與 zy 面），依「視線在物件內的方向」混合：
+ * 正面看用 xy、側面看用 zy，圖樣不會被拉長成條紋。只有在兩面交界的視角才需要取 2 次，
+ * 其他時候只取 1 次（同一區域的像素走同一條分支，手機 GPU 上很便宜）。
+ */
+vec4 j34Tex(vec3 p, float w, float bias) {
+  if (w < 0.01) return texture2D(j34Noise, p.xy, bias);
+  if (w > 0.99) return texture2D(j34Noise, p.zy + vec2(0.37, 0.61), bias);
+  return mix(texture2D(j34Noise, p.xy, bias), texture2D(j34Noise, p.zy + vec2(0.37, 0.61), bias), w);
 }
 /* 圓角五角星的距離（正值 = 星星外） */
 float j34StarDist(vec2 uv, float outer, float inner, float sharp) {
@@ -294,9 +300,10 @@ export const JELLY34_MAIN = `
     vec3 p1 = lp + rd * 0.07;
     vec3 p2 = lp + rd * 0.2;
     vec3 p3 = lp + rd * 0.38;
-    vec4 t1 = j34Tex(p1 * 1.15 + vec3(0.13, 0.0, 0.0), 0.0);
-    vec4 t2 = j34Tex(p2 * 0.7 + vec3(0.31, 0.17, 0.0), 0.5);
-    vec4 t3 = j34Tex(p3 * 0.42 + vec3(0.07, 0.53, 0.0), 1.5);
+    float bw = smoothstep(0.45, 0.75, abs(rd.x));
+    vec4 t1 = j34Tex(p1 * 1.15 + vec3(0.13, 0.0, 0.29), bw, 0.0);
+    vec4 t2 = j34Tex(p2 * 0.7 + vec3(0.31, 0.17, 0.05), bw, 0.5);
+    vec4 t3 = j34Tex(p3 * 0.42 + vec3(0.07, 0.53, 0.41), bw, 1.5);
     float n2 = smoothstep(0.4, 0.78, t2.r);
     float n3 = smoothstep(0.36, 0.74, t3.g);
     float low = 1.0 - smoothstep(0.05, 0.75, p3.y);

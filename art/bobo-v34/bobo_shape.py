@@ -37,7 +37,7 @@ BELLY_STAR = dict(height=0.2, outer=0.11, inner=0.062, depth=0.028)
 EYE = dict(height=0.52, half_spacing=0.25, rx=0.092, rz=0.112)
 MOUTH = dict(height=0.405)
 BLUSH = dict(height=0.39, half_spacing=0.38)
-WING = dict(height=0.36)
+WING = dict(height=0.3)  # V3.4：設定圖羽翼約在嘴巴高度（V3.1～V3.3 為 0.36）
 
 
 # ----------------------------------------------------------------- SDF 基本形狀
@@ -107,9 +107,9 @@ def _normalize(v):
 
 def wing_frames(side):
     """翅膀的根部位置與方向（side = +1 角色左翼 / -1 右翼）"""
-    root = np.array([side * 0.5, 0.1, WING["height"]])
+    root = np.array([side * 0.56, 0.16, WING["height"]])  # 根部貼著身體側面（不埋太深），側面看得到整片羽翼
     # 往外、往後、略往上翹（設定圖：正面往外伸、側面往後掠）
-    d = _normalize([side * 0.76, 0.56, 0.16])
+    d = _normalize([side * 0.7, 0.68, 0.08])  # 往後掠多一點：側面看得到完整羽翼
     nrm = _normalize(np.cross(d, [0, 0, 1]))  # 翼面法線（水平）
     up = np.cross(nrm, d)  # 翼面內與 d 垂直的方向（往上）
     return root, d, up, nrm
