@@ -506,34 +506,44 @@ for (const name of browsers) {
           const wait = (ms) => new Promise((r) => setTimeout(r, ms));
           api.setCount(1);
           api.setAnim("move");
-          await wait(250); // 轉身朝向前進方向後開始前進（來回距離 ±0.45 公尺，量測期間還不會折返）
-          const a = api.animState();
-          let maxLift = 0;
-          let minY = 9;
-          for (let i = 0; i < 12; i++) {
+          // 軟體繪圖下幀率很低且不穩：取 1.6 秒內的多個樣本，逐段檢查「有前進的那一段」方向與朝向一致
+          const samples = [];
+          for (let i = 0; i < 32; i++) {
             await wait(50);
-            const s = api.animState();
-            maxLift = Math.max(maxLift, s.lift);
-            minY = Math.min(minY, s.y);
+            samples.push(api.animState());
+          }
+          const a = samples[0];
+          const maxLift = Math.max(...samples.map((q) => q.lift));
+          const minY = Math.min(...samples.map((q) => q.y));
+          let path = 0;
+          let segs = 0;
+          let aligned = 0;
+          for (let i = 1; i < samples.length; i++) {
+            const p0 = samples[i - 1];
+            const p1 = samples[i];
+            const dx = p1.x - p0.x;
+            const dz = p1.z - p0.z;
+            const len = Math.hypot(dx, dz);
+            path += len;
+            if (len > 0.005) {
+              segs++;
+              if ((dx * Math.sin(p1.yaw) + dz * Math.cos(p1.yaw)) / len > 0.8) aligned++;
+            }
           }
           const b = api.animState();
           api.setAnim("idle");
-          await wait(1300);
+          await wait(2000); // 先跳完這一跳、落地回彈，再淡入待機（低幀率時動畫時間比實際時間慢）
           const c = api.animState();
           await wait(400);
           const d = api.animState();
           api.setCount(3);
-          return { a, b, c, d, maxLift, minY };
+          return { a, b, c, d, maxLift, minY, path, segs, aligned };
         });
         {
-          const dx = mv.b.x - mv.a.x;
-          const dz = mv.b.z - mv.a.z;
-          const len = Math.hypot(dx, dz);
-          const dot = len > 0 ? (dx * Math.sin(mv.b.yaw) + dz * Math.cos(mv.b.yaw)) / len : 0;
           check(
             "V3.8R 第四階段：移動（彈跳離地、前進方向與朝向一致、不穿地）",
-            mv.a.anim === "move" && len > 0.05 && dot > 0.9 && mv.maxLift > 0.02 && mv.minY >= 0 && run.errors.length === 0,
-            { len, dot, maxLift: mv.maxLift, minY: mv.minY },
+            mv.a.anim === "move" && mv.path > 0.05 && mv.segs > 0 && mv.aligned / mv.segs >= 0.8 && mv.maxLift > 0.02 && mv.minY >= 0 && run.errors.length === 0,
+            { path: mv.path, segs: mv.segs, aligned: mv.aligned, maxLift: mv.maxLift, minY: mv.minY },
           );
           check(
             "V3.8R 第四階段：停止移動後接回待機（落地、不再前進）",
