@@ -608,7 +608,8 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
     }
     for (const it of instances) {
       if (it.jelly) it.body.getWorldMatrix().invertToRef(it.jelly.invWorld);
-      if (it.jelly instanceof JellyV37Plugin) it.jelly.view.copyFrom(scene.getViewMatrix());
+      // 視角矩陣取自鏡頭（scene.getViewMatrix() 在第一次 render 之前是空的）
+      if (it.jelly instanceof JellyV37Plugin) it.jelly.view.copyFrom(camera.getViewMatrix());
     }
     scene.render();
     perf.update(dt);
