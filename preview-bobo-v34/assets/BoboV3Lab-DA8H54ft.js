@@ -1,4 +1,4 @@
-import{n as e}from"./scene.pure-BGKq890p.js";import{o as t,t as n}from"./math.vector.pure-DST8O3ID.js";import{t as r}from"./math.color.pure-D3LZPd96.js";import{r as i}from"./buffer.pure-BQQy_Hxi.js";import{n as a}from"./texture.pure-DMXFILnG.js";import{l as o}from"./pbrMaterial.pure-CwSCcVZ3.js";import{t as s}from"./constants-DlOANaVb.js";import{M as c,N as l,O as u,P as d,S as f,a as p,c as m,j as h,k as g,l as _,o as v,s as ee,u as te,w as ne,x as re}from"./index-D4QUbceJ.js";function y(e,t){let n=[...e].sort((e,t)=>e-t),r=n.reduce((e,t)=>e+t,0),i=n.length,a=i?n[Math.min(i-1,Math.floor(i*.99))]:0,o=t.length?t.reduce((e,t)=>e+t,0)/t.length:0;return{seconds:Math.round(r*10)/10,frames:i,avgFps:i?i/Math.max(r,1e-6):0,low1Fps:a>0?1/a:0,minFps:i?1/n[i-1]:0,avgDrawCalls:o,maxDrawCalls:t.length?Math.max(...t):0}}var ie=class{warmup;target;elapsed=0;dts=[];draws=[];constructor(e,t=.5){this.target=e,this.warmup=t}get progress(){return Math.min(1,this.elapsed/(this.target+this.warmup))}record(e,t){return this.elapsed+=e,this.elapsed>this.warmup&&(this.dts.push(e),this.draws.push(t)),this.elapsed>=this.target+this.warmup}summary(){return y(this.dts,this.draws)}},b=class extends o{rim=new r(.55,.8,1);deep=new r(.2,.14,.78);top=new r(.3,.55,1);nebulaA=new r(.2,.85,1);nebulaB=new r(.6,.38,1);skyLow=new r(.95,.88,.98);skyHigh=new r(.55,.78,1);height=.8;strength=1;invWorld=n.Identity();nebula=1;enabled=!1;constructor(e){super(e,`JellyV3Plugin`,200,{JELLY3:!1}),this._enable(!0),this.enabled=!0}get jellyEnabled(){return this.enabled}set jellyEnabled(e){this.enabled!==e&&(this.enabled=e,this.markAllDefinesAsDirty())}getClassName(){return`JellyV3Plugin`}prepareDefines(e,t,n){e.JELLY3=this.enabled}getUniforms(){return{ubo:[{name:`j3Rim`,size:3,type:`vec3`},{name:`j3Deep`,size:3,type:`vec3`},{name:`j3Top`,size:3,type:`vec3`},{name:`j3NebA`,size:3,type:`vec3`},{name:`j3NebB`,size:3,type:`vec3`},{name:`j3SkyLow`,size:3,type:`vec3`},{name:`j3SkyHigh`,size:3,type:`vec3`},{name:`j3Params`,size:4,type:`vec4`},{name:`j3InvWorld`,size:16,type:`mat4`}],fragment:`#ifdef JELLY3
+import{n as e}from"./scene.pure-BGKq890p.js";import{o as t,t as n}from"./math.vector.pure-DST8O3ID.js";import{t as r}from"./math.color.pure-D3LZPd96.js";import{r as i}from"./buffer.pure-BQQy_Hxi.js";import{n as a}from"./texture.pure-DMXFILnG.js";import{l as o}from"./pbrMaterial.pure-CwSCcVZ3.js";import{t as s}from"./constants-DlOANaVb.js";import{M as c,N as l,O as u,P as d,S as f,a as p,c as m,j as h,k as g,l as _,o as v,s as ee,u as te,w as ne,x as re}from"./index-CB9R0Dle.js";function y(e,t){let n=[...e].sort((e,t)=>e-t),r=n.reduce((e,t)=>e+t,0),i=n.length,a=i?n[Math.min(i-1,Math.floor(i*.99))]:0,o=t.length?t.reduce((e,t)=>e+t,0)/t.length:0;return{seconds:Math.round(r*10)/10,frames:i,avgFps:i?i/Math.max(r,1e-6):0,low1Fps:a>0?1/a:0,minFps:i?1/n[i-1]:0,avgDrawCalls:o,maxDrawCalls:t.length?Math.max(...t):0}}var ie=class{warmup;target;elapsed=0;dts=[];draws=[];constructor(e,t=.5){this.target=e,this.warmup=t}get progress(){return Math.min(1,this.elapsed/(this.target+this.warmup))}record(e,t){return this.elapsed+=e,this.elapsed>this.warmup&&(this.dts.push(e),this.draws.push(t)),this.elapsed>=this.target+this.warmup}summary(){return y(this.dts,this.draws)}},b=class extends o{rim=new r(.55,.8,1);deep=new r(.2,.14,.78);top=new r(.3,.55,1);nebulaA=new r(.2,.85,1);nebulaB=new r(.6,.38,1);skyLow=new r(.95,.88,.98);skyHigh=new r(.55,.78,1);height=.8;strength=1;invWorld=n.Identity();nebula=1;enabled=!1;constructor(e){super(e,`JellyV3Plugin`,200,{JELLY3:!1}),this._enable(!0),this.enabled=!0}get jellyEnabled(){return this.enabled}set jellyEnabled(e){this.enabled!==e&&(this.enabled=e,this.markAllDefinesAsDirty())}getClassName(){return`JellyV3Plugin`}prepareDefines(e,t,n){e.JELLY3=this.enabled}getUniforms(){return{ubo:[{name:`j3Rim`,size:3,type:`vec3`},{name:`j3Deep`,size:3,type:`vec3`},{name:`j3Top`,size:3,type:`vec3`},{name:`j3NebA`,size:3,type:`vec3`},{name:`j3NebB`,size:3,type:`vec3`},{name:`j3SkyLow`,size:3,type:`vec3`},{name:`j3SkyHigh`,size:3,type:`vec3`},{name:`j3Params`,size:4,type:`vec4`},{name:`j3InvWorld`,size:16,type:`mat4`}],fragment:`#ifdef JELLY3
 uniform vec3 j3Rim;
 uniform vec3 j3Deep;
 uniform vec3 j3Top;
@@ -382,9 +382,15 @@ uniform mat4 j34InvWorld;
 #ifdef JELLY34
 // 取樣器不能放在 UBO 宣告裡（WebGL2 會被略過），在這裡宣告
 uniform sampler2D j34Noise;
-/* 單次取樣的斜投影：把深度（z）斜向混進貼圖座標，前後不同深度取到不同圖樣（1 次取樣／層） */
-vec4 j34Tex(vec3 p, float bias) {
-  return texture2D(j34Noise, p.xy + p.z * vec2(0.47, 0.29), bias);
+/*
+ * 雙平面取樣（物件座標的 xy 面與 zy 面），依「視線在物件內的方向」混合：
+ * 正面看用 xy、側面看用 zy，圖樣不會被拉長成條紋。只有在兩面交界的視角才需要取 2 次，
+ * 其他時候只取 1 次（同一區域的像素走同一條分支，手機 GPU 上很便宜）。
+ */
+vec4 j34Tex(vec3 p, float w, float bias) {
+  if (w < 0.01) return texture2D(j34Noise, p.xy, bias);
+  if (w > 0.99) return texture2D(j34Noise, p.zy + vec2(0.37, 0.61), bias);
+  return mix(texture2D(j34Noise, p.xy, bias), texture2D(j34Noise, p.zy + vec2(0.37, 0.61), bias), w);
 }
 /* 圓角五角星的距離（正值 = 星星外） */
 float j34StarDist(vec2 uv, float outer, float inner, float sharp) {
@@ -428,9 +434,10 @@ float j34StarDist(vec2 uv, float outer, float inner, float sharp) {
     vec3 p1 = lp + rd * 0.07;
     vec3 p2 = lp + rd * 0.2;
     vec3 p3 = lp + rd * 0.38;
-    vec4 t1 = j34Tex(p1 * 1.15 + vec3(0.13, 0.0, 0.0), 0.0);
-    vec4 t2 = j34Tex(p2 * 0.7 + vec3(0.31, 0.17, 0.0), 0.5);
-    vec4 t3 = j34Tex(p3 * 0.42 + vec3(0.07, 0.53, 0.0), 1.5);
+    float bw = smoothstep(0.45, 0.75, abs(rd.x));
+    vec4 t1 = j34Tex(p1 * 1.15 + vec3(0.13, 0.0, 0.29), bw, 0.0);
+    vec4 t2 = j34Tex(p2 * 0.7 + vec3(0.31, 0.17, 0.05), bw, 0.5);
+    vec4 t3 = j34Tex(p3 * 0.42 + vec3(0.07, 0.53, 0.41), bw, 1.5);
     float n2 = smoothstep(0.4, 0.78, t2.r);
     float n3 = smoothstep(0.36, 0.74, t3.g);
     float low = 1.0 - smoothstep(0.05, 0.75, p3.y);
