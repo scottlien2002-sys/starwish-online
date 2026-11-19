@@ -1,0 +1,6285 @@
+{
+  "startedAt": "2026-11-19T06:39:54.370Z",
+  "runs": [
+    {
+      "browser": "chromium",
+      "viewport": "iPhone 15 橫向",
+      "checks": {
+        "啟動": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "3D 畫面有繪製": {
+          "ok": true,
+          "detail": {
+            "renderer": {
+              "webgl": 2,
+              "hardwareScaling": 0.6666666666666666,
+              "width": 1278,
+              "height": 589
+            },
+            "pixels": {
+              "samples": 3568,
+              "distinctColors": 162,
+              "opaqueRatio": 1
+            }
+          }
+        },
+        "HUD 不重疊/不超出安全區": {
+          "ok": true,
+          "detail": []
+        },
+        "草原：3 隻星露啵啵生成於出生點前方 6–9 公尺且看得到": {
+          "ok": true,
+          "detail": {
+            "mons0": [
+              {
+                "id": "star_dew_bobo#1",
+                "state": "move",
+                "mode": "chase",
+                "hp": 60,
+                "maxHp": 60,
+                "x": -0.8631197170255658,
+                "y": 0,
+                "z": 3.344588903474062,
+                "spawnX": -1.6000000000000005,
+                "spawnZ": 6.2,
+                "visible": true
+              },
+              {
+                "id": "star_dew_bobo#2",
+                "state": "idle",
+                "mode": "idle",
+                "hp": 60,
+                "maxHp": 60,
+                "x": -3.2000000000000006,
+                "y": 0,
+                "z": 8,
+                "spawnX": -3.2000000000000006,
+                "spawnZ": 8,
+                "visible": true
+              },
+              {
+                "id": "star_dew_bobo#3",
+                "state": "idle",
+                "mode": "idle",
+                "hp": 60,
+                "maxHp": 60,
+                "x": 2.3999999999999995,
+                "y": 0,
+                "z": 8.6,
+                "spawnX": 2.3999999999999995,
+                "spawnZ": 8.6,
+                "visible": true
+              }
+            ],
+            "dists": [
+              6.403124237432849,
+              8.616263691415208,
+              8.928605714219886
+            ]
+          }
+        },
+        "草原：鎖定並攻擊、冷卻內不重複攻擊": {
+          "ok": true,
+          "detail": {
+            "a1": {
+              "ok": true,
+              "targetId": "star_dew_bobo#1",
+              "killed": false,
+              "damage": 20
+            },
+            "a2": {
+              "ok": false,
+              "reason": "cooldown"
+            },
+            "afterOne": {
+              "id": "star_dew_bobo#1",
+              "state": "attack",
+              "mode": "attack",
+              "hp": 40,
+              "maxHp": 60,
+              "x": -0.7831587509385993,
+              "y": 0,
+              "z": 3.034740159887068,
+              "spawnX": -1.6000000000000005,
+              "spawnZ": 6.2,
+              "visible": true
+            }
+          }
+        },
+        "草原：鎖定同一隻並擊敗（播放死亡）": {
+          "ok": true,
+          "detail": {
+            "log": [
+              {
+                "ok": true,
+                "targetId": "star_dew_bobo#1",
+                "killed": false,
+                "damage": 20
+              },
+              {
+                "ok": true,
+                "targetId": "star_dew_bobo#1",
+                "killed": true,
+                "damage": 20
+              }
+            ],
+            "dying": {
+              "id": "star_dew_bobo#1",
+              "state": "death",
+              "mode": "dead",
+              "hp": 0,
+              "maxHp": 60,
+              "x": -0.7831587509385993,
+              "y": 0,
+              "z": 3.034740159887068,
+              "spawnX": -1.6000000000000005,
+              "spawnZ": 6.2,
+              "visible": true
+            }
+          }
+        },
+        "草原：死亡中的怪物不會被重複攻擊": {
+          "ok": true,
+          "detail": {
+            "ok": false,
+            "reason": "cooldown"
+          }
+        },
+        "草原：死亡後重生並回到待機/移動": {
+          "ok": true,
+          "detail": [
+            {
+              "id": "star_dew_bobo#1",
+              "state": "move",
+              "mode": "chase",
+              "hp": 60,
+              "maxHp": 60,
+              "x": -1.5600195169565174,
+              "y": 0,
+              "z": 6.045075628206503,
+              "spawnX": -1.6000000000000005,
+              "spawnZ": 6.2,
+              "visible": true
+            },
+            {
+              "id": "star_dew_bobo#2",
+              "state": "attack",
+              "mode": "attack",
+              "hp": 60,
+              "maxHp": 60,
+              "x": -0.5296004861424338,
+              "y": 0,
+              "z": 0.8773842599703358,
+              "spawnX": -3.2000000000000006,
+              "spawnZ": 8,
+              "visible": true
+            },
+            {
+              "id": "star_dew_bobo#3",
+              "state": "idle",
+              "mode": "attack",
+              "hp": 60,
+              "maxHp": 60,
+              "x": 0.46570911136744353,
+              "y": 0,
+              "z": 0.9741251773978957,
+              "spawnX": 2.3999999999999995,
+              "spawnZ": 8.6,
+              "visible": true
+            }
+          ]
+        },
+        "草原：怪物攻擊會打到玩家（扣暫定攻擊力 8）": {
+          "ok": true,
+          "detail": {
+            "hp": 12,
+            "maxHp": 100,
+            "down": false,
+            "hitsTaken": 11,
+            "lockedId": "star_dew_bobo#2",
+            "tilt": 0
+          }
+        },
+        "草原：多隻同時存在、無異常狀態": {
+          "ok": true,
+          "detail": [
+            {
+              "id": "star_dew_bobo#1",
+              "state": "move",
+              "mode": "chase",
+              "hp": 60,
+              "maxHp": 60,
+              "x": -1.5600195169565174,
+              "y": 0,
+              "z": 6.045075628206503,
+              "spawnX": -1.6000000000000005,
+              "spawnZ": 6.2,
+              "visible": true
+            },
+            {
+              "id": "star_dew_bobo#2",
+              "state": "attack",
+              "mode": "attack",
+              "hp": 60,
+              "maxHp": 60,
+              "x": -0.5296004861424338,
+              "y": 0,
+              "z": 0.8773842599703358,
+              "spawnX": -3.2000000000000006,
+              "spawnZ": 8,
+              "visible": true
+            },
+            {
+              "id": "star_dew_bobo#3",
+              "state": "idle",
+              "mode": "attack",
+              "hp": 60,
+              "maxHp": 60,
+              "x": 0.46570911136744353,
+              "y": 0,
+              "z": 0.9741251773978957,
+              "spawnX": 2.3999999999999995,
+              "spawnZ": 8.6,
+              "visible": true
+            }
+          ]
+        },
+        "草原：多隻怪物不疊在一起、不擠進玩家": {
+          "ok": true,
+          "detail": {
+            "minPair": 1.0000000000000002,
+            "minToPlayer": 5.367925146113577,
+            "ring": [
+              {
+                "id": "star_dew_bobo#1",
+                "state": "move",
+                "mode": "chase",
+                "hp": 60,
+                "maxHp": 60,
+                "x": -1.3301930856241106,
+                "y": 0,
+                "z": 5.28227824501791,
+                "spawnX": -1.6000000000000005,
+                "spawnZ": 6.2,
+                "visible": true
+              },
+              {
+                "id": "star_dew_bobo#2",
+                "state": "move",
+                "mode": "return",
+                "hp": 60,
+                "maxHp": 60,
+                "x": -2.306100777491226,
+                "y": 0,
+                "z": 5.064094430415177,
+                "spawnX": -3.2000000000000006,
+                "spawnZ": 8,
+                "visible": true
+              },
+              {
+                "id": "star_dew_bobo#3",
+                "state": "move",
+                "mode": "return",
+                "hp": 60,
+                "maxHp": 60,
+                "x": 1.352392164464041,
+                "y": 0,
+                "z": 5.194771968794659,
+                "spawnX": 2.3999999999999995,
+                "spawnZ": 8.6,
+                "visible": true
+              }
+            ],
+            "pl": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "yaw": -1.5707963267948966
+            }
+          }
+        },
+        "草原：玩家 HP 歸零時倒地且不能移動": {
+          "ok": true,
+          "detail": {
+            "downA": {
+              "c": {
+                "hp": 0,
+                "maxHp": 100,
+                "down": true,
+                "hitsTaken": 13,
+                "lockedId": null,
+                "tilt": 1.4451326206513049
+              },
+              "p": {
+                "x": 0,
+                "y": 0,
+                "z": 0,
+                "yaw": -1.5707963267948966
+              }
+            },
+            "downB": {
+              "c": {
+                "hp": 0,
+                "maxHp": 100,
+                "down": true,
+                "hitsTaken": 13,
+                "lockedId": null,
+                "tilt": 1.4451326206513049
+              },
+              "p": {
+                "x": 0,
+                "y": 0,
+                "z": 0,
+                "yaw": -1.5707963267948966
+              }
+            }
+          }
+        },
+        "草原：倒地後在出生點站起、HP 全滿": {
+          "ok": true,
+          "detail": {
+            "c": {
+              "hp": 100,
+              "maxHp": 100,
+              "down": false,
+              "hitsTaken": 13,
+              "lockedId": null,
+              "tilt": 0
+            },
+            "p": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "yaw": -1.5707963267948966
+            }
+          }
+        },
+        "搖桿移動角色": {
+          "ok": true,
+          "detail": {
+            "from": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "yaw": -1.5707963267948966
+            },
+            "to": {
+              "x": -6.343385132544761e-16,
+              "y": 0.08827200960409438,
+              "z": 10.359534090908943,
+              "yaw": -3.706569199925874e-16
+            },
+            "moved": 10.359534090908943
+          }
+        },
+        "拖曳旋轉攝影機": {
+          "ok": true,
+          "detail": {
+            "before": -1.5707963267948966,
+            "after": -2.350796326794896
+          }
+        },
+        "攻擊按鈕可按": {
+          "ok": true,
+          "detail": null
+        }
+      },
+      "errors": [],
+      "fpsReference": [
+        9.935090740495406,
+        9.9502487562189,
+        10.106114199090445,
+        10.37775010377754,
+        10.569334836527641,
+        10.753844499408492
+      ],
+      "screenshot": "e2e/chromium_iPhone_15_橫向.png",
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "viewport": "iPhone SE 直向",
+      "checks": {
+        "啟動": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "3D 畫面有繪製": {
+          "ok": true,
+          "detail": {
+            "renderer": {
+              "webgl": 2,
+              "hardwareScaling": 0.6666666666666666,
+              "width": 562,
+              "height": 1000
+            },
+            "pixels": {
+              "samples": 2664,
+              "distinctColors": 174,
+              "opaqueRatio": 1
+            }
+          }
+        },
+        "HUD 不重疊/不超出安全區": {
+          "ok": true,
+          "detail": []
+        },
+        "草原：3 隻星露啵啵生成於出生點前方 6–9 公尺且看得到": {
+          "ok": true,
+          "detail": {
+            "mons0": [
+              {
+                "id": "star_dew_bobo#1",
+                "state": "move",
+                "mode": "chase",
+                "hp": 60,
+                "maxHp": 60,
+                "x": -0.7440578385220714,
+                "y": 0,
+                "z": 2.8832241242730223,
+                "spawnX": -1.6000000000000005,
+                "spawnZ": 6.2,
+                "visible": true
+              },
+              {
+                "id": "star_dew_bobo#2",
+                "state": "idle",
+                "mode": "idle",
+                "hp": 60,
+                "maxHp": 60,
+                "x": -3.2000000000000006,
+                "y": 0,
+                "z": 8,
+                "spawnX": -3.2000000000000006,
+                "spawnZ": 8,
+                "visible": true
+              },
+              {
+                "id": "star_dew_bobo#3",
+                "state": "idle",
+                "mode": "idle",
+                "hp": 60,
+                "maxHp": 60,
+                "x": 2.3999999999999995,
+                "y": 0,
+                "z": 8.6,
+                "spawnX": 2.3999999999999995,
+                "spawnZ": 8.6,
+                "visible": true
+              }
+            ],
+            "dists": [
+              6.403124237432849,
+              8.616263691415208,
+              8.928605714219886
+            ]
+          }
+        },
+        "搖桿移動角色": {
+          "ok": true,
+          "detail": {
+            "from": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "yaw": 0
+            },
+            "to": {
+              "x": -5.782281193701423e-16,
+              "y": 0.009939884061871572,
+              "z": 9.443181818181818,
+              "yaw": -6.12323399573675e-17
+            },
+            "moved": 9.443181818181818
+          }
+        },
+        "拖曳旋轉攝影機": {
+          "ok": true,
+          "detail": {
+            "before": -1.5707963267948966,
+            "after": -2.350796326794896
+          }
+        },
+        "攻擊按鈕可按": {
+          "ok": true,
+          "detail": null
+        }
+      },
+      "errors": [],
+      "fpsReference": [
+        11.46526026140792,
+        11.415090749971446,
+        11.771630370806369,
+        12.175324675324688,
+        12.704865963664158,
+        13.283740701381557
+      ],
+      "screenshot": "e2e/chromium_iPhone_SE_直向.png",
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "viewport": "iPhone 15 橫向 / ?lab=bobo",
+      "checks": {
+        "場景啟動": {
+          "ok": true,
+          "detail": null
+        },
+        "介面不重疊": {
+          "ok": true,
+          "detail": null
+        },
+        "移動": {
+          "ok": true,
+          "detail": "move"
+        },
+        "攻擊：可發動、攻擊中不可重複、移動排隊": {
+          "ok": true,
+          "detail": {
+            "a1": {
+              "accepted": true
+            },
+            "a2": {
+              "accepted": false,
+              "reason": "攻擊動作進行中"
+            },
+            "queued": {
+              "accepted": true,
+              "queued": true
+            },
+            "overlay": {
+              "accepted": true,
+              "overlay": true
+            },
+            "state": "attack"
+          }
+        },
+        "攻擊中受擊為疊加": {
+          "ok": true,
+          "detail": {
+            "accepted": true,
+            "overlay": true
+          }
+        },
+        "攻擊結束回到移動": {
+          "ok": true,
+          "detail": "move"
+        },
+        "受傷": {
+          "ok": true,
+          "detail": "hit"
+        },
+        "死亡：不可攻擊/移動/受擊，播完進入 dead": {
+          "ok": true,
+          "detail": [
+            {
+              "accepted": false,
+              "reason": "死亡中無法攻擊"
+            },
+            {
+              "accepted": false,
+              "reason": "死亡中無法移動"
+            },
+            {
+              "accepted": false,
+              "reason": "已死亡"
+            }
+          ]
+        },
+        "重生後恢復完整": {
+          "ok": true,
+          "detail": {
+            "state": "idle",
+            "pose": {
+              "offsetY": 0,
+              "offsetZ": 0,
+              "shakeX": 0,
+              "scaleY": 1.0266405930459641,
+              "scaleXZ": 0.9869400748736888,
+              "stretchZ": 1,
+              "lean": 0,
+              "opacity": 1,
+              "starGlow": 0.9388019768198806,
+              "antennaSway": -0.007967591939467679,
+              "wingFlap": -0.1717632591329278,
+              "hitFlash": 0,
+              "face": "normal",
+              "ringScale": 0,
+              "ringOpacity": 0,
+              "bodyVisible": true
+            }
+          }
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "e2e/chromium_bobo_1_idle.png",
+        "e2e/chromium_bobo_2_move.png",
+        "e2e/chromium_bobo_2b_move.png",
+        "e2e/chromium_bobo_3_attack.png",
+        "e2e/chromium_bobo_4_hit.png",
+        "e2e/chromium_bobo_5_death.png",
+        "e2e/chromium_bobo_6_respawn.png"
+      ],
+      "fpsReference": [
+        15.913430935709643
+      ],
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "viewport": "iPhone 15 橫向 / ?lab=dummy",
+      "checks": {
+        "場景啟動": {
+          "ok": true,
+          "detail": null
+        },
+        "介面不重疊": {
+          "ok": true,
+          "detail": null
+        },
+        "移動": {
+          "ok": true,
+          "detail": "move"
+        },
+        "攻擊：可發動、攻擊中不可重複、移動排隊": {
+          "ok": true,
+          "detail": {
+            "a1": {
+              "accepted": true
+            },
+            "a2": {
+              "accepted": false,
+              "reason": "攻擊動作進行中"
+            },
+            "queued": {
+              "accepted": true,
+              "queued": true
+            },
+            "overlay": {
+              "accepted": true,
+              "overlay": true
+            },
+            "state": "attack"
+          }
+        },
+        "攻擊中受擊為疊加": {
+          "ok": true,
+          "detail": {
+            "accepted": true,
+            "overlay": true
+          }
+        },
+        "攻擊結束回到移動": {
+          "ok": true,
+          "detail": "move"
+        },
+        "受傷": {
+          "ok": true,
+          "detail": "hit"
+        },
+        "死亡：不可攻擊/移動/受擊，播完進入 dead": {
+          "ok": true,
+          "detail": [
+            {
+              "accepted": false,
+              "reason": "死亡中無法攻擊"
+            },
+            {
+              "accepted": false,
+              "reason": "死亡中無法移動"
+            },
+            {
+              "accepted": false,
+              "reason": "已死亡"
+            }
+          ]
+        },
+        "重生後恢復完整": {
+          "ok": true,
+          "detail": {
+            "state": "idle",
+            "pose": {
+              "offsetY": 0,
+              "offsetZ": 0,
+              "shakeX": 0,
+              "scaleY": 1,
+              "scaleXZ": 1,
+              "stretchZ": 1,
+              "lean": 0,
+              "opacity": 1,
+              "starGlow": 1,
+              "antennaSway": 0,
+              "wingFlap": 0,
+              "hitFlash": 0,
+              "face": "normal",
+              "ringScale": 0,
+              "ringOpacity": 0,
+              "bodyVisible": true
+            }
+          }
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "e2e/chromium_dummy_1_idle.png",
+        "e2e/chromium_dummy_2_move.png",
+        "e2e/chromium_dummy_2b_move.png",
+        "e2e/chromium_dummy_3_attack.png",
+        "e2e/chromium_dummy_4_hit.png",
+        "e2e/chromium_dummy_5_death.png",
+        "e2e/chromium_dummy_6_respawn.png"
+      ],
+      "fpsReference": [
+        19.030702867292607
+      ],
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "viewport": "iPhone 15 橫向 / ?lab=field",
+      "checks": {
+        "場景啟動（含 GLB 載入）": {
+          "ok": true,
+          "detail": null
+        },
+        "同時生成 5 隻怪物（3 程式化 + 2 GLB）": {
+          "ok": true,
+          "detail": [
+            "star_dew_bobo#1",
+            "star_dew_bobo#2",
+            "star_dew_bobo#3",
+            "test_dummy#4",
+            "test_dummy#5"
+          ]
+        },
+        "介面不重疊": {
+          "ok": true,
+          "detail": null
+        },
+        "AI：目標靠近時追擊/攻擊": {
+          "ok": true,
+          "detail": {
+            "id": "star_dew_bobo#1",
+            "monsterId": "star_dew_bobo",
+            "state": "move",
+            "mode": "chase",
+            "hp": 60,
+            "maxHp": 60,
+            "x": -4.212813888015252,
+            "z": -2.7874821932471487
+          }
+        },
+        "受傷→死亡": {
+          "ok": true,
+          "detail": "star_dew_bobo#1"
+        },
+        "AI：死亡後停止行動": {
+          "ok": true,
+          "detail": {
+            "id": "star_dew_bobo#1",
+            "monsterId": "star_dew_bobo",
+            "state": "death",
+            "mode": "dead",
+            "hp": 0,
+            "maxHp": 60,
+            "x": -3.0171951912126445,
+            "z": -2.9023089595347984
+          }
+        },
+        "AI：目標離開後不再追擊": {
+          "ok": true,
+          "detail": [
+            "star_dew_bobo#1:dead",
+            "star_dew_bobo#2:return",
+            "star_dew_bobo#3:return",
+            "test_dummy#4:return",
+            "test_dummy#5:return"
+          ]
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "e2e/chromium_field_1_engage.png",
+        "e2e/chromium_field_2_after.png"
+      ],
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "viewport": "iPhone 15 橫向 / ?lab=bobo3",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3600,
+                "vertices": 1799
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 1120,
+                "vertices": 644
+              }
+            ],
+            "trianglesTotal": 6472,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 7.6847074322098905,
+            "drawCalls": 36,
+            "activeMeshes": 20,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v3",
+            "file": "bobo_v3_medium.glb",
+            "bellyStar": null,
+            "bellyStarVersion": null,
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 7.6847074322098905,
+            "drawCalls": 36,
+            "activeMeshes": 20,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v3",
+            "file": "bobo_v3_medium.glb",
+            "bellyStar": null,
+            "bellyStarVersion": null,
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v3"
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "viewport": "iPhone SE 直向 / ?lab=bobo3",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3600,
+                "vertices": 1799
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 1120,
+                "vertices": 644
+              }
+            ],
+            "trianglesTotal": 6472,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 8.697669024701424,
+            "drawCalls": 36,
+            "activeMeshes": 18,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v3",
+            "file": "bobo_v3_medium.glb",
+            "bellyStar": null,
+            "bellyStarVersion": null,
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 8.697669024701424,
+            "drawCalls": 36,
+            "activeMeshes": 18,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v3",
+            "file": "bobo_v3_medium.glb",
+            "bellyStar": null,
+            "bellyStarVersion": null,
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v3"
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "viewport": "iPhone 15 橫向 / ?lab=bobo31",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3599,
+                "vertices": 1785
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 560,
+                "vertices": 322
+              }
+            ],
+            "trianglesTotal": 5911,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 7.725416620682055,
+            "drawCalls": 33,
+            "activeMeshes": 20,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v31",
+            "file": "bobo_v31_medium.glb",
+            "bellyStar": null,
+            "bellyStarVersion": null,
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 7.725416620682055,
+            "drawCalls": 33,
+            "activeMeshes": 20,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v31",
+            "file": "bobo_v31_medium.glb",
+            "bellyStar": null,
+            "bellyStarVersion": null,
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v31"
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "viewport": "iPhone SE 直向 / ?lab=bobo31",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3599,
+                "vertices": 1785
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 560,
+                "vertices": 322
+              }
+            ],
+            "trianglesTotal": 5911,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 8.493290300662519,
+            "drawCalls": 31,
+            "activeMeshes": 17,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v31",
+            "file": "bobo_v31_medium.glb",
+            "bellyStar": null,
+            "bellyStarVersion": null,
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 8.493290300662519,
+            "drawCalls": 31,
+            "activeMeshes": 17,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v31",
+            "file": "bobo_v31_medium.glb",
+            "bellyStar": null,
+            "bellyStarVersion": null,
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v31"
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "viewport": "iPhone 15 橫向 / ?lab=bobo32",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3599,
+                "vertices": 1785
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 560,
+                "vertices": 322
+              }
+            ],
+            "trianglesTotal": 5911,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 7.657177236305935,
+            "drawCalls": 33,
+            "activeMeshes": 20,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v32",
+            "file": "bobo_v31_medium.glb",
+            "bellyStar": {
+              "outer": 0.084,
+              "inner": 0.042,
+              "centerY": 0.248
+            },
+            "bellyStarVersion": null,
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 7.657177236305935,
+            "drawCalls": 33,
+            "activeMeshes": 20,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v32",
+            "file": "bobo_v31_medium.glb",
+            "bellyStar": {
+              "outer": 0.084,
+              "inner": 0.042,
+              "centerY": 0.248
+            },
+            "bellyStarVersion": null,
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v32"
+        },
+        "V3.2 保持不變（腹部星星 0.084）": {
+          "ok": true,
+          "detail": {
+            "file": "bobo_v31_medium.glb",
+            "star": {
+              "outer": 0.084,
+              "inner": 0.042,
+              "centerY": 0.248
+            }
+          }
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "viewport": "iPhone SE 直向 / ?lab=bobo32",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3599,
+                "vertices": 1785
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 560,
+                "vertices": 322
+              }
+            ],
+            "trianglesTotal": 5911,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 8.405715886803026,
+            "drawCalls": 31,
+            "activeMeshes": 17,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v32",
+            "file": "bobo_v31_medium.glb",
+            "bellyStar": {
+              "outer": 0.084,
+              "inner": 0.042,
+              "centerY": 0.248
+            },
+            "bellyStarVersion": null,
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 8.405715886803026,
+            "drawCalls": 31,
+            "activeMeshes": 17,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v32",
+            "file": "bobo_v31_medium.glb",
+            "bellyStar": {
+              "outer": 0.084,
+              "inner": 0.042,
+              "centerY": 0.248
+            },
+            "bellyStarVersion": null,
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v32"
+        },
+        "V3.2 保持不變（腹部星星 0.084）": {
+          "ok": true,
+          "detail": {
+            "file": "bobo_v31_medium.glb",
+            "star": {
+              "outer": 0.084,
+              "inner": 0.042,
+              "centerY": 0.248
+            }
+          }
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "viewport": "iPhone 15 橫向 / ?lab=bobo33",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3599,
+                "vertices": 1785
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 560,
+                "vertices": 322
+              }
+            ],
+            "trianglesTotal": 5911,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 7.488633324418294,
+            "drawCalls": 33,
+            "activeMeshes": 20,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v33",
+            "file": "bobo_v33_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.3",
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 7.488633324418294,
+            "drawCalls": 33,
+            "activeMeshes": 20,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v33",
+            "file": "bobo_v33_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.3",
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v33"
+        },
+        "V3.3：載入 bobo_v33 模型，腹部星星取自模型（0.0714）": {
+          "ok": true,
+          "detail": {
+            "file": "bobo_v33_medium.glb",
+            "star": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "v": "3.3"
+          }
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "viewport": "iPhone SE 直向 / ?lab=bobo33",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3599,
+                "vertices": 1785
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 560,
+                "vertices": 322
+              }
+            ],
+            "trianglesTotal": 5911,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 8.31301263577923,
+            "drawCalls": 31,
+            "activeMeshes": 17,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v33",
+            "file": "bobo_v33_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.3",
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 8.31301263577923,
+            "drawCalls": 31,
+            "activeMeshes": 17,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v33",
+            "file": "bobo_v33_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.3",
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v33"
+        },
+        "V3.3：載入 bobo_v33 模型，腹部星星取自模型（0.0714）": {
+          "ok": true,
+          "detail": {
+            "file": "bobo_v33_medium.glb",
+            "star": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "v": "3.3"
+          }
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "viewport": "iPhone 15 橫向 / ?lab=bobo34",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3599,
+                "vertices": 1783
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 560,
+                "vertices": 322
+              }
+            ],
+            "trianglesTotal": 5911,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 7.550426059756238,
+            "drawCalls": 33,
+            "activeMeshes": 20,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v34",
+            "file": "bobo_v34_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.4",
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 7.550426059756238,
+            "drawCalls": 33,
+            "activeMeshes": 20,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v34",
+            "file": "bobo_v34_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.4",
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v34"
+        },
+        "V3.4：載入 bobo_v34 模型，腹部星星維持 0.0714": {
+          "ok": true,
+          "detail": {
+            "file": "bobo_v34_medium.glb",
+            "star": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "v": "3.4"
+          }
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "viewport": "iPhone SE 直向 / ?lab=bobo34",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3599,
+                "vertices": 1783
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 560,
+                "vertices": 322
+              }
+            ],
+            "trianglesTotal": 5911,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 8.565310492505352,
+            "drawCalls": 31,
+            "activeMeshes": 17,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v34",
+            "file": "bobo_v34_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.4",
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 8.565310492505352,
+            "drawCalls": 31,
+            "activeMeshes": 17,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v34",
+            "file": "bobo_v34_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.4",
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v34"
+        },
+        "V3.4：載入 bobo_v34 模型，腹部星星維持 0.0714": {
+          "ok": true,
+          "detail": {
+            "file": "bobo_v34_medium.glb",
+            "star": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "v": "3.4"
+          }
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "viewport": "iPhone 15 橫向 / ?lab=bobo35",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3600,
+                "vertices": 1802
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 560,
+                "vertices": 322
+              }
+            ],
+            "trianglesTotal": 5912,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 9.465369802206448,
+            "drawCalls": 24,
+            "activeMeshes": 21,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v35",
+            "file": "bobo_v35_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.5",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 9.465369802206448,
+            "drawCalls": 24,
+            "activeMeshes": 21,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v35",
+            "file": "bobo_v35_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.5",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v35"
+        },
+        "V3.5：載入 bobo_v35 模型，腹部星星維持 0.0714": {
+          "ok": true,
+          "detail": {
+            "file": "bobo_v35_medium.glb",
+            "star": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            }
+          }
+        },
+        "V3.5：不使用陰影貼圖與 GlowLayer（改用接觸陰影與星星光暈）": {
+          "ok": true,
+          "detail": {
+            "fps": 9.465369802206448,
+            "drawCalls": 24,
+            "activeMeshes": 21,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v35",
+            "file": "bobo_v35_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.5",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "V3.5：3 隻同場 Draw Calls 不高於 V3.4": {
+          "ok": true,
+          "detail": {
+            "v35": 24,
+            "v34": 33
+          }
+        },
+        "成本分析：6 項都有結果": {
+          "ok": true,
+          "detail": [
+            {
+              "name": "目前設定",
+              "avg": 13.836361959228778,
+              "low1": 12.562814070350841,
+              "draws": 24,
+              "gain": 0
+            },
+            {
+              "name": "關閉果凍內部星雲",
+              "avg": 21.630124864812217,
+              "low1": 17.27115716753196,
+              "draws": 24,
+              "gain": 7.7937629055834385
+            },
+            {
+              "name": "關閉果凍材質（純透明）",
+              "avg": 23.5338416643129,
+              "low1": 21.367521367513397,
+              "draws": 24,
+              "gain": 9.69747970508412
+            },
+            {
+              "name": "關閉 MSAA 抗鋸齒",
+              "avg": 20.38043478260881,
+              "low1": 18.65671641790842,
+              "draws": 24,
+              "gain": 6.544072823380031
+            },
+            {
+              "name": "解析度 1.5x",
+              "avg": 10.100082637039975,
+              "low1": 9.633911368016495,
+              "draws": 24,
+              "gain": -3.7362793221888033
+            },
+            {
+              "name": "隱藏啵啵（只剩場景）",
+              "avg": 12.794735880095251,
+              "low1": 12.004801920765791,
+              "draws": 5,
+              "gain": -1.0416260791335272
+            }
+          ]
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "viewport": "iPhone SE 直向 / ?lab=bobo35",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3600,
+                "vertices": 1802
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 560,
+                "vertices": 322
+              }
+            ],
+            "trianglesTotal": 5912,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 11.800802454566858,
+            "drawCalls": 23,
+            "activeMeshes": 18,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v35",
+            "file": "bobo_v35_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.5",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 11.800802454566858,
+            "drawCalls": 23,
+            "activeMeshes": 18,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v35",
+            "file": "bobo_v35_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.5",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v35"
+        },
+        "V3.5：載入 bobo_v35 模型，腹部星星維持 0.0714": {
+          "ok": true,
+          "detail": {
+            "file": "bobo_v35_medium.glb",
+            "star": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            }
+          }
+        },
+        "V3.5：不使用陰影貼圖與 GlowLayer（改用接觸陰影與星星光暈）": {
+          "ok": true,
+          "detail": {
+            "fps": 11.800802454566858,
+            "drawCalls": 23,
+            "activeMeshes": 18,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v35",
+            "file": "bobo_v35_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.5",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "V3.5：3 隻同場 Draw Calls 不高於 V3.4": {
+          "ok": true,
+          "detail": {
+            "v35": 23,
+            "v34": 31
+          }
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "viewport": "iPhone 15 橫向 / ?lab=bobo36",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3600,
+                "vertices": 1797
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 560,
+                "vertices": 322
+              }
+            ],
+            "trianglesTotal": 5912,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 9.623361539737848,
+            "drawCalls": 24,
+            "activeMeshes": 21,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v36",
+            "file": "bobo_v36_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.6",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 9.623361539737848,
+            "drawCalls": 24,
+            "activeMeshes": 21,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v36",
+            "file": "bobo_v36_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.6",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v36"
+        },
+        "V3.6：載入 bobo_v36 模型（共用載入器），腹部星星維持 0.0714": {
+          "ok": true,
+          "detail": {
+            "file": "bobo_v36_medium.glb",
+            "star": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            }
+          }
+        },
+        "V3.6：不使用陰影貼圖與 GlowLayer（沿用 V3.5 繪製方式）": {
+          "ok": true,
+          "detail": {
+            "fps": 9.623361539737848,
+            "drawCalls": 24,
+            "activeMeshes": 21,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v36",
+            "file": "bobo_v36_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.6",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "V3.6：3 隻同場 Draw Calls 不高於 V3.5": {
+          "ok": true,
+          "detail": {
+            "v36": 24,
+            "v35": 24
+          }
+        },
+        "共用測試介面 __monsterLab 可用": {
+          "ok": true,
+          "detail": true
+        },
+        "成本分析（共用流程）：6 項都有結果與差值": {
+          "ok": true,
+          "detail": [
+            {
+              "name": "目前設定",
+              "avg": 13.840191917328067,
+              "low1": 13.14060446780954,
+              "draws": 24,
+              "gain": 0
+            },
+            {
+              "name": "關閉果凍內部星雲",
+              "avg": 21.659289951972994,
+              "low1": 18.97533206831748,
+              "draws": 24,
+              "gain": 7.819098034644927
+            },
+            {
+              "name": "關閉果凍材質（純透明）",
+              "avg": 23.54714137703657,
+              "low1": 20.746887966799967,
+              "draws": 24,
+              "gain": 9.706949459708504
+            },
+            {
+              "name": "關閉 MSAA 抗鋸齒",
+              "avg": 20.55397866301356,
+              "low1": 19.379844961249052,
+              "draws": 24,
+              "gain": 6.713786745685493
+            },
+            {
+              "name": "解析度 1.5x",
+              "avg": 10.141052825665975,
+              "low1": 9.75609756097561,
+              "draws": 24,
+              "gain": -3.699139091662092
+            },
+            {
+              "name": "隱藏啵啵（只剩場景）",
+              "avg": 12.937806117733619,
+              "low1": 12.254901960779069,
+              "draws": 5,
+              "gain": -0.9023857995944482
+            }
+          ]
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        },
+        "點擊效能測試：10 秒後顯示平均／最慢 1%／最低 FPS 與 Draw Calls": {
+          "ok": true,
+          "detail": "V3.6 效能測試（本機 WebGL 實測）\nbobo_v36_medium.glb・3 隻・畫質 medium・1x・10.1 秒\n平均 10.3 FPS・最慢 1% 8.5 FPS・最低 8.5 FPS\nDraw Calls 平均 24（最高 24）・畫面物件 21\n點此關閉"
+        },
+        "共用載入器釋放資源：零件全部移除": {
+          "ok": true,
+          "detail": {
+            "before": 15,
+            "after": 0
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "viewport": "iPhone SE 直向 / ?lab=bobo36",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3600,
+                "vertices": 1797
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 560,
+                "vertices": 322
+              }
+            ],
+            "trianglesTotal": 5912,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 11.851617745822088,
+            "drawCalls": 23,
+            "activeMeshes": 18,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v36",
+            "file": "bobo_v36_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.6",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 11.851617745822088,
+            "drawCalls": 23,
+            "activeMeshes": 18,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v36",
+            "file": "bobo_v36_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.6",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v36"
+        },
+        "V3.6：載入 bobo_v36 模型（共用載入器），腹部星星維持 0.0714": {
+          "ok": true,
+          "detail": {
+            "file": "bobo_v36_medium.glb",
+            "star": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            }
+          }
+        },
+        "V3.6：不使用陰影貼圖與 GlowLayer（沿用 V3.5 繪製方式）": {
+          "ok": true,
+          "detail": {
+            "fps": 11.851617745822088,
+            "drawCalls": 23,
+            "activeMeshes": 18,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v36",
+            "file": "bobo_v36_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.6",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "V3.6：3 隻同場 Draw Calls 不高於 V3.5": {
+          "ok": true,
+          "detail": {
+            "v36": 23,
+            "v35": 23
+          }
+        },
+        "共用測試介面 __monsterLab 可用": {
+          "ok": true,
+          "detail": true
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        },
+        "共用載入器釋放資源：零件全部移除": {
+          "ok": true,
+          "detail": {
+            "before": 15,
+            "after": 0
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "viewport": "iPhone 15 橫向 / ?lab=bobo37",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3600,
+                "vertices": 1797
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 560,
+                "vertices": 322
+              }
+            ],
+            "trianglesTotal": 5912,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 9.519120301985883,
+            "drawCalls": 24,
+            "activeMeshes": 21,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v37",
+            "file": "bobo_v37_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.7",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 9.519120301985883,
+            "drawCalls": 24,
+            "activeMeshes": 21,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v37",
+            "file": "bobo_v37_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.7",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v37"
+        },
+        "V3.7：載入 bobo_v37 模型（共用載入器），腹部星星維持 0.0714": {
+          "ok": true,
+          "detail": {
+            "file": "bobo_v37_medium.glb",
+            "star": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            }
+          }
+        },
+        "V3.7：不使用陰影貼圖與 GlowLayer": {
+          "ok": true,
+          "detail": {
+            "fps": 9.519120301985883,
+            "drawCalls": 24,
+            "activeMeshes": 21,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v37",
+            "file": "bobo_v37_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.7",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "V3.7：3 隻同場 Draw Calls 不高於 V3.6（≤25）": {
+          "ok": true,
+          "detail": {
+            "v37": 24,
+            "v36": 24
+          }
+        },
+        "設定圖對照模式可切換並恢復": {
+          "ok": true,
+          "detail": {
+            "on": true,
+            "off": false
+          }
+        },
+        "成本分析：6 項都有結果": {
+          "ok": true,
+          "detail": [
+            {
+              "name": "目前設定",
+              "avg": 13.596809282088328,
+              "low1": 13.089005235598105,
+              "draws": 24,
+              "gain": 0
+            },
+            {
+              "name": "關閉果凍內部星雲",
+              "avg": 21.794750307969537,
+              "low1": 20.366598777989587,
+              "draws": 24,
+              "gain": 8.197941025881208
+            },
+            {
+              "name": "關閉果凍材質（純透明）",
+              "avg": 24.135933577911068,
+              "low1": 22.421524663688835,
+              "draws": 24,
+              "gain": 10.53912429582274
+            },
+            {
+              "name": "關閉 MSAA 抗鋸齒",
+              "avg": 20.105313547151745,
+              "low1": 18.83239171373526,
+              "draws": 24,
+              "gain": 6.508504265063417
+            },
+            {
+              "name": "解析度 1.5x",
+              "avg": 9.97370568501203,
+              "low1": 9.615384615384615,
+              "draws": 24,
+              "gain": -3.623103597076298
+            },
+            {
+              "name": "隱藏啵啵（只剩場景）",
+              "avg": 18.053971873812838,
+              "low1": 13.60544217687075,
+              "draws": 5,
+              "gain": 4.45716259172451
+            }
+          ]
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        },
+        "點擊效能測試：10 秒後顯示平均／最慢 1%／最低 FPS 與 Draw Calls": {
+          "ok": true,
+          "detail": "V3.7 效能測試（本機 WebGL 實測）\nbobo_v37_medium.glb・3 隻・畫質 medium・1x・10.1 秒\n平均 13.8 FPS・最慢 1% 12.5 FPS・最低 11.8 FPS\nDraw Calls 平均 24（最高 24）・畫面物件 21\n點此關閉"
+        },
+        "共用載入器釋放資源：零件全部移除": {
+          "ok": true,
+          "detail": {
+            "before": 15,
+            "after": 0
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "viewport": "iPhone SE 直向 / ?lab=bobo37",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3600,
+                "vertices": 1797
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 560,
+                "vertices": 322
+              }
+            ],
+            "trianglesTotal": 5912,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 10.382778431508186,
+            "drawCalls": 23,
+            "activeMeshes": 18,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v37",
+            "file": "bobo_v37_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.7",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 10.382778431508186,
+            "drawCalls": 23,
+            "activeMeshes": 18,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v37",
+            "file": "bobo_v37_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.7",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v37"
+        },
+        "V3.7：載入 bobo_v37 模型（共用載入器），腹部星星維持 0.0714": {
+          "ok": true,
+          "detail": {
+            "file": "bobo_v37_medium.glb",
+            "star": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            }
+          }
+        },
+        "V3.7：不使用陰影貼圖與 GlowLayer": {
+          "ok": true,
+          "detail": {
+            "fps": 10.382778431508186,
+            "drawCalls": 23,
+            "activeMeshes": 18,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v37",
+            "file": "bobo_v37_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.7",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "V3.7：3 隻同場 Draw Calls 不高於 V3.6（≤25）": {
+          "ok": true,
+          "detail": {
+            "v37": 23,
+            "v36": 23
+          }
+        },
+        "設定圖對照模式可切換並恢復": {
+          "ok": true,
+          "detail": {
+            "on": true,
+            "off": false
+          }
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        },
+        "共用載入器釋放資源：零件全部移除": {
+          "ok": true,
+          "detail": {
+            "before": 15,
+            "after": 0
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone 15 橫向",
+      "checks": {
+        "啟動": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "3D 畫面有繪製": {
+          "ok": true,
+          "detail": {
+            "renderer": {
+              "webgl": 2,
+              "hardwareScaling": 0.6666666666666666,
+              "width": 1278,
+              "height": 589
+            },
+            "pixels": {
+              "samples": 3568,
+              "distinctColors": 159,
+              "opaqueRatio": 1
+            }
+          }
+        },
+        "HUD 不重疊/不超出安全區": {
+          "ok": true,
+          "detail": []
+        },
+        "草原：3 隻星露啵啵生成於出生點前方 6–9 公尺且看得到": {
+          "ok": true,
+          "detail": {
+            "mons0": [
+              {
+                "id": "star_dew_bobo#1",
+                "state": "move",
+                "mode": "chase",
+                "hp": 60,
+                "maxHp": 60,
+                "x": -1.234578384982565,
+                "y": 0,
+                "z": 4.783991241807437,
+                "spawnX": -1.6000000000000005,
+                "spawnZ": 6.2,
+                "visible": true
+              },
+              {
+                "id": "star_dew_bobo#2",
+                "state": "idle",
+                "mode": "idle",
+                "hp": 60,
+                "maxHp": 60,
+                "x": -3.2000000000000006,
+                "y": 0,
+                "z": 8,
+                "spawnX": -3.2000000000000006,
+                "spawnZ": 8,
+                "visible": true
+              },
+              {
+                "id": "star_dew_bobo#3",
+                "state": "idle",
+                "mode": "idle",
+                "hp": 60,
+                "maxHp": 60,
+                "x": 2.3999999999999995,
+                "y": 0,
+                "z": 8.6,
+                "spawnX": 2.3999999999999995,
+                "spawnZ": 8.6,
+                "visible": true
+              }
+            ],
+            "dists": [
+              6.403124237432849,
+              8.616263691415208,
+              8.928605714219886
+            ]
+          }
+        },
+        "草原：鎖定並攻擊、冷卻內不重複攻擊": {
+          "ok": true,
+          "detail": {
+            "a1": {
+              "ok": true,
+              "targetId": "star_dew_bobo#1",
+              "killed": false,
+              "damage": 20
+            },
+            "a2": {
+              "ok": false,
+              "reason": "cooldown"
+            },
+            "afterOne": {
+              "id": "star_dew_bobo#1",
+              "state": "attack",
+              "mode": "attack",
+              "hp": 40,
+              "maxHp": 60,
+              "x": -1.234578384982565,
+              "y": 0,
+              "z": 4.783991241807437,
+              "spawnX": -1.6000000000000005,
+              "spawnZ": 6.2,
+              "visible": true
+            }
+          }
+        },
+        "草原：鎖定同一隻並擊敗（播放死亡）": {
+          "ok": true,
+          "detail": {
+            "log": [
+              {
+                "ok": true,
+                "targetId": "star_dew_bobo#1",
+                "killed": false,
+                "damage": 20
+              },
+              {
+                "ok": true,
+                "targetId": "star_dew_bobo#1",
+                "killed": true,
+                "damage": 20
+              }
+            ],
+            "dying": {
+              "id": "star_dew_bobo#1",
+              "state": "death",
+              "mode": "attack",
+              "hp": 0,
+              "maxHp": 60,
+              "x": -1.2738642537955998,
+              "y": 0,
+              "z": 4.658131278107271,
+              "spawnX": -1.6000000000000005,
+              "spawnZ": 6.2,
+              "visible": true
+            }
+          }
+        },
+        "草原：死亡中的怪物不會被重複攻擊": {
+          "ok": true,
+          "detail": {
+            "ok": false,
+            "reason": "cooldown"
+          }
+        },
+        "草原：死亡後重生並回到待機/移動": {
+          "ok": true,
+          "detail": [
+            {
+              "id": "star_dew_bobo#1",
+              "state": "idle",
+              "mode": "idle",
+              "hp": 60,
+              "maxHp": 60,
+              "x": -1.6000000000000005,
+              "y": 0,
+              "z": 6.2,
+              "spawnX": -1.6000000000000005,
+              "spawnZ": 6.2,
+              "visible": true
+            },
+            {
+              "id": "star_dew_bobo#2",
+              "state": "move",
+              "mode": "return",
+              "hp": 60,
+              "maxHp": 60,
+              "x": -1.2106045838960644,
+              "y": 0,
+              "z": 2.50092843712314,
+              "spawnX": -3.2000000000000006,
+              "spawnZ": 8,
+              "visible": true
+            },
+            {
+              "id": "star_dew_bobo#3",
+              "state": "move",
+              "mode": "return",
+              "hp": 60,
+              "maxHp": 60,
+              "x": 1.0257221824185099,
+              "y": 0,
+              "z": 3.4737102038611622,
+              "spawnX": 2.3999999999999995,
+              "spawnZ": 8.6,
+              "visible": true
+            }
+          ]
+        },
+        "草原：怪物攻擊會打到玩家（扣暫定攻擊力 8）": {
+          "ok": true,
+          "detail": {
+            "hp": 0,
+            "maxHp": 100,
+            "down": true,
+            "hitsTaken": 13,
+            "lockedId": null,
+            "tilt": 1.4451326206513049
+          }
+        },
+        "草原：多隻同時存在、無異常狀態": {
+          "ok": true,
+          "detail": [
+            {
+              "id": "star_dew_bobo#1",
+              "state": "idle",
+              "mode": "idle",
+              "hp": 60,
+              "maxHp": 60,
+              "x": -1.6000000000000005,
+              "y": 0,
+              "z": 6.2,
+              "spawnX": -1.6000000000000005,
+              "spawnZ": 6.2,
+              "visible": true
+            },
+            {
+              "id": "star_dew_bobo#2",
+              "state": "move",
+              "mode": "return",
+              "hp": 60,
+              "maxHp": 60,
+              "x": -1.2106045838960644,
+              "y": 0,
+              "z": 2.50092843712314,
+              "spawnX": -3.2000000000000006,
+              "spawnZ": 8,
+              "visible": true
+            },
+            {
+              "id": "star_dew_bobo#3",
+              "state": "move",
+              "mode": "return",
+              "hp": 60,
+              "maxHp": 60,
+              "x": 1.0257221824185099,
+              "y": 0,
+              "z": 3.4737102038611622,
+              "spawnX": 2.3999999999999995,
+              "spawnZ": 8.6,
+              "visible": true
+            }
+          ]
+        },
+        "草原：多隻怪物不疊在一起、不擠進玩家": {
+          "ok": true,
+          "detail": {
+            "minPair": 2.9850178117813346,
+            "minToPlayer": 1.0481170647261886,
+            "ring": [
+              {
+                "id": "star_dew_bobo#1",
+                "state": "attack",
+                "mode": "attack",
+                "hp": 60,
+                "maxHp": 60,
+                "x": -1.1764265314861622,
+                "y": 0,
+                "z": 4.74552861385683,
+                "spawnX": -1.6000000000000005,
+                "spawnZ": 6.2,
+                "visible": true
+              },
+              {
+                "id": "star_dew_bobo#2",
+                "state": "move",
+                "mode": "chase",
+                "hp": 60,
+                "maxHp": 60,
+                "x": -2.844273614306549,
+                "y": 0,
+                "z": 7.221133074383461,
+                "spawnX": -3.2000000000000006,
+                "spawnZ": 8,
+                "visible": true
+              },
+              {
+                "id": "star_dew_bobo#3",
+                "state": "move",
+                "mode": "chase",
+                "hp": 60,
+                "maxHp": 60,
+                "x": 1.6260393595036697,
+                "y": 0,
+                "z": 7.345954732035103,
+                "spawnX": 2.3999999999999995,
+                "spawnZ": 8.6,
+                "visible": true
+              }
+            ],
+            "pl": {
+              "x": -0.9600000000000003,
+              "y": 0,
+              "z": 3.7199999999999998,
+              "yaw": -1.5707963267948966
+            }
+          }
+        },
+        "草原：玩家 HP 歸零時倒地且不能移動": {
+          "ok": true,
+          "detail": {
+            "downA": {
+              "c": {
+                "hp": 0,
+                "maxHp": 100,
+                "down": true,
+                "hitsTaken": 15,
+                "lockedId": null,
+                "tilt": 1.4451326206513049
+              },
+              "p": {
+                "x": -0.9600000000000003,
+                "y": 0,
+                "z": 3.7199999999999998,
+                "yaw": -1.5707963267948966
+              }
+            },
+            "downB": {
+              "c": {
+                "hp": 0,
+                "maxHp": 100,
+                "down": true,
+                "hitsTaken": 15,
+                "lockedId": null,
+                "tilt": 1.4451326206513049
+              },
+              "p": {
+                "x": -0.9600000000000003,
+                "y": 0,
+                "z": 3.7199999999999998,
+                "yaw": -1.5707963267948966
+              }
+            }
+          }
+        },
+        "草原：倒地後在出生點站起、HP 全滿": {
+          "ok": true,
+          "detail": {
+            "c": {
+              "hp": 100,
+              "maxHp": 100,
+              "down": false,
+              "hitsTaken": 15,
+              "lockedId": null,
+              "tilt": 0
+            },
+            "p": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "yaw": -1.5707963267948966
+            }
+          }
+        },
+        "搖桿移動角色": {
+          "ok": true,
+          "detail": {
+            "from": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "yaw": -1.5707963267948966
+            },
+            "to": {
+              "x": -3.6923100994292695e-16,
+              "y": 0,
+              "z": 6.0299999999999985,
+              "yaw": -7.302840996742231e-8
+            },
+            "moved": 6.0299999999999985
+          }
+        },
+        "拖曳旋轉攝影機": {
+          "ok": true,
+          "detail": {
+            "before": -1.5707963267948966,
+            "after": -2.350796326794897
+          }
+        },
+        "攻擊按鈕可按": {
+          "ok": true,
+          "detail": null
+        }
+      },
+      "errors": [],
+      "fpsReference": [
+        20.040080160320617,
+        20.44989775051122,
+        21.613832853025905,
+        23.84737678855322,
+        24.979184013322193,
+        26.666666666666625
+      ],
+      "screenshot": "e2e/webkit_iPhone_15_橫向.png",
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone SE 直向",
+      "checks": {
+        "啟動": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "3D 畫面有繪製": {
+          "ok": true,
+          "detail": {
+            "renderer": {
+              "webgl": 2,
+              "hardwareScaling": 0.6666666666666666,
+              "width": 562,
+              "height": 1000
+            },
+            "pixels": {
+              "samples": 2664,
+              "distinctColors": 165,
+              "opaqueRatio": 1
+            }
+          }
+        },
+        "HUD 不重疊/不超出安全區": {
+          "ok": true,
+          "detail": []
+        },
+        "草原：3 隻星露啵啵生成於出生點前方 6–9 公尺且看得到": {
+          "ok": true,
+          "detail": {
+            "mons0": [
+              {
+                "id": "star_dew_bobo#1",
+                "state": "move",
+                "mode": "chase",
+                "hp": 60,
+                "maxHp": 60,
+                "x": -0.9898978287564475,
+                "y": 0,
+                "z": 3.8358540864312336,
+                "spawnX": -1.6000000000000005,
+                "spawnZ": 6.2,
+                "visible": true
+              },
+              {
+                "id": "star_dew_bobo#2",
+                "state": "idle",
+                "mode": "idle",
+                "hp": 60,
+                "maxHp": 60,
+                "x": -3.2000000000000006,
+                "y": 0,
+                "z": 8,
+                "spawnX": -3.2000000000000006,
+                "spawnZ": 8,
+                "visible": true
+              },
+              {
+                "id": "star_dew_bobo#3",
+                "state": "idle",
+                "mode": "idle",
+                "hp": 60,
+                "maxHp": 60,
+                "x": 2.3999999999999995,
+                "y": 0,
+                "z": 8.6,
+                "spawnX": 2.3999999999999995,
+                "spawnZ": 8.6,
+                "visible": true
+              }
+            ],
+            "dists": [
+              6.403124237432849,
+              8.616263691415208,
+              8.928605714219886
+            ]
+          }
+        },
+        "搖桿移動角色": {
+          "ok": true,
+          "detail": {
+            "from": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "yaw": 0
+            },
+            "to": {
+              "x": -3.8178363963418735e-16,
+              "y": 0,
+              "z": 6.235,
+              "yaw": -6.123233835387199e-17
+            },
+            "moved": 6.235
+          }
+        },
+        "拖曳旋轉攝影機": {
+          "ok": true,
+          "detail": {
+            "before": -1.5707963267948966,
+            "after": -2.350796326794897
+          }
+        },
+        "攻擊按鈕可按": {
+          "ok": true,
+          "detail": null
+        }
+      },
+      "errors": [],
+      "fpsReference": [
+        19.404915912031036,
+        22.32142857142855,
+        22.607385079125827,
+        24.855012427506193,
+        27.149321266968286,
+        30.120481927710802
+      ],
+      "screenshot": "e2e/webkit_iPhone_SE_直向.png",
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone 15 橫向 / ?lab=bobo",
+      "checks": {
+        "場景啟動": {
+          "ok": true,
+          "detail": null
+        },
+        "介面不重疊": {
+          "ok": true,
+          "detail": null
+        },
+        "移動": {
+          "ok": true,
+          "detail": "move"
+        },
+        "攻擊：可發動、攻擊中不可重複、移動排隊": {
+          "ok": true,
+          "detail": {
+            "a1": {
+              "accepted": true
+            },
+            "a2": {
+              "accepted": false,
+              "reason": "攻擊動作進行中"
+            },
+            "queued": {
+              "accepted": true,
+              "queued": true
+            },
+            "overlay": {
+              "accepted": true,
+              "overlay": true
+            },
+            "state": "attack"
+          }
+        },
+        "攻擊中受擊為疊加": {
+          "ok": true,
+          "detail": {
+            "accepted": true,
+            "overlay": true
+          }
+        },
+        "攻擊結束回到移動": {
+          "ok": true,
+          "detail": "move"
+        },
+        "受傷": {
+          "ok": true,
+          "detail": "hit"
+        },
+        "死亡：不可攻擊/移動/受擊，播完進入 dead": {
+          "ok": true,
+          "detail": [
+            {
+              "accepted": false,
+              "reason": "死亡中無法攻擊"
+            },
+            {
+              "accepted": false,
+              "reason": "死亡中無法移動"
+            },
+            {
+              "accepted": false,
+              "reason": "已死亡"
+            }
+          ]
+        },
+        "重生後恢復完整": {
+          "ok": true,
+          "detail": {
+            "state": "idle",
+            "pose": {
+              "offsetY": 0,
+              "offsetZ": 0,
+              "shakeX": 0,
+              "scaleY": 0.9554489354027549,
+              "scaleXZ": 1.0230485862844978,
+              "stretchZ": 1,
+              "lean": 0,
+              "opacity": 1,
+              "starGlow": 0.701496451342516,
+              "antennaSway": -0.0799728952876273,
+              "wingFlap": -0.05021839908705676,
+              "hitFlash": 0,
+              "face": "normal",
+              "ringScale": 0,
+              "ringOpacity": 0,
+              "bodyVisible": true
+            }
+          }
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "e2e/webkit_bobo_1_idle.png",
+        "e2e/webkit_bobo_2_move.png",
+        "e2e/webkit_bobo_2b_move.png",
+        "e2e/webkit_bobo_3_attack.png",
+        "e2e/webkit_bobo_4_hit.png",
+        "e2e/webkit_bobo_5_death.png",
+        "e2e/webkit_bobo_6_respawn.png"
+      ],
+      "fpsReference": [
+        29.211295034079832
+      ],
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone 15 橫向 / ?lab=dummy",
+      "checks": {
+        "場景啟動": {
+          "ok": true,
+          "detail": null
+        },
+        "介面不重疊": {
+          "ok": true,
+          "detail": null
+        },
+        "移動": {
+          "ok": true,
+          "detail": "move"
+        },
+        "攻擊：可發動、攻擊中不可重複、移動排隊": {
+          "ok": true,
+          "detail": {
+            "a1": {
+              "accepted": true
+            },
+            "a2": {
+              "accepted": false,
+              "reason": "攻擊動作進行中"
+            },
+            "queued": {
+              "accepted": true,
+              "queued": true
+            },
+            "overlay": {
+              "accepted": true,
+              "overlay": true
+            },
+            "state": "attack"
+          }
+        },
+        "攻擊中受擊為疊加": {
+          "ok": true,
+          "detail": {
+            "accepted": true,
+            "overlay": true
+          }
+        },
+        "攻擊結束回到移動": {
+          "ok": true,
+          "detail": "move"
+        },
+        "受傷": {
+          "ok": true,
+          "detail": "hit"
+        },
+        "死亡：不可攻擊/移動/受擊，播完進入 dead": {
+          "ok": true,
+          "detail": [
+            {
+              "accepted": false,
+              "reason": "死亡中無法攻擊"
+            },
+            {
+              "accepted": false,
+              "reason": "死亡中無法移動"
+            },
+            {
+              "accepted": false,
+              "reason": "已死亡"
+            }
+          ]
+        },
+        "重生後恢復完整": {
+          "ok": true,
+          "detail": {
+            "state": "idle",
+            "pose": {
+              "offsetY": 0,
+              "offsetZ": 0,
+              "shakeX": 0,
+              "scaleY": 1,
+              "scaleXZ": 1,
+              "stretchZ": 1,
+              "lean": 0,
+              "opacity": 1,
+              "starGlow": 1,
+              "antennaSway": 0,
+              "wingFlap": 0,
+              "hitFlash": 0,
+              "face": "normal",
+              "ringScale": 0,
+              "ringOpacity": 0,
+              "bodyVisible": true
+            }
+          }
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "e2e/webkit_dummy_1_idle.png",
+        "e2e/webkit_dummy_2_move.png",
+        "e2e/webkit_dummy_2b_move.png",
+        "e2e/webkit_dummy_3_attack.png",
+        "e2e/webkit_dummy_4_hit.png",
+        "e2e/webkit_dummy_5_death.png",
+        "e2e/webkit_dummy_6_respawn.png"
+      ],
+      "fpsReference": [
+        28.169014084507037
+      ],
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone 15 橫向 / ?lab=field",
+      "checks": {
+        "場景啟動（含 GLB 載入）": {
+          "ok": true,
+          "detail": null
+        },
+        "同時生成 5 隻怪物（3 程式化 + 2 GLB）": {
+          "ok": true,
+          "detail": [
+            "star_dew_bobo#1",
+            "star_dew_bobo#2",
+            "star_dew_bobo#3",
+            "test_dummy#4",
+            "test_dummy#5"
+          ]
+        },
+        "介面不重疊": {
+          "ok": true,
+          "detail": null
+        },
+        "AI：目標靠近時追擊/攻擊": {
+          "ok": true,
+          "detail": {
+            "id": "star_dew_bobo#1",
+            "monsterId": "star_dew_bobo",
+            "state": "move",
+            "mode": "chase",
+            "hp": 60,
+            "maxHp": 60,
+            "x": -5,
+            "z": -3
+          }
+        },
+        "受傷→死亡": {
+          "ok": true,
+          "detail": "star_dew_bobo#1"
+        },
+        "AI：死亡後停止行動": {
+          "ok": true,
+          "detail": {
+            "id": "star_dew_bobo#1",
+            "monsterId": "star_dew_bobo",
+            "state": "death",
+            "mode": "dead",
+            "hp": 0,
+            "maxHp": 60,
+            "x": -4.84,
+            "z": -3
+          }
+        },
+        "AI：目標離開後不再追擊": {
+          "ok": true,
+          "detail": [
+            "star_dew_bobo#1:dead",
+            "star_dew_bobo#2:return",
+            "star_dew_bobo#3:return",
+            "test_dummy#4:return",
+            "test_dummy#5:idle"
+          ]
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "e2e/webkit_field_1_engage.png",
+        "e2e/webkit_field_2_after.png"
+      ],
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone 15 橫向 / ?lab=bobo3",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3600,
+                "vertices": 1799
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 1120,
+                "vertices": 644
+              }
+            ],
+            "trianglesTotal": 6472,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 9.183673469387756,
+            "drawCalls": 36,
+            "activeMeshes": 20,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v3",
+            "file": "bobo_v3_medium.glb",
+            "bellyStar": null,
+            "bellyStarVersion": null,
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 9.183673469387756,
+            "drawCalls": 36,
+            "activeMeshes": 20,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v3",
+            "file": "bobo_v3_medium.glb",
+            "bellyStar": null,
+            "bellyStarVersion": null,
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v3"
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone SE 直向 / ?lab=bobo3",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3600,
+                "vertices": 1799
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 1120,
+                "vertices": 644
+              }
+            ],
+            "trianglesTotal": 6472,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 17.857142857142858,
+            "drawCalls": 36,
+            "activeMeshes": 18,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v3",
+            "file": "bobo_v3_medium.glb",
+            "bellyStar": null,
+            "bellyStarVersion": null,
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 17.857142857142858,
+            "drawCalls": 36,
+            "activeMeshes": 18,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v3",
+            "file": "bobo_v3_medium.glb",
+            "bellyStar": null,
+            "bellyStarVersion": null,
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v3"
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone 15 橫向 / ?lab=bobo31",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3599,
+                "vertices": 1785
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 560,
+                "vertices": 322
+              }
+            ],
+            "trianglesTotal": 5911,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 9.67741935483871,
+            "drawCalls": 33,
+            "activeMeshes": 20,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v31",
+            "file": "bobo_v31_medium.glb",
+            "bellyStar": null,
+            "bellyStarVersion": null,
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 9.67741935483871,
+            "drawCalls": 33,
+            "activeMeshes": 20,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v31",
+            "file": "bobo_v31_medium.glb",
+            "bellyStar": null,
+            "bellyStarVersion": null,
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v31"
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone SE 直向 / ?lab=bobo31",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3599,
+                "vertices": 1785
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 560,
+                "vertices": 322
+              }
+            ],
+            "trianglesTotal": 5911,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 17.838405036726126,
+            "drawCalls": 31,
+            "activeMeshes": 17,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v31",
+            "file": "bobo_v31_medium.glb",
+            "bellyStar": null,
+            "bellyStarVersion": null,
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 17.838405036726126,
+            "drawCalls": 31,
+            "activeMeshes": 17,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v31",
+            "file": "bobo_v31_medium.glb",
+            "bellyStar": null,
+            "bellyStarVersion": null,
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v31"
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone 15 橫向 / ?lab=bobo32",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3599,
+                "vertices": 1785
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 560,
+                "vertices": 322
+              }
+            ],
+            "trianglesTotal": 5911,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 10.672358591248665,
+            "drawCalls": 33,
+            "activeMeshes": 20,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v32",
+            "file": "bobo_v31_medium.glb",
+            "bellyStar": {
+              "outer": 0.084,
+              "inner": 0.042,
+              "centerY": 0.248
+            },
+            "bellyStarVersion": null,
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 10.672358591248665,
+            "drawCalls": 33,
+            "activeMeshes": 20,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v32",
+            "file": "bobo_v31_medium.glb",
+            "bellyStar": {
+              "outer": 0.084,
+              "inner": 0.042,
+              "centerY": 0.248
+            },
+            "bellyStarVersion": null,
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v32"
+        },
+        "V3.2 保持不變（腹部星星 0.084）": {
+          "ok": true,
+          "detail": {
+            "file": "bobo_v31_medium.glb",
+            "star": {
+              "outer": 0.084,
+              "inner": 0.042,
+              "centerY": 0.248
+            }
+          }
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone SE 直向 / ?lab=bobo32",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3599,
+                "vertices": 1785
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 560,
+                "vertices": 322
+              }
+            ],
+            "trianglesTotal": 5911,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 17.222820236813774,
+            "drawCalls": 31,
+            "activeMeshes": 17,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v32",
+            "file": "bobo_v31_medium.glb",
+            "bellyStar": {
+              "outer": 0.084,
+              "inner": 0.042,
+              "centerY": 0.248
+            },
+            "bellyStarVersion": null,
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 17.222820236813774,
+            "drawCalls": 31,
+            "activeMeshes": 17,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v32",
+            "file": "bobo_v31_medium.glb",
+            "bellyStar": {
+              "outer": 0.084,
+              "inner": 0.042,
+              "centerY": 0.248
+            },
+            "bellyStarVersion": null,
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v32"
+        },
+        "V3.2 保持不變（腹部星星 0.084）": {
+          "ok": true,
+          "detail": {
+            "file": "bobo_v31_medium.glb",
+            "star": {
+              "outer": 0.084,
+              "inner": 0.042,
+              "centerY": 0.248
+            }
+          }
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone 15 橫向 / ?lab=bobo33",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3599,
+                "vertices": 1785
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 560,
+                "vertices": 322
+              }
+            ],
+            "trianglesTotal": 5911,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 12.958963282937367,
+            "drawCalls": 33,
+            "activeMeshes": 20,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v33",
+            "file": "bobo_v33_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.3",
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 12.958963282937367,
+            "drawCalls": 33,
+            "activeMeshes": 20,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v33",
+            "file": "bobo_v33_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.3",
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v33"
+        },
+        "V3.3：載入 bobo_v33 模型，腹部星星取自模型（0.0714）": {
+          "ok": true,
+          "detail": {
+            "file": "bobo_v33_medium.glb",
+            "star": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "v": "3.3"
+          }
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone SE 直向 / ?lab=bobo33",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3599,
+                "vertices": 1785
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 560,
+                "vertices": 322
+              }
+            ],
+            "trianglesTotal": 5911,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 17.80104712041885,
+            "drawCalls": 31,
+            "activeMeshes": 17,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v33",
+            "file": "bobo_v33_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.3",
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 17.80104712041885,
+            "drawCalls": 31,
+            "activeMeshes": 17,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v33",
+            "file": "bobo_v33_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.3",
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v33"
+        },
+        "V3.3：載入 bobo_v33 模型，腹部星星取自模型（0.0714）": {
+          "ok": true,
+          "detail": {
+            "file": "bobo_v33_medium.glb",
+            "star": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "v": "3.3"
+          }
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone 15 橫向 / ?lab=bobo34",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3599,
+                "vertices": 1783
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 560,
+                "vertices": 322
+              }
+            ],
+            "trianglesTotal": 5911,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 10.17293997965412,
+            "drawCalls": 33,
+            "activeMeshes": 20,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v34",
+            "file": "bobo_v34_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.4",
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 10.17293997965412,
+            "drawCalls": 33,
+            "activeMeshes": 20,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v34",
+            "file": "bobo_v34_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.4",
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v34"
+        },
+        "V3.4：載入 bobo_v34 模型，腹部星星維持 0.0714": {
+          "ok": true,
+          "detail": {
+            "file": "bobo_v34_medium.glb",
+            "star": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "v": "3.4"
+          }
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone SE 直向 / ?lab=bobo34",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3599,
+                "vertices": 1783
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 560,
+                "vertices": 322
+              }
+            ],
+            "trianglesTotal": 5911,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 17.74530271398747,
+            "drawCalls": 31,
+            "activeMeshes": 17,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v34",
+            "file": "bobo_v34_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.4",
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 17.74530271398747,
+            "drawCalls": 31,
+            "activeMeshes": 17,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v34",
+            "file": "bobo_v34_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.4",
+            "shadowMap": true,
+            "refMode": false,
+            "glowLayer": true
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v34"
+        },
+        "V3.4：載入 bobo_v34 模型，腹部星星維持 0.0714": {
+          "ok": true,
+          "detail": {
+            "file": "bobo_v34_medium.glb",
+            "star": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "v": "3.4"
+          }
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone 15 橫向 / ?lab=bobo35",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3600,
+                "vertices": 1802
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 560,
+                "vertices": 322
+              }
+            ],
+            "trianglesTotal": 5912,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 11.351909184726521,
+            "drawCalls": 24,
+            "activeMeshes": 21,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v35",
+            "file": "bobo_v35_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.5",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 11.351909184726521,
+            "drawCalls": 24,
+            "activeMeshes": 21,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v35",
+            "file": "bobo_v35_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.5",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v35"
+        },
+        "V3.5：載入 bobo_v35 模型，腹部星星維持 0.0714": {
+          "ok": true,
+          "detail": {
+            "file": "bobo_v35_medium.glb",
+            "star": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            }
+          }
+        },
+        "V3.5：不使用陰影貼圖與 GlowLayer（改用接觸陰影與星星光暈）": {
+          "ok": true,
+          "detail": {
+            "fps": 11.351909184726521,
+            "drawCalls": 24,
+            "activeMeshes": 21,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v35",
+            "file": "bobo_v35_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.5",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "V3.5：3 隻同場 Draw Calls 不高於 V3.4": {
+          "ok": true,
+          "detail": {
+            "v35": 24,
+            "v34": 33
+          }
+        },
+        "成本分析：6 項都有結果": {
+          "ok": true,
+          "detail": [
+            {
+              "name": "目前設定",
+              "avg": 23.969319271332687,
+              "low1": 20.408163265306122,
+              "draws": 24,
+              "gain": 0
+            },
+            {
+              "name": "關閉果凍內部星雲",
+              "avg": 33.81642512077293,
+              "low1": 28.57142857142857,
+              "draws": 24,
+              "gain": 9.84710584944024
+            },
+            {
+              "name": "關閉果凍材質（純透明）",
+              "avg": 40.3458213256484,
+              "low1": 28.57142857142857,
+              "draws": 24,
+              "gain": 16.376502054315715
+            },
+            {
+              "name": "關閉 MSAA 抗鋸齒",
+              "avg": 36.23898139079332,
+              "low1": 23.255813953488374,
+              "draws": 24,
+              "gain": 12.269662119460634
+            },
+            {
+              "name": "解析度 1.5x",
+              "avg": 25.072324011571833,
+              "low1": 21.73913043478261,
+              "draws": 24,
+              "gain": 1.1030047402391467
+            },
+            {
+              "name": "隱藏啵啵（只剩場景）",
+              "avg": 34.849951597289426,
+              "low1": 32.25806451612903,
+              "draws": 5,
+              "gain": 10.88063232595674
+            }
+          ]
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone SE 直向 / ?lab=bobo35",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3600,
+                "vertices": 1802
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 560,
+                "vertices": 322
+              }
+            ],
+            "trianglesTotal": 5912,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 24.364406779661028,
+            "drawCalls": 23,
+            "activeMeshes": 18,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v35",
+            "file": "bobo_v35_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.5",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 24.364406779661028,
+            "drawCalls": 23,
+            "activeMeshes": 18,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v35",
+            "file": "bobo_v35_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.5",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v35"
+        },
+        "V3.5：載入 bobo_v35 模型，腹部星星維持 0.0714": {
+          "ok": true,
+          "detail": {
+            "file": "bobo_v35_medium.glb",
+            "star": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            }
+          }
+        },
+        "V3.5：不使用陰影貼圖與 GlowLayer（改用接觸陰影與星星光暈）": {
+          "ok": true,
+          "detail": {
+            "fps": 24.364406779661028,
+            "drawCalls": 23,
+            "activeMeshes": 18,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v35",
+            "file": "bobo_v35_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.5",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "V3.5：3 隻同場 Draw Calls 不高於 V3.4": {
+          "ok": true,
+          "detail": {
+            "v35": 23,
+            "v34": 31
+          }
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone 15 橫向 / ?lab=bobo36",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3600,
+                "vertices": 1797
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 560,
+                "vertices": 322
+              }
+            ],
+            "trianglesTotal": 5912,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 13.086150490730645,
+            "drawCalls": 24,
+            "activeMeshes": 21,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v36",
+            "file": "bobo_v36_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.6",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 13.086150490730645,
+            "drawCalls": 24,
+            "activeMeshes": 21,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v36",
+            "file": "bobo_v36_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.6",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v36"
+        },
+        "V3.6：載入 bobo_v36 模型（共用載入器），腹部星星維持 0.0714": {
+          "ok": true,
+          "detail": {
+            "file": "bobo_v36_medium.glb",
+            "star": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            }
+          }
+        },
+        "V3.6：不使用陰影貼圖與 GlowLayer（沿用 V3.5 繪製方式）": {
+          "ok": true,
+          "detail": {
+            "fps": 13.086150490730645,
+            "drawCalls": 24,
+            "activeMeshes": 21,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v36",
+            "file": "bobo_v36_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.6",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "V3.6：3 隻同場 Draw Calls 不高於 V3.5": {
+          "ok": true,
+          "detail": {
+            "v36": 24,
+            "v35": 24
+          }
+        },
+        "共用測試介面 __monsterLab 可用": {
+          "ok": true,
+          "detail": true
+        },
+        "成本分析（共用流程）：6 項都有結果與差值": {
+          "ok": true,
+          "detail": [
+            {
+              "name": "目前設定",
+              "avg": 25.193798449612398,
+              "low1": 21.27659574468085,
+              "draws": 24,
+              "gain": 0
+            },
+            {
+              "name": "關閉果凍內部星雲",
+              "avg": 35.36345776031432,
+              "low1": 32.25806451612903,
+              "draws": 24,
+              "gain": 10.16965931070192
+            },
+            {
+              "name": "關閉果凍材質（純透明）",
+              "avg": 42.71844660194173,
+              "low1": 33.333333333333336,
+              "draws": 24,
+              "gain": 17.52464815232933
+            },
+            {
+              "name": "關閉 MSAA 抗鋸齒",
+              "avg": 37.53609239653511,
+              "low1": 31.25,
+              "draws": 24,
+              "gain": 12.342293946922712
+            },
+            {
+              "name": "解析度 1.5x",
+              "avg": 24.856596558317392,
+              "low1": 17.241379310344826,
+              "draws": 24,
+              "gain": -0.3372018912950061
+            },
+            {
+              "name": "隱藏啵啵（只剩場景）",
+              "avg": 33.91472868217052,
+              "low1": 28.57142857142857,
+              "draws": 5,
+              "gain": 8.720930232558121
+            }
+          ]
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        },
+        "點擊效能測試：10 秒後顯示平均／最慢 1%／最低 FPS 與 Draw Calls": {
+          "ok": true,
+          "detail": "V3.6 效能測試（本機 WebGL 實測）\nbobo_v36_medium.glb・3 隻・畫質 medium・1x・10 秒\n平均 25.3 FPS・最慢 1% 20.8 FPS・最低 20.4 FPS\nDraw Calls 平均 24（最高 24）・畫面物件 21\n點此關閉"
+        },
+        "共用載入器釋放資源：零件全部移除": {
+          "ok": true,
+          "detail": {
+            "before": 15,
+            "after": 0
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone SE 直向 / ?lab=bobo36",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3600,
+                "vertices": 1797
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 560,
+                "vertices": 322
+              }
+            ],
+            "trianglesTotal": 5912,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 23.758099352051833,
+            "drawCalls": 23,
+            "activeMeshes": 18,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v36",
+            "file": "bobo_v36_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.6",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 23.758099352051833,
+            "drawCalls": 23,
+            "activeMeshes": 18,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v36",
+            "file": "bobo_v36_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.6",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v36"
+        },
+        "V3.6：載入 bobo_v36 模型（共用載入器），腹部星星維持 0.0714": {
+          "ok": true,
+          "detail": {
+            "file": "bobo_v36_medium.glb",
+            "star": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            }
+          }
+        },
+        "V3.6：不使用陰影貼圖與 GlowLayer（沿用 V3.5 繪製方式）": {
+          "ok": true,
+          "detail": {
+            "fps": 23.758099352051833,
+            "drawCalls": 23,
+            "activeMeshes": 18,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v36",
+            "file": "bobo_v36_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.6",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "V3.6：3 隻同場 Draw Calls 不高於 V3.5": {
+          "ok": true,
+          "detail": {
+            "v36": 23,
+            "v35": 23
+          }
+        },
+        "共用測試介面 __monsterLab 可用": {
+          "ok": true,
+          "detail": true
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        },
+        "共用載入器釋放資源：零件全部移除": {
+          "ok": true,
+          "detail": {
+            "before": 15,
+            "after": 0
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone 15 橫向 / ?lab=bobo37",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3600,
+                "vertices": 1797
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 560,
+                "vertices": 322
+              }
+            ],
+            "trianglesTotal": 5912,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 13.086150490730642,
+            "drawCalls": 24,
+            "activeMeshes": 21,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v37",
+            "file": "bobo_v37_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.7",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 13.086150490730642,
+            "drawCalls": 24,
+            "activeMeshes": 21,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v37",
+            "file": "bobo_v37_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.7",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v37"
+        },
+        "V3.7：載入 bobo_v37 模型（共用載入器），腹部星星維持 0.0714": {
+          "ok": true,
+          "detail": {
+            "file": "bobo_v37_medium.glb",
+            "star": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            }
+          }
+        },
+        "V3.7：不使用陰影貼圖與 GlowLayer": {
+          "ok": true,
+          "detail": {
+            "fps": 13.086150490730642,
+            "drawCalls": 24,
+            "activeMeshes": 21,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v37",
+            "file": "bobo_v37_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.7",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "V3.7：3 隻同場 Draw Calls 不高於 V3.6（≤25）": {
+          "ok": true,
+          "detail": {
+            "v37": 24,
+            "v36": 24
+          }
+        },
+        "設定圖對照模式可切換並恢復": {
+          "ok": true,
+          "detail": {
+            "on": true,
+            "off": false
+          }
+        },
+        "成本分析：6 項都有結果": {
+          "ok": true,
+          "detail": [
+            {
+              "name": "目前設定",
+              "avg": 25.399811853245527,
+              "low1": 20.408163265306122,
+              "draws": 24,
+              "gain": 0
+            },
+            {
+              "name": "關閉果凍內部星雲",
+              "avg": 33.88189738625361,
+              "low1": 31.25,
+              "draws": 24,
+              "gain": 8.482085533008085
+            },
+            {
+              "name": "關閉果凍材質（純透明）",
+              "avg": 43.310875842155895,
+              "low1": 38.46153846153846,
+              "draws": 24,
+              "gain": 17.911063988910367
+            },
+            {
+              "name": "關閉 MSAA 抗鋸齒",
+              "avg": 35.36345776031432,
+              "low1": 27.77777777777778,
+              "draws": 24,
+              "gain": 9.963645907068791
+            },
+            {
+              "name": "解析度 1.5x",
+              "avg": 24.061597690086614,
+              "low1": 19.607843137254903,
+              "draws": 24,
+              "gain": -1.3382141631589128
+            },
+            {
+              "name": "隱藏啵啵（只剩場景）",
+              "avg": 34.188034188034166,
+              "low1": 30.3030303030303,
+              "draws": 5,
+              "gain": 8.788222334788639
+            }
+          ]
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        },
+        "點擊效能測試：10 秒後顯示平均／最慢 1%／最低 FPS 與 Draw Calls": {
+          "ok": true,
+          "detail": "V3.7 效能測試（本機 WebGL 實測）\nbobo_v37_medium.glb・3 隻・畫質 medium・1x・10 秒\n平均 24.1 FPS・最慢 1% 19.2 FPS・最低 18.5 FPS\nDraw Calls 平均 24（最高 24）・畫面物件 21\n點此關閉"
+        },
+        "共用載入器釋放資源：零件全部移除": {
+          "ok": true,
+          "detail": {
+            "before": 15,
+            "after": 0
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone SE 直向 / ?lab=bobo37",
+      "checks": {
+        "V3 模型載入（GLB）": {
+          "ok": true,
+          "detail": "載入中…"
+        },
+        "零件齊全（身體、眼睛、嘴、腮紅、星星）": {
+          "ok": true,
+          "detail": {
+            "quality": "medium",
+            "meshes": [
+              {
+                "name": "Body_medium_0",
+                "triangles": 3600,
+                "vertices": 1797
+              },
+              {
+                "name": "Eyes_0",
+                "triangles": 1296,
+                "vertices": 722
+              },
+              {
+                "name": "Mouth_0",
+                "triangles": 200,
+                "vertices": 121
+              },
+              {
+                "name": "Blush_0",
+                "triangles": 256,
+                "vertices": 162
+              },
+              {
+                "name": "Stars_0",
+                "triangles": 560,
+                "vertices": 322
+              }
+            ],
+            "trianglesTotal": 5912,
+            "materials": 5
+          }
+        },
+        "表情切換確實改變眼睛貼圖（8 種各不相同）": {
+          "ok": true,
+          "detail": [
+            "0,0.5",
+            "0.25,0.5",
+            "0.5,0.5",
+            "0.75,0.5",
+            "0,1",
+            "0.25,1",
+            "0.5,1",
+            "0.75,1"
+          ]
+        },
+        "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
+          "ok": true,
+          "detail": {
+            "fps": 22.58064516129032,
+            "drawCalls": 23,
+            "activeMeshes": 18,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v37",
+            "file": "bobo_v37_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.7",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "果凍材質著色器正常（中／高畫質）": {
+          "ok": true,
+          "detail": {
+            "fps": 22.58064516129032,
+            "drawCalls": 23,
+            "activeMeshes": 18,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v37",
+            "file": "bobo_v37_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.7",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "載入的是正確版本": {
+          "ok": true,
+          "detail": "v37"
+        },
+        "V3.7：載入 bobo_v37 模型（共用載入器），腹部星星維持 0.0714": {
+          "ok": true,
+          "detail": {
+            "file": "bobo_v37_medium.glb",
+            "star": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            }
+          }
+        },
+        "V3.7：不使用陰影貼圖與 GlowLayer": {
+          "ok": true,
+          "detail": {
+            "fps": 22.58064516129032,
+            "drawCalls": 23,
+            "activeMeshes": 18,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "jelly": true,
+            "variant": "v37",
+            "file": "bobo_v37_medium.glb",
+            "bellyStar": {
+              "outer": 0.0714,
+              "inner": 0.0357,
+              "centerY": 0.24
+            },
+            "bellyStarVersion": "3.7",
+            "shadowMap": false,
+            "refMode": false,
+            "glowLayer": false
+          }
+        },
+        "V3.7：3 隻同場 Draw Calls 不高於 V3.6（≤25）": {
+          "ok": true,
+          "detail": {
+            "v37": 23,
+            "v36": 23
+          }
+        },
+        "設定圖對照模式可切換並恢復": {
+          "ok": true,
+          "detail": {
+            "on": true,
+            "off": false
+          }
+        },
+        "按鈕不重疊、效能測試按鈕可點": {
+          "ok": true,
+          "detail": {
+            "overlaps": [],
+            "benchOnTop": true,
+            "inView": true
+          }
+        },
+        "共用載入器釋放資源：零件全部移除": {
+          "ok": true,
+          "detail": {
+            "before": 15,
+            "after": 0
+          }
+        }
+      },
+      "errors": [],
+      "ok": true
+    }
+  ],
+  "finishedAt": "2026-11-19T06:46:05.203Z",
+  "failures": 0
+}
