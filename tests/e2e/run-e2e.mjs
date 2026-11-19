@@ -501,6 +501,46 @@ for (const name of browsers) {
             run.errors.length === 0,
           an,
         );
+        const mv = await page.evaluate(async () => {
+          const api = window.__monsterLab;
+          const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+          api.setCount(1);
+          api.setAnim("move");
+          await wait(250); // 轉身朝向前進方向後開始前進（來回距離 ±0.45 公尺，量測期間還不會折返）
+          const a = api.animState();
+          let maxLift = 0;
+          let minY = 9;
+          for (let i = 0; i < 12; i++) {
+            await wait(50);
+            const s = api.animState();
+            maxLift = Math.max(maxLift, s.lift);
+            minY = Math.min(minY, s.y);
+          }
+          const b = api.animState();
+          api.setAnim("idle");
+          await wait(1300);
+          const c = api.animState();
+          await wait(400);
+          const d = api.animState();
+          api.setCount(3);
+          return { a, b, c, d, maxLift, minY };
+        });
+        {
+          const dx = mv.b.x - mv.a.x;
+          const dz = mv.b.z - mv.a.z;
+          const len = Math.hypot(dx, dz);
+          const dot = len > 0 ? (dx * Math.sin(mv.b.yaw) + dz * Math.cos(mv.b.yaw)) / len : 0;
+          check(
+            "V3.8R 第四階段：移動（彈跳離地、前進方向與朝向一致、不穿地）",
+            mv.a.anim === "move" && len > 0.05 && dot > 0.9 && mv.maxLift > 0.02 && mv.minY >= 0 && run.errors.length === 0,
+            { len, dot, maxLift: mv.maxLift, minY: mv.minY },
+          );
+          check(
+            "V3.8R 第四階段：停止移動後接回待機（落地、不再前進）",
+            mv.c.anim === "idle" && mv.c.lift === 0 && Math.hypot(mv.d.x - mv.c.x, mv.d.z - mv.c.z) < 1e-6,
+            { c: mv.c, d: mv.d },
+          );
+        }
         const d38 = drawCalls3[`bobo38|${vp.name}`];
         check("V3.8R：3 隻同場 Draw Calls 不高於 V3.8（≤25）", typeof d38 === "number" && perf.drawCalls <= d38 && perf.drawCalls <= 25, { v38r: perf.drawCalls, v38: d38 });
         const views = await page.evaluate(async () => {

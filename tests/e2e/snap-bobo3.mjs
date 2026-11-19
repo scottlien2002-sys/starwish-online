@@ -80,6 +80,22 @@ if (ok && closeOnly) {
         shots.push({ name: `a_idle_${v}_${k}`, label: `待機 ${v} ${k}` });
       }
     }
+    // 移動（果凍彈跳）：原地停格一次彈跳 12 格（0.62 秒），側面與 45 度
+    const hasMove = await page.evaluate(() => {
+      window.__monsterLab.setAnim("move");
+      return window.__monsterLab.perf().anim === "move";
+    });
+    if (hasMove) {
+      for (const v of ["side", "q45"]) {
+        await page.evaluate((x) => window.__monsterLab.setView(x), v);
+        for (let k = 0; k < 12; k++) {
+          await page.evaluate((t) => window.__monsterLab.holdAnimAt(t), (k * 0.62) / 12);
+          await page.waitForTimeout(250);
+          await page.screenshot({ path: `${outDir}/a_move_${v}_${String(k).padStart(2, "0")}.png` });
+          shots.push({ name: `a_move_${v}_${k}`, label: `移動 ${v} ${k}` });
+        }
+      }
+    }
     await page.evaluate(() => {
       window.__monsterLab.setRefMode(false);
       window.__monsterLab.setView("front");

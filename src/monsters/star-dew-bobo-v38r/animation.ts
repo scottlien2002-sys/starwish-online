@@ -8,11 +8,11 @@
  * - 頭頂星星：跟著觸角末端的位移一起移動（仍是真正的 3D 物件，不面向鏡頭）
  * - 眨眼：只換眼睛貼圖座標（和表情同一張貼圖），模型外型不變
  *
- * 目前完成：待機（idle）。移動、攻擊、受傷、死亡在待機驗收後依序加入。
+ * 目前完成：待機（idle，已驗收）、移動（move，果凍彈跳）。攻擊、受傷、死亡之後依序加入。
  */
 
-export type BoboAnimName = "none" | "idle";
-export const BOBO_ANIMS: readonly BoboAnimName[] = ["none", "idle"];
+export type BoboAnimName = "none" | "idle" | "move";
+export const BOBO_ANIMS: readonly BoboAnimName[] = ["none", "idle", "move"];
 
 /** 一幀的姿勢（全部是相對於靜止姿勢的變化量） */
 export interface BoboPose {
@@ -29,9 +29,11 @@ export interface BoboPose {
   swayZ: number;
   /** 翅膀拍動量（約為角度，弧度） */
   flap: number;
+  /** 離地高度（公尺；彈跳用，其他動畫為 0） */
+  lift: number;
 }
 
-export const REST_POSE: BoboPose = { sy: 1, sxz: 1, roll: 0, pitch: 0, swayX: 0, swayZ: 0, flap: 0 };
+export const REST_POSE: BoboPose = { sy: 1, sxz: 1, roll: 0, pitch: 0, swayX: 0, swayZ: 0, flap: 0, lift: 0 };
 
 /** 待機週期（秒）：一次慢慢的「呼吸」 */
 export const IDLE_PERIOD = 2.6;
@@ -57,11 +59,161 @@ export function idlePose(t: number, phase = 0): BoboPose {
   const swayZ = 0.022 * Math.sin(a * 0.5 - 0.4) - pitch * 0.6;
   // 翅膀：兩倍頻率輕拍
   const flap = 0.12 * Math.sin(2 * a + 0.9);
-  return { sy, sxz, roll, pitch, swayX, swayZ, flap };
+  return { sy, sxz, roll, pitch, swayX, swayZ, flap, lift: 0 };
+}
+
+// ---------------------------------------------------------------- 移動：果凍彈跳
+
+/** 一次彈跳的時間（秒） */
+export const HOP_PERIOD = 0.62;
+/** 每次彈跳前進距離（公尺；角色高約 0.8 公尺） */
+export const HOP_DISTANCE = 0.3;
+
+/**
+ * 彈跳關鍵格：u（0～1 一次彈跳）→ 高度縮放 sy、離地 lift（公尺）、前傾 pitch（正 = 往前）、觸角前後 swayZ（正 = 往前）
+ * 0.00 站立 → 0.12 壓扁蓄力 → 0.20 起跳拉長 → 0.42 最高點 → 0.62 下落 → 0.70 落地壓縮 → 0.84 回彈 → 1.00 站立
+ */
+const HOP_KEYS: readonly [u: number, sy: number, lift: number, pitch: number, swayZ: number][] = [
+  [0.0, 1.0, 0.0, 0.0, 0.0],
+  [0.12, 0.88, 0.0, -0.04, 0.02],
+  [0.2, 1.13, 0.03, 0.07, -0.05],
+  [0.42, 1.04, 0.16, 0.03, -0.02],
+  [0.62, 1.07, 0.05, -0.02, 0.03],
+  [0.7, 0.84, 0.0, 0.06, 0.06],
+  [0.84, 1.05, 0.0, -0.02, -0.02],
+  [1.0, 1.0, 0.0, 0.0, 0.0],
+];
+
+function hermite(u: number, col: 1 | 2 | 3 | 4): number {
+  const k = HOP_KEYS;
+  let i = 0;
+  while (i < k.length - 2 && u > k[i + 1]![0]) i++;
+  const [u0, u1] = [k[i]![0], k[i + 1]![0]];
+  const v0 = k[i]![col];
+  const v1 = k[i + 1]![col];
+  // 斜率：相鄰兩段平均（Catmull-Rom），兩端為 0 → 循環時銜接平順
+  const slope = (j: number): number => {
+    if (j <= 0 || j >= k.length - 1) return 0;
+    return (k[j + 1]![col] - k[j - 1]![col]) / (k[j + 1]![0] - k[j - 1]![0]);
+  };
+  const h = u1 - u0;
+  const s = (u - u0) / h;
+  const m0 = slope(i) * h;
+  const m1 = slope(i + 1) * h;
+  const s2 = s * s;
+  const s3 = s2 * s;
+  return (2 * s3 - 3 * s2 + 1) * v0 + (s3 - 2 * s2 + s) * m0 + (-2 * s3 + 3 * s2) * v1 + (s3 - s2) * m1;
+}
+
+/** 空中權重（起跳到落地之間為 1，平滑過渡）：決定前進與翅膀快拍 */
+export function hopAir(u: number): number {
+  const a = Math.min(1, Math.max(0, (u - 0.16) / 0.08));
+  const b = Math.min(1, Math.max(0, (0.72 - u) / 0.08));
+  const w = Math.min(a, b);
+  return w * w * (3 - 2 * w);
+}
+
+/** 一次彈跳中，到 u 為止已前進的比例（0～1；只在空中前進） */
+export function hopProgress(u: number): number {
+  const x = Math.min(1, Math.max(0, (u - 0.18) / 0.5));
+  return x * x * (3 - 2 * x);
+}
+
+/** 移動：u 為一次彈跳中的位置（0～1） */
+export function hopPose(u: number): BoboPose {
+  u = ((u % 1) + 1) % 1;
+  const sy = hermite(u, 1);
+  const lift = Math.max(0, hermite(u, 2));
+  const pitch = hermite(u, 3);
+  const air = hopAir(u);
+  // 觸角：慣性（起跳時往後、落地時往前甩）；翅膀：空中快速輕拍，地面幾乎不動
+  const swayZ = hermite(u, 4) - pitch * 0.3;
+  const flap = air * 0.3 * Math.sin(TAU * 3 * u) + (1 - air) * 0.04 * Math.sin(TAU * u);
+  return { sy, sxz: 1 / Math.sqrt(sy), roll: 0, pitch, swayX: 0, swayZ, flap, lift };
 }
 
 export function poseAt(name: BoboAnimName, t: number, phase = 0): BoboPose {
-  return name === "idle" ? idlePose(t, phase) : REST_POSE;
+  if (name === "idle") return idlePose(t, phase);
+  if (name === "move") return hopPose(t / HOP_PERIOD + phase);
+  return REST_POSE;
+}
+
+export function lerpPose(a: BoboPose, b: BoboPose, s: number): BoboPose {
+  const m = (x: number, y: number): number => x + (y - x) * s;
+  const sy = m(a.sy, b.sy);
+  return { sy, sxz: 1 / Math.sqrt(sy), roll: m(a.roll, b.roll), pitch: m(a.pitch, b.pitch), swayX: m(a.swayX, b.swayX), swayZ: m(a.swayZ, b.swayZ), flap: m(a.flap, b.flap), lift: m(a.lift, b.lift) };
+}
+
+/**
+ * 動畫播放器（每隻一個）：
+ * - 切換動畫時用 0.3 秒交叉淡化，不會跳格
+ * - 從「移動」切到其他動畫時，先把目前這一跳跳完、落地回彈後才切換 → 停止移動自然銜接待機
+ * - update 回傳這一幀的姿勢與前進距離（公尺；只有移動時大於 0）
+ */
+export class BoboAnimPlayer {
+  current: BoboAnimName;
+  private requested: BoboAnimName;
+  private t = 0;
+  private from: BoboPose | null = null;
+  private fade = 1;
+  private lastPose: BoboPose = REST_POSE;
+  private readonly phase: number;
+  static readonly FADE = 0.3;
+
+  constructor(initial: BoboAnimName, phase = 0) {
+    this.current = initial;
+    this.requested = initial;
+    this.phase = phase;
+  }
+
+  /** 待切換的動畫（正在等這一跳落地時與 current 不同） */
+  get pending(): BoboAnimName {
+    return this.requested;
+  }
+
+  request(name: BoboAnimName): void {
+    this.requested = name;
+    if (this.current !== "move") this.switchNow();
+  }
+
+  private switchNow(): void {
+    if (this.requested === this.current) return;
+    this.from = this.lastPose;
+    this.fade = 0;
+    this.current = this.requested;
+    this.t = 0;
+  }
+
+  update(dt: number): { pose: BoboPose; travel: number } {
+    let travel = 0;
+    if (this.current === "move") {
+      const u0 = this.t / HOP_PERIOD;
+      const u1 = (this.t + dt) / HOP_PERIOD;
+      // 前進：本幀在這一跳中的進度差（跨越一跳時分兩段計算）
+      const f0 = u0 - Math.floor(u0);
+      const crossed = Math.floor(u1) > Math.floor(u0);
+      const f1 = crossed ? 1 : u1 - Math.floor(u1);
+      travel = (hopProgress(f1) - hopProgress(f0)) * HOP_DISTANCE;
+      this.t += dt;
+      if (crossed && this.requested !== "move") {
+        // 這一跳已落地回彈 → 切換（從站立姿勢淡入，所以 from 用 REST）
+        this.lastPose = REST_POSE;
+        this.switchNow();
+      } else if (crossed) {
+        travel += hopProgress(u1 - Math.floor(u1)) * HOP_DISTANCE;
+      }
+    } else {
+      this.t += dt;
+    }
+    let pose = this.current === "move" ? hopPose(this.t / HOP_PERIOD) : poseAt(this.current, this.t, this.phase);
+    if (this.fade < 1) {
+      this.fade = Math.min(1, this.fade + dt / BoboAnimPlayer.FADE);
+      const s = this.fade * this.fade * (3 - 2 * this.fade);
+      pose = lerpPose(this.from ?? REST_POSE, pose, s);
+    }
+    this.lastPose = pose;
+    return { pose, travel };
+  }
 }
 
 /**
