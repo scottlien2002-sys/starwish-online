@@ -882,10 +882,16 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
       it.starMat = mats.stars.clone(`BoboV38R_StarDim_${instances.indexOf(it)}`) as StandardMaterial;
       it.stars.material = it.starMat;
     }
+    // 熄滅時不變成黑色：自發光降到 0，留下淡淡的冷灰藍水晶色（像熄燈的玻璃星），之後跟著整隻淡出
     const base = mats.stars;
-    it.starMat.emissiveColor.copyFrom(base.emissiveColor).scaleInPlace(b);
-    it.starMat.specularColor.copyFrom(base.specularColor).scaleInPlace(0.3 + 0.7 * b);
-    it.starMat.diffuseColor.copyFrom(base.diffuseColor).scaleInPlace(0.6 + 0.4 * b);
+    const out = 1 - b;
+    it.starMat.emissiveColor.set(
+      base.emissiveColor.r * b + 0.3 * out,
+      base.emissiveColor.g * b + 0.34 * out,
+      base.emissiveColor.b * b + 0.42 * out,
+    );
+    it.starMat.diffuseColor.set(base.diffuseColor.r * b + 0.4 * out, base.diffuseColor.g * b + 0.45 * out, base.diffuseColor.b * b + 0.55 * out);
+    it.starMat.specularColor.copyFrom(base.specularColor).scaleInPlace(0.5 + 0.5 * b);
   };
   const applyDeathFx = (it: BoboV3Instance, fx: ReturnType<typeof deathFx> | null): void => {
     setVis(it, fx ? fx.visibility : 1);
