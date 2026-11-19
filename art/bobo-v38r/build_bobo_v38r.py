@@ -370,8 +370,8 @@ def build():
     mouth.data.materials.append(mats["face"])
     # 腮紅：左右兩片，共用貼圖下半部的腮紅格
     B = S.BLUSH
-    bl = surface_patch("BlushL", bvh, B["half_spacing"], B["height"], 0.12, 0.065, (0.0, 0.25, 0.25, 0.5), lift=0.004, res=8)
-    br = surface_patch("BlushR", bvh, -B["half_spacing"], B["height"], 0.12, 0.065, (0.0, 0.25, 0.25, 0.5), lift=0.004, res=8)
+    bl = surface_patch("BlushL", bvh, B["half_spacing"], B["height"], 0.13, 0.07, (0.0, 0.25, 0.25, 0.5), lift=0.004, res=8)
+    br = surface_patch("BlushR", bvh, -B["half_spacing"], B["height"], 0.13, 0.07, (0.0, 0.25, 0.25, 0.5), lift=0.004, res=8)
     blush = join([bl, br], "Blush")
     blush.data.materials.append(mats["face"])
     bm.free()
