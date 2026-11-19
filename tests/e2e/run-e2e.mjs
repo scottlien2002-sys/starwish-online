@@ -466,6 +466,7 @@ for (const name of browsers) {
           const on = api.perf().refMode;
           api.setRefMode(false);
           api.setView("front");
+          api.setCount(3); // 之後的效能測試要 3 隻同場
           return { out, on, off: api.perf().refMode };
         });
         check("V3.8R：五個視角（正面、側面、背面、45 度、俯視）與對照模式可切換", views.out.length === 5 && views.on === true && views.off === false && run.errors.length === 0, views);
