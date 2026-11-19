@@ -30,7 +30,7 @@ import {
 export class JellyV36Plugin extends MaterialPluginBase {
   rim = new Color3(0.78, 0.95, 1.0); // 最外緣水晶反光（青白）
   core = new Color3(0.3, 0.6, 1.0); // 中央：柔和青藍
-  shell = new Color3(0.08, 0.2, 0.82); // 外層／邊緣：深藍
+  shell = new Color3(0.05, 0.14, 0.7); // 外層／邊緣：深藍
   top = new Color3(0.2, 0.42, 0.98);
   nebulaA = new Color3(0.3, 0.9, 1.0); // 亮青（下半部內部光、中層星雲）
   nebulaB = new Color3(0.42, 0.3, 0.95); // 遠層：較暗的紫藍
@@ -286,7 +286,7 @@ export const JELLY36_MAIN = `
   // 本色：邊緣深藍 → 中央柔和青藍（設定圖中間亮、邊緣深）；頂部略淡
   float h = clamp(lp.y, 0.0, 1.0);
   vec3 shell = mix(j36Shell, j36Top, smoothstep(0.45, 1.0, h) * 0.6);
-  vec3 base = mix(shell, j36Core, smoothstep(0.15, 0.9, jNdV) * 0.85);
+  vec3 base = mix(shell, j36Core, smoothstep(0.3, 0.95, jNdV) * 0.8);
   vec3 wingCol = mix(j36Wing, j36WingTip, smoothstep(0.0, 1.0, jWingT));
   base = mix(base, wingCol, jWing);
   color.rgb = mix(color.rgb, color.rgb * 0.1 + base * 0.88, jS * 0.94);
@@ -309,9 +309,9 @@ export const JELLY36_MAIN = `
     float n2 = smoothstep(0.46, 0.76, t2.r);
     float n3 = smoothstep(0.42, 0.72, t3.g);
     float low = 1.0 - smoothstep(0.05, 0.75, p3.y);
-    vec3 neb = j36NebA * n2 * 0.42 + j36NebB * n3 * (0.32 + 0.3 * low);
+    vec3 neb = j36NebA * n2 * 0.5 + j36NebB * n3 * (0.36 + 0.3 * low);
     // 星光：近層較稀疏但清楚、中層細光點、遠層暗
-    float st = pow(t1.b, 4.0) * 1.1 + pow(t2.b, 2.6) * 0.45 + pow(t3.b, 2.0) * 0.2;
+    float st = pow(t1.b, 3.5) * 1.45 + pow(t2.b, 2.4) * 0.6 + pow(t3.b, 2.0) * 0.24;
     float dust = smoothstep(0.7, 0.94, t2.a) * 0.12;
     float core = smoothstep(0.55, 0.0, length(p2.xz)) * (1.0 - smoothstep(0.1, 0.6, p2.y));
     vec3 inner = neb + vec3(0.88, 0.96, 1.0) * (st + dust) + j36NebA * core * 0.3;
@@ -325,9 +325,9 @@ export const JELLY36_MAIN = `
   {
     float body = 1.0 - jWing;
     float cyan = (1.0 - smoothstep(0.0, 0.42, lp.y)) * smoothstep(0.8, 0.15, length(lp.xz)) * body;
-    color.rgb += j36NebA * cyan * (0.34 + 0.2 * jNdV) * jS;
+    color.rgb += j36NebA * cyan * (0.5 + 0.22 * jNdV) * jS;
     float band = smoothstep(0.015, 0.06, lp.y) * (1.0 - smoothstep(0.07, 0.17, lp.y)) * (1.0 - jNdV) * body;
-    color.rgb += vec3(0.6, 0.98, 1.0) * band * 0.35 * jS;
+    color.rgb += vec3(0.6, 0.98, 1.0) * band * 0.5 * jS;
   }
 
   // 腹部星星：沿折射視線找到身體內的星星平面，在那裡畫一顆圓角金星＋光暈
