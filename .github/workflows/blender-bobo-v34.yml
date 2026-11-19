@@ -59,7 +59,7 @@ jobs:
 
       - name: Validate GLB (Khronos glTF-Validator)
         run: |
-          mkdir -p /tmp/gv && cd /tmp/gv && npm init -y >/dev/null && npm i --no-save --silent gltf-validator@2
+          mkdir -p /tmp/gv && cd /tmp/gv && npm init -y >/dev/null && npm i --no-save gltf-validator@latest 2>&1 | tail -3
           cd "$GITHUB_WORKSPACE"
           NODE_PATH=/tmp/gv/node_modules node -e '
             const v = require("gltf-validator"); const fs = require("fs");
