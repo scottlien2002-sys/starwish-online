@@ -65,9 +65,9 @@ ANTENNA_R1 = 0.024  # 尖端半徑（約 0.04 W）
 HEAD_STAR = dict(center=(0.215, -0.322, 1.19), outer=0.14, inner=0.088, depth=0.035, yaw_deg=35.0)
 BELLY_STAR = dict(height=0.24, outer=0.11, inner=0.062, depth=0.028)
 # 臉部位置：第三階段依設定圖重做（第二階段灰模不顯示臉）；先放在設定圖量到的位置
-EYE = dict(height=0.56, half_spacing=0.25, rx=0.09, rz=0.125)
-MOUTH = dict(height=0.43)
-BLUSH = dict(height=0.43, half_spacing=0.39)
+EYE = dict(height=0.564, half_spacing=0.25, rx=0.0875, rz=0.125)
+MOUTH = dict(height=0.426)
+BLUSH = dict(height=0.426, half_spacing=0.39)
 # 翅膀（決定 6：小巧、像小魚鰭，貼著身體側面、往外微微張開）
 # 正面伸出身體 0.22、高 0.29、中心約 40% 身高；側面中心在身體中心後方 0.27
 WING = dict(height=0.40, back=0.27)

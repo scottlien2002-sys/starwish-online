@@ -1,8 +1,9 @@
 """
-星露啵啵 V3：表情貼圖集（眼睛、嘴巴、腮紅），依《怪物設定圖 01》表情參考繪製。
+星露啵啵 V3.8R 第三階段：表情貼圖集（眼睛＋眉毛、嘴巴、腮紅），依《怪物設定圖 01》重畫。
 用法：python3 gen_textures.py <輸出資料夾>（需要 Pillow）
 輸出：
-  bobo_v38r_eyes.png  1024×512：4×2 格（每格 256×256），透明背景
+  bobo_v38r_eyes.png  1024×1024：4×2 格（每格 256×512），透明背景；每格下方是眼睛、上方是眉毛
+    （眉毛和眼睛在同一格 → 8 種表情各有自己的眉形，切換表情只改貼圖座標，不改模型外型）
   bobo_v38r_face.png  1024×512：上半 4×2 格嘴型（每格 256×128）；下半左邊為腮紅
 表情順序（兩張相同）：0 一般 1 開心 2 好奇 3 生氣 4 害怕 5 暈眩 6 昏睡 7 受傷
 貼圖以「畫面右邊那隻眼（角色左眼）」繪製；另一眼 UV 鏡像，所以「受傷」畫成「<」，合起來是「> <」。
@@ -25,12 +26,14 @@ def down(img, w, h):
 
 
 def eye_cell(kind):
-    W = H = 256
+    # 格子 256×512，對應模型上寬 0.26、高 0.52 的貼片（約每單位 985 像素）
+    # 設定圖：眼睛寬 0.14 W、高 0.20 W（模型 0.175 × 0.25）、眉毛在 79% 身高、長約 0.16 W
+    W, H = 256, 512
     im = cell_canvas(W, H)
     d = ImageDraw.Draw(im)
     S = SS
-    cx, cy = 128 * S, 128 * S
-    rx, ry = 92 * S, 112 * S  # 眼睛幾乎填滿格子（眼睛網格本身就是眼睛的大小）
+    cx, cy = 128 * S, 311 * S
+    rx, ry = 86 * S, 122 * S
 
     def ellipse(c, r, fill):
         d.ellipse([c[0] - r[0], c[1] - r[1], c[0] + r[0], c[1] + r[1]], fill=fill)
@@ -112,7 +115,6 @@ def eye_cell(kind):
         # 此貼圖是「畫面右邊那隻眼（角色左眼）」：內側在畫面左邊 → 左邊切得較深、眉毛內低外高
         cut = [(cx - rx * 1.2, cy - ry * 1.3), (cx + rx * 1.2, cy - ry * 1.3), (cx + rx * 1.2, cy - ry * 0.62), (cx - rx * 1.2, cy - ry * 0.05)]
         open_eye(pupil_scale=0.9, cut=cut, extra_shine=False)
-        line([(cx - rx * 0.95, cy - ry * 0.38), (cx + rx * 1.0, cy - ry * 0.98)], 20)
     elif kind == "happy":
         pts = [(cx - rx * 0.85 + rx * 1.7 * t, cy + ry * 0.15 - math.sin(math.pi * t) * ry * 0.55) for t in [i / 20 for i in range(21)]]
         line(pts, 26)
@@ -129,7 +131,41 @@ def eye_cell(kind):
             r = (i / 160) * rx * 0.85
             pts.append((cx + math.cos(a) * r, cy + math.sin(a) * r * (ry / rx)))
         line(pts, 15)
+    brow(d, kind)
     return down(im, W, H)
+
+
+# 眉毛（設定圖：眼睛上方細細的深藍弧線）。此格是「畫面右邊那隻眼（角色左眼）」：內側在畫面左邊
+# (內端 y, 外端 y, 弧度（正 = 往上拱）, 粗細, 波浪)；y 以像素計（格子 512 高），眉毛中心約 y 98
+BROWS = {
+    "normal": (104, 100, 10, 9, 0),
+    "happy": (96, 92, 16, 9, 0),
+    "curious": (82, 86, 18, 9, 0),
+    "angry": (138, 92, -2, 12, 0),
+    "scared": (84, 116, 6, 9, 5),
+    "dizzy": (100, 108, 4, 8, 7),
+    "sleepy": (128, 126, 3, 8, 0),
+    "hurt": (88, 122, 2, 10, 0),
+}
+
+
+def brow(d, kind):
+    S = SS
+    yi, yo, arc, wid, wave = BROWS[kind]
+    x0, x1 = 60, 200  # 內端 → 外端（中心稍微偏外，像設定圖）
+    pts = []
+    for i in range(25):
+        t = i / 24
+        x = x0 + (x1 - x0) * t
+        y = yi + (yo - yi) * t - arc * math.sin(math.pi * t) + wave * math.sin(t * math.pi * 3)
+        pts.append((x * S, y * S))
+    # 兩端略細：分段畫，越往兩端越細
+    for i in range(len(pts) - 1):
+        t = i / (len(pts) - 2)
+        w = wid * (0.55 + 0.45 * math.sin(math.pi * min(1.0, t * 1.1)))
+        d.line([pts[i], pts[i + 1]], fill=INK, width=max(1, int(w * S)))
+        r = w * S / 2
+        d.ellipse([pts[i][0] - r, pts[i][1] - r, pts[i][0] + r, pts[i][1] + r], fill=INK)
 
 
 def mouth_cell(kind):
@@ -157,29 +193,31 @@ def mouth_cell(kind):
         return mask
 
     if kind in ("normal", "happy", "hurt"):
-        w, h = (44 * S, 36 * S) if kind == "normal" else (56 * S, 46 * S)
+        # 設定圖：張開的 D 形笑口，寬約 0.15 W（貼片每單位 640 像素 → 半寬約 60）
+        w, h = (58 * S, 54 * S) if kind == "normal" else (66 * S, 62 * S)
         if kind == "hurt":
-            w, h = 40 * S, 30 * S
+            w, h = 46 * S, 38 * S
         mask = d_mouth(w, h)
         # 舌頭裁切在嘴形內
         clipped = Image.new("RGBA", im.size, (0, 0, 0, 0))
         clipped.paste(im, (0, 0), mask)
         im = clipped
     elif kind == "curious":
-        d.ellipse([cx - 16 * S, cy - 16 * S, cx + 16 * S, cy + 20 * S], fill=dark)
-        d.ellipse([cx - 11 * S, cy - 9 * S, cx + 11 * S, cy + 15 * S], fill=red)
+        d.ellipse([cx - 22 * S, cy - 20 * S, cx + 22 * S, cy + 28 * S], fill=dark)
+        d.ellipse([cx - 16 * S, cy - 13 * S, cx + 16 * S, cy + 22 * S], fill=red)
+        d.ellipse([cx - 10 * S, cy + 6 * S, cx + 10 * S, cy + 20 * S], fill=tongue)
     elif kind == "dizzy":
-        d.ellipse([cx - 20 * S, cy - 18 * S, cx + 20 * S, cy + 22 * S], fill=dark)
-        d.ellipse([cx - 14 * S, cy - 11 * S, cx + 14 * S, cy + 16 * S], fill=red)
+        d.ellipse([cx - 26 * S, cy - 22 * S, cx + 26 * S, cy + 28 * S], fill=dark)
+        d.ellipse([cx - 19 * S, cy - 15 * S, cx + 19 * S, cy + 21 * S], fill=red)
     elif kind == "angry":
-        pts = [(cx - 40 * S + 80 * S * t, cy + 8 * S - math.sin(math.pi * t) * 18 * S) for t in [i / 20 for i in range(21)]]
-        d.line(pts, fill=dark, width=10 * S, joint="curve")
+        pts = [(cx - 48 * S + 96 * S * t, cy + 12 * S - math.sin(math.pi * t) * 22 * S) for t in [i / 20 for i in range(21)]]
+        d.line(pts, fill=dark, width=11 * S, joint="curve")
     elif kind == "scared":
-        pts = [(cx - 44 * S + 88 * S * i / 8, cy + (8 * S if i % 2 else -6 * S)) for i in range(9)]
-        d.line(pts, fill=dark, width=8 * S, joint="curve")
+        pts = [(cx - 52 * S + 104 * S * i / 8, cy + (9 * S if i % 2 else -7 * S)) for i in range(9)]
+        d.line(pts, fill=dark, width=9 * S, joint="curve")
     elif kind == "sleepy":
-        pts = [(cx - 22 * S + 44 * S * t, cy + math.sin(math.pi * t) * 10 * S) for t in [i / 16 for i in range(17)]]
-        d.line(pts, fill=dark, width=8 * S, joint="curve")
+        pts = [(cx - 28 * S + 56 * S * t, cy + math.sin(math.pi * t) * 12 * S) for t in [i / 16 for i in range(17)]]
+        d.line(pts, fill=dark, width=9 * S, joint="curve")
     return down(im, W, H)
 
 
@@ -189,24 +227,20 @@ def blush_cell():
     px = im.load()
     for y in range(H):
         for x in range(W):
-            dx = (x - W / 2) / (W * 0.42)
-            dy = (y - H / 2) / (H * 0.4)
+            dx = (x - W / 2) / (W * 0.33)
+            dy = (y - H / 2) / (H * 0.36)
             r = math.sqrt(dx * dx + dy * dy)
-            a = max(0.0, 1 - r) ** 1.4 * 0.85
-            px[x, y] = (255, 118, 158, int(255 * a))
-    d = ImageDraw.Draw(im)
-    for i in (-1, 0, 1):
-        x0 = W / 2 + i * 34
-        d.line([(x0 - 9, H / 2 + 14), (x0 + 9, H / 2 - 14)], fill=(255, 84, 132, 150), width=4)
+            a = (1.0 - min(1.0, r) ** 2.2) ** 1.6 * 0.9 if r < 1 else 0.0
+            px[x, y] = (255, 112, 150, int(255 * a))
     return im
 
 
 def main(out):
-    eyes = Image.new("RGBA", (1024, 512), (0, 0, 0, 0))
+    eyes = Image.new("RGBA", (1024, 1024), (0, 0, 0, 0))
     face = Image.new("RGBA", (1024, 512), (0, 0, 0, 0))
     for i, k in enumerate(EXPRESSIONS):
         col, row = i % 4, i // 4
-        eyes.paste(eye_cell(k), (col * 256, row * 256))
+        eyes.paste(eye_cell(k), (col * 256, row * 512))
         face.paste(mouth_cell(k), (col * 256, row * 128))
     face.paste(blush_cell(), (0, 256))
     eyes.save(f"{out}/bobo_v38r_eyes.png", optimize=True)

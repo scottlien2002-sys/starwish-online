@@ -87,6 +87,7 @@ jobs:
             if grep -q "bobo38r" cur/src/main.ts; then
               # V3.8 ／ V3.8R 灰模對照（Chromium 高畫質；含設定圖對照模式 r_*；灰模另有 45 度與俯視）＋ V3.8R WebKit 三種畫質
               for l in bobo38 bobo38r; do node cur/tests/e2e/snap-bobo3.mjs cur/dist out/chr_$l chromium high $l || true; done
+              for l in bobo38 bobo38r; do CLOSE_ONLY=1 node cur/tests/e2e/snap-bobo3.mjs cur/dist out/close_$l chromium high $l || true; done
               for q in high medium low; do node cur/tests/e2e/snap-bobo3.mjs cur/dist out/bobo38r_$q webkit $q bobo38r || true; done
             elif grep -q "bobo38" cur/src/main.ts; then
               # V3.7／V3.8 對照（Chromium 高畫質；含設定圖對照模式 r_*）＋ V3.8 WebKit 三種畫質

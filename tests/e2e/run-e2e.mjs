@@ -449,7 +449,30 @@ for (const name of browsers) {
       }
       if (labName === "bobo38r") {
         check("V3.8R：載入 bobo_v38r 模型（共用載入器）", /^bobo_v38r_(high|medium|low)\.glb$/.test(perf.file), perf.file);
-        check("V3.8R：灰模模式（不顯示臉部、無陰影貼圖與 GlowLayer）", perf.grey === true && perf.faceVisible === false && perf.shadowMap === false && perf.glowLayer === false, perf);
+        check("V3.8R 第三階段：果凍材質與臉部顯示、腹部星星 0.0714、無陰影貼圖與 GlowLayer", perf.grey === false && perf.faceVisible === true && perf.jelly === (perf.quality !== "low" ? true : perf.jelly) && Math.abs(perf.bellyStar?.outer - 0.0714) < 1e-6 && perf.shadowMap === false && perf.glowLayer === false, perf);
+        const greyT = await page.evaluate(async () => {
+          const api = window.__monsterLab;
+          api.setGrey(true);
+          await new Promise((r) => setTimeout(r, 200));
+          const on = api.perf();
+          api.setGrey(false);
+          await new Promise((r) => setTimeout(r, 200));
+          const off = api.perf();
+          return { onGrey: on.grey, onFace: on.faceVisible, offGrey: off.grey, offFace: off.faceVisible };
+        });
+        check("V3.8R：第二階段灰模可切換並恢復", greyT.onGrey === true && greyT.onFace === false && greyT.offGrey === false && greyT.offFace === true && run.errors.length === 0, greyT);
+        const shape = await page.evaluate(async () => {
+          const api = window.__monsterLab;
+          const out = [];
+          for (const e of ["normal", "happy", "curious", "angry", "scared", "dizzy", "sleepy", "hurt"]) {
+            api.setExpression(e);
+            await new Promise((r) => setTimeout(r, 60));
+            out.push(api.bodyExtent().join(","));
+          }
+          api.setExpression("normal");
+          return out;
+        });
+        check("V3.8R：8 種表情切換時身體外型不變", new Set(shape).size === 1, shape[0]);
         const d38 = drawCalls3[`bobo38|${vp.name}`];
         check("V3.8R：3 隻同場 Draw Calls 不高於 V3.8（≤25）", typeof d38 === "number" && perf.drawCalls <= d38 && perf.drawCalls <= 25, { v38r: perf.drawCalls, v38: d38 });
         const views = await page.evaluate(async () => {

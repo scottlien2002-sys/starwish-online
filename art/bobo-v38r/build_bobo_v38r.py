@@ -136,29 +136,31 @@ def body_color(x, y, z, nx, ny, nz):
 # ----------------------------------------------------------------- 貼合表面的面片（眼睛、嘴、腮紅）
 
 
-def surface_patch(name, bvh, center_x, center_z, half_w, half_h, uv_rect, lift, dome=0.0, mirror_u=False, res=14):
+def surface_patch(name, bvh, center_x, center_z, half_w, half_h, uv_rect, lift, dome=0.0, mirror_u=False, res=14, dome_v=0.5, dome_rv=0.5, res_v=None):
     """
     在身體正面投影出一片貼合曲面的網格：每個頂點都由 +Y 方向射線打到身體表面，再沿法線抬高。
     uv_rect = (u0, v0, u1, v1)（Blender UV，v 向上）
     """
     verts, uvs, faces = [], [], []
-    for j in range(res + 1):
+    rv = res_v or res
+    for j in range(rv + 1):
         for i in range(res + 1):
             u = i / res
-            v = j / res
+            v = j / rv
             x = center_x + (u * 2 - 1) * half_w
             z = center_z + (v * 2 - 1) * half_h
             hit = bvh.ray_cast(Vector((x, -3.0, z)), Vector((0, 1, 0)))
             loc, nrm = hit[0], hit[1]
             if loc is None:
                 loc, nrm = Vector((x, -0.5, z)), Vector((0, -1, 0))
-            r2 = ((u * 2 - 1) ** 2 + (v * 2 - 1) ** 2)
+            # 角膜鼓起：以 (0.5, dome_v) 為中心（V3.8R 眼睛貼片上方含眉毛，鼓起只在眼睛處）
+            r2 = ((u * 2 - 1) ** 2 + ((v - dome_v) / dome_rv) ** 2)
             bump = dome * max(0.0, 1 - r2)
             p = loc + nrm * (lift + bump)
             verts.append(p[:])
             uu = 1 - u if mirror_u else u
             uvs.append((uv_rect[0] + (uv_rect[2] - uv_rect[0]) * uu, uv_rect[1] + (uv_rect[3] - uv_rect[1]) * v))
-    for j in range(res):
+    for j in range(rv):
         for i in range(res):
             a = j * (res + 1) + i
             # 面朝 -Y（朝外）
@@ -351,21 +353,25 @@ def build():
     bvh = BVHTree.FromBMesh(bm)
 
     # 眼睛：左右各一片，中央微微鼓起（角膜），右眼 UV 鏡像；表情集第 0 格（一般）
+    # V3.8R 第三階段：眼睛貼片往上延伸到眉毛（貼圖每格 256×512：下方眼睛、上方眉毛）
+    # 貼片寬 0.26、高 0.52，從高度 0.36 到 0.88；眼睛中心在貼片 v = 0.392（高度 0.564）
     E = S.EYE
-    eye_half = 0.128
     eye_uv = (0.0, 0.5, 0.25, 1.0)
-    eyeL = surface_patch("EyeL", bvh, E["half_spacing"], E["height"], eye_half, eye_half, eye_uv, lift=0.006, dome=0.032, res=18)
-    eyeR = surface_patch("EyeR", bvh, -E["half_spacing"], E["height"], eye_half, eye_half, eye_uv, lift=0.006, dome=0.032, mirror_u=True, res=18)
+    eye_v = (E["height"] - 0.36) / 0.52
+    eye_kw = dict(lift=0.006, dome=0.026, res=12, res_v=24, dome_v=eye_v, dome_rv=0.25)
+    eyeL = surface_patch("EyeL", bvh, E["half_spacing"], 0.62, 0.13, 0.26, eye_uv, **eye_kw)
+    eyeR = surface_patch("EyeR", bvh, -E["half_spacing"], 0.62, 0.13, 0.26, eye_uv, mirror_u=True, **eye_kw)
     eyes = join([eyeL, eyeR], "Eyes")
     eyes.data.materials.append(mats["eyes"])
 
     # 嘴：表情集第 0 格（上半部 4×2，每格 256×128 → UV 寬 0.25、高 0.25）
-    mouth = surface_patch("Mouth", bvh, 0.0, S.MOUTH["height"] - 0.01, 0.25, 0.125, (0.0, 0.75, 0.25, 1.0), lift=0.005, res=10)
+    # 設定圖嘴巴中心 43% 身高、寬 0.15 W；嘴形畫在格子中線略下方 → 貼片中心上移 0.017
+    mouth = surface_patch("Mouth", bvh, 0.0, S.MOUTH["height"] + 0.017, 0.2, 0.1, (0.0, 0.75, 0.25, 1.0), lift=0.005, res=10)
     mouth.data.materials.append(mats["face"])
     # 腮紅：左右兩片，共用貼圖下半部的腮紅格
     B = S.BLUSH
-    bl = surface_patch("BlushL", bvh, B["half_spacing"], B["height"], 0.13, 0.065, (0.0, 0.25, 0.25, 0.5), lift=0.004, res=8)
-    br = surface_patch("BlushR", bvh, -B["half_spacing"], B["height"], 0.13, 0.065, (0.0, 0.25, 0.25, 0.5), lift=0.004, res=8)
+    bl = surface_patch("BlushL", bvh, B["half_spacing"], B["height"], 0.12, 0.065, (0.0, 0.25, 0.25, 0.5), lift=0.004, res=8)
+    br = surface_patch("BlushR", bvh, -B["half_spacing"], B["height"], 0.12, 0.065, (0.0, 0.25, 0.25, 0.5), lift=0.004, res=8)
     blush = join([bl, br], "Blush")
     blush.data.materials.append(mats["face"])
     bm.free()

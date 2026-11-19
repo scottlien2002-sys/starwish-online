@@ -33,9 +33,10 @@ if (ok && closeOnly) {
 } else if (ok) {
   // 隱藏 UI，只看模型
   await page.addStyleTag({ content: "#hud-root{visibility:hidden}" });
-  // V3.8R 灰模：另外截 45 度角與俯視；灰模不顯示臉部，所以不截表情
+  // V3.8R：另外截 45 度角與俯視；灰模（不顯示臉部）不截表情
   const grey = await page.evaluate(() => !!window.__monsterLab.perf().grey);
-  const VIEWS = grey ? ["front", "side", "back", "q45", "top"] : ["front", "side", "back"];
+  const views5 = await page.evaluate(() => !!window.__monsterLab.perf().views5);
+  const VIEWS = views5 ? ["front", "side", "back", "q45", "top"] : ["front", "side", "back"];
   for (const v of VIEWS) {
     await page.evaluate((x) => window.__monsterLab.setView(x), v);
     await shot(`v_${v}`, v);
@@ -43,7 +44,7 @@ if (ok && closeOnly) {
   // 設定圖對照模式（有提供 setRefMode 的測試頁）：同樣三個視角，平視＋設定圖背景色
   if (await page.evaluate(() => typeof window.__monsterLab.setRefMode === "function")) {
     await page.evaluate(() => window.__monsterLab.setRefMode(true));
-    for (const v of grey ? ["front", "side", "back", "q45"] : ["front", "side", "back"]) {
+    for (const v of views5 ? ["front", "side", "back", "q45"] : ["front", "side", "back"]) {
       await page.evaluate((x) => window.__monsterLab.setView(x), v);
       await shot(`r_${v}`, `對照 ${v}`);
     }
