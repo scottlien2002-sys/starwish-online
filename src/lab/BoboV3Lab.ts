@@ -357,6 +357,9 @@ export async function startBoboV3Lab(canvas: HTMLCanvasElement, uiRoot: HTMLElem
       body.material = greyMat;
       body.alphaIndex = 0;
       stars.material = greyMat;
+      // 模型檔裡有頂點色（第三階段材質用）；灰模不使用，否則會被染成藍色／金色
+      body.useVertexColors = false;
+      stars.useVertexColors = false;
       for (const m of [eyes, mouth, blush]) m.setEnabled(false);
     }
     const it: BoboV3Instance = { root, body, eyes, mouth, blush, stars, jelly: bodyMat.jelly, eyeUV, mouthUV, expr };
