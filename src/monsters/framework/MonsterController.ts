@@ -17,6 +17,7 @@ export class MonsterController {
   readonly visual: IMonsterVisual | null;
   readonly brain: MonsterBrain | null;
   lastFrame: AnimFrame | null = null;
+  private seenHitSeq = 0;
 
   constructor(instance: MonsterInstance, profile: MonsterAnimationProfile, visual: IMonsterVisual | null, brain: MonsterBrain | null) {
     this.instance = instance;
@@ -45,6 +46,11 @@ export class MonsterController {
       // 先更新位置，特效才會出現在本幀正確的位置
       const p = this.instance.currentPosition;
       v.setTransform(p.x, p.y, p.z, this.instance.yaw);
+      if (this.instance.hitReactionSeq !== this.seenHitSeq) {
+        this.seenHitSeq = this.instance.hitReactionSeq;
+        const r = this.instance.lastHitReaction;
+        if (r) v.onHitReaction?.(r);
+      }
       for (const s of frame.entered) v.onStateEnter(s);
       for (const e of frame.effects) v.playEffect(e);
       v.applyPose(frame.pose);

@@ -31,10 +31,13 @@ export class MonsterStateMachine {
   private _locomotion: "idle" | "move" = "idle";
   private _hitOverlay = 0;
   private _entered = true;
+  /** 這一次受擊狀態的長度（預設 = timings.hit；連續受擊抗性可指定較短的硬直） */
+  private _hitDuration: number;
   private readonly timings: MonsterAnimTimings;
 
   constructor(timings: MonsterAnimTimings) {
     this.timings = timings;
+    this._hitDuration = timings.hit;
   }
 
   get state(): MonsterState {
@@ -66,7 +69,7 @@ export class MonsterStateMachine {
       case "attack":
         return this.timings.attack;
       case "hit":
-        return this.timings.hit;
+        return this._hitDuration;
       case "death":
         return this.timings.death;
       case "respawn":
@@ -111,7 +114,12 @@ export class MonsterStateMachine {
     }
   }
 
-  request(action: MonsterAction): RequestResult {
+  /**
+   * @param hit 受擊選項（只對 "hit" 有效；省略 = 原本行為）：
+   *   - duration：這次硬直秒數（進入受擊狀態，長度用這個值）
+   *   - noStagger：不硬直（不進入受擊狀態、不打斷攻擊），只做疊加閃白 flash 秒
+   */
+  request(action: MonsterAction, hit?: { duration?: number; noStagger?: boolean; flash?: number }): RequestResult {
     const r = this.check(action);
     if (!r.accepted) return r;
 
@@ -128,8 +136,16 @@ export class MonsterStateMachine {
         break;
       case "hit":
         if (r.locked) break;
+        if (hit?.noStagger) {
+          // 不硬直：維持目前狀態（含攻擊中），只做閃白
+          this._hitOverlay = Math.max(this._hitOverlay, hit.flash ?? this.timings.hit);
+          return { ...r, overlay: true };
+        }
         if (r.overlay) this._hitOverlay = this.timings.hit;
-        else this.enter("hit");
+        else {
+          this._hitDuration = hit?.duration ?? this.timings.hit;
+          this.enter("hit");
+        }
         break;
       case "death":
         this._hitOverlay = 0;
@@ -146,6 +162,7 @@ export class MonsterStateMachine {
   /** 測試用（?debug=1 的「重設測試」）：不論目前狀態，直接回到待機。一般遊戲流程不會呼叫 */
   resetToIdle(): void {
     this._locomotion = "idle";
+    this._hitDuration = this.timings.hit;
     this._hitOverlay = 0;
     this.enter("idle");
   }

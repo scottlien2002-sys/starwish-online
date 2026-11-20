@@ -26,7 +26,8 @@ export interface CombatMonster {
   readonly isAlive: boolean;
   readonly currentPosition: { x: number; z: number };
   readonly definition: { attack: number; attackRange: number; name: string };
-  receiveDamage(amount: number): { applied: boolean; killed: boolean };
+  /** now：遊戲時間（套用連續受擊抗性） */
+  receiveDamage(amount: number, now?: number): { applied: boolean; killed: boolean };
 }
 
 export type PlayerAttackResult =
@@ -115,7 +116,7 @@ export class PreviewCombat {
     if (!target || !target.isAlive) return { ok: false, reason: "miss" };
     const d = Math.hypot(target.currentPosition.x - px, target.currentPosition.z - pz);
     if (d > PREVIEW_COMBAT.playerAttackRange + 0.6) return { ok: false, reason: "miss" };
-    const r = target.receiveDamage(PREVIEW_COMBAT.playerAttackDamage);
+    const r = target.receiveDamage(PREVIEW_COMBAT.playerAttackDamage, now);
     return { ok: true, targetId: target.instanceId, killed: r.killed, damage: PREVIEW_COMBAT.playerAttackDamage };
   }
 

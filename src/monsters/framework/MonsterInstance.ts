@@ -1,6 +1,8 @@
 import { MonsterStateMachine, type RequestResult } from "../anim/MonsterStateMachine.ts";
 import type { MonsterAnimTimings, MonsterState } from "../anim/types.ts";
 import type { MonsterDefinition, Vec3 } from "./types.ts";
+import { HitResistance, type HitReaction } from "./hitResistance.ts";
+import { HIT_REACTION } from "../../config/hitReaction.ts";
 
 export interface DamageResult {
   applied: boolean;
@@ -11,6 +13,8 @@ export interface DamageResult {
   rehitLocked?: boolean;
   /** 這次受擊打斷了尚未命中的攻擊 → 該次攻擊取消、不結算 */
   cancelledAttackId?: number;
+  /** 連續受擊抗性的反應（只有傳入 now 的受擊才有；見 config/hitReaction.ts） */
+  reaction?: HitReaction;
   reason?: string;
 }
 
@@ -55,6 +59,11 @@ export class MonsterInstance {
   /** 目前這次攻擊是否已結算（命中判定只做一次） */
   private attackSettled = true;
   readonly attackLog: AttackLog = { started: 0, resolved: 0, cancelled: 0, duplicatesBlocked: 0, lastResolvedId: null, lastCancelledId: null };
+  /** 連續受擊抗性（遊戲受擊傳入 now 時使用） */
+  readonly resistance = new HitResistance();
+  /** 最近一次受擊反應與序號（MonsterController 據此通知視覺：後退幅度、受擊表情） */
+  lastHitReaction: HitReaction | null = null;
+  hitReactionSeq = 0;
 
   constructor(instanceId: string, definition: MonsterDefinition, timings: MonsterAnimTimings, spawn: Vec3) {
     this.instanceId = instanceId;
@@ -136,8 +145,9 @@ export class MonsterInstance {
   /**
    * 承受傷害（amount 為已計算好的最終傷害；傷害公式屬於 W2 戰鬥系統）。
    * 死亡、重生中不受傷害；攻擊中受擊不中斷攻擊；血量歸零進入死亡。
+   * @param now 遊戲時間（秒）。有傳入時套用連續受擊抗性（遊戲戰鬥使用）；省略 = 原本的受擊規則（測試頁）
    */
-  receiveDamage(amount: number): DamageResult {
+  receiveDamage(amount: number, now?: number): DamageResult {
     if (!this.isAlive) return { applied: false, killed: false, reason: "死亡或重生中不受傷害" };
     const dmg = Math.max(0, Math.floor(amount));
     const wasAttacking = this.sm.state === "attack";
@@ -146,15 +156,24 @@ export class MonsterInstance {
       // 死亡優先：直接進入死亡（不經過受擊），未命中的攻擊一併取消
       this.sm.request("death");
       this.currentTarget = null;
+      this.resistance.reset();
       const cancelled = this.cancelPendingAttack(wasAttacking);
       return { applied: true, killed: true, ...(cancelled !== undefined ? { cancelledAttackId: cancelled } : {}) };
     }
-    const r = this.sm.request("hit");
+    const reaction = now === undefined ? undefined : this.resistance.register(now);
+    const r = reaction
+      ? this.sm.request("hit", reaction.stagger > 0 ? { duration: reaction.stagger } : { noStagger: true, flash: HIT_REACTION.noStaggerFlash })
+      : this.sm.request("hit");
+    if (reaction && !r.locked) {
+      this.lastHitReaction = reaction;
+      this.hitReactionSeq++;
+    }
     const cancelled = this.cancelPendingAttack(wasAttacking);
     return {
       applied: true,
       killed: false,
       overlay: r.overlay === true,
+      ...(reaction ? { reaction } : {}),
       ...(r.locked ? { rehitLocked: true } : {}),
       ...(cancelled !== undefined ? { cancelledAttackId: cancelled } : {}),
     };
@@ -174,6 +193,8 @@ export class MonsterInstance {
     this.lastAttackTime = Number.NEGATIVE_INFINITY;
     this.attackId = 0;
     this.attackSettled = true;
+    this.resistance.reset();
+    this.lastHitReaction = null;
     Object.assign(this.attackLog, { started: 0, resolved: 0, cancelled: 0, duplicatesBlocked: 0, lastResolvedId: null, lastCancelledId: null });
   }
 
@@ -188,6 +209,8 @@ export class MonsterInstance {
     this.currentTarget = null;
     this.lastAttackTime = Number.NEGATIVE_INFINITY;
     this.attackSettled = true;
+    this.resistance.reset();
+    this.lastHitReaction = null;
     return r;
   }
 }

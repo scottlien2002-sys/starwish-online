@@ -328,6 +328,8 @@ export interface BoboV38RVisualOptions {
 
 /** 測試與預覽頁讀取的動畫狀態 */
 export interface BoboV38RAnimDebug {
+  /** 受擊反應次數：完整後退、後退減半、不硬直（只閃受擊表情） */
+  reactions: { full: number; reduced: number; noStagger: number };
   /** 目前播放的 V3.8R 動畫 */
   anim: string;
   animTime: number;
@@ -406,6 +408,7 @@ export class BoboV38RVisual implements IMonsterVisual {
       fwd: f?.pose.fwd ?? 0,
       lag: this.driver.lag,
       starts: { ...this.driver.starts },
+      reactions: { ...this.driver.reactions },
     };
   }
 
@@ -439,6 +442,10 @@ export class BoboV38RVisual implements IMonsterVisual {
     this.xf.z = z;
     this.xf.yaw = yaw;
     this.driver.setTransform(x, z, yaw);
+  }
+
+  onHitReaction(r: { stagger: number; recoil: number; immune: boolean }): void {
+    this.driver.onHitReaction(r);
   }
 
   onStateEnter(state: MonsterState): void {

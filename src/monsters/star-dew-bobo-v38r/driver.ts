@@ -9,9 +9,11 @@ import {
   HOP_PERIOD,
   hopAir,
   HURT_FACE_UNTIL,
+  HURT_PHASES,
   REST_POSE,
 } from "./animation.ts";
 import { RESPAWN_FADE } from "./profile.ts";
+import { HIT_REACTION } from "../../config/hitReaction.ts";
 
 /**
  * 星露啵啵 V3.8R：遊戲狀態 → 已驗收動畫的驅動器（純邏輯，不依賴 Babylon，可單元測試）。
@@ -50,6 +52,9 @@ export interface BoboDriverFrame {
   offsetZ: number;
 }
 
+/** 不硬直受擊的受擊表情秒數（與 config/hitReaction.ts 的 noStaggerFlash 相同） */
+const HIT_FLASH_SECONDS = HIT_REACTION.noStaggerFlash;
+
 const smooth01 = (x: number): number => {
   const c = Math.min(1, Math.max(0, x));
   return c * c * (3 - 2 * c);
@@ -72,6 +77,11 @@ export class BoboV38RAnimDriver {
   private respawnT: number | null = null;
   private blinkClosed = false;
   readonly starts = { attack: 0, hurt: 0, death: 0, respawn: 0 };
+  /** 目前這次受傷動畫的後退幅度倍率（連續受擊抗性；1 = 原本） */
+  private recoilScale = 1;
+  /** 不硬直的受擊：顯示受擊表情的剩餘秒數（打擊感回饋，不改動作） */
+  private flashLeft = 0;
+  readonly reactions = { full: 0, reduced: 0, noStagger: 0 };
 
   constructor(phase = 0, blinkSeed = 17, hopSync = false) {
     this.phase = phase;
@@ -93,6 +103,19 @@ export class BoboV38RAnimDriver {
     this.targetYaw = yaw;
     if (!this.hasXf) this.yaw = yaw;
     this.hasXf = true;
+  }
+
+  /** 受擊反應（同一幀的 onStateEnter("hit") 之前呼叫）：決定這次受傷動畫的後退幅度，或不硬直時只閃受擊表情 */
+  onHitReaction(r: { stagger: number; recoil: number; immune: boolean }): void {
+    if (this.logic === "death" || this.logic === "dead") return;
+    if (r.stagger > 0) {
+      this.recoilScale = r.recoil;
+      if (r.recoil >= 1) this.reactions.full++;
+      else this.reactions.reduced++;
+    } else {
+      this.flashLeft = HIT_FLASH_SECONDS;
+      this.reactions.noStagger++;
+    }
   }
 
   /** 遊戲狀態機進入新狀態 */
@@ -119,6 +142,8 @@ export class BoboV38RAnimDriver {
       case "dead":
         break;
       case "respawn":
+        this.recoilScale = 1;
+        this.flashLeft = 0;
         this.player = new BoboAnimPlayer("idle", this.phase);
         this.blink = new BlinkTimer(this.blinkSeed);
         this.blinkClosed = false;
@@ -167,10 +192,16 @@ export class BoboV38RAnimDriver {
     if (this.logic === "idle" || this.logic === "move") {
       const c = this.player.current;
       if ((c === "idle" || c === "move") && this.player.pending !== this.logic) this.player.request(this.logic);
+      // 硬直結束就開始移動時：受傷動畫的後退階段播完後就接移動（不在原地播完整段受傷而滑行）
+      if (this.logic === "move" && c === "hurt" && this.player.time >= HURT_PHASES.recoil[1]) this.player.request("move", { immediate: true });
     }
-    const pose = this.player.update(dt).pose;
+    let pose = this.player.update(dt).pose;
     const cur = this.player.current;
     const t = this.player.time;
+    // 連續受擊抗性：第 2 擊的後退幅度減半（只縮放受傷動畫的前後位移，其他曲線不變）
+    if (cur === "hurt" && this.recoilScale !== 1) pose = { ...pose, fwd: pose.fwd * this.recoilScale };
+    if (cur !== "hurt") this.recoilScale = 1;
+    this.flashLeft = Math.max(0, this.flashLeft - dt);
 
     // 朝向：平滑轉向邏輯朝向（受傷、死亡時不轉身；攻擊時仍朝向目標）
     if (cur !== "hurt" && cur !== "death" && cur !== "dead") {
@@ -196,7 +227,17 @@ export class BoboV38RAnimDriver {
     // 表情（與已驗收的測試頁相同）
     const dying = cur === "death" || cur === "dead";
     const face: BoboExpr =
-      cur === "attack" ? "angry" : cur === "hurt" && t < HURT_FACE_UNTIL ? "hurt" : dying ? (cur === "dead" || t >= DEATH_EYES_CLOSE_AT ? "sleepy" : "hurt") : "normal";
+      dying
+        ? cur === "dead" || t >= DEATH_EYES_CLOSE_AT
+          ? "sleepy"
+          : "hurt"
+        : this.flashLeft > 0
+          ? "hurt"
+          : cur === "attack"
+            ? "angry"
+            : cur === "hurt" && t < HURT_FACE_UNTIL
+              ? "hurt"
+              : "normal";
     const canBlink = cur === "idle" && this.respawnT === null;
     this.blinkClosed = canBlink && this.blink.update(dt);
 
