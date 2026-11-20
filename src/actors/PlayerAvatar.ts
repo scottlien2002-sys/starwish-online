@@ -1,5 +1,6 @@
 import { Color3, Mesh, MeshBuilder, Scene, StandardMaterial, TransformNode, type ShadowGenerator } from "@babylonjs/core";
 import { TUNING } from "../config/tuning.ts";
+import { AttackAnimator, type AttackPose } from "./attackAnim.ts";
 
 /**
  * 暫代角色：3.2 頭身 Q版比例，用基本幾何組成。
@@ -14,6 +15,8 @@ export class PlayerAvatar {
   private readonly armR: TransformNode;
   private phase = 0;
   private walkAmount = 0;
+  private readonly attackAnim = new AttackAnimator();
+  private lastAttackPose: AttackPose = this.attackAnim.pose();
 
   constructor(scene: Scene, shadows: ShadowGenerator) {
     const H = TUNING.player.height;
@@ -101,17 +104,52 @@ export class PlayerAvatar {
     for (const m of meshes) shadows.addShadowCaster(m);
   }
 
+  /** 開始一次普通攻擊動作（每次從蓄力重新開始，不疊加） */
+  playAttack(): void {
+    this.attackAnim.start();
+  }
+
+  /** 目前攻擊動作（測試與除錯用） */
+  get attackPose(): AttackPose {
+    return this.lastAttackPose;
+  }
+
+  get attacking(): boolean {
+    return this.attackAnim.active;
+  }
+
+  /** 攻擊開始後經過的秒數（沒有攻擊時為 -1；測試用） */
+  get attackElapsed(): number {
+    return this.attackAnim.elapsed;
+  }
+
+  /** 已開始的攻擊動作次數（測試用） */
+  get attacksStarted(): number {
+    return this.attackAnim.started;
+  }
+
   /** speed01：0 = 站立，1 = 全速奔跑 */
   update(dt: number, speed01: number): void {
     this.walkAmount += (speed01 - this.walkAmount) * Math.min(1, dt * 12);
     this.phase += dt * (6 + 6 * this.walkAmount);
     const swing = Math.sin(this.phase) * 0.7 * this.walkAmount;
+    const a = (this.lastAttackPose = this.attackAnim.update(dt));
+    const w = a.weight;
+
+    // 腿：走路擺動照常（移動中攻擊時腳步不停）
     this.legL.rotation.x = swing;
     this.legR.rotation.x = -swing;
-    this.armL.rotation.x = -swing * 0.8;
-    this.armR.rotation.x = swing * 0.8;
-    // 走路彈跳 + 站立呼吸
+    // 手：攻擊時右手由攻擊動作接管，左手在走路擺動上疊加平衡動作
+    this.armL.rotation.x = -swing * 0.8 * (1 - w * 0.6) + a.armLX;
+    this.armR.rotation.x = swing * 0.8 * (1 - w) + a.armRX;
+    this.armR.rotation.z = 0.18 + a.armRZ;
+
+    // 走路彈跳 + 站立呼吸（與原本完全相同；沒有攻擊時手腳與身體的動作也和原本相同）
     const bob = Math.abs(Math.sin(this.phase)) * 0.05 * this.walkAmount + Math.sin(this.phase * 0.5) * 0.008 * (1 - this.walkAmount);
     this.body.position.y = bob;
+    // 攻擊：前傾、扭腰、向前踏
+    this.body.rotation.x = a.lean;
+    this.body.rotation.y = a.twist;
+    this.body.position.z = a.lunge;
   }
 }

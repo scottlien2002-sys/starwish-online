@@ -32,7 +32,8 @@ import { registerBabylonVisuals } from "../monsters/babylon/registerVisuals.ts";
 import { BOBO_MODEL_IDS, BOBO_PROFILE_IDS, boboVariantFromSearch, hopSyncFromSearch, type BoboVariant } from "./boboVariant.ts";
 import { BoboV38RSceneAssets, BoboV38RVisual, type BoboV38RAnimDebug } from "../monsters/star-dew-bobo-v38r/BoboV38RVisual.ts";
 import type { AttackLog } from "../monsters/framework/MonsterInstance.ts";
-import { PREVIEW_COMBAT, PreviewCombat, previewSpawnPoints, separate, type PlayerAttackResult } from "./previewCombat.ts";
+import { PREVIEW_COMBAT, PreviewCombat, previewSpawnPoints, separate, type AttackStartResult, type PlayerAttackResult } from "./previewCombat.ts";
+import { ATTACK_TIMING, type AttackPhase } from "../actors/attackAnim.ts";
 
 export interface DebugApi {
   ready: boolean;
@@ -70,8 +71,22 @@ export interface DebugApi {
   }[];
   /** 測試用：直接對怪物造成傷害（不經過玩家攻擊距離與冷卻） */
   damageMonster(id: string, amount: number): { applied: boolean; killed: boolean; rehitLocked?: boolean; cancelledAttackId?: number; reason?: string } | null;
-  /** 預覽測試：等同按下攻擊鍵 */
-  attack(): PlayerAttackResult;
+  /** 預覽測試：等同按下攻擊鍵（傷害在揮中時結算，見 attackState().lastHit） */
+  attack(): AttackStartResult;
+  /** 玩家攻擊動作狀態（測試用） */
+  attackState(): {
+    phase: AttackPhase;
+    attacking: boolean;
+    started: number;
+    armRX: number;
+    lean: number;
+    /** 角色面向與目標方向的夾角（弧度）；沒有目標時為 null */
+    facingError: number | null;
+    lastHit: PlayerAttackResult | null;
+    hits: number;
+    /** 最近一次攻擊：播放過的階段、右手最大後拉／前揮、最大前傾、結算傷害時的階段與攻擊時間 */
+    trace: { phases: AttackPhase[]; maxBack: number; maxFwd: number; maxLean: number; hitPhase: AttackPhase | null; hitElapsed: number | null };
+  };
   /** 預覽測試：玩家戰鬥狀態 */
   combat(): { hp: number; maxHp: number; down: boolean; hitsTaken: number; lockedId: string | null; tilt: number };
   /** 預覽測試：直接讓玩家倒地 */
@@ -131,6 +146,12 @@ export class Game {
   private lockedId: string | null = null;
   /** 倒地動作進度 0..1 */
   private downT = 0;
+  /** 攻擊中要面向的目標 */
+  private attackTargetId: string | null = null;
+  private lastHit: PlayerAttackResult | null = null;
+  private hits = 0;
+  /** 最近一次攻擊動作逐幀紀錄（測試用：確認每個階段都有播放、揮中時才結算） */
+  private attackTrace = { phases: [] as AttackPhase[], maxBack: 0, maxFwd: 0, maxLean: 0, hitPhase: null as AttackPhase | null, hitElapsed: null as number | null };
   private now = 0;
 
   constructor(canvas: HTMLCanvasElement, hudRoot: HTMLElement) {
@@ -276,12 +297,29 @@ export class Game {
     const pushed = resolvePropCollisions(step.x, step.z, PLAYER_RADIUS, this.world.props);
     const bounded = clampToWalkable(pushed.x, pushed.z);
     this.position.set(bounded.x, heightAt(bounded.x, bounded.z), bounded.z);
-    this.yaw = turnTowards(this.yaw, step.dirX, step.dirZ, TUNING.player.turnSharpness, dt);
+    // 攻擊動作中：快速轉向鎖定的目標（移動照常，只是面向目標出手）；其餘時間面向移動方向
+    const faceTarget = this.player.attacking ? this.attackTarget() : null;
+    if (faceTarget) {
+      const p = faceTarget.instance.currentPosition;
+      this.yaw = turnTowards(this.yaw, p.x - this.position.x, p.z - this.position.z, 24, dt);
+    } else {
+      this.yaw = turnTowards(this.yaw, step.dirX, step.dirZ, TUNING.player.turnSharpness, dt);
+    }
 
     const root = this.player.root;
     root.position.copyFrom(this.position);
     root.rotation.y = this.yaw;
     this.player.update(dt, Math.min(1, Math.hypot(move.x, move.y)));
+    {
+      const a = this.player.attackPose;
+      const tr = this.attackTrace;
+      if (a.phase !== "idle") {
+        if (tr.phases[tr.phases.length - 1] !== a.phase) tr.phases.push(a.phase);
+        tr.maxBack = Math.max(tr.maxBack, a.armRX);
+        tr.maxFwd = Math.min(tr.maxFwd, a.armRX);
+        tr.maxLean = Math.max(tr.maxLean, a.lean);
+      }
+    }
     // 預覽測試：HP 歸零時角色往後倒在地上（0.4 秒倒下），復活時立刻站起
     this.downT = this.combat.isDown ? Math.min(1, this.downT + dt / 0.4) : 0;
     if (this.downT > 0) {
@@ -326,32 +364,53 @@ export class Game {
     this.hud.setBars({ hp: this.combat.hp, maxHp: PREVIEW_COMBAT.playerMaxHp, mp: 50, maxMp: 50, exp: 0, expToNext: 100 });
   }
 
-  private playerAttack(): PlayerAttackResult {
-    const r = this.combat.playerAttack(this.now, this.position.x, this.position.z, this.monsters.map((m) => m.instance));
+  private attackTarget(): MonsterController | null {
+    if (!this.attackTargetId) return null;
+    const m = this.monsters.find((x) => x.instance.instanceId === this.attackTargetId);
+    return m && m.instance.isAlive ? m : null;
+  }
+
+  /** 按下攻擊：通過冷卻與目標檢查後播放攻擊動作；傷害在動作揮中時（ATTACK_TIMING.hit）結算 */
+  private playerAttack(): AttackStartResult {
+    const r = this.combat.startAttack(this.now, this.position.x, this.position.z, this.monsters.map((m) => m.instance), ATTACK_TIMING.hit - 1e-6);
     if (r.ok) {
-      // 面向目標
-      const t = this.monsters.find((m) => m.instance.instanceId === r.targetId);
-      if (t) this.yaw = Math.atan2(t.instance.currentPosition.x - this.position.x, t.instance.currentPosition.z - this.position.z);
+      this.attackTargetId = r.targetId;
+      this.player.playAttack();
+      this.attackTrace = { phases: [], maxBack: 0, maxFwd: 0, maxLean: 0, hitPhase: null, hitElapsed: null };
     }
     return r;
   }
 
-  private handleAttack(r: PlayerAttackResult): void {
-    if (r.ok) {
-      const m = this.monsters.find((x) => x.instance.instanceId === r.targetId)!;
-      const i = m.instance;
-      this.hud.toast(
-        r.killed ? `擊敗${i.definition.name}！（測試：不給經驗、不掉寶）` : `${i.definition.name} -${r.damage}（HP ${i.currentHp}/${i.definition.maxHp}）`,
-        1100,
-      );
-    } else if (r.reason === "no-target") {
+  private handleAttack(r: AttackStartResult): void {
+    if (r.ok) return; // 傷害提示在揮中時顯示
+    if (r.reason === "no-target") {
       this.hud.toast("攻擊範圍內沒有怪物，請再靠近一點", 1100);
     } else if (r.reason === "down") {
       this.hud.toast("倒地中…", 800);
     }
   }
 
+  private handleHit(r: PlayerAttackResult): void {
+    this.lastHit = r;
+    this.attackTrace.hitPhase = this.player.attackPose.phase;
+    this.attackTrace.hitElapsed = this.player.attackElapsed;
+    if (r.ok) {
+      this.hits++;
+      const m = this.monsters.find((x) => x.instance.instanceId === r.targetId)!;
+      const i = m.instance;
+      this.hud.toast(
+        r.killed ? `擊敗${i.definition.name}！（測試：不給經驗、不掉寶）` : `${i.definition.name} -${r.damage}（HP ${i.currentHp}/${i.definition.maxHp}）`,
+        1100,
+      );
+    } else if (r.reason === "miss") {
+      this.hud.toast("沒打中（目標離開了）", 800);
+    }
+  }
+
   private updateMonsters(dt: number): void {
+    // 攻擊揮中的瞬間結算傷害（與動作同步）
+    const hit = this.combat.resolvePending(this.now, this.position.x, this.position.z, this.monsters.map((m) => m.instance));
+    if (hit) this.handleHit(hit);
     if (this.combat.update(this.now)) {
       // 測試規則：倒地 2 秒後回出生點、HP 全滿
       this.position.set(0, heightAt(0, 0), 0);
@@ -602,6 +661,26 @@ export class Game {
         const r = this.playerAttack();
         this.handleAttack(r);
         return r;
+      },
+      attackState: () => {
+        const a = this.player.attackPose;
+        const t = this.attackTarget();
+        let facingError: number | null = null;
+        if (t) {
+          const want = Math.atan2(t.instance.currentPosition.x - this.position.x, t.instance.currentPosition.z - this.position.z);
+          facingError = Math.abs(Math.atan2(Math.sin(want - this.yaw), Math.cos(want - this.yaw)));
+        }
+        return {
+          phase: a.phase,
+          attacking: this.player.attacking,
+          started: this.player.attacksStarted,
+          armRX: a.armRX,
+          lean: a.lean,
+          facingError,
+          lastHit: this.lastHit,
+          hits: this.hits,
+          trace: { ...this.attackTrace, phases: [...this.attackTrace.phases] },
+        };
       },
       combat: () => ({
         hp: this.combat.hp,

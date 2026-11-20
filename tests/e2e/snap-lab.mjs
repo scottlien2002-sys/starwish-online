@@ -120,8 +120,11 @@ if (mode === "game") {
       window.__starwish.teleport(m.x + 1.2, m.z);
       window.__starwish.attack();
     });
-    await run(150);
-    await shot("g05_bobo_hit", "草原：攻擊星露啵啵（受傷）");
+    await run(120);
+    await shot("g05_bobo_hit", "草原：攻擊蓄力");
+    // 新版：揮擊到底的瞬間（右手前揮、身體前傾）
+    await run(120);
+    await shot("g05b_attack_swing", "草原：攻擊揮擊");
     if (await page.evaluate(() => typeof window.__starwish.knockDown === "function")) {
       await page.evaluate(() => window.__starwish.knockDown());
       await run(600);

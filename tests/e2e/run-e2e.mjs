@@ -74,26 +74,88 @@ for (const name of browsers) {
         };
         await near();
         await page.waitForTimeout(200);
-        const a1 = await page.evaluate(() => window.__starwish.attack());
-        const a2 = await page.evaluate(() => window.__starwish.attack());
+        // ---- 玩家攻擊動作：按下 → 蓄力 → 揮擊（此時才扣血）→ 收招 → 回待機 ----
+        const idle0 = await page.evaluate(() => window.__starwish.attackState());
+        // 按下攻擊的同一個瞬間讀取怪物血量（確認按下時還沒扣血）
+        const press = await page.evaluate((id) => {
+          const a1 = window.__starwish.attack();
+          const a2 = window.__starwish.attack();
+          const hp = window.__starwish.monsters().find((x) => x.id === id).hp;
+          return { a1, a2, hp };
+        }, target);
+        const { a1, a2 } = press;
+        // 取樣轉向（遊戲時間在軟體繪圖下較慢）
+        const samples = [];
+        for (let k = 0; k < 80; k++) {
+          const st = await page.evaluate(() => window.__starwish.attackState());
+          samples.push(st);
+          if (!st.attacking && k > 2) break;
+          await page.waitForTimeout(40);
+        }
+        const strikeFacing = samples.filter((x) => x.phase === "strike" && x.facingError !== null).map((x) => x.facingError);
+        await page.waitForFunction(() => !window.__starwish.attackState().attacking, null, { timeout: 10000 }).catch(() => {});
+        const afterAnim = await page.evaluate(() => window.__starwish.attackState());
+        const tr = afterAnim.trace;
         const afterOne = (await page.evaluate(() => window.__starwish.monsters())).find((x) => x.id === target);
-        check("草原：鎖定並攻擊、冷卻內不重複攻擊", a1.ok === true && a1.targetId === target && a2.ok === false && a2.reason === "cooldown" && afterOne.hp === afterOne.maxHp - a1.damage, { a1, a2, afterOne });
-        // 持續攻擊直到擊敗（每 1.05 秒一下，最多 8 次）
+        check("草原：待機時呼吸、未攻擊時為待機姿勢", idle0.phase === "idle" && idle0.attacking === false, idle0);
+        check(
+          "草原：按下攻擊播放蓄力→揮擊→收招，右手明顯揮出、身體前傾",
+          a1.ok === true && tr.phases.join(">") === "windup>strike>recover" && tr.maxBack > 0.8 && tr.maxFwd < -1.2 && tr.maxLean > 0.15,
+          { a1, tr },
+        );
+        check(
+          "草原：傷害在揮中時結算（按下瞬間不扣血）、冷卻內不重複攻擊",
+          a2.ok === false && a2.reason === "cooldown" && press.hp === afterOne.maxHp && (tr.hitPhase === "strike" || tr.hitPhase === "recover") && afterOne.hp === afterOne.maxHp - 20 && afterAnim.lastHit?.ok === true && afterAnim.lastHit.targetId === target && afterAnim.started === idle0.started + 1,
+          { a2, atPress: press.hp, afterOne: afterOne.hp, hitPhase: tr.hitPhase, lastHit: afterAnim.lastHit, started: afterAnim.started },
+        );
+        check("草原：攻擊時轉向目標", strikeFacing.length === 0 || Math.min(...strikeFacing) < 0.35, { strikeFacing });
+        check("草原：攻擊結束後回到待機姿勢", afterAnim.attacking === false && afterAnim.phase === "idle" && Math.abs(afterAnim.armRX) < 0.01, afterAnim);
+
+        // 持續攻擊直到擊敗：連續出招不卡住、每次都完整播完、鎖定同一隻
         let killed = false;
         const log = [];
-        // 軟體繪圖下遊戲時間可能比真實時間慢，冷卻中就稍候重試（冷卻回應本身也驗證了不會重複攻擊）
-        for (let k = 0; k < 40 && !killed; k++) {
-          await page.waitForTimeout(300);
+        for (let k = 0; k < 60 && !killed; k++) {
+          await page.waitForTimeout(250);
           const st = await page.evaluate(() => window.__starwish.combat());
           if (st.down) await page.waitForFunction(() => !window.__starwish.combat().down, null, { timeout: 8000 });
           await near();
           const r = await page.evaluate(() => window.__starwish.attack());
-          if (r.ok || r.reason !== "cooldown") log.push(r);
-          if (r.ok && r.targetId !== target) break; // 鎖定應維持在同一隻
-          if (r.ok && r.killed) killed = true;
+          if (!r.ok) continue;
+          // 等這一招揮中結算
+          await page.waitForFunction((n) => window.__starwish.attackState().hits >= n || window.__starwish.attackState().lastHit?.ok === false, log.length + 2, { timeout: 15000 }).catch(() => {});
+          const h = (await page.evaluate(() => window.__starwish.attackState())).lastHit;
+          log.push({ start: r, hit: h });
+          if (r.targetId !== target) break; // 鎖定應維持在同一隻
+          if (h?.ok && h.killed) killed = true;
         }
+        const endState = await page.waitForFunction(() => !window.__starwish.attackState().attacking, null, { timeout: 10000 }).then(() => page.evaluate(() => window.__starwish.attackState())).catch(() => null);
+        check("草原：連續攻擊正常銜接、不卡住", log.length >= 2 && endState !== null && endState.phase === "idle" && endState.started === idle0.started + 1 + log.length, { n: log.length, endState });
         const dying = (await page.evaluate(() => window.__starwish.monsters())).find((x) => x.id === target);
-        check("草原：鎖定同一隻並擊敗（播放死亡）", killed && log.filter((r) => r.ok).every((r) => r.targetId === target) && (dying.state === "death" || dying.state === "dead") && dying.hp === 0, { log, dying });
+        check("草原：鎖定同一隻並擊敗（播放死亡）", killed && log.every((r) => r.start.targetId === target) && (dying.state === "death" || dying.state === "dead") && dying.hp === 0, { log, dying });
+        // 移動中攻擊：邊走邊出招，角色照常移動、動作照常播放
+        await page.waitForFunction(() => !window.__starwish.combat().down, null, { timeout: 8000 }).catch(() => {});
+        const alive = (await page.evaluate(() => window.__starwish.monsters())).find((x) => x.id !== target && x.state !== "death" && x.state !== "dead");
+        let moveAtk = null;
+        if (alive) {
+          await page.evaluate(([x, z]) => window.__starwish.teleport(x, z), [alive.x + 1.2, alive.z]);
+          await page.waitForTimeout(1100);
+          const p0 = await page.evaluate(() => window.__starwish.getPlayer());
+          await page.evaluate(() => window.__starwish.setMove({ x: 0.3, y: 0.6 }));
+          const r = await page.evaluate(() => window.__starwish.attack());
+          await page.waitForTimeout(120);
+          const mid = await page.evaluate(() => window.__starwish.attackState());
+          await page.waitForTimeout(500);
+          await page.evaluate(() => window.__starwish.setMove(null));
+          const p1 = await page.evaluate(() => window.__starwish.getPlayer());
+          await page.waitForFunction(() => !window.__starwish.attackState().attacking, null, { timeout: 10000 }).catch(() => {});
+          const end = await page.evaluate(() => window.__starwish.attackState());
+          moveAtk = { r, mid, moved: Math.hypot(p1.x - p0.x, p1.z - p0.z), end };
+        }
+        check(
+          "草原：移動中攻擊照常出招、角色照常移動",
+          moveAtk !== null && moveAtk.r.ok === true && moveAtk.mid.attacking === true && moveAtk.moved > 0.2 && moveAtk.end.phase === "idle",
+          moveAtk,
+        );
         // 死亡中不可再被攻擊（會改打其他怪或沒有目標，不會打到死亡的這隻）
         const again = await page.evaluate(() => window.__starwish.attack());
         check("草原：死亡中的怪物不會被重複攻擊", !(again.ok && again.targetId === target), again);
@@ -184,7 +246,8 @@ for (const name of browsers) {
 
       // 技能按鈕可按且有回饋
       await page.locator('[data-slot="attack"]').click();
-      const toastShown = await page.locator(".hud-toast.show").count();
+      // 命中提示在揮中時才出現（動作與傷害同步），稍等一下
+      const toastShown = await page.waitForSelector(".hud-toast.show", { timeout: 5000 }).then(() => 1).catch(() => 0);
       check("攻擊按鈕可按", toastShown > 0, null);
 
       // 持續移動 3 秒取樣 FPS（僅供參考）
@@ -1118,6 +1181,51 @@ for (const name of browsers) {
         const res1 = await page.evaluate(async () => (await window.__starwish.bobo()).scene);
         check("死亡重生後資源數不增加（暫時材質與星塵已釋放）", res1.materials === res0.materials && res1.textures === res0.textures && res1.meshes === res0.meshes, { before: res0, after: res1 });
       }
+      // ---- Stage 5.2P：玩家攻擊動作（V3.8R 模式）：揮擊明顯、揮中才扣 20 一次、面向目標；啵啵照常播受傷 ----
+      {
+        const mm = await mons();
+        const tgt = mm.find((m) => (m.state === "idle" || m.state === "move") && m.hp > 20) ?? mm.find((m) => m.state !== "death" && m.state !== "dead" && m.state !== "respawn");
+        if (tgt) {
+          await page.evaluate(({ x, z }) => window.__starwish.teleport(x + 1.2, z), { x: tgt.x, z: tgt.z });
+          await page.waitForFunction(() => !window.__starwish.combat().down, null, { timeout: 8000 }).catch(() => {});
+          await page.waitForTimeout(1200);
+          const before = await page.evaluate(() => ({ st: window.__starwish.attackState(), ms: window.__starwish.monsters() }));
+          // 按下的同一瞬間讀取被鎖定目標的血量
+          const press = await page.evaluate(() => {
+            const r = window.__starwish.attack();
+            const r2 = window.__starwish.attack();
+            const t = r.ok ? window.__starwish.monsters().find((x) => x.id === r.targetId) : null;
+            return { r, r2, hp: t ? t.hp : null, hurt: t && t.anim ? t.anim.starts.hurt : null };
+          });
+          const facing = [];
+          for (let k = 0; k < 60; k++) {
+            const st = await page.evaluate(() => window.__starwish.attackState());
+            if (st.phase === "strike" && st.facingError !== null) facing.push(st.facingError);
+            if (!st.attacking && k > 2) break;
+            await page.waitForTimeout(40);
+          }
+          await page.waitForFunction(() => !window.__starwish.attackState().attacking, null, { timeout: 10000 }).catch(() => {});
+          const after = await page.evaluate(() => ({ st: window.__starwish.attackState(), ms: window.__starwish.monsters() }));
+          const tAfter = press.r.ok ? after.ms.find((x) => x.id === press.r.targetId) : null;
+          const tr = after.st.trace;
+          check(
+            "玩家攻擊（V3.8R 模式）：蓄力→揮擊→收招、右手明顯揮出、身體前傾，結束回待機",
+            press.r.ok && tr.phases.join(">") === "windup>strike>recover" && tr.maxBack > 0.8 && tr.maxFwd < -1.2 && tr.maxLean > 0.15 && after.st.phase === "idle" && after.st.started === before.st.started + 1,
+            { r: press.r, tr, started: [before.st.started, after.st.started] },
+          );
+          check(
+            "玩家攻擊（V3.8R 模式）：按下不扣血、揮中扣 20 一次、冷卻內再按無效",
+            press.r2.ok === false && press.r2.reason === "cooldown" && after.st.lastHit?.ok === true && after.st.hits === before.st.hits + 1 && (tr.hitPhase === "strike" || tr.hitPhase === "recover") && tAfter && press.hp - tAfter.hp === 20,
+            { atPress: press.hp, after: tAfter && tAfter.hp, hitPhase: tr.hitPhase, hitElapsed: tr.hitElapsed, hits: [before.st.hits, after.st.hits], lastHit: after.st.lastHit },
+          );
+          check("玩家攻擊（V3.8R 模式）：揮擊時面向目標", facing.length === 0 || Math.min(...facing) < 0.35, { facing });
+          check(
+            "玩家命中後星露啵啵播放已驗收的受傷動畫（或死亡）",
+            !!tAfter && tAfter.anim && (tAfter.anim.starts.hurt === press.hurt + 1 || tAfter.anim.starts.death >= 1),
+            tAfter && tAfter.anim,
+          );
+        } else check("玩家攻擊（V3.8R 模式）：找到可攻擊的啵啵", false, mm.map((m) => m.state));
+      }
       const perf1 = await page.evaluate(() => window.__starwish.perf());
       run.samples.push({ quality: q, perf: perf1, resources: await page.evaluate(async () => (await window.__starwish.bobo()).scene) });
       const f = `${outDir}${name}_game_v38r_combat_${q}.png`;
@@ -1126,7 +1234,7 @@ for (const name of browsers) {
     } catch (e) {
       run.errors.push(`exception: ${e.message}`);
     }
-    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 9;
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 13;
     if (!run.ok) failures++;
     report.runs.push(run);
     console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);

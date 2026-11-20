@@ -31,6 +31,11 @@ export interface CombatMonster {
 
 export type PlayerAttackResult =
   | { ok: true; targetId: string; killed: boolean; damage: number }
+  | { ok: false; reason: "cooldown" | "no-target" | "down" | "miss" };
+
+/** 按下攻擊鍵的結果：成功時傷害會在 hitAt（動畫揮中的時間）結算 */
+export type AttackStartResult =
+  | { ok: true; targetId: string; hitAt: number }
   | { ok: false; reason: "cooldown" | "no-target" | "down" };
 
 export class PreviewCombat {
@@ -39,6 +44,8 @@ export class PreviewCombat {
   private downUntil: number | null = null;
   /** 目前鎖定的怪物 id */
   lockedId: string | null = null;
+  /** 已出手、等待揮中的攻擊 */
+  private pending: { targetId: string; hitAt: number } | null = null;
   /** 累計：玩家受到的攻擊次數（測試用） */
   hitsTaken = 0;
 
@@ -77,15 +84,46 @@ export class PreviewCombat {
     return next;
   }
 
-  /** 玩家按下攻擊鍵 */
-  playerAttack(now: number, px: number, pz: number, monsters: readonly CombatMonster[]): PlayerAttackResult {
+  get pendingAttack(): { targetId: string; hitAt: number } | null {
+    return this.pending;
+  }
+
+  /**
+   * 按下攻擊鍵：檢查冷卻與目標、開始冷卻計時（攻擊間隔不變）。
+   * 傷害不在此時結算，而是在 hitDelay 秒後（攻擊動作揮中的瞬間）由 resolvePending 結算。
+   */
+  startAttack(now: number, px: number, pz: number, monsters: readonly CombatMonster[], hitDelay: number): AttackStartResult {
     if (this.isDown) return { ok: false, reason: "down" };
     if (now < this.nextAttackAt) return { ok: false, reason: "cooldown" };
     const target = this.lockTarget(px, pz, monsters);
     if (!target) return { ok: false, reason: "no-target" };
     this.nextAttackAt = now + PREVIEW_COMBAT.playerAttackInterval;
+    this.pending = { targetId: target.instanceId, hitAt: now + hitDelay };
+    return { ok: true, targetId: target.instanceId, hitAt: this.pending.hitAt };
+  }
+
+  /**
+   * 每幀呼叫：到了揮中時間就結算傷害（數值不變）。目標若已死亡或已離開範圍（含 0.6 公尺寬容）則落空。
+   * 沒有要結算的攻擊時回傳 null。
+   */
+  resolvePending(now: number, px: number, pz: number, monsters: readonly CombatMonster[]): PlayerAttackResult | null {
+    const p = this.pending;
+    if (!p || now < p.hitAt) return null;
+    this.pending = null;
+    if (this.isDown) return { ok: false, reason: "down" };
+    const target = monsters.find((m) => m.instanceId === p.targetId);
+    if (!target || !target.isAlive) return { ok: false, reason: "miss" };
+    const d = Math.hypot(target.currentPosition.x - px, target.currentPosition.z - pz);
+    if (d > PREVIEW_COMBAT.playerAttackRange + 0.6) return { ok: false, reason: "miss" };
     const r = target.receiveDamage(PREVIEW_COMBAT.playerAttackDamage);
     return { ok: true, targetId: target.instanceId, killed: r.killed, damage: PREVIEW_COMBAT.playerAttackDamage };
+  }
+
+  /** 按下攻擊並立即結算（不經過動畫；單元測試與純邏輯使用） */
+  playerAttack(now: number, px: number, pz: number, monsters: readonly CombatMonster[]): PlayerAttackResult {
+    const s = this.startAttack(now, px, pz, monsters, 0);
+    if (!s.ok) return s;
+    return this.resolvePending(now, px, pz, monsters)!;
   }
 
   /**
@@ -99,12 +137,16 @@ export class PreviewCombat {
     const dmg = Math.max(0, Math.floor(monster.definition.attack));
     this.hp = Math.max(0, this.hp - dmg);
     this.hitsTaken++;
-    if (this.hp === 0) this.downUntil = now + PREVIEW_COMBAT.downSeconds;
+    if (this.hp === 0) {
+      this.downUntil = now + PREVIEW_COMBAT.downSeconds;
+      this.pending = null;
+    }
     return dmg;
   }
 
   /** 測試用：直接讓玩家倒地（E2E 驗證倒地與復活流程） */
   debugKnockDown(now: number): void {
+    this.pending = null;
     this.hp = 0;
     this.downUntil = now + PREVIEW_COMBAT.downSeconds;
   }
