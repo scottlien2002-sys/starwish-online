@@ -37,9 +37,10 @@ import { BoboV38RSceneAssets, BoboV38RVisual, type BoboV38RAnimDebug } from "../
 import type { AttackLog } from "../monsters/framework/MonsterInstance.ts";
 import { PREVIEW_COMBAT, PreviewCombat, previewSpawnPoints, separate, type AttackStartResult, type PlayerAttackResult } from "./previewCombat.ts";
 import { ATTACK_TIMING, type AttackPhase } from "../actors/attackAnim.ts";
-import { FrameRecorder } from "../render/benchmark.ts";
+import { FrameRecorder, summarizeFrames } from "../render/benchmark.ts";
 import { FrameProfiler, resolutionInfo } from "../render/frameProfiler.ts";
 import { DebugPanel, debugEnabledFromSearch, formatDebugLines, type DebugInfo } from "./debugPanel.ts";
+import { AUTOPLAY_STORAGE_KEY, AutoplayStats, autoplayKey, autoplayOptionsFromSearch, extraSpawnPoints, formatAutoplay, movePath, soakSegment, worldToInput, type AutoplayOptions, type AutoplayResult } from "./autoplay.ts";
 import { contactShadowQuality, experimentLabels, experimentTag, renderExperimentsFromSearch, type RenderExperiments } from "../render/renderExperiments.ts";
 import { BENCH_SPOTS, benchOptionsFromSearch, benchUrl, compareExperimentRows, compareRows, formatResult, loadResults, saveResult, type BenchOptions, type BenchResult } from "./benchMode.ts";
 
@@ -103,6 +104,15 @@ export interface DebugApi {
   teleport(x: number, z: number): void;
   /** Stage 5.1：星露啵啵外觀與 V3.8R 適配器資源狀態 */
   bobo(): Promise<unknown>;
+  /**
+   * 陰影鏡頭（測試截圖用）：玩家站在離出生點最近的一棵樹前方，鏡頭固定、怪物與玩家動作停住、解析度固定，
+   * 讓樹影與玩家影子都在畫面中，用來比較陰影品質
+   */
+  stageShadowPhoto(): { tree: { x: number; z: number }; player: { x: number; z: number } };
+  /** 靜止畫面穩定性：相隔 ms 毫秒讀兩次畫面，回傳不同的像素數（陰影閃爍或取樣雜訊會造成差異） */
+  stabilityCheck(ms: number): Promise<{ pixels: number; changed: number; maxDelta: number }>;
+  /** 實際遊玩壓力測試（?autoplay=）狀態；一般遊戲為 null */
+  autoplayState(): { phase: "loading" | "warmup" | "running" | "done"; elapsed: number; result: AutoplayResult | null } | null;
   /** 目前啟用的渲染實驗（預設為空） */
   renderExperiments(): { tag: string; labels: string[]; shadowQuality: number; msaa: number; hdr: boolean | null; shadowEnabled: boolean };
   /** 除錯面板（?debug=1）目前的資料；一般遊戲為 null */
@@ -169,6 +179,22 @@ export class Game {
   private readonly boboVariant: BoboVariant;
   /** 測試截圖：怪物停住（不更新 AI 與動畫），只用於同條件比較畫質 */
   private photoMode = false;
+  /** 實際遊玩壓力測試（?autoplay=）：null = 一般遊戲 */
+  private readonly autoOpts: AutoplayOptions | null = autoplayOptionsFromSearch(location.search);
+  private autoRun: {
+    phase: "loading" | "warmup" | "running" | "done";
+    warm: number;
+    stats: AutoplayStats;
+    rec: { draws: number[] };
+    path: { x: number; z: number }[];
+    wp: number;
+    banner: HTMLDivElement | null;
+    resStart: { meshes: number; materials: number; textures: number } | null;
+    prevStates: string[];
+    prevDown: boolean;
+    revived: boolean;
+    result: AutoplayResult | null;
+  } | null = null;
   /** 渲染效能實驗（?opt=／?diag=）；預設全部關閉 */
   private readonly experiments: RenderExperiments = renderExperimentsFromSearch(location.search);
   /** 除錯面板（?debug=1）：null = 一般遊戲（不建立、不計時） */
@@ -270,7 +296,10 @@ export class Game {
     // 外觀：預設 V2；?bobo=v38r 改用 V3.8R（只換模型，數值、AI、戰鬥規則不變）
     this.boboVariant = boboVariantFromSearch(location.search);
     const modelId = BOBO_MODEL_IDS[this.boboVariant];
-    this.monsters = previewSpawnPoints(0, 0, this.camera.forwardYaw).map((p) =>
+    // 怪物數量：正式遊戲 3 隻；只有 ?autoplay=…&count=5／10 的測試場景會多生成（不改正式設定）
+    const spawnPts = previewSpawnPoints(0, 0, this.camera.forwardYaw);
+    if (this.autoOpts && this.autoOpts.count > 3) spawnPts.push(...extraSpawnPoints(this.autoOpts.count - 3, this.camera.forwardYaw));
+    this.monsters = spawnPts.map((p) =>
       factory.create("star_dew_bobo", { x: p.x, y: heightAt(p.x, p.z), z: p.z }, { modelId, animationProfileId: BOBO_PROFILE_IDS[this.boboVariant] }),
     );
     for (const m of this.monsters) void m.visual?.load();
@@ -294,7 +323,7 @@ export class Game {
     // 經驗值與 MP 尚無系統：固定顯示；HP 由預覽測試戰鬥更新
     this.updateBars();
     this.hud.events.on("skillPressed", ({ slot }) => {
-      if (this.benchLocked) return; // 效能測試中不接受操作
+      if (this.benchLocked || this.autoplayActive) return; // 效能測試、自動遊玩測試中不接受玩家操作
       if (slot !== "attack") {
         this.hud.toast("技能將於 W2 啟用", 1200);
         return;
@@ -317,6 +346,7 @@ export class Game {
     this.installPlatformGuards();
     this.installDebugApi();
     if (this.benchOpts) void this.startBench(hudRoot);
+    else if (this.autoOpts) void this.startAutoplay(hudRoot);
     if (this.debugOn || (this.benchOpts && this.benchOpts.profile)) this.setupProfiling();
     if (this.debugOn) this.debugPanel = new DebugPanel(hudRoot, () => this.resetTest());
   }
@@ -327,7 +357,7 @@ export class Game {
     this.engine.runRenderLoop(this.frame);
     if (!this.welcomed) {
       this.welcomed = true;
-      if (this.benchOpts) return; // 效能測試：不顯示歡迎提示（避免動畫中的提示影響測量）
+      if (this.benchOpts || this.autoOpts) return; // 效能／自動測試：不顯示歡迎提示（避免動畫中的提示影響測量）
       this.hud.toast("預覽測試：前方有 3 隻星露啵啵，靠近後按攻擊鍵（測試用數值）", 4500);
     }
   }
@@ -348,6 +378,9 @@ export class Game {
     this.keyboard.update();
     this.now += dt;
 
+    const autoActive = this.autoplayActive;
+    const posX0 = this.position.x, posZ0 = this.position.z;
+    if (autoActive) this.autoplayDrive();
     const down = this.combat.isDown;
     const rawMove = this.input.getMove();
     const benchLocked = this.benchLocked;
@@ -376,7 +409,8 @@ export class Game {
     const root = this.player.root;
     root.position.copyFrom(this.position);
     root.rotation.y = this.yaw;
-    this.player.update(dt, Math.min(1, Math.hypot(move.x, move.y)));
+    // 測試截圖（photoMode）時玩家動作停住，畫面完全靜止，方便逐像素比較
+    if (!this.photoMode) this.player.update(dt, Math.min(1, Math.hypot(move.x, move.y)));
     {
       const a = this.player.attackPose;
       const tr = this.attackTrace;
@@ -400,7 +434,7 @@ export class Game {
     prof?.mark("player");
     const camInput = this.input.consumeCamera();
     // 效能測試：鏡頭固定（觸控旋轉／縮放不生效）
-    this.camera.update(dt, this.position, benchLocked ? { yaw: 0, pitch: 0, zoom: 0 } : camInput);
+    this.camera.update(dt, this.position, benchLocked || autoActive ? { yaw: 0, pitch: 0, zoom: 0 } : camInput);
 
     // 陰影跟著角色，只算附近範圍
     this.sun.position.copyFrom(this.position).subtractInPlace(this.sun.direction.scale(45));
@@ -410,12 +444,14 @@ export class Game {
     else if (!this.photoMode) this.updateMonsters(dt);
     prof?.mark("monsters");
 
-    this.world.update(dt);
+    // 測試截圖（photoMode）時雲停住，畫面完全靜止
+    if (!this.photoMode) this.world.update(dt);
     prof?.mark("world");
     this.scene.render();
     prof?.mark("render");
     this.perfOverlay.update(dt);
     if (this.benchRun) this.benchFrame();
+    if (autoActive) this.autoplayFrame(posX0, posZ0, dt);
 
     this.fpsTimer += dt;
     if (this.fpsTimer >= 0.5) {
@@ -534,6 +570,216 @@ export class Game {
     this.player.root.rotation.x = 0;
     this.updateBars();
     this.hud.toast("已重設測試：怪物與玩家回到出生點、HP 全滿", 1200);
+  }
+
+  /** 自動遊玩測試進行中（暖機或測量；遊戲照常運作，只是由程式操作） */
+  private get autoplayActive(): boolean {
+    return this.autoRun !== null && (this.autoRun.phase === "warmup" || this.autoRun.phase === "running");
+  }
+
+  private async startAutoplay(hudRoot: HTMLElement): Promise<void> {
+    const o = this.autoOpts!;
+    const banner = document.createElement("div");
+    banner.className = "autoplay-banner";
+    banner.setAttribute("style", "position:fixed;left:50%;top:6px;transform:translateX(-50%);z-index:50;display:flex;gap:8px;align-items:center;padding:5px 10px;border-radius:12px;background:rgba(30,30,60,.72);color:#fff;font:600 12px/1.4 system-ui,sans-serif;white-space:nowrap");
+    const text = document.createElement("span");
+    // 測量期間不更新這段文字（不增加額外成本）
+    text.textContent = `自動測試中（${o.mode}・${o.count} 隻・${o.duration} 秒），請勿觸碰`;
+    const stop = document.createElement("button");
+    stop.type = "button";
+    stop.className = "autoplay-stop";
+    stop.textContent = "停止";
+    stop.setAttribute("style", "padding:3px 10px;border-radius:8px;border:0;background:#f07c9a;color:#fff;font:600 12px system-ui,sans-serif");
+    stop.addEventListener("pointerdown", (e) => e.stopPropagation());
+    stop.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (this.autoRun?.phase === "running") this.finishAutoplay();
+    });
+    banner.append(text, stop);
+    hudRoot.appendChild(banner);
+    this.engine.onContextLostObservable.add(() => {
+      if (this.autoRun) this.autoRun.stats.contextLost++;
+    });
+    const stats = new AutoplayStats(o.mode === "soak" ? 60 : 30);
+    this.autoRun = {
+      phase: "loading", warm: 0, stats, rec: { draws: [] }, path: movePath(7), wp: 0, banner,
+      resStart: null, prevStates: this.monsters.map((m) => m.instance.sm.state), prevDown: false, revived: false, result: null,
+    };
+    await Promise.all(this.monsters.map((m) => m.visual?.load() ?? Promise.resolve()));
+    await this.scene.whenReadyAsync();
+    this.autoRun.phase = "warmup";
+  }
+
+  /** 每幀（讀取輸入之前）：依模式設定模擬搖桿、按攻擊鍵 */
+  private autoplayDrive(): void {
+    const a = this.autoRun!;
+    const o = this.autoOpts!;
+    const seg = o.mode === "soak" ? soakSegment(a.stats.elapsed + a.warm) : o.mode;
+    if (this.combat.isDown) {
+      this.input.moveOverride = null;
+      return;
+    }
+    const p = this.position;
+    const toward = (x: number, z: number): void => {
+      this.input.moveOverride = worldToInput(x - p.x, z - p.z, this.camera.forwardYaw);
+    };
+    if (seg === "move") {
+      let t = a.path[a.wp]!;
+      if (Math.hypot(t.x - p.x, t.z - p.z) < 0.8) {
+        a.wp = (a.wp + 1) % a.path.length;
+        t = a.path[a.wp]!;
+      }
+      toward(t.x, t.z);
+      return;
+    }
+    // 戰鬥：走向最近的存活怪物，進入攻擊距離就按攻擊（冷卻中按了也不會出手）
+    let best: MonsterController | null = null;
+    let bd = Infinity;
+    for (const m of this.monsters) {
+      if (!m.instance.isAlive) continue;
+      const d = Math.hypot(m.instance.currentPosition.x - p.x, m.instance.currentPosition.z - p.z);
+      if (d < bd) {
+        bd = d;
+        best = m;
+      }
+    }
+    if (!best) {
+      this.input.moveOverride = null;
+      return;
+    }
+    const mp = best.instance.currentPosition;
+    if (bd > 1.6) toward(mp.x, mp.z);
+    else this.input.moveOverride = null;
+    if (bd <= 2.3) {
+      const r = this.playerAttack();
+      if (r.ok && a.phase === "running") a.stats.attackStarted(this.now);
+    }
+  }
+
+  /** 每幀（繪製之後）：暖機計時、記錄影格與各項觀察 */
+  private autoplayFrame(x0: number, z0: number, dt: number): void {
+    const a = this.autoRun!;
+    const o = this.autoOpts!;
+    const rawDt = this.engine.getDeltaTime() / 1000;
+    if (a.phase === "warmup") {
+      a.warm += rawDt;
+      if (a.warm >= o.warmup) {
+        a.phase = "running";
+        a.resStart = this.resourceCounts();
+        a.prevStates = this.monsters.map((m) => m.instance.sm.state);
+        a.prevDown = this.combat.isDown;
+      }
+      a.revived = false;
+      return;
+    }
+    const st = a.stats;
+    const moved = Math.hypot(this.position.x - x0, this.position.z - z0);
+    const tgt = this.camera.camera.target;
+    let valid = true;
+    this.monsters.forEach((m, i) => {
+      const s = m.instance.sm.state;
+      const q = m.instance.currentPosition;
+      if (!Number.isFinite(q.x) || !Number.isFinite(q.z) || !Number.isFinite(m.instance.currentHp)) valid = false;
+      if (s !== a.prevStates[i]) {
+        if (s === "death") st.monsterDeaths++;
+        if (s === "respawn") st.monsterRespawns++;
+        a.prevStates[i] = s;
+      }
+    });
+    if (this.combat.isDown && !a.prevDown) st.playerDowns++;
+    a.prevDown = this.combat.isDown;
+    st.frame({
+      rawDt,
+      drawCalls: this.perfOverlay.drawCalls,
+      moved,
+      expectedMax: TUNING.player.moveSpeed * Math.min(dt, 0.1) + 0.02,
+      intendMove: this.input.moveOverride !== null && !this.combat.isDown,
+      revived: a.revived,
+      cameraLag: Math.hypot(tgt.x - this.position.x, tgt.z - this.position.z),
+      valid,
+    });
+    a.revived = false;
+    if (st.dueSample()) st.sample({ ...this.resourceCounts(), heapMB: this.heapMB() });
+    if (st.elapsed >= o.duration) this.finishAutoplay();
+  }
+
+  private heapMB(): number | null {
+    const m = (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory;
+    return m ? m.usedJSHeapSize / (1024 * 1024) : null;
+  }
+
+  private finishAutoplay(): void {
+    const a = this.autoRun!;
+    const o = this.autoOpts!;
+    a.phase = "done";
+    this.input.moveOverride = null;
+    const st = a.stats;
+    if (st.timeline.length === 0 || st.elapsed - (st.timeline[st.timeline.length - 1]?.t ?? 0) > 1) st.sample({ ...this.resourceCounts(), heapMB: this.heapMB() });
+    const end = this.resourceCounts();
+    const dup = this.monsters.reduce((n, m) => n + m.instance.attackLog.duplicatesBlocked, 0);
+    const result: AutoplayResult = {
+      mode: o.mode,
+      count: this.monsters.length,
+      variant: this.boboVariant,
+      quality: this.quality.level,
+      pixelRatio: Math.round((1 / this.engine.getHardwareScalingLevel()) * 100) / 100,
+      summary: summarizeFrames(st.dts, st.draws),
+      timeline: st.timeline,
+      checks: st.judge({ mode: o.mode, attackInterval: PREVIEW_COMBAT.playerAttackInterval, resStart: a.resStart ?? end, resEnd: end, duplicatesBlocked: dup }),
+      counters: {
+        出手: st.attackStarts,
+        命中: st.hits,
+        落空: st.misses,
+        怪物死亡: st.monsterDeaths,
+        怪物重生: st.monsterRespawns,
+        玩家倒地: st.playerDowns,
+        玩家受擊: this.combat.hitsTaken,
+      },
+      at: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+    };
+    a.result = result;
+    try {
+      const all = JSON.parse(window.localStorage.getItem(AUTOPLAY_STORAGE_KEY) ?? "{}") as Record<string, AutoplayResult>;
+      all[autoplayKey(result)] = result;
+      window.localStorage.setItem(AUTOPLAY_STORAGE_KEY, JSON.stringify(all));
+    } catch {
+      /* 無法儲存時只顯示本次結果 */
+    }
+    a.banner?.remove();
+    a.banner = null;
+    const el = document.createElement("div");
+    el.className = "autoplay-result";
+    el.setAttribute(
+      "style",
+      "position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;max-width:94vw;max-height:90vh;overflow:auto;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.96);color:#223;font:12px/1.4 system-ui,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.25);user-select:text;-webkit-user-select:text",
+    );
+    const row = document.createElement("div");
+    row.setAttribute("style", "display:flex;gap:8px;margin-bottom:8px");
+    for (const [label, fn] of [["重新測試", () => location.reload()], ["關閉", () => el.remove()]] as const) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = label;
+      b.setAttribute("style", "padding:7px 12px;border-radius:10px;border:0;background:#8a7cf0;color:#fff;font:600 13px system-ui,sans-serif");
+      b.addEventListener("pointerdown", (e) => e.stopPropagation());
+      b.addEventListener("click", (e) => {
+        e.stopPropagation();
+        fn();
+      });
+      row.appendChild(b);
+    }
+    el.appendChild(row);
+    const title = document.createElement("div");
+    title.style.fontWeight = "700";
+    title.textContent = "🎮 實際遊玩壓力測試結果";
+    el.appendChild(title);
+    for (const t of formatAutoplay(result)) {
+      const d = document.createElement("div");
+      d.textContent = t;
+      el.appendChild(d);
+    }
+    el.addEventListener("pointerdown", (e) => e.stopPropagation());
+    document.body.appendChild(el);
   }
 
   /** 效能測試進行中（載入、暖機、測量）：暫停操作、AI 與戰鬥 */
@@ -773,9 +1019,16 @@ export class Game {
 
   private updateMonsters(dt: number): void {
     // 攻擊揮中的瞬間結算傷害（與動作同步）
+    const pend = this.combat.pendingAttack;
+    const pendTarget = pend && this.now >= pend.hitAt ? this.monsters.find((m) => m.instance.instanceId === pend.targetId) : undefined;
+    const hpBefore = pendTarget ? pendTarget.instance.currentHp : 0;
     const hit = this.combat.resolvePending(this.now, this.position.x, this.position.z, this.monsters.map((m) => m.instance));
-    if (hit) this.handleHit(hit);
+    if (hit) {
+      this.handleHit(hit);
+      if (this.autoRun?.phase === "running") this.autoRun.stats.hit(hit.ok, pendTarget ? hpBefore - pendTarget.instance.currentHp : 0, hpBefore, PREVIEW_COMBAT.playerAttackDamage);
+    }
     if (this.combat.update(this.now)) {
+      if (this.autoRun) this.autoRun.revived = true;
       // 測試規則：倒地 2 秒後回出生點、HP 全滿
       this.position.set(0, heightAt(0, 0), 0);
       this.player.root.position.copyFrom(this.position);
@@ -977,6 +1230,61 @@ export class Game {
           pixelRatio: 1 / this.engine.getHardwareScalingLevel(),
           shots,
         };
+      },
+      stageShadowPhoto: () => {
+        this.photoMode = true;
+        this.input.moveOverride = null;
+        const trees = this.world.props.filter((p) => p.kind === "tree");
+        let tree = trees[0]!;
+        for (const t of trees) if (Math.hypot(t.x, t.z) < Math.hypot(tree.x, tree.z)) tree = t;
+        const c = TUNING.camera;
+        // 鏡頭從玩家後方看向樹：玩家站在樹與鏡頭之間、距離樹 4.5 公尺
+        const fy = this.camera.forwardYaw;
+        const fx = Math.sin(fy), fz = Math.cos(fy);
+        const px = tree.x - fx * 4.5, pz = tree.z - fz * 4.5;
+        this.position.set(px, heightAt(px, pz), pz);
+        this.yaw = fy;
+        this.player.root.position.copyFrom(this.position);
+        this.player.root.rotation.set(0, fy, 0);
+        this.camera.snap(this.position, this.camera.camera.alpha, c.defaultBeta, c.distance);
+        this.perfOverlay.lockResolution(this.quality.maxPixelRatio);
+        this.engine.resize();
+        return { tree: { x: tree.x, z: tree.z }, player: { x: px, z: pz } };
+      },
+      stabilityCheck: (ms) => {
+        const grab = (): Promise<Uint8Array> =>
+          new Promise((resolve, reject) => {
+            this.scene.onAfterRenderObservable.addOnce(() => {
+              this.engine
+                .readPixels(0, 0, this.engine.getRenderWidth(), this.engine.getRenderHeight())
+                .then((v) => resolve(new Uint8Array(v.buffer.slice(v.byteOffset, v.byteOffset + v.byteLength))))
+                .catch(reject);
+            });
+          });
+        return grab().then(
+          (a) =>
+            new Promise((resolve, reject) => {
+              window.setTimeout(() => {
+                grab()
+                  .then((b) => {
+                    let changed = 0;
+                    let maxDelta = 0;
+                    const n = Math.min(a.length, b.length);
+                    for (let i = 0; i + 3 < n; i += 4) {
+                      const d = Math.max(Math.abs(a[i]! - b[i]!), Math.abs(a[i + 1]! - b[i + 1]!), Math.abs(a[i + 2]! - b[i + 2]!));
+                      if (d > 0) changed++;
+                      if (d > maxDelta) maxDelta = d;
+                    }
+                    resolve({ pixels: n / 4, changed, maxDelta });
+                  })
+                  .catch(reject);
+              }, ms);
+            }),
+        );
+      },
+      autoplayState: () => {
+        const a = this.autoRun;
+        return a ? { phase: a.phase, elapsed: a.stats.elapsed, result: a.result } : null;
       },
       renderExperiments: () => ({
         tag: experimentTag(this.experiments),

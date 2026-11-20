@@ -1499,6 +1499,116 @@ for (const name of browsers) {
     for (const e of run.errors) console.log(`   ! ${e}`);
   }
 
+  // ---------- Stage 5.3：陰影品質與穩定性（高畫質：預設 PCSS32 vs 回退原本高品質）----------
+  {
+    const vp = VIEWPORTS[0];
+    const run = { browser: name, viewport: `${vp.name} / 遊戲 陰影品質與穩定性（高畫質）`, checks: {}, errors: [], screenshots: [], shots: [] };
+    const check = (key, ok, detail) => {
+      run.checks[key] = { ok, detail };
+    };
+    for (const [label, extra] of [["pcss32_default", ""], ["original", "&shadowq=original"]]) {
+      const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+      const page = await ctx.newPage();
+      page.on("pageerror", (e) => run.errors.push(`${label} pageerror: ${e.message}`));
+      page.on("console", (m) => m.type() === "error" && run.errors.push(`${label} console: ${m.text()}`));
+      try {
+        await page.goto(server.url + `/?bobo=v38r&quality=high${extra}`, { waitUntil: "load" });
+        await page.addStyleTag({ content: safeAreaCss(vp.safe) + " .hud-toast { display: none !important; }" });
+        await page.waitForFunction(() => window.__starwish?.ready === true, null, { timeout: 45000 });
+        await page.waitForFunction(async () => (await window.__starwish.bobo()).visuals.every((x) => x.loaded), null, { timeout: 45000, polling: 250 });
+        const staged = await page.evaluate(() => window.__starwish.stageShadowPhoto());
+        await page.waitForTimeout(2500);
+        const exp = await page.evaluate(() => window.__starwish.renderExperiments());
+        const stab = await page.evaluate(() => window.__starwish.stabilityCheck(1000));
+        const f = `${outDir}${name}_shadow_${label}.png`;
+        await page.screenshot({ path: f });
+        run.screenshots.push(f.split("/test-results/")[1]);
+        run.shots.push({ label, staged, exp, stab });
+        check(
+          `${label}：靜止畫面連續兩幀完全相同（陰影沒有閃爍或取樣雜訊）`,
+          stab.pixels > 0 && stab.changed === 0,
+          stab,
+        );
+        check(
+          `${label}：陰影設定正確（${label === "original" ? "原本高品質" : "PCSS32 中品質"}、陰影開啟、MSAA 4x）`,
+          exp.shadowEnabled === true && exp.msaa === 4 && exp.shadowQuality === (label === "original" ? 0 : 1),
+          exp,
+        );
+      } catch (e) {
+        run.errors.push(`${label} exception: ${e.message}`);
+      }
+      await ctx.close();
+    }
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 4;
+    if (!run.ok) failures++;
+    report.runs.push(run);
+    console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
+    for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}${v.ok ? "" : "  " + JSON.stringify(v.detail).slice(0, 500)}`);
+    for (const e of run.errors) console.log(`   ! ${e}`);
+  }
+
+  // ---------- Stage 5.3：實際遊玩壓力測試（?autoplay=；CI 用短時間）----------
+  {
+    const vp = VIEWPORTS[0];
+    const cases =
+      name === "webkit"
+        ? [["move", 3, "high", 6], ["attack", 3, "low", 22], ["attack", 10, "low", 22], ["soak", 5, "medium", 8]]
+        : [["attack", 5, "low", 22]];
+    const run = { browser: name, viewport: `${vp.name} / 遊戲 實際遊玩壓力測試 ?autoplay`, checks: {}, errors: [], screenshots: [], results: [] };
+    const check = (key, ok, detail) => {
+      run.checks[key] = { ok, detail };
+    };
+    for (const [mode, count, q, dur] of cases) {
+      const tag = `${mode}／${count} 隻／${q}`;
+      const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+      const page = await ctx.newPage();
+      page.on("pageerror", (e) => run.errors.push(`${tag} pageerror: ${e.message}`));
+      page.on("console", (m) => m.type() === "error" && run.errors.push(`${tag} console: ${m.text()}`));
+      try {
+        await page.goto(server.url + `/?bobo=v38r&quality=${q}&autoplay=${mode}&count=${count}&dur=${dur}&warmup=1`, { waitUntil: "load" });
+        await page.waitForFunction(() => window.__starwish?.ready === true, null, { timeout: 45000 });
+        const n = await page.evaluate(() => window.__starwish.monsters().length);
+        await page.waitForFunction(() => window.__starwish.autoplayState()?.phase === "done", null, { timeout: (dur + 90) * 1000 });
+        const st = await page.evaluate(() => window.__starwish.autoplayState());
+        const r = st.result;
+        const panel = await page.evaluate(() => document.querySelector(".autoplay-result")?.textContent ?? "");
+        run.results.push({ tag, summary: r.summary, counters: r.counters, checks: r.checks.map((c) => `${c.ok ? "✓" : "✗"} ${c.name}（${c.detail}）`), timeline: r.timeline });
+        const failed = r.checks.filter((c) => !c.ok);
+        check(`${tag}：怪物數量正確（${count} 隻）`, n === count && r.count === count, { n, count: r.count });
+        check(`${tag}：所有自動判定通過`, failed.length === 0 && r.summary.frames > 0, failed);
+        if (mode === "attack") check(`${tag}：有出手、命中、擊倒怪物`, r.counters["出手"] >= 2 && r.counters["命中"] >= 2 && r.counters["怪物死亡"] >= 1, r.counters);
+        check(`${tag}：結果面板顯示`, /實際遊玩壓力測試結果/.test(panel) && /平均/.test(panel), panel.slice(0, 200));
+        const f = `${outDir}${name}_autoplay_${mode}_${count}_${q}.png`;
+        await page.screenshot({ path: f });
+        run.screenshots.push(f.split("/test-results/")[1]);
+      } catch (e) {
+        run.errors.push(`${tag} exception: ${e.message}`);
+      }
+      await ctx.close();
+    }
+    // 一般遊戲不受影響：沒有 autoplay 參數時 count 無效、怪物 3 隻
+    {
+      const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+      const page = await ctx.newPage();
+      try {
+        await page.goto(server.url + "/?bobo=v38r&count=10", { waitUntil: "load" });
+        await page.waitForFunction(() => window.__starwish?.ready === true, null, { timeout: 45000 });
+        const n = await page.evaluate(() => ({ n: window.__starwish.monsters().length, st: window.__starwish.autoplayState(), banner: !!document.querySelector(".autoplay-banner") }));
+        check("一般遊戲（不加 autoplay）不啟用測試、怪物維持 3 隻", n.n === 3 && n.st === null && !n.banner, n);
+      } catch (e) {
+        run.errors.push(`normal exception: ${e.message}`);
+      }
+      await ctx.close();
+    }
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 4;
+    if (!run.ok) failures++;
+    report.runs.push(run);
+    console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
+    for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}${v.ok ? "" : "  " + JSON.stringify(v.detail).slice(0, 700)}`);
+    for (const r of run.results) console.log(`   · ${r.tag}: avg ${r.summary.avgFps.toFixed(1)}, 1%low ${r.summary.low1Fps.toFixed(1)}, min ${r.summary.minFps.toFixed(1)}, draw ${r.summary.avgDrawCalls.toFixed(1)} | ${JSON.stringify(r.counters)}`);
+    for (const e of run.errors) console.log(`   ! ${e}`);
+  }
+
   await browser.close();
 }
 
