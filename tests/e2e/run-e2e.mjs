@@ -1660,20 +1660,23 @@ for (const name of browsers) {
             out.push({ tier: r.reaction?.tier, immune: r.reaction?.immune, state: m.state, hitDuration: m.hitDuration, hp: m.hp, combo: m.hitCombo, immuneLeft: m.hitImmune });
             await wait(300);
           }
-          await wait(2300);
+          // 等「遊戲時間」過 2 秒未受擊（CI 很慢時遊戲時間會比實際時間慢，每幀上限 0.1 秒）
+          const t0 = performance.now();
+          const comboWhileWaiting = api.monsters().find((x) => x.id === id).hitCombo;
+          while (api.monsters().find((x) => x.id === id).hitCombo !== 0 && performance.now() - t0 < 15000) await wait(100);
           const after = api.monsters().find((x) => x.id === id);
           const r5 = api.hitMonster(id, 1);
           // 受擊反應在下一幀由 MonsterController 通知視覺
           await new Promise((r2) => requestAnimationFrame(() => requestAnimationFrame(r2)));
           const anim = api.monsters().find((x) => x.id === id).anim;
-          return { out, comboAfter: after.hitCombo, tierAfterReset: r5.reaction?.tier, reactions: anim?.reactions ?? null };
+          return { out, comboWhileWaiting, comboAfter: after.hitCombo, tierAfterReset: r5.reaction?.tier, reactions: anim?.reactions ?? null };
         });
         run.results.push({ tag: `${tag}：規則`, tiers });
         const o = tiers.out;
         check(`${tag}：第 1 擊硬直 0.25 秒、第 2 擊 0.15 秒（進入受擊）`, o[0].tier === 1 && o[0].state === "hit" && Math.abs(o[0].hitDuration - 0.25) < 1e-9 && o[1].tier === 2 && Math.abs(o[1].hitDuration - 0.15) < 1e-9, o);
         check(`${tag}：第 3 擊不硬直並開始免疫；免疫中受擊不硬直`, o[2].tier === 3 && o[2].state !== "hit" && o[2].immuneLeft > 1 && o[3].immune === true && o[3].state !== "hit", o);
         check(`${tag}：免疫中照常扣血（每下 1）`, o.map((x) => x.hp).join(",") === "59,58,57,56", o.map((x) => x.hp));
-        check(`${tag}：2 秒未受擊後回到第 1 擊`, tiers.comboAfter === 0 && tiers.tierAfterReset === 1, tiers);
+        check(`${tag}：2 秒未受擊後回到第 1 擊`, tiers.comboWhileWaiting === 3 && tiers.comboAfter === 0 && tiers.tierAfterReset === 1, tiers);
         check(`${tag}：畫面反應（完整後退、後退減半、不硬直閃表情）都有出現`, !!tiers.reactions && tiers.reactions.full >= 2 && tiers.reactions.reduced >= 1 && tiers.reactions.noStagger >= 2, tiers.reactions);
         // 2. 實際遊玩：玩家站著持續普通攻擊 25 秒，怪物要能恢復並真的打到玩家
         await page.evaluate(() => {
