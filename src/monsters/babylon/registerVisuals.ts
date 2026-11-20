@@ -16,6 +16,7 @@ import {
   Vector3,
 } from "@babylonjs/core";
 import { StarDewBoboModel } from "../star-dew-bobo/StarDewBoboModel.ts";
+import { BoboV38RVisual } from "../star-dew-bobo-v38r/BoboV38RVisual.ts";
 import { ClipMonsterVisual, ProceduralVisual, type ClipPlayer } from "../framework/visuals.ts";
 import type { MonsterRegistry } from "../framework/registry.ts";
 import type { ClipMap, IMonsterVisual } from "../framework/types.ts";
@@ -42,6 +43,8 @@ export function registerBabylonVisuals(registry: MonsterRegistry, ctx: BabylonVi
         model.root.rotation.y = yaw;
       });
     })
+    // V3.8R（Stage 5 整合中）：預設不使用；以 SpawnOptions.modelId 指定時才會建立（V2 仍為預設、可隨時切回）
+    .addVisual("star_dew_bobo_v38r", () => new BoboV38RVisual({ scene: ctx.scene, baseUrl: `${import.meta.env.BASE_URL}models/`, lod: ctx.quality ?? "medium" }))
     .addVisual("test_dummy_glb", (def, profile) =>
       createGltfVisual(ctx, `${import.meta.env.BASE_URL}models/test-dummy.glb`, profile.clips!, def.height ?? 0.8, 0.7),
     );

@@ -28,6 +28,8 @@ import { PerfOverlay, type PerfStats } from "../render/PerfOverlay.ts";
 import type { QualitySettings } from "../render/quality.ts";
 import { createMonsterRegistry, MonsterFactory, type MonsterController, type MonsterTarget } from "../monsters/framework/index.ts";
 import { registerBabylonVisuals } from "../monsters/babylon/registerVisuals.ts";
+import { BOBO_MODEL_IDS, boboVariantFromSearch, type BoboVariant } from "./boboVariant.ts";
+import { BoboV38RSceneAssets, BoboV38RVisual } from "../monsters/star-dew-bobo-v38r/BoboV38RVisual.ts";
 import { PREVIEW_COMBAT, PreviewCombat, previewSpawnPoints, separate, type PlayerAttackResult } from "./previewCombat.ts";
 
 export interface DebugApi {
@@ -54,6 +56,10 @@ export interface DebugApi {
   knockDown(): void;
   /** 預覽測試：直接設定玩家位置（x, z） */
   teleport(x: number, z: number): void;
+  /** Stage 5.1：星露啵啵外觀與 V3.8R 適配器資源狀態 */
+  bobo(): Promise<unknown>;
+  /** Stage 5.1：另建一隻 V3.8R 視覺 → 移除，比對資源數（只在 ?bobo=v38r 時執行） */
+  boboAdapterSelfTest(): Promise<unknown>;
 }
 
 declare global {
@@ -90,6 +96,7 @@ export class Game {
   private timeMin = Infinity;
   /** 預覽測試：星露啵啵 V2 接入草原（測試用戰鬥，見 previewCombat.ts） */
   private readonly monsters: MonsterController[];
+  private readonly boboVariant: BoboVariant;
   private readonly combat = new PreviewCombat();
   private readonly lockRing: Mesh;
   private lockedId: string | null = null;
@@ -150,8 +157,11 @@ export class Game {
       quality: this.quality.level,
     });
     const factory = new MonsterFactory(registry);
+    // 外觀：預設 V2；?bobo=v38r 改用 V3.8R（只換模型，數值、AI、戰鬥規則不變）
+    this.boboVariant = boboVariantFromSearch(location.search);
+    const modelId = BOBO_MODEL_IDS[this.boboVariant];
     this.monsters = previewSpawnPoints(0, 0, this.camera.forwardYaw).map((p) =>
-      factory.create("star_dew_bobo", { x: p.x, y: heightAt(p.x, p.z), z: p.z }),
+      factory.create("star_dew_bobo", { x: p.x, y: heightAt(p.x, p.z), z: p.z }, { modelId }),
     );
     for (const m of this.monsters) void m.visual?.load();
     // 鎖定標記：攻擊範圍內最近的怪物腳下的光圈
@@ -264,6 +274,18 @@ export class Game {
       this.hud.setFps(this.engine.getFps());
     }
   };
+
+  /** 場景資源數（Stage 5 資源檢查用） */
+  private resourceCounts(): { meshes: number; materials: number; textures: number; geometries: number; sprites: number } {
+    const sc = this.scene;
+    return {
+      meshes: sc.meshes.length,
+      materials: sc.materials.length,
+      textures: sc.textures.length,
+      geometries: sc.geometries.length,
+      sprites: sc.spriteManagers?.reduce((a, m) => a + m.sprites.length, 0) ?? 0,
+    };
+  }
 
   private updateBars(): void {
     this.hud.setBars({ hp: this.combat.hp, maxHp: PREVIEW_COMBAT.playerMaxHp, mp: 50, maxMp: 50, exp: 0, expToNext: 100 });
@@ -403,6 +425,45 @@ export class Game {
         shadowFilter: this.quality.shadows.filter,
         shadowMap: this.quality.shadows.mapSize,
       }),
+      // Stage 5.1：V3.8R 適配器檢查（資源只載入一次、每隻材質獨立、移除一隻不釋放共用資源）
+      bobo: async () => {
+        const assets = await Promise.all(BoboV38RSceneAssets.loaded(this.scene));
+        return {
+          variant: this.boboVariant,
+          modelId: BOBO_MODEL_IDS[this.boboVariant],
+          loadedAssets: assets.map((a) => ({ file: a.handle.file, lod: a.lod, live: a.liveCount, refs: a.refCount })),
+          visuals: this.monsters.map((m) => {
+            const v = m.visual;
+            if (!(v instanceof BoboV38RVisual)) return { kind: v?.kind ?? null, v38r: false };
+            const root = v.model?.root;
+            const meshes = root ? root.getChildMeshes(false) : [];
+            const body = meshes.find((x) => x.name.includes("Body_"));
+            return {
+              kind: v.kind,
+              v38r: true,
+              loaded: v.loaded,
+              bodyMaterial: body?.material?.name ?? null,
+              bodyMaterialId: body?.material?.uniqueId ?? null,
+              geometryId: (body as unknown as { geometry?: { uniqueId: number } } | undefined)?.geometry?.uniqueId ?? null,
+              position: root ? root.position.asArray() : null,
+              enabled: root ? root.isEnabled() : false,
+            };
+          }),
+          scene: this.resourceCounts(),
+        };
+      },
+      boboAdapterSelfTest: async () => {
+        if (this.boboVariant !== "v38r") return { skipped: true };
+        const before = this.resourceCounts();
+        const v = new BoboV38RVisual({ scene: this.scene, baseUrl: `${import.meta.env.BASE_URL}models/`, lod: this.quality.level });
+        await v.load();
+        v.setTransform(0, -50, 0, 0);
+        const during = this.resourceCounts();
+        v.dispose();
+        const after = this.resourceCounts();
+        const assets = await Promise.all(BoboV38RSceneAssets.loaded(this.scene));
+        return { skipped: false, before, during, after, sharedAlive: assets.map((a) => !a.isDisposed && a.handle.container.textures.every((t) => !!t.getInternalTexture())) };
+      },
       monsters: () =>
         this.monsters.map((m) => {
           const i = m.instance;

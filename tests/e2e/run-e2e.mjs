@@ -857,6 +857,79 @@ for (const name of browsers) {
     await ctx.close();
   }
 
+  // ---------- Stage 5.1：正式遊戲場景 + V3.8R 整合適配器（?bobo=v38r；預設仍是 V2）----------
+  {
+    const vp = VIEWPORTS[0];
+    const run = { browser: name, viewport: `${vp.name} / 遊戲 ?bobo=v38r`, checks: {}, errors: [], screenshots: [] };
+    const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+    const page = await ctx.newPage();
+    page.on("pageerror", (e) => run.errors.push(`pageerror: ${e.message}`));
+    page.on("console", (m) => m.type() === "error" && run.errors.push(`console: ${m.text()}`));
+    const check = (key, ok, detail) => {
+      run.checks[key] = { ok, detail };
+    };
+    try {
+      await page.goto(server.url + "/?bobo=v38r", { waitUntil: "load" });
+      await page.addStyleTag({ content: safeAreaCss(vp.safe) });
+      const ready = await page
+        .waitForFunction(() => window.__starwish?.ready === true || document.querySelector(".boot-status.error"), null, { timeout: 45000 })
+        .then(() => page.evaluate(() => window.__starwish?.ready === true))
+        .catch(() => false);
+      check("啟動（?bobo=v38r）", ready, "ok");
+      if (!ready) throw new Error("遊戲未啟動");
+      const allLoaded = await page
+        .waitForFunction(async () => {
+          const b = await window.__starwish.bobo();
+          return b.visuals.length === 3 && b.visuals.every((v) => v.v38r && v.loaded);
+        }, null, { timeout: 45000, polling: 250 })
+        .then(() => true)
+        .catch(() => false);
+      await page.waitForTimeout(1200);
+      const b = await page.evaluate(() => window.__starwish.bobo());
+      check("三隻都改用 V3.8R 並載入完成", allLoaded && b.variant === "v38r" && b.modelId === "star_dew_bobo_v38r", b.visuals);
+      const q = (await page.evaluate(() => window.__starwish.perf())).quality ?? null;
+      check(
+        "GLB 只載入一次（同一份共用資源、3 隻實例）",
+        b.loadedAssets.length === 1 && b.loadedAssets[0].live === 3 && b.loadedAssets[0].refs === 3 && /^bobo_v38r_(high|medium|low)\.glb$/.test(b.loadedAssets[0].file),
+        { loadedAssets: b.loadedAssets, quality: q },
+      );
+      const matIds = new Set(b.visuals.map((v) => v.bodyMaterialId));
+      const geoIds = new Set(b.visuals.map((v) => v.geometryId));
+      check("每隻身體材質獨立、幾何共用", matIds.size === 3 && !matIds.has(null) && geoIds.size === 1 && !geoIds.has(null), { matIds: [...matIds], geoIds: [...geoIds] });
+      const mons = await page.evaluate(() => window.__starwish.monsters());
+      const posOk = b.visuals.every((v, i) => v.position && Math.hypot(v.position[0] - mons[i].x, v.position[2] - mons[i].z) < 0.2);
+      check("模型位置跟著遊戲怪物（框架 setTransform）", posOk, { visual: b.visuals.map((v) => v.position), logic: mons.map((m) => [m.x, m.y, m.z]) });
+      const pixels = await page.evaluate(() => window.__starwish.pixelStats());
+      check("3D 畫面有繪製、至少一隻在畫面內", pixels.distinctColors >= 20 && pixels.opaqueRatio > 0.3 && mons.some((m) => m.visible), { pixels, visible: mons.map((m) => m.visible) });
+      const st = await page.evaluate(() => window.__starwish.boboAdapterSelfTest());
+      const same = (x, y) => Object.keys(x).every((k) => x[k] === y[k]);
+      check(
+        "另建一隻再移除：資源數回到原值、共用資源未被釋放",
+        st && !st.skipped && same(st.before, st.after) && st.during.materials === st.before.materials + 1 && st.during.meshes > st.before.meshes && st.sharedAlive.length === 1 && st.sharedAlive.every(Boolean),
+        st,
+      );
+      const after = await page.evaluate(() => window.__starwish.bobo());
+      check("自我檢查後原本 3 隻不受影響", after.loadedAssets[0]?.live === 3 && after.visuals.every((v) => v.loaded && v.enabled), after.loadedAssets);
+      const f = `${outDir}${name}_game_bobo_v38r.png`;
+      await page.screenshot({ path: f });
+      run.screenshots.push(f.split("/test-results/")[1]);
+      // 回退：不加參數 = V2，完全不載入 V3.8R
+      await page.goto(server.url + "/", { waitUntil: "load" });
+      await page.waitForFunction(() => window.__starwish?.ready === true, null, { timeout: 45000 });
+      const v2 = await page.evaluate(() => window.__starwish.bobo());
+      check("預設（不加參數）仍是 V2、不載入 V3.8R", v2.variant === "v2" && v2.loadedAssets.length === 0 && v2.visuals.every((v) => !v.v38r), v2);
+    } catch (e) {
+      run.errors.push(`exception: ${e.message}`);
+    }
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 9;
+    if (!run.ok) failures++;
+    report.runs.push(run);
+    console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
+    for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}${v.ok ? "" : "  " + JSON.stringify(v.detail).slice(0, 600)}`);
+    for (const e of run.errors) console.log(`   ! ${e}`);
+    await ctx.close();
+  }
+
   await browser.close();
 }
 
