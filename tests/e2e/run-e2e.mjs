@@ -1121,8 +1121,10 @@ for (const name of browsers) {
       check("命中後玩家扣 8 HP（每次命中剛好 8）", !!hit && hit.hitsTaken >= 1 && 100 - hit.hp === 8 * hit.hitsTaken, hit);
       // 讓 AI 連續攻擊幾次
       await page.waitForTimeout(6000);
-      const after = await mons();
-      const cb = await page.evaluate(() => window.__starwish.combat());
+      // 怪物紀錄與玩家戰鬥狀態在同一次讀取（分兩次讀會被中間發生的命中錯開）
+      const snap = await page.evaluate(() => ({ ms: window.__starwish.monsters(), cb: window.__starwish.combat() }));
+      const after = snap.ms;
+      const cb = snap.cb;
       const totals = after.reduce((a, m) => ({ started: a.started + m.attackLog.started, resolved: a.resolved + m.attackLog.resolved, dup: a.dup + m.attackLog.duplicatesBlocked, anims: a.anims + m.anim.starts.attack }), { started: 0, resolved: 0, dup: 0, anims: 0 });
       check("每一次邏輯攻擊都播放了攻擊動畫（動畫次數 = attackId 次數）", after.every((m) => m.anim.starts.attack === m.attackLog.started) && totals.started >= 2, { totals, per: after.map((m) => [m.attackLog.started, m.anim.starts.attack]) });
       check(
@@ -1292,7 +1294,7 @@ for (const name of browsers) {
           run.results.push({ variant, q, summary: s, avgActiveMeshes: r.avgActiveMeshes, meshes: r.meshes, materials: r.materials, textures: r.textures, pixelRatio: r.pixelRatio });
           check(
             `${variant}／${q}：完成測試、數值合理（1% Low ≤ 平均、最低 ≤ 1% Low、Draw Calls > 0、3 隻）`,
-            banner && r.variant === variant && r.quality === q && s.frames > 0 && s.avgFps > 0 && s.low1Fps <= s.avgFps + 1e-6 && s.minFps <= s.low1Fps + 1e-6 && s.low1AvgFps <= s.low1Fps + 1e-6 && s.avgDrawCalls > 0 && r.monsters === 3 && Math.abs(s.seconds - 2) <= 0.3,
+            banner && r.variant === variant && r.quality === q && s.frames > 0 && s.avgFps > 0 && s.low1Fps <= s.avgFps + 1e-6 && s.minFps <= s.low1Fps + 1e-6 && s.low1AvgFps <= s.low1Fps + 1e-6 && s.avgDrawCalls > 0 && r.monsters === 3 && s.seconds >= 2 - 0.05 && s.seconds <= 2 + s.maxFrameMs / 1000 + 0.1,
             { s, r: { pixelRatio: r.pixelRatio, meshes: r.meshes, avgActiveMeshes: r.avgActiveMeshes } },
           );
           check(`${variant}／${q}：測量中場景固定、不戰鬥、操作無效`, held, { a: a.ms.map((m) => [m.x, m.z, m.state]), b: b.ms.map((m) => [m.x, m.z, m.state, m.hp]), hits: b.c.hitsTaken, phase: b.st.phase });
