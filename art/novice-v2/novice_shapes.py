@@ -239,7 +239,7 @@ def male_hair():
     for az, el1, w in ((-54, -24, 0.1), (-38, -18, 0.1), (-21, -14, 0.1), (-5, -24, 0.09), (11, -14, 0.1), (27, -17, 0.1), (43, -19, 0.1), (57, -25, 0.09)):
         H.lock(az * 0.5, 75, az, el1, w, 0.05, lift=0.04, flare=0.0, curl=0.008, tip=0.05, k=0.008)
     # 頭頂的翹髮：短、往外上方翹出（打破圓頂輪廓，像設定圖頭頂的亂翹）
-    for az, el, up, out in ((35, 62, 0.035, 0.07), (-40, 60, 0.03, 0.07), (150, 64, 0.035, 0.075), (210, 62, 0.035, 0.075), (100, 46, 0.015, 0.075), (-100, 46, 0.015, 0.075), (-15, 76, 0.04, 0.05)):
+    for az, el, up, out in ((160, 66, 0.03, 0.06), (205, 64, 0.025, 0.06)):
         p0, n = H.surf(az, el, 0.0)
         hor = unit(np.array([n[0], n[1], 0.0]))
         tipp = p0 + hor * out + np.array([0, 0, up])
@@ -267,7 +267,7 @@ def female_hair():
     for i, az in enumerate(range(62, 299, 15)):
         L = -62 if abs(az - 180) > 40 else -56
         H.lock(az, 34, az + 3 * (-1) ** i, L + 6 * (i % 2), 0.13, 0.045, lift=0.085,
-               flare=(0.075, 0.05)[i % 2], curl=0.015, tip=0.2, k=0.014)
+               flare=(0.11, 0.075)[i % 2], curl=0.02, tip=0.2, k=0.014)
     # 臉頰兩側的長鬢髮（到 0.63，髮尾外翹）
     for sx in (1, -1):
         H.lock(46 * sx, 45, 54 * sx, -96, 0.085, 0.035, lift=0.03, flare=0.045, curl=0.0, tip=0.18, k=0.008)
@@ -307,7 +307,7 @@ def female_ponytail_and_bow(H):
     bc = BOW_C
     # 兩個大圈（側面看：前上方一個、後方一個），面向 +X
     Rz = rot((0, 0, 1), -35)  # 蝴蝶結面向角色左前方（正面、側面都看得到）
-    for off, rad, ang in (((0.0, -0.075, 0.06), (0.032, 0.085, 0.06), 38), ((0.0, 0.085, 0.035), (0.032, 0.09, 0.062), -28)):
+    for off, rad, ang in (((0.0, -0.075, 0.055), (0.022, 0.088, 0.064), 38), ((0.0, 0.085, 0.03), (0.022, 0.092, 0.066), -28)):
         R = Rz @ rot((1, 0, 0), ang)
         bow.add(ellipsoid(bc + Rz @ np.array(off), rad, R), 0.014)
     bow.add(ellipsoid(bc + [0.008, 0, 0], (0.035, 0.036, 0.034)), 0.01)
@@ -551,7 +551,7 @@ def male_clothes():
     pts = bezier3(np.array([0, -0.07, 0.668]), np.array([0, -0.11, 0.645]), np.array([0, -0.115, 0.62]), np.array([0, -0.108, 0.6]), 6)
     scarf.add(flat_tube(pts, np.linspace(0.075, 0.012, 6), np.full(6, 0.008), [np.array([0, -1.0, 0])] * 6), 0.015)
     # 背後一小段飄起的圍巾尾（設定圖側面：肩後短短飄出）
-    pts = bezier3(np.array([0.03, 0.07, 0.665]), np.array([0.06, 0.13, 0.64]), np.array([0.08, 0.17, 0.6]), np.array([0.085, 0.2, 0.55]), 8)
+    pts = bezier3(np.array([0.03, 0.07, 0.665]), np.array([0.05, 0.12, 0.645]), np.array([0.07, 0.15, 0.61]), np.array([0.075, 0.16, 0.56]), 8)
     scarf.add(flat_tube(pts, np.linspace(0.045, 0.012, 8), np.full(8, 0.009), [unit(np.array([0.9, -0.3, 0.0]))] * 8), 0.02)
     out.append(scarf)
     # 腰帶、方扣、腰包
@@ -613,10 +613,10 @@ def female_clothes():
     out = []
     A = arm_joints("female")
     blouse = Part("blouse", "cloth", step=0.004)
-    blouse.add(lathe_shell(0.47, 0.67, lerp_fn([(0.47, 0.083), (0.53, 0.079), (0.58, 0.085), (0.62, 0.087), (0.65, 0.065), (0.67, 0.033)]), lerp_fn([(0.47, 0.065), (0.53, 0.063), (0.58, 0.07), (0.62, 0.065), (0.67, 0.03)]), 0.03))
+    blouse.add(lathe_shell(0.47, 0.67, lerp_fn([(0.47, 0.083), (0.53, 0.077), (0.58, 0.083), (0.62, 0.08), (0.65, 0.058), (0.67, 0.033)]), lerp_fn([(0.47, 0.065), (0.53, 0.063), (0.58, 0.07), (0.62, 0.065), (0.67, 0.03)]), 0.03))
     for sx in (1, -1):
         sh, el, _ = [np.array([v[0] * sx, v[1], v[2]]) for v in A]
-        blouse.add(ellipsoid(sh + (el - sh) * 0.22 + [0.01 * sx, 0, 0.0], (0.05, 0.05, 0.043)), 0.02)  # 泡泡袖
+        blouse.add(ellipsoid(sh + (el - sh) * 0.22 + [0.01 * sx, 0, 0.0], (0.044, 0.044, 0.038)), 0.015)  # 泡泡袖
     out.append(blouse)
     arm = Part("armband", "leather", step=0.002)
     for sx in (1, -1):
@@ -664,10 +664,10 @@ def female_clothes():
         return base - 0.08 * np.exp(-(((a - 44) / 9) ** 2)) - 0.03 * np.exp(-(((a - 120) / 12) ** 2)) + 0.015 * np.cos(np.radians(a) * 9) * (a > 60)
 
     osk = Part("overskirt", "cloth2", step=0.003)
-    osk.add(lathe_shell(0.17, 0.5, lerp_fn([(0.17, 0.3), (0.33, 0.21), (0.5, 0.115)]), lerp_fn([(0.17, 0.25), (0.33, 0.17), (0.5, 0.097)]), 0.012, cy_fn=lerp_fn([(0.17, 0.05), (0.5, 0.0)]), open_front_deg=40, hem_fn=ohem))
+    osk.add(lathe_shell(0.17, 0.5, lerp_fn([(0.17, 0.35), (0.33, 0.225), (0.5, 0.115)]), lerp_fn([(0.17, 0.27), (0.33, 0.175), (0.5, 0.097)]), 0.012, cy_fn=lerp_fn([(0.17, 0.05), (0.5, 0.0)]), open_front_deg=40, hem_fn=ohem))
     out.append(osk)
     otrim = Part("overskirt_trim", "metal", step=0.0025)
-    otrim.add(lathe_shell(0.17, 0.5, lerp_fn([(0.17, 0.304), (0.33, 0.214), (0.5, 0.119)]), lerp_fn([(0.17, 0.254), (0.33, 0.174), (0.5, 0.101)]), 0.01, cy_fn=lerp_fn([(0.17, 0.05), (0.5, 0.0)]), open_front_deg=40, hem_fn=ohem))
+    otrim.add(lathe_shell(0.17, 0.5, lerp_fn([(0.17, 0.354), (0.33, 0.229), (0.5, 0.119)]), lerp_fn([(0.17, 0.274), (0.33, 0.179), (0.5, 0.101)]), 0.01, cy_fn=lerp_fn([(0.17, 0.05), (0.5, 0.0)]), open_front_deg=40, hem_fn=ohem))
     otrim.inter(Prim(lambda P: P[..., 2] - (ohem(np.arctan2(P[..., 0], -(P[..., 1] - 0.0))) + 0.02), (-0.3, -0.3, 0.1), (0.3, 0.3, 0.5)))
     out.append(otrim)
     emb = Part("overskirt_emblem", "metal", step=0.0015)

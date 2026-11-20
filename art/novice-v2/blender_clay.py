@@ -25,7 +25,7 @@ OUT = argv[argv.index("--out") + 1]
 os.makedirs(OUT, exist_ok=True)
 
 # 黏土灰階（零件分組只用深淺區分，不是最終配色）
-TONE = {"skin": 0.80, "hair": 0.50, "cloth": 0.82, "cloth2": 0.42, "leather": 0.30, "metal": 0.88, "dark": 0.24, "face": 0.80}
+TONE = {"skin": 0.62, "hair": 0.34, "cloth": 0.66, "cloth2": 0.26, "leather": 0.17, "metal": 0.75, "dark": 0.12, "face": 0.62}
 DECIMATE_TARGET = 160000  # 每個角色 GLB 的三角形上限（灰模檢查用）
 
 W, H = 1040, 1280
@@ -106,10 +106,10 @@ def setup_render():
     world = bpy.data.worlds.new("w")
     world.use_nodes = True
     world.node_tree.nodes["Background"].inputs["Color"].default_value = (0.92, 0.92, 0.93, 1)
-    world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.85
+    world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.45
     sc.world = world
     # 主光（左上前）、補光、輪廓光
-    for name, rot, energy in (("key", (52, 0, -35), 3.2), ("fill", (70, 0, 140), 0.9), ("rim", (35, 0, 180), 1.6)):
+    for name, rot, energy in (("key", (50, 0, -35), 2.4), ("fill", (70, 0, 140), 0.5), ("rim", (35, 0, 180), 1.2)):
         L = bpy.data.lights.new(name, "SUN")
         L.energy = energy
         L.angle = math.radians(12)
