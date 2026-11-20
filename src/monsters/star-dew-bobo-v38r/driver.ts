@@ -13,7 +13,7 @@ import {
   REST_POSE,
 } from "./animation.ts";
 import { RESPAWN_FADE } from "./profile.ts";
-import { HIT_REACTION } from "../../config/hitReaction.ts";
+import { HIT_REACTION, NORMAL_HIT_FLASH } from "../../config/hitReaction.ts";
 
 /**
  * 星露啵啵 V3.8R：遊戲狀態 → 已驗收動畫的驅動器（純邏輯，不依賴 Babylon，可單元測試）。
@@ -106,14 +106,14 @@ export class BoboV38RAnimDriver {
   }
 
   /** 受擊反應（同一幀的 onStateEnter("hit") 之前呼叫）：決定這次受傷動畫的後退幅度，或不硬直時只閃受擊表情 */
-  onHitReaction(r: { stagger: number; recoil: number; immune: boolean }): void {
+  onHitReaction(r: { stagger: number; recoil: number; immune: boolean; kind?: "normal" | "control" }): void {
     if (this.logic === "death" || this.logic === "dead") return;
     if (r.stagger > 0) {
       this.recoilScale = r.recoil;
       if (r.recoil >= 1) this.reactions.full++;
       else this.reactions.reduced++;
     } else {
-      this.flashLeft = HIT_FLASH_SECONDS;
+      this.flashLeft = r.kind === "normal" ? NORMAL_HIT_FLASH : HIT_FLASH_SECONDS;
       this.reactions.noStagger++;
     }
   }

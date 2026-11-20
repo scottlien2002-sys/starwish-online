@@ -1209,7 +1209,7 @@ for (const name of browsers) {
             const r = window.__starwish.attack();
             const r2 = window.__starwish.attack();
             const t = r.ok ? window.__starwish.monsters().find((x) => x.id === r.targetId) : null;
-            return { r, r2, hp: t ? t.hp : null, hurt: t && t.anim ? t.anim.starts.hurt : null };
+            return { r, r2, hp: t ? t.hp : null, hurt: t && t.anim ? t.anim.starts.hurt : null, flash: t && t.anim ? t.anim.reactions.noStagger : null, state: t ? t.state : null };
           });
           const facing = [];
           for (let k = 0; k < 60; k++) {
@@ -1234,9 +1234,9 @@ for (const name of browsers) {
           );
           check("玩家攻擊（V3.8R 模式）：揮擊時面向目標", facing.length === 0 || Math.min(...facing) < 0.35, { facing });
           check(
-            "玩家命中後星露啵啵播放已驗收的受傷動畫（或死亡）",
-            !!tAfter && tAfter.anim && (tAfter.anim.starts.hurt === press.hurt + 1 || tAfter.anim.starts.death >= 1),
-            tAfter && tAfter.anim,
+            "玩家普通攻擊命中：星露啵啵顯示受擊表情（或死亡），不播受傷硬直動作（2026-11-20 正式規則）",
+            !!tAfter && tAfter.anim && ((tAfter.anim.reactions.noStagger === press.flash + 1 && tAfter.anim.starts.hurt === press.hurt) || tAfter.anim.starts.death >= 1),
+            { press, anim: tAfter && tAfter.anim, state: tAfter && tAfter.state },
           );
         } else check("玩家攻擊（V3.8R 模式）：找到可攻擊的啵啵", false, mm.map((m) => m.state));
       }
@@ -1638,9 +1638,9 @@ for (const name of browsers) {
       }
       await ctx.close();
     }
-    // 連續受擊抗性（config/hitReaction.ts）：實際遊戲中被打的怪物會恢復並反擊
+    // 受擊規則：普通攻擊不擊退、不硬直（正式）；control 受擊的擊退／硬直／連續受擊抗性保留給未來技能
     {
-      const tag = "連續受擊抗性";
+      const tag = "受擊規則";
       const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
       const page = await ctx.newPage();
       page.on("pageerror", (e) => run.errors.push(`${tag} pageerror: ${e.message}`));
@@ -1654,7 +1654,7 @@ for (const name of browsers) {
           const wait = (ms) => new Promise((r) => setTimeout(r, ms));
           const out = [];
           for (let k = 0; k < 4; k++) {
-            const r = api.hitMonster(id, 1);
+            const r = api.hitMonster(id, 1, "control");
             await new Promise((r2) => requestAnimationFrame(() => requestAnimationFrame(r2)));
             const m = api.monsters().find((x) => x.id === id);
             out.push({ tier: r.reaction?.tier, immune: r.reaction?.immune, state: m.state, hitDuration: m.hitDuration, hp: m.hp, combo: m.hitCombo, immuneLeft: m.hitImmune });
@@ -1665,7 +1665,7 @@ for (const name of browsers) {
           const comboWhileWaiting = api.monsters().find((x) => x.id === id).hitCombo;
           while (api.monsters().find((x) => x.id === id).hitCombo !== 0 && performance.now() - t0 < 15000) await wait(100);
           const after = api.monsters().find((x) => x.id === id);
-          const r5 = api.hitMonster(id, 1);
+          const r5 = api.hitMonster(id, 1, "control");
           // 受擊反應在下一幀由 MonsterController 通知視覺
           await new Promise((r2) => requestAnimationFrame(() => requestAnimationFrame(r2)));
           const anim = api.monsters().find((x) => x.id === id).anim;
@@ -1673,12 +1673,31 @@ for (const name of browsers) {
         });
         run.results.push({ tag: `${tag}：規則`, tiers });
         const o = tiers.out;
-        check(`${tag}：第 1 擊硬直 0.25 秒、第 2 擊 0.15 秒（進入受擊）`, o[0].tier === 1 && o[0].state === "hit" && Math.abs(o[0].hitDuration - 0.25) < 1e-9 && o[1].tier === 2 && Math.abs(o[1].hitDuration - 0.15) < 1e-9, o);
-        check(`${tag}：第 3 擊不硬直並開始免疫；免疫中受擊不硬直`, o[2].tier === 3 && o[2].state !== "hit" && o[2].immuneLeft > 1 && o[3].immune === true && o[3].state !== "hit", o);
-        check(`${tag}：免疫中照常扣血（每下 1）`, o.map((x) => x.hp).join(",") === "59,58,57,56", o.map((x) => x.hp));
-        check(`${tag}：2 秒未受擊後回到第 1 擊`, tiers.comboWhileWaiting === 3 && tiers.comboAfter === 0 && tiers.tierAfterReset === 1, tiers);
-        check(`${tag}：畫面反應（完整後退、後退減半、不硬直閃表情）都有出現`, !!tiers.reactions && tiers.reactions.full >= 2 && tiers.reactions.reduced >= 1 && tiers.reactions.noStagger >= 2, tiers.reactions);
-        // 2. 實際遊玩：玩家站著持續普通攻擊 25 秒，怪物要能恢復並真的打到玩家
+        check(`${tag}：control（未來技能）第 1 擊硬直 0.25 秒、第 2 擊 0.15 秒（進入受擊）`, o[0].tier === 1 && o[0].state === "hit" && Math.abs(o[0].hitDuration - 0.25) < 1e-9 && o[1].tier === 2 && Math.abs(o[1].hitDuration - 0.15) < 1e-9, o);
+        check(`${tag}：control 第 3 擊不硬直並開始免疫；免疫中受擊不硬直`, o[2].tier === 3 && o[2].state !== "hit" && o[2].immuneLeft > 1 && o[3].immune === true && o[3].state !== "hit", o);
+        check(`${tag}：control 免疫中照常扣血（每下 1）`, o.map((x) => x.hp).join(",") === "59,58,57,56", o.map((x) => x.hp));
+        check(`${tag}：control 2 秒未受擊後回到第 1 擊`, tiers.comboWhileWaiting === 3 && tiers.comboAfter === 0 && tiers.tierAfterReset === 1, tiers);
+        check(`${tag}：control 畫面反應（完整後退、後退減半、不硬直閃表情）都有出現`, !!tiers.reactions && tiers.reactions.full >= 2 && tiers.reactions.reduced >= 1 && tiers.reactions.noStagger >= 2, tiers.reactions);
+        // 2. 普通攻擊（hitMonster 預設 normal）：只扣血與受擊表情，狀態與位置不受影響
+        const normal = await page.evaluate(async () => {
+          const api = window.__starwish;
+          api.resetTest();
+          await new Promise((r) => setTimeout(r, 300));
+          const id = api.monsters()[1].id;
+          const b = api.monsters().find((x) => x.id === id);
+          const r = api.hitMonster(id, 20);
+          const a = api.monsters().find((x) => x.id === id);
+          await new Promise((r2) => requestAnimationFrame(() => requestAnimationFrame(r2)));
+          const f = api.monsters().find((x) => x.id === id);
+          return { kind: r.reaction?.kind, stagger: r.reaction?.stagger, before: { state: b.state, hp: b.hp, x: b.x, z: b.z, hurt: b.anim.starts.hurt }, after: { state: a.state, hp: a.hp, x: a.x, z: a.z }, face: f.anim.face, hurt: f.anim.starts.hurt, combo: f.hitCombo };
+        });
+        run.results.push({ tag: `${tag}：普通攻擊`, tiers: normal });
+        check(
+          `${tag}：普通攻擊只扣血與受擊表情；不進入受擊、不播受傷動作、不推動位置、不累計連續受擊`,
+          normal.kind === "normal" && normal.stagger === 0 && normal.after.hp === normal.before.hp - 20 && normal.after.state === normal.before.state && normal.after.x === normal.before.x && normal.after.z === normal.before.z && normal.face === "hurt" && normal.hurt === normal.before.hurt && normal.combo === 0,
+          normal,
+        );
+        // 3. 實際遊玩：玩家站著持續普通攻擊 25 秒，怪物要照常追擊、出手並真的打到玩家
         await page.evaluate(() => {
           const api = window.__starwish;
           api.resetTest();
@@ -1690,15 +1709,22 @@ for (const name of browsers) {
             new Promise((res) => {
               const api = window.__starwish;
               const t0 = performance.now();
-              const log = { samples: 0, maxHitStreak: 0, hitsTakenStart: api.combat().hitsTaken, playerHitsByMonster: 0, monsterHitByPlayer: 0, landedAfterHit: false, deaths: 0, nan: 0 };
+              const log = { samples: 0, cancelledAlive: 0, hurtStarts: 0, maxRecoil: 0, maxHitStreak: 0, hitsTakenStart: api.combat().hitsTaken, playerHitsByMonster: 0, monsterHitByPlayer: 0, landedAfterHit: false, deaths: 0, nan: 0 };
               const hitSince = new Map();
               let firstPlayerHit = null;
               let prevTaken = log.hitsTakenStart;
               let prevPlayerHits = api.attackState().hits;
               const prevState = new Map();
+              const prevCancel = new Map();
+              const prevHurt = new Map();
+              const prevDist = new Map();
+              let lastP = api.getPlayer();
               const step = () => {
                 const now = performance.now();
                 api.attack();
+                const pp = api.getPlayer();
+                if (Math.hypot(pp.x - lastP.x, pp.z - lastP.z) > 0.5) prevDist.clear(); // 玩家倒地後回出生點
+                lastP = pp;
                 const ms = api.monsters();
                 for (const m of ms) {
                   if (!Number.isFinite(m.x) || !Number.isFinite(m.z) || !Number.isFinite(m.hp)) log.nan++;
@@ -1708,6 +1734,17 @@ for (const name of browsers) {
                   } else hitSince.delete(m.id);
                   if (m.state === "death" && prevState.get(m.id) !== "death") log.deaths++;
                   prevState.set(m.id, m.state);
+                  if (prevCancel.has(m.id) && m.attackLog.cancelled !== prevCancel.get(m.id) && m.state !== "death") log.cancelledAlive++;
+                  prevCancel.set(m.id, m.attackLog.cancelled);
+                  if (m.anim) {
+                    if (prevHurt.has(m.id) && m.anim.starts.hurt > prevHurt.get(m.id)) log.hurtStarts += m.anim.starts.hurt - prevHurt.get(m.id);
+                    prevHurt.set(m.id, m.anim.starts.hurt);
+                  }
+                  // 被打的那一刻有沒有被推離玩家（同一取樣間隔內距離變大的量；怪物只會走向玩家）
+                  const p = api.getPlayer();
+                  const d = Math.hypot(m.x - p.x, m.z - p.z);
+                  if (prevDist.has(m.id) && (m.mode === "chase" || m.mode === "attack") && !api.combat().down) log.maxRecoil = Math.max(log.maxRecoil, d - prevDist.get(m.id));
+                  prevDist.set(m.id, d);
                 }
                 const ph = api.attackState().hits;
                 if (ph > prevPlayerHits) {
@@ -1731,7 +1768,8 @@ for (const name of browsers) {
         run.results.push({ tag: `${tag}：持續攻擊 25 秒`, fight });
         check(`${tag}：持續攻擊 25 秒，玩家有打中怪物、怪物有被擊倒`, fight.monsterHitByPlayer >= 10 && fight.deaths >= 1, fight);
         check(`${tag}：玩家開始攻擊後，怪物仍能恢復並真的打到玩家`, fight.landedAfterHit && fight.playerHitsByMonster >= 2, fight);
-        check(`${tag}：怪物不會卡在受擊（連續受擊狀態最長 < 0.5 秒）`, fight.maxHitStreak < 0.5, fight.maxHitStreak);
+        check(`${tag}：持續普通攻擊 25 秒，沒有怪物進入受擊硬直、沒有播受傷動作、活著時攻擊沒有被取消`, fight.maxHitStreak === 0 && fight.hurtStarts === 0 && fight.cancelledAlive === 0, fight);
+        check(`${tag}：被打時沒有被推離玩家（取樣間距離最多變大 0.3 公尺，含怪物彼此推開）`, fight.maxRecoil < 0.3, fight.maxRecoil);
         check(`${tag}：怪物狀態與位置正常（無 NaN）`, fight.nan === 0, fight.nan);
       } catch (e) {
         run.errors.push(`${tag} exception: ${e.message}`);

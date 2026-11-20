@@ -444,7 +444,7 @@ export class BoboV38RVisual implements IMonsterVisual {
     this.driver.setTransform(x, z, yaw);
   }
 
-  onHitReaction(r: { stagger: number; recoil: number; immune: boolean }): void {
+  onHitReaction(r: { stagger: number; recoil: number; immune: boolean; kind?: "normal" | "control" }): void {
     this.driver.onHitReaction(r);
   }
 

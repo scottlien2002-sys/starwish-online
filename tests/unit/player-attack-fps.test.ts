@@ -148,21 +148,26 @@ for (const { name, dt } of FPS) {
     assert.equal(!r.ok && r.reason, "down");
   });
 
-  test(`星露啵啵 V3.8R 規則不受影響：玩家命中時才受傷；命中前的攻擊被打斷取消（${name}）`, () => {
+  test(`星露啵啵 V3.8R 普通攻擊規則（2026-11-20 正式）：揮中才扣血；不硬直、不打斷怪物攻擊，該次攻擊照常命中（${name}）`, () => {
     const w = world(dt);
     const m = w.monsters[0]!;
     m.instance.tryAttack(w.now);
     w.frame();
     assert.equal(m.instance.sm.state, "attack");
+    const id = m.instance.attackId;
     w.press();
-    // 玩家按下後、揮中前：怪物仍在攻擊
+    // 玩家按下後、揮中前：還沒扣血
     for (let i = 0; i < Math.floor((0.2 - 1e-6) / dt) - 1; i++) w.frame();
-    assert.equal(m.instance.sm.state, "attack");
-    // 揮中那一幀：玩家傷害先結算 → 怪物受傷、攻擊取消（攻擊 0.50 秒命中尚未到）
+    assert.equal(m.instance.currentHp, 60);
+    // 揮中：扣 20，但怪物仍在攻擊（不進入受擊、不取消）
     w.run(dt * 2);
-    assert.equal(m.instance.sm.state, "hit");
-    assert.equal(m.instance.attackLog.cancelled, 1);
-    assert.equal(m.instance.attackLog.resolved, 0);
     assert.equal(m.instance.currentHp, 40);
+    assert.equal(m.instance.sm.state, "attack");
+    assert.equal(m.instance.attackLog.cancelled, 0);
+    // 這個模擬不處理撞擊事件：攻擊進行到命中時間（0.50 秒）時手動結算，確認該次攻擊仍有效
+    let guard = 0;
+    while (m.instance.sm.state === "attack" && m.instance.sm.stateTime < 0.5 && guard++ < 200) w.frame();
+    assert.equal(m.instance.sm.state, "attack", "攻擊沒有被打斷");
+    assert.equal(m.instance.claimAttackImpact(), id, "被打的那次攻擊照常結算");
   });
 }

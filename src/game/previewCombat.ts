@@ -26,8 +26,8 @@ export interface CombatMonster {
   readonly isAlive: boolean;
   readonly currentPosition: { x: number; z: number };
   readonly definition: { attack: number; attackRange: number; name: string };
-  /** now：遊戲時間（套用連續受擊抗性） */
-  receiveDamage(amount: number, now?: number): { applied: boolean; killed: boolean };
+  /** now：遊戲時間；kind：受擊種類（普通攻擊 = normal：不擊退、不硬直） */
+  receiveDamage(amount: number, now?: number, kind?: "normal" | "control"): { applied: boolean; killed: boolean };
 }
 
 export type PlayerAttackResult =
@@ -47,6 +47,11 @@ export class PreviewCombat {
   lockedId: string | null = null;
   /** 已出手、等待揮中的攻擊 */
   private pending: { targetId: string; hitAt: number } | null = null;
+  /**
+   * 玩家普通攻擊的受擊種類：正式規則為 normal（不擊退、不硬直）。
+   * control（擊退＋硬直＋連續受擊抗性）保留給未來特殊技能，只有測試會改這個值。
+   */
+  attackHitKind: "normal" | "control" = "normal";
   /** 累計：玩家受到的攻擊次數（測試用） */
   hitsTaken = 0;
 
@@ -116,7 +121,7 @@ export class PreviewCombat {
     if (!target || !target.isAlive) return { ok: false, reason: "miss" };
     const d = Math.hypot(target.currentPosition.x - px, target.currentPosition.z - pz);
     if (d > PREVIEW_COMBAT.playerAttackRange + 0.6) return { ok: false, reason: "miss" };
-    const r = target.receiveDamage(PREVIEW_COMBAT.playerAttackDamage, now);
+    const r = target.receiveDamage(PREVIEW_COMBAT.playerAttackDamage, now, this.attackHitKind);
     return { ok: true, targetId: target.instanceId, killed: r.killed, damage: PREVIEW_COMBAT.playerAttackDamage };
   }
 

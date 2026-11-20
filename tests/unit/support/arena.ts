@@ -17,7 +17,7 @@ export class DriverVisual implements IMonsterVisual {
   readonly kind = "gltf" as const;
   readonly driver = new BoboV38RAnimDriver(0, 17, false);
   frame: BoboDriverFrame | null = null;
-  reactions: { stagger: number; recoil: number; immune: boolean }[] = [];
+  reactions: { stagger: number; recoil: number; immune: boolean; kind?: "normal" | "control" }[] = [];
   load(): Promise<void> {
     return Promise.resolve();
   }
@@ -27,7 +27,7 @@ export class DriverVisual implements IMonsterVisual {
   onStateEnter(s: MonsterState): void {
     this.driver.onStateEnter(s);
   }
-  onHitReaction(r: { stagger: number; recoil: number; immune: boolean }): void {
+  onHitReaction(r: { stagger: number; recoil: number; immune: boolean; kind?: "normal" | "control" }): void {
     this.reactions.push(r);
     this.driver.onHitReaction?.(r);
   }

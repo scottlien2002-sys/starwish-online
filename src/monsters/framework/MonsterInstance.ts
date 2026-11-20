@@ -2,7 +2,7 @@ import { MonsterStateMachine, type RequestResult } from "../anim/MonsterStateMac
 import type { MonsterAnimTimings, MonsterState } from "../anim/types.ts";
 import type { MonsterDefinition, Vec3 } from "./types.ts";
 import { HitResistance, type HitReaction } from "./hitResistance.ts";
-import { HIT_REACTION } from "../../config/hitReaction.ts";
+import { HIT_REACTION, NORMAL_HIT_FLASH, type HitKind } from "../../config/hitReaction.ts";
 
 export interface DamageResult {
   applied: boolean;
@@ -145,9 +145,11 @@ export class MonsterInstance {
   /**
    * 承受傷害（amount 為已計算好的最終傷害；傷害公式屬於 W2 戰鬥系統）。
    * 死亡、重生中不受傷害；攻擊中受擊不中斷攻擊；血量歸零進入死亡。
-   * @param now 遊戲時間（秒）。有傳入時套用連續受擊抗性（遊戲戰鬥使用）；省略 = 原本的受擊規則（測試頁）
+   * @param now 遊戲時間（秒）。有傳入時套用遊戲的受擊規則；省略 = 原本的受擊規則（動畫測試頁）
+   * @param kind 受擊種類（預設 normal = 普通攻擊：只扣血與受擊回饋，不硬直、不後退、不打斷行動；
+   *             control = 未來特殊技能：擊退與硬直，套用連續受擊抗性）
    */
-  receiveDamage(amount: number, now?: number): DamageResult {
+  receiveDamage(amount: number, now?: number, kind: HitKind = "normal"): DamageResult {
     if (!this.isAlive) return { applied: false, killed: false, reason: "死亡或重生中不受傷害" };
     const dmg = Math.max(0, Math.floor(amount));
     const wasAttacking = this.sm.state === "attack";
@@ -160,9 +162,15 @@ export class MonsterInstance {
       const cancelled = this.cancelPendingAttack(wasAttacking);
       return { applied: true, killed: true, ...(cancelled !== undefined ? { cancelledAttackId: cancelled } : {}) };
     }
-    const reaction = now === undefined ? undefined : this.resistance.register(now);
+    const reaction: HitReaction | undefined =
+      now === undefined
+        ? undefined
+        : kind === "normal"
+          ? { tier: 0, stagger: 0, recoil: 0, immune: false, kind: "normal" }
+          : { ...this.resistance.register(now), kind: "control" };
+    const flash = kind === "normal" ? NORMAL_HIT_FLASH : HIT_REACTION.noStaggerFlash;
     const r = reaction
-      ? this.sm.request("hit", reaction.stagger > 0 ? { duration: reaction.stagger } : { noStagger: true, flash: HIT_REACTION.noStaggerFlash })
+      ? this.sm.request("hit", reaction.stagger > 0 ? { duration: reaction.stagger } : { noStagger: true, flash })
       : this.sm.request("hit");
     if (reaction && !r.locked) {
       this.lastHitReaction = reaction;

@@ -6,6 +6,8 @@ export interface HitReaction {
   stagger: number;
   recoil: number;
   immune: boolean;
+  /** 受擊種類：normal = 普通攻擊（不硬直、不後退）；control = 技能（連續受擊抗性） */
+  kind?: "normal" | "control";
 }
 
 export interface HitResistanceConfig {

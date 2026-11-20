@@ -93,7 +93,7 @@ export interface IMonsterVisual {
   setFace(face: MonsterFace): void;
   playEffect(effect: MonsterEffect): void;
   /** 選填：受擊反應（連續受擊抗性：後退幅度倍率、是否硬直）。在同一幀的 onStateEnter 之前呼叫 */
-  onHitReaction?(r: { stagger: number; recoil: number; immune: boolean }): void;
+  onHitReaction?(r: { stagger: number; recoil: number; immune: boolean; kind?: "normal" | "control" }): void;
   update(dt: number): void;
   dispose(): void;
 }

@@ -81,14 +81,14 @@ export interface DebugApi {
     hitCombo: number;
     hitImmune: number;
     hitDuration: number;
-    lastReaction: { tier: number; stagger: number; recoil: number; immune: boolean } | null;
+    lastReaction: { tier: number; stagger: number; recoil: number; immune: boolean; kind?: string } | null;
     /** V3.8R 動畫狀態（V2 為 null） */
     anim: BoboV38RAnimDebug | null;
   }[];
   /** 測試用：直接對怪物造成傷害（不經過玩家攻擊距離與冷卻） */
   damageMonster(id: string, amount: number): { applied: boolean; killed: boolean; rehitLocked?: boolean; cancelledAttackId?: number; reason?: string } | null;
   /** 測試用：用遊戲的受擊規則（含連續受擊抗性）對怪物造成傷害，不經過攻擊距離與冷卻 */
-  hitMonster(id: string, amount: number): { applied: boolean; killed: boolean; reaction?: { tier: number; stagger: number; recoil: number; immune: boolean } } | null;
+  hitMonster(id: string, amount: number, kind?: "normal" | "control"): { applied: boolean; killed: boolean; reaction?: { tier: number; stagger: number; recoil: number; immune: boolean; kind?: string } } | null;
   /** 預覽測試：等同按下攻擊鍵（傷害在揮中時結算，見 attackState().lastHit） */
   attack(): AttackStartResult;
   /** 玩家攻擊動作狀態（測試用） */
@@ -1405,9 +1405,9 @@ export class Game {
         const m = this.monsters.find((x) => x.instance.instanceId === id);
         return m ? m.instance.receiveDamage(amount) : null;
       },
-      hitMonster: (id, amount) => {
+      hitMonster: (id, amount, kind = "normal") => {
         const m = this.monsters.find((x) => x.instance.instanceId === id);
-        return m ? m.instance.receiveDamage(amount, this.now) : null;
+        return m ? m.instance.receiveDamage(amount, this.now, kind) : null;
       },
       attack: () => {
         const r = this.playerAttack();
