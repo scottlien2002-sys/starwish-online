@@ -40,7 +40,7 @@ import { ATTACK_TIMING, type AttackPhase } from "../actors/attackAnim.ts";
 import { FrameRecorder } from "../render/benchmark.ts";
 import { FrameProfiler, resolutionInfo } from "../render/frameProfiler.ts";
 import { DebugPanel, debugEnabledFromSearch, formatDebugLines, type DebugInfo } from "./debugPanel.ts";
-import { experimentLabels, experimentTag, renderExperimentsFromSearch, type RenderExperiments } from "../render/renderExperiments.ts";
+import { contactShadowQuality, experimentLabels, experimentTag, renderExperimentsFromSearch, type RenderExperiments } from "../render/renderExperiments.ts";
 import { BENCH_SPOTS, benchOptionsFromSearch, benchUrl, compareExperimentRows, compareRows, formatResult, loadResults, saveResult, type BenchOptions, type BenchResult } from "./benchMode.ts";
 
 export interface DebugApi {
@@ -240,8 +240,10 @@ export class Game {
     this.shadowGen = shadows;
     shadows.darkness = 0.35;
     // ---- 渲染效能實驗（只在網址參數開啟；預設與原本完全相同） ----
-    // opt=pcss32：柔和接觸陰影維持同一種陰影與同樣的柔和範圍（contactHardeningLightSizeUVRatio 不變），只把取樣品質由高降為中
-    if (this.experiments.opt.includes("pcss32") && shadows.useContactHardeningShadow) shadows.filteringQuality = ShadowGenerator.QUALITY_MEDIUM;
+    // 高畫質柔和接觸陰影的取樣品質：V3.8R 預設中品質（PCSS32）；V2 與 ?shadowq=original 維持原本高品質。
+    // 只改取樣品質：陰影類型、柔和範圍（contactHardeningLightSizeUVRatio）、陰影貼圖、偏移、濃度都不變；中、低畫質（PCF）不受影響
+    const contactQ = contactShadowQuality(this.quality.shadows.filter, boboVariantFromSearch(location.search), this.experiments);
+    if (contactQ && shadows.useContactHardeningShadow) shadows.filteringQuality = contactQ === "medium" ? ShadowGenerator.QUALITY_MEDIUM : ShadowGenerator.QUALITY_HIGH;
     // diag=noshadow：診斷用，量測陰影整體成本（陰影貼圖繪製＋地面等物件的陰影取樣）
     if (this.experiments.diag === "noshadow") this.sun.shadowEnabled = false;
 
@@ -681,7 +683,7 @@ export class Game {
     const expCmp = compareExperimentRows(all[`${r.variant}_${r.quality}`], r);
     const cmp = r.experiment ? expCmp : compareRows(all[`v2_${r.quality}`], all[`v38r_${r.quality}`]);
     if (r.experiment && !expCmp) {
-      line("（同外觀、同畫質的原始畫質尚未測試：去掉網址中的 opt／diag 參數測一次後，會顯示比較）");
+      line("（同外觀、同畫質的目前預設尚未測試：去掉網址中的 opt／diag／shadowq 參數測一次後，會顯示比較）");
     } else if (cmp) {
       el.appendChild(document.createElement("hr"));
       cmp.forEach((t, i) => line(t, i === 0));

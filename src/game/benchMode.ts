@@ -121,7 +121,7 @@ export function compareExperimentRows(base: BenchResult | undefined, exp: BenchR
   const d = (x: number | undefined, y: number | undefined): string => (x === undefined || y === undefined ? "—" : `${y - x >= 0 ? "+" : ""}${(y - x).toFixed(1)}`);
   const sa = base.summary, sb = exp.summary;
   return [
-    `比較（${VARIANT_LABEL[exp.variant]}・畫質${QUALITY_LABEL[exp.quality]}）：原始畫質 → 實驗 ${exp.experiment}`,
+    `比較（${VARIANT_LABEL[exp.variant]}・畫質${QUALITY_LABEL[exp.quality]}）：目前預設 → 實驗 ${exp.experiment}`,
     `平均 FPS ${f1(sa.avgFps)} → ${f1(sb.avgFps)}（${d(sa.avgFps, sb.avgFps)}）`,
     `1% Low ${f1(sa.low1Fps)} → ${f1(sb.low1Fps)}（${d(sa.low1Fps, sb.low1Fps)}）`,
     `最低 ${f1(sa.minFps)} → ${f1(sb.minFps)}（${d(sa.minFps, sb.minFps)}）`,
