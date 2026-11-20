@@ -665,7 +665,7 @@ export class Game {
       a.warm += rawDt;
       if (a.warm >= o.warmup) {
         a.phase = "running";
-        a.resStart = this.resourceCounts();
+        a.resStart = this.steadyResourceCounts();
         a.prevStates = this.monsters.map((m) => m.instance.sm.state);
         a.prevDown = this.combat.isDown;
       }
@@ -703,6 +703,13 @@ export class Game {
     if (st.elapsed >= o.duration) this.finishAutoplay();
   }
 
+  /** 持續存在的場景資源：扣掉死亡動畫中暫時複製的星星材質（移除時就釋放，不是洩漏） */
+  private steadyResourceCounts(): { meshes: number; materials: number; textures: number } {
+    const c = this.resourceCounts();
+    const temp = this.monsters.filter((m) => m.visual instanceof BoboV38RVisual && m.visual.debugState().tempStarMaterial).length;
+    return { meshes: c.meshes, materials: c.materials - temp, textures: c.textures };
+  }
+
   private heapMB(): number | null {
     const m = (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory;
     return m ? m.usedJSHeapSize / (1024 * 1024) : null;
@@ -715,7 +722,7 @@ export class Game {
     this.input.moveOverride = null;
     const st = a.stats;
     if (st.timeline.length === 0 || st.elapsed - (st.timeline[st.timeline.length - 1]?.t ?? 0) > 1) st.sample({ ...this.resourceCounts(), heapMB: this.heapMB() });
-    const end = this.resourceCounts();
+    const end = this.steadyResourceCounts();
     const dup = this.monsters.reduce((n, m) => n + m.instance.attackLog.duplicatesBlocked, 0);
     const result: AutoplayResult = {
       mode: o.mode,

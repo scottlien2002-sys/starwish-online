@@ -220,7 +220,7 @@ export class AutoplayStats {
     c.push({ name: "怪物狀態與位置正常（無 NaN／異常狀態）", ok: this.invalid === 0, detail: `異常幀 ${this.invalid}` });
     const grew = (k: "meshes" | "materials" | "textures"): number => o.resEnd[k] - o.resStart[k];
     c.push({
-      name: "場景資源沒有持續增加（Mesh／材質／貼圖）",
+      name: "場景資源沒有持續增加（Mesh／材質／貼圖；不含死亡動畫中的暫時材質）",
       ok: grew("meshes") <= 0 && grew("materials") <= 0 && grew("textures") <= 0,
       detail: `Mesh ${o.resStart.meshes}→${o.resEnd.meshes}、材質 ${o.resStart.materials}→${o.resEnd.materials}、貼圖 ${o.resStart.textures}→${o.resEnd.textures}`,
     });
