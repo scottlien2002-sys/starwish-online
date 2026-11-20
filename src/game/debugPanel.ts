@@ -56,6 +56,8 @@ export interface DebugInfo {
   gpuSupported: boolean;
   player: { hp: number; maxHp: number; down: boolean; attackPhase: string; hits: number };
   monsters: DebugMonsterInfo[];
+  /** 啟用中的渲染實驗說明（?opt=／?diag=；預設為空） */
+  experiments?: string[];
 }
 
 const f1 = (v: number): string => (Number.isFinite(v) ? v.toFixed(1) : "—");
@@ -77,6 +79,7 @@ export function formatDebugLines(d: DebugInfo): string[] {
     `Draw Calls ${d.drawCalls}・Active Mesh ${d.activeMeshes}・Mesh ${d.meshes}・材質 ${d.materials}・貼圖 ${d.textures}`,
     `解析度 ${r.width}×${r.height}（${f2(r.pixelRatio)}x ${f2(r.megapixels)}MP；畫面 ${r.cssWidth}×${r.cssHeight} 裝置 ${r.devicePixelRatio}x）`,
   ];
+  if (d.experiments && d.experiments.length) lines.push("實驗：" + d.experiments.join("；"));
   const p = d.profile;
   if (p) {
     lines.push(`影格 ${f1(p.avgFrameMs)}ms（最長 ${f1(p.maxFrameMs)}）＝CPU ${f1(p.cpuMs)}＋GPU／等待 ${f1(p.waitMs)}`);

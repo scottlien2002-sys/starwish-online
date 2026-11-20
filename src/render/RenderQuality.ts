@@ -73,7 +73,7 @@ export interface RenderSetup {
  * 套用畫質：色調映射與曝光（全部畫質）、後製管線（高/中）、選擇性 Bloom（高/中）。
  * 抗鋸齒依畫質只開一種。
  */
-export function setupRendering(scene: Scene, camera: Camera, q: QualitySettings): RenderSetup {
+export function setupRendering(scene: Scene, camera: Camera, q: QualitySettings, opts: { hdr?: boolean } = {}): RenderSetup {
   const ip = scene.imageProcessingConfiguration;
   ip.toneMappingEnabled = q.toneMapping.enabled;
   // KHR PBR Neutral：保留明亮粉嫩的顏色（ACES 會讓粉彩變暗變灰）；舊版沒有時退回 ACES
@@ -84,7 +84,8 @@ export function setupRendering(scene: Scene, camera: Camera, q: QualitySettings)
 
   let pipeline: DefaultRenderingPipeline | null = null;
   if (q.postProcess) {
-    pipeline = new DefaultRenderingPipeline("main", true, scene, [camera]);
+    // hdr 預設 true（原本設定）；只有診斷用 ?diag=nohdr 會傳 false
+    pipeline = new DefaultRenderingPipeline("main", opts.hdr ?? true, scene, [camera]);
     pipeline.samples = q.msaaSamples;
     pipeline.fxaaEnabled = q.fxaa;
     pipeline.imageProcessingEnabled = true;

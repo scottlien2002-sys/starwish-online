@@ -57,6 +57,8 @@ export interface BenchResult {
   materials: number;
   textures: number;
   monsters: number;
+  /** 渲染實驗標記（?opt=／?diag=；例 "opt:pcss32"）；一般測試沒有 */
+  experiment?: string;
   /** 調查用：這次測試指定的渲染倍率（&benchres）；一般測試沒有 */
   resOverride?: number;
   /** 調查用：測量期間每幀 CPU 分段平均（&benchprof=1） */
@@ -68,9 +70,9 @@ export interface BenchResult {
 
 export const BENCH_STORAGE_KEY = "starwish.bench.v1";
 
-export function benchKey(r: Pick<BenchResult, "variant" | "quality" | "resOverride">): string {
-  // 指定渲染倍率的調查結果另存，不覆蓋一般測試、不進入 V2／V3.8R 比較
-  return `${r.variant}_${r.quality}${r.resOverride !== undefined ? `_r${r.resOverride}` : ""}`;
+export function benchKey(r: Pick<BenchResult, "variant" | "quality" | "resOverride" | "experiment">): string {
+  // 指定渲染倍率、渲染實驗的結果另存，不覆蓋一般測試、不進入 V2／V3.8R 比較
+  return `${r.variant}_${r.quality}${r.resOverride !== undefined ? `_r${r.resOverride}` : ""}${r.experiment ? `_${r.experiment}` : ""}`;
 }
 
 const VARIANT_LABEL = { v2: "V2", v38r: "V3.8R" } as const;
@@ -83,7 +85,7 @@ const f0 = (v: number | undefined): string => (v === undefined ? "—" : Math.ro
 export function formatResult(r: BenchResult): string[] {
   const s = r.summary;
   const lines = [
-    `${VARIANT_LABEL[r.variant]}・畫質${QUALITY_LABEL[r.quality]}・${r.pixelRatio}x${r.resOverride !== undefined ? "【調查：指定倍率】" : ""}（裝置 ${r.devicePixelRatio}x，${r.width}×${r.height}）`,
+    `${VARIANT_LABEL[r.variant]}・畫質${QUALITY_LABEL[r.quality]}・${r.pixelRatio}x${r.resOverride !== undefined ? "【調查：指定倍率】" : ""}${r.experiment ? `【實驗 ${r.experiment}】` : ""}（裝置 ${r.devicePixelRatio}x，${r.width}×${r.height}）`,
     `平均 ${f1(s.avgFps)} FPS／1% Low ${f1(s.low1Fps)}／最低 ${f1(s.minFps)}`,
     `最慢 1% 平均 ${f1(s.low1AvgFps)} FPS／第 99 百分位影格 ${f1(s.p99FrameMs)} ms／最長影格 ${f1(s.maxFrameMs)} ms`,
     `Draw Calls 平均 ${f1(s.avgDrawCalls)}・最高 ${f0(s.maxDrawCalls)}／Active Mesh 平均 ${f1(r.avgActiveMeshes)}・最高 ${f0(r.maxActiveMeshes)}`,
@@ -110,6 +112,20 @@ export function compareRows(a: BenchResult | undefined, b: BenchResult | undefin
     `最低 ${f1(sa.minFps)} → ${f1(sb.minFps)}（${d(sa.minFps, sb.minFps)}）`,
     `Draw Calls 平均 ${f1(sa.avgDrawCalls)} → ${f1(sb.avgDrawCalls)}（${d(sa.avgDrawCalls, sb.avgDrawCalls)}）`,
     `Active Mesh 平均 ${f1(a.avgActiveMeshes)} → ${f1(b.avgActiveMeshes)}／場景 Mesh ${a.meshes} → ${b.meshes}`,
+  ];
+}
+
+/** 同外觀、同畫質、同倍率：原始畫質（基準）與渲染實驗的比較列 */
+export function compareExperimentRows(base: BenchResult | undefined, exp: BenchResult | undefined): string[] | null {
+  if (!base || !exp || !exp.experiment) return null;
+  const d = (x: number | undefined, y: number | undefined): string => (x === undefined || y === undefined ? "—" : `${y - x >= 0 ? "+" : ""}${(y - x).toFixed(1)}`);
+  const sa = base.summary, sb = exp.summary;
+  return [
+    `比較（${VARIANT_LABEL[exp.variant]}・畫質${QUALITY_LABEL[exp.quality]}）：原始畫質 → 實驗 ${exp.experiment}`,
+    `平均 FPS ${f1(sa.avgFps)} → ${f1(sb.avgFps)}（${d(sa.avgFps, sb.avgFps)}）`,
+    `1% Low ${f1(sa.low1Fps)} → ${f1(sb.low1Fps)}（${d(sa.low1Fps, sb.low1Fps)}）`,
+    `最低 ${f1(sa.minFps)} → ${f1(sb.minFps)}（${d(sa.minFps, sb.minFps)}）`,
+    `Draw Calls 平均 ${f1(sa.avgDrawCalls)} → ${f1(sb.avgDrawCalls)}`,
   ];
 }
 

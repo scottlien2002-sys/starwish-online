@@ -10,7 +10,7 @@ import {
   EngineInstrumentation,
   Matrix,
   SceneInstrumentation,
-  type ShadowGenerator,
+  ShadowGenerator,
   type TransformNode,
   Vector3,
 } from "@babylonjs/core";
@@ -40,7 +40,8 @@ import { ATTACK_TIMING, type AttackPhase } from "../actors/attackAnim.ts";
 import { FrameRecorder } from "../render/benchmark.ts";
 import { FrameProfiler, resolutionInfo } from "../render/frameProfiler.ts";
 import { DebugPanel, debugEnabledFromSearch, formatDebugLines, type DebugInfo } from "./debugPanel.ts";
-import { BENCH_SPOTS, benchOptionsFromSearch, benchUrl, compareRows, formatResult, loadResults, saveResult, type BenchOptions, type BenchResult } from "./benchMode.ts";
+import { experimentLabels, experimentTag, renderExperimentsFromSearch, type RenderExperiments } from "../render/renderExperiments.ts";
+import { BENCH_SPOTS, benchOptionsFromSearch, benchUrl, compareExperimentRows, compareRows, formatResult, loadResults, saveResult, type BenchOptions, type BenchResult } from "./benchMode.ts";
 
 export interface DebugApi {
   ready: boolean;
@@ -102,6 +103,8 @@ export interface DebugApi {
   teleport(x: number, z: number): void;
   /** Stage 5.1：星露啵啵外觀與 V3.8R 適配器資源狀態 */
   bobo(): Promise<unknown>;
+  /** 目前啟用的渲染實驗（預設為空） */
+  renderExperiments(): { tag: string; labels: string[]; shadowQuality: number; msaa: number; hdr: boolean | null; shadowEnabled: boolean };
   /** 除錯面板（?debug=1）目前的資料；一般遊戲為 null */
   debugInfo(): DebugInfo | null;
   /** 除錯面板的「重設測試」 */
@@ -166,6 +169,8 @@ export class Game {
   private readonly boboVariant: BoboVariant;
   /** 測試截圖：怪物停住（不更新 AI 與動畫），只用於同條件比較畫質 */
   private photoMode = false;
+  /** 渲染效能實驗（?opt=／?diag=）；預設全部關閉 */
+  private readonly experiments: RenderExperiments = renderExperimentsFromSearch(location.search);
   /** 除錯面板（?debug=1）：null = 一般遊戲（不建立、不計時） */
   private readonly debugOn = debugEnabledFromSearch(location.search);
   private debugPanel: DebugPanel | null = null;
@@ -234,6 +239,11 @@ export class Game {
     const shadows = createShadows(this.sun, this.quality);
     this.shadowGen = shadows;
     shadows.darkness = 0.35;
+    // ---- 渲染效能實驗（只在網址參數開啟；預設與原本完全相同） ----
+    // opt=pcss32：柔和接觸陰影維持同一種陰影與同樣的柔和範圍（contactHardeningLightSizeUVRatio 不變），只把取樣品質由高降為中
+    if (this.experiments.opt.includes("pcss32") && shadows.useContactHardeningShadow) shadows.filteringQuality = ShadowGenerator.QUALITY_MEDIUM;
+    // diag=noshadow：診斷用，量測陰影整體成本（陰影貼圖繪製＋地面等物件的陰影取樣）
+    if (this.experiments.diag === "noshadow") this.sun.shadowEnabled = false;
 
     this.world = buildMeadow(scene, shadows);
     this.player = new PlayerAvatar(scene, shadows);
@@ -242,7 +252,9 @@ export class Game {
     this.camera = new ThirdPersonCamera(scene, this.position);
     scene.activeCamera = this.camera.camera;
     // 色調映射、曝光、後製抗鋸齒、選擇性 Bloom
-    this.render = setupRendering(scene, this.camera.camera, this.quality);
+    this.render = setupRendering(scene, this.camera.camera, this.quality, this.experiments.diag === "nohdr" ? { hdr: false } : {});
+    // diag=nomsaa：診斷用，量測後製管線 MSAA 的成本
+    if (this.experiments.diag === "nomsaa" && this.render.pipeline) this.render.pipeline.samples = 1;
 
     // ---------- 預覽測試：星露啵啵 V2（沿用怪物框架：生成、AI、狀態機、動畫） ----------
     const registry = registerBabylonVisuals(createMonsterRegistry(), {
@@ -471,6 +483,7 @@ export class Game {
       gpuMs: gi && gi.gpuFrameTimeCounter.count > 0 ? gi.gpuFrameTimeCounter.lastSecAverage * 1e-6 : null,
       gpuSupported: gi !== null,
       player: { hp: this.combat.hp, maxHp: PREVIEW_COMBAT.playerMaxHp, down: this.combat.isDown, attackPhase: a.phase, hits: this.hits },
+      experiments: experimentLabels(this.experiments),
       monsters: this.monsters.map((m) => {
         const i = m.instance;
         const v = m.visual;
@@ -626,6 +639,7 @@ export class Game {
       textures: counts.textures,
       monsters: this.monsters.length,
       ...(this.benchOpts!.res !== null ? { resOverride: this.benchOpts!.res } : {}),
+      ...(experimentTag(this.experiments) ? { experiment: experimentTag(this.experiments) } : {}),
       ...(this.benchOpts!.profile && this.profiler ? { profile: this.profiler.takeWindow() } : {}),
       at: new Date().toISOString(),
       userAgent: navigator.userAgent,
@@ -664,8 +678,11 @@ export class Game {
     el.appendChild(row);
     line("⏱ 效能測試結果（10 秒）".replace("10", String(this.benchOpts!.seconds)), true);
     for (const t of formatResult(r)) line(t);
-    const cmp = compareRows(all[`v2_${r.quality}`], all[`v38r_${r.quality}`]);
-    if (cmp) {
+    const expCmp = compareExperimentRows(all[`${r.variant}_${r.quality}`], r);
+    const cmp = r.experiment ? expCmp : compareRows(all[`v2_${r.quality}`], all[`v38r_${r.quality}`]);
+    if (r.experiment && !expCmp) {
+      line("（同外觀、同畫質的原始畫質尚未測試：去掉網址中的 opt／diag 參數測一次後，會顯示比較）");
+    } else if (cmp) {
       el.appendChild(document.createElement("hr"));
       cmp.forEach((t, i) => line(t, i === 0));
     } else {
@@ -959,6 +976,14 @@ export class Game {
           shots,
         };
       },
+      renderExperiments: () => ({
+        tag: experimentTag(this.experiments),
+        labels: experimentLabels(this.experiments),
+        shadowQuality: this.shadowGen.filteringQuality,
+        msaa: this.render.pipeline ? this.render.pipeline.samples : 0,
+        hdr: this.render.pipeline ? this.experiments.diag !== "nohdr" : null,
+        shadowEnabled: this.sun.shadowEnabled,
+      }),
       debugInfo: () => (this.debugOn ? (this.debugLast ?? this.collectDebugInfo()) : null),
       resetTest: () => this.resetTest(),
       renderBreakdown: () => {

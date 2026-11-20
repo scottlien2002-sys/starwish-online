@@ -1004,6 +1004,7 @@ for (const name of browsers) {
     };
     const variants = [
       { q: "high", glow: undefined, label: "high" },
+      { q: "high", glow: undefined, label: "high_opt_pcss32", extra: "&opt=pcss32" },
       { q: "medium", glow: undefined, label: "medium" },
       { q: "low", glow: undefined, label: "low" },
     ];
@@ -1013,7 +1014,7 @@ for (const name of browsers) {
       page.on("pageerror", (e) => run.errors.push(`${v.label} pageerror: ${e.message}`));
       page.on("console", (m) => m.type() === "error" && run.errors.push(`${v.label} console: ${m.text()}`));
       try {
-        await page.goto(server.url + `/?bobo=v38r&quality=${v.q}`, { waitUntil: "load" });
+        await page.goto(server.url + `/?bobo=v38r&quality=${v.q}${v.extra ?? ""}`, { waitUntil: "load" });
         await page.addStyleTag({ content: safeAreaCss(vp.safe) + " .toast, .hud-toast { display: none !important; }" });
         await page.waitForFunction(() => window.__starwish?.ready === true, null, { timeout: 45000 });
         await page.waitForFunction(async () => (await window.__starwish.bobo()).visuals.every((x) => x.loaded), null, { timeout: 45000, polling: 250 });
@@ -1022,16 +1023,27 @@ for (const name of browsers) {
         const perf = await page.evaluate(() => window.__starwish.perf());
         const res = await page.evaluate(async () => (await window.__starwish.bobo()).scene);
         const renderer = await page.evaluate(() => window.__starwish.renderer());
+        const exp = await page.evaluate(() => window.__starwish.renderExperiments());
         const f = `${outDir}${name}_photo_${v.label}.png`;
         await page.screenshot({ path: f });
         run.screenshots.push(f.split("/test-results/")[1]);
-        run.photo.push({ label: v.label, quality: v.q, staged, perf, resources: res, renderer, file: f.split("/test-results/")[1] });
+        run.photo.push({ label: v.label, quality: v.q, staged, perf, resources: res, renderer, exp, file: f.split("/test-results/")[1] });
       } catch (e) {
         run.errors.push(`${v.label} exception: ${e.message}`);
       }
       await ctx.close();
     }
     const by = (l) => run.photo.find((p) => p.label === l);
+    {
+      const a = by("high"), b = by("high_opt_pcss32");
+      // Babylon：QUALITY_HIGH = 0、QUALITY_MEDIUM = 1
+      check(
+        "預設＝原始畫質（柔和陰影高品質、MSAA 4x、HDR）；opt=pcss32 只把柔和陰影取樣降為中品質",
+        !!a && !!b && a.exp.tag === "" && a.exp.shadowQuality === 0 && a.exp.msaa === 4 && a.exp.hdr === true && a.exp.shadowEnabled === true &&
+          b.exp.tag === "opt:pcss32" && b.exp.shadowQuality === 1 && b.exp.msaa === 4 && b.exp.hdr === true && b.exp.shadowEnabled === true && b.perf.drawCalls === a.perf.drawCalls,
+        { base: a && a.exp, opt: b && b.exp, draw: [a && a.perf.drawCalls, b && b.perf.drawCalls] },
+      );
+    }
     for (const l of ["high", "medium", "low"]) {
       const p = by(l);
       check(`${l}：V3.8R 模式發光層停用、畫質正確`, !!p && p.perf.quality === l && p.perf.bloom === false && p.staged.glow !== true, p && { bloom: p.perf.bloom, glow: p.staged.glow });
@@ -1432,6 +1444,33 @@ for (const name of browsers) {
             "效能測試調查參數：benchres=1 固定 1x、benchprof=1 記錄 CPU 分段、結果另存（不覆蓋一般測試）",
             r.resOverride === 1 && r.pixelRatio === 1 && r.profile && r.profile.frames > 0 && r.profile.cpuMs > 0 && st.saved.includes("v38r_medium_r1"),
             { pixelRatio: r.pixelRatio, profile: r.profile, saved: st.saved },
+          );
+          // 渲染實驗：診斷開關確實生效；中畫質（PCF）時 opt=pcss32 不改任何東西
+          const diag = {};
+          for (const d of ["noshadow", "nomsaa", "nohdr"]) {
+            await page.goto(server.url + `/?bobo=v38r&quality=high&diag=${d}`, { waitUntil: "load" });
+            await page.waitForFunction(() => window.__starwish?.ready === true, null, { timeout: 45000 });
+            diag[d] = await page.evaluate(() => window.__starwish.renderExperiments());
+          }
+          await page.goto(server.url + `/?bobo=v38r&quality=medium&opt=pcss32`, { waitUntil: "load" });
+          await page.waitForFunction(() => window.__starwish?.ready === true, null, { timeout: 45000 });
+          const medOpt = await page.evaluate(() => window.__starwish.renderExperiments());
+          check(
+            "診斷開關生效（noshadow 關陰影、nomsaa 關 MSAA、nohdr 改 8 位元）；中畫質 opt=pcss32 不改設定",
+            diag.noshadow.shadowEnabled === false && diag.nomsaa.msaa === 1 && diag.nohdr.hdr === false && diag.nohdr.msaa === 4 && medOpt.shadowQuality === 1 && medOpt.msaa === 1,
+            { diag, medOpt },
+          );
+          // 效能測試：原始畫質與實驗各測一次 → 顯示「原始畫質 → 實驗」比較
+          for (const qs of ["", "&opt=pcss32"]) {
+            await page.goto(server.url + `/?bobo=v38r&quality=high&bench=1&benchsec=2&warmup=1${qs}`, { waitUntil: "load" });
+            await page.waitForFunction(() => window.__starwish?.benchState()?.phase === "done", null, { timeout: 120000 });
+          }
+          const expPanel = await page.evaluate(() => document.querySelector(".bench-result")?.textContent ?? "");
+          const expSt = await page.evaluate(() => window.__starwish.benchState());
+          check(
+            "效能測試：實驗結果另存並顯示「原始畫質 → 實驗」比較",
+            expSt.result.experiment === "opt:pcss32" && expSt.saved.includes("v38r_high") && expSt.saved.includes("v38r_high_opt:pcss32") && /原始畫質 → 實驗 opt:pcss32/.test(expPanel),
+            { saved: expSt.saved, panel: expPanel.slice(0, 300) },
           );
         }
       } catch (e) {
