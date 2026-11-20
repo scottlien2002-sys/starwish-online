@@ -393,7 +393,8 @@ export class BoboV38RVisual implements IMonsterVisual {
   debugState(): BoboV38RAnimDebug {
     const f = this.last;
     return {
-      anim: this.driver.player.current,
+      // 已移除時播放器停在死亡最後一幀；顯示為 dead
+      anim: this.driver.logic === "dead" ? "dead" : this.driver.player.current,
       animTime: this.driver.player.time,
       logic: this.driver.logic,
       face: this.face ?? "normal",

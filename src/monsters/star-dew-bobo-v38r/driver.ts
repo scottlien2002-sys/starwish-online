@@ -151,7 +151,7 @@ export class BoboV38RAnimDriver {
       return {
         hidden: true,
         pose: REST_POSE,
-        anim: this.player.current,
+        anim: "dead",
         animTime: this.player.time,
         face: "sleepy",
         blinkClosed: false,

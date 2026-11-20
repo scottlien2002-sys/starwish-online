@@ -1377,18 +1377,23 @@ for (const name of browsers) {
           const d2 = await page.evaluate(() => window.__starwish.debugInfo());
           const r2 = d2.monsters[1].respawnIn;
           const txt2 = await page.evaluate(() => document.querySelector(".debug-text").textContent);
-          check(`${tag}：重生倒數顯示並遞減（10 秒內）`, r1 !== null && r2 !== null && r2 < r1 && r1 <= 10 && /#2 HP 0\/60・已移除.*重生倒數/.test(txt2), { r1, r2, line: txt2.split("\n").find((l) => l.startsWith("#2")) });
+          check(`${tag}：重生倒數顯示並遞減（死亡動畫剩餘＋10 秒）`, r1 !== null && r2 !== null && r2 < r1 && r1 <= 11.8 && r2 <= 10 && /#2 HP 0\/60・已移除・動畫 dead.*重生倒數/.test(txt2), { r1, r2, line: txt2.split("\n").find((l) => l.startsWith("#2")) });
           // 重設測試：玩家倒地、一隻已移除 → 按下按鈕 → 全部回到出生點、HP 全滿、待機
           await page.evaluate(() => window.__starwish.knockDown());
-          await page.locator(".debug-reset").click();
-          await page.waitForTimeout(900);
-          const after = await page.evaluate(() => ({ ms: window.__starwish.monsters(), c: window.__starwish.combat(), p: window.__starwish.getPlayer() }));
+          // 按下按鈕的同一瞬間讀取（之後 AI 會立刻開始追玩家，位置會變）
+          const after = await page.evaluate(() => {
+            document.querySelector(".debug-reset").click();
+            return { ms: window.__starwish.monsters(), c: window.__starwish.combat(), p: window.__starwish.getPlayer() };
+          });
+          await page.waitForTimeout(1200);
+          const later = await page.evaluate(() => window.__starwish.monsters());
           check(
-            `${tag}：「重設測試」：怪物回出生點、HP 全滿、待機、attackId 歸零；玩家 HP 全滿、站起、回出生點`,
-            after.ms.every((m) => m.hp === m.maxHp && (m.state === "idle" || m.state === "move") && Math.hypot(m.x - m.spawnX, m.z - m.spawnZ) < 0.6 && m.attackId <= 1) &&
-              after.c.hp === 100 && after.c.down === false && Math.hypot(after.p.x, after.p.z) < 0.6 &&
-              (variant !== "v38r" || after.ms.every((m) => m.anim.visibility === 1 && m.anim.anim !== "dead")),
-            after,
+            `${tag}：「重設測試」：怪物回出生點、HP 全滿、待機、attackId 歸零；玩家 HP 全滿、站起、回出生點；之後照常行動`,
+            after.ms.every((m) => m.hp === m.maxHp && m.state === "idle" && Math.hypot(m.x - m.spawnX, m.z - m.spawnZ) < 1e-6 && m.attackId === 0 && m.cooldown === 0) &&
+              after.c.hp === 100 && after.c.down === false && after.c.hitsTaken === 0 && Math.hypot(after.p.x, after.p.z) < 1e-6 &&
+              later.every((m) => m.state !== "dead" && m.state !== "death") &&
+              (variant !== "v38r" || later.every((m) => m.anim.visibility === 1 && m.anim.anim !== "dead" && m.anim.anim !== "death")),
+            { after, later: later.map((m) => [m.state, m.anim && m.anim.anim, m.anim && m.anim.visibility]) },
           );
           // 收合／展開
           await page.locator(".debug-toggle").click();
