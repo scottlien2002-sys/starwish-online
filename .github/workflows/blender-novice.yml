@@ -1,0 +1,116 @@
+name: Blender — Novice male/female characters (Stage 5.4)
+
+# 在雲端以 Blender（官方免費版，無介面）執行建模腳本，產出男女初心者 GLB（共用骨架、6 段動畫）與渲染圖。
+# 結果推到 art-novice 分支（不影響遊戲網站與 main）。原始設定圖不放進儲存庫。
+on:
+  workflow_dispatch:
+  push:
+    branches: ["feature/render-novice"]
+    paths:
+      - "art/novice-v1/**"
+      - ".github/workflows/blender-novice.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: blender-novice
+  cancel-in-progress: true
+
+env:
+  BLENDER_VERSION: "4.2.3"
+  BLENDER_SERIES: "4.2"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: System libraries for Blender (headless)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libsm6 libxkbcommon0 >/dev/null
+
+      - name: Download Blender ${{ env.BLENDER_VERSION }} (official, free)
+        run: |
+          URL="https://download.blender.org/release/Blender${BLENDER_SERIES}/blender-${BLENDER_VERSION}-linux-x64.tar.xz"
+          curl -fsSL --retry 5 --retry-delay 10 "$URL" -o /tmp/blender.tar.xz || curl -fsSL --retry 5 "https://mirrors.ocf.berkeley.edu/blender/release/Blender${BLENDER_SERIES}/blender-${BLENDER_VERSION}-linux-x64.tar.xz" -o /tmp/blender.tar.xz
+          mkdir -p /opt/blender && tar -xf /tmp/blender.tar.xz -C /opt/blender --strip-components=1
+          /opt/blender/blender --version | head -2
+
+      - name: Generate face expression atlases
+        run: |
+          python3 -m pip install --quiet pillow
+          mkdir -p out
+          python3 art/novice-v1/gen_faces.py out
+
+      - name: Build models, export GLB, render
+        run: |
+          /opt/blender/blender -b --factory-startup -noaudio -P art/novice-v1/build_novice.py -- --out "$PWD/out" --textures "$PWD/out" 2>&1 | tee out/blender.log | grep -v "^Fra:" | tail -80
+          ls -la out
+          for t in male female; do for q in high low; do test -f out/novice_${t}_v1_${q}.glb; done; test -f out/render_${t}_front.png; done
+
+      - name: Validate GLB (Khronos glTF-Validator) and check skin / animations
+        run: |
+          mkdir -p /tmp/gv && cd /tmp/gv && npm init -y >/dev/null && npm i --no-save gltf-validator@latest 2>&1 | tail -3
+          cd "$GITHUB_WORKSPACE"
+          NODE_PATH=/tmp/gv/node_modules node -e '
+            const v = require("gltf-validator"); const fs = require("fs");
+            const want = ["Idle","Walk","Run","Attack","Hurt","Death"];
+            (async () => {
+              let bad = 0; const summary = {};
+              for (const t of ["male","female"]) for (const q of ["high","low"]) {
+                const f = `out/novice_${t}_v1_${q}.glb`;
+                const b = fs.readFileSync(f);
+                const r = await v.validateBytes(new Uint8Array(b));
+                fs.writeFileSync(`out/validator_${t}_${q}.json`, JSON.stringify(r, null, 1));
+                const jl = b.readUInt32LE(12); const j = JSON.parse(b.slice(20, 20 + jl).toString());
+                const anims = (j.animations || []).map(a => a.name);
+                const joints = j.skins && j.skins[0] ? j.skins[0].joints.map(i => j.nodes[i].name) : [];
+                const missing = want.filter(a => !anims.includes(a));
+                summary[`${t}_${q}`] = { errors: r.issues.numErrors, warnings: r.issues.numWarnings, bytes: b.length, triangles: r.info.totalTriangleCount, animations: anims, joints: joints.length, jointNames: joints, missing };
+                console.log(f, "errors", r.issues.numErrors, "warnings", r.issues.numWarnings, "tris", r.info.totalTriangleCount, "anims", anims.join(","), "joints", joints.length);
+                bad += r.issues.numErrors + missing.length + (joints.length === 0 ? 1 : 0);
+              }
+              const m = summary.male_high.jointNames.join(","), f2 = summary.female_high.jointNames.join(",");
+              if (m !== f2) { console.log("skeleton mismatch"); bad++; }
+              fs.writeFileSync("out/validator_summary.json", JSON.stringify(summary, null, 1));
+              if (bad) process.exit(1);
+            })();'
+
+      - name: Contact sheet
+        if: always()
+        run: |
+          python3 - <<'EOF'
+          from PIL import Image
+          import os
+          rows = []
+          for t in ("male", "female"):
+              ims = [f"out/render_{t}_{v}.png" for v in ("front", "side", "back")] + [f"out/pose_{t}_{p}.png" for p in ("run", "attack", "hurt", "death")]
+              ims = [Image.open(p).convert("RGB") for p in ims if os.path.exists(p)]
+              if ims:
+                  rows.append(ims)
+          if rows:
+              w = max(sum(i.width for i in r) for r in rows); h = sum(max(i.height for i in r) for r in rows)
+              sheet = Image.new("RGB", (w, h), (235, 236, 242)); y = 0
+              for r in rows:
+                  x = 0
+                  for i in r:
+                      sheet.paste(i, (x, y)); x += i.width
+                  y += max(i.height for i in r)
+              sheet.save("out/contact_sheet.png")
+          EOF
+
+      - name: Push results to art-novice branch
+        if: always()
+        run: |
+          echo "{\"commit\":\"${GITHUB_SHA}\",\"blender\":\"${BLENDER_VERSION}\",\"builtAt\":\"$(date -u +%FT%TZ)\"}" > out/build.json
+          cd out
+          git init -q -b work
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -qm "Novice v1 ${GITHUB_SHA::7}"
+          git push -qf "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" HEAD:art-novice
