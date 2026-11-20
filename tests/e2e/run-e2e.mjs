@@ -1294,7 +1294,7 @@ for (const name of browsers) {
           run.results.push({ variant, q, summary: s, avgActiveMeshes: r.avgActiveMeshes, meshes: r.meshes, materials: r.materials, textures: r.textures, pixelRatio: r.pixelRatio });
           check(
             `${variant}／${q}：完成測試、數值合理（1% Low ≤ 平均、最低 ≤ 1% Low、Draw Calls > 0、3 隻）`,
-            banner && r.variant === variant && r.quality === q && s.frames > 0 && s.avgFps > 0 && s.low1Fps <= s.avgFps + 1e-6 && s.minFps <= s.low1Fps + 1e-6 && s.low1AvgFps <= s.low1Fps + 1e-6 && s.avgDrawCalls > 0 && r.monsters === 3 && s.seconds >= 2 - 0.05 && s.seconds <= 2 + s.maxFrameMs / 1000 + 0.1,
+            banner && r.variant === variant && r.quality === q && s.frames > 0 && s.avgFps > 0 && s.low1Fps <= s.avgFps + 1e-6 && s.minFps <= s.low1Fps + 1e-6 && s.low1AvgFps <= s.low1Fps + 1e-6 && s.avgDrawCalls > 0 && r.monsters === 3 && s.seconds >= 2 - 0.05 && s.seconds <= 2 + (2 * s.maxFrameMs) / 1000 + 0.05, // 起點與終點各可能多一幀（實機 60 FPS 時約 0.03 秒）
             { s, r: { pixelRatio: r.pixelRatio, meshes: r.meshes, avgActiveMeshes: r.avgActiveMeshes } },
           );
           check(`${variant}／${q}：測量中場景固定、不戰鬥、操作無效`, held, { a: a.ms.map((m) => [m.x, m.z, m.state]), b: b.ms.map((m) => [m.x, m.z, m.state, m.hp]), hits: b.c.hitsTaken, phase: b.st.phase });
