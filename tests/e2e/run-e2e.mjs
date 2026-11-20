@@ -1663,6 +1663,8 @@ for (const name of browsers) {
           await wait(2300);
           const after = api.monsters().find((x) => x.id === id);
           const r5 = api.hitMonster(id, 1);
+          // 受擊反應在下一幀由 MonsterController 通知視覺
+          await new Promise((r2) => requestAnimationFrame(() => requestAnimationFrame(r2)));
           const anim = api.monsters().find((x) => x.id === id).anim;
           return { out, comboAfter: after.hitCombo, tierAfterReset: r5.reaction?.tier, reactions: anim?.reactions ?? null };
         });
