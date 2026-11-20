@@ -112,7 +112,14 @@ export class AutoplayStats {
   private winDist = 0;
   private winMoveTime = 0;
   private stuckWinStart = 0;
+  /** 一般跟隨時的最大鏡頭偏離（不含復活傳送後的追趕期間） */
   maxCameraLag = 0;
+  /** 復活傳送：次數、傳送瞬間的最大距離、鏡頭追上（偏離 < 0.6 公尺）所需的最長時間 */
+  revives = 0;
+  revivePeakLag = 0;
+  reviveMaxSettle = 0;
+  reviveUnsettled = 0;
+  private settleStart: number | null = null;
   // 攻擊
   attackStarts = 0;
   minAttackInterval = Infinity;
@@ -143,7 +150,24 @@ export class AutoplayStats {
       if (r > this.maxStepRatio) this.maxStepRatio = r;
       if (r > 1.6) this.teleports++;
     }
-    if (o.cameraLag > this.maxCameraLag) this.maxCameraLag = o.cameraLag;
+    // 鏡頭：復活傳送回出生點後，鏡頭會用平滑跟隨追過去（約 0.3 秒）；這段期間另外計算「追上所需時間」，不算一般跟隨偏離
+    if (o.revived) {
+      this.revives++;
+      this.settleStart = this.elapsed;
+      if (o.cameraLag > this.revivePeakLag) this.revivePeakLag = o.cameraLag;
+    } else if (this.settleStart !== null) {
+      if (o.cameraLag > this.revivePeakLag) this.revivePeakLag = o.cameraLag;
+      if (o.cameraLag < 0.6) {
+        this.reviveMaxSettle = Math.max(this.reviveMaxSettle, this.elapsed - this.settleStart);
+        this.settleStart = null;
+      } else if (this.elapsed - this.settleStart > 1) {
+        // 超過 1 秒還沒追上：記為異常，之後照一般跟隨計算
+        this.reviveUnsettled++;
+        this.reviveMaxSettle = Math.max(this.reviveMaxSettle, this.elapsed - this.settleStart);
+        this.settleStart = null;
+        if (o.cameraLag > this.maxCameraLag) this.maxCameraLag = o.cameraLag;
+      }
+    } else if (o.cameraLag > this.maxCameraLag) this.maxCameraLag = o.cameraLag;
     // 卡住：在移動中的每 3 秒，實際走的距離 < 1 公尺（移動速度 5 m/s）
     if (o.intendMove) {
       this.winDist += o.moved;
@@ -205,7 +229,13 @@ export class AutoplayStats {
     c.push({ name: "沒有瞬間位移", ok: this.teleports === 0, detail: `單幀位移最大為正常速度的 ${this.maxStepRatio.toFixed(2)} 倍` });
     if (moves) {
       c.push({ name: "移動時不會卡住（每 3 秒至少走 1 公尺）", ok: this.movingWindows > 0 && this.stuckWindows === 0, detail: `移動區段 ${this.movingWindows}、卡住 ${this.stuckWindows}` });
-      c.push({ name: "鏡頭跟隨玩家（鏡頭中心與玩家距離 < 2 公尺）", ok: this.maxCameraLag < 2, detail: `最大 ${this.maxCameraLag.toFixed(2)} 公尺` });
+      c.push({ name: "鏡頭跟隨玩家（一般移動時鏡頭中心與玩家距離 < 2 公尺）", ok: this.maxCameraLag < 2, detail: `最大 ${this.maxCameraLag.toFixed(2)} 公尺` });
+      if (this.revives > 0)
+        c.push({
+          name: "復活傳送回出生點後，鏡頭 1 秒內跟上（偏離 < 0.6 公尺）",
+          ok: this.reviveUnsettled === 0,
+          detail: `復活 ${this.revives} 次、傳送瞬間最大距離 ${this.revivePeakLag.toFixed(2)} 公尺、最長 ${this.reviveMaxSettle.toFixed(2)} 秒跟上`,
+        });
     }
     if (attacks) {
       c.push({ name: "普通攻擊有出手", ok: this.attackStarts > 0, detail: `${this.attackStarts} 次` });

@@ -1586,6 +1586,58 @@ for (const name of browsers) {
       }
       await ctx.close();
     }
+    // 鏡頭偏離原因重現：自動移動中（繞半徑 7 公尺路線）倒地 → 2 秒後傳送回出生點 → 鏡頭平滑追上
+    // 一般跟隨偏離不應包含這段追趕；追趕時間另列為「復活傳送後鏡頭 1 秒內跟上」
+    {
+      const tag = "move／復活傳送";
+      const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+      const page = await ctx.newPage();
+      page.on("pageerror", (e) => run.errors.push(`${tag} pageerror: ${e.message}`));
+      try {
+        await page.goto(server.url + "/?bobo=v38r&quality=low&autoplay=move&count=3&dur=14&warmup=1", { waitUntil: "load" });
+        await page.waitForFunction(() => window.__starwish?.ready === true, null, { timeout: 45000 });
+        await page.waitForFunction(() => window.__starwish.autoplayState()?.phase === "running" && window.__starwish.autoplayState().elapsed > 3, null, { timeout: 60000 });
+        const p0 = await page.evaluate(() => window.__starwish.getPlayer());
+        await page.evaluate(() => window.__starwish.knockDown());
+        // 直接量測：復活後每幀鏡頭中心與玩家的水平距離
+        const trace = await page.evaluate(
+          () =>
+            new Promise((res) => {
+              const out = [];
+              let revivedAt = null;
+              const t0 = performance.now();
+              const step = () => {
+                const s = window.__starwish.getPlayer();
+                const c = window.__starwish.combat();
+                const lag = window.__starwish.cameraLag();
+                const t = performance.now();
+                if (revivedAt === null && !c.down && t - t0 > 500) revivedAt = t;
+                if (revivedAt !== null) out.push({ t: (t - revivedAt) / 1000, lag, x: s.x, z: s.z });
+                if (revivedAt !== null && t - revivedAt > 1500) res(out);
+                else if (t - t0 > 6000) res(out);
+                else requestAnimationFrame(step);
+              };
+              requestAnimationFrame(step);
+            }),
+        );
+        await page.waitForFunction(() => window.__starwish.autoplayState()?.phase === "done", null, { timeout: 90000 });
+        const r = (await page.evaluate(() => window.__starwish.autoplayState())).result;
+        const fell = Math.hypot(p0.x, p0.z);
+        const peak = Math.max(0, ...trace.map((f) => f.lag));
+        const settle = trace.find((f) => f.lag < 0.6)?.t ?? null;
+        const follow = r.checks.find((c) => c.name.includes("一般移動時"));
+        const rev = r.checks.find((c) => c.name.includes("復活傳送"));
+        run.results.push({ tag, fellFromSpawn: +fell.toFixed(2), peakLagAfterRevive: +peak.toFixed(2), settleSec: settle, checks: r.checks.map((c) => `${c.ok ? "✓" : "✗"} ${c.name}（${c.detail}）`) });
+        check(`${tag}：倒地時離出生點有一段距離（重現條件）`, fell > 3, { fell });
+        check(`${tag}：復活瞬間鏡頭偏離約等於傳送距離（原因：鏡頭平滑追上傳送後的玩家）`, trace.length > 0 && peak > 3, { peak, fell });
+        check(`${tag}：鏡頭 1 秒內追上（偏離 < 0.6 公尺）`, settle !== null && settle < 1, { settle });
+        check(`${tag}：自動判定「一般移動時鏡頭跟隨」通過（不含復活追趕）`, !!follow?.ok, follow);
+        check(`${tag}：自動判定另列復活檢查且通過`, !!rev?.ok && /復活 1 次/.test(rev.detail), rev);
+      } catch (e) {
+        run.errors.push(`${tag} exception: ${e.message}`);
+      }
+      await ctx.close();
+    }
     // 一般遊戲不受影響：沒有 autoplay 參數時 count 無效、怪物 3 隻
     {
       const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });

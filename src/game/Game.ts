@@ -48,6 +48,8 @@ export interface DebugApi {
   ready: boolean;
   getPlayer(): { x: number; y: number; z: number; yaw: number };
   getCamera(): { alpha: number; beta: number; radius: number };
+  /** 測試用（唯讀）：鏡頭中心與玩家的水平距離（公尺） */
+  cameraLag(): number;
   setMove(move: { x: number; y: number } | null): void;
   hudIssues(insets?: Insets): string[];
   fps(): number;
@@ -1109,6 +1111,10 @@ export class Game {
     window.__starwish = {
       ready: true,
       getPlayer: () => ({ x: this.position.x, y: this.position.y, z: this.position.z, yaw: this.yaw }),
+      cameraLag: () => {
+        const t = this.camera.camera.target;
+        return Math.hypot(t.x - this.position.x, t.z - this.position.z);
+      },
       getCamera: () => ({ alpha: this.camera.camera.alpha, beta: this.camera.camera.beta, radius: this.camera.camera.radius }),
       setMove: (m) => {
         this.input.moveOverride = m;

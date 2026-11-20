@@ -142,3 +142,40 @@ test("soak 太短（只有移動段）時不檢查攻擊；有戰鬥段時才檢
   const long = s.judge({ mode: "soak", attackInterval: 1, resStart: res, resEnd: res, duplicatesBlocked: 0, attackExpected: true });
   assert.ok(long.some((c) => c.name.includes("出手") && !c.ok));
 });
+
+test("鏡頭：復活傳送後的平滑追趕另外計算，不算一般跟隨偏離；超過 1 秒沒追上仍會被抓到", () => {
+  // 模擬實際鏡頭：damp(10) 每幀追 1 - e^(-10/60)
+  const k = 1 - Math.exp(-10 / 60);
+  const run = (sharp: number) => {
+    const s = new AutoplayStats(30);
+    for (let i = 0; i < 300; i++) s.frame(frame());
+    let lag = 6.65;
+    s.frame(frame({ revived: true, cameraLag: lag, moved: 6.65 }));
+    for (let i = 0; i < 120; i++) {
+      lag *= 1 - sharp;
+      s.frame(frame({ cameraLag: lag, moved: 0, intendMove: false }));
+    }
+    for (let i = 0; i < 300; i++) s.frame(frame());
+    return s;
+  };
+  const ok = run(k);
+  assert.ok(ok.maxCameraLag < 0.5, String(ok.maxCameraLag));
+  assert.equal(ok.revives, 1);
+  assert.ok(Math.abs(ok.revivePeakLag - 6.65) < 1e-9);
+  assert.ok(ok.reviveMaxSettle > 0.2 && ok.reviveMaxSettle < 0.35, String(ok.reviveMaxSettle));
+  const c1 = ok.judge({ mode: "soak", attackInterval: 1, resStart: res, resEnd: res, duplicatesBlocked: 0, attackExpected: false });
+  assert.ok(c1.find((c) => c.name.includes("一般移動時"))!.ok);
+  assert.ok(c1.find((c) => c.name.includes("復活傳送"))!.ok);
+
+  // 鏡頭壞掉（幾乎不追）：復活檢查失敗，而且 1 秒後的偏離算回一般跟隨
+  const bad = run(0.001);
+  const c2 = bad.judge({ mode: "soak", attackInterval: 1, resStart: res, resEnd: res, duplicatesBlocked: 0, attackExpected: false });
+  assert.equal(c2.find((c) => c.name.includes("復活傳送"))!.ok, false);
+  assert.equal(c2.find((c) => c.name.includes("一般移動時"))!.ok, false);
+
+  // 沒有復活時不顯示復活檢查
+  const none = new AutoplayStats(30);
+  for (let i = 0; i < 300; i++) none.frame(frame());
+  const c3 = none.judge({ mode: "move", attackInterval: 1, resStart: res, resEnd: res, duplicatesBlocked: 0 });
+  assert.ok(!c3.some((c) => c.name.includes("復活傳送")));
+});
