@@ -396,7 +396,7 @@ def hair_cap(m, hf, center, scale, keep, dark, light):
     def f(u):
         return c + (hf(u) - c) * scale
 
-    verts, faces = uv_sphere(30, 18, f)
+    verts, faces = uv_sphere(26, 16, f)
     # 依單位方向決定保留哪些面（臉部不蓋）
     units = []
     for v in verts:
@@ -407,7 +407,7 @@ def hair_cap(m, hf, center, scale, keep, dark, light):
     remap = {o: n for n, o in enumerate(used)}
     nv = [verts[i] for i in used]
     nf = [tuple(remap[i] for i in fc) for fc in kept_faces]
-    m.add("hair_cap", (nv, nf), lambda p: mix(dark, light, 0.25 + 0.3 * clamp((p[2] - 0.9) / 0.25)), rigid("head"), group="gloss", solid=0.008)
+    m.add("hair_cap", (nv, nf), lambda p: mix(dark, light, 0.25 + 0.3 * clamp((p[2] - 0.9) / 0.25)), rigid("head"), group="gloss")
 
 
 # ---------------------------------------------------------- 臉部貼片（表情圖集第 0 格）
@@ -472,7 +472,7 @@ def add_body_common(m, female):
     """頭、耳、脖子、手臂、手套、腿、靴子（男女共用造型，顏色與細節略不同）"""
     hc = V(0, 0.0, 0.885)
     hf = make_head_fn(hc, 0.168 if not female else 0.164, 0.152, 0.19, 0.168, 0.30 if not female else 0.33)
-    hv, hfc = uv_sphere(28, 18, hf)
+    hv, hfc = uv_sphere(26, 16, hf)
     m.add("head", (hv, hfc), C["skin"], rigid("head"))
     for x in (1, -1):
         m.add(f"ear_{x}", ellipsoid((0.158 * x, 0.012, 0.865), (0.022, 0.032, 0.045), 10, 6), C["skin"], rigid("head"))
@@ -531,7 +531,7 @@ def build_male():
         S(az, 62, 0.12, 0.105, lambda n: n + up * 0.55 + back * 0.3, lambda n: n * 0.8 + up * 0.2 + back * 0.45)
     S(8, 82, 0.11, 0.045, lambda n: up + back * 0.2, lambda n: V(0, -0.9, 0.2), flat=0.6)  # 呆毛
     # 上圈：大髮束往外、髮尾下垂外翹
-    for az in range(48, 320, 26):
+    for az in range(48, 320, 30):
         S(az, 34, 0.16, 0.12, lambda n: n * 0.65 - up * 0.15 + back * 0.1, lambda n: n * 0.45 - up * 0.9)
     # 下圈：兩側、後腦往下往外
     for az in range(76, 290, 22):
@@ -634,10 +634,10 @@ def build_female():
         i += 1
 
     # 鮑伯髮外層：往外鼓再往下、髮尾內捲（到下巴下方）
-    for az in range(50, 311, 16):
-        S(az, 20, 0.26, 0.12, lambda n: n * 0.65 - up * 0.75, lambda n: -n * 0.35 - up * 0.9, segs=7)
+    for az in range(50, 311, 20):
+        S(az, 20, 0.26, 0.13, lambda n: n * 0.65 - up * 0.75, lambda n: -n * 0.35 - up * 0.9, segs=7)
     # 內層（後腦較短）
-    for az in range(74, 290, 24):
+    for az in range(80, 285, 34):
         S(az, -10, 0.17, 0.11, lambda n: n * 0.4 - up, lambda n: -n * 0.3 - up)
     # 頭頂蓬鬆
     for az in range(0, 360, 45):
@@ -1179,7 +1179,7 @@ def setup_render():
     world.use_nodes = True
     bg = world.node_tree.nodes.get("Background")
     bg.inputs["Color"].default_value = (0.92, 0.93, 0.96, 1)
-    bg.inputs["Strength"].default_value = 0.75
+    bg.inputs["Strength"].default_value = 0.42
 
     def light(name, loc, energy, size, rot):
         ld = bpy.data.lights.new(name, "AREA")
@@ -1193,9 +1193,9 @@ def setup_render():
 
     rig = link(bpy.data.objects.new("LightRig", None))
     for lo in (
-        light("Key", (-1.6, -2.2, 2.6), 260, 1.4, (math.radians(45), 0, math.radians(-35))),
-        light("Rim", (1.8, 1.6, 1.8), 110, 1.0, (math.radians(-55), 0, math.radians(130))),
-        light("Fill", (0.6, -2.6, 0.7), 90, 1.6, (math.radians(80), 0, 0)),
+        light("Key", (-1.6, -2.2, 2.6), 150, 1.4, (math.radians(45), 0, math.radians(-35))),
+        light("Rim", (1.8, 1.6, 1.8), 70, 1.0, (math.radians(-55), 0, math.radians(130))),
+        light("Fill", (0.6, -2.6, 0.7), 45, 1.6, (math.radians(80), 0, 0)),
     ):
         lo.parent = rig
     bpy.ops.mesh.primitive_plane_add(size=8, location=(0, 0, 0))
@@ -1241,21 +1241,21 @@ def render_character(tag, rig, meshes, acts, others, cam, lrig):
 
 
 def main():
-    reset()
-    bpy.context.scene.render.fps = FPS
     info = {"version": VERSION, "fps": FPS}
-    built = {}
+    # 每個角色在全新的場景建立、匯出、渲染：GLB 只會帶自己的動畫（不會混入另一個角色的動作）
     for tag, mk, face in (("Male", build_male, "novice_face_male.png"), ("Female", build_female, "novice_face_female.png")):
+        reset()
+        for a in list(bpy.data.actions):
+            bpy.data.actions.remove(a)
+        bpy.context.scene.render.fps = FPS
         model = mk()
-        built[tag] = build_character(model, tag, os.path.join(TEX, face), info)
+        rig, meshes, acts = build_character(model, tag, os.path.join(TEX, face), info)
         print(tag, json.dumps(info[tag]["lods"]["high"]["triangles_total"]), "tris")
+        if RENDER:
+            cam, lrig = setup_render()
+            render_character(tag, rig, meshes, acts, [], cam, lrig)
     with open(os.path.join(OUT, "novice_info.json"), "w") as f:
         json.dump(info, f, indent=1, ensure_ascii=False)
-    if RENDER:
-        cam, lrig = setup_render()
-        for tag, (rig, meshes, acts) in built.items():
-            others = [o for t, (r, ms, _) in built.items() if t != tag for o in ms]
-            render_character(tag, rig, meshes, acts, others, cam, lrig)
     print("done")
 
 
