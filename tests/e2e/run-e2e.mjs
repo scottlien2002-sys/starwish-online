@@ -1361,7 +1361,7 @@ for (const name of browsers) {
         const overlap = await page.evaluate(() => {
           const p = document.querySelector(".debug-panel").getBoundingClientRect();
           const hit = (r) => !(r.right <= p.left || r.left >= p.right || r.bottom <= p.top || r.top >= p.bottom);
-          const els = [...document.querySelectorAll(".skill-btn, .hud-joystick-zone, .hud-status, .hud-system, .perf-panel")];
+          const els = [...document.querySelectorAll(".skill-btn, .joystick-base, .hud-status, .hud-system, .perf-panel")];
           return els.filter((e) => hit(e.getBoundingClientRect())).map((e) => e.className || e.getAttribute("data-layout"));
         });
         const hud = await page.evaluate((sa) => window.__starwish.hudIssues(sa), vp.safe);

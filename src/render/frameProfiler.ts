@@ -11,11 +11,11 @@ export const PROFILE_SECTIONS = ["input", "player", "monsters", "world", "render
 export type ProfileSection = (typeof PROFILE_SECTIONS)[number];
 
 export const SECTION_LABEL: Record<ProfileSection, string> = {
-  input: "輸入與鏡頭",
+  input: "鏡頭",
   player: "玩家",
-  monsters: "怪物（AI＋動畫）",
-  world: "場景物件",
-  render: "繪製提交（CPU）",
+  monsters: "怪物",
+  world: "場景",
+  render: "繪製",
   hud: "介面",
 };
 

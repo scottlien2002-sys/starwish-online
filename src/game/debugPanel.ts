@@ -64,7 +64,7 @@ const f2 = (v: number): string => (Number.isFinite(v) ? v.toFixed(2) : "—");
 export function formatMonsterLine(m: DebugMonsterInfo, index: number): string {
   const st = STATE_LABEL[m.state] ?? m.state;
   const anim = m.anim ? `・動畫 ${m.anim}` : "";
-  const atk = `・attackId ${m.attackId}（命中 ${m.resolved}／取消 ${m.cancelled}${m.duplicatesBlocked ? `／擋下重複 ${m.duplicatesBlocked}` : ""}）`;
+  const atk = `・attackId ${m.attackId}（中${m.resolved}／消${m.cancelled}${m.duplicatesBlocked ? `／重${m.duplicatesBlocked}` : ""}）`;
   const cd = m.cooldown > 0 && m.respawnIn === null ? `・冷卻 ${f1(m.cooldown)}s` : "";
   const resp = m.respawnIn !== null ? `・重生倒數 ${f1(m.respawnIn)}s` : "";
   return `#${index + 1} HP ${m.hp}/${m.maxHp}・${st}${anim}${atk}${cd}${resp}`;
@@ -75,18 +75,18 @@ export function formatDebugLines(d: DebugInfo): string[] {
   const lines = [
     `${d.variant === "v38r" ? "V3.8R" : "V2"}・畫質 ${d.quality}・FPS ${f1(d.fps)}`,
     `Draw Calls ${d.drawCalls}・Active Mesh ${d.activeMeshes}・Mesh ${d.meshes}・材質 ${d.materials}・貼圖 ${d.textures}`,
-    `解析度 ${r.width}×${r.height}（${f2(r.pixelRatio)}x，${f2(r.megapixels)} MP；畫面 ${r.cssWidth}×${r.cssHeight}、裝置 ${r.devicePixelRatio}x）`,
+    `解析度 ${r.width}×${r.height}（${f2(r.pixelRatio)}x ${f2(r.megapixels)}MP；畫面 ${r.cssWidth}×${r.cssHeight} 裝置 ${r.devicePixelRatio}x）`,
   ];
   const p = d.profile;
   if (p) {
-    lines.push(`影格 ${f1(p.avgFrameMs)} ms（最長 ${f1(p.maxFrameMs)}）＝ CPU ${f1(p.cpuMs)} ms ＋ GPU／等待 ${f1(p.waitMs)} ms`);
-    lines.push("CPU：" + PROFILE_SECTIONS.map((k) => `${SECTION_LABEL[k]} ${f2(p.sections[k])}`).join("・"));
+    lines.push(`影格 ${f1(p.avgFrameMs)}ms（最長 ${f1(p.maxFrameMs)}）＝CPU ${f1(p.cpuMs)}＋GPU／等待 ${f1(p.waitMs)}`);
+    lines.push("CPU ms：" + PROFILE_SECTIONS.map((k) => `${SECTION_LABEL[k]} ${f2(p.sections[k])}`).join(" "));
   }
   if (d.sceneTimes) {
     const s = d.sceneTimes;
-    lines.push(`繪製細項：可見物件判定 ${f2(s.activeMeshes)}・陰影貼圖 ${f2(s.renderTargets)}・精靈 ${f2(s.sprites)}・粒子 ${f2(s.particles)} ms`);
+    lines.push(`繪製細項 ms：可見判定 ${f2(s.activeMeshes)} 陰影 ${f2(s.renderTargets)} 精靈 ${f2(s.sprites)} 粒子 ${f2(s.particles)}`);
   }
-  lines.push(d.gpuSupported ? `GPU 影格時間 ${d.gpuMs === null ? "量測中" : `${f1(d.gpuMs)} ms`}` : "GPU 影格時間：此裝置不支援計時（以「GPU／等待」推估）");
+  lines.push(d.gpuSupported ? `GPU 影格時間 ${d.gpuMs === null ? "量測中" : `${f1(d.gpuMs)} ms`}` : "GPU 計時：此裝置不支援（看上方 GPU／等待）");
   const pl = d.player;
   lines.push(`玩家 HP ${pl.hp}/${pl.maxHp}${pl.down ? "・倒地" : ""}・攻擊動作 ${pl.attackPhase}・命中 ${pl.hits}`);
   d.monsters.forEach((m, i) => lines.push(formatMonsterLine(m, i)));
@@ -182,7 +182,8 @@ export class DebugPanel {
       const r = e.getBoundingClientRect();
       return r.width > 0 && r.height > 0 ? { left: r.left, top: r.top, right: r.right, bottom: r.bottom } : null;
     };
-    const controls = [...document.querySelectorAll(".skill-btn, .hud-joystick-zone")]
+    // 只避開看得見的操作元件（技能按鈕、搖桿本體）；搖桿的觸控區是看不見的大範圍，面板不接收觸控，不影響操作
+    const controls = [...document.querySelectorAll(".skill-btn, .joystick-base")]
       .map((e) => e.getBoundingClientRect())
       .filter((r) => r.width > 0)
       .map((r) => ({ left: r.left, top: r.top, right: r.right, bottom: r.bottom }));

@@ -82,12 +82,12 @@ test("面板文字：FPS、Draw Calls、解析度、CPU／GPU 推估、玩家、
   const all = lines.join("\n");
   assert.match(all, /V3\.8R・畫質 high・FPS 34\.7/);
   assert.match(all, /Draw Calls 58・Active Mesh 41・Mesh 51/);
-  assert.match(all, /1704×786（2\.00x，1\.34 MP/);
-  assert.match(all, /CPU 6\.1 ms ＋ GPU／等待 22\.7 ms/);
-  assert.match(all, /此裝置不支援計時/);
+  assert.match(all, /1704×786（2\.00x 1\.34MP/);
+  assert.match(all, /CPU 6\.1＋GPU／等待 22\.7/);
+  assert.match(all, /此裝置不支援/);
   assert.match(all, /玩家 HP 92\/100/);
-  assert.equal(formatMonsterLine(info().monsters[0]!, 0), "#1 HP 40/60・攻擊・動畫 attack・attackId 3（命中 2／取消 1）・冷卻 1.5s");
-  assert.equal(formatMonsterLine(info().monsters[1]!, 1), "#2 HP 0/60・已移除・動畫 dead・attackId 1（命中 1／取消 0）・重生倒數 7.3s");
+  assert.equal(formatMonsterLine(info().monsters[0]!, 0), "#1 HP 40/60・攻擊・動畫 attack・attackId 3（中2／消1）・冷卻 1.5s");
+  assert.equal(formatMonsterLine(info().monsters[1]!, 1), "#2 HP 0/60・已移除・動畫 dead・attackId 1（中1／消0）・重生倒數 7.3s");
   // 不支援計時以外的情況
   const g = { ...info(), gpuSupported: true, gpuMs: 12.34, profile: null, sceneTimes: null };
   assert.match(formatDebugLines(g).join("\n"), /GPU 影格時間 12\.3 ms/);
