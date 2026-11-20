@@ -1638,6 +1638,101 @@ for (const name of browsers) {
       }
       await ctx.close();
     }
+    // 連續受擊抗性（config/hitReaction.ts）：實際遊戲中被打的怪物會恢復並反擊
+    {
+      const tag = "連續受擊抗性";
+      const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+      const page = await ctx.newPage();
+      page.on("pageerror", (e) => run.errors.push(`${tag} pageerror: ${e.message}`));
+      try {
+        await page.goto(server.url + "/?bobo=v38r&quality=low", { waitUntil: "load" });
+        await page.waitForFunction(() => window.__starwish?.ready === true, null, { timeout: 45000 });
+        // 1. 規則：第 1、2、3 擊與免疫（每下只扣 1，避免打死；用遊戲的受擊規則）
+        const tiers = await page.evaluate(async () => {
+          const api = window.__starwish;
+          const id = api.monsters()[0].id;
+          const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+          const out = [];
+          for (let k = 0; k < 4; k++) {
+            const r = api.hitMonster(id, 1);
+            await new Promise((r2) => requestAnimationFrame(() => requestAnimationFrame(r2)));
+            const m = api.monsters().find((x) => x.id === id);
+            out.push({ tier: r.reaction?.tier, immune: r.reaction?.immune, state: m.state, hitDuration: m.hitDuration, hp: m.hp, combo: m.hitCombo, immuneLeft: m.hitImmune });
+            await wait(300);
+          }
+          await wait(2300);
+          const after = api.monsters().find((x) => x.id === id);
+          const r5 = api.hitMonster(id, 1);
+          const anim = api.monsters().find((x) => x.id === id).anim;
+          return { out, comboAfter: after.hitCombo, tierAfterReset: r5.reaction?.tier, reactions: anim?.reactions ?? null };
+        });
+        run.results.push({ tag: `${tag}：規則`, tiers });
+        const o = tiers.out;
+        check(`${tag}：第 1 擊硬直 0.25 秒、第 2 擊 0.15 秒（進入受擊）`, o[0].tier === 1 && o[0].state === "hit" && Math.abs(o[0].hitDuration - 0.25) < 1e-9 && o[1].tier === 2 && Math.abs(o[1].hitDuration - 0.15) < 1e-9, o);
+        check(`${tag}：第 3 擊不硬直並開始免疫；免疫中受擊不硬直`, o[2].tier === 3 && o[2].state !== "hit" && o[2].immuneLeft > 1 && o[3].immune === true && o[3].state !== "hit", o);
+        check(`${tag}：免疫中照常扣血（每下 1）`, o.map((x) => x.hp).join(",") === "59,58,57,56", o.map((x) => x.hp));
+        check(`${tag}：2 秒未受擊後回到第 1 擊`, tiers.comboAfter === 0 && tiers.tierAfterReset === 1, tiers);
+        check(`${tag}：畫面反應（完整後退、後退減半、不硬直閃表情）都有出現`, !!tiers.reactions && tiers.reactions.full >= 2 && tiers.reactions.reduced >= 1 && tiers.reactions.noStagger >= 2, tiers.reactions);
+        // 2. 實際遊玩：玩家站著持續普通攻擊 25 秒，怪物要能恢復並真的打到玩家
+        await page.evaluate(() => {
+          const api = window.__starwish;
+          api.resetTest();
+          const m = api.monsters()[0];
+          api.teleport(m.x + 1.0, m.z);
+        });
+        const fight = await page.evaluate(
+          () =>
+            new Promise((res) => {
+              const api = window.__starwish;
+              const t0 = performance.now();
+              const log = { samples: 0, maxHitStreak: 0, hitsTakenStart: api.combat().hitsTaken, playerHitsByMonster: 0, monsterHitByPlayer: 0, landedAfterHit: false, deaths: 0, nan: 0 };
+              const hitSince = new Map();
+              let firstPlayerHit = null;
+              let prevTaken = log.hitsTakenStart;
+              let prevPlayerHits = api.attackState().hits;
+              const prevState = new Map();
+              const step = () => {
+                const now = performance.now();
+                api.attack();
+                const ms = api.monsters();
+                for (const m of ms) {
+                  if (!Number.isFinite(m.x) || !Number.isFinite(m.z) || !Number.isFinite(m.hp)) log.nan++;
+                  if (m.state === "hit") {
+                    if (!hitSince.has(m.id)) hitSince.set(m.id, now);
+                    log.maxHitStreak = Math.max(log.maxHitStreak, (now - hitSince.get(m.id)) / 1000);
+                  } else hitSince.delete(m.id);
+                  if (m.state === "death" && prevState.get(m.id) !== "death") log.deaths++;
+                  prevState.set(m.id, m.state);
+                }
+                const ph = api.attackState().hits;
+                if (ph > prevPlayerHits) {
+                  log.monsterHitByPlayer += ph - prevPlayerHits;
+                  if (firstPlayerHit === null) firstPlayerHit = now;
+                  prevPlayerHits = ph;
+                }
+                const taken = api.combat().hitsTaken;
+                if (taken > prevTaken) {
+                  log.playerHitsByMonster += taken - prevTaken;
+                  if (firstPlayerHit !== null) log.landedAfterHit = true;
+                  prevTaken = taken;
+                }
+                log.samples++;
+                if (now - t0 > 25000) res(log);
+                else setTimeout(step, 50);
+              };
+              step();
+            }),
+        );
+        run.results.push({ tag: `${tag}：持續攻擊 25 秒`, fight });
+        check(`${tag}：持續攻擊 25 秒，玩家有打中怪物、怪物有被擊倒`, fight.monsterHitByPlayer >= 10 && fight.deaths >= 1, fight);
+        check(`${tag}：玩家開始攻擊後，怪物仍能恢復並真的打到玩家`, fight.landedAfterHit && fight.playerHitsByMonster >= 2, fight);
+        check(`${tag}：怪物不會卡在受擊（連續受擊狀態最長 < 0.5 秒）`, fight.maxHitStreak < 0.5, fight.maxHitStreak);
+        check(`${tag}：怪物狀態與位置正常（無 NaN）`, fight.nan === 0, fight.nan);
+      } catch (e) {
+        run.errors.push(`${tag} exception: ${e.message}`);
+      }
+      await ctx.close();
+    }
     // 一般遊戲不受影響：沒有 autoplay 參數時 count 無效、怪物 3 隻
     {
       const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
@@ -1657,7 +1752,8 @@ for (const name of browsers) {
     report.runs.push(run);
     console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
     for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}${v.ok ? "" : "  " + JSON.stringify(v.detail).slice(0, 700)}`);
-    for (const r of run.results) if (!r.summary) console.log(`   · ${r.tag}: 倒地處離出生點 ${r.fellFromSpawn} m、復活後鏡頭最大偏離 ${r.peakLagAfterRevive} m、${r.settleSec?.toFixed(2)} 秒追上 | ${r.checks.join(" / ")}`);
+    for (const r of run.results) if (r.tiers || r.fight) console.log(`   · ${r.tag}: ${JSON.stringify(r.tiers ?? r.fight)}`);
+    else if (!r.summary) console.log(`   · ${r.tag}: 倒地處離出生點 ${r.fellFromSpawn} m、復活後鏡頭最大偏離 ${r.peakLagAfterRevive} m、${r.settleSec?.toFixed(2)} 秒追上 | ${r.checks.join(" / ")}`);
     else console.log(`   · ${r.tag}: avg ${r.summary.avgFps.toFixed(1)}, 1%low ${r.summary.low1Fps.toFixed(1)}, min ${r.summary.minFps.toFixed(1)}, draw ${r.summary.avgDrawCalls.toFixed(1)} | ${JSON.stringify(r.counters)}`);
     for (const e of run.errors) console.log(`   ! ${e}`);
   }
