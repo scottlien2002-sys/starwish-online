@@ -932,6 +932,76 @@ for (const name of browsers) {
     await ctx.close();
   }
 
+  // ---------- V3.8R 畫質比對：同場景、同鏡頭、同位置、同表情；高畫質另拍「修正前」（發光層開啟）----------
+  {
+    const vp = VIEWPORTS[0];
+    const run = { browser: name, viewport: `${vp.name} / 遊戲 V3.8R 畫質比對`, checks: {}, errors: [], screenshots: [], photo: [] };
+    const check = (key, ok, detail) => {
+      run.checks[key] = { ok, detail };
+    };
+    const variants = [
+      { q: "high", glow: undefined, label: "high" },
+      { q: "high", glow: true, label: "high_before_glowOn" },
+      { q: "medium", glow: undefined, label: "medium" },
+      { q: "medium", glow: true, label: "medium_before_glowOn" },
+      { q: "low", glow: undefined, label: "low" },
+    ];
+    for (const v of variants) {
+      const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+      const page = await ctx.newPage();
+      page.on("pageerror", (e) => run.errors.push(`${v.label} pageerror: ${e.message}`));
+      page.on("console", (m) => m.type() === "error" && run.errors.push(`${v.label} console: ${m.text()}`));
+      try {
+        await page.goto(server.url + `/?bobo=v38r&quality=${v.q}`, { waitUntil: "load" });
+        await page.addStyleTag({ content: safeAreaCss(vp.safe) + " .toast, .hud-toast { display: none !important; }" });
+        await page.waitForFunction(() => window.__starwish?.ready === true, null, { timeout: 45000 });
+        await page.waitForFunction(async () => (await window.__starwish.bobo()).visuals.every((x) => x.loaded), null, { timeout: 45000, polling: 250 });
+        const staged = await page.evaluate((g) => window.__starwish.stageBoboPhoto(g === undefined ? {} : { glow: g }), v.glow);
+        await page.waitForTimeout(2500);
+        const perf = await page.evaluate(() => window.__starwish.perf());
+        const res = await page.evaluate(async () => (await window.__starwish.bobo()).scene);
+        const renderer = await page.evaluate(() => window.__starwish.renderer());
+        const f = `${outDir}${name}_photo_${v.label}.png`;
+        await page.screenshot({ path: f });
+        run.screenshots.push(f.split("/test-results/")[1]);
+        run.photo.push({ label: v.label, quality: v.q, staged, perf, resources: res, renderer, file: f.split("/test-results/")[1] });
+      } catch (e) {
+        run.errors.push(`${v.label} exception: ${e.message}`);
+      }
+      await ctx.close();
+    }
+    const by = (l) => run.photo.find((p) => p.label === l);
+    for (const l of ["high", "medium", "low"]) {
+      const p = by(l);
+      check(`${l}：V3.8R 模式發光層停用、畫質正確`, !!p && p.perf.quality === l && p.perf.bloom === false && p.staged.glow !== true, p && { bloom: p.perf.bloom, glow: p.staged.glow });
+    }
+    for (const l of ["high", "medium"]) {
+      const a = by(l), b = by(`${l}_before_glowOn`);
+      check(`${l}：修正後 Draw Calls 不增加（相對修正前）`, !!a && !!b && a.perf.drawCalls <= b.perf.drawCalls, a && b && { after: a.perf.drawCalls, before: b.perf.drawCalls });
+    }
+    // 回退檢查：V2 模式發光層仍照舊（只影響 V3.8R 模式）
+    {
+      const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+      const page = await ctx.newPage();
+      try {
+        await page.goto(server.url + `/?quality=high`, { waitUntil: "load" });
+        await page.waitForFunction(() => window.__starwish?.ready === true, null, { timeout: 45000 });
+        const perf = await page.evaluate(() => window.__starwish.perf());
+        check("V2（預設）高畫質發光層維持開啟、不受影響", perf.bloom === true && perf.quality === "high", perf);
+      } catch (e) {
+        run.errors.push(`v2 exception: ${e.message}`);
+      }
+      await ctx.close();
+    }
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 6;
+    if (!run.ok) failures++;
+    report.runs.push(run);
+    console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
+    for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}  ${JSON.stringify(v.detail).slice(0, 300)}`);
+    for (const p of run.photo) console.log(`   · ${p.label}: draw ${p.perf.drawCalls}, activeMeshes ${p.perf.activeMeshes}, fps ${p.perf.fps.toFixed(1)}, res ${JSON.stringify(p.resources)}, px ${p.staged.pixelRatio}`);
+    for (const e of run.errors) console.log(`   ! ${e}`);
+  }
+
   await browser.close();
 }
 

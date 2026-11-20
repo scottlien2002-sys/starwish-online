@@ -58,6 +58,14 @@ export class PerfOverlay {
     this.last = this.read();
   }
 
+  private resolutionLocked = false;
+
+  /** 測試截圖用：固定解析度（不做動態降解析度），讓不同畫質的截圖可比較 */
+  lockResolution(ratio: number | null): void {
+    this.resolutionLocked = ratio !== null;
+    if (ratio !== null) this.engine.setHardwareScalingLevel(1 / ratio);
+  }
+
   get pixelRatio(): number {
     return this.steps[this.stepIndex]!;
   }
@@ -67,7 +75,7 @@ export class PerfOverlay {
     const fps = this.engine.getFps();
     this.cooldown -= dt;
     this.lowFps = fps < 40 ? this.lowFps + dt : 0;
-    if (this.lowFps > 2 && this.cooldown <= 0 && this.stepIndex < this.steps.length - 1) {
+    if (!this.resolutionLocked && this.lowFps > 2 && this.cooldown <= 0 && this.stepIndex < this.steps.length - 1) {
       this.stepIndex++;
       this.engine.setHardwareScalingLevel(1 / this.steps[this.stepIndex]!);
       this.lowFps = 0;

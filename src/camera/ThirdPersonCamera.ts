@@ -27,6 +27,17 @@ export class ThirdPersonCamera {
     return Math.atan2(-Math.cos(a), -Math.sin(a));
   }
 
+  /** 測試截圖用：立刻把鏡頭放到指定位置（不平滑），之後的 update 會從這裡繼續 */
+  snap(follow: Vector3, alpha: number, beta: number, radius: number): void {
+    const c = TUNING.camera;
+    this.smoothTarget.copyFrom(follow).addInPlaceFromFloats(0, c.targetHeight, 0);
+    this.camera.target.copyFrom(this.smoothTarget);
+    this.camera.alpha = alpha;
+    this.camera.beta = beta;
+    this.camera.radius = radius;
+    this.desiredRadius = radius;
+  }
+
   update(dt: number, follow: Vector3, rotate: { yaw: number; pitch: number; zoom: number }): void {
     const c = TUNING.camera;
     const cam = this.camera;

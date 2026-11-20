@@ -7,6 +7,7 @@ import {
   MeshBuilder,
   Scene,
   StandardMaterial,
+  Matrix,
   type TransformNode,
   Vector3,
 } from "@babylonjs/core";
@@ -60,6 +61,11 @@ export interface DebugApi {
   bobo(): Promise<unknown>;
   /** Stage 5.1：另建一隻 V3.8R 視覺 → 移除，比對資源數（只在 ?bobo=v38r 時執行） */
   boboAdapterSelfTest(): Promise<unknown>;
+  /**
+   * 畫質比對截圖：玩家回出生點、鏡頭固定、3 隻怪物放到鏡頭前固定位置並面向鏡頭、停住、固定解析度。
+   * glow：發光層開關（只用於重現修正前的畫面）。回傳每隻身體與臉在畫面上的位置（CSS 像素）與繪製數據
+   */
+  stageBoboPhoto(opts?: { glow?: boolean }): unknown;
 }
 
 declare global {
@@ -97,6 +103,8 @@ export class Game {
   /** 預覽測試：星露啵啵 V2 接入草原（測試用戰鬥，見 previewCombat.ts） */
   private readonly monsters: MonsterController[];
   private readonly boboVariant: BoboVariant;
+  /** 測試截圖：怪物停住（不更新 AI 與動畫），只用於同條件比較畫質 */
+  private photoMode = false;
   private readonly combat = new PreviewCombat();
   private readonly lockRing: Mesh;
   private lockedId: string | null = null;
@@ -164,6 +172,11 @@ export class Game {
       factory.create("star_dew_bobo", { x: p.x, y: heightAt(p.x, p.z), z: p.z }, { modelId }),
     );
     for (const m of this.monsters) void m.visual?.load();
+    // V3.8R 不使用 GlowLayer（頭頂星星的柔光改用光暈 sprite，與已驗收的測試頁相同）。
+    // GlowLayer 是「選擇性發光」，但只有 V2 模型會登記發光物件；沒有任何登記時 Babylon 會讓「所有」自發光物件發光
+    // → 高／中畫質的 V3.8R 身體、眼睛、嘴、腮紅整片泛白（低畫質沒有 GlowLayer，所以清楚），草原與玩家也被誤加光暈。
+    // V3.8R 模式下沒有任何物件需要發光，因此停用（同時省下發光層的額外繪製與模糊）。V2 模式不受影響。
+    if (this.boboVariant === "v38r" && this.render.glow) this.render.glow.isEnabled = false;
     // 鎖定標記：攻擊範圍內最近的怪物腳下的光圈
     this.lockRing = MeshBuilder.CreateTorus("PH_lockRing", { diameter: 1.1, thickness: 0.05, tessellation: 40 }, scene);
     const ringMat = new StandardMaterial("PH_lockRingMat", scene);
@@ -262,7 +275,7 @@ export class Game {
     // 陰影跟著角色，只算附近範圍
     this.sun.position.copyFrom(this.position).subtractInPlace(this.sun.direction.scale(45));
 
-    this.updateMonsters(dt);
+    if (!this.photoMode) this.updateMonsters(dt);
 
     this.world.update(dt);
     this.scene.render();
@@ -421,7 +434,7 @@ export class Game {
       perf: () => ({
         ...this.perfOverlay.stats(),
         postProcess: this.render.pipeline !== null,
-        bloom: this.render.glow !== null,
+        bloom: this.render.glow !== null && this.render.glow.isEnabled,
         shadowFilter: this.quality.shadows.filter,
         shadowMap: this.quality.shadows.mapSize,
       }),
@@ -450,6 +463,72 @@ export class Game {
             };
           }),
           scene: this.resourceCounts(),
+        };
+      },
+      stageBoboPhoto: (opts = {}) => {
+        this.photoMode = true;
+        this.input.moveOverride = null;
+        this.position.set(0, heightAt(0, 0), 0);
+        this.yaw = 0;
+        this.player.root.position.copyFrom(this.position);
+        this.player.root.rotation.set(0, 0, 0);
+        const c = TUNING.camera;
+        this.camera.snap(this.position, -Math.PI / 2, c.defaultBeta, c.distance);
+        const fy = this.camera.forwardYaw;
+        const fx = Math.sin(fy), fz = Math.cos(fy);
+        const rx = fz, rz = -fx;
+        // 左、中、右；中間那隻稍遠，避免被玩家擋住
+        const spots: [number, number][] = [[2.7, -1.15], [3.4, 0], [2.7, 1.15]];
+        this.monsters.forEach((m, i) => {
+          const [f, r] = spots[i % spots.length]!;
+          const x = fx * f + rx * r, z = fz * f + rz * r;
+          const p = m.instance.currentPosition;
+          p.x = x;
+          p.z = z;
+          p.y = heightAt(x, z);
+          m.instance.yaw = fy + Math.PI; // 面向鏡頭
+          m.visual?.setTransform(p.x, p.y, p.z, m.instance.yaw);
+          m.visual?.setFace("normal");
+        });
+        if (this.render.glow && opts.glow !== undefined) this.render.glow.isEnabled = opts.glow;
+        this.perfOverlay.lockResolution(this.quality.maxPixelRatio);
+        this.engine.resize();
+        // 畫面位置（CSS 像素）：身體中心、眼睛中心
+        const cam = this.camera.camera;
+        const w = this.engine.getRenderWidth(), h = this.engine.getRenderHeight();
+        const k = (this.engine.getRenderingCanvas()?.clientWidth ?? w) / w;
+        const vp = cam.viewport.toGlobal(w, h);
+        this.scene.render();
+        const proj = (v: Vector3): [number, number] => {
+          const o = Vector3.Project(v, Matrix.Identity(), this.scene.getTransformMatrix(), vp);
+          return [o.x * k, o.y * k];
+        };
+        const shots = this.monsters.map((m) => {
+          const root = (m.visual as unknown as { model?: { root?: TransformNode } } | null)?.model?.root;
+          const meshes = root ? root.getChildMeshes(false) : [];
+          const find = (pre: string) => meshes.find((x) => x.name.startsWith(pre) || x.name.includes(pre));
+          const center = (pre: string): [number, number] | null => {
+            const me = find(pre);
+            if (!me) return null;
+            me.computeWorldMatrix(true);
+            me.refreshBoundingInfo();
+            return proj(me.getBoundingInfo().boundingBox.centerWorld);
+          };
+          const bb = (pre: string): number[] | null => {
+            const me = find(pre);
+            if (!me) return null;
+            const box = me.getBoundingInfo().boundingBox;
+            const pts = box.vectorsWorld.map(proj);
+            return [Math.min(...pts.map((q) => q[0])), Math.min(...pts.map((q) => q[1])), Math.max(...pts.map((q) => q[0])), Math.max(...pts.map((q) => q[1]))];
+          };
+          return { id: m.instance.instanceId, body: center("Body_"), eyes: center("Eyes"), bodyBox: bb("Body_"), eyesBox: bb("Eyes") };
+        });
+        return {
+          quality: this.quality.level,
+          variant: this.boboVariant,
+          glow: this.render.glow ? this.render.glow.isEnabled : null,
+          pixelRatio: 1 / this.engine.getHardwareScalingLevel(),
+          shots,
         };
       },
       boboAdapterSelfTest: async () => {
