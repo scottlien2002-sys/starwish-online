@@ -1088,12 +1088,13 @@ for (const name of browsers) {
             tick();
           }),
       );
-      const hurt = intr && (await sampleUntil(`const m = ms.find((x) => x.id === ${JSON.stringify(intr.id)}); return m && m.state === 'hit' ? { anim: m.anim.anim, face: m.anim.face, log: m.attackLog } : null;`, 3000));
+      // 受傷由下一幀的怪物更新切換（仍在繪製之前）→ 等動畫本身切換
+      const hurt = intr && (await sampleUntil(`const m = ms.find((x) => x.id === ${JSON.stringify(intr.id)}); return m && m.anim.anim === 'hurt' ? { anim: m.anim.anim, face: m.anim.face, state: m.state, log: m.attackLog } : null;`, 3000));
       await page.waitForTimeout(1500);
       const intrAfter = intr && (await mons()).find((m) => m.id === intr.id);
       check(
         "命中前受傷：攻擊取消（不結算）、播放受傷動畫",
-        !!intr && intr.r.cancelledAttackId === intr.attackId && !!hurt && hurt.anim === "hurt" && intrAfter.attackLog.lastCancelledId === intr.attackId && intrAfter.attackLog.lastResolvedId !== intr.attackId,
+        !!intr && intr.r.cancelledAttackId === intr.attackId && !!hurt && hurt.anim === "hurt" && hurt.state === "hit" && intrAfter.attackLog.lastCancelledId === intr.attackId && intrAfter.attackLog.lastResolvedId !== intr.attackId,
         { intr, hurt, log: intrAfter && intrAfter.attackLog },
       );
 
@@ -1101,9 +1102,10 @@ for (const name of browsers) {
       await page.evaluate(() => window.__starwish.teleport(-6, -6));
       const victim = (await mons())[2];
       const kill = await page.evaluate((id) => window.__starwish.damageMonster(id, 999), victim.id);
-      const dying = await sampleUntil(`const m = ms.find((x) => x.id === ${JSON.stringify(victim.id)}); return m && m.state === 'death' ? { anim: m.anim.anim } : null;`, 2000);
+      const dying = await sampleUntil(`const m = ms.find((x) => x.id === ${JSON.stringify(victim.id)}); return m && m.anim.anim === 'death' ? { anim: m.anim.anim, state: m.state, face: m.anim.face } : null;`, 3000);
       const dead = await sampleUntil(`const m = ms.find((x) => x.id === ${JSON.stringify(victim.id)}); return m && m.state === 'dead' ? { anim: m.anim.anim, visible: m.visible, vis: m.anim.visibility, dust: m.anim.dust } : null;`, 15000);
-      check("致命傷 → 死亡動畫 → 完成後移除（隱藏、星塵清除）", kill && kill.killed && !!dying && dying.anim === "death" && !!dead && dead.visible === false && dead.dust === 0, { kill, dying, dead });
+      const resDead = await page.evaluate(async () => (await window.__starwish.bobo()).scene);
+      check("致命傷 → 死亡動畫 → 完成後移除（隱藏、星塵清除、暫時材質釋放）", resDead.materials === res0.materials && kill && kill.killed && !!dying && dying.anim === "death" && dying.state === "death" && !!dead && dead.visible === false && dead.dust === 0, { kill, dying, dead });
       if (q === "medium") {
         const resp = await sampleUntil(`const m = ms.find((x) => x.id === ${JSON.stringify(victim.id)}); return m && m.state === 'respawn' ? { vis: m.anim.visibility, anim: m.anim.anim, x: m.x, z: m.z, sx: m.spawnX, sz: m.spawnZ, hp: m.hp } : null;`, 40000);
         const idle = await sampleUntil(`const m = ms.find((x) => x.id === ${JSON.stringify(victim.id)}); return m && m.state === 'idle' || (m && m.state === 'move') ? { vis: m.anim.visibility, star: m.anim.starBright, temp: m.anim.tempStarMaterial } : null;`, 5000);

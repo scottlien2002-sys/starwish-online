@@ -485,6 +485,8 @@ export class BoboV38RVisual implements IMonsterVisual {
       if (l.place.isEnabled()) l.place.setEnabled(false);
       l.shown = false;
       this.clearDust();
+      // 已移除：這一隻的暫時星星材質不再需要，立即釋放
+      this.releaseStarMat();
       return;
     }
     if (!l.place.isEnabled()) l.place.setEnabled(true);
@@ -519,7 +521,8 @@ export class BoboV38RVisual implements IMonsterVisual {
   private setVis(v: number): void {
     const l = this.live!;
     l.vis = v;
-    if (Math.abs(v - this.vis) < 1e-4) return;
+    // 完全比較（不用門檻）：結束時一定回到 1，網格才會回到不透明繪製
+    if (v === this.vis) return;
     this.vis = v;
     // mesh.visibility 是每隻自己的網格屬性，不改共用材質
     for (const m of l.inst.meshes) m.visibility = v;
