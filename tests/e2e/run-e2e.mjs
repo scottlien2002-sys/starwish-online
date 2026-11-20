@@ -896,9 +896,11 @@ for (const name of browsers) {
       const matIds = new Set(b.visuals.map((v) => v.bodyMaterialId));
       const geoIds = new Set(b.visuals.map((v) => v.geometryId));
       check("每隻身體材質獨立、幾何共用", matIds.size === 3 && !matIds.has(null) && geoIds.size === 1 && !geoIds.has(null), { matIds: [...matIds], geoIds: [...geoIds] });
-      const mons = await page.evaluate(() => window.__starwish.monsters());
-      const posOk = b.visuals.every((v, i) => v.position && Math.hypot(v.position[0] - mons[i].x, v.position[2] - mons[i].z) < 0.2);
-      check("模型位置跟著遊戲怪物（框架 setTransform）", posOk, { visual: b.visuals.map((v) => v.position), logic: mons.map((m) => [m.x, m.y, m.z]) });
+      // 同一次讀取（同一幀）比對模型與邏輯位置；分兩次讀會因巡邏移動而有落差
+      const pair = await page.evaluate(async () => ({ vis: (await window.__starwish.bobo()).visuals, mons: window.__starwish.monsters() }));
+      const mons = pair.mons;
+      const posOk = pair.vis.every((v, i) => v.position && Math.hypot(v.position[0] - mons[i].x, v.position[2] - mons[i].z) < 0.02 && Math.abs(v.position[1] - mons[i].y) < 0.02);
+      check("模型位置跟著遊戲怪物（框架 setTransform）", posOk, { visual: pair.vis.map((v) => v.position), logic: mons.map((m) => [m.x, m.y, m.z]) });
       const pixels = await page.evaluate(() => window.__starwish.pixelStats());
       check("3D 畫面有繪製、至少一隻在畫面內", pixels.distinctColors >= 20 && pixels.opaqueRatio > 0.3 && mons.some((m) => m.visible), { pixels, visible: mons.map((m) => m.visible) });
       const st = await page.evaluate(() => window.__starwish.boboAdapterSelfTest());
