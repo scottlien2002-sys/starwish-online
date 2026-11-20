@@ -66,6 +66,11 @@ export class PerfOverlay {
     if (ratio !== null) this.engine.setHardwareScalingLevel(1 / ratio);
   }
 
+  /** 上一幀的 Draw Calls（效能測試逐幀讀取；不建立物件） */
+  get drawCalls(): number {
+    return this.instr.drawCallsCounter.current;
+  }
+
   get pixelRatio(): number {
     return this.steps[this.stepIndex]!;
   }

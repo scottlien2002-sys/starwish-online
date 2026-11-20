@@ -1244,6 +1244,89 @@ for (const name of browsers) {
     await ctx.close();
   }
 
+  // ---------- Stage 5.3-1：遊戲內效能測試模式（?bench=1；CI 用短時間：暖機 1 秒＋測量 2 秒）----------
+  {
+    const vp = VIEWPORTS[0];
+    const runs = name === "webkit" ? [["v2", "medium"], ["v38r", "medium"], ["v38r", "high"], ["v38r", "low"]] : [["v2", "medium"], ["v38r", "medium"]];
+    const run = { browser: name, viewport: `${vp.name} / 遊戲 效能測試模式 ?bench=1`, checks: {}, errors: [], screenshots: [], results: [] };
+    const check = (key, ok, detail) => {
+      run.checks[key] = { ok, detail };
+    };
+    // 同一個瀏覽器環境（localStorage 共用）→ 測完 V2 再測 V3.8R 會出現比較
+    const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+    try {
+      for (const [variant, q] of runs) {
+        const page = await ctx.newPage();
+        page.on("pageerror", (e) => run.errors.push(`${variant}/${q} pageerror: ${e.message}`));
+        page.on("console", (m) => m.type() === "error" && run.errors.push(`${variant}/${q} console: ${m.text()}`));
+        try {
+          const qs = `?bench=1&benchsec=2&warmup=1&quality=${q}${variant === "v38r" ? "&bobo=v38r" : ""}`;
+          await page.goto(server.url + "/" + qs, { waitUntil: "load" });
+          await page.waitForFunction(() => window.__starwish?.ready === true, null, { timeout: 45000 });
+          const banner = await page.waitForSelector(".bench-banner", { timeout: 5000 }).then(() => true).catch(() => false);
+          await page.waitForFunction(() => window.__starwish.benchState()?.phase === "measuring" || window.__starwish.benchState()?.phase === "done", null, { timeout: 60000 });
+          // 測量中：場景固定（位置不變、待機、不戰鬥），V3.8R 待機動畫照常播放
+          const a = await page.evaluate(() => ({ ms: window.__starwish.monsters(), c: window.__starwish.combat(), p: window.__starwish.getPlayer(), cam: window.__starwish.getCamera() }));
+          await page.evaluate(() => window.__starwish.attack()); // 測試中按攻擊不應有作用
+          await page.evaluate(() => window.__starwish.setMove({ x: 1, y: 0 }));
+          await page.waitForTimeout(600);
+          const b = await page.evaluate(() => ({ ms: window.__starwish.monsters(), c: window.__starwish.combat(), p: window.__starwish.getPlayer(), cam: window.__starwish.getCamera(), st: window.__starwish.benchState() }));
+          await page.evaluate(() => window.__starwish.setMove(null));
+          const held =
+            b.st.phase !== "measuring" ||
+            (a.ms.every((m, i) => Math.hypot(m.x - b.ms[i].x, m.z - b.ms[i].z) < 1e-6 && (b.ms[i].state === "idle")) &&
+              Math.hypot(a.p.x - b.p.x, a.p.z - b.p.z) < 1e-6 &&
+              Math.abs(a.cam.alpha - b.cam.alpha) < 1e-6 &&
+              b.c.hitsTaken === 0 &&
+              b.ms.every((m) => m.hp === m.maxHp));
+          const animating = variant !== "v38r" || b.st.phase !== "measuring" || b.ms.every((m, i) => m.anim && m.anim.anim === "idle" && m.anim.animTime > a.ms[i].anim.animTime);
+          await page.waitForFunction(() => window.__starwish.benchState()?.phase === "done", null, { timeout: 60000 });
+          const st = await page.evaluate(() => window.__starwish.benchState());
+          const r = st.result;
+          const s = r.summary;
+          const panel = await page.evaluate(() => {
+            const el = document.querySelector(".bench-result");
+            return el ? el.textContent : null;
+          });
+          const bannerGone = await page.evaluate(() => !document.querySelector(".bench-banner"));
+          run.results.push({ variant, q, summary: s, avgActiveMeshes: r.avgActiveMeshes, meshes: r.meshes, materials: r.materials, textures: r.textures, pixelRatio: r.pixelRatio });
+          check(
+            `${variant}／${q}：完成測試、數值合理（1% Low ≤ 平均、最低 ≤ 1% Low、Draw Calls > 0、3 隻）`,
+            banner && r.variant === variant && r.quality === q && s.frames > 0 && s.avgFps > 0 && s.low1Fps <= s.avgFps + 1e-6 && s.minFps <= s.low1Fps + 1e-6 && s.low1AvgFps <= s.low1Fps + 1e-6 && s.avgDrawCalls > 0 && r.monsters === 3 && Math.abs(s.seconds - 2) <= 0.3,
+            { s, r: { pixelRatio: r.pixelRatio, meshes: r.meshes, avgActiveMeshes: r.avgActiveMeshes } },
+          );
+          check(`${variant}／${q}：測量中場景固定、不戰鬥、操作無效`, held, { a: a.ms.map((m) => [m.x, m.z, m.state]), b: b.ms.map((m) => [m.x, m.z, m.state, m.hp]), hits: b.c.hitsTaken, phase: b.st.phase });
+          check(`${variant}／${q}：怪物待機動畫照常播放（V3.8R）`, animating, b.ms.map((m) => m.anim && [m.anim.anim, m.anim.animTime]));
+          check(`${variant}／${q}：結果面板顯示、提示文字移除`, !!panel && /1% Low/.test(panel) && /Draw Calls/.test(panel) && bannerGone, panel && panel.slice(0, 200));
+          if (variant === "v38r" && q === "medium") check("同畫質測過 V2 與 V3.8R 後顯示比較", !!panel && /比較/.test(panel) && /V2 → V3\.8R/.test(panel), panel && panel.slice(0, 400));
+          const f = `${outDir}${name}_bench_${variant}_${q}.png`;
+          await page.screenshot({ path: f });
+          run.screenshots.push(f.split("/test-results/")[1]);
+        } catch (e) {
+          run.errors.push(`${variant}/${q} exception: ${e.message}`);
+        }
+        await page.close();
+      }
+      // 一般遊戲（沒有 bench 參數）：完全不啟用
+      const page = await ctx.newPage();
+      await page.goto(server.url + "/?bobo=v38r", { waitUntil: "load" });
+      await page.waitForFunction(() => window.__starwish?.ready === true, null, { timeout: 45000 });
+      const normal = await page.evaluate(() => ({ st: window.__starwish.benchState(), banner: !!document.querySelector(".bench-banner"), panel: !!document.querySelector(".bench-result") }));
+      check("一般遊戲（不加 bench）不啟用測試模式", normal.st === null && !normal.banner && !normal.panel, normal);
+      await page.close();
+    } catch (e) {
+      run.errors.push(`exception: ${e.message}`);
+    }
+    await ctx.close();
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 6;
+    if (!run.ok) failures++;
+    report.runs.push(run);
+    console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
+    for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}${v.ok ? "" : "  " + JSON.stringify(v.detail).slice(0, 700)}`);
+    for (const r of run.results) console.log(`   · ${r.variant}/${r.q}: avg ${r.summary.avgFps.toFixed(1)}, 1%low ${r.summary.low1Fps.toFixed(1)}, min ${r.summary.minFps.toFixed(1)}, draw ${r.summary.avgDrawCalls.toFixed(1)}, active ${r.avgActiveMeshes.toFixed(1)}, meshes ${r.meshes}, px ${r.pixelRatio}`);
+    for (const e of run.errors) console.log(`   ! ${e}`);
+  }
+
   await browser.close();
 }
 

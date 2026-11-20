@@ -34,6 +34,8 @@ import { BoboV38RSceneAssets, BoboV38RVisual, type BoboV38RAnimDebug } from "../
 import type { AttackLog } from "../monsters/framework/MonsterInstance.ts";
 import { PREVIEW_COMBAT, PreviewCombat, previewSpawnPoints, separate, type AttackStartResult, type PlayerAttackResult } from "./previewCombat.ts";
 import { ATTACK_TIMING, type AttackPhase } from "../actors/attackAnim.ts";
+import { FrameRecorder } from "../render/benchmark.ts";
+import { BENCH_SPOTS, benchOptionsFromSearch, benchUrl, compareRows, formatResult, loadResults, saveResult, type BenchOptions, type BenchResult } from "./benchMode.ts";
 
 export interface DebugApi {
   ready: boolean;
@@ -95,6 +97,8 @@ export interface DebugApi {
   teleport(x: number, z: number): void;
   /** Stage 5.1：星露啵啵外觀與 V3.8R 適配器資源狀態 */
   bobo(): Promise<unknown>;
+  /** 效能測試（?bench=1）狀態；一般遊戲為 null */
+  benchState(): { phase: "loading" | "warmup" | "measuring" | "done"; progress: number; result: BenchResult | null; saved: string[] } | null;
   /** Stage 5.1：另建一隻 V3.8R 視覺 → 移除，比對資源數（只在 ?bobo=v38r 時執行） */
   boboAdapterSelfTest(): Promise<unknown>;
   /**
@@ -141,6 +145,17 @@ export class Game {
   private readonly boboVariant: BoboVariant;
   /** 測試截圖：怪物停住（不更新 AI 與動畫），只用於同條件比較畫質 */
   private photoMode = false;
+  /** 效能測試（?bench=1）：null = 一般遊戲 */
+  private readonly benchOpts: BenchOptions | null = benchOptionsFromSearch(location.search);
+  private benchRun: {
+    phase: "loading" | "warmup" | "measuring" | "done";
+    rec: FrameRecorder | null;
+    activeSum: number;
+    activeMax: number;
+    activeN: number;
+    result: BenchResult | null;
+    banner: HTMLDivElement | null;
+  } | null = null;
   private readonly combat = new PreviewCombat();
   private readonly lockRing: Mesh;
   private lockedId: string | null = null;
@@ -235,6 +250,7 @@ export class Game {
     // 經驗值與 MP 尚無系統：固定顯示；HP 由預覽測試戰鬥更新
     this.updateBars();
     this.hud.events.on("skillPressed", ({ slot }) => {
+      if (this.benchLocked) return; // 效能測試中不接受操作
       if (slot !== "attack") {
         this.hud.toast("技能將於 W2 啟用", 1200);
         return;
@@ -256,6 +272,7 @@ export class Game {
 
     this.installPlatformGuards();
     this.installDebugApi();
+    if (this.benchOpts) void this.startBench(hudRoot);
   }
 
   start(): void {
@@ -264,6 +281,7 @@ export class Game {
     this.engine.runRenderLoop(this.frame);
     if (!this.welcomed) {
       this.welcomed = true;
+      if (this.benchOpts) return; // 效能測試：不顯示歡迎提示（避免動畫中的提示影響測量）
       this.hud.toast("預覽測試：前方有 3 隻星露啵啵，靠近後按攻擊鍵（測試用數值）", 4500);
     }
   }
@@ -284,7 +302,8 @@ export class Game {
 
     const down = this.combat.isDown;
     const rawMove = this.input.getMove();
-    const move = down ? { x: 0, y: 0 } : rawMove;
+    const benchLocked = this.benchLocked;
+    const move = down || benchLocked ? { x: 0, y: 0 } : rawMove;
     const step = moveStep({
       x: this.position.x,
       z: this.position.z,
@@ -330,16 +349,20 @@ export class Game {
       root.rotation.x = 0;
     }
 
-    this.camera.update(dt, this.position, this.input.consumeCamera());
+    const camInput = this.input.consumeCamera();
+    // 效能測試：鏡頭固定（觸控旋轉／縮放不生效）
+    this.camera.update(dt, this.position, benchLocked ? { yaw: 0, pitch: 0, zoom: 0 } : camInput);
 
     // 陰影跟著角色，只算附近範圍
     this.sun.position.copyFrom(this.position).subtractInPlace(this.sun.direction.scale(45));
 
-    if (!this.photoMode) this.updateMonsters(dt);
+    if (benchLocked) this.updateMonstersHeld(dt);
+    else if (!this.photoMode) this.updateMonsters(dt);
 
     this.world.update(dt);
     this.scene.render();
     this.perfOverlay.update(dt);
+    if (this.benchRun) this.benchFrame();
 
     this.fpsTimer += dt;
     if (this.fpsTimer >= 0.5) {
@@ -347,6 +370,171 @@ export class Game {
       this.hud.setFps(this.engine.getFps());
     }
   };
+
+  /** 效能測試進行中（載入、暖機、測量）：暫停操作、AI 與戰鬥 */
+  private get benchLocked(): boolean {
+    return this.benchRun !== null && this.benchRun.phase !== "done";
+  }
+
+  /**
+   * 效能測試：怪物停在固定位置播放待機（不跑 AI、不戰鬥），其餘與 MonsterController.update 相同
+   * （動畫器 → 位置 → 進入狀態 → 姿勢 → 視覺更新）。
+   */
+  private updateMonstersHeld(dt: number): void {
+    for (const m of this.monsters) {
+      const frame = m.animator.update(dt);
+      const v = m.visual;
+      if (!v) continue;
+      const p = m.instance.currentPosition;
+      v.setTransform(p.x, p.y, p.z, m.instance.yaw);
+      for (const st of frame.entered) v.onStateEnter(st);
+      v.applyPose(frame.pose);
+      v.update(dt);
+    }
+  }
+
+  /** ?bench=1：等模型載入 → 固定場景 → 暖機 → 測量 → 顯示結果 */
+  private async startBench(hudRoot: HTMLElement): Promise<void> {
+    const opts = this.benchOpts!;
+    const banner = document.createElement("div");
+    banner.className = "bench-banner";
+    banner.setAttribute("style", "position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:50;padding:6px 14px;border-radius:12px;background:rgba(30,30,60,.72);color:#fff;font:600 13px/1.4 system-ui,sans-serif;pointer-events:none;white-space:nowrap");
+    // 測量期間不更新這段文字（不增加額外成本）
+    banner.textContent = `效能測試中（暖機 ${opts.warmup} 秒＋測量 ${opts.seconds} 秒），請勿觸碰畫面`;
+    hudRoot.appendChild(banner);
+    this.benchRun = { phase: "loading", rec: null, activeSum: 0, activeMax: 0, activeN: 0, result: null, banner };
+    await Promise.all(this.monsters.map((m) => m.visual?.load() ?? Promise.resolve()));
+    await this.scene.whenReadyAsync();
+    this.stageBench();
+    this.benchRun.rec = new FrameRecorder(opts.seconds, opts.warmup);
+    this.benchRun.phase = "warmup";
+  }
+
+  /** 固定場景：玩家在出生點、鏡頭預設角度、3 隻怪物在鏡頭前固定位置面向鏡頭、解析度固定為畫質上限 */
+  private stageBench(): void {
+    this.input.moveOverride = null;
+    this.position.set(0, heightAt(0, 0), 0);
+    this.yaw = 0;
+    this.player.root.position.copyFrom(this.position);
+    this.player.root.rotation.set(0, 0, 0);
+    const c = TUNING.camera;
+    this.camera.snap(this.position, -Math.PI / 2, c.defaultBeta, c.distance);
+    const fy = this.camera.forwardYaw;
+    const fx = Math.sin(fy), fz = Math.cos(fy);
+    this.monsters.forEach((m, i) => {
+      const [f, r] = BENCH_SPOTS[i % BENCH_SPOTS.length]!;
+      const x = fx * f + fz * r, z = fz * f - fx * r;
+      const p = m.instance.currentPosition;
+      p.x = x;
+      p.z = z;
+      p.y = heightAt(x, z);
+      m.instance.yaw = fy + Math.PI;
+      m.instance.setLocomotion(false);
+      m.visual?.setTransform(p.x, p.y, p.z, m.instance.yaw);
+      if (m.visual instanceof BoboV38RVisual) m.visual.snap();
+    });
+    this.lockRing.setEnabled(false);
+    this.perfOverlay.lockResolution(Math.min(window.devicePixelRatio || 1, this.quality.maxPixelRatio));
+    this.engine.resize();
+  }
+
+  /** 每幀（繪製之後）：記錄實際影格時間與 Draw Calls；不建立物件、不更新畫面文字 */
+  private benchFrame(): void {
+    const b = this.benchRun!;
+    if (!b.rec || b.phase === "done") return;
+    const rawDt = this.engine.getDeltaTime() / 1000;
+    const done = b.rec.record(rawDt, this.perfOverlay.drawCalls);
+    if (b.rec.progress * (this.benchOpts!.seconds + this.benchOpts!.warmup) > this.benchOpts!.warmup) {
+      b.phase = "measuring";
+      const active = this.scene.getActiveMeshes().length;
+      b.activeSum += active;
+      b.activeN++;
+      if (active > b.activeMax) b.activeMax = active;
+    }
+    if (done) this.finishBench();
+  }
+
+  private finishBench(): void {
+    const b = this.benchRun!;
+    b.phase = "done";
+    const counts = this.resourceCounts();
+    const result: BenchResult = {
+      variant: this.boboVariant,
+      quality: this.quality.level,
+      pixelRatio: Math.round((1 / this.engine.getHardwareScalingLevel()) * 100) / 100,
+      devicePixelRatio: window.devicePixelRatio || 1,
+      width: this.engine.getRenderWidth(),
+      height: this.engine.getRenderHeight(),
+      warmup: this.benchOpts!.warmup,
+      summary: b.rec!.summary(),
+      avgActiveMeshes: b.activeN ? b.activeSum / b.activeN : 0,
+      maxActiveMeshes: b.activeMax,
+      meshes: counts.meshes,
+      materials: counts.materials,
+      textures: counts.textures,
+      monsters: this.monsters.length,
+      at: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+    };
+    b.result = result;
+    let storage: Storage | null = null;
+    try {
+      storage = window.localStorage;
+    } catch {
+      storage = null;
+    }
+    const all = saveResult(storage, result);
+    b.banner?.remove();
+    b.banner = null;
+    this.showBenchResult(result, all);
+    // 測試結束：解除固定解析度，遊戲恢復正常
+    this.perfOverlay.lockResolution(null);
+  }
+
+  private showBenchResult(r: BenchResult, all: Record<string, BenchResult>): void {
+    const el = document.createElement("div");
+    el.className = "bench-result";
+    el.setAttribute(
+      "style",
+      "position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;max-width:94vw;max-height:88vh;overflow:auto;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.96);color:#223;font:13px/1.5 system-ui,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.25);user-select:text;-webkit-user-select:text",
+    );
+    const line = (t: string, bold = false): void => {
+      const d = document.createElement("div");
+      d.textContent = t;
+      if (bold) d.style.fontWeight = "700";
+      el.appendChild(d);
+    };
+    line("⏱ 效能測試結果（10 秒）".replace("10", String(this.benchOpts!.seconds)), true);
+    for (const t of formatResult(r)) line(t);
+    const cmp = compareRows(all[`v2_${r.quality}`], all[`v38r_${r.quality}`]);
+    if (cmp) {
+      el.appendChild(document.createElement("hr"));
+      cmp.forEach((t, i) => line(t, i === 0));
+    } else {
+      line(`（同畫質的${r.variant === "v2" ? " V3.8R" : " V2"} 尚未測試，按下方按鈕測試後會顯示比較）`);
+    }
+    const row = document.createElement("div");
+    row.setAttribute("style", "display:flex;flex-wrap:wrap;gap:8px;margin-top:10px");
+    const btn = (label: string, onClick: () => void): void => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = label;
+      b.setAttribute("style", "padding:8px 12px;border-radius:10px;border:0;background:#8a7cf0;color:#fff;font:600 13px system-ui,sans-serif");
+      b.addEventListener("pointerdown", (e) => e.stopPropagation());
+      b.addEventListener("click", (e) => {
+        e.stopPropagation();
+        onClick();
+      });
+      row.appendChild(b);
+    };
+    btn("測 V2", () => location.replace(benchUrl(location.href, "v2")));
+    btn("測 V3.8R", () => location.replace(benchUrl(location.href, "v38r")));
+    btn("重新測試", () => location.reload());
+    btn("關閉", () => el.remove());
+    el.appendChild(row);
+    el.addEventListener("pointerdown", (e) => e.stopPropagation());
+    document.body.appendChild(el);
+  }
 
   /** 場景資源數（Stage 5 資源檢查用） */
   private resourceCounts(): { meshes: number; materials: number; textures: number; geometries: number; sprites: number } {
@@ -372,6 +560,8 @@ export class Game {
 
   /** 按下攻擊：通過冷卻與目標檢查後播放攻擊動作；傷害在動作揮中時（ATTACK_TIMING.hit）結算 */
   private playerAttack(): AttackStartResult {
+    // 效能測試進行中：不接受攻擊（任何途徑）
+    if (this.benchLocked) return { ok: false, reason: "down" };
     const r = this.combat.startAttack(this.now, this.position.x, this.position.z, this.monsters.map((m) => m.instance), ATTACK_TIMING.hit - 1e-6);
     if (r.ok) {
       this.attackTargetId = r.targetId;
@@ -613,6 +803,17 @@ export class Game {
           pixelRatio: 1 / this.engine.getHardwareScalingLevel(),
           shots,
         };
+      },
+      benchState: () => {
+        const b = this.benchRun;
+        if (!b) return null;
+        let saved: string[] = [];
+        try {
+          saved = Object.keys(loadResults(window.localStorage));
+        } catch {
+          saved = [];
+        }
+        return { phase: b.phase, progress: b.rec ? b.rec.progress : 0, result: b.result, saved };
       },
       boboAdapterSelfTest: async () => {
         if (this.boboVariant !== "v38r") return { skipped: true };

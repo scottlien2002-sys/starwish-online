@@ -11,6 +11,12 @@ export interface BenchmarkSummary {
   minFps: number;
   avgDrawCalls: number;
   maxDrawCalls: number;
+  /** 最慢 1% 影格（至少 1 幀）的平均影格時間換算的 FPS（另一種常見的 1% Low 定義；選填，舊結果沒有） */
+  low1AvgFps?: number;
+  /** 第 99 百分位影格時間（毫秒） */
+  p99FrameMs?: number;
+  /** 最長影格時間（毫秒） */
+  maxFrameMs?: number;
 }
 
 export function summarizeFrames(dts: readonly number[], drawCalls: readonly number[]): BenchmarkSummary {
@@ -27,7 +33,20 @@ export function summarizeFrames(dts: readonly number[], drawCalls: readonly numb
     minFps: n ? 1 / sorted[n - 1]! : 0,
     avgDrawCalls: draws,
     maxDrawCalls: drawCalls.length ? Math.max(...drawCalls) : 0,
+    low1AvgFps: worstAvgFps(sorted, 0.01),
+    p99FrameMs: p99 * 1000,
+    maxFrameMs: n ? sorted[n - 1]! * 1000 : 0,
   };
+}
+
+/** 最慢 fraction 比例的影格（至少 1 幀）平均影格時間 → FPS；sorted 為由小到大排序的影格時間（秒） */
+export function worstAvgFps(sorted: readonly number[], fraction: number): number {
+  const n = sorted.length;
+  if (!n) return 0;
+  const k = Math.max(1, Math.ceil(n * fraction));
+  let sum = 0;
+  for (let i = n - k; i < n; i++) sum += sorted[i]!;
+  return k / Math.max(sum, 1e-9);
 }
 
 /** 逐幀收集：start → record(每幀) → done 時回傳摘要 */
