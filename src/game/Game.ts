@@ -511,7 +511,7 @@ export class Game {
             const me = find(pre);
             if (!me) return null;
             me.computeWorldMatrix(true);
-            me.refreshBoundingInfo();
+            me.refreshBoundingInfo({});
             return proj(me.getBoundingInfo().boundingBox.centerWorld);
           };
           const bb = (pre: string): number[] | null => {
