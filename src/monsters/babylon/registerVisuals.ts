@@ -28,6 +28,8 @@ export interface BabylonVisualContext {
   glow?: GlowLayer;
   /** 畫質等級（影響程式化模型細分數） */
   quality?: "high" | "medium" | "low";
+  /** V3.8R 彈跳位移同步（實驗，預設關閉；?hopsync=1） */
+  boboHopSync?: boolean;
 }
 
 /**
@@ -44,7 +46,7 @@ export function registerBabylonVisuals(registry: MonsterRegistry, ctx: BabylonVi
       });
     })
     // V3.8R（Stage 5 整合中）：預設不使用；以 SpawnOptions.modelId 指定時才會建立（V2 仍為預設、可隨時切回）
-    .addVisual("star_dew_bobo_v38r", () => new BoboV38RVisual({ scene: ctx.scene, baseUrl: `${import.meta.env.BASE_URL}models/`, lod: ctx.quality ?? "medium" }))
+    .addVisual("star_dew_bobo_v38r", () => new BoboV38RVisual({ scene: ctx.scene, baseUrl: `${import.meta.env.BASE_URL}models/`, lod: ctx.quality ?? "medium", hopSync: ctx.boboHopSync === true }))
     .addVisual("test_dummy_glb", (def, profile) =>
       createGltfVisual(ctx, `${import.meta.env.BASE_URL}models/test-dummy.glb`, profile.clips!, def.height ?? 0.8, 0.7),
     );

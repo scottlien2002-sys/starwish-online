@@ -29,8 +29,9 @@ import { PerfOverlay, type PerfStats } from "../render/PerfOverlay.ts";
 import type { QualitySettings } from "../render/quality.ts";
 import { createMonsterRegistry, MonsterFactory, type MonsterController, type MonsterTarget } from "../monsters/framework/index.ts";
 import { registerBabylonVisuals } from "../monsters/babylon/registerVisuals.ts";
-import { BOBO_MODEL_IDS, boboVariantFromSearch, type BoboVariant } from "./boboVariant.ts";
-import { BoboV38RSceneAssets, BoboV38RVisual } from "../monsters/star-dew-bobo-v38r/BoboV38RVisual.ts";
+import { BOBO_MODEL_IDS, BOBO_PROFILE_IDS, boboVariantFromSearch, hopSyncFromSearch, type BoboVariant } from "./boboVariant.ts";
+import { BoboV38RSceneAssets, BoboV38RVisual, type BoboV38RAnimDebug } from "../monsters/star-dew-bobo-v38r/BoboV38RVisual.ts";
+import type { AttackLog } from "../monsters/framework/MonsterInstance.ts";
 import { PREVIEW_COMBAT, PreviewCombat, previewSpawnPoints, separate, type PlayerAttackResult } from "./previewCombat.ts";
 
 export interface DebugApi {
@@ -48,7 +49,27 @@ export interface DebugApi {
   /** 畫質與效能資訊（實際瀏覽器量測） */
   perf(): PerfStats & { postProcess: boolean; bloom: boolean; shadowFilter: string; shadowMap: number };
   /** 預覽測試：草原上的怪物狀態 */
-  monsters(): { id: string; state: string; mode: string; hp: number; maxHp: number; x: number; y: number; z: number; spawnX: number; spawnZ: number; visible: boolean }[];
+  monsters(): {
+    id: string;
+    state: string;
+    mode: string;
+    hp: number;
+    maxHp: number;
+    x: number;
+    y: number;
+    z: number;
+    spawnX: number;
+    spawnZ: number;
+    visible: boolean;
+    stateTime: number;
+    attackId: number;
+    attackLog: AttackLog;
+    cooldown: number;
+    /** V3.8R 動畫狀態（V2 為 null） */
+    anim: BoboV38RAnimDebug | null;
+  }[];
+  /** 測試用：直接對怪物造成傷害（不經過玩家攻擊距離與冷卻） */
+  damageMonster(id: string, amount: number): { applied: boolean; killed: boolean; rehitLocked?: boolean; cancelledAttackId?: number; reason?: string } | null;
   /** 預覽測試：等同按下攻擊鍵 */
   attack(): PlayerAttackResult;
   /** 預覽測試：玩家戰鬥狀態 */
@@ -163,13 +184,14 @@ export class Game {
       shadows,
       glow: this.render.glow ?? undefined,
       quality: this.quality.level,
+      boboHopSync: hopSyncFromSearch(location.search),
     });
     const factory = new MonsterFactory(registry);
     // 外觀：預設 V2；?bobo=v38r 改用 V3.8R（只換模型，數值、AI、戰鬥規則不變）
     this.boboVariant = boboVariantFromSearch(location.search);
     const modelId = BOBO_MODEL_IDS[this.boboVariant];
     this.monsters = previewSpawnPoints(0, 0, this.camera.forwardYaw).map((p) =>
-      factory.create("star_dew_bobo", { x: p.x, y: heightAt(p.x, p.z), z: p.z }, { modelId }),
+      factory.create("star_dew_bobo", { x: p.x, y: heightAt(p.x, p.z), z: p.z }, { modelId, animationProfileId: BOBO_PROFILE_IDS[this.boboVariant] }),
     );
     for (const m of this.monsters) void m.visual?.load();
     // V3.8R 不使用 GlowLayer（頭頂星星的柔光改用光暈 sprite，與已驗收的測試頁相同）。
@@ -343,7 +365,8 @@ export class Game {
       p.y = heightAt(p.x, p.z);
       const frame = m.update(dt, this.now, target);
       p.y = heightAt(p.x, p.z);
-      if (frame.effects.includes("attackImpact")) {
+      // 命中判定：同一個 attackId 只結算一次；命中前被受傷／死亡打斷的攻擊已取消，不會結算
+      if (frame.effects.includes("attackImpact") && m.instance.claimAttackImpact() !== null) {
         const dmg = this.combat.monsterImpact(this.now, m.instance, this.position.x, this.position.z);
         if (dmg > 0) {
           this.updateBars();
@@ -489,6 +512,7 @@ export class Game {
           m.instance.yaw = fy + Math.PI; // 面向鏡頭
           m.visual?.setTransform(p.x, p.y, p.z, m.instance.yaw);
           m.visual?.setFace("normal");
+          if (m.visual instanceof BoboV38RVisual) m.visual.snap();
         });
         if (this.render.glow && opts.glow !== undefined) this.render.glow.isEnabled = opts.glow;
         this.perfOverlay.lockResolution(this.quality.maxPixelRatio);
@@ -563,8 +587,17 @@ export class Game {
             spawnX: i.spawnPosition.x,
             spawnZ: i.spawnPosition.z,
             visible: inView,
+            stateTime: i.sm.stateTime,
+            attackId: i.attackId,
+            attackLog: { ...i.attackLog },
+            cooldown: i.cooldownRemaining(this.now),
+            anim: m.visual instanceof BoboV38RVisual ? m.visual.debugState() : null,
           };
         }),
+      damageMonster: (id, amount) => {
+        const m = this.monsters.find((x) => x.instance.instanceId === id);
+        return m ? m.instance.receiveDamage(amount) : null;
+      },
       attack: () => {
         const r = this.playerAttack();
         this.handleAttack(r);

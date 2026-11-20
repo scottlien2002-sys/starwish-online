@@ -407,11 +407,16 @@ export class BoboAnimPlayer {
     return this.t;
   }
 
-  request(name: BoboAnimName): void {
+  /**
+   * opts.immediate（正式遊戲整合用；預覽頁不使用）：不等這一跳落地、不等目前一次性動作結束，立刻以原本的淡入時間切換。
+   * 遊戲的攻擊由狀態機決定開始時間，命中判定固定在攻擊開始後 0.50 秒，動畫必須同一刻開始才會對齊。
+   * 只改「何時開始」，動畫曲線、時長、淡入時間都不變。
+   */
+  request(name: BoboAnimName, opts?: { immediate?: boolean }): void {
     if (this.current === "attack" && name === "attack") return;
     if (this.current === "death" || this.current === "dead") return; // 死亡期間與死亡後不接受移動、攻擊等指令（只能由遊戲重生）
     this.requested = name;
-    if (this.current !== "move" && this.current !== "attack" && this.current !== "hurt") this.switchNow();
+    if (opts?.immediate || (this.current !== "move" && this.current !== "attack" && this.current !== "hurt")) this.switchNow();
   }
 
   /** 是否已死亡（死亡動畫播放中或播完） */
@@ -439,13 +444,14 @@ export class BoboAnimPlayer {
    * lethal = 生命值已歸零 → 直接由死亡動畫接管（死亡動畫本身有「最後衝擊」），不回待機。
    * 死亡期間再受擊：忽略（不重播死亡）
    */
-  hurt(lethal = false): void {
+  hurt(lethal = false, opts?: { force?: boolean }): void {
     if (this.isDead) return;
     if (lethal) {
       this.death();
       return;
     }
-    if (this.current === "hurt" && this.t < HURT_REHIT_LOCK) return;
+    // opts.force（正式遊戲整合用）：重播與否已由遊戲狀態機以同一個 0.15 秒規則決定，這裡直接照做（避免兩邊計時的浮點誤差）
+    if (!opts?.force && this.current === "hurt" && this.t < HURT_REHIT_LOCK) return;
     this.requested = "hurt";
     this.from = this.lastPose;
     this.fade = 0;

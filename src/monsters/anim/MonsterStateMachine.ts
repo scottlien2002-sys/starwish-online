@@ -6,6 +6,8 @@ export interface RequestResult {
   overlay?: boolean;
   /** 被接受但排隊，等目前動作結束後才生效 */
   queued?: boolean;
+  /** 受擊中再受擊、仍在 hitRehitLock 內：接受（呼叫端照常扣血）但不重播受擊動畫 */
+  locked?: boolean;
   reason?: string;
 }
 
@@ -18,6 +20,10 @@ export interface RequestResult {
  * - hit：idle / move 中會進入受擊；攻擊中只做疊加閃白，不打斷攻擊；受擊中再受擊會重新計時。
  * - death：最高優先，可打斷 idle / move / attack / hit；死亡後進入 dead，只接受 respawn。
  * - respawn：只能從 dead 發動，播放中不可被任何動作打斷，結束後回到 idle。
+ *
+ * 每種怪物可選的規則（timings 選填欄位；省略 = 上述原本行為）：
+ * - hitInterruptsAttack：攻擊中受擊改為打斷攻擊、進入受擊
+ * - hitRehitLock：受擊開始後 N 秒內再受擊不重播（locked），之後重新計時
  */
 export class MonsterStateMachine {
   private _state: MonsterState = "idle";
@@ -86,11 +92,14 @@ export class MonsterStateMachine {
         if (s === "hit") return { accepted: false, reason: "受擊硬直中" };
         if (s === "respawn") return { accepted: false, reason: "重生中" };
         return { accepted: false, reason: "死亡中無法攻擊" };
-      case "hit":
+      case "hit": {
+        const lock = this.timings.hitRehitLock ?? 0;
+        if (s === "hit" && lock > 0 && this._time < lock) return { accepted: true, locked: true };
         if (s === "idle" || s === "move" || s === "hit") return { accepted: true };
-        if (s === "attack") return { accepted: true, overlay: true };
+        if (s === "attack") return this.timings.hitInterruptsAttack ? { accepted: true } : { accepted: true, overlay: true };
         if (s === "respawn") return { accepted: false, reason: "重生中無敵" };
         return { accepted: false, reason: "已死亡" };
+      }
       case "death":
         if (s === "death" || s === "dead") return { accepted: false, reason: "已死亡" };
         if (s === "respawn") return { accepted: false, reason: "重生中無敵" };
@@ -118,6 +127,7 @@ export class MonsterStateMachine {
         this.enter("attack");
         break;
       case "hit":
+        if (r.locked) break;
         if (r.overlay) this._hitOverlay = this.timings.hit;
         else this.enter("hit");
         break;

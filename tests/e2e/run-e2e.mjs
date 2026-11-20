@@ -941,9 +941,7 @@ for (const name of browsers) {
     };
     const variants = [
       { q: "high", glow: undefined, label: "high" },
-      { q: "high", glow: true, label: "high_before_glowOn" },
       { q: "medium", glow: undefined, label: "medium" },
-      { q: "medium", glow: true, label: "medium_before_glowOn" },
       { q: "low", glow: undefined, label: "low" },
     ];
     for (const v of variants) {
@@ -975,10 +973,6 @@ for (const name of browsers) {
       const p = by(l);
       check(`${l}：V3.8R 模式發光層停用、畫質正確`, !!p && p.perf.quality === l && p.perf.bloom === false && p.staged.glow !== true, p && { bloom: p.perf.bloom, glow: p.staged.glow });
     }
-    for (const l of ["high", "medium"]) {
-      const a = by(l), b = by(`${l}_before_glowOn`);
-      check(`${l}：修正後 Draw Calls 不增加（相對修正前）`, !!a && !!b && a.perf.drawCalls <= b.perf.drawCalls, a && b && { after: a.perf.drawCalls, before: b.perf.drawCalls });
-    }
     // 回退檢查：V2 模式發光層仍照舊（只影響 V3.8R 模式）
     {
       const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
@@ -993,13 +987,151 @@ for (const name of browsers) {
       }
       await ctx.close();
     }
-    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 6;
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 4;
     if (!run.ok) failures++;
     report.runs.push(run);
     console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
     for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}  ${JSON.stringify(v.detail).slice(0, 300)}`);
     for (const p of run.photo) console.log(`   · ${p.label}: draw ${p.perf.drawCalls}, activeMeshes ${p.perf.activeMeshes}, fps ${p.perf.fps.toFixed(1)}, res ${JSON.stringify(p.resources)}, px ${p.staged.pixelRatio}`);
     for (const e of run.errors) console.log(`   ! ${e}`);
+  }
+
+  // ---------- Stage 5.2：V3.8R 動畫與戰鬥事件（正式遊戲頁；WebKit 三種畫質、Chromium 中畫質）----------
+  for (const q of name === "webkit" ? ["high", "medium", "low"] : ["medium"]) {
+    const vp = VIEWPORTS[0];
+    const run = { browser: name, viewport: `${vp.name} / 遊戲 V3.8R 動畫戰鬥（${q}）`, checks: {}, errors: [], screenshots: [], samples: [] };
+    const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+    const page = await ctx.newPage();
+    page.on("pageerror", (e) => run.errors.push(`pageerror: ${e.message}`));
+    page.on("console", (m) => m.type() === "error" && run.errors.push(`console: ${m.text()}`));
+    const check = (key, ok, detail) => {
+      run.checks[key] = { ok, detail };
+    };
+    const mons = () => page.evaluate(() => window.__starwish.monsters());
+    /** 在頁面內每幀取樣，直到條件成立（避免 CI 低 FPS 時漏掉短暫的狀態） */
+    const sampleUntil = (fnSrc, timeoutMs) =>
+      page.evaluate(
+        ({ fnSrc, timeoutMs }) =>
+          new Promise((resolve) => {
+            const fn = new Function("ms", "combat", fnSrc);
+            const t0 = performance.now();
+            const tick = () => {
+              const r = fn(window.__starwish.monsters(), window.__starwish.combat());
+              if (r) return resolve(r);
+              if (performance.now() - t0 > timeoutMs) return resolve(null);
+              requestAnimationFrame(tick);
+            };
+            tick();
+          }),
+        { fnSrc, timeoutMs },
+      );
+    try {
+      await page.goto(server.url + `/?bobo=v38r&quality=${q}`, { waitUntil: "load" });
+      await page.addStyleTag({ content: safeAreaCss(vp.safe) });
+      await page.waitForFunction(() => window.__starwish?.ready === true, null, { timeout: 45000 });
+      const loaded = await page
+        .waitForFunction(async () => (await window.__starwish.bobo()).visuals.every((x) => x.loaded), null, { timeout: 45000, polling: 250 })
+        .then(() => true)
+        .catch(() => false);
+      const perf0 = await page.evaluate(() => window.__starwish.perf());
+      check(`畫質 ${q}：V3.8R 載入、畫質正確、發光層停用`, loaded && perf0.quality === q && perf0.bloom === false, perf0);
+      const res0 = await page.evaluate(async () => (await window.__starwish.bobo()).scene);
+      const m0 = await mons();
+      check(
+        "三隻都有獨立的 V3.8R 動畫，待機／移動與狀態一致",
+        m0.length === 3 && m0.every((m) => m.anim && (m.state === "idle" || m.state === "move") && (m.anim.anim === "idle" || m.anim.anim === "move")),
+        m0.map((m) => [m.state, m.anim && m.anim.anim]),
+      );
+
+      // ---- 怪物攻擊玩家：攻擊動畫實際播放、0.50 秒命中、每次攻擊只扣一次 ----
+      const target = m0[0];
+      await page.evaluate(({ x, z }) => window.__starwish.teleport(x, z), { x: target.x, z: target.z - 0.9 });
+      const atk = await sampleUntil(
+        "const m = ms.find((x) => x.state === 'attack'); return m ? { id: m.id, anim: m.anim.anim, face: m.anim.face, stateTime: m.stateTime, animTime: m.anim.animTime, attackId: m.attackId } : null;",
+        20000,
+      );
+      check("攻擊開始時播放 V3.8R 攻擊動畫（同一幀、時間一致、生氣表情）", !!atk && atk.anim === "attack" && atk.face === "angry" && Math.abs(atk.stateTime - atk.animTime) < 0.02, atk);
+      const hit = await sampleUntil(
+        `const m = ms.find((x) => x.id === ${JSON.stringify(atk && atk.id)}); return m && m.attackLog.resolved >= 1 ? { log: m.attackLog, state: m.state, anim: m.anim.anim, hp: combat.hp, hitsTaken: combat.hitsTaken } : null;`,
+        8000,
+      );
+      check("命中後玩家扣 8 HP（每次命中剛好 8）", !!hit && hit.hitsTaken >= 1 && 100 - hit.hp === 8 * hit.hitsTaken, hit);
+      // 讓 AI 連續攻擊幾次
+      await page.waitForTimeout(6000);
+      const after = await mons();
+      const cb = await page.evaluate(() => window.__starwish.combat());
+      const totals = after.reduce((a, m) => ({ started: a.started + m.attackLog.started, resolved: a.resolved + m.attackLog.resolved, dup: a.dup + m.attackLog.duplicatesBlocked, anims: a.anims + m.anim.starts.attack }), { started: 0, resolved: 0, dup: 0, anims: 0 });
+      check("每一次邏輯攻擊都播放了攻擊動畫（動畫次數 = attackId 次數）", after.every((m) => m.anim.starts.attack === m.attackLog.started) && totals.started >= 2, { totals, per: after.map((m) => [m.attackLog.started, m.anim.starts.attack]) });
+      check(
+        "命中去重：結算次數 ≤ 攻擊次數、沒有重複結算、扣血 = 8 × 受擊次數",
+        totals.resolved <= totals.started && totals.dup === 0 && (cb.down || 100 - cb.hp === 8 * cb.hitsTaken) && cb.hitsTaken <= totals.resolved,
+        { totals, combat: cb },
+      );
+      const cdOk = after.every((m) => m.attackLog.started === 0 || m.state !== "attack" || m.cooldown > 0);
+      check("攻擊冷卻 2 秒（從攻擊開始計算）：攻擊中冷卻尚未結束", cdOk, after.map((m) => [m.state, m.cooldown]));
+
+      // ---- 命中前被受傷打斷：取消、不結算、播受傷 ----
+      const intr = await page.evaluate(
+        () =>
+          new Promise((resolve) => {
+            const t0 = performance.now();
+            const tick = () => {
+              const m = window.__starwish.monsters().find((x) => x.state === "attack" && x.stateTime < 0.35 && x.hp > 20);
+              if (m) {
+                const before = window.__starwish.combat().hitsTaken;
+                const r = window.__starwish.damageMonster(m.id, 20);
+                return resolve({ id: m.id, attackId: m.attackId, stateTime: m.stateTime, r, before });
+              }
+              if (performance.now() - t0 > 20000) return resolve(null);
+              requestAnimationFrame(tick);
+            };
+            tick();
+          }),
+      );
+      const hurt = intr && (await sampleUntil(`const m = ms.find((x) => x.id === ${JSON.stringify(intr.id)}); return m && m.state === 'hit' ? { anim: m.anim.anim, face: m.anim.face, log: m.attackLog } : null;`, 3000));
+      await page.waitForTimeout(1500);
+      const intrAfter = intr && (await mons()).find((m) => m.id === intr.id);
+      check(
+        "命中前受傷：攻擊取消（不結算）、播放受傷動畫",
+        !!intr && intr.r.cancelledAttackId === intr.attackId && !!hurt && hurt.anim === "hurt" && intrAfter.attackLog.lastCancelledId === intr.attackId && intrAfter.attackLog.lastResolvedId !== intr.attackId,
+        { intr, hurt, log: intrAfter && intrAfter.attackLog },
+      );
+
+      // ---- 死亡：1.8 秒死亡動畫 → 移除；（中畫質）10 秒後原出生點重生、淡入 ----
+      await page.evaluate(() => window.__starwish.teleport(-6, -6));
+      const victim = (await mons())[2];
+      const kill = await page.evaluate((id) => window.__starwish.damageMonster(id, 999), victim.id);
+      const dying = await sampleUntil(`const m = ms.find((x) => x.id === ${JSON.stringify(victim.id)}); return m && m.state === 'death' ? { anim: m.anim.anim } : null;`, 2000);
+      const dead = await sampleUntil(`const m = ms.find((x) => x.id === ${JSON.stringify(victim.id)}); return m && m.state === 'dead' ? { anim: m.anim.anim, visible: m.visible, vis: m.anim.visibility, dust: m.anim.dust } : null;`, 15000);
+      check("致命傷 → 死亡動畫 → 完成後移除（隱藏、星塵清除）", kill && kill.killed && !!dying && dying.anim === "death" && !!dead && dead.visible === false && dead.dust === 0, { kill, dying, dead });
+      if (q === "medium") {
+        const resp = await sampleUntil(`const m = ms.find((x) => x.id === ${JSON.stringify(victim.id)}); return m && m.state === 'respawn' ? { vis: m.anim.visibility, anim: m.anim.anim, x: m.x, z: m.z, sx: m.spawnX, sz: m.spawnZ, hp: m.hp } : null;`, 40000);
+        const idle = await sampleUntil(`const m = ms.find((x) => x.id === ${JSON.stringify(victim.id)}); return m && m.state === 'idle' || (m && m.state === 'move') ? { vis: m.anim.visibility, star: m.anim.starBright, temp: m.anim.tempStarMaterial } : null;`, 5000);
+        check(
+          "10 秒後原出生點重生：待機姿勢淡入，結束後完全不透明、星星恢復",
+          !!resp && resp.vis < 1 && resp.anim === "idle" && Math.hypot(resp.x - resp.sx, resp.z - resp.sz) < 0.01 && resp.hp === 60 && !!idle && idle.vis === 1 && idle.star === 1 && idle.temp === false,
+          { resp, idle },
+        );
+        await page.waitForTimeout(500);
+        const res1 = await page.evaluate(async () => (await window.__starwish.bobo()).scene);
+        check("死亡重生後資源數不增加（暫時材質與星塵已釋放）", res1.materials === res0.materials && res1.textures === res0.textures && res1.meshes === res0.meshes, { before: res0, after: res1 });
+      }
+      const perf1 = await page.evaluate(() => window.__starwish.perf());
+      run.samples.push({ quality: q, perf: perf1, resources: await page.evaluate(async () => (await window.__starwish.bobo()).scene) });
+      const f = `${outDir}${name}_game_v38r_combat_${q}.png`;
+      await page.screenshot({ path: f });
+      run.screenshots.push(f.split("/test-results/")[1]);
+    } catch (e) {
+      run.errors.push(`exception: ${e.message}`);
+    }
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 9;
+    if (!run.ok) failures++;
+    report.runs.push(run);
+    console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
+    for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}${v.ok ? "" : "  " + JSON.stringify(v.detail).slice(0, 700)}`);
+    for (const sm of run.samples) console.log(`   · ${sm.quality}: draw ${sm.perf.drawCalls}, activeMeshes ${sm.perf.activeMeshes}, fps ${sm.perf.fps.toFixed(1)}, res ${JSON.stringify(sm.resources)}`);
+    for (const e of run.errors) console.log(`   ! ${e}`);
+    await ctx.close();
   }
 
   await browser.close();

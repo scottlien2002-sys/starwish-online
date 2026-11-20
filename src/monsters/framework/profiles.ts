@@ -19,6 +19,8 @@ export function withPlaybackSpeed(anim: AnimProfile, speeds: SpeedMap): AnimProf
   };
   const t = anim.timings;
   const timings: MonsterAnimTimings = {
+    ...t,
+    ...(t.hitRehitLock !== undefined ? { hitRehitLock: t.hitRehitLock / s("hit") } : {}),
     attack: t.attack / s("attack"),
     hit: t.hit / s("hit"),
     death: t.death / s("death"),

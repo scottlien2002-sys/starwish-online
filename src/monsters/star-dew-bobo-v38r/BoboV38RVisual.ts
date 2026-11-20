@@ -1,5 +1,6 @@
 import {
   Color3,
+  Color4,
   Constants,
   DynamicTexture,
   Matrix,
@@ -22,6 +23,8 @@ import { ExpressionAtlasController, loadMonsterAsset, type MonsterAssetHandle, t
 import { createBoboV38RMaterials, type BoboV38RSharedMaterials } from "./materials.ts";
 import type { JellyV38RPlugin } from "./JellyV38RPlugin.ts";
 import { BOBO_V38R_SPEC } from "./spec.ts";
+import { antennaWeight, DUST_COLORS, dustCount, dustParticle, poseScale } from "./animation.ts";
+import { BoboV38RAnimDriver, type BoboDriverFrame, type BoboExpr } from "./driver.ts";
 
 /**
  * 星露啵啵 V3.8R — 正式遊戲整合適配器（Stage 5.1）。
@@ -38,8 +41,10 @@ import { BOBO_V38R_SPEC } from "./spec.ts";
  * 五段已驗收動畫（Idle/Move/Attack/Hurt/Death）與狀態對應在 Stage 5.2 接上；此階段模型保持靜止姿勢。
  */
 
-/** 表情名稱 → 表情圖格索引（V3 起順序：一般、開心、好奇、生氣、害怕、暈眩、昏睡、受傷） */
-const FACE_INDEX: Record<MonsterFace, number> = { normal: 0, angry: 3, hurt: 7 };
+/** 表情圖格索引（V3 起順序：一般、開心、好奇、生氣、害怕、暈眩、昏睡、受傷） */
+const EXPR: Record<BoboExpr, number> = { normal: 0, angry: 3, sleepy: 6, hurt: 7 };
+/** 頭頂星星中心高度（身體模型座標；與測試頁相同） */
+const STAR_W = antennaWeight(1.19);
 
 interface BellyStarDef {
   outer: number;
@@ -59,10 +64,14 @@ interface LiveInstance {
   sprite: Sprite;
   /** 0~1：整體透明度（死亡淡出／重生淡入）；圓影與光暈跟著變淡 */
   vis: number;
+  /** 0~1：頭頂星星亮度（死亡時熄滅）；光暈跟著變暗 */
+  starBright: number;
   shown: boolean;
 }
 
 const HALO_CAPACITY = 32;
+/** 星塵容量：每隻最多 10 顆（高畫質）；同時死亡的隻數超過時，多出的不顯示星塵（不影響死亡流程） */
+const DUST_CAPACITY = 64;
 
 /** 每個場景＋畫質一份的共用資源 */
 export class BoboV38RSceneAssets {
@@ -75,6 +84,8 @@ export class BoboV38RSceneAssets {
   private readonly blobMat: StandardMaterial;
   private readonly blobTex: DynamicTexture;
   private readonly halo: SpriteManager;
+  /** 死亡星塵（測試頁同一張四芒星光貼圖；所有啵啵共用 1 個 SpriteManager，預先建立，沒有粒子時不繪製） */
+  readonly dust: SpriteManager;
   private readonly live = new Set<LiveInstance>();
   private fxBuf = new Float32Array(16 * 4);
   private readonly tmpM = new Matrix();
@@ -139,6 +150,28 @@ export class BoboV38RSceneAssets {
     this.halo.blendMode = Constants.ALPHA_ADD;
     this.halo.disableDepthWrite = true;
     this.halo.isPickable = false;
+
+    {
+      const c = document.createElement("canvas");
+      c.width = c.height = 64;
+      const g = c.getContext("2d")!;
+      const rg = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+      rg.addColorStop(0, "rgba(255,255,255,1)");
+      rg.addColorStop(0.18, "rgba(255,255,255,0.75)");
+      rg.addColorStop(0.5, "rgba(255,255,255,0.12)");
+      rg.addColorStop(1, "rgba(255,255,255,0)");
+      g.fillStyle = rg;
+      g.fillRect(0, 0, 64, 64);
+      g.globalCompositeOperation = "lighter";
+      g.fillStyle = "rgba(255,255,255,0.8)";
+      g.beginPath();
+      g.moveTo(32, 2); g.quadraticCurveTo(35, 29, 62, 32); g.quadraticCurveTo(35, 35, 32, 62); g.quadraticCurveTo(29, 35, 2, 32); g.quadraticCurveTo(29, 29, 32, 2);
+      g.fill();
+      this.dust = new SpriteManager("BoboV38RGame_StarDust", c.toDataURL("image/png"), DUST_CAPACITY, { width: 64, height: 64 }, scene);
+      this.dust.blendMode = Constants.ALPHA_ADD;
+      this.dust.disableDepthWrite = true;
+      this.dust.isPickable = false;
+    }
 
     // 每幀在繪製前更新：果凍矩陣（星雲黏在身體上）、圓影位置、光暈位置
     this.observer = scene.onBeforeRenderObservable.add(() => this.beforeRender());
@@ -217,7 +250,7 @@ export class BoboV38RSceneAssets {
     const sprite = new Sprite(`BoboV38RGame_Halo_${n}`, this.halo);
     sprite.width = sprite.height = 0.42;
     sprite.isPickable = false;
-    const live: LiveInstance = { place, inst, body, stars, jelly: bm.jelly, sprite, vis: 1, shown: true };
+    const live: LiveInstance = { place, inst, body, stars, jelly: bm.jelly, sprite, vis: 1, starBright: 1, shown: true };
     this.live.add(live);
     return { live, expr, bodyMaterial: bm.material };
   }
@@ -241,6 +274,7 @@ export class BoboV38RSceneAssets {
     this.scene.onBeforeRenderObservable.remove(this.observer);
     BoboV38RSceneAssets.cache.get(this.scene)?.delete(this.lod);
     this.halo.dispose();
+    this.dust.dispose();
     this.blob.dispose(false, false);
     this.blobMat.dispose(false, false);
     this.blobTex.dispose();
@@ -258,10 +292,11 @@ export class BoboV38RSceneAssets {
       l.body.getWorldMatrix().invertToRef(l.jelly.invWorld);
       if (cam) l.jelly.view.copyFrom(cam.getViewMatrix());
       const q = l.place.position;
-      // 離地時縮小（Stage 5.2 起跳躍才會離地）；淡出時跟著消失
+      const w = l.inst.root.getWorldMatrix().getTranslationToRef(this.tmpV);
+      // 離地時縮小（彈跳）；淡出時跟著消失；跟著攻擊往前彈出的位置
       const sc = (1 - Math.min(0.45, Math.max(0, l.inst.root.position.y) * 2.6)) * l.vis;
       this.tmpS.set(sc, 1, sc);
-      this.tmpT.set(q.x, q.y + 0.004, q.z);
+      this.tmpT.set(w.x, q.y + 0.004, w.z);
       Matrix.ComposeToRef(this.tmpS, Quaternion.Identity(), this.tmpT, this.tmpM);
       this.tmpM.copyToArray(this.fxBuf, k * 16);
     });
@@ -273,7 +308,8 @@ export class BoboV38RSceneAssets {
       l.stars.computeWorldMatrix(true);
       Vector3.TransformCoordinatesToRef(l.stars.getBoundingInfo().boundingSphere.center, l.stars.getWorldMatrix(), this.tmpV);
       l.sprite.position.copyFrom(this.tmpV);
-      l.sprite.color.a = l.vis;
+      // 死亡：光暈跟著星星亮度與整體透明度變暗（加法混合，alpha 直接決定亮度）
+      l.sprite.color.a = l.starBright * l.vis;
     }
   }
 }
@@ -283,27 +319,66 @@ export interface BoboV38RVisualOptions {
   /** 模型資料夾網址（例：`${import.meta.env.BASE_URL}models/`） */
   baseUrl: string;
   lod: MonsterLod;
+  /**
+   * 彈跳位移同步（實驗、預設關閉）：模型在著地期間不前進、在空中補上 AI 已走的距離，
+   * 消除著地滑行；模型位置最多落後邏輯位置約 0.4 公尺。只影響畫面，不影響 AI、命中與距離判定。
+   */
+  hopSync?: boolean;
 }
 
-/** 一隻 V3.8R 啵啵的視覺（IMonsterVisual） */
+/** 測試與預覽頁讀取的動畫狀態 */
+export interface BoboV38RAnimDebug {
+  /** 目前播放的 V3.8R 動畫 */
+  anim: string;
+  animTime: number;
+  /** 遊戲狀態機目前的狀態 */
+  logic: MonsterState;
+  face: BoboExpr;
+  visibility: number;
+  starBright: number;
+  dust: number;
+  tempStarMaterial: boolean;
+  lift: number;
+  fwd: number;
+  /** 視覺位置與邏輯位置的水平差距（公尺；hopSync 開啟時才會大於 0） */
+  lag: number;
+  /** 累計：開始播放各動畫的次數 */
+  starts: { attack: number; hurt: number; death: number; respawn: number };
+}
+
+let visualSeq = 0;
+
+/**
+ * 一隻 V3.8R 啵啵的視覺（IMonsterVisual）。
+ * 何時播哪一段動畫由 BoboV38RAnimDriver（純邏輯、可單元測試）依遊戲狀態機決定；
+ * 這裡只把結果套到模型：根節點縮放／傾斜／離地／往前彈出、觸角與翅膀（頂點著色器）、頭頂星星位置、
+ * 表情貼圖、透明度、星星熄滅（死亡時這一隻專用的暫時材質）、星塵。
+ */
 export class BoboV38RVisual implements IMonsterVisual {
   readonly kind = "gltf" as const;
   private readonly opts: BoboV38RVisualOptions;
+  readonly driver: BoboV38RAnimDriver;
   private assets: BoboV38RSceneAssets | null = null;
   private live: LiveInstance | null = null;
   private expr: ExpressionAtlasController | null = null;
   private bodyMaterial: StandardMaterial | null = null;
   private loading: Promise<void> | null = null;
   private disposed = false;
-  // 載入完成前收到的最新狀態，載入後立刻套用
   private readonly xf = { x: 0, y: 0, z: 0, yaw: 0 };
-  private face: MonsterFace = "normal";
-  private opacity = 1;
-  private visible = true;
-  private lastFace = -1;
+  private last: BoboDriverFrame | null = null;
+  private face: BoboExpr | null = null;
+  private blinkClosed = false;
+  private vis = 1;
+  private starBright = 1;
+  private starMat: StandardMaterial | null = null;
+  private readonly dust: Sprite[] = [];
+  private readonly dustN: number;
 
   constructor(opts: BoboV38RVisualOptions) {
     this.opts = opts;
+    const n = visualSeq++;
+    this.driver = new BoboV38RAnimDriver([0, 0.37, 0.71][n % 3]!, 17 + (n % 3) * 101, opts.hopSync === true);
+    this.dustN = dustCount(opts.lod);
   }
 
   /** 相容既有除錯 API（window.__starwish.monsters() 以 model.root 判斷是否在畫面內） */
@@ -313,6 +388,30 @@ export class BoboV38RVisual implements IMonsterVisual {
 
   get loaded(): boolean {
     return this.live !== null;
+  }
+
+  debugState(): BoboV38RAnimDebug {
+    const f = this.last;
+    return {
+      anim: this.driver.player.current,
+      animTime: this.driver.player.time,
+      logic: this.driver.logic,
+      face: this.face ?? "normal",
+      visibility: this.vis,
+      starBright: this.starBright,
+      dust: this.dust.length,
+      tempStarMaterial: this.starMat !== null,
+      lift: f?.pose.lift ?? 0,
+      fwd: f?.pose.fwd ?? 0,
+      lag: this.driver.lag,
+      starts: { ...this.driver.starts },
+    };
+  }
+
+  /** 截圖用：待機第 0 秒、一般表情、對齊邏輯位置與朝向 */
+  snap(): void {
+    this.driver.snap();
+    if (this.live) this.render(0);
   }
 
   load(): Promise<void> {
@@ -327,9 +426,7 @@ export class BoboV38RVisual implements IMonsterVisual {
         this.live = s.live;
         this.expr = s.expr;
         this.bodyMaterial = s.bodyMaterial;
-        this.applyTransform();
-        this.applyVisibility();
-        this.applyFace();
+        this.render(0);
       });
     }
     return this.loading;
@@ -340,40 +437,35 @@ export class BoboV38RVisual implements IMonsterVisual {
     this.xf.y = y;
     this.xf.z = z;
     this.xf.yaw = yaw;
-    this.applyTransform();
+    this.driver.setTransform(x, z, yaw);
   }
 
-  onStateEnter(_state: MonsterState): void {
-    /* Stage 5.2：狀態 → V3.8R 動畫 */
+  onStateEnter(state: MonsterState): void {
+    this.driver.onStateEnter(state);
   }
 
-  applyPose(pose: MonsterPose): void {
-    // Stage 5.1：只取通用的顯示與透明度（死亡後隱藏、重生淡入）；伸縮／傾斜等姿勢曲線在 Stage 5.2 改用 V3.8R 已驗收動畫
-    const visible = pose.bodyVisible;
-    const opacity = Math.max(0, Math.min(1, pose.opacity));
-    if (visible !== this.visible || Math.abs(opacity - this.opacity) > 0.002) {
-      this.visible = visible;
-      this.opacity = opacity;
-      this.applyVisibility();
-    }
+  applyPose(_pose: MonsterPose): void {
+    /* V3.8R 的姿勢由已驗收的動畫產生（driver）；框架的通用姿勢不使用 */
   }
 
-  setFace(face: MonsterFace): void {
-    this.face = face;
-    this.applyFace();
+  setFace(_face: MonsterFace): void {
+    /* 表情跟著 V3.8R 動畫（攻擊 → 生氣、受傷 → 受傷、死亡 → 受傷 → 閉眼），與已驗收的測試頁相同 */
   }
 
   playEffect(_effect: MonsterEffect): void {
-    /* Stage 5.2／5.3：攻擊命中、死亡星塵、重生 */
+    /* 已驗收的 V3.8R 動畫沒有額外特效（死亡星塵屬於死亡動畫） */
   }
 
-  update(_dt: number): void {
-    /* 果凍矩陣、圓影、光暈由共用資源在繪製前統一更新 */
+  update(dt: number): void {
+    if (this.live) this.render(dt);
+    else this.driver.update(dt); // 載入完成前狀態照樣前進，載入後立刻是正確的動畫
   }
 
   dispose(): void {
     if (this.disposed) return;
     this.disposed = true;
+    this.clearDust();
+    this.releaseStarMat();
     if (this.assets && this.live && this.bodyMaterial) this.assets.despawn(this.live, this.bodyMaterial);
     this.assets?.release();
     this.assets = null;
@@ -382,29 +474,109 @@ export class BoboV38RVisual implements IMonsterVisual {
     this.bodyMaterial = null;
   }
 
-  private applyTransform(): void {
-    const l = this.live;
-    if (!l) return;
-    l.place.position.set(this.xf.x, this.xf.y, this.xf.z);
-    l.place.rotation.y = this.xf.yaw;
+  // ------------------------------------------------------------------ 內部
+
+  private render(dt: number): void {
+    const l = this.live!;
+    const f = this.driver.update(dt);
+    this.last = f;
+    if (f.hidden) {
+      // 移除：隱藏、沒有圓影與光暈；資源保留給重生
+      if (l.place.isEnabled()) l.place.setEnabled(false);
+      l.shown = false;
+      this.clearDust();
+      return;
+    }
+    if (!l.place.isEnabled()) l.place.setEnabled(true);
+    l.shown = true;
+    const p = f.pose;
+    l.place.position.set(this.xf.x + f.offsetX, this.xf.y, this.xf.z + f.offsetZ);
+    l.place.rotation.y = f.yaw;
+    const root = l.inst.root;
+    root.position.set(0, p.lift, p.fwd);
+    const [sx, sy, sz] = poseScale(p);
+    root.scaling.set(sx, sy, sz);
+    root.rotation.x = p.pitch;
+    root.rotation.z = p.roll;
+    l.jelly.anim.set(p.swayX, p.swayZ, p.flap, 0);
+    l.stars.position.set(p.swayX * STAR_W, 0, p.swayZ * STAR_W);
+
+    if (f.face !== this.face) {
+      this.face = f.face;
+      this.blinkClosed = false;
+      this.expr?.set(EXPR[f.face]);
+    }
+    if (f.blinkClosed !== this.blinkClosed) {
+      this.blinkClosed = f.blinkClosed;
+      this.expr?.setPart("Eyes", f.blinkClosed ? EXPR.sleepy : undefined);
+    }
+    if (f.dustTime !== null) this.updateDust(f.dustTime);
+    else this.clearDust();
+    this.setStarBright(f.starBright);
+    this.setVis(f.visibility);
   }
 
-  private applyVisibility(): void {
-    const l = this.live;
-    if (!l) return;
-    const on = this.visible && this.opacity > 0.001;
-    if (l.place.isEnabled() !== on) l.place.setEnabled(on);
-    l.shown = on;
-    l.vis = on ? this.opacity : 0;
+  private setVis(v: number): void {
+    const l = this.live!;
+    l.vis = v;
+    if (Math.abs(v - this.vis) < 1e-4) return;
+    this.vis = v;
     // mesh.visibility 是每隻自己的網格屬性，不改共用材質
-    for (const m of l.inst.meshes) m.visibility = this.opacity;
+    for (const m of l.inst.meshes) m.visibility = v;
   }
 
-  private applyFace(): void {
-    if (!this.expr) return;
-    const i = FACE_INDEX[this.face] ?? 0;
-    if (i === this.lastFace) return;
-    this.lastFace = i;
-    this.expr.set(i);
+  /** 死亡時只為這一隻複製一份星星材質（其他隻不受影響），重生時釋放；熄滅後留下淡淡的冷灰藍水晶色（與測試頁相同） */
+  private setStarBright(b: number): void {
+    const l = this.live!;
+    l.starBright = b;
+    if (b >= 1) {
+      this.releaseStarMat();
+      return;
+    }
+    if (b === this.starBright && this.starMat) return;
+    this.starBright = b;
+    const base = this.assets!.mats.stars;
+    if (!this.starMat) {
+      this.starMat = base.clone(`BoboV38RGame_StarDim_${l.place.name}`) as StandardMaterial;
+      l.stars.material = this.starMat;
+    }
+    const out = 1 - b;
+    this.starMat.emissiveColor.set(base.emissiveColor.r * b + 0.3 * out, base.emissiveColor.g * b + 0.34 * out, base.emissiveColor.b * b + 0.42 * out);
+    this.starMat.diffuseColor.set(base.diffuseColor.r * b + 0.4 * out, base.diffuseColor.g * b + 0.45 * out, base.diffuseColor.b * b + 0.55 * out);
+    this.starMat.specularColor.copyFrom(base.specularColor).scaleInPlace(0.5 + 0.5 * b);
+  }
+
+  private releaseStarMat(): void {
+    this.starBright = 1;
+    if (this.live) this.live.starBright = 1;
+    if (!this.starMat) return;
+    if (this.live && this.assets) this.live.stars.material = this.assets.mats.stars;
+    this.starMat.dispose(false, false);
+    this.starMat = null;
+  }
+
+  private updateDust(t: number): void {
+    const a = this.assets!;
+    while (this.dust.length < this.dustN && a.dust.sprites.length < DUST_CAPACITY) {
+      const k = this.dust.length;
+      const sp = new Sprite(`BoboV38RGame_Dust_${this.live!.place.name}_${k}`, a.dust);
+      const c = DUST_COLORS[k % DUST_COLORS.length]!;
+      sp.color = new Color4(c[0], c[1], c[2], 0);
+      sp.isPickable = false;
+      this.dust.push(sp);
+    }
+    const q = this.live!.place.position;
+    this.dust.forEach((sp, k) => {
+      const d = dustParticle(k, this.dustN, t);
+      sp.position.set(q.x + d.x, q.y + d.y, q.z + d.z);
+      sp.width = sp.height = d.size;
+      sp.color.a = d.alpha;
+    });
+  }
+
+  private clearDust(): void {
+    if (!this.dust.length) return;
+    for (const sp of this.dust) sp.dispose();
+    this.dust.length = 0;
   }
 }

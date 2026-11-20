@@ -5,6 +5,7 @@
 import { MONSTER_DEFINITIONS } from "../../config/monsters.ts";
 import { STAR_DEW_BOBO_PROFILE } from "../star-dew-bobo/profile.ts";
 import { TEST_DUMMY_PROFILE } from "../test-dummy/profile.ts";
+import { STAR_DEW_BOBO_V38R_PROFILE } from "../star-dew-bobo-v38r/profile.ts";
 import { proceduralProfile } from "./profiles.ts";
 import { MonsterRegistry } from "./registry.ts";
 
@@ -22,5 +23,6 @@ export function createMonsterRegistry(): MonsterRegistry {
   return new MonsterRegistry()
     .addDefinitions(MONSTER_DEFINITIONS)
     .addProfile(proceduralProfile("star_dew_bobo", STAR_DEW_BOBO_PROFILE))
-    .addProfile(TEST_DUMMY_PROFILE);
+    .addProfile(TEST_DUMMY_PROFILE)
+    .addProfile(STAR_DEW_BOBO_V38R_PROFILE);
 }

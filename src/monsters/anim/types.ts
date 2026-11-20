@@ -71,6 +71,16 @@ export interface MonsterAnimTimings {
   respawn: number;
   idlePeriod: number;
   hopPeriod: number;
+  /**
+   * 選填規則（省略 = 原本的行為，V2 與測試方塊不設定）：
+   * true = 攻擊中受擊會打斷攻擊、進入受擊（被打斷的攻擊不會觸發命中）；省略／false = 只疊加閃白、不打斷
+   */
+  hitInterruptsAttack?: boolean;
+  /**
+   * 受擊中再受擊：受擊開始後這麼多秒內不重播受擊動畫（傷害照常結算，由呼叫端扣血）；之後從頭重播。
+   * 省略／0 = 原本的「每次都重新計時」
+   */
+  hitRehitLock?: number;
 }
 
 export interface EffectCue {

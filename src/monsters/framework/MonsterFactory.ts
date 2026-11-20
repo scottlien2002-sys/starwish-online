@@ -16,6 +16,8 @@ export interface SpawnOptions {
    * 例：預覽 V3.8R 時把 star_dew_bobo 的 star_dew_bobo_procedural（V2）換成 star_dew_bobo_v38r；省略 = 使用定義裡的 modelId。
    */
   modelId?: string;
+  /** 改用另一個已註冊的動畫設定（時長、命中時間點、受擊規則）；省略 = 定義裡的 animationProfileId */
+  animationProfileId?: string;
 }
 
 /**
@@ -31,7 +33,7 @@ export class MonsterFactory {
 
   create(monsterId: string, spawn: Vec3, options: SpawnOptions = {}): MonsterController {
     const def = this.registry.definition(monsterId);
-    const profile = this.registry.profile(def.animationProfileId);
+    const profile = this.registry.profile(options.animationProfileId ?? def.animationProfileId);
     const id = options.instanceId ?? `${monsterId}#${++this.seq}`;
     const instance = new MonsterInstance(id, def, profile.anim.timings, spawn);
 
