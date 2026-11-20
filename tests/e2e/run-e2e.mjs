@@ -1657,7 +1657,8 @@ for (const name of browsers) {
     report.runs.push(run);
     console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
     for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}${v.ok ? "" : "  " + JSON.stringify(v.detail).slice(0, 700)}`);
-    for (const r of run.results) console.log(`   · ${r.tag}: avg ${r.summary.avgFps.toFixed(1)}, 1%low ${r.summary.low1Fps.toFixed(1)}, min ${r.summary.minFps.toFixed(1)}, draw ${r.summary.avgDrawCalls.toFixed(1)} | ${JSON.stringify(r.counters)}`);
+    for (const r of run.results) if (!r.summary) console.log(`   · ${r.tag}: 倒地處離出生點 ${r.fellFromSpawn} m、復活後鏡頭最大偏離 ${r.peakLagAfterRevive} m、${r.settleSec?.toFixed(2)} 秒追上 | ${r.checks.join(" / ")}`);
+    else console.log(`   · ${r.tag}: avg ${r.summary.avgFps.toFixed(1)}, 1%low ${r.summary.low1Fps.toFixed(1)}, min ${r.summary.minFps.toFixed(1)}, draw ${r.summary.avgDrawCalls.toFixed(1)} | ${JSON.stringify(r.counters)}`);
     for (const e of run.errors) console.log(`   ! ${e}`);
   }
 
