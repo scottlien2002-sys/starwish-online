@@ -187,6 +187,7 @@ class Hair:
             nrs.append(nv)
         hw = w / 2 * ((1 - ts) ** 0.8 * (1 - tip) + tip) * (1 + wide_mid * np.sin(np.pi * ts))
         ht = t / 2 * (1 - 0.5 * ts) + 0.002
+        ht = np.minimum(ht, hw * 0.42 + 0.0015)  # 髮尾保持「扁的葉片」而不是圓管（避免像滴下來的麵條）
         self.part.add(flat_tube(np.array(pts), hw, ht, nrs), k)
         return pts
 
@@ -224,20 +225,20 @@ def male_hair():
     for i, az in enumerate(range(96, 266, 17)):
         L = -36 if abs(az - 180) > 55 else -50
         fl = (0.025, 0.065)[i % 2]
-        H.lock(az, 50, az + 7 * (-1) ** i, L + 8 * (i % 2), 0.14, 0.06, lift=0.018, flare=fl, curl=0.02 + fl * 0.4, tip=0.05, k=0.01)
+        H.lock(az, 50, az + 7 * (-1) ** i, L + 8 * (i % 2), 0.175, 0.06, lift=0.018, flare=fl, curl=0.02 + fl * 0.4, tip=0.06, k=0.012)
     # 後頸：短、內收
     for az in (160, 180, 200):
         H.lock(az, 10, az, -66, 0.11, 0.05, lift=0.0, flare=0.015, curl=0.0, tip=0.12, k=0.012)
     # 耳朵上方的外翹髮尾（正面輪廓最寬處）
     for sx in (1, -1):
         for az, el1, fl in ((86, -20, 0.065), (104, -26, 0.075), (124, -30, 0.06)):
-            H.lock(az * sx, 35, (az + 6) * sx, el1, 0.13, 0.05, lift=0.02, flare=fl, curl=0.035, tip=0.07, k=0.01)
+            H.lock(az * sx, 35, (az + 6) * sx, el1, 0.16, 0.05, lift=0.02, flare=fl, curl=0.035, tip=0.07, k=0.012)
     # 鬢角：耳朵前方往下、貼臉
     for sx in (1, -1):
         H.lock(64 * sx, 30, 66 * sx, -36, 0.06, 0.03, lift=-0.02, flare=0.0, curl=0.0, tip=0.14, k=0.01)
     # 瀏海：由頭頂往前、往下蓋住額頭到眉毛，前緣凸出臉，中間一束垂到兩眼之間
     for az, el1, w in ((-54, -24, 0.1), (-38, -18, 0.1), (-21, -14, 0.1), (-5, -24, 0.09), (11, -14, 0.1), (27, -17, 0.1), (43, -19, 0.1), (57, -25, 0.09)):
-        H.lock(az * 0.5, 75, az, el1, w, 0.05, lift=0.04, flare=0.0, curl=0.008, tip=0.05, k=0.008)
+        H.lock(az * 0.5, 75, az, el1, w * 1.25, 0.05, lift=0.04, flare=0.0, curl=0.008, tip=0.06, k=0.01)
     # 頭頂的翹髮：短、往外上方翹出（打破圓頂輪廓，像設定圖頭頂的亂翹）
     for az, el, up, out in ((160, 66, 0.03, 0.06), (205, 64, 0.025, 0.06)):
         p0, n = H.surf(az, el, 0.0)
@@ -266,14 +267,14 @@ def female_hair():
     # 下半部：直直垂到肩上，髮尾往外翹
     for i, az in enumerate(range(62, 299, 15)):
         L = -62 if abs(az - 180) > 40 else -56
-        H.lock(az, 34, az + 3 * (-1) ** i, L + 6 * (i % 2), 0.13, 0.045, lift=0.085,
+        H.lock(az, 34, az + 3 * (-1) ** i, L + 6 * (i % 2), 0.17, 0.045, lift=0.085,
                flare=(0.11, 0.075)[i % 2], curl=0.02, tip=0.2, k=0.014)
     # 臉頰兩側的長鬢髮（到 0.63，髮尾外翹）
     for sx in (1, -1):
-        H.lock(46 * sx, 45, 54 * sx, -96, 0.085, 0.035, lift=0.03, flare=0.045, curl=0.0, tip=0.18, k=0.008)
+        H.lock(46 * sx, 45, 54 * sx, -96, 0.11, 0.035, lift=0.03, flare=0.045, curl=0.0, tip=0.18, k=0.008)
     # 瀏海：輕薄、到眉毛
     for az, el1 in ((-46, -24), (-31, -18), (-16, -14), (-2, -19), (13, -14), (28, -17), (43, -22)):
-        H.lock(az * 0.5, 74, az, el1, 0.09, 0.032, lift=0.022, flare=0.0, curl=0.008, tip=0.08, k=0.007)
+        H.lock(az * 0.5, 74, az, el1, 0.115, 0.032, lift=0.022, flare=0.0, curl=0.008, tip=0.08, k=0.009)
     # 呆毛
     for sx, (az, a_, b_) in ((1, (-6, 0.075, 0.06)), (-1, (8, 0.06, 0.045))):
         p0, n = H.surf(az, 86, 0.0)
