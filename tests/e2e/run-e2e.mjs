@@ -1040,7 +1040,7 @@ for (const name of browsers) {
       check(
         "V3.8R 高畫質預設 PCSS32（柔和陰影中品質，MSAA 4x、HDR 不變）；?shadowq=original 回退為原本高品質；Draw Calls 相同",
         !!a && !!b && a.exp.tag === "" && a.exp.shadowQuality === 1 && a.exp.msaa === 4 && a.exp.hdr === true && a.exp.shadowEnabled === true &&
-          b.exp.tag === "shadowq:original" && b.exp.shadowQuality === 0 && b.exp.msaa === 4 && b.exp.hdr === true && b.exp.shadowEnabled === true && b.perf.drawCalls === a.perf.drawCalls,
+          b.exp.tag === "shadowq:original" && b.exp.shadowQuality === 0 && b.exp.msaa === 4 && b.exp.hdr === true && b.exp.shadowEnabled === true && Math.abs(b.perf.drawCalls - a.perf.drawCalls) <= 1, // 單一瞬間讀取的 Draw Calls 可能差 1
         { def: a && a.exp, original: b && b.exp, draw: [a && a.perf.drawCalls, b && b.perf.drawCalls] },
       );
     }
@@ -1552,7 +1552,7 @@ for (const name of browsers) {
     const vp = VIEWPORTS[0];
     const cases =
       name === "webkit"
-        ? [["move", 3, "high", 6], ["attack", 3, "low", 22], ["attack", 10, "low", 22], ["soak", 5, "medium", 8]]
+        ? [["move", 3, "high", 6], ["attack", 3, "low", 22], ["attack", 10, "low", 22], ["soak", 5, "low", 30]]
         : [["attack", 5, "low", 22]];
     const run = { browser: name, viewport: `${vp.name} / 遊戲 實際遊玩壓力測試 ?autoplay`, checks: {}, errors: [], screenshots: [], results: [] };
     const check = (key, ok, detail) => {

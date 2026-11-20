@@ -132,3 +132,13 @@ test("時間軸取樣與結果文字", () => {
   assert.match(lines.join("\n"), /Safari 不提供/);
   assert.equal(autoplayKey({ mode: "attack", count: 10, variant: "v38r", quality: "high" }), "attack_10_v38r_high");
 });
+
+test("soak 太短（只有移動段）時不檢查攻擊；有戰鬥段時才檢查", () => {
+  const s = new AutoplayStats(60);
+  for (let i = 0; i < 300; i++) s.frame(frame());
+  const short = s.judge({ mode: "soak", attackInterval: 1, resStart: res, resEnd: res, duplicatesBlocked: 0, attackExpected: false });
+  assert.ok(short.every((c) => c.ok), JSON.stringify(short.filter((c) => !c.ok)));
+  assert.ok(!short.some((c) => c.name.includes("出手")));
+  const long = s.judge({ mode: "soak", attackInterval: 1, resStart: res, resEnd: res, duplicatesBlocked: 0, attackExpected: true });
+  assert.ok(long.some((c) => c.name.includes("出手") && !c.ok));
+});

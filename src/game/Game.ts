@@ -725,7 +725,15 @@ export class Game {
       pixelRatio: Math.round((1 / this.engine.getHardwareScalingLevel()) * 100) / 100,
       summary: summarizeFrames(st.dts, st.draws),
       timeline: st.timeline,
-      checks: st.judge({ mode: o.mode, attackInterval: PREVIEW_COMBAT.playerAttackInterval, resStart: a.resStart ?? end, resEnd: end, duplicatesBlocked: dup }),
+      checks: st.judge({
+        mode: o.mode,
+        attackInterval: PREVIEW_COMBAT.playerAttackInterval,
+        resStart: a.resStart ?? end,
+        resEnd: end,
+        duplicatesBlocked: dup,
+        // soak：暖機＋測量超過 20 秒才會進入第一段戰鬥（再留 3 秒讓角色走到怪物旁）
+        attackExpected: o.mode !== "soak" || a.warm + st.elapsed > 23,
+      }),
       counters: {
         出手: st.attackStarts,
         命中: st.hits,

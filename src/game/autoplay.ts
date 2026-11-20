@@ -194,10 +194,12 @@ export class AutoplayStats {
     resStart: { meshes: number; materials: number; textures: number };
     resEnd: { meshes: number; materials: number; textures: number };
     duplicatesBlocked: number;
+    /** 這次測試是否有戰鬥段（soak 每 60 秒的第 20 秒起才戰鬥；太短的 soak 只有移動段） */
+    attackExpected?: boolean;
   }): AutoplayCheck[] {
     const c: AutoplayCheck[] = [];
     const moves = o.mode !== "attack";
-    const attacks = o.mode !== "move";
+    const attacks = o.mode === "attack" || (o.mode === "soak" && o.attackExpected !== false);
     c.push({ name: "畫面持續更新（無凍結：最長一幀 < 1 秒）", ok: this.dts.length > 0 && Math.max(...this.dts) < 1, detail: `最長一幀 ${(Math.max(0, ...this.dts) * 1000).toFixed(0)} ms` });
     c.push({ name: "WebGL 沒有 Context Lost", ok: this.contextLost === 0, detail: `${this.contextLost} 次` });
     c.push({ name: "沒有瞬間位移", ok: this.teleports === 0, detail: `單幀位移最大為正常速度的 ${this.maxStepRatio.toFixed(2)} 倍` });
