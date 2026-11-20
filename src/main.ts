@@ -71,6 +71,18 @@ function main(): void {
         });
       return;
     }
+    // ?lab=novice：Stage 5.4 男女初心者角色預覽（GLB、共用骨架、6 段動畫）；&bench=1 效能測試
+    if (lab === "novice") {
+      document.body.classList.add("lab-mode");
+      void import("./lab/NoviceLab.ts")
+        .then((m) => m.startNoviceLab(canvas, hudRoot))
+        .then(() => hideBoot())
+        .catch((err: unknown) => {
+          console.error(err);
+          fail(`角色預覽載入失敗：${err instanceof Error ? err.message : String(err)}`);
+        });
+      return;
+    }
     const LAB_MONSTER: Record<string, string> = { bobo: "star_dew_bobo", dummy: "test_dummy" };
     if (lab && (lab in LAB_MONSTER || lab === "field")) {
       const start =

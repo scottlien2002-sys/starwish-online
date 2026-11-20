@@ -1801,6 +1801,102 @@ for (const name of browsers) {
     for (const e of run.errors) console.log(`   ! ${e}`);
   }
 
+  // ---------- Stage 5.4：男女初心者角色預覽（?lab=novice；GLB、共用骨架、6 段動畫、表情、效能測試）----------
+  {
+    const vp = VIEWPORTS[0];
+    const run = { browser: name, viewport: `${vp.name} / Stage 5.4 男女初心者角色預覽 ?lab=novice`, checks: {}, errors: [], screenshots: [], results: [] };
+    const check = (key, ok, detail) => {
+      run.checks[key] = { ok, detail };
+    };
+    const shot = async (page, label) => {
+      const f = `${outDir}${name}_novice_${label}.png`;
+      await page.screenshot({ path: f });
+      run.screenshots.push(f.split("/test-results/")[1]);
+    };
+    const qs = name === "webkit" ? ["high", "low"] : ["high"];
+    for (const q of qs) {
+      const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+      const page = await ctx.newPage();
+      page.on("pageerror", (e) => run.errors.push(`${q} pageerror: ${e.message}`));
+      page.on("console", (m) => m.type() === "error" && run.errors.push(`${q} console: ${m.text()}`));
+      try {
+        await page.goto(server.url + `/?lab=novice&quality=${q}`, { waitUntil: "load" });
+        await page.waitForFunction(() => window.__starwishNovice?.ready === true, null, { timeout: 60000 });
+        await page.waitForTimeout(800);
+        const info = await page.evaluate(() => window.__starwishNovice.info());
+        const chars = await page.evaluate(() => window.__starwishNovice.chars());
+        run.results.push({ tag: `novice ${q}`, info, chars });
+        check(`${q}：男女兩個角色載入（GLB 蒙皮網格，各 3 個網格、18 根骨頭）`, chars.length === 2 && chars.every((c) => c.meshes === 3 && c.bones === 18) && chars[0].gender === "male" && chars[1].gender === "female", chars);
+        check(`${q}：男女骨架相同（名稱與順序）`, info.bones.length === 2 && info.bones[0].length === 18 && info.bones[0].join() === info.bones[1].join(), info.bones);
+        check(`${q}：6 段動畫都在（待機、走路、跑步、攻擊、受傷、死亡）`, ["Idle", "Walk", "Run", "Attack", "Hurt", "Death"].every((a) => info.animations.includes(a)), info.animations);
+        check(`${q}：角色身高約 1.1～1.25 公尺（與遊戲角色相同比例）`, chars.every((c) => c.height > 1.05 && c.height < 1.3), chars.map((c) => c.height));
+        check(`${q}：模型三角形（每個角色 6,000～12,500）`, chars.every((c) => c.triangles >= 6000 && c.triangles <= 12500), chars.map((c) => c.triangles));
+        if (q === "high") check(`${q}：畫質設定與遊戲相同（PCSS32 陰影、HDR、MSAA 4x）`, info.shadowQuality === 1 && info.hdr === true && info.msaa === 4, info);
+        // 動畫真的在動：同一動畫隔一段時間，影格不同；死亡後躺下（高度明顯變低）
+        const anims = {};
+        for (const a of ["Idle", "Walk", "Run", "Attack", "Hurt", "Death"]) {
+          await page.evaluate((x) => window.__starwishNovice.play(x), a);
+          await page.waitForTimeout(120);
+          const f0 = await page.evaluate(() => window.__starwishNovice.chars());
+          await page.waitForTimeout(a === "Death" ? 1800 : 250);
+          const f1 = await page.evaluate(() => window.__starwishNovice.chars());
+          anims[a] = { playing0: f0.map((c) => c.playing), frame0: f0.map((c) => c.frame), frame1: f1.map((c) => c.frame), height1: f1.map((c) => +c.height.toFixed(3)), anim1: f1.map((c) => c.anim), expr: f1.map((c) => c.expr) };
+          if (q === "high" && name === "webkit") await shot(page, `${a.toLowerCase()}`);
+        }
+        run.results.push({ tag: `novice ${q} anims`, anims });
+        check(`${q}：循環動畫（待機、走路、跑步）播放中且影格前進`, ["Idle", "Walk", "Run"].every((a) => anims[a].playing0.every((p) => p.includes(a)) && anims[a].frame1.every((f, i) => f !== anims[a].frame0[i])), anims);
+        check(`${q}：攻擊、受傷播完回到待機`, anims.Attack.anim1.every((x) => x === "Idle") && anims.Hurt.anim1.every((x) => x === "Idle"), { a: anims.Attack, h: anims.Hurt });
+        check(`${q}：死亡後倒在地上（高度 < 0.7 公尺）、表情倒下`, anims.Death.height1.every((h) => h < 0.7) && anims.Death.expr.every((e) => e === "ko"), anims.Death);
+        // 表情切換、三視圖截圖
+        await page.evaluate(() => window.__starwishNovice.play("Idle"));
+        await page.evaluate(() => window.__starwishNovice.freeze(true));
+        for (const v of ["front", "side", "back"]) {
+          await page.evaluate((x) => window.__starwishNovice.view(x), v);
+          await page.waitForTimeout(400);
+          await shot(page, `${q}_${v}`);
+        }
+        await page.evaluate(() => window.__starwishNovice.view("front"));
+        for (const e of ["serious", "happy", "hurt"]) {
+          await page.evaluate((x) => window.__starwishNovice.expression(x), e);
+          await page.waitForTimeout(250);
+          if (q === "high") await shot(page, `${q}_expr_${e}`);
+        }
+        const ex = await page.evaluate(() => window.__starwishNovice.chars().map((c) => c.expr));
+        check(`${q}：表情切換`, ex.every((e) => e === "hurt"), ex);
+      } catch (e) {
+        run.errors.push(`${q} exception: ${e.message}`);
+      }
+      await ctx.close();
+    }
+    // 效能測試（CI 無 GPU，只檢查流程與數據完整；FPS 不代表 iPhone）
+    {
+      const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+      const page = await ctx.newPage();
+      page.on("pageerror", (e) => run.errors.push(`bench pageerror: ${e.message}`));
+      try {
+        await page.goto(server.url + "/?lab=novice&quality=high&bench=1&count=10&anim=Run&dur=4&warmup=1", { waitUntil: "load" });
+        await page.waitForFunction(() => window.__starwishNovice?.ready === true, null, { timeout: 60000 });
+        await page.waitForFunction(() => window.__starwishNovice.bench().state === "done", null, { timeout: 120000 });
+        const b = await page.evaluate(() => window.__starwishNovice.bench());
+        const chars = await page.evaluate(() => window.__starwishNovice.chars());
+        const panel = await page.evaluate(() => document.querySelector("[data-novice-bench]")?.textContent ?? "");
+        run.results.push({ tag: "novice bench 10 Run", bench: b.result });
+        check("效能測試：10 個角色（男女各 5）跑步，產生平均／1% Low／Draw Calls 結果面板", chars.length === 10 && chars.filter((c) => c.gender === "male").length === 5 && b.result && b.result.frames > 0 && b.result.avgDrawCalls > 0 && /角色效能測試結果/.test(panel), { r: b.result, panel });
+        await shot(page, "bench10");
+      } catch (e) {
+        run.errors.push(`bench exception: ${e.message}`);
+      }
+      await ctx.close();
+    }
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 8;
+    if (!run.ok) failures++;
+    report.runs.push(run);
+    console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
+    for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}${v.ok ? "" : "  " + JSON.stringify(v.detail).slice(0, 900)}`);
+    for (const r of run.results) if (r.bench) console.log(`   · ${r.tag}: ${JSON.stringify(r.bench)}`);
+    for (const e of run.errors) console.log(`   ! ${e}`);
+  }
+
   await browser.close();
 }
 
