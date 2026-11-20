@@ -496,7 +496,7 @@ export class Game {
     el.className = "bench-result";
     el.setAttribute(
       "style",
-      "position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;max-width:94vw;max-height:88vh;overflow:auto;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.96);color:#223;font:13px/1.5 system-ui,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.25);user-select:text;-webkit-user-select:text",
+      "position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;max-width:94vw;max-height:90vh;overflow:auto;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.96);color:#223;font:12px/1.4 system-ui,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.25);user-select:text;-webkit-user-select:text",
     );
     const line = (t: string, bold = false): void => {
       const d = document.createElement("div");
@@ -504,6 +504,10 @@ export class Game {
       if (bold) d.style.fontWeight = "700";
       el.appendChild(d);
     };
+    // 按鈕放在最上方：手機橫向畫面較矮時也不必捲動
+    const row = document.createElement("div");
+    row.setAttribute("style", "display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px");
+    el.appendChild(row);
     line("⏱ 效能測試結果（10 秒）".replace("10", String(this.benchOpts!.seconds)), true);
     for (const t of formatResult(r)) line(t);
     const cmp = compareRows(all[`v2_${r.quality}`], all[`v38r_${r.quality}`]);
@@ -513,13 +517,11 @@ export class Game {
     } else {
       line(`（同畫質的${r.variant === "v2" ? " V3.8R" : " V2"} 尚未測試，按下方按鈕測試後會顯示比較）`);
     }
-    const row = document.createElement("div");
-    row.setAttribute("style", "display:flex;flex-wrap:wrap;gap:8px;margin-top:10px");
     const btn = (label: string, onClick: () => void): void => {
       const b = document.createElement("button");
       b.type = "button";
       b.textContent = label;
-      b.setAttribute("style", "padding:8px 12px;border-radius:10px;border:0;background:#8a7cf0;color:#fff;font:600 13px system-ui,sans-serif");
+      b.setAttribute("style", "padding:7px 12px;border-radius:10px;border:0;background:#8a7cf0;color:#fff;font:600 13px system-ui,sans-serif");
       b.addEventListener("pointerdown", (e) => e.stopPropagation());
       b.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -531,7 +533,6 @@ export class Game {
     btn("測 V3.8R", () => location.replace(benchUrl(location.href, "v38r")));
     btn("重新測試", () => location.reload());
     btn("關閉", () => el.remove());
-    el.appendChild(row);
     el.addEventListener("pointerdown", (e) => e.stopPropagation());
     document.body.appendChild(el);
   }
