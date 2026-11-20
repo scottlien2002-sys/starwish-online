@@ -1838,7 +1838,10 @@ for (const name of browsers) {
           await page.evaluate((x) => window.__starwishNovice.play(x), a);
           await page.waitForTimeout(120);
           const f0 = await page.evaluate(() => window.__starwishNovice.chars());
-          await page.waitForTimeout(a === "Death" ? 1800 : 250);
+          await page.waitForTimeout(250);
+          // 單次動畫：等它真的播完（CI 沒有 GPU、每秒只有幾格，不能用固定時間）
+          if (a === "Attack" || a === "Hurt") await page.waitForFunction(() => window.__starwishNovice.chars().every((c) => c.anim === "Idle"), null, { timeout: 15000 }).catch(() => {});
+          if (a === "Death") await page.waitForFunction(() => window.__starwishNovice.chars().every((c) => c.playing.length === 0), null, { timeout: 15000 }).catch(() => {});
           const f1 = await page.evaluate(() => window.__starwishNovice.chars());
           anims[a] = { playing0: f0.map((c) => c.playing), frame0: f0.map((c) => c.frame), frame1: f1.map((c) => c.frame), height1: f1.map((c) => +c.height.toFixed(3)), anim1: f1.map((c) => c.anim), expr: f1.map((c) => c.expr) };
           if (q === "high" && name === "webkit") await shot(page, `${a.toLowerCase()}`);
