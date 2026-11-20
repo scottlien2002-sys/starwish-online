@@ -160,6 +160,23 @@ export class MonsterInstance {
     };
   }
 
+  /**
+   * 測試用（?debug=1 的「重設測試」）：不論目前狀態，立即回到出生點、血量全滿、待機、冷卻與攻擊紀錄歸零。
+   * 一般遊戲流程不會呼叫；數值不變。
+   */
+  resetForTest(): void {
+    this.sm.resetToIdle();
+    this.currentHp = this.definition.maxHp;
+    this.currentPosition.x = this.spawnPosition.x;
+    this.currentPosition.y = this.spawnPosition.y;
+    this.currentPosition.z = this.spawnPosition.z;
+    this.currentTarget = null;
+    this.lastAttackTime = Number.NEGATIVE_INFINITY;
+    this.attackId = 0;
+    this.attackSettled = true;
+    Object.assign(this.attackLog, { started: 0, resolved: 0, cancelled: 0, duplicatesBlocked: 0, lastResolvedId: null, lastCancelledId: null });
+  }
+
   /** 重生：回到出生點、血量全滿（只能在死亡動畫播完後） */
   respawn(): RequestResult {
     const r = this.sm.request("respawn");

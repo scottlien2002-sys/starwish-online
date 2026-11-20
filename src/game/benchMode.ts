@@ -1,4 +1,5 @@
 import type { BenchmarkSummary } from "../render/benchmark.ts";
+import { PROFILE_SECTIONS, SECTION_LABEL, type ProfileWindow } from "../render/frameProfiler.ts";
 
 /**
  * 遊戲內效能測試（?bench=1）— 純資料與邏輯，不依賴 Babylon，可單元測試。
@@ -11,6 +12,13 @@ import type { BenchmarkSummary } from "../render/benchmark.ts";
 export interface BenchOptions {
   seconds: number;
   warmup: number;
+  /** 調查用（&benchprof=1）：同時記錄每幀 CPU 分段時間 */
+  profile: boolean;
+  /**
+   * 調查用（&benchres=1／1.25／1.5／2）：只在這次測試期間把渲染倍率固定為指定值，用來判斷是否受 GPU 填充率限制。
+   * 不改畫質設定；測試結束後恢復。null = 預設（裝置像素比與畫質上限取小者）
+   */
+  res: number | null;
 }
 
 /** 解析網址參數；沒有 bench=1 時回傳 null（一般遊戲完全不受影響） */
@@ -21,7 +29,9 @@ export function benchOptionsFromSearch(search: string): BenchOptions | null {
     const v = Number(q.get(k));
     return Number.isFinite(v) && q.get(k) !== null && q.get(k) !== "" ? Math.min(max, Math.max(min, v)) : def;
   };
-  return { seconds: num("benchsec", 10, 1, 60), warmup: num("warmup", 3, 0.5, 15) };
+  const resRaw = Number(q.get("benchres"));
+  const res = [1, 1.25, 1.5, 2].includes(resRaw) ? resRaw : null;
+  return { seconds: num("benchsec", 10, 1, 60), warmup: num("warmup", 3, 0.5, 15), profile: q.get("benchprof") === "1", res };
 }
 
 /** 測試場景中 3 隻怪物的固定位置（相對玩家：前方 f 公尺、右方 r 公尺）；與畫質比對截圖相同 */
@@ -47,6 +57,10 @@ export interface BenchResult {
   materials: number;
   textures: number;
   monsters: number;
+  /** 調查用：這次測試指定的渲染倍率（&benchres）；一般測試沒有 */
+  resOverride?: number;
+  /** 調查用：測量期間每幀 CPU 分段平均（&benchprof=1） */
+  profile?: ProfileWindow;
   /** ISO 時間 */
   at: string;
   userAgent: string;
@@ -54,8 +68,9 @@ export interface BenchResult {
 
 export const BENCH_STORAGE_KEY = "starwish.bench.v1";
 
-export function benchKey(r: Pick<BenchResult, "variant" | "quality">): string {
-  return `${r.variant}_${r.quality}`;
+export function benchKey(r: Pick<BenchResult, "variant" | "quality" | "resOverride">): string {
+  // 指定渲染倍率的調查結果另存，不覆蓋一般測試、不進入 V2／V3.8R 比較
+  return `${r.variant}_${r.quality}${r.resOverride !== undefined ? `_r${r.resOverride}` : ""}`;
 }
 
 const VARIANT_LABEL = { v2: "V2", v38r: "V3.8R" } as const;
@@ -67,14 +82,20 @@ const f0 = (v: number | undefined): string => (v === undefined ? "—" : Math.ro
 /** 單次結果的文字列（結果面板與複製用） */
 export function formatResult(r: BenchResult): string[] {
   const s = r.summary;
-  return [
-    `${VARIANT_LABEL[r.variant]}・畫質${QUALITY_LABEL[r.quality]}・${r.pixelRatio}x（裝置 ${r.devicePixelRatio}x，${r.width}×${r.height}）`,
+  const lines = [
+    `${VARIANT_LABEL[r.variant]}・畫質${QUALITY_LABEL[r.quality]}・${r.pixelRatio}x${r.resOverride !== undefined ? "【調查：指定倍率】" : ""}（裝置 ${r.devicePixelRatio}x，${r.width}×${r.height}）`,
     `平均 ${f1(s.avgFps)} FPS／1% Low ${f1(s.low1Fps)}／最低 ${f1(s.minFps)}`,
     `最慢 1% 平均 ${f1(s.low1AvgFps)} FPS／第 99 百分位影格 ${f1(s.p99FrameMs)} ms／最長影格 ${f1(s.maxFrameMs)} ms`,
     `Draw Calls 平均 ${f1(s.avgDrawCalls)}・最高 ${f0(s.maxDrawCalls)}／Active Mesh 平均 ${f1(r.avgActiveMeshes)}・最高 ${f0(r.maxActiveMeshes)}`,
     `場景 Mesh ${r.meshes}・材質 ${r.materials}・貼圖 ${r.textures}・怪物 ${r.monsters} 隻`,
     `${s.frames} 幀／${s.seconds} 秒（暖機 ${r.warmup} 秒不計）`,
   ];
+  const p = r.profile;
+  if (p) {
+    lines.push(`每幀：影格 ${f1(p.avgFrameMs)} ms ＝ CPU ${f1(p.cpuMs)} ms ＋ GPU／等待 ${f1(p.waitMs)} ms`);
+    lines.push("CPU：" + PROFILE_SECTIONS.map((k) => `${SECTION_LABEL[k]} ${p.sections[k].toFixed(2)}`).join("・"));
+  }
+  return lines;
 }
 
 /** 同畫質 V2 與 V3.8R 的比較列（兩者都有結果時） */

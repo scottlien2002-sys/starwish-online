@@ -144,6 +144,16 @@ export class PreviewCombat {
     return dmg;
   }
 
+  /** 測試用（?debug=1 的「重設測試」）：玩家 HP 全滿、解除倒地、清除冷卻、未揮中的攻擊與鎖定。數值不變 */
+  resetForTest(): void {
+    this.hp = PREVIEW_COMBAT.playerMaxHp;
+    this.downUntil = null;
+    this.nextAttackAt = 0;
+    this.pending = null;
+    this.lockedId = null;
+    this.hitsTaken = 0;
+  }
+
   /** 測試用：直接讓玩家倒地（E2E 驗證倒地與復活流程） */
   debugKnockDown(now: number): void {
     this.pending = null;

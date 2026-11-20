@@ -7,7 +7,10 @@ import {
   MeshBuilder,
   Scene,
   StandardMaterial,
+  EngineInstrumentation,
   Matrix,
+  SceneInstrumentation,
+  type ShadowGenerator,
   type TransformNode,
   Vector3,
 } from "@babylonjs/core";
@@ -35,6 +38,8 @@ import type { AttackLog } from "../monsters/framework/MonsterInstance.ts";
 import { PREVIEW_COMBAT, PreviewCombat, previewSpawnPoints, separate, type AttackStartResult, type PlayerAttackResult } from "./previewCombat.ts";
 import { ATTACK_TIMING, type AttackPhase } from "../actors/attackAnim.ts";
 import { FrameRecorder } from "../render/benchmark.ts";
+import { FrameProfiler, resolutionInfo } from "../render/frameProfiler.ts";
+import { DebugPanel, debugEnabledFromSearch, formatDebugLines, type DebugInfo } from "./debugPanel.ts";
 import { BENCH_SPOTS, benchOptionsFromSearch, benchUrl, compareRows, formatResult, loadResults, saveResult, type BenchOptions, type BenchResult } from "./benchMode.ts";
 
 export interface DebugApi {
@@ -97,6 +102,21 @@ export interface DebugApi {
   teleport(x: number, z: number): void;
   /** Stage 5.1：星露啵啵外觀與 V3.8R 適配器資源狀態 */
   bobo(): Promise<unknown>;
+  /** 除錯面板（?debug=1）目前的資料；一般遊戲為 null */
+  debugInfo(): DebugInfo | null;
+  /** 除錯面板的「重設測試」 */
+  resetTest(): void;
+  /** 調查用（只在呼叫時計算）：這一幀畫了哪些東西 */
+  renderBreakdown(): {
+    pixelRatio: number;
+    renderSize: [number, number];
+    postProcess: { enabled: boolean; msaaSamples: number; fxaa: boolean };
+    glow: { exists: boolean; enabled: boolean };
+    shadow: { mapSize: number; casters: number; filter: string };
+    renderTargets: number;
+    activeByGroup: Record<string, number>;
+    trianglesActive: number;
+  };
   /** 效能測試（?bench=1）狀態；一般遊戲為 null */
   benchState(): { phase: "loading" | "warmup" | "measuring" | "done"; progress: number; result: BenchResult | null; saved: string[] } | null;
   /** Stage 5.1：另建一隻 V3.8R 視覺 → 移除，比對資源數（只在 ?bobo=v38r 時執行） */
@@ -130,6 +150,7 @@ export class Game {
   private readonly sun: DirectionalLight;
   private readonly quality: QualitySettings;
   private readonly render: RenderSetup;
+  private readonly shadowGen: ShadowGenerator;
   private readonly perfOverlay: PerfOverlay;
   private readonly position = new Vector3(0, 0, 0);
   private yaw = 0;
@@ -145,6 +166,14 @@ export class Game {
   private readonly boboVariant: BoboVariant;
   /** 測試截圖：怪物停住（不更新 AI 與動畫），只用於同條件比較畫質 */
   private photoMode = false;
+  /** 除錯面板（?debug=1）：null = 一般遊戲（不建立、不計時） */
+  private readonly debugOn = debugEnabledFromSearch(location.search);
+  private debugPanel: DebugPanel | null = null;
+  private debugLast: DebugInfo | null = null;
+  /** 每幀 CPU 分段計時：只在 ?debug=1 或 ?bench=1&benchprof=1 建立 */
+  private profiler: FrameProfiler | null = null;
+  private sceneInstr: SceneInstrumentation | null = null;
+  private gpuInstr: EngineInstrumentation | null = null;
   /** 效能測試（?bench=1）：null = 一般遊戲 */
   private readonly benchOpts: BenchOptions | null = benchOptionsFromSearch(location.search);
   private benchRun: {
@@ -203,6 +232,7 @@ export class Game {
 
     // 陰影依畫質：高 = 柔和接觸陰影，中/低 = PCF
     const shadows = createShadows(this.sun, this.quality);
+    this.shadowGen = shadows;
     shadows.darkness = 0.35;
 
     this.world = buildMeadow(scene, shadows);
@@ -273,6 +303,8 @@ export class Game {
     this.installPlatformGuards();
     this.installDebugApi();
     if (this.benchOpts) void this.startBench(hudRoot);
+    if (this.debugOn || (this.benchOpts && this.benchOpts.profile)) this.setupProfiling();
+    if (this.debugOn) this.debugPanel = new DebugPanel(hudRoot, () => this.resetTest());
   }
 
   start(): void {
@@ -292,6 +324,8 @@ export class Game {
   }
 
   private frame = (): void => {
+    const prof = this.profiler;
+    prof?.beginFrame();
     const dt = Math.min(this.engine.getDeltaTime() / 1000, 0.1);
     this.timeFrames++;
     this.timeSum += dt;
@@ -349,6 +383,7 @@ export class Game {
       root.rotation.x = 0;
     }
 
+    prof?.mark("player");
     const camInput = this.input.consumeCamera();
     // 效能測試：鏡頭固定（觸控旋轉／縮放不生效）
     this.camera.update(dt, this.position, benchLocked ? { yaw: 0, pitch: 0, zoom: 0 } : camInput);
@@ -356,20 +391,135 @@ export class Game {
     // 陰影跟著角色，只算附近範圍
     this.sun.position.copyFrom(this.position).subtractInPlace(this.sun.direction.scale(45));
 
+    prof?.mark("input");
     if (benchLocked) this.updateMonstersHeld(dt);
     else if (!this.photoMode) this.updateMonsters(dt);
+    prof?.mark("monsters");
 
     this.world.update(dt);
+    prof?.mark("world");
     this.scene.render();
+    prof?.mark("render");
     this.perfOverlay.update(dt);
     if (this.benchRun) this.benchFrame();
 
     this.fpsTimer += dt;
     if (this.fpsTimer >= 0.5) {
       this.fpsTimer = 0;
+      if (this.debugPanel) this.updateDebugPanel();
       this.hud.setFps(this.engine.getFps());
     }
+    if (prof) {
+      prof.mark("hud");
+      prof.endFrame(this.engine.getDeltaTime());
+    }
   };
+
+  /** 調查用計時（只在除錯或效能分析模式）：CPU 分段、Babylon 繪製細項、GPU 計時（裝置支援時） */
+  private setupProfiling(): void {
+    this.profiler = new FrameProfiler();
+    const si = new SceneInstrumentation(this.scene);
+    si.captureActiveMeshesEvaluationTime = true;
+    si.captureRenderTargetsRenderTime = true;
+    si.captureSpritesRenderTime = true;
+    si.captureParticlesRenderTime = true;
+    this.sceneInstr = si;
+    // GPU 計時需要 EXT_disjoint_timer_query；iOS Safari 通常不支援，此時不建立
+    if (this.engine.getCaps().timerQuery) {
+      const gi = new EngineInstrumentation(this.engine);
+      gi.captureGPUFrameTime = true;
+      this.gpuInstr = gi;
+    }
+  }
+
+  private collectDebugInfo(): DebugInfo {
+    const counts = this.resourceCounts();
+    const canvas = this.engine.getRenderingCanvas();
+    const w = this.engine.getRenderWidth(), h = this.engine.getRenderHeight();
+    const cssW = Math.round(canvas?.clientWidth ?? w), cssH = Math.round(canvas?.clientHeight ?? h);
+    const si = this.sceneInstr;
+    const gi = this.gpuInstr;
+    const a = this.player.attackPose;
+    return {
+      variant: this.boboVariant,
+      quality: this.quality.level,
+      fps: this.engine.getFps(),
+      drawCalls: this.perfOverlay.drawCalls,
+      activeMeshes: this.scene.getActiveMeshes().length,
+      meshes: counts.meshes,
+      materials: counts.materials,
+      textures: counts.textures,
+      render: {
+        width: w,
+        height: h,
+        cssWidth: cssW,
+        cssHeight: cssH,
+        pixelRatio: Math.round((1 / this.engine.getHardwareScalingLevel()) * 100) / 100,
+        devicePixelRatio: window.devicePixelRatio || 1,
+        megapixels: resolutionInfo(cssW, cssH, w, h).megapixels,
+      },
+      // 效能測試進行中時不取走計時視窗（留給測試結果）
+      profile: this.profiler && !this.benchLocked ? this.profiler.takeWindow() : null,
+      sceneTimes: si
+        ? {
+            activeMeshes: si.activeMeshesEvaluationTimeCounter.lastSecAverage,
+            renderTargets: si.renderTargetsRenderTimeCounter.lastSecAverage,
+            sprites: si.spritesRenderTimeCounter.lastSecAverage,
+            particles: si.particlesRenderTimeCounter.lastSecAverage,
+          }
+        : null,
+      gpuMs: gi && gi.gpuFrameTimeCounter.count > 0 ? gi.gpuFrameTimeCounter.lastSecAverage * 1e-6 : null,
+      gpuSupported: gi !== null,
+      player: { hp: this.combat.hp, maxHp: PREVIEW_COMBAT.playerMaxHp, down: this.combat.isDown, attackPhase: a.phase, hits: this.hits },
+      monsters: this.monsters.map((m) => {
+        const i = m.instance;
+        const v = m.visual;
+        return {
+          id: i.instanceId,
+          hp: i.currentHp,
+          maxHp: i.definition.maxHp,
+          state: i.sm.state,
+          anim: v instanceof BoboV38RVisual ? v.debugState().anim : null,
+          attackId: i.attackId,
+          resolved: i.attackLog.resolved,
+          cancelled: i.attackLog.cancelled,
+          duplicatesBlocked: i.attackLog.duplicatesBlocked,
+          cooldown: i.cooldownRemaining(this.now),
+          respawnIn: m.brain ? m.brain.respawnRemaining(this.now) : null,
+        };
+      }),
+    };
+  }
+
+  /** 每 0.5 秒：整理資料、更新面板文字（只在 ?debug=1） */
+  private updateDebugPanel(): void {
+    const info = this.collectDebugInfo();
+    this.debugLast = info;
+    this.debugPanel!.setLines(formatDebugLines(info));
+  }
+
+  /**
+   * 「重設測試」（只在 ?debug=1 的面板與除錯介面）：
+   * 怪物全部回出生點、HP 全滿、待機、冷卻與攻擊紀錄歸零（V3.8R 以重生淡入呈現）；玩家回出生點、HP 全滿、解除倒地。
+   * 不改任何數值與規則。
+   */
+  private resetTest(): void {
+    for (const m of this.monsters) {
+      if (m.visual instanceof BoboV38RVisual) m.visual.onStateEnter("respawn");
+      m.instance.resetForTest();
+      m.brain?.resetForTest();
+    }
+    this.combat.resetForTest();
+    this.attackTargetId = null;
+    this.lastHit = null;
+    this.hits = 0;
+    this.downT = 0;
+    this.position.set(0, heightAt(0, 0), 0);
+    this.player.root.position.copyFrom(this.position);
+    this.player.root.rotation.x = 0;
+    this.updateBars();
+    this.hud.toast("已重設測試：怪物與玩家回到出生點、HP 全滿", 1200);
+  }
 
   /** 效能測試進行中（載入、暖機、測量）：暫停操作、AI 與戰鬥 */
   private get benchLocked(): boolean {
@@ -434,7 +584,7 @@ export class Game {
       if (m.visual instanceof BoboV38RVisual) m.visual.snap();
     });
     this.lockRing.setEnabled(false);
-    this.perfOverlay.lockResolution(Math.min(window.devicePixelRatio || 1, this.quality.maxPixelRatio));
+    this.perfOverlay.lockResolution(this.benchOpts?.res ?? Math.min(window.devicePixelRatio || 1, this.quality.maxPixelRatio));
     this.engine.resize();
   }
 
@@ -445,6 +595,8 @@ export class Game {
     const rawDt = this.engine.getDeltaTime() / 1000;
     const done = b.rec.record(rawDt, this.perfOverlay.drawCalls);
     if (b.rec.progress * (this.benchOpts!.seconds + this.benchOpts!.warmup) > this.benchOpts!.warmup) {
+      // 進入測量的那一幀：丟掉暖機期間的分段計時
+      if (b.phase === "warmup") this.profiler?.takeWindow();
       b.phase = "measuring";
       const active = this.scene.getActiveMeshes().length;
       b.activeSum += active;
@@ -473,6 +625,8 @@ export class Game {
       materials: counts.materials,
       textures: counts.textures,
       monsters: this.monsters.length,
+      ...(this.benchOpts!.res !== null ? { resOverride: this.benchOpts!.res } : {}),
+      ...(this.benchOpts!.profile && this.profiler ? { profile: this.profiler.takeWindow() } : {}),
       at: new Date().toISOString(),
       userAgent: navigator.userAgent,
     };
@@ -803,6 +957,31 @@ export class Game {
           glow: this.render.glow ? this.render.glow.isEnabled : null,
           pixelRatio: 1 / this.engine.getHardwareScalingLevel(),
           shots,
+        };
+      },
+      debugInfo: () => (this.debugOn ? (this.debugLast ?? this.collectDebugInfo()) : null),
+      resetTest: () => this.resetTest(),
+      renderBreakdown: () => {
+        const groups: Record<string, number> = {};
+        let tris = 0;
+        const act = this.scene.getActiveMeshes();
+        for (let i = 0; i < act.length; i++) {
+          const m = act.data[i]!;
+          const n = m.name;
+          const g = n.startsWith("BoboV38RGame") || /^(Body_|Eyes|Mouth|Blush|Stars)/.test(n) ? "怪物 V3.8R" : n.startsWith("PH_") ? "玩家／介面" : /bobo|Bobo/.test(n) ? "怪物 V2" : "草原與天空";
+          groups[g] = (groups[g] ?? 0) + 1;
+          tris += Math.floor((m.getTotalIndices?.() ?? 0) / 3) * Math.max(1, (m as unknown as { thinInstanceCount?: number }).thinInstanceCount ?? 1);
+        }
+        const casters = this.shadowGen.getShadowMap()?.renderList?.length ?? 0;
+        return {
+          pixelRatio: Math.round((1 / this.engine.getHardwareScalingLevel()) * 100) / 100,
+          renderSize: [this.engine.getRenderWidth(), this.engine.getRenderHeight()],
+          postProcess: { enabled: this.render.pipeline !== null, msaaSamples: this.quality.msaaSamples, fxaa: this.quality.fxaa },
+          glow: { exists: this.render.glow !== null, enabled: this.render.glow?.isEnabled ?? false },
+          shadow: { mapSize: this.quality.shadows.mapSize, casters, filter: this.quality.shadows.filter },
+          renderTargets: this.scene.customRenderTargets.length + (this.shadowGen.getShadowMap() ? 1 : 0),
+          activeByGroup: groups,
+          trianglesActive: tris,
         };
       },
       benchState: () => {

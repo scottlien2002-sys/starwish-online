@@ -20,11 +20,11 @@ test("網址參數：只有 bench=1 才啟用；預設暖機 3 秒、測量 10 �
   assert.equal(benchOptionsFromSearch("?bobo=v38r"), null);
   assert.equal(benchOptionsFromSearch("?bench=0"), null);
   assert.equal(benchOptionsFromSearch("?bench=profile"), null);
-  assert.deepEqual(benchOptionsFromSearch("?bench=1"), { seconds: 10, warmup: 3 });
-  assert.deepEqual(benchOptionsFromSearch("?bench=1&bobo=v38r&quality=high"), { seconds: 10, warmup: 3 });
-  assert.deepEqual(benchOptionsFromSearch("?bench=1&benchsec=2&warmup=1"), { seconds: 2, warmup: 1 });
-  assert.deepEqual(benchOptionsFromSearch("?bench=1&benchsec=999&warmup=0"), { seconds: 60, warmup: 0.5 });
-  assert.deepEqual(benchOptionsFromSearch("?bench=1&benchsec=abc"), { seconds: 10, warmup: 3 });
+  assert.deepEqual(benchOptionsFromSearch("?bench=1"), { seconds: 10, warmup: 3, profile: false, res: null });
+  assert.deepEqual(benchOptionsFromSearch("?bench=1&bobo=v38r&quality=high"), { seconds: 10, warmup: 3, profile: false, res: null });
+  assert.deepEqual(benchOptionsFromSearch("?bench=1&benchsec=2&warmup=1"), { seconds: 2, warmup: 1, profile: false, res: null });
+  assert.deepEqual(benchOptionsFromSearch("?bench=1&benchsec=999&warmup=0"), { seconds: 60, warmup: 0.5, profile: false, res: null });
+  assert.deepEqual(benchOptionsFromSearch("?bench=1&benchsec=abc"), { seconds: 10, warmup: 3, profile: false, res: null });
 });
 
 test("1% Low 的兩種定義：第 99 百分位影格（與已驗收測試頁相同）＋最慢 1% 影格平均", () => {

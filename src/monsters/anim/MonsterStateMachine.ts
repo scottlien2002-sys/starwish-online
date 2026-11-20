@@ -143,6 +143,13 @@ export class MonsterStateMachine {
     return r;
   }
 
+  /** 測試用（?debug=1 的「重設測試」）：不論目前狀態，直接回到待機。一般遊戲流程不會呼叫 */
+  resetToIdle(): void {
+    this._locomotion = "idle";
+    this._hitOverlay = 0;
+    this.enter("idle");
+  }
+
   /** 推進時間；回傳本次發生的狀態轉換 */
   update(dt: number): MonsterState[] {
     const entered: MonsterState[] = [];

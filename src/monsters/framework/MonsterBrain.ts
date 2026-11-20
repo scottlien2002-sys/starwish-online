@@ -45,6 +45,29 @@ export class MonsterBrain {
     return this._mode;
   }
 
+  /**
+   * 距離重生還有幾秒（只讀，不影響計時）：
+   * - 死亡動畫中：剩餘死亡時間＋重生等待
+   * - 已死亡（移除）：重生等待剩餘
+   * - 其他狀態：null
+   */
+  respawnRemaining(now: number): number | null {
+    const m = this.instance;
+    const st = m.sm.state;
+    const wait = m.definition.respawnTime;
+    if (st === "death") return Math.max(0, m.sm.duration("death") - m.sm.stateTime) + wait;
+    if (st === "dead") return this.deadSince === null ? wait : Math.max(0, wait - (now - this.deadSince));
+    return null;
+  }
+
+  /** 測試用（?debug=1 的「重設測試」）：回到待機、清除死亡計時與巡邏目標 */
+  resetForTest(): void {
+    this._mode = "idle";
+    this.deadSince = null;
+    this.patrolPoint = null;
+    this.idleTimer = this.rng.range(this.idleMin, this.idleMax);
+  }
+
   get leashRange(): number {
     const d = this.instance.definition;
     return d.leashRange ?? d.aggroRange * 2.5;

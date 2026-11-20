@@ -1329,6 +1329,120 @@ for (const name of browsers) {
     for (const e of run.errors) console.log(`   ! ${e}`);
   }
 
+  // ---------- Stage 5.3-2：除錯面板（?debug=1）、重設測試、渲染調查 ----------
+  {
+    const vp = VIEWPORTS[0];
+    const cases = name === "webkit" ? [["v38r", "high"], ["v38r", "medium"], ["v38r", "low"], ["v2", "high"]] : [["v38r", "medium"]];
+    const run = { browser: name, viewport: `${vp.name} / 遊戲 除錯面板 ?debug=1`, checks: {}, errors: [], screenshots: [], breakdown: [] };
+    const check = (key, ok, detail) => {
+      run.checks[key] = { ok, detail };
+    };
+    for (const [variant, q] of cases) {
+      const tag = `${variant}／${q}`;
+      const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+      const page = await ctx.newPage();
+      page.on("pageerror", (e) => run.errors.push(`${tag} pageerror: ${e.message}`));
+      page.on("console", (m) => m.type() === "error" && run.errors.push(`${tag} console: ${m.text()}`));
+      try {
+        await page.goto(server.url + `/?debug=1&quality=${q}${variant === "v38r" ? "&bobo=v38r" : ""}`, { waitUntil: "load" });
+        await page.addStyleTag({ content: safeAreaCss(vp.safe) });
+        await page.waitForFunction(() => window.__starwish?.ready === true, null, { timeout: 45000 });
+        if (variant === "v38r") await page.waitForFunction(async () => (await window.__starwish.bobo()).visuals.every((x) => x.loaded), null, { timeout: 45000, polling: 250 });
+        await page.waitForFunction(() => /Draw Calls/.test(document.querySelector(".debug-text")?.textContent ?? ""), null, { timeout: 20000 });
+        await page.waitForTimeout(1500);
+        const txt = await page.evaluate(() => document.querySelector(".debug-text").textContent);
+        const di = await page.evaluate(() => window.__starwish.debugInfo());
+        check(
+          `${tag}：面板顯示 FPS、Draw Calls、解析度、CPU／GPU、玩家與 3 隻怪物（HP、狀態、attackId）`,
+          /FPS/.test(txt) && /Draw Calls \d+/.test(txt) && /解析度 \d+×\d+/.test(txt) && /CPU/.test(txt) && /GPU/.test(txt) && /玩家 HP/.test(txt) && /#1 HP/.test(txt) && /#3 HP/.test(txt) && /attackId/.test(txt) && (variant !== "v38r" || /動畫 (idle|move|attack|hurt)/.test(txt)) && di.monsters.length === 3 && di.drawCalls > 0 && di.profile && di.profile.frames > 0 && di.sceneTimes !== null,
+          txt.slice(0, 600),
+        );
+        // 面板不擋住搖桿與技能按鈕；HUD 版面檢查照常通過
+        const overlap = await page.evaluate(() => {
+          const p = document.querySelector(".debug-panel").getBoundingClientRect();
+          const hit = (r) => !(r.right <= p.left || r.left >= p.right || r.bottom <= p.top || r.top >= p.bottom);
+          const els = [...document.querySelectorAll(".skill-btn, .hud-joystick-zone, .hud-status, .hud-system, .perf-panel")];
+          return els.filter((e) => hit(e.getBoundingClientRect())).map((e) => e.className || e.getAttribute("data-layout"));
+        });
+        const hud = await page.evaluate((sa) => window.__starwish.hudIssues(sa), vp.safe);
+        check(`${tag}：面板不擋住搖桿、攻擊／技能按鈕、HP 狀態與效能面板，HUD 版面正常`, overlap.length === 0 && hud.length === 0, { overlap, hud });
+        if (q === "medium" || name === "chromium") {
+          // 重生倒數：擊倒一隻 → 面板出現倒數且遞減
+          const victim = (await page.evaluate(() => window.__starwish.monsters()))[1];
+          await page.evaluate((id) => window.__starwish.damageMonster(id, 999), victim.id);
+          await page.waitForFunction((id) => window.__starwish.monsters().find((m) => m.id === id).state === "dead", victim.id, { timeout: 20000 });
+          await page.waitForTimeout(700);
+          const r1 = (await page.evaluate(() => window.__starwish.debugInfo())).monsters[1].respawnIn;
+          await page.waitForTimeout(1500);
+          const d2 = await page.evaluate(() => window.__starwish.debugInfo());
+          const r2 = d2.monsters[1].respawnIn;
+          const txt2 = await page.evaluate(() => document.querySelector(".debug-text").textContent);
+          check(`${tag}：重生倒數顯示並遞減（10 秒內）`, r1 !== null && r2 !== null && r2 < r1 && r1 <= 10 && /#2 HP 0\/60・已移除.*重生倒數/.test(txt2), { r1, r2, line: txt2.split("\n").find((l) => l.startsWith("#2")) });
+          // 重設測試：玩家倒地、一隻已移除 → 按下按鈕 → 全部回到出生點、HP 全滿、待機
+          await page.evaluate(() => window.__starwish.knockDown());
+          await page.locator(".debug-reset").click();
+          await page.waitForTimeout(900);
+          const after = await page.evaluate(() => ({ ms: window.__starwish.monsters(), c: window.__starwish.combat(), p: window.__starwish.getPlayer() }));
+          check(
+            `${tag}：「重設測試」：怪物回出生點、HP 全滿、待機、attackId 歸零；玩家 HP 全滿、站起、回出生點`,
+            after.ms.every((m) => m.hp === m.maxHp && (m.state === "idle" || m.state === "move") && Math.hypot(m.x - m.spawnX, m.z - m.spawnZ) < 0.6 && m.attackId <= 1) &&
+              after.c.hp === 100 && after.c.down === false && Math.hypot(after.p.x, after.p.z) < 0.6 &&
+              (variant !== "v38r" || after.ms.every((m) => m.anim.visibility === 1 && m.anim.anim !== "dead")),
+            after,
+          );
+          // 收合／展開
+          await page.locator(".debug-toggle").click();
+          const hidden = await page.evaluate(() => getComputedStyle(document.querySelector(".debug-text")).display === "none");
+          await page.locator(".debug-toggle").click();
+          const shown = await page.evaluate(() => getComputedStyle(document.querySelector(".debug-text")).display !== "none");
+          check(`${tag}：面板可收合與展開`, hidden && shown, { hidden, shown });
+        }
+        const bd = await page.evaluate(() => window.__starwish.renderBreakdown());
+        run.breakdown.push({ tag, bd, profile: di.profile, sceneTimes: di.sceneTimes, gpuSupported: di.gpuSupported, render: di.render });
+        check(`${tag}：渲染調查資料（解析度、陰影、後製、各類物件數）`, bd.renderSize[0] > 0 && bd.shadow.casters >= 0 && Object.keys(bd.activeByGroup).length > 0, bd);
+        const f = `${outDir}${name}_debug_${variant}_${q}.png`;
+        await page.screenshot({ path: f });
+        run.screenshots.push(f.split("/test-results/")[1]);
+      } catch (e) {
+        run.errors.push(`${tag} exception: ${e.message}`);
+      }
+      await ctx.close();
+    }
+    // 不加 debug：完全不建立
+    {
+      const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+      const page = await ctx.newPage();
+      try {
+        await page.goto(server.url + "/?bobo=v38r", { waitUntil: "load" });
+        await page.waitForFunction(() => window.__starwish?.ready === true, null, { timeout: 45000 });
+        const n = await page.evaluate(() => ({ panel: !!document.querySelector(".debug-panel"), info: window.__starwish.debugInfo() }));
+        check("一般遊戲（不加 debug）不建立除錯面板", n.panel === false && n.info === null, n);
+        if (name === "webkit") {
+          // 調查用效能測試參數：指定渲染倍率 1x＋CPU 分段；結果另存
+          await page.goto(server.url + "/?bobo=v38r&quality=medium&bench=1&benchsec=2&warmup=1&benchres=1&benchprof=1", { waitUntil: "load" });
+          await page.waitForFunction(() => window.__starwish?.benchState()?.phase === "done", null, { timeout: 90000 });
+          const st = await page.evaluate(() => window.__starwish.benchState());
+          const r = st.result;
+          check(
+            "效能測試調查參數：benchres=1 固定 1x、benchprof=1 記錄 CPU 分段、結果另存（不覆蓋一般測試）",
+            r.resOverride === 1 && r.pixelRatio === 1 && r.profile && r.profile.frames > 0 && r.profile.cpuMs > 0 && st.saved.includes("v38r_medium_r1"),
+            { pixelRatio: r.pixelRatio, profile: r.profile, saved: st.saved },
+          );
+        }
+      } catch (e) {
+        run.errors.push(`normal exception: ${e.message}`);
+      }
+      await ctx.close();
+    }
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 4;
+    if (!run.ok) failures++;
+    report.runs.push(run);
+    console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
+    for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}${v.ok ? "" : "  " + JSON.stringify(v.detail).slice(0, 700)}`);
+    for (const b of run.breakdown) console.log(`   · ${b.tag}: ${JSON.stringify({ px: b.bd.pixelRatio, size: b.bd.renderSize, post: b.bd.postProcess, glow: b.bd.glow, shadow: b.bd.shadow, rt: b.bd.renderTargets, groups: b.bd.activeByGroup, tris: b.bd.trianglesActive, cpu: b.profile && b.profile.sections, gpu: b.gpuSupported })}`);
+    for (const e of run.errors) console.log(`   ! ${e}`);
+  }
+
   await browser.close();
 }
 
