@@ -385,7 +385,7 @@ def add_strand(m, name, vf, dark, light):
     def col(p, _r=root, _s=span):
         s = clamp((Vector(p) - _r).length / _s)
         band = math.exp(-((s - 0.45) / 0.22) ** 2)  # 中段亮帶（動漫頭髮高光）
-        return mix(mix(dark, light, 0.25 + 0.35 * s), light, 0.55 * band)
+        return mix(mix(dark, light, 0.3 + 0.3 * s), light, 0.35 * band)
 
     m.add(name, vf, col, rigid("head"), group="gloss")
 
@@ -455,10 +455,10 @@ C = {
     "leather_light": srgb("#94603A"),
     "leather_dark": srgb("#4E2F1D"),
     "shorts": srgb("#4A4552"),
-    "hair_m_dark": srgb("#6E351C"),
-    "hair_m_light": srgb("#C0743F"),
-    "hair_f_dark": srgb("#8C433F"),
-    "hair_f_light": srgb("#D9918A"),
+    "hair_m_dark": srgb("#5A2914"),
+    "hair_m_light": srgb("#A65E32"),
+    "hair_f_dark": srgb("#7E3C3C"),
+    "hair_f_light": srgb("#C27E76"),
     "purple": srgb("#6E3FA6"),
     "purple_light": srgb("#B48AE0"),
     "pink": srgb("#F2A9C4"),
