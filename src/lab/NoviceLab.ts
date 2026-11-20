@@ -196,8 +196,9 @@ export async function startNoviceLab(canvas: HTMLCanvasElement, hudRoot: HTMLEle
     camera.radius = 5.5 + Math.sqrt(bench.count) * 0.9;
     camera.beta = 1.15;
   } else {
-    chars.push(spawn("male", -0.42, 0));
-    chars.push(spawn("female", 0.42, 0));
+    // 從正面看：男生在左、女生在右
+    chars.push(spawn("male", 0.42, 0));
+    chars.push(spawn("female", -0.42, 0));
     for (const c of chars) play(c, "Idle");
   }
 
@@ -338,7 +339,8 @@ export async function startNoviceLab(canvas: HTMLCanvasElement, hudRoot: HTMLEle
 
   // ---------- 效能測試 ----------
   const recorder = new FrameRecorder(bench.seconds, bench.warmup);
-  if (bench.enabled) perf.lockResolution(Math.min(window.devicePixelRatio || 1, quality.maxPixelRatio));
+  // 預覽固定解析度（不自動降解析度）：看到的畫質與量到的效能都是該畫質的最高解析度
+  perf.lockResolution(Math.min(window.devicePixelRatio || 1, quality.maxPixelRatio));
 
   engine.runRenderLoop(() => {
     const dt = engine.getDeltaTime() / 1000;

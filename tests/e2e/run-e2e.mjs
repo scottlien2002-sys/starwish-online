@@ -1852,6 +1852,8 @@ for (const name of browsers) {
         check(`${q}：死亡後倒在地上（高度 < 0.7 公尺）、表情倒下`, anims.Death.height1.every((h) => h < 0.7) && anims.Death.expr.every((e) => e === "ko"), anims.Death);
         // 表情切換、三視圖截圖
         await page.evaluate(() => window.__starwishNovice.play("Idle"));
+        // 等待機姿勢真的套用（影格前進、站起來）再暫停
+        await page.waitForFunction(() => window.__starwishNovice.chars().every((c) => c.frame > 2 && c.height > 1), null, { timeout: 15000 }).catch(() => {});
         await page.evaluate(() => window.__starwishNovice.freeze(true));
         for (const v of ["front", "side", "back"]) {
           await page.evaluate((x) => window.__starwishNovice.view(x), v);
