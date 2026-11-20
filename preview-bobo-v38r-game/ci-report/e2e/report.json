@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-11-20T01:43:19.002Z",
+  "startedAt": "2026-11-20T02:10:20.414Z",
   "runs": [
     {
       "browser": "chromium",
@@ -20,7 +20,7 @@
             },
             "pixels": {
               "samples": 3568,
-              "distinctColors": 166,
+              "distinctColors": 162,
               "opaqueRatio": 1
             }
           }
@@ -39,12 +39,24 @@
                 "mode": "chase",
                 "hp": 60,
                 "maxHp": 60,
-                "x": -0.9414015028246838,
+                "x": -0.9763844254877433,
                 "y": 0,
-                "z": 3.6479308234456433,
+                "z": 3.7834896487649985,
                 "spawnX": -1.6000000000000005,
                 "spawnZ": 6.2,
-                "visible": true
+                "visible": true,
+                "stateTime": 1.5598000000000178,
+                "attackId": 0,
+                "attackLog": {
+                  "started": 0,
+                  "resolved": 0,
+                  "cancelled": 0,
+                  "duplicatesBlocked": 0,
+                  "lastResolvedId": null,
+                  "lastCancelledId": null
+                },
+                "cooldown": 0,
+                "anim": null
               },
               {
                 "id": "star_dew_bobo#2",
@@ -57,7 +69,19 @@
                 "z": 8,
                 "spawnX": -3.2000000000000006,
                 "spawnZ": 8,
-                "visible": true
+                "visible": true,
+                "stateTime": 1.5598000000000178,
+                "attackId": 0,
+                "attackLog": {
+                  "started": 0,
+                  "resolved": 0,
+                  "cancelled": 0,
+                  "duplicatesBlocked": 0,
+                  "lastResolvedId": null,
+                  "lastCancelledId": null
+                },
+                "cooldown": 0,
+                "anim": null
               },
               {
                 "id": "star_dew_bobo#3",
@@ -70,7 +94,19 @@
                 "z": 8.6,
                 "spawnX": 2.3999999999999995,
                 "spawnZ": 8.6,
-                "visible": true
+                "visible": true,
+                "stateTime": 1.5598000000000178,
+                "attackId": 0,
+                "attackLog": {
+                  "started": 0,
+                  "resolved": 0,
+                  "cancelled": 0,
+                  "duplicatesBlocked": 0,
+                  "lastResolvedId": null,
+                  "lastCancelledId": null
+                },
+                "cooldown": 0,
+                "anim": null
               }
             ],
             "dists": [
@@ -99,12 +135,24 @@
               "mode": "attack",
               "hp": 40,
               "maxHp": 60,
-              "x": -0.8614405367377174,
+              "x": -0.8964234594007768,
               "y": 0,
-              "z": 3.338082079858649,
+              "z": 3.473640905178004,
               "spawnX": -1.6000000000000005,
               "spawnZ": 6.2,
-              "visible": true
+              "visible": true,
+              "stateTime": 0.30000000000000004,
+              "attackId": 1,
+              "attackLog": {
+                "started": 1,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "cooldown": 1.7999999999999998,
+              "anim": null
             }
           }
         },
@@ -131,12 +179,24 @@
               "mode": "dead",
               "hp": 0,
               "maxHp": 60,
-              "x": -0.8614405367377174,
+              "x": -0.8964234594007768,
               "y": 0,
-              "z": 3.338082079858649,
+              "z": 3.473640905178004,
               "spawnX": -1.6000000000000005,
               "spawnZ": 6.2,
-              "visible": true
+              "visible": true,
+              "stateTime": 0.1,
+              "attackId": 2,
+              "attackLog": {
+                "started": 2,
+                "resolved": 2,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": 2,
+                "lastCancelledId": null
+              },
+              "cooldown": 1.5000000000000013,
+              "anim": null
             }
           }
         },
@@ -161,7 +221,19 @@
               "z": 6.045075628206503,
               "spawnX": -1.6000000000000005,
               "spawnZ": 6.2,
-              "visible": true
+              "visible": true,
+              "stateTime": 0.1,
+              "attackId": 2,
+              "attackLog": {
+                "started": 2,
+                "resolved": 2,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": 2,
+                "lastCancelledId": null
+              },
+              "cooldown": 0,
+              "anim": null
             },
             {
               "id": "star_dew_bobo#2",
@@ -169,37 +241,61 @@
               "mode": "attack",
               "hp": 60,
               "maxHp": 60,
-              "x": -0.5713168999951174,
+              "x": -0.5626700424178118,
               "y": 0,
-              "z": 0.8714904429933868,
+              "z": 0.9396507355374942,
               "spawnX": -3.2000000000000006,
               "spawnZ": 8,
-              "visible": true
+              "visible": true,
+              "stateTime": 0.5,
+              "attackId": 6,
+              "attackLog": {
+                "started": 6,
+                "resolved": 6,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": 6,
+                "lastCancelledId": null
+              },
+              "cooldown": 1.5999999999999943,
+              "anim": null
             },
             {
               "id": "star_dew_bobo#3",
-              "state": "idle",
+              "state": "attack",
               "mode": "attack",
               "hp": 60,
               "maxHp": 60,
-              "x": 0.42863805039962344,
+              "x": 0.43725800493173117,
               "y": 0,
-              "z": 0.8619984895036377,
+              "z": 0.9276548977705706,
               "spawnX": 2.3999999999999995,
               "spawnZ": 8.6,
-              "visible": true
+              "visible": true,
+              "stateTime": 0.2,
+              "attackId": 6,
+              "attackLog": {
+                "started": 6,
+                "resolved": 5,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": 5,
+                "lastCancelledId": null
+              },
+              "cooldown": 1.8999999999999986,
+              "anim": null
             }
           ]
         },
         "草原：怪物攻擊會打到玩家（扣暫定攻擊力 8）": {
           "ok": true,
           "detail": {
-            "hp": 12,
+            "hp": 0,
             "maxHp": 100,
-            "down": false,
-            "hitsTaken": 11,
-            "lockedId": "star_dew_bobo#2",
-            "tilt": 0
+            "down": true,
+            "hitsTaken": 13,
+            "lockedId": null,
+            "tilt": 0.8354672963140356
           }
         },
         "草原：多隻同時存在、無異常狀態": {
@@ -216,7 +312,19 @@
               "z": 6.045075628206503,
               "spawnX": -1.6000000000000005,
               "spawnZ": 6.2,
-              "visible": true
+              "visible": true,
+              "stateTime": 0.1,
+              "attackId": 2,
+              "attackLog": {
+                "started": 2,
+                "resolved": 2,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": 2,
+                "lastCancelledId": null
+              },
+              "cooldown": 0,
+              "anim": null
             },
             {
               "id": "star_dew_bobo#2",
@@ -224,46 +332,82 @@
               "mode": "attack",
               "hp": 60,
               "maxHp": 60,
-              "x": -0.5713168999951174,
+              "x": -0.5626700424178118,
               "y": 0,
-              "z": 0.8714904429933868,
+              "z": 0.9396507355374942,
               "spawnX": -3.2000000000000006,
               "spawnZ": 8,
-              "visible": true
+              "visible": true,
+              "stateTime": 0.5,
+              "attackId": 6,
+              "attackLog": {
+                "started": 6,
+                "resolved": 6,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": 6,
+                "lastCancelledId": null
+              },
+              "cooldown": 1.5999999999999943,
+              "anim": null
             },
             {
               "id": "star_dew_bobo#3",
-              "state": "idle",
+              "state": "attack",
               "mode": "attack",
               "hp": 60,
               "maxHp": 60,
-              "x": 0.42863805039962344,
+              "x": 0.43725800493173117,
               "y": 0,
-              "z": 0.8619984895036377,
+              "z": 0.9276548977705706,
               "spawnX": 2.3999999999999995,
               "spawnZ": 8.6,
-              "visible": true
+              "visible": true,
+              "stateTime": 0.2,
+              "attackId": 6,
+              "attackLog": {
+                "started": 6,
+                "resolved": 5,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": 5,
+                "lastCancelledId": null
+              },
+              "cooldown": 1.8999999999999986,
+              "anim": null
             }
           ]
         },
         "草原：多隻怪物不疊在一起、不擠進玩家": {
           "ok": true,
           "detail": {
-            "minPair": 2.1120099562904064,
-            "minToPlayer": 0.9979998189851111,
+            "minPair": 1.7510560682910488,
+            "minToPlayer": 0.9718355413262232,
             "ring": [
               {
                 "id": "star_dew_bobo#1",
                 "state": "idle",
-                "mode": "idle",
+                "mode": "attack",
                 "hp": 60,
                 "maxHp": 60,
-                "x": -1.5600195169565172,
+                "x": -1.1538622602678585,
                 "y": 0,
-                "z": 6.045075628206503,
+                "z": 4.672303388332033,
                 "spawnX": -1.6000000000000005,
                 "spawnZ": 6.2,
-                "visible": true
+                "visible": true,
+                "stateTime": 0.09999999999999987,
+                "attackId": 3,
+                "attackLog": {
+                  "started": 3,
+                  "resolved": 3,
+                  "cancelled": 0,
+                  "duplicatesBlocked": 0,
+                  "lastResolvedId": 3,
+                  "lastCancelledId": null
+                },
+                "cooldown": 1.0999999999999872,
+                "anim": null
               },
               {
                 "id": "star_dew_bobo#2",
@@ -271,12 +415,24 @@
                 "mode": "return",
                 "hp": 60,
                 "maxHp": 60,
-                "x": -1.9273933679604378,
+                "x": -2.525777744848269,
                 "y": 0,
-                "z": 3.9652625334625653,
+                "z": 5.7604418250520135,
                 "spawnX": -3.2000000000000006,
                 "spawnZ": 8,
-                "visible": true
+                "visible": true,
+                "stateTime": 3.3000000000000016,
+                "attackId": 6,
+                "attackLog": {
+                  "started": 6,
+                  "resolved": 6,
+                  "cancelled": 0,
+                  "duplicatesBlocked": 0,
+                  "lastResolvedId": 6,
+                  "lastCancelledId": null
+                },
+                "cooldown": 0,
+                "anim": null
               },
               {
                 "id": "star_dew_bobo#3",
@@ -284,12 +440,24 @@
                 "mode": "return",
                 "hp": 60,
                 "maxHp": 60,
-                "x": 0.996935618775882,
+                "x": 1.6268855150420871,
                 "y": 0,
-                "z": 3.9000750022620947,
+                "z": 5.577900739356653,
                 "spawnX": 2.3999999999999995,
                 "spawnZ": 8.6,
-                "visible": true
+                "visible": true,
+                "stateTime": 3.0000000000000013,
+                "attackId": 6,
+                "attackLog": {
+                  "started": 6,
+                  "resolved": 6,
+                  "cancelled": 0,
+                  "duplicatesBlocked": 0,
+                  "lastResolvedId": 6,
+                  "lastCancelledId": null
+                },
+                "cooldown": 0,
+                "anim": null
               }
             ],
             "pl": {
@@ -308,7 +476,7 @@
                 "hp": 0,
                 "maxHp": 100,
                 "down": true,
-                "hitsTaken": 13,
+                "hitsTaken": 14,
                 "lockedId": null,
                 "tilt": 1.4451326206513049
               },
@@ -324,7 +492,7 @@
                 "hp": 0,
                 "maxHp": 100,
                 "down": true,
-                "hitsTaken": 13,
+                "hitsTaken": 14,
                 "lockedId": null,
                 "tilt": 1.4451326206513049
               },
@@ -344,7 +512,7 @@
               "hp": 100,
               "maxHp": 100,
               "down": false,
-              "hitsTaken": 13,
+              "hitsTaken": 14,
               "lockedId": null,
               "tilt": 0
             },
@@ -366,12 +534,12 @@
               "yaw": -1.5707963267948966
             },
             "to": {
-              "x": -5.476119493914585e-16,
+              "x": -4.251472694767233e-16,
               "y": 0,
-              "z": 8.943181818181818,
-              "yaw": -1.6348099709083537e-14
+              "z": 6.943181818181818,
+              "yaw": -4.4044602631989835e-12
             },
-            "moved": 8.943181818181818
+            "moved": 6.943181818181818
           }
         },
         "拖曳旋轉攝影機": {
@@ -388,12 +556,12 @@
       },
       "errors": [],
       "fpsReference": [
-        7.7459333849729,
-        7.728970758727305,
-        7.735148514851213,
-        7.838423954223517,
-        7.986369928654806,
-        8.161710694561691
+        4.781486085875506,
+        4.787361365993779,
+        4.783697160078442,
+        4.7710682421794095,
+        4.806459882081516,
+        4.858535637358916
       ],
       "screenshot": "e2e/chromium_iPhone_15_橫向.png",
       "ok": true
@@ -417,7 +585,7 @@
             },
             "pixels": {
               "samples": 2664,
-              "distinctColors": 171,
+              "distinctColors": 166,
               "opaqueRatio": 1
             }
           }
@@ -436,12 +604,24 @@
                 "mode": "chase",
                 "hp": 60,
                 "maxHp": 60,
-                "x": -0.8627998731611584,
+                "x": -0.9776238204621054,
                 "y": 0,
-                "z": 3.3433495084994838,
+                "z": 3.7882923042906516,
                 "spawnX": -1.6000000000000005,
                 "spawnZ": 6.2,
-                "visible": true
+                "visible": true,
+                "stateTime": 1.5566999999999829,
+                "attackId": 0,
+                "attackLog": {
+                  "started": 0,
+                  "resolved": 0,
+                  "cancelled": 0,
+                  "duplicatesBlocked": 0,
+                  "lastResolvedId": null,
+                  "lastCancelledId": null
+                },
+                "cooldown": 0,
+                "anim": null
               },
               {
                 "id": "star_dew_bobo#2",
@@ -454,7 +634,19 @@
                 "z": 8,
                 "spawnX": -3.2000000000000006,
                 "spawnZ": 8,
-                "visible": true
+                "visible": true,
+                "stateTime": 1.5566999999999829,
+                "attackId": 0,
+                "attackLog": {
+                  "started": 0,
+                  "resolved": 0,
+                  "cancelled": 0,
+                  "duplicatesBlocked": 0,
+                  "lastResolvedId": null,
+                  "lastCancelledId": null
+                },
+                "cooldown": 0,
+                "anim": null
               },
               {
                 "id": "star_dew_bobo#3",
@@ -467,7 +659,19 @@
                 "z": 8.6,
                 "spawnX": 2.3999999999999995,
                 "spawnZ": 8.6,
-                "visible": true
+                "visible": true,
+                "stateTime": 1.5566999999999829,
+                "attackId": 0,
+                "attackLog": {
+                  "started": 0,
+                  "resolved": 0,
+                  "cancelled": 0,
+                  "duplicatesBlocked": 0,
+                  "lastResolvedId": null,
+                  "lastCancelledId": null
+                },
+                "cooldown": 0,
+                "anim": null
               }
             ],
             "dists": [
@@ -487,12 +691,12 @@
               "yaw": 0
             },
             "to": {
-              "x": -5.169957794127747e-16,
+              "x": -3.9453109949803945e-16,
               "y": 0,
-              "z": 8.443181818181818,
-              "yaw": -6.123233995736508e-17
+              "z": 6.443181818181818,
+              "yaw": -6.123233995667142e-17
             },
-            "moved": 8.443181818181818
+            "moved": 6.443181818181818
           }
         },
         "拖曳旋轉攝影機": {
@@ -509,12 +713,12 @@
       },
       "errors": [],
       "fpsReference": [
-        8.991458114790959,
-        9.006304413089172,
-        9.194275031414044,
-        9.495173286912497,
-        9.874592673051943,
-        10.263427984946981
+        5.222659378155342,
+        5.392870625033706,
+        5.603601247735225,
+        5.634755169887857,
+        5.694436535504819,
+        5.7964293994899005
       ],
       "screenshot": "e2e/chromium_iPhone_SE_直向.png",
       "ok": true
@@ -596,14 +800,14 @@
               "offsetY": 0,
               "offsetZ": 0,
               "shakeX": 0,
-              "scaleY": 0.9811710112659927,
-              "scaleXZ": 1.009549564465103,
+              "scaleY": 1.041597085252988,
+              "scaleXZ": 0.9798286230329498,
               "stretchZ": 1,
               "lean": 0,
               "opacity": 1,
-              "starGlow": 0.7872367042199756,
-              "antennaSway": -0.10861671127608137,
-              "wingFlap": 0.13681184601223595,
+              "starGlow": 0.9886569508432936,
+              "antennaSway": 0.055350292064703675,
+              "wingFlap": -0.12694556859507755,
               "hitFlash": 0,
               "face": "normal",
               "ringScale": 0,
@@ -624,7 +828,7 @@
         "e2e/chromium_bobo_6_respawn.png"
       ],
       "fpsReference": [
-        13.289625232567616
+        8.756056272254936
       ],
       "ok": true
     },
@@ -733,7 +937,7 @@
         "e2e/chromium_dummy_6_respawn.png"
       ],
       "fpsReference": [
-        16.04878831648169
+        9.591712760175186
       ],
       "ok": true
     },
@@ -768,32 +972,32 @@
             "mode": "chase",
             "hp": 60,
             "maxHp": 60,
-            "x": -4.150627972071791,
-            "z": -2.7826380823886865
+            "x": -4.120700437867111,
+            "z": -2.7856628297222947
           }
         },
         "受傷→死亡": {
           "ok": true,
-          "detail": "star_dew_bobo#1"
+          "detail": "star_dew_bobo#2"
         },
         "AI：死亡後停止行動": {
           "ok": true,
           "detail": {
-            "id": "star_dew_bobo#1",
+            "id": "star_dew_bobo#2",
             "monsterId": "star_dew_bobo",
             "state": "death",
             "mode": "dead",
             "hp": 0,
             "maxHp": 60,
-            "x": -3.085653483620644,
-            "z": -2.8902740380365017
+            "x": -1.3753902070857689,
+            "z": -3.776030389236279
           }
         },
         "AI：目標離開後不再追擊": {
           "ok": true,
           "detail": [
-            "star_dew_bobo#1:dead",
-            "star_dew_bobo#2:return",
+            "star_dew_bobo#1:return",
+            "star_dew_bobo#2:dead",
             "star_dew_bobo#3:return",
             "test_dummy#4:return",
             "test_dummy#5:return"
@@ -866,7 +1070,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 6.461494280380844,
+            "fps": 4.011850388840891,
             "drawCalls": 36,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -888,7 +1092,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 6.461494280380844,
+            "fps": 4.011850388840891,
             "drawCalls": 36,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -982,7 +1186,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 7.292616226071103,
+            "fps": 4.379316152939195,
             "drawCalls": 36,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -1004,7 +1208,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 7.292616226071103,
+            "fps": 4.379316152939195,
             "drawCalls": 36,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -1098,7 +1302,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 6.444836969494579,
+            "fps": 3.9734694501329444,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -1120,7 +1324,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 6.444836969494579,
+            "fps": 3.9734694501329444,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -1214,7 +1418,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 7.132304243720942,
+            "fps": 4.373275920070007,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -1236,7 +1440,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 7.132304243720942,
+            "fps": 4.373275920070007,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -1330,7 +1534,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 6.411017452214175,
+            "fps": 4.0154192097655,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -1356,7 +1560,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 6.411017452214175,
+            "fps": 4.0154192097655,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -1465,7 +1669,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 7.091839319183507,
+            "fps": 4.351828604904176,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -1491,7 +1695,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 7.091839319183507,
+            "fps": 4.351828604904176,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -1600,7 +1804,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 6.381620931716444,
+            "fps": 4.0028820750940675,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -1626,7 +1830,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 6.381620931716444,
+            "fps": 4.0028820750940675,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -1736,7 +1940,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 7.112014224028448,
+            "fps": 4.339046411107976,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -1762,7 +1966,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 7.112014224028448,
+            "fps": 4.339046411107976,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -1872,7 +2076,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 6.418790414606101,
+            "fps": 3.9907414797669416,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -1898,7 +2102,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 6.418790414606101,
+            "fps": 3.9907414797669416,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -2008,7 +2212,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 7.1690093965226875,
+            "fps": 4.362928531874558,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -2034,7 +2238,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 7.1690093965226875,
+            "fps": 4.362928531874558,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -2144,7 +2348,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 7.859428507270281,
+            "fps": 4.8445098660307,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -2170,7 +2374,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 7.859428507270281,
+            "fps": 4.8445098660307,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -2211,7 +2415,7 @@
         "V3.5：不使用陰影貼圖與 GlowLayer（改用接觸陰影與星星光暈）": {
           "ok": true,
           "detail": {
-            "fps": 7.859428507270281,
+            "fps": 4.8445098660307,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -2246,45 +2450,45 @@
           "detail": [
             {
               "name": "目前設定",
-              "avg": 11.00715465052331,
-              "low1": 10.526315789473685,
+              "avg": 6.70947953608749,
+              "low1": 6.605019815058429,
               "draws": 24,
               "gain": 0
             },
             {
               "name": "關閉果凍內部星雲",
-              "avg": 17.722227404162368,
-              "low1": 17.182130584206188,
+              "avg": 7.197480881691407,
+              "low1": 6.9348127600549185,
               "draws": 24,
-              "gain": 6.715072753639058
+              "gain": 0.4880013456039167
             },
             {
               "name": "關閉果凍材質（純透明）",
-              "avg": 18.625624938729793,
-              "low1": 18.083182640205575,
+              "avg": 11.650833482702508,
+              "low1": 11.261261261262737,
               "draws": 24,
-              "gain": 7.618470288206483
+              "gain": 4.941353946615018
             },
             {
               "name": "關閉 MSAA 抗鋸齒",
-              "avg": 16.27573001436094,
-              "low1": 15.948963317396215,
+              "avg": 9.959257582616567,
+              "low1": 9.606147934680344,
               "draws": 24,
-              "gain": 5.268575363837629
+              "gain": 3.2497780465290775
             },
             {
               "name": "解析度 1.5x",
-              "avg": 8.140670791273818,
-              "low1": 7.867820613684242,
+              "avg": 4.848093083387064,
+              "low1": 4.741583688951587,
               "draws": 24,
-              "gain": -2.8664838592494917
+              "gain": -1.861386452700426
             },
             {
               "name": "隱藏啵啵（只剩場景）",
-              "avg": 10.487177042614679,
-              "low1": 10.266940451730655,
+              "avg": 6.2018251085318745,
+              "low1": 6.020469596629381,
               "draws": 5,
-              "gain": -0.5199776079086309
+              "gain": -0.5076544275556154
             }
           ]
         },
@@ -2359,10 +2563,10 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 8.92511825781741,
+            "fps": 5.246691669419584,
             "drawCalls": 23,
             "activeMeshes": 18,
-            "pixelRatio": 1.25,
+            "pixelRatio": 1.5,
             "quality": "medium",
             "jelly": true,
             "variant": "v35",
@@ -2385,10 +2589,10 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 8.92511825781741,
+            "fps": 5.246691669419584,
             "drawCalls": 23,
             "activeMeshes": 18,
-            "pixelRatio": 1.25,
+            "pixelRatio": 1.5,
             "quality": "medium",
             "jelly": true,
             "variant": "v35",
@@ -2426,10 +2630,10 @@
         "V3.5：不使用陰影貼圖與 GlowLayer（改用接觸陰影與星星光暈）": {
           "ok": true,
           "detail": {
-            "fps": 8.92511825781741,
+            "fps": 5.246691669419584,
             "drawCalls": 23,
             "activeMeshes": 18,
-            "pixelRatio": 1.25,
+            "pixelRatio": 1.5,
             "quality": "medium",
             "jelly": true,
             "variant": "v35",
@@ -2527,7 +2731,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 7.844895214614021,
+            "fps": 4.819648743999559,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -2553,7 +2757,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 7.844895214614021,
+            "fps": 4.819648743999559,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -2594,7 +2798,7 @@
         "V3.6：不使用陰影貼圖與 GlowLayer（沿用 V3.5 繪製方式）": {
           "ok": true,
           "detail": {
-            "fps": 7.844895214614021,
+            "fps": 4.819648743999559,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -2633,45 +2837,45 @@
           "detail": [
             {
               "name": "目前設定",
-              "avg": 11.1162575266327,
-              "low1": 10.256410256410255,
+              "avg": 6.709158000670785,
+              "low1": 6.497725795972885,
               "draws": 24,
               "gain": 0
             },
             {
               "name": "關閉果凍內部星雲",
-              "avg": 17.838700591496092,
-              "low1": 16.638935108191756,
+              "avg": 6.056935190793398,
+              "low1": 5.924170616114153,
               "draws": 24,
-              "gain": 6.722443064863393
+              "gain": -0.6522228098773866
             },
             {
               "name": "關閉果凍材質（純透明）",
-              "avg": 19.031306499192855,
-              "low1": 17.88908765648481,
+              "avg": 11.66861143523945,
+              "low1": 11.025358324144118,
               "draws": 24,
-              "gain": 7.915048972560156
+              "gain": 4.959453434568665
             },
             {
               "name": "關閉 MSAA 抗鋸齒",
-              "avg": 16.35558976332646,
-              "low1": 15.55209953342575,
+              "avg": 10.006367688529169,
+              "low1": 9.49667616334388,
               "draws": 24,
-              "gain": 5.239332236693761
+              "gain": 3.297209687858384
             },
             {
               "name": "解析度 1.5x",
-              "avg": 8.102998109300781,
-              "low1": 7.886435331227387,
+              "avg": 4.80730710680243,
+              "low1": 4.672897196261682,
               "draws": 24,
-              "gain": -3.013259417331918
+              "gain": -1.901850893868355
             },
             {
               "name": "隱藏啵啵（只剩場景）",
-              "avg": 14.85056617783681,
-              "low1": 14.409221901988287,
+              "avg": 6.173383896287023,
+              "low1": 6.038647342996018,
               "draws": 5,
-              "gain": 3.7343086512041115
+              "gain": -0.535774104383762
             }
           ]
         },
@@ -2753,7 +2957,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 8.866820358219783,
+            "fps": 5.197305101058711,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -2779,7 +2983,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 8.866820358219783,
+            "fps": 5.197305101058711,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -2820,7 +3024,7 @@
         "V3.6：不使用陰影貼圖與 GlowLayer（沿用 V3.5 繪製方式）": {
           "ok": true,
           "detail": {
-            "fps": 8.866820358219783,
+            "fps": 5.197305101058711,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -2932,7 +3136,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 7.712011457845694,
+            "fps": 4.703491872366034,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -2958,7 +3162,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 7.712011457845694,
+            "fps": 4.703491872366034,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -2999,7 +3203,7 @@
         "V3.7：不使用陰影貼圖與 GlowLayer": {
           "ok": true,
           "detail": {
-            "fps": 7.712011457845694,
+            "fps": 4.703491872366034,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -3041,45 +3245,45 @@
           "detail": [
             {
               "name": "目前設定",
-              "avg": 10.702818408848108,
-              "low1": 8.726003490412033,
+              "avg": 6.423786363219166,
+              "low1": 6.203473945408981,
               "draws": 24,
               "gain": 0
             },
             {
               "name": "關閉果凍內部星雲",
-              "avg": 16.98754246885468,
-              "low1": 15.772870662425815,
+              "avg": 7.980845969672704,
+              "low1": 6.858710562414814,
               "draws": 24,
-              "gain": 6.284724060006573
+              "gain": 1.5570596064535387
             },
             {
               "name": "關閉果凍材質（純透明）",
-              "avg": 19.00057001709883,
-              "low1": 18.416206261494334,
+              "avg": 11.653966831017481,
+              "low1": 11.248593925763698,
               "draws": 24,
-              "gain": 8.297751608250723
+              "gain": 5.2301804677983155
             },
             {
               "name": "關閉 MSAA 抗鋸齒",
-              "avg": 15.893792071801162,
-              "low1": 15.455950540969393,
+              "avg": 9.55690703735882,
+              "low1": 9.157509157513063,
               "draws": 24,
-              "gain": 5.190973662953054
+              "gain": 3.133120674139655
             },
             {
               "name": "解析度 1.5x",
-              "avg": 7.860948554457944,
-              "low1": 7.645259938835198,
+              "avg": 4.661570016781753,
+              "low1": 4.587155963302752,
               "draws": 24,
-              "gain": -2.841869854390164
+              "gain": -1.7622163464374125
             },
             {
               "name": "隱藏啵啵（只剩場景）",
-              "avg": 14.719411223551058,
-              "low1": 14.326647564460357,
+              "avg": 8.67077083152701,
+              "low1": 8.403361344537815,
               "draws": 5,
-              "gain": 4.01659281470295
+              "gain": 2.2469844683078444
             }
           ]
         },
@@ -3161,7 +3365,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 8.32547038907666,
+            "fps": 4.9562200561704834,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -3187,7 +3391,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 8.32547038907666,
+            "fps": 4.9562200561704834,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -3228,7 +3432,7 @@
         "V3.7：不使用陰影貼圖與 GlowLayer": {
           "ok": true,
           "detail": {
-            "fps": 8.32547038907666,
+            "fps": 4.9562200561704834,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -3343,7 +3547,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 7.673124880107719,
+            "fps": 4.688760104278004,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -3369,7 +3573,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 7.673124880107719,
+            "fps": 4.688760104278004,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -3410,7 +3614,7 @@
         "V3.8：不使用陰影貼圖與 GlowLayer": {
           "ok": true,
           "detail": {
-            "fps": 7.673124880107719,
+            "fps": 4.688760104278004,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -3452,45 +3656,45 @@
           "detail": [
             {
               "name": "目前設定",
-              "avg": 11.046672190002287,
-              "low1": 10.570824524328508,
+              "avg": 6.434414927842494,
+              "low1": 6.277463904583007,
               "draws": 24,
               "gain": 0
             },
             {
               "name": "關閉果凍內部星雲",
-              "avg": 16.933207902163687,
-              "low1": 16.1030595812963,
+              "avg": 5.801906340654787,
+              "low1": 5.608524957934598,
               "draws": 24,
-              "gain": 5.8865357121614
+              "gain": -0.632508587187707
             },
             {
               "name": "關閉果凍材質（純透明）",
-              "avg": 18.73536299765808,
-              "low1": 17.985611510836556,
+              "avg": 11.574074074073954,
+              "low1": 11.049723756906078,
               "draws": 24,
-              "gain": 7.688690807655792
+              "gain": 5.13965914623146
             },
             {
               "name": "關閉 MSAA 抗鋸齒",
-              "avg": 15.489749430523917,
-              "low1": 14.224751066846908,
+              "avg": 9.57604248280704,
+              "low1": 9.09918107370144,
               "draws": 24,
-              "gain": 4.44307724052163
+              "gain": 3.141627554964546
             },
             {
               "name": "解析度 1.5x",
-              "avg": 7.883672039244132,
-              "low1": 7.485029940127587,
+              "avg": 4.594321418726504,
+              "low1": 4.438526409232364,
               "draws": 24,
-              "gain": -3.1630001507581547
+              "gain": -1.8400935091159898
             },
             {
               "name": "隱藏啵啵（只剩場景）",
-              "avg": 14.688331956301582,
-              "low1": 14.224751066846908,
+              "avg": 8.773469029654413,
+              "low1": 8.583690987124463,
               "draws": 5,
-              "gain": 3.641659766299295
+              "gain": 2.339054101811919
             }
           ]
         },
@@ -3504,7 +3708,7 @@
         },
         "點擊效能測試：10 秒後顯示平均／最慢 1%／最低 FPS 與 Draw Calls": {
           "ok": true,
-          "detail": "V3.8 效能測試（本機 WebGL 實測）\nbobo_v38_medium.glb・3 隻・畫質 medium・1x・10.1 秒\n平均 11.0 FPS・最慢 1% 10.3 FPS・最低 10.2 FPS\nDraw Calls 平均 24（最高 24）・畫面物件 21\n點此關閉"
+          "detail": "V3.8 效能測試（本機 WebGL 實測）\nbobo_v38_medium.glb・3 隻・畫質 medium・1x・10.2 秒\n平均 6.7 FPS・最慢 1% 6.1 FPS・最低 6.1 FPS\nDraw Calls 平均 24（最高 24）・畫面物件 21\n點此關閉"
         },
         "共用載入器釋放資源：零件全部移除": {
           "ok": true,
@@ -3576,7 +3780,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 8.28203075394076,
+            "fps": 4.928806133625411,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -3602,7 +3806,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 8.28203075394076,
+            "fps": 4.928806133625411,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -3643,7 +3847,7 @@
         "V3.8：不使用陰影貼圖與 GlowLayer": {
           "ok": true,
           "detail": {
-            "fps": 8.28203075394076,
+            "fps": 4.928806133625411,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -3758,7 +3962,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 7.448195142712647,
+            "fps": 4.580206461614365,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -3784,7 +3988,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 7.448195142712647,
+            "fps": 4.580206461614365,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -3818,7 +4022,7 @@
         "V3.8R 第三階段：果凍材質與臉部顯示、腹部星星 0.0714、無陰影貼圖與 GlowLayer": {
           "ok": true,
           "detail": {
-            "fps": 7.448195142712647,
+            "fps": 4.580206461614365,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -3858,22 +4062,22 @@
           "ok": true,
           "detail": {
             "p1": {
-              "sy": 1.0276507902797305,
-              "sxz": 0.9864548666291981,
-              "roll": 0.0175975344104797,
-              "swayX": 0.0054918546110569386,
-              "flap": -0.06094077777139522,
-              "starX": 0.0012578334742010973,
-              "scaleY": 1.0276507902797305
+              "sy": 1.0292613337776868,
+              "sxz": 0.9856827835831383,
+              "roll": 0.01481838017700965,
+              "swayX": -0.003931823720716044,
+              "flap": 0.036413263997088524,
+              "starX": -0.0009005299376675856,
+              "scaleY": 1.0292613337776868
             },
             "p2": {
-              "sy": 1.0016960923301774,
-              "sxz": 0.9991530310858683,
-              "roll": 0.019523608379314245,
-              "swayX": 0.008594436333268366,
-              "flap": 0.11222482010580029,
-              "starX": 0.001968436981217639,
-              "scaleY": 1.0016960923301774
+              "sy": 1.0138836168691772,
+              "sxz": 0.9931296483641018,
+              "roll": 0.020959008925353052,
+              "swayX": 0.013571467978221013,
+              "flap": -0.06271897277867294,
+              "starX": 0.0031083573630455844,
+              "scaleY": 1.0138836168691772
             },
             "live": "idle",
             "rest": {
@@ -3890,10 +4094,10 @@
         "V3.8R 第四階段：移動（彈跳離地、前進方向與朝向一致、不穿地）": {
           "ok": true,
           "detail": {
-            "path": 1.5463774508004873,
-            "segs": 19,
-            "aligned": 18,
-            "maxLift": 0.15983528224408378,
+            "path": 2.544802851479859,
+            "segs": 22,
+            "aligned": 20,
+            "maxLift": 0.16009463398581517,
             "minY": 0
           }
         },
@@ -3903,47 +4107,47 @@
             "c": {
               "anim": "idle",
               "pending": "idle",
-              "x": -0.524546873881586,
+              "x": 0.4977924106316548,
               "y": 0,
-              "z": 0.034874759308279095,
-              "yaw": 1.512497970499372e-7,
+              "z": 0.011266912010476178,
+              "yaw": -9.48460991812316e-10,
               "lift": 0,
-              "sy": 0.9755696053922284,
+              "sy": 0.9749139016223279,
               "sfwd": 1,
               "fwd": 0,
-              "bx": -0.524546873881586,
-              "bz": 0.034874759308279095,
+              "bx": 0.4977924106316548,
+              "bz": 0.011266912010476178,
               "angry": false,
               "face": "normal",
-              "rx": -0.007743890373011867,
-              "rz": 0.013756086696886983,
+              "rx": -0.007816760349722863,
+              "rz": 0.01357110943831831,
               "scale": [
-                1.0124436700730044,
-                0.9755696053922284,
-                1.0124436700730044
+                1.0127840855410168,
+                0.9749139016223279,
+                1.0127840855410168
               ]
             },
             "d": {
               "anim": "idle",
               "pending": "idle",
-              "x": -0.524546873881586,
+              "x": 0.4977924106316548,
               "y": 0,
-              "z": 0.034874759308279095,
-              "yaw": 1.9062094881465544e-9,
+              "z": 0.011266912010476178,
+              "yaw": -2.030144490056889e-12,
               "lift": 0,
-              "sy": 0.9708058337910772,
+              "sy": 0.9757081660048651,
               "sfwd": 1,
               "fwd": 0,
-              "bx": -0.524546873881586,
-              "bz": 0.034874759308279095,
+              "bx": 0.4977924106316548,
+              "bz": 0.011266912010476178,
               "angry": false,
               "face": "normal",
-              "rx": -0.009962023882071796,
-              "rz": 0.0024385054685053874,
+              "rx": -0.009999538722322922,
+              "rz": 0.0008147778168017825,
               "scale": [
-                1.0149246750262453,
-                0.9708058337910772,
-                1.0149246750262453
+                1.012371778804232,
+                0.9757081660048651,
+                1.012371778804232
               ]
             }
           }
@@ -3951,7 +4155,7 @@
         "V3.8R 第四階段：攻擊（蓄力壓扁後縮 → 往前拉長彈擊 → 回彈；攻擊中換生氣表情）": {
           "ok": true,
           "detail": {
-            "n": 8,
+            "n": 5,
             "windup": {
               "sy": 0.8,
               "fwd": -0.07
@@ -3972,33 +4176,33 @@
           "detail": {
             "anim": "idle",
             "pending": "idle",
-            "x": -0.524546873881586,
+            "x": 0.4977924106316548,
             "y": 0,
-            "z": 0.034874759308279095,
-            "yaw": 4.9626725400813e-27,
+            "z": 0.011266912010476178,
+            "yaw": -3.741345001014357e-46,
             "lift": 0,
-            "sy": 1.0064504346722218,
+            "sy": 1.0179663839775082,
             "sfwd": 1,
             "fwd": 0,
-            "bx": -0.524546873881586,
-            "bz": 0.034874759308279095,
+            "bx": 0.4977924106316548,
+            "bz": 0.011266912010476178,
             "angry": false,
             "face": "normal",
-            "rx": 0.0026463150629505274,
-            "rz": -0.020404976036183756,
+            "rx": 0.001918292665621213,
+            "rz": 0.02048357874069299,
             "scale": [
-              0.9967903023028458,
-              1.0064504346722218,
-              0.9967903023028458
+              0.99113607034784,
+              1.0179663839775082,
+              0.99113607034784
             ]
           }
         },
         "V3.8R 第四階段：受傷（壓縮 ≤12%、後退、不穿地、受傷表情）": {
           "ok": true,
           "detail": {
-            "n": 7,
-            "minSy": 0.8892482509630031,
-            "minFwd": -0.08034746517333029,
+            "n": 3,
+            "minSy": 0.8982361010247721,
+            "minFwd": -0.07712,
             "minY": 0
           }
         },
@@ -4012,19 +4216,19 @@
             "z": 0,
             "yaw": 0,
             "lift": 0,
-            "sy": 1.0198395356848209,
+            "sy": 1.01610961167778,
             "sfwd": 1,
             "fwd": 0,
             "bx": 0,
             "bz": 0,
             "angry": false,
             "face": "curious",
-            "rx": -0.002564635826649336,
-            "rz": -0.0201317160376693,
+            "rx": 0.008887737366855311,
+            "rz": 0.009076179010256471,
             "scale": [
-              0.9902254361611206,
-              1.0198395356848209,
-              0.9902254361611206
+              0.9920412256723339,
+              1.01610961167778,
+              0.9920412256723339
             ]
           }
         },
@@ -4043,7 +4247,7 @@
               "anim": "death",
               "visibility": 1,
               "x": 0,
-              "z": -0.04188136326643487
+              "z": -0.04183391003460207
             },
             "mid": {
               "anim": "dead",
@@ -4144,7 +4348,7 @@
         },
         "點擊效能測試：10 秒後顯示平均／最慢 1%／最低 FPS 與 Draw Calls": {
           "ok": true,
-          "detail": "V3.8R 效能測試（本機 WebGL 實測）\nbobo_v38r_medium.glb・3 隻・畫質 medium・1x・10.1 秒\n平均 16.0 FPS・最慢 1% 15.2 FPS・最低 14.9 FPS\nDraw Calls 平均 24（最高 24）・畫面物件 21\n點此關閉"
+          "detail": "V3.8R 效能測試（本機 WebGL 實測）\nbobo_v38r_medium.glb・3 隻・畫質 medium・1x・10.1 秒\n平均 9.7 FPS・最慢 1% 9.0 FPS・最低 9.0 FPS\nDraw Calls 平均 24（最高 24）・畫面物件 21\n點此關閉"
         },
         "共用載入器釋放資源：零件全部移除": {
           "ok": true,
@@ -4216,7 +4420,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 8.10482236930974,
+            "fps": 4.7067026932798735,
             "drawCalls": 20,
             "activeMeshes": 15,
             "pixelRatio": 1.5,
@@ -4242,7 +4446,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 8.10482236930974,
+            "fps": 4.7067026932798735,
             "drawCalls": 20,
             "activeMeshes": 15,
             "pixelRatio": 1.5,
@@ -4276,7 +4480,7 @@
         "V3.8R 第三階段：果凍材質與臉部顯示、腹部星星 0.0714、無陰影貼圖與 GlowLayer": {
           "ok": true,
           "detail": {
-            "fps": 8.10482236930974,
+            "fps": 4.7067026932798735,
             "drawCalls": 20,
             "activeMeshes": 15,
             "pixelRatio": 1.5,
@@ -4316,22 +4520,22 @@
           "ok": true,
           "detail": {
             "p1": {
-              "sy": 1.0293497605054869,
-              "sxz": 0.9856404449250262,
-              "roll": 0.015997849703273507,
-              "swayX": 0.0001682559206952379,
-              "flap": -0.002732243880228109,
-              "starX": 0.00003853669557400473,
-              "scaleY": 1.0293497605054869
+              "sy": 1.0290477495740793,
+              "sxz": 0.9857850700657659,
+              "roll": 0.01650392820018622,
+              "swayX": 0.0018919342986173544,
+              "flap": -0.02089499479670451,
+              "starX": 0.00043332142970407025,
+              "scaleY": 1.0290477495740793
             },
             "p2": {
-              "sy": 1.0056737290867308,
-              "sxz": 0.997175150362908,
-              "roll": 0.020271148679731836,
-              "swayX": 0.010509783199721342,
-              "flap": 0.08240373945909393,
-              "starX": 0.002407120736333849,
-              "scaleY": 1.0056737290867308
+              "sy": 1.0041350837346372,
+              "sxz": 0.9979388482109356,
+              "roll": 0.019991063647540507,
+              "swayX": 0.009758848603436376,
+              "flap": 0.09725604303732656,
+              "starX": 0.0022351295349933727,
+              "scaleY": 1.0041350837346372
             },
             "live": "idle",
             "rest": {
@@ -4348,10 +4552,10 @@
         "V3.8R 第四階段：移動（彈跳離地、前進方向與朝向一致、不穿地）": {
           "ok": true,
           "detail": {
-            "path": 1.4390648305645373,
-            "segs": 18,
-            "aligned": 17,
-            "maxLift": 0.15740670077652932,
+            "path": 2.4423435112698004,
+            "segs": 21,
+            "aligned": 19,
+            "maxLift": 0.15977952735133244,
             "minY": 0
           }
         },
@@ -4361,47 +4565,47 @@
             "c": {
               "anim": "idle",
               "pending": "idle",
-              "x": -0.16659936522306276,
+              "x": 0.44805736090555937,
               "y": 0,
-              "z": 0.03243443407211774,
-              "yaw": 0.000001714394159762322,
+              "z": 0.017169502820889984,
+              "yaw": -9.241423422545563e-8,
               "lift": 0,
-              "sy": 0.9935426255722117,
+              "sy": 0.9940902394243815,
               "sfwd": 1,
               "fwd": 0,
-              "bx": -0.16659936522306276,
-              "bz": 0.03243443407211774,
+              "bx": 0.44805736090555937,
+              "bz": 0.017169502820889984,
               "angry": false,
               "face": "normal",
-              "rx": -0.0054846809266363315,
-              "rz": 0.01788842894431456,
+              "rx": -0.0053985134068020935,
+              "rz": 0.018000461909193306,
               "scale": [
-                1.0032444084667742,
-                0.9935426255722117,
-                1.0032444084667742
+                1.002968042099393,
+                0.9940902394243815,
+                1.002968042099393
               ]
             },
             "d": {
               "anim": "idle",
               "pending": "idle",
-              "x": -0.16659936522306276,
+              "x": 0.44805736090555937,
               "y": 0,
-              "z": 0.03243443407211774,
-              "yaw": 2.6470622169825376e-8,
+              "z": 0.017169502820889984,
+              "yaw": -1.2558626118868927e-9,
               "lift": 0,
-              "sy": 0.9645473124598487,
+              "sy": 0.9669163477085037,
               "sfwd": 1,
               "fwd": 0,
-              "bx": -0.16659936522306276,
-              "bz": 0.03243443407211774,
+              "bx": 0.44805736090555937,
+              "bz": 0.017169502820889984,
               "angry": false,
               "face": "normal",
-              "rx": -0.009154605198675012,
-              "rz": 0.0090083116880439,
+              "rx": -0.008762198376724931,
+              "rz": 0.01065311774356698,
               "scale": [
-                1.0182120499566274,
-                0.9645473124598487,
-                1.0182120499566274
+                1.0169639277317188,
+                0.9669163477085037,
+                1.0169639277317188
               ]
             }
           }
@@ -4409,7 +4613,7 @@
         "V3.8R 第四階段：攻擊（蓄力壓扁後縮 → 往前拉長彈擊 → 回彈；攻擊中換生氣表情）": {
           "ok": true,
           "detail": {
-            "n": 9,
+            "n": 5,
             "windup": {
               "sy": 0.8,
               "fwd": -0.07
@@ -4430,33 +4634,33 @@
           "detail": {
             "anim": "idle",
             "pending": "idle",
-            "x": -0.16659936522306276,
+            "x": 0.44805736090555937,
             "y": 0,
-            "z": 0.03243443407211774,
-            "yaw": 7.215643933852448e-25,
+            "z": 0.017169502820889984,
+            "yaw": -1.1310615164435394e-40,
             "lift": 0,
-            "sy": 1.011739507531808,
+            "sy": 1.0274971628145677,
             "sfwd": 1,
             "fwd": 0,
-            "bx": -0.16659936522306276,
-            "bz": 0.03243443407211774,
+            "bx": 0.44805736090555937,
+            "bz": 0.017169502820889984,
             "angry": false,
             "face": "normal",
-            "rx": 0.0005875119280857293,
-            "rz": -0.02099081256624601,
+            "rx": 0.005145940804342957,
+            "rz": 0.01768289070442955,
             "scale": [
-              0.9941814267958095,
-              1.011739507531808,
-              0.9941814267958095
+              0.9865286093614892,
+              1.0274971628145677,
+              0.9865286093614892
             ]
           }
         },
         "V3.8R 第四階段：受傷（壓縮 ≤12%、後退、不穿地、受傷表情）": {
           "ok": true,
           "detail": {
-            "n": 6,
-            "minSy": 0.8880356283346862,
-            "minFwd": -0.08051728666666667,
+            "n": 3,
+            "minSy": 0.8906751709586295,
+            "minFwd": -0.07902124405332989,
             "minY": 0
           }
         },
@@ -4470,19 +4674,19 @@
             "z": 0,
             "yaw": 0,
             "lift": 0,
-            "sy": 1.018638301031682,
+            "sy": 1.017228846123137,
             "sfwd": 1,
             "fwd": 0,
             "bx": 0,
             "bz": 0,
             "angry": false,
             "face": "curious",
-            "rx": -0.002154882388271285,
-            "rz": -0.020365755956111405,
+            "rx": 0.00881122096832045,
+            "rz": 0.009386135903357679,
             "scale": [
-              0.9908091284465598,
-              1.018638301031682,
-              0.9908091284465598
+              0.9914953149363427,
+              1.017228846123137,
+              0.9914953149363427
             ]
           }
         },
@@ -4501,7 +4705,7 @@
               "anim": "death",
               "visibility": 1,
               "x": 0,
-              "z": -0.04114511251211255
+              "z": -0.04185969453748537
             },
             "mid": {
               "anim": "dead",
@@ -4627,12 +4831,12 @@
               "v38r": true,
               "loaded": true,
               "bodyMaterial": "BoboV38RGame_Body_0",
-              "bodyMaterialId": 168,
+              "bodyMaterialId": 170,
               "geometryId": 135,
               "position": [
-                -1.0408329641538079,
+                -1.1129577555642611,
                 0,
-                4.0332277360959985
+                4.312711302811504
               ],
               "enabled": true
             },
@@ -4641,7 +4845,7 @@
               "v38r": true,
               "loaded": true,
               "bodyMaterial": "BoboV38RGame_Body_1",
-              "bodyMaterialId": 181,
+              "bodyMaterialId": 183,
               "geometryId": 135,
               "position": [
                 -3.2000000000000006,
@@ -4655,7 +4859,7 @@
               "v38r": true,
               "loaded": true,
               "bodyMaterial": "BoboV38RGame_Body_2",
-              "bodyMaterialId": 194,
+              "bodyMaterialId": 196,
               "geometryId": 135,
               "position": [
                 2.3999999999999995,
@@ -4684,9 +4888,9 @@
           "ok": true,
           "detail": {
             "matIds": [
-              168,
-              181,
-              194
+              170,
+              183,
+              196
             ],
             "geoIds": [
               135
@@ -4698,9 +4902,9 @@
           "detail": {
             "visual": [
               [
-                -0.9608719980668413,
+                -1.0329967894772945,
                 0,
-                3.723378992509004
+                4.002862559224509
               ],
               [
                 -3.2000000000000006,
@@ -4715,9 +4919,9 @@
             ],
             "logic": [
               [
-                -0.9608719980668413,
+                -1.0329967894772945,
                 0,
-                3.723378992509004
+                4.002862559224509
               ],
               [
                 -3.2000000000000006,
@@ -4754,21 +4958,21 @@
             "before": {
               "meshes": 51,
               "materials": 24,
-              "textures": 10,
+              "textures": 11,
               "geometries": 44,
               "sprites": 3
             },
             "during": {
               "meshes": 57,
               "materials": 25,
-              "textures": 10,
+              "textures": 11,
               "geometries": 46,
               "sprites": 4
             },
             "after": {
               "meshes": 51,
               "materials": 24,
-              "textures": 10,
+              "textures": 11,
               "geometries": 44,
               "sprites": 3
             },
@@ -4849,24 +5053,10 @@
             "glow": null
           }
         },
-        "high：修正後 Draw Calls 不增加（相對修正前）": {
-          "ok": true,
-          "detail": {
-            "after": 58,
-            "before": 62
-          }
-        },
-        "medium：修正後 Draw Calls 不增加（相對修正前）": {
-          "ok": true,
-          "detail": {
-            "after": 59,
-            "before": 105
-          }
-        },
         "V2（預設）高畫質發光層維持開啟、不受影響": {
           "ok": true,
           "detail": {
-            "fps": 1.2112696528500766,
+            "fps": 0.8563696776624397,
             "drawCalls": 85,
             "activeMeshes": 55,
             "pixelRatio": 2,
@@ -4881,9 +5071,7 @@
       "errors": [],
       "screenshots": [
         "e2e/chromium_photo_high.png",
-        "e2e/chromium_photo_high_before_glowOn.png",
         "e2e/chromium_photo_medium.png",
-        "e2e/chromium_photo_medium_before_glowOn.png",
         "e2e/chromium_photo_low.png"
       ],
       "photo": [
@@ -4899,77 +5087,77 @@
               {
                 "id": "star_dew_bobo#1",
                 "body": [
-                  385.2362667572579,
-                  158.1184714180047
+                  385.33758475700085,
+                  158.11581096021445
                 ],
                 "eyes": [
-                  384.4341408403609,
-                  164.44177183715988
+                  384.53455597490597,
+                  164.52555954434877
                 ],
                 "bodyBox": [
-                  357.76681467652367,
-                  133.3274995529925,
-                  409.5357726754957,
-                  183.5879906933539
+                  358.0175662033399,
+                  133.02382482083814,
+                  409.4843451809195,
+                  183.84497732987148
                 ],
                 "eyesBox": [
-                  372.06204211949927,
-                  154.70926890446646,
-                  396.23340588648335,
-                  174.27469354803642
+                  372.2262609989893,
+                  154.67374993647752,
+                  396.2688344022026,
+                  174.471250110899
                 ]
               },
               {
                 "id": "star_dew_bobo#2",
                 "body": [
-                  425.94990354514823,
-                  148.33355789799137
+                  426.34302396586367,
+                  148.08478732624152
                 ],
                 "eyes": [
-                  426.00030449285873,
-                  154.13814511272622
+                  426.3619471257148,
+                  153.88803523187218
                 ],
                 "bodyBox": [
-                  402.4583633251749,
-                  124.89496614627895,
-                  449.43525563182794,
-                  172.38106492715121
+                  403.447426354797,
+                  123.98400302414902,
+                  450.0874792554742,
+                  172.7522611141911
                 ],
                 "eyesBox": [
-                  415.2322457681463,
-                  144.95136693445735,
-                  436.7683767979464,
-                  163.4148354067074
+                  415.7117409437354,
+                  144.41616757038048,
+                  437.2114008429757,
+                  163.4427303484507
                 ]
               },
               {
                 "id": "star_dew_bobo#3",
                 "body": [
-                  466.6582447898644,
-                  158.1184714180047
+                  466.84255490711973,
+                  158.58572835364956
                 ],
                 "eyes": [
-                  467.5664998000418,
-                  164.44177183715988
+                  467.7558560768729,
+                  164.85455938647152
                 ],
                 "bodyBox": [
-                  442.3648265752888,
-                  133.3274995529925,
-                  494.1208150070501,
-                  183.5879906933539
+                  442.0246059308053,
+                  134.07737279041044,
+                  494.85823409677914,
+                  183.83769832761567
                 ],
                 "eyesBox": [
-                  455.7672203537857,
-                  154.70926890446646,
-                  479.9386136201385,
-                  174.27469354803642
+                  455.71506145031685,
+                  155.19325882807954,
+                  480.3737655976661,
+                  174.62594151576073
                 ]
               }
             ]
           },
           "perf": {
-            "fps": 1.0676688518289221,
-            "drawCalls": 58,
+            "fps": 0.8297531023546477,
+            "drawCalls": 57,
             "activeMeshes": 41,
             "pixelRatio": 2,
             "quality": "high",
@@ -4981,7 +5169,7 @@
           "resources": {
             "meshes": 51,
             "materials": 24,
-            "textures": 10,
+            "textures": 11,
             "geometries": 44,
             "sprites": 3
           },
@@ -4992,112 +5180,6 @@
             "height": 786
           },
           "file": "e2e/chromium_photo_high.png"
-        },
-        {
-          "label": "high_before_glowOn",
-          "quality": "high",
-          "staged": {
-            "quality": "high",
-            "variant": "v38r",
-            "glow": true,
-            "pixelRatio": 2,
-            "shots": [
-              {
-                "id": "star_dew_bobo#1",
-                "body": [
-                  385.2362667572579,
-                  158.1184714180047
-                ],
-                "eyes": [
-                  384.4341408403609,
-                  164.44177183715988
-                ],
-                "bodyBox": [
-                  357.76681467652367,
-                  133.3274995529925,
-                  409.5357726754957,
-                  183.5879906933539
-                ],
-                "eyesBox": [
-                  372.06204211949927,
-                  154.70926890446646,
-                  396.23340588648335,
-                  174.27469354803642
-                ]
-              },
-              {
-                "id": "star_dew_bobo#2",
-                "body": [
-                  425.94990354514823,
-                  148.33355789799137
-                ],
-                "eyes": [
-                  426.00030449285873,
-                  154.13814511272622
-                ],
-                "bodyBox": [
-                  402.4583633251749,
-                  124.89496614627895,
-                  449.43525563182794,
-                  172.38106492715121
-                ],
-                "eyesBox": [
-                  415.2322457681463,
-                  144.95136693445735,
-                  436.7683767979464,
-                  163.4148354067074
-                ]
-              },
-              {
-                "id": "star_dew_bobo#3",
-                "body": [
-                  466.6582447898644,
-                  158.1184714180047
-                ],
-                "eyes": [
-                  467.5664998000418,
-                  164.44177183715988
-                ],
-                "bodyBox": [
-                  442.3648265752888,
-                  133.3274995529925,
-                  494.1208150070501,
-                  183.5879906933539
-                ],
-                "eyesBox": [
-                  455.7672203537857,
-                  154.70926890446646,
-                  479.9386136201385,
-                  174.27469354803642
-                ]
-              }
-            ]
-          },
-          "perf": {
-            "fps": 1.0895619960775769,
-            "drawCalls": 62,
-            "activeMeshes": 41,
-            "pixelRatio": 2,
-            "quality": "high",
-            "postProcess": true,
-            "bloom": true,
-            "shadowFilter": "contact",
-            "shadowMap": 2048
-          },
-          "resources": {
-            "meshes": 51,
-            "materials": 24,
-            "textures": 10,
-            "geometries": 44,
-            "sprites": 3
-          },
-          "renderer": {
-            "webgl": 2,
-            "hardwareScaling": 0.5,
-            "width": 1704,
-            "height": 786
-          },
-          "file": "e2e/chromium_photo_high_before_glowOn.png"
         },
         {
           "label": "medium",
@@ -5111,76 +5193,76 @@
               {
                 "id": "star_dew_bobo#1",
                 "body": [
-                  385.2753449582733,
-                  157.96586343511865
+                  385.37662450634866,
+                  157.96308682040888
                 ],
                 "eyes": [
-                  384.46940991382286,
-                  164.30230441114492
+                  384.569739881862,
+                  164.386021053831
                 ],
                 "bodyBox": [
-                  357.8239691905069,
-                  133.18456447746905,
-                  409.5580204177273,
-                  183.42482842689665
+                  358.0746099951365,
+                  132.8809368424483,
+                  409.50661960083403,
+                  183.68152592878073
                 ],
                 "eyesBox": [
-                  372.10780586371936,
-                  154.57805631978687,
-                  396.25866619711223,
-                  174.12688610824006
+                  372.2718854614028,
+                  154.5425674835532,
+                  396.2940646653018,
+                  174.323275955506
                 ]
               },
               {
                 "id": "star_dew_bobo#2",
                 "body": [
-                  425.95344178704784,
-                  148.19036487325982
+                  426.3464505640105,
+                  147.94174478178368
                 ],
                 "eyes": [
-                  426.00031529468833,
-                  154.00741656973733
+                  426.3616511770656,
+                  153.75751882751717
                 ],
                 "bodyBox": [
-                  402.4775708225168,
-                  124.76072842385983,
-                  449.4235607553196,
-                  172.22813160331958
+                  403.46631625277826,
+                  123.85019123497086,
+                  450.0757141686793,
+                  172.5991873333994
                 ],
                 "eyesBox": [
-                  415.24139061703073,
-                  144.82843036586712,
-                  436.7592543778537,
-                  163.2762386283184
+                  415.7204788736466,
+                  144.29368495060817,
+                  437.20190263974746,
+                  163.30410990748294
                 ]
               },
               {
                 "id": "star_dew_bobo#3",
                 "body": [
-                  466.626618344948,
-                  157.96586343511865
+                  466.81090945783126,
+                  158.43310151085342
                 ],
                 "eyes": [
-                  467.53125476120977,
-                  164.30230441114492
+                  467.72045041759543,
+                  164.71474183962235
                 ],
                 "bodyBox": [
-                  442.3496013012107,
-                  133.18456447746905,
-                  494.07159731775056,
-                  183.42482842689665
+                  442.00966165687834,
+                  133.9345273539779,
+                  494.80866151476846,
+                  183.67441371483528
                 ],
                 "eyesBox": [
-                  455.74198319109394,
-                  154.57805631978687,
-                  479.89287484028864,
-                  174.12688610824006
+                  455.6898685265543,
+                  155.06163572613755,
+                  480.32765770679316,
+                  174.47783615589492
                 ]
               }
             ]
           },
           "perf": {
-            "fps": 4.513857542655907,
+            "fps": 2.7005586780765483,
             "drawCalls": 59,
             "activeMeshes": 41,
             "pixelRatio": 1.5,
@@ -5193,7 +5275,7 @@
           "resources": {
             "meshes": 51,
             "materials": 24,
-            "textures": 10,
+            "textures": 11,
             "geometries": 44,
             "sprites": 3
           },
@@ -5204,112 +5286,6 @@
             "height": 589
           },
           "file": "e2e/chromium_photo_medium.png"
-        },
-        {
-          "label": "medium_before_glowOn",
-          "quality": "medium",
-          "staged": {
-            "quality": "medium",
-            "variant": "v38r",
-            "glow": true,
-            "pixelRatio": 1.5,
-            "shots": [
-              {
-                "id": "star_dew_bobo#1",
-                "body": [
-                  385.2753449582733,
-                  157.96586343511865
-                ],
-                "eyes": [
-                  384.46940991382286,
-                  164.30230441114492
-                ],
-                "bodyBox": [
-                  357.8239691905069,
-                  133.18456447746905,
-                  409.5580204177273,
-                  183.42482842689665
-                ],
-                "eyesBox": [
-                  372.10780586371936,
-                  154.57805631978687,
-                  396.25866619711223,
-                  174.12688610824006
-                ]
-              },
-              {
-                "id": "star_dew_bobo#2",
-                "body": [
-                  425.95344178704784,
-                  148.19036487325982
-                ],
-                "eyes": [
-                  426.00031529468833,
-                  154.00741656973733
-                ],
-                "bodyBox": [
-                  402.4775708225168,
-                  124.76072842385983,
-                  449.4235607553196,
-                  172.22813160331958
-                ],
-                "eyesBox": [
-                  415.24139061703073,
-                  144.82843036586712,
-                  436.7592543778537,
-                  163.2762386283184
-                ]
-              },
-              {
-                "id": "star_dew_bobo#3",
-                "body": [
-                  466.626618344948,
-                  157.96586343511865
-                ],
-                "eyes": [
-                  467.53125476120977,
-                  164.30230441114492
-                ],
-                "bodyBox": [
-                  442.3496013012107,
-                  133.18456447746905,
-                  494.07159731775056,
-                  183.42482842689665
-                ],
-                "eyesBox": [
-                  455.74198319109394,
-                  154.57805631978687,
-                  479.89287484028864,
-                  174.12688610824006
-                ]
-              }
-            ]
-          },
-          "perf": {
-            "fps": 4.03922536633547,
-            "drawCalls": 105,
-            "activeMeshes": 41,
-            "pixelRatio": 1.5,
-            "quality": "medium",
-            "postProcess": true,
-            "bloom": true,
-            "shadowFilter": "pcf",
-            "shadowMap": 1024
-          },
-          "resources": {
-            "meshes": 51,
-            "materials": 24,
-            "textures": 10,
-            "geometries": 44,
-            "sprites": 3
-          },
-          "renderer": {
-            "webgl": 2,
-            "hardwareScaling": 0.6666666666666666,
-            "width": 1278,
-            "height": 589
-          },
-          "file": "e2e/chromium_photo_medium_before_glowOn.png"
         },
         {
           "label": "low",
@@ -5323,76 +5299,76 @@
               {
                 "id": "star_dew_bobo#1",
                 "body": [
-                  385.262449105521,
-                  158.03758315740674
+                  385.3636585312097,
+                  158.0348167899791
                 ],
                 "eyes": [
-                  384.4553163313759,
-                  164.35809192128684
+                  384.555680377026,
+                  164.44183698922532
                 ],
                 "bodyBox": [
-                  357.8223658359117,
-                  133.26668941307915,
-                  409.53638934104873,
-                  183.48707612909857
+                  358.0728785240549,
+                  132.96315428643226,
+                  409.48500402023797,
+                  183.74376693681285
                 ],
                 "eyesBox": [
-                  372.08951485402383,
-                  154.63054211722263,
-                  396.24857569916486,
-                  174.18600939775718
+                  372.25365018352977,
+                  154.59504123307002,
+                  396.28398618980935,
+                  174.38246592550678
                 ]
               },
               {
                 "id": "star_dew_bobo#2",
                 "body": [
-                  425.9533775867592,
-                  148.25808259002613
+                  426.3461129489017,
+                  148.0096404033409
                 ],
                 "eyes": [
-                  426.00032476493584,
-                  154.05970849903977
+                  426.36178336602836,
+                  153.80972590877175
                 ],
                 "bodyBox": [
-                  402.4878007249259,
-                  124.83854733794574,
-                  449.41319897042627,
-                  172.28657870686527
+                  403.4759037245681,
+                  123.92862737493707,
+                  450.06482078797166,
+                  172.65745587683898
                 ],
                 "eyesBox": [
-                  415.2377468805262,
-                  144.87760571796977,
-                  436.7629181952068,
-                  163.3316776371409
+                  415.71699723725106,
+                  144.34267874081237,
+                  437.2057167832951,
+                  163.35955837865177
                 ]
               },
               {
                 "id": "star_dew_bobo#3",
                 "body": [
-                  466.6393801230598,
-                  158.03758315740674
+                  466.82354210856175,
+                  158.50447510219294
                 ],
                 "eyes": [
-                  467.54536931835696,
-                  164.35809192128684
+                  467.73462920822476,
+                  164.7706693844642
                 ],
                 "bodyBox": [
-                  442.3711020345379,
-                  133.26668941307915,
-                  494.07306271013414,
-                  183.48707612909857
+                  442.0312793761866,
+                  134.01598681786243,
+                  494.8097857059398,
+                  183.73655955874239
                 ],
                 "eyesBox": [
-                  455.75209346899476,
-                  154.63054211722263,
-                  479.91118807743396,
-                  174.18600939775718
+                  455.6999610995068,
+                  155.11428571196407,
+                  480.34611856737956,
+                  174.53707860450118
                 ]
               }
             ]
           },
           "perf": {
-            "fps": 5.683701984559152,
+            "fps": 3.675727334546339,
             "drawCalls": 57,
             "activeMeshes": 41,
             "pixelRatio": 1.25,
@@ -5405,7 +5381,7 @@
           "resources": {
             "meshes": 51,
             "materials": 24,
-            "textures": 7,
+            "textures": 8,
             "geometries": 44,
             "sprites": 3
           },
@@ -5419,6 +5395,253 @@
         }
       ],
       "ok": true
+    },
+    {
+      "browser": "chromium",
+      "viewport": "iPhone 15 橫向 / 遊戲 V3.8R 動畫戰鬥（medium）",
+      "checks": {
+        "畫質 medium：V3.8R 載入、畫質正確、發光層停用": {
+          "ok": true,
+          "detail": {
+            "fps": 2.77375412210676,
+            "drawCalls": 58,
+            "activeMeshes": 41,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "postProcess": true,
+            "bloom": false,
+            "shadowFilter": "pcf",
+            "shadowMap": 1024
+          }
+        },
+        "三隻都有獨立的 V3.8R 動畫，待機／移動與狀態一致": {
+          "ok": true,
+          "detail": [
+            [
+              "move",
+              "move"
+            ],
+            [
+              "idle",
+              "idle"
+            ],
+            [
+              "idle",
+              "idle"
+            ]
+          ]
+        },
+        "攻擊開始時播放 V3.8R 攻擊動畫（同一幀、時間一致、生氣表情）": {
+          "ok": true,
+          "detail": {
+            "id": "star_dew_bobo#1",
+            "anim": "attack",
+            "face": "angry",
+            "stateTime": 0.1,
+            "animTime": 0.1,
+            "attackId": 1
+          }
+        },
+        "命中後玩家扣 8 HP（每次命中剛好 8）": {
+          "ok": true,
+          "detail": {
+            "log": {
+              "started": 1,
+              "resolved": 1,
+              "cancelled": 0,
+              "duplicatesBlocked": 0,
+              "lastResolvedId": 1,
+              "lastCancelledId": null
+            },
+            "state": "attack",
+            "anim": "attack",
+            "hp": 92,
+            "hitsTaken": 1
+          }
+        },
+        "每一次邏輯攻擊都播放了攻擊動畫（動畫次數 = attackId 次數）": {
+          "ok": true,
+          "detail": {
+            "totals": {
+              "started": 2,
+              "resolved": 1,
+              "dup": 0,
+              "anims": 2
+            },
+            "per": [
+              [
+                2,
+                2
+              ],
+              [
+                0,
+                0
+              ],
+              [
+                0,
+                0
+              ]
+            ]
+          }
+        },
+        "命中去重：結算次數 ≤ 攻擊次數、沒有重複結算、扣血 = 8 × 受擊次數": {
+          "ok": true,
+          "detail": {
+            "totals": {
+              "started": 2,
+              "resolved": 1,
+              "dup": 0,
+              "anims": 2
+            },
+            "combat": {
+              "hp": 92,
+              "maxHp": 100,
+              "down": false,
+              "hitsTaken": 1,
+              "lockedId": "star_dew_bobo#1",
+              "tilt": 0
+            }
+          }
+        },
+        "攻擊冷卻 2 秒（從攻擊開始計算）：攻擊中冷卻尚未結束": {
+          "ok": true,
+          "detail": [
+            [
+              "attack",
+              1.9
+            ],
+            [
+              "move",
+              0
+            ],
+            [
+              "move",
+              0
+            ]
+          ]
+        },
+        "命中前受傷：攻擊取消（不結算）、播放受傷動畫": {
+          "ok": false,
+          "detail": {
+            "intr": {
+              "id": "star_dew_bobo#2",
+              "attackId": 1,
+              "stateTime": 0.1,
+              "r": {
+                "applied": true,
+                "killed": false,
+                "overlay": false,
+                "cancelledAttackId": 1
+              },
+              "before": 2
+            },
+            "hurt": {
+              "anim": "attack",
+              "face": "angry",
+              "log": {
+                "started": 1,
+                "resolved": 0,
+                "cancelled": 1,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": 1
+              }
+            },
+            "log": {
+              "started": 1,
+              "resolved": 0,
+              "cancelled": 1,
+              "duplicatesBlocked": 0,
+              "lastResolvedId": null,
+              "lastCancelledId": 1
+            }
+          }
+        },
+        "致命傷 → 死亡動畫 → 完成後移除（隱藏、星塵清除）": {
+          "ok": true,
+          "detail": {
+            "kill": {
+              "applied": true,
+              "killed": true
+            },
+            "dying": {
+              "anim": "death"
+            },
+            "dead": {
+              "anim": "death",
+              "visible": false,
+              "vis": 0,
+              "dust": 0
+            }
+          }
+        },
+        "10 秒後原出生點重生：待機姿勢淡入，結束後完全不透明、星星恢復": {
+          "ok": true,
+          "detail": {
+            "resp": {
+              "vis": 0.15625,
+              "anim": "idle",
+              "x": 2.3999999999999995,
+              "z": 8.6,
+              "sx": 2.3999999999999995,
+              "sz": 8.6,
+              "hp": 60
+            },
+            "idle": {
+              "vis": 1,
+              "star": 1,
+              "temp": false
+            }
+          }
+        },
+        "死亡重生後資源數不增加（暫時材質與星塵已釋放）": {
+          "ok": true,
+          "detail": {
+            "before": {
+              "meshes": 51,
+              "materials": 24,
+              "textures": 11,
+              "geometries": 44,
+              "sprites": 3
+            },
+            "after": {
+              "meshes": 51,
+              "materials": 24,
+              "textures": 11,
+              "geometries": 44,
+              "sprites": 3
+            }
+          }
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "e2e/chromium_game_v38r_combat_medium.png"
+      ],
+      "samples": [
+        {
+          "quality": "medium",
+          "perf": {
+            "fps": 5.627567577707313,
+            "drawCalls": 59,
+            "activeMeshes": 41,
+            "pixelRatio": 1,
+            "quality": "medium",
+            "postProcess": true,
+            "bloom": false,
+            "shadowFilter": "pcf",
+            "shadowMap": 1024
+          },
+          "resources": {
+            "meshes": 51,
+            "materials": 24,
+            "textures": 11,
+            "geometries": 44,
+            "sprites": 3
+          }
+        }
+      ],
+      "ok": false
     },
     {
       "browser": "webkit",
@@ -5458,12 +5681,24 @@
                 "mode": "chase",
                 "hp": 60,
                 "maxHp": 60,
-                "x": -1.336128811913012,
+                "x": -1.4800585508695512,
                 "y": 0,
-                "z": 5.177499146162917,
+                "z": 5.735226884619507,
                 "spawnX": -1.6000000000000005,
                 "spawnZ": 6.2,
-                "visible": true
+                "visible": true,
+                "stateTime": 0.30000000000000004,
+                "attackId": 0,
+                "attackLog": {
+                  "started": 0,
+                  "resolved": 0,
+                  "cancelled": 0,
+                  "duplicatesBlocked": 0,
+                  "lastResolvedId": null,
+                  "lastCancelledId": null
+                },
+                "cooldown": 0,
+                "anim": null
               },
               {
                 "id": "star_dew_bobo#2",
@@ -5476,7 +5711,19 @@
                 "z": 8,
                 "spawnX": -3.2000000000000006,
                 "spawnZ": 8,
-                "visible": true
+                "visible": true,
+                "stateTime": 0.30000000000000004,
+                "attackId": 0,
+                "attackLog": {
+                  "started": 0,
+                  "resolved": 0,
+                  "cancelled": 0,
+                  "duplicatesBlocked": 0,
+                  "lastResolvedId": null,
+                  "lastCancelledId": null
+                },
+                "cooldown": 0,
+                "anim": null
               },
               {
                 "id": "star_dew_bobo#3",
@@ -5489,7 +5736,19 @@
                 "z": 8.6,
                 "spawnX": 2.3999999999999995,
                 "spawnZ": 8.6,
-                "visible": true
+                "visible": true,
+                "stateTime": 0.30000000000000004,
+                "attackId": 0,
+                "attackLog": {
+                  "started": 0,
+                  "resolved": 0,
+                  "cancelled": 0,
+                  "duplicatesBlocked": 0,
+                  "lastResolvedId": null,
+                  "lastCancelledId": null
+                },
+                "cooldown": 0,
+                "anim": null
               }
             ],
             "dists": [
@@ -5518,12 +5777,24 @@
               "mode": "attack",
               "hp": 40,
               "maxHp": 60,
-              "x": -1.336128811913012,
+              "x": -1.4800585508695512,
               "y": 0,
-              "z": 5.177499146162917,
+              "z": 5.735226884619507,
               "spawnX": -1.6000000000000005,
               "spawnZ": 6.2,
-              "visible": true
+              "visible": true,
+              "stateTime": 0.2,
+              "attackId": 1,
+              "attackLog": {
+                "started": 1,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "cooldown": 1.9,
+              "anim": null
             }
           }
         },
@@ -5550,12 +5821,24 @@
               "mode": "attack",
               "hp": 0,
               "maxHp": 60,
-              "x": -1.3700618369200508,
+              "x": -1.5105534192823358,
               "y": 0,
-              "z": 5.032631659007531,
+              "z": 5.513888793607912,
               "spawnX": -1.6000000000000005,
               "spawnZ": 6.2,
-              "visible": true
+              "visible": true,
+              "stateTime": 0,
+              "attackId": 2,
+              "attackLog": {
+                "started": 2,
+                "resolved": 2,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": 2,
+                "lastCancelledId": null
+              },
+              "cooldown": 1.5999999999999996,
+              "anim": null
             }
           }
         },
@@ -5580,7 +5863,19 @@
               "z": 6.2,
               "spawnX": -1.6000000000000005,
               "spawnZ": 6.2,
-              "visible": true
+              "visible": true,
+              "stateTime": 0.17099999999999993,
+              "attackId": 2,
+              "attackLog": {
+                "started": 2,
+                "resolved": 2,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": 2,
+                "lastCancelledId": null
+              },
+              "cooldown": 0,
+              "anim": null
             },
             {
               "id": "star_dew_bobo#2",
@@ -5588,12 +5883,24 @@
               "mode": "return",
               "hp": 60,
               "maxHp": 60,
-              "x": -1.1962535012191553,
+              "x": -1.0052902628112033,
               "y": 0,
-              "z": 2.301627740872881,
+              "z": 1.8291240621503888,
               "spawnX": -3.2000000000000006,
               "spawnZ": 8,
-              "visible": true
+              "visible": true,
+              "stateTime": 0.7080000000000001,
+              "attackId": 6,
+              "attackLog": {
+                "started": 6,
+                "resolved": 6,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": 6,
+                "lastCancelledId": null
+              },
+              "cooldown": 0.4560000000000013,
+              "anim": null
             },
             {
               "id": "star_dew_bobo#3",
@@ -5601,12 +5908,24 @@
               "mode": "return",
               "hp": 60,
               "maxHp": 60,
-              "x": 0.9640294153336687,
+              "x": 0.8153664428663538,
               "y": 0,
-              "z": 3.2771961531972753,
+              "z": 2.7589334137593795,
               "spawnX": 2.3999999999999995,
               "spawnZ": 8.6,
-              "visible": true
+              "visible": true,
+              "stateTime": 1.13,
+              "attackId": 5,
+              "attackLog": {
+                "started": 5,
+                "resolved": 5,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": 5,
+                "lastCancelledId": null
+              },
+              "cooldown": 0,
+              "anim": null
             }
           ]
         },
@@ -5635,7 +5954,19 @@
               "z": 6.2,
               "spawnX": -1.6000000000000005,
               "spawnZ": 6.2,
-              "visible": true
+              "visible": true,
+              "stateTime": 0.17099999999999993,
+              "attackId": 2,
+              "attackLog": {
+                "started": 2,
+                "resolved": 2,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": 2,
+                "lastCancelledId": null
+              },
+              "cooldown": 0,
+              "anim": null
             },
             {
               "id": "star_dew_bobo#2",
@@ -5643,12 +5974,24 @@
               "mode": "return",
               "hp": 60,
               "maxHp": 60,
-              "x": -1.1962535012191553,
+              "x": -1.0052902628112033,
               "y": 0,
-              "z": 2.301627740872881,
+              "z": 1.8291240621503888,
               "spawnX": -3.2000000000000006,
               "spawnZ": 8,
-              "visible": true
+              "visible": true,
+              "stateTime": 0.7080000000000001,
+              "attackId": 6,
+              "attackLog": {
+                "started": 6,
+                "resolved": 6,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": 6,
+                "lastCancelledId": null
+              },
+              "cooldown": 0.4560000000000013,
+              "anim": null
             },
             {
               "id": "star_dew_bobo#3",
@@ -5656,20 +5999,32 @@
               "mode": "return",
               "hp": 60,
               "maxHp": 60,
-              "x": 0.9640294153336687,
+              "x": 0.8153664428663538,
               "y": 0,
-              "z": 3.2771961531972753,
+              "z": 2.7589334137593795,
               "spawnX": 2.3999999999999995,
               "spawnZ": 8.6,
-              "visible": true
+              "visible": true,
+              "stateTime": 1.13,
+              "attackId": 5,
+              "attackLog": {
+                "started": 5,
+                "resolved": 5,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": 5,
+                "lastCancelledId": null
+              },
+              "cooldown": 0,
+              "anim": null
             }
           ]
         },
         "草原：多隻怪物不疊在一起、不擠進玩家": {
           "ok": true,
           "detail": {
-            "minPair": 3.121334372670681,
-            "minToPlayer": 1.0948968360812743,
+            "minPair": 2.8993366888625633,
+            "minToPlayer": 1.0997671304431083,
             "ring": [
               {
                 "id": "star_dew_bobo#1",
@@ -5677,12 +6032,24 @@
                 "mode": "attack",
                 "hp": 60,
                 "maxHp": 60,
-                "x": -1.1880769276414567,
+                "x": -1.1902066089379908,
                 "y": 0,
-                "z": 4.790878142805435,
+                "z": 4.795403486327034,
                 "spawnX": -1.6000000000000005,
                 "spawnZ": 6.2,
-                "visible": true
+                "visible": true,
+                "stateTime": 0.581,
+                "attackId": 4,
+                "attackLog": {
+                  "started": 4,
+                  "resolved": 4,
+                  "cancelled": 0,
+                  "duplicatesBlocked": 0,
+                  "lastResolvedId": 4,
+                  "lastCancelledId": null
+                },
+                "cooldown": 1.4869999999999983,
+                "anim": null
               },
               {
                 "id": "star_dew_bobo#2",
@@ -5690,12 +6057,24 @@
                 "mode": "chase",
                 "hp": 60,
                 "maxHp": 60,
-                "x": -2.920742626437263,
+                "x": -2.8290777041999315,
                 "y": 0,
-                "z": 7.387144277513492,
+                "z": 7.187108896384774,
                 "spawnX": -3.2000000000000006,
                 "spawnZ": 8,
-                "visible": true
+                "visible": true,
+                "stateTime": 0.376,
+                "attackId": 6,
+                "attackLog": {
+                  "started": 6,
+                  "resolved": 6,
+                  "cancelled": 0,
+                  "duplicatesBlocked": 0,
+                  "lastResolvedId": 6,
+                  "lastCancelledId": null
+                },
+                "cooldown": 0,
+                "anim": null
               },
               {
                 "id": "star_dew_bobo#3",
@@ -5703,12 +6082,24 @@
                 "mode": "chase",
                 "hp": 60,
                 "maxHp": 60,
-                "x": 1.6774752505324546,
+                "x": 1.6511311029306504,
                 "y": 0,
-                "z": 7.4197095291631445,
+                "z": 7.374936637348081,
                 "spawnX": 2.3999999999999995,
                 "spawnZ": 8.6,
-                "visible": true
+                "visible": true,
+                "stateTime": 0.722,
+                "attackId": 5,
+                "attackLog": {
+                  "started": 5,
+                  "resolved": 5,
+                  "cancelled": 0,
+                  "duplicatesBlocked": 0,
+                  "lastResolvedId": 5,
+                  "lastCancelledId": null
+                },
+                "cooldown": 0,
+                "anim": null
               }
             ],
             "pl": {
@@ -5785,12 +6176,12 @@
               "yaw": -1.5707963267948966
             },
             "to": {
-              "x": -3.741295971395165e-16,
+              "x": -3.762727290380243e-16,
               "y": 0,
-              "z": 6.110000000000001,
-              "yaw": -5.837271333817962e-8
+              "z": 6.1450000000000005,
+              "yaw": -5.292355656291856e-8
             },
-            "moved": 6.110000000000001
+            "moved": 6.1450000000000005
           }
         },
         "拖曳旋轉攝影機": {
@@ -5807,12 +6198,12 @@
       },
       "errors": [],
       "fpsReference": [
-        16.129032258064548,
-        16.129032258064548,
-        16.65741254858415,
-        17.58499413833532,
-        18.796992481203045,
-        20.161290322580687
+        13.020833333333343,
+        13.157894736842113,
+        13.593112822836433,
+        13.94052044609666,
+        14.91795126802587,
+        15.657620041753669
       ],
       "screenshot": "e2e/webkit_iPhone_15_橫向.png",
       "ok": true
@@ -5836,7 +6227,7 @@
             },
             "pixels": {
               "samples": 2664,
-              "distinctColors": 166,
+              "distinctColors": 165,
               "opaqueRatio": 1
             }
           }
@@ -5855,12 +6246,24 @@
                 "mode": "chase",
                 "hp": 60,
                 "maxHp": 60,
-                "x": -0.9998929495173186,
+                "x": -0.9866993901129689,
                 "y": 0,
-                "z": 3.8745851793796064,
+                "z": 3.82346013668775,
                 "spawnX": -1.6000000000000005,
                 "spawnZ": 6.2,
-                "visible": true
+                "visible": true,
+                "stateTime": 1.534,
+                "attackId": 0,
+                "attackLog": {
+                  "started": 0,
+                  "resolved": 0,
+                  "cancelled": 0,
+                  "duplicatesBlocked": 0,
+                  "lastResolvedId": null,
+                  "lastCancelledId": null
+                },
+                "cooldown": 0,
+                "anim": null
               },
               {
                 "id": "star_dew_bobo#2",
@@ -5873,7 +6276,19 @@
                 "z": 8,
                 "spawnX": -3.2000000000000006,
                 "spawnZ": 8,
-                "visible": true
+                "visible": true,
+                "stateTime": 1.534,
+                "attackId": 0,
+                "attackLog": {
+                  "started": 0,
+                  "resolved": 0,
+                  "cancelled": 0,
+                  "duplicatesBlocked": 0,
+                  "lastResolvedId": null,
+                  "lastCancelledId": null
+                },
+                "cooldown": 0,
+                "anim": null
               },
               {
                 "id": "star_dew_bobo#3",
@@ -5886,7 +6301,19 @@
                 "z": 8.6,
                 "spawnX": 2.3999999999999995,
                 "spawnZ": 8.6,
-                "visible": true
+                "visible": true,
+                "stateTime": 1.534,
+                "attackId": 0,
+                "attackLog": {
+                  "started": 0,
+                  "resolved": 0,
+                  "cancelled": 0,
+                  "duplicatesBlocked": 0,
+                  "lastResolvedId": null,
+                  "lastCancelledId": null
+                },
+                "cooldown": 0,
+                "anim": null
               }
             ],
             "dists": [
@@ -5906,12 +6333,12 @@
               "yaw": 0
             },
             "to": {
-              "x": -3.689248482431402e-16,
+              "x": -3.4688120585848785e-16,
               "y": 0,
-              "z": 6.025,
-              "yaw": -6.123233707045965e-17
+              "z": 5.665,
+              "yaw": -6.123233204690684e-17
             },
-            "moved": 6.025
+            "moved": 5.665
           }
         },
         "拖曳旋轉攝影機": {
@@ -5928,12 +6355,12 @@
       },
       "errors": [],
       "fpsReference": [
-        14.388489208633082,
-        16.111707841031134,
-        16.787912702853927,
-        18.14882032667875,
-        20.746887966804962,
-        23.96166134185302
+        11.252813203300825,
+        11.834319526627217,
+        13.239187996469548,
+        14.184397163120565,
+        15.748031496062989,
+        18.39362354383813
       ],
       "screenshot": "e2e/webkit_iPhone_SE_直向.png",
       "ok": true
@@ -6015,14 +6442,14 @@
               "offsetY": 0,
               "offsetZ": 0,
               "shakeX": 0,
-              "scaleY": 0.9559590148185091,
-              "scaleXZ": 1.0227756113735333,
+              "scaleY": 0.9689386941894503,
+              "scaleXZ": 1.0159020815570763,
               "stretchZ": 1,
               "lean": 0,
               "opacity": 1,
-              "starGlow": 0.7031967160616969,
-              "antennaSway": -0.07395024836674563,
-              "wingFlap": -0.07235059979807393,
+              "starGlow": 0.7464623139648345,
+              "antennaSway": -0.11928836616727287,
+              "wingFlap": 0.17980017749315458,
               "hitFlash": 0,
               "face": "normal",
               "ringScale": 0,
@@ -6043,7 +6470,7 @@
         "e2e/webkit_bobo_6_respawn.png"
       ],
       "fpsReference": [
-        20.256583389601634
+        16.9109357384442
       ],
       "ok": true
     },
@@ -6152,7 +6579,7 @@
         "e2e/webkit_dummy_6_respawn.png"
       ],
       "fpsReference": [
-        20.491803278688536
+        18.64512119328777
       ],
       "ok": true
     },
@@ -6204,7 +6631,7 @@
             "mode": "dead",
             "hp": 0,
             "maxHp": 60,
-            "x": -4.84,
+            "x": -4.68,
             "z": -3
           }
         },
@@ -6285,7 +6712,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 6.487488415199257,
+            "fps": 3.5118525021949076,
             "drawCalls": 36,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -6307,7 +6734,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 6.487488415199257,
+            "fps": 3.5118525021949076,
             "drawCalls": 36,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -6401,7 +6828,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 13.157894736842104,
+            "fps": 10.576923076923077,
             "drawCalls": 36,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -6423,7 +6850,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 13.157894736842104,
+            "fps": 10.576923076923077,
             "drawCalls": 36,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -6517,7 +6944,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 7.1428571428571415,
+            "fps": 4.84027105517909,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -6539,7 +6966,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 7.1428571428571415,
+            "fps": 4.84027105517909,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -6633,7 +7060,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 13.013013013013014,
+            "fps": 10.080645161290322,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -6655,7 +7082,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 13.013013013013014,
+            "fps": 10.080645161290322,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -6749,7 +7176,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 8.08897876643074,
+            "fps": 5.865102639296188,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -6775,7 +7202,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 8.08897876643074,
+            "fps": 5.865102639296188,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -6884,7 +7311,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 12.96111665004985,
+            "fps": 9.970089730807576,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -6910,7 +7337,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 12.96111665004985,
+            "fps": 9.970089730807576,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -7019,7 +7446,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 10.02004008016032,
+            "fps": 7.684918347742554,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -7045,7 +7472,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 10.02004008016032,
+            "fps": 7.684918347742554,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -7155,7 +7582,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 13.402061855670103,
+            "fps": 10.80550098231827,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -7181,7 +7608,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 13.402061855670103,
+            "fps": 10.80550098231827,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -7291,7 +7718,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 6.979062811565305,
+            "fps": 4.844961240310077,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -7317,7 +7744,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 6.979062811565305,
+            "fps": 4.844961240310077,
             "drawCalls": 33,
             "activeMeshes": 20,
             "pixelRatio": 1.5,
@@ -7427,7 +7854,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 12.51303441084463,
+            "fps": 10.587102983638113,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -7453,7 +7880,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 12.51303441084463,
+            "fps": 10.587102983638113,
             "drawCalls": 31,
             "activeMeshes": 17,
             "pixelRatio": 1.5,
@@ -7563,7 +7990,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 7.246376811594204,
+            "fps": 3.902439024390244,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -7589,7 +8016,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 7.246376811594204,
+            "fps": 3.902439024390244,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -7630,7 +8057,7 @@
         "V3.5：不使用陰影貼圖與 GlowLayer（改用接觸陰影與星星光暈）": {
           "ok": true,
           "detail": {
-            "fps": 7.246376811594204,
+            "fps": 3.902439024390244,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -7665,45 +8092,45 @@
           "detail": [
             {
               "name": "目前設定",
-              "avg": 17.857142857142854,
-              "low1": 15.625,
+              "avg": 15.813953488372091,
+              "low1": 14.925373134328357,
               "draws": 24,
               "gain": 0
             },
             {
               "name": "關閉果凍內部星雲",
-              "avg": 26.13746369796708,
+              "avg": 23.233301064859624,
               "low1": 20.833333333333332,
               "draws": 24,
-              "gain": 8.280320840824224
+              "gain": 7.419347576487533
             },
             {
               "name": "關閉果凍材質（純透明）",
-              "avg": 32.4803149606299,
-              "low1": 25,
+              "avg": 26.87140115163146,
+              "low1": 21.73913043478261,
               "draws": 24,
-              "gain": 14.623172103487043
+              "gain": 11.057447663259369
             },
             {
               "name": "關閉 MSAA 抗鋸齒",
-              "avg": 27.9652844744455,
+              "avg": 24.509803921568622,
               "low1": 21.73913043478261,
               "draws": 24,
-              "gain": 10.108141617302646
+              "gain": 8.695850433196531
             },
             {
               "name": "解析度 1.5x",
-              "avg": 18.60465116279069,
-              "low1": 15.625,
+              "avg": 16.319129646418855,
+              "low1": 15.384615384615383,
               "draws": 24,
-              "gain": 0.7475083056478375
+              "gain": 0.5051761580467637
             },
             {
               "name": "隱藏啵啵（只剩場景）",
-              "avg": 25.78796561604584,
+              "avg": 23.16602316602316,
               "low1": 21.27659574468085,
               "draws": 5,
-              "gain": 7.930822758902988
+              "gain": 7.352069677651068
             }
           ]
         },
@@ -7778,7 +8205,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 18.42374616171955,
+            "fps": 14.749262536873157,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -7804,7 +8231,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 18.42374616171955,
+            "fps": 14.749262536873157,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -7845,7 +8272,7 @@
         "V3.5：不使用陰影貼圖與 GlowLayer（改用接觸陰影與星星光暈）": {
           "ok": true,
           "detail": {
-            "fps": 18.42374616171955,
+            "fps": 14.749262536873157,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -7946,7 +8373,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 8.421052631578947,
+            "fps": 5.752636625119847,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -7972,7 +8399,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 8.421052631578947,
+            "fps": 5.752636625119847,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -8013,7 +8440,7 @@
         "V3.6：不使用陰影貼圖與 GlowLayer（沿用 V3.5 繪製方式）": {
           "ok": true,
           "detail": {
-            "fps": 8.421052631578947,
+            "fps": 5.752636625119847,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -8052,45 +8479,45 @@
           "detail": [
             {
               "name": "目前設定",
-              "avg": 18.04368471035137,
-              "low1": 15.384615384615383,
+              "avg": 15.932521087160262,
+              "low1": 13.698630136986303,
               "draws": 24,
               "gain": 0
             },
             {
               "name": "關閉果凍內部星雲",
-              "avg": 25.787965616045835,
-              "low1": 21.73913043478261,
+              "avg": 23.233301064859624,
+              "low1": 20.408163265306122,
               "draws": 24,
-              "gain": 7.744280905694463
+              "gain": 7.300779977699362
             },
             {
               "name": "關閉果凍材質（純透明）",
-              "avg": 33.238366571699885,
-              "low1": 22.72727272727273,
+              "avg": 28.04642166344292,
+              "low1": 20.408163265306122,
               "draws": 24,
-              "gain": 15.194681861348514
+              "gain": 12.113900576282658
             },
             {
               "name": "關閉 MSAA 抗鋸齒",
-              "avg": 28.375733855185892,
-              "low1": 22.22222222222222,
+              "avg": 23.832221163012385,
+              "low1": 16.949152542372882,
               "draws": 24,
-              "gain": 10.33204914483452
+              "gain": 7.899700075852122
             },
             {
               "name": "解析度 1.5x",
-              "avg": 18.761726078799246,
-              "low1": 17.543859649122805,
+              "avg": 16.39344262295083,
+              "low1": 15.384615384615383,
               "draws": 24,
-              "gain": 0.7180413684478744
+              "gain": 0.4609215357905665
             },
             {
               "name": "隱藏啵啵（只剩場景）",
-              "avg": 26.66666666666666,
-              "low1": 24.390243902439025,
+              "avg": 23.460410557184744,
+              "low1": 20.408163265306122,
               "draws": 5,
-              "gain": 8.62298195631529
+              "gain": 7.527889470024482
             }
           ]
         },
@@ -8172,7 +8599,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 18.274111675126903,
+            "fps": 14.184397163120565,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -8198,7 +8625,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 18.274111675126903,
+            "fps": 14.184397163120565,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -8239,7 +8666,7 @@
         "V3.6：不使用陰影貼圖與 GlowLayer（沿用 V3.5 繪製方式）": {
           "ok": true,
           "detail": {
-            "fps": 18.274111675126903,
+            "fps": 14.184397163120565,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -8351,7 +8778,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 9.155645981688709,
+            "fps": 5.928853754940711,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -8377,7 +8804,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 9.155645981688709,
+            "fps": 5.928853754940711,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -8418,7 +8845,7 @@
         "V3.7：不使用陰影貼圖與 GlowLayer": {
           "ok": true,
           "detail": {
-            "fps": 9.155645981688709,
+            "fps": 5.928853754940711,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -8460,45 +8887,45 @@
           "detail": [
             {
               "name": "目前設定",
-              "avg": 18.83239171374764,
-              "low1": 16.39344262295082,
+              "avg": 16.068052930056712,
+              "low1": 14.492753623188404,
               "draws": 24,
               "gain": 0
             },
             {
               "name": "關閉果凍內部星雲",
-              "avg": 25.440313111545983,
-              "low1": 21.27659574468085,
+              "avg": 22.157996146435448,
+              "low1": 20.408163265306122,
               "draws": 24,
-              "gain": 6.607921397798343
+              "gain": 6.089943216378735
             },
             {
               "name": "關閉果凍材質（純透明）",
-              "avg": 33.686236766121255,
-              "low1": 31.25,
+              "avg": 29.440628066732074,
+              "low1": 25.641025641025642,
               "draws": 24,
-              "gain": 14.853845052373615
+              "gain": 13.372575136675362
             },
             {
               "name": "關閉 MSAA 抗鋸齒",
-              "avg": 27.210884353741488,
-              "low1": 21.73913043478261,
+              "avg": 23.60717658168082,
+              "low1": 20,
               "draws": 24,
-              "gain": 8.378492639993848
+              "gain": 7.539123651624109
             },
             {
               "name": "解析度 1.5x",
-              "avg": 18.58736059479553,
-              "low1": 17.241379310344826,
+              "avg": 15.932521087160266,
+              "low1": 14.925373134328357,
               "draws": 24,
-              "gain": -0.2450311189521095
+              "gain": -0.13553184289644626
             },
             {
               "name": "隱藏啵啵（只剩場景）",
-              "avg": 26.627218934911237,
-              "low1": 20.833333333333332,
+              "avg": 23.34630350194552,
+              "low1": 21.27659574468085,
               "draws": 5,
-              "gain": 7.794827221163597
+              "gain": 7.278250571888808
             }
           ]
         },
@@ -8580,7 +9007,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 17.932489451476794,
+            "fps": 14.056224899598394,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -8606,7 +9033,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 17.932489451476794,
+            "fps": 14.056224899598394,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -8647,7 +9074,7 @@
         "V3.7：不使用陰影貼圖與 GlowLayer": {
           "ok": true,
           "detail": {
-            "fps": 17.932489451476794,
+            "fps": 14.056224899598394,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -8762,7 +9189,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 8.583690987124463,
+            "fps": 5.882352941176471,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -8788,7 +9215,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 8.583690987124463,
+            "fps": 5.882352941176471,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -8829,7 +9256,7 @@
         "V3.8：不使用陰影貼圖與 GlowLayer": {
           "ok": true,
           "detail": {
-            "fps": 8.583690987124463,
+            "fps": 5.882352941176471,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -8871,45 +9298,45 @@
           "detail": [
             {
               "name": "目前設定",
-              "avg": 18.744142455482656,
-              "low1": 16.666666666666668,
+              "avg": 15.655577299412915,
+              "low1": 14.084507042253522,
               "draws": 24,
               "gain": 0
             },
             {
               "name": "關閉果凍內部星雲",
-              "avg": 25.911708253358917,
-              "low1": 23.255813953488374,
+              "avg": 22.05177372962607,
+              "low1": 20.833333333333332,
               "draws": 24,
-              "gain": 7.167565797876261
+              "gain": 6.3961964302131555
             },
             {
               "name": "關閉果凍材質（純透明）",
-              "avg": 34.71552555448407,
-              "low1": 29.41176470588235,
+              "avg": 29.325513196480923,
+              "low1": 25.641025641025642,
               "draws": 24,
-              "gain": 15.971383099001411
+              "gain": 13.669935897068008
             },
             {
               "name": "關閉 MSAA 抗鋸齒",
-              "avg": 27.514231499051228,
-              "low1": 26.315789473684212,
+              "avg": 23.764258555133075,
+              "low1": 21.27659574468085,
               "draws": 24,
-              "gain": 8.770089043568571
+              "gain": 8.10868125572016
             },
             {
               "name": "解析度 1.5x",
-              "avg": 18.216682646212842,
-              "low1": 16.949152542372882,
+              "avg": 15.655577299412911,
+              "low1": 14.084507042253522,
               "draws": 24,
-              "gain": -0.5274598092698142
+              "gain": -3.552713678800501e-15
             },
             {
               "name": "隱藏啵啵（只剩場景）",
-              "avg": 26.3653483992467,
-              "low1": 22.22222222222222,
+              "avg": 23.16602316602316,
+              "low1": 20,
               "draws": 5,
-              "gain": 7.621205943764043
+              "gain": 7.510445866610244
             }
           ]
         },
@@ -8923,7 +9350,7 @@
         },
         "點擊效能測試：10 秒後顯示平均／最慢 1%／最低 FPS 與 Draw Calls": {
           "ok": true,
-          "detail": "V3.8 效能測試（本機 WebGL 實測）\nbobo_v38_medium.glb・3 隻・畫質 medium・1x・10 秒\n平均 18.6 FPS・最慢 1% 15.9 FPS・最低 15.6 FPS\nDraw Calls 平均 24（最高 24）・畫面物件 21\n點此關閉"
+          "detail": "V3.8 效能測試（本機 WebGL 實測）\nbobo_v38_medium.glb・3 隻・畫質 medium・1x・10.1 秒\n平均 15.9 FPS・最慢 1% 14.1 FPS・最低 13.9 FPS\nDraw Calls 平均 24（最高 24）・畫面物件 21\n點此關閉"
         },
         "共用載入器釋放資源：零件全部移除": {
           "ok": true,
@@ -8995,7 +9422,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 18.386108273748718,
+            "fps": 14.170040485829958,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -9021,7 +9448,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 18.386108273748718,
+            "fps": 14.170040485829958,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -9062,7 +9489,7 @@
         "V3.8：不使用陰影貼圖與 GlowLayer": {
           "ok": true,
           "detail": {
-            "fps": 18.386108273748718,
+            "fps": 14.170040485829958,
             "drawCalls": 23,
             "activeMeshes": 18,
             "pixelRatio": 1.5,
@@ -9177,7 +9604,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 5.307855626326964,
+            "fps": 2.079002079002079,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -9203,7 +9630,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 5.307855626326964,
+            "fps": 2.079002079002079,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -9237,7 +9664,7 @@
         "V3.8R 第三階段：果凍材質與臉部顯示、腹部星星 0.0714、無陰影貼圖與 GlowLayer": {
           "ok": true,
           "detail": {
-            "fps": 5.307855626326964,
+            "fps": 2.079002079002079,
             "drawCalls": 24,
             "activeMeshes": 21,
             "pixelRatio": 1.5,
@@ -9277,22 +9704,22 @@
           "ok": true,
           "detail": {
             "p1": {
-              "sy": 1.0294441201658957,
-              "sxz": 0.9855952715993618,
-              "roll": 0.015537062958932063,
-              "swayX": -0.0014227877297353867,
-              "flap": 0.013190436581784206,
-              "starX": -0.000325869885473776,
-              "scaleY": 1.0294441201658957
+              "sy": 1.0294268200081658,
+              "sxz": 0.9856035533352209,
+              "roll": 0.015295858754670355,
+              "swayX": -0.0022618635263483393,
+              "flap": 0.02122470021053603,
+              "starX": -0.0005180486118091046,
+              "scaleY": 1.0294268200081658
             },
             "p2": {
-              "sy": 1.0096408843177593,
-              "sxz": 0.9952141351494921,
-              "roll": 0.0208520968858325,
-              "swayX": 0.012386792588318618,
-              "flap": 0.02089499479670455,
-              "starX": 0.0028370238214617725,
-              "scaleY": 1.0096408843177593
+              "sy": 1.0100202840763095,
+              "sxz": 0.9950271985732115,
+              "roll": 0.02088860394038379,
+              "swayX": 0.012545017700774238,
+              "flap": 0.013434006788753063,
+              "starX": 0.0028732630989009847,
+              "scaleY": 1.0100202840763095
             },
             "live": "idle",
             "rest": {
@@ -9309,10 +9736,10 @@
         "V3.8R 第四階段：移動（彈跳離地、前進方向與朝向一致、不穿地）": {
           "ok": true,
           "detail": {
-            "path": 0.7870539184019624,
-            "segs": 15,
-            "aligned": 14,
-            "maxLift": 0.15986609839432092,
+            "path": 0.9628221080966092,
+            "segs": 16,
+            "aligned": 15,
+            "maxLift": 0.1599671166606519,
             "minY": 0
           }
         },
@@ -9322,47 +9749,47 @@
             "c": {
               "anim": "idle",
               "pending": "idle",
-              "x": -0.12301406984082856,
+              "x": -0.10695692922227758,
               "y": 0,
-              "z": 0.03747861952061715,
-              "yaw": -0.000007333225487580636,
+              "z": 0.03820071734295385,
+              "yaw": -0.000001336630761868184,
               "lift": 0,
-              "sy": 0.9946302221885313,
+              "sy": 0.9823766410317403,
               "sfwd": 1,
               "fwd": 0,
-              "bx": -0.12301406984082856,
-              "bz": 0.03747861952061715,
+              "bx": -0.10695692922227758,
+              "bz": 0.03820071734295385,
               "angry": false,
               "face": "normal",
-              "rx": -0.005311776429533003,
-              "rz": 0.018110596111191875,
+              "rx": -0.0069717064101101405,
+              "rz": 0.015476088294678142,
               "scale": [
-                1.002695750462753,
-                0.9946302221885313,
-                1.002695750462753
+                1.008929885301039,
+                0.9823766410317403,
+                1.008929885301039
               ]
             },
             "d": {
               "anim": "idle",
               "pending": "idle",
-              "x": -0.12301406984082856,
+              "x": -0.10695692922227758,
               "y": 0,
-              "z": 0.03747861952061715,
-              "yaw": -3.299638360032059e-7,
+              "z": 0.03820071734295385,
+              "yaw": -5.408540137366675e-8,
               "lift": 0,
-              "sy": 0.9681136364011109,
+              "sy": 0.9638444970382455,
               "sfwd": 1,
               "fwd": 0,
-              "bx": -0.12301406984082856,
-              "bz": 0.03747861952061715,
+              "bx": -0.10695692922227758,
+              "bz": 0.03820071734295385,
               "angry": false,
               "face": "normal",
-              "rx": -0.008604040603425307,
-              "rz": 0.011224889424591388,
+              "rx": -0.009512247120090524,
+              "rz": 0.007058995130382599,
               "scale": [
-                1.0163348816894853,
-                0.9681136364011109,
-                1.0163348816894853
+                1.0185832118649962,
+                0.9638444970382455,
+                1.0185832118649962
               ]
             }
           }
@@ -9391,33 +9818,33 @@
           "detail": {
             "anim": "idle",
             "pending": "idle",
-            "x": -0.12301406984082856,
+            "x": -0.10695692922227758,
             "y": 0,
-            "z": 0.03747861952061715,
-            "yaw": -7.493313045837539e-16,
+            "z": 0.03820071734295385,
+            "yaw": -3.9893651589015046e-17,
             "lift": 0,
-            "sy": 0.9649280308851355,
+            "sy": 0.9638367661198018,
             "sfwd": 1,
             "fwd": 0,
-            "bx": -0.12301406984082856,
-            "bz": 0.03747861952061715,
+            "bx": -0.10695692922227758,
+            "bz": 0.03820071734295385,
             "angry": false,
             "face": "normal",
-            "rx": -0.009076117059985784,
-            "rz": 0.009368803149613018,
+            "rx": -0.00939419454146404,
+            "rz": 0.007771137681813985,
             "scale": [
-              1.01801115915387,
-              0.9649280308851355,
-              1.01801115915387
+              1.0185872968761858,
+              0.9638367661198018,
+              1.0185872968761858
             ]
           }
         },
         "V3.8R 第四階段：受傷（壓縮 ≤12%、後退、不穿地、受傷表情）": {
           "ok": true,
           "detail": {
-            "n": 15,
-            "minSy": 0.8835322359396434,
-            "minFwd": -0.07945781333333331,
+            "n": 14,
+            "minSy": 0.8805816186556927,
+            "minFwd": -0.08050856,
             "minY": 0
           }
         },
@@ -9431,19 +9858,19 @@
             "z": 0,
             "yaw": 0,
             "lift": 0,
-            "sy": 0.9680172128730925,
+            "sy": 0.9639175938805384,
             "sfwd": 1,
             "fwd": 0,
             "bx": 0,
             "bz": 0,
             "angry": false,
             "face": "curious",
-            "rx": -0.008616330811799758,
-            "rz": 0.011181965995245513,
+            "rx": -0.009343508341838794,
+            "rz": 0.008053187816163305,
             "scale": [
-              1.0163854986379062,
-              0.9680172128730925,
-              1.0163854986379062
+              1.0185445899804761,
+              0.9639175938805384,
+              1.0185445899804761
             ]
           }
         },
@@ -9462,11 +9889,11 @@
               "anim": "death",
               "visibility": 1,
               "x": 0,
-              "z": -0.03851628869670764
+              "z": -0.03556995903504779
             },
             "mid": {
               "anim": "death",
-              "visibility": 0.21852478400000008,
+              "visibility": 0.062288384000000474,
               "x": 0,
               "z": -0.03
             },
@@ -9563,7 +9990,7 @@
         },
         "點擊效能測試：10 秒後顯示平均／最慢 1%／最低 FPS 與 Draw Calls": {
           "ok": true,
-          "detail": "V3.8R 效能測試（本機 WebGL 實測）\nbobo_v38r_medium.glb・3 隻・畫質 medium・1x・10.1 秒\n平均 26.6 FPS・最慢 1% 23.8 FPS・最低 23.3 FPS\nDraw Calls 平均 24（最高 24）・畫面物件 21\n點此關閉"
+          "detail": "V3.8R 效能測試（本機 WebGL 實測）\nbobo_v38r_medium.glb・3 隻・畫質 medium・1x・10.1 秒\n平均 24.0 FPS・最慢 1% 20.0 FPS・最低 18.9 FPS\nDraw Calls 平均 24（最高 24）・畫面物件 21\n點此關閉"
         },
         "共用載入器釋放資源：零件全部移除": {
           "ok": true,
@@ -9635,7 +10062,7 @@
         "8 種表情、三視圖、3 隻同場可切換且無錯誤": {
           "ok": true,
           "detail": {
-            "fps": 14.5681581685744,
+            "fps": 12.232415902140673,
             "drawCalls": 20,
             "activeMeshes": 15,
             "pixelRatio": 1.5,
@@ -9661,7 +10088,7 @@
         "果凍材質著色器正常（中／高畫質）": {
           "ok": true,
           "detail": {
-            "fps": 14.5681581685744,
+            "fps": 12.232415902140673,
             "drawCalls": 20,
             "activeMeshes": 15,
             "pixelRatio": 1.5,
@@ -9695,7 +10122,7 @@
         "V3.8R 第三階段：果凍材質與臉部顯示、腹部星星 0.0714、無陰影貼圖與 GlowLayer": {
           "ok": true,
           "detail": {
-            "fps": 14.5681581685744,
+            "fps": 12.232415902140673,
             "drawCalls": 20,
             "activeMeshes": 15,
             "pixelRatio": 1.5,
@@ -9735,22 +10162,22 @@
           "ok": true,
           "detail": {
             "p1": {
-              "sy": 1.0293751952680954,
-              "sxz": 0.9856282677880057,
-              "roll": 0.015085625940605512,
-              "swayX": -0.0029958976690121503,
-              "flap": 0.028035277825048086,
-              "starX": -0.0006861689975873712,
-              "scaleY": 1.0293751952680954
+              "sy": 1.0293808211204545,
+              "sxz": 0.9856255744180799,
+              "roll": 0.015103267091324347,
+              "swayX": -0.002934219440694447,
+              "flap": 0.027471016647455344,
+              "starX": -0.0006720424509648098,
+              "scaleY": 1.0293808211204545
             },
             "p2": {
-              "sy": 1.0097289806070024,
-              "sxz": 0.9951707192495702,
-              "roll": 0.020860978590922414,
-              "swayX": 0.0124241391079942,
-              "flap": 0.019179479751077845,
-              "starX": 0.0028455775261607783,
-              "scaleY": 1.0097289806070024
+              "sy": 1.0105936791176617,
+              "sxz": 0.9947448770894058,
+              "roll": 0.020934701950013034,
+              "swayX": 0.012769699789190486,
+              "flap": 0.001862425725959435,
+              "starX": 0.002924723429131573,
+              "scaleY": 1.0105936791176617
             },
             "live": "idle",
             "rest": {
@@ -9767,10 +10194,10 @@
         "V3.8R 第四階段：移動（彈跳離地、前進方向與朝向一致、不穿地）": {
           "ok": true,
           "detail": {
-            "path": 1.0452925656943972,
+            "path": 1.0529153610239599,
             "segs": 15,
             "aligned": 15,
-            "maxLift": 0.16004059949793087,
+            "maxLift": 0.1581258397853368,
             "minY": 0
           }
         },
@@ -9780,47 +10207,47 @@
             "c": {
               "anim": "idle",
               "pending": "idle",
-              "x": -0.1167471869279226,
+              "x": -0.14885905661893023,
               "y": 0,
-              "z": 0.04304394796661475,
-              "yaw": -0.0000017373744841524349,
+              "z": 0.03728901686376008,
+              "yaw": -5.439688933063142e-7,
               "lift": 0,
-              "sy": 0.9785048242302962,
+              "sy": 0.9720020848791652,
               "sfwd": 1,
               "fwd": 0,
-              "bx": -0.1167471869279226,
-              "bz": 0.04304394796661475,
+              "bx": -0.14885905661893023,
+              "bz": 0.03728901686376008,
               "angry": false,
               "face": "normal",
-              "rx": -0.007416208806998131,
-              "rz": 0.01453595204242074,
+              "rx": -0.008142758990818176,
+              "rz": 0.012684146952247287,
               "scale": [
-                1.0109240170312446,
-                0.9785048242302962,
-                1.0109240170312446
+                1.0142999446126082,
+                0.9720020848791652,
+                1.0142999446126082
               ]
             },
             "d": {
               "anim": "idle",
               "pending": "idle",
-              "x": -0.1167471869279226,
+              "x": -0.14885905661893023,
               "y": 0,
-              "z": 0.04304394796661475,
-              "yaw": -7.625724962093457e-8,
+              "z": 0.03728901686376008,
+              "yaw": -2.4036645534143835e-8,
               "lift": 0,
-              "sy": 0.9646321571287901,
+              "sy": 0.9681077669102056,
               "sfwd": 1,
               "fwd": 0,
-              "bx": -0.1167471869279226,
-              "bz": 0.04304394796661475,
+              "bx": -0.14885905661893023,
+              "bz": 0.03728901686376008,
               "angry": false,
               "face": "normal",
-              "rx": -0.009693153730684873,
-              "rz": 0.005754403347229201,
+              "rx": -0.009901002666849248,
+              "rz": 0.0035534625241882664,
               "scale": [
-                1.018167270315315,
-                0.9646321571287901,
-                1.018167270315315
+                1.0163379626271178,
+                0.9681077669102056,
+                1.0163379626271178
               ]
             }
           }
@@ -9828,7 +10255,7 @@
         "V3.8R 第四階段：攻擊（蓄力壓扁後縮 → 往前拉長彈擊 → 回彈；攻擊中換生氣表情）": {
           "ok": true,
           "detail": {
-            "n": 17,
+            "n": 15,
             "windup": {
               "sy": 0.8,
               "fwd": -0.07
@@ -9849,33 +10276,33 @@
           "detail": {
             "anim": "idle",
             "pending": "idle",
-            "x": -0.1167471869279226,
+            "x": -0.14885905661893023,
             "y": 0,
-            "z": 0.04304394796661475,
-            "yaw": -5.82987210500313e-17,
+            "z": 0.03728901686376008,
+            "yaw": -2.3788470339272984e-18,
             "lift": 0,
-            "sy": 0.9656794734539715,
+            "sy": 0.9804448911500369,
             "sfwd": 1,
             "fwd": 0,
-            "bx": -0.1167471869279226,
-            "bz": 0.04304394796661475,
+            "bx": -0.14885905661893023,
+            "bz": 0.03728901686376008,
             "angry": false,
             "face": "normal",
-            "rx": -0.009788415058284506,
-            "rz": 0.004895401610034408,
+            "rx": -0.009985579558791771,
+            "rz": -0.0005145847871197348,
             "scale": [
-              1.0176149998608452,
-              0.9656794734539715,
-              1.0176149998608452
+              1.0099233328319837,
+              0.9804448911500369,
+              1.0099233328319837
             ]
           }
         },
         "V3.8R 第四階段：受傷（壓縮 ≤12%、後退、不穿地、受傷表情）": {
           "ok": true,
           "detail": {
-            "n": 14,
-            "minSy": 0.8807864705882353,
-            "minFwd": -0.08010514666666667,
+            "n": 12,
+            "minSy": 0.88016006455257,
+            "minFwd": -0.08053835333333333,
             "minY": 0
           }
         },
@@ -9889,19 +10316,19 @@
             "z": 0,
             "yaw": 0,
             "lift": 0,
-            "sy": 0.9639175938805384,
+            "sy": 0.9658633257707879,
             "sfwd": 1,
             "fwd": 0,
             "bx": 0,
             "bz": 0,
             "angry": false,
             "face": "curious",
-            "rx": -0.00934350834183879,
-            "rz": 0.008053187816163314,
+            "rx": -0.009800598506462322,
+            "rz": 0.0047719364179741935,
             "scale": [
-              1.0185445899804761,
-              0.9639175938805384,
-              1.0185445899804761
+              1.0175181436212484,
+              0.9658633257707879,
+              1.0175181436212484
             ]
           }
         },
@@ -9920,11 +10347,11 @@
               "anim": "death",
               "visibility": 1,
               "x": 0,
-              "z": -0.03419077232589895
+              "z": -0.03321700045516614
             },
             "mid": {
               "anim": "death",
-              "visibility": 0.2927265760000002,
+              "visibility": 0.3898104480000002,
               "x": 0,
               "z": -0.03
             },
@@ -10046,12 +10473,12 @@
               "v38r": true,
               "loaded": true,
               "bodyMaterial": "BoboV38RGame_Body_0",
-              "bodyMaterialId": 168,
+              "bodyMaterialId": 170,
               "geometryId": 135,
               "position": [
-                -1.0662605513695003,
+                -1.107840253734723,
                 0,
-                4.131759636556815
+                4.292880983222049
               ],
               "enabled": true
             },
@@ -10060,7 +10487,7 @@
               "v38r": true,
               "loaded": true,
               "bodyMaterial": "BoboV38RGame_Body_1",
-              "bodyMaterialId": 181,
+              "bodyMaterialId": 183,
               "geometryId": 135,
               "position": [
                 -3.2000000000000006,
@@ -10074,7 +10501,7 @@
               "v38r": true,
               "loaded": true,
               "bodyMaterial": "BoboV38RGame_Body_2",
-              "bodyMaterialId": 194,
+              "bodyMaterialId": 196,
               "geometryId": 135,
               "position": [
                 2.3999999999999995,
@@ -10103,9 +10530,9 @@
           "ok": true,
           "detail": {
             "matIds": [
-              168,
-              181,
-              194
+              170,
+              183,
+              196
             ],
             "geoIds": [
               135
@@ -10117,9 +10544,9 @@
           "detail": {
             "visual": [
               [
-                -1.0662605513695003,
+                -1.107840253734723,
                 0,
-                4.131759636556815
+                4.292880983222049
               ],
               [
                 -3.2000000000000006,
@@ -10134,9 +10561,9 @@
             ],
             "logic": [
               [
-                -1.0662605513695003,
+                -1.107840253734723,
                 0,
-                4.131759636556815
+                4.292880983222049
               ],
               [
                 -3.2000000000000006,
@@ -10156,7 +10583,7 @@
           "detail": {
             "pixels": {
               "samples": 3568,
-              "distinctColors": 155,
+              "distinctColors": 154,
               "opaqueRatio": 1
             },
             "visible": [
@@ -10173,21 +10600,21 @@
             "before": {
               "meshes": 51,
               "materials": 24,
-              "textures": 10,
+              "textures": 11,
               "geometries": 44,
               "sprites": 3
             },
             "during": {
               "meshes": 57,
               "materials": 25,
-              "textures": 10,
+              "textures": 11,
               "geometries": 46,
               "sprites": 4
             },
             "after": {
               "meshes": 51,
               "materials": 24,
-              "textures": 10,
+              "textures": 11,
               "geometries": 44,
               "sprites": 3
             },
@@ -10268,20 +10695,6 @@
             "glow": null
           }
         },
-        "high：修正後 Draw Calls 不增加（相對修正前）": {
-          "ok": true,
-          "detail": {
-            "after": 58,
-            "before": 104
-          }
-        },
-        "medium：修正後 Draw Calls 不增加（相對修正前）": {
-          "ok": true,
-          "detail": {
-            "after": 59,
-            "before": 105
-          }
-        },
         "V2（預設）高畫質發光層維持開啟、不受影響": {
           "ok": true,
           "detail": {
@@ -10300,9 +10713,7 @@
       "errors": [],
       "screenshots": [
         "e2e/webkit_photo_high.png",
-        "e2e/webkit_photo_high_before_glowOn.png",
         "e2e/webkit_photo_medium.png",
-        "e2e/webkit_photo_medium_before_glowOn.png",
         "e2e/webkit_photo_low.png"
       ],
       "photo": [
@@ -10318,76 +10729,76 @@
               {
                 "id": "star_dew_bobo#1",
                 "body": [
-                  385.2362667572579,
-                  158.1184714180047
+                  385.33758475700085,
+                  158.11581096021445
                 ],
                 "eyes": [
-                  384.4341408403609,
-                  164.44177183715988
+                  384.53455597490597,
+                  164.52555954434877
                 ],
                 "bodyBox": [
-                  357.76681467652367,
-                  133.3274995529925,
-                  409.5357726754957,
-                  183.5879906933539
+                  358.0175662033399,
+                  133.02382482083814,
+                  409.4843451809195,
+                  183.84497732987148
                 ],
                 "eyesBox": [
-                  372.06204211949927,
-                  154.70926890446646,
-                  396.23340588648335,
-                  174.27469354803642
+                  372.2262609989893,
+                  154.67374993647752,
+                  396.2688344022026,
+                  174.471250110899
                 ]
               },
               {
                 "id": "star_dew_bobo#2",
                 "body": [
-                  425.94990354514823,
-                  148.33355789799137
+                  426.34302396586367,
+                  148.08478732624152
                 ],
                 "eyes": [
-                  426.00030449285873,
-                  154.13814511272622
+                  426.3619471257148,
+                  153.88803523187218
                 ],
                 "bodyBox": [
-                  402.4583633251749,
-                  124.89496614627895,
-                  449.43525563182794,
-                  172.38106492715121
+                  403.447426354797,
+                  123.98400302414902,
+                  450.0874792554742,
+                  172.7522611141911
                 ],
                 "eyesBox": [
-                  415.2322457681463,
-                  144.95136693445735,
-                  436.7683767979464,
-                  163.4148354067074
+                  415.7117409437354,
+                  144.41616757038048,
+                  437.2114008429757,
+                  163.4427303484507
                 ]
               },
               {
                 "id": "star_dew_bobo#3",
                 "body": [
-                  466.6582447898644,
-                  158.1184714180047
+                  466.84255490711973,
+                  158.58572835364956
                 ],
                 "eyes": [
-                  467.5664998000418,
-                  164.44177183715988
+                  467.7558560768729,
+                  164.85455938647152
                 ],
                 "bodyBox": [
-                  442.3648265752888,
-                  133.3274995529925,
-                  494.1208150070501,
-                  183.5879906933539
+                  442.0246059308053,
+                  134.07737279041044,
+                  494.85823409677914,
+                  183.83769832761567
                 ],
                 "eyesBox": [
-                  455.7672203537857,
-                  154.70926890446646,
-                  479.9386136201385,
-                  174.27469354803642
+                  455.71506145031685,
+                  155.19325882807954,
+                  480.3737655976661,
+                  174.62594151576073
                 ]
               }
             ]
           },
           "perf": {
-            "fps": 2.6054002842254858,
+            "fps": 1.8382352941176467,
             "drawCalls": 58,
             "activeMeshes": 41,
             "pixelRatio": 2,
@@ -10400,7 +10811,7 @@
           "resources": {
             "meshes": 51,
             "materials": 24,
-            "textures": 10,
+            "textures": 11,
             "geometries": 44,
             "sprites": 3
           },
@@ -10411,112 +10822,6 @@
             "height": 786
           },
           "file": "e2e/webkit_photo_high.png"
-        },
-        {
-          "label": "high_before_glowOn",
-          "quality": "high",
-          "staged": {
-            "quality": "high",
-            "variant": "v38r",
-            "glow": true,
-            "pixelRatio": 2,
-            "shots": [
-              {
-                "id": "star_dew_bobo#1",
-                "body": [
-                  385.2362667572579,
-                  158.1184714180047
-                ],
-                "eyes": [
-                  384.4341408403609,
-                  164.44177183715988
-                ],
-                "bodyBox": [
-                  357.76681467652367,
-                  133.3274995529925,
-                  409.5357726754957,
-                  183.5879906933539
-                ],
-                "eyesBox": [
-                  372.06204211949927,
-                  154.70926890446646,
-                  396.23340588648335,
-                  174.27469354803642
-                ]
-              },
-              {
-                "id": "star_dew_bobo#2",
-                "body": [
-                  425.94990354514823,
-                  148.33355789799137
-                ],
-                "eyes": [
-                  426.00030449285873,
-                  154.13814511272622
-                ],
-                "bodyBox": [
-                  402.4583633251749,
-                  124.89496614627895,
-                  449.43525563182794,
-                  172.38106492715121
-                ],
-                "eyesBox": [
-                  415.2322457681463,
-                  144.95136693445735,
-                  436.7683767979464,
-                  163.4148354067074
-                ]
-              },
-              {
-                "id": "star_dew_bobo#3",
-                "body": [
-                  466.6582447898644,
-                  158.1184714180047
-                ],
-                "eyes": [
-                  467.5664998000418,
-                  164.44177183715988
-                ],
-                "bodyBox": [
-                  442.3648265752888,
-                  133.3274995529925,
-                  494.1208150070501,
-                  183.5879906933539
-                ],
-                "eyesBox": [
-                  455.7672203537857,
-                  154.70926890446646,
-                  479.9386136201385,
-                  174.27469354803642
-                ]
-              }
-            ]
-          },
-          "perf": {
-            "fps": 2.4330900243309004,
-            "drawCalls": 104,
-            "activeMeshes": 41,
-            "pixelRatio": 2,
-            "quality": "high",
-            "postProcess": true,
-            "bloom": true,
-            "shadowFilter": "contact",
-            "shadowMap": 2048
-          },
-          "resources": {
-            "meshes": 51,
-            "materials": 24,
-            "textures": 10,
-            "geometries": 44,
-            "sprites": 3
-          },
-          "renderer": {
-            "webgl": 2,
-            "hardwareScaling": 0.5,
-            "width": 1704,
-            "height": 786
-          },
-          "file": "e2e/webkit_photo_high_before_glowOn.png"
         },
         {
           "label": "medium",
@@ -10530,76 +10835,76 @@
               {
                 "id": "star_dew_bobo#1",
                 "body": [
-                  385.2753449582733,
-                  157.96586343511865
+                  385.37662450634866,
+                  157.96308682040888
                 ],
                 "eyes": [
-                  384.46940991382286,
-                  164.30230441114492
+                  384.569739881862,
+                  164.386021053831
                 ],
                 "bodyBox": [
-                  357.8239691905069,
-                  133.18456447746905,
-                  409.5580204177273,
-                  183.42482842689665
+                  358.0746099951365,
+                  132.8809368424483,
+                  409.50661960083403,
+                  183.68152592878073
                 ],
                 "eyesBox": [
-                  372.10780586371936,
-                  154.57805631978687,
-                  396.25866619711223,
-                  174.12688610824006
+                  372.2718854614028,
+                  154.5425674835532,
+                  396.2940646653018,
+                  174.323275955506
                 ]
               },
               {
                 "id": "star_dew_bobo#2",
                 "body": [
-                  425.95344178704784,
-                  148.19036487325982
+                  426.3464505640105,
+                  147.94174478178368
                 ],
                 "eyes": [
-                  426.00031529468833,
-                  154.00741656973733
+                  426.3616511770656,
+                  153.75751882751717
                 ],
                 "bodyBox": [
-                  402.4775708225168,
-                  124.76072842385983,
-                  449.4235607553196,
-                  172.22813160331958
+                  403.46631625277826,
+                  123.85019123497086,
+                  450.0757141686793,
+                  172.5991873333994
                 ],
                 "eyesBox": [
-                  415.24139061703073,
-                  144.82843036586712,
-                  436.7592543778537,
-                  163.2762386283184
+                  415.7204788736466,
+                  144.29368495060817,
+                  437.20190263974746,
+                  163.30410990748294
                 ]
               },
               {
                 "id": "star_dew_bobo#3",
                 "body": [
-                  466.626618344948,
-                  157.96586343511865
+                  466.81090945783126,
+                  158.43310151085342
                 ],
                 "eyes": [
-                  467.53125476120977,
-                  164.30230441114492
+                  467.72045041759543,
+                  164.71474183962235
                 ],
                 "bodyBox": [
-                  442.3496013012107,
-                  133.18456447746905,
-                  494.07159731775056,
-                  183.42482842689665
+                  442.00966165687834,
+                  133.9345273539779,
+                  494.80866151476846,
+                  183.67441371483528
                 ],
                 "eyesBox": [
-                  455.74198319109394,
-                  154.57805631978687,
-                  479.89287484028864,
-                  174.12688610824006
+                  455.6898685265543,
+                  155.06163572613755,
+                  480.32765770679316,
+                  174.47783615589492
                 ]
               }
             ]
           },
           "perf": {
-            "fps": 13.642564802182807,
+            "fps": 8.51063829787234,
             "drawCalls": 59,
             "activeMeshes": 41,
             "pixelRatio": 1.5,
@@ -10612,7 +10917,7 @@
           "resources": {
             "meshes": 51,
             "materials": 24,
-            "textures": 10,
+            "textures": 11,
             "geometries": 44,
             "sprites": 3
           },
@@ -10623,112 +10928,6 @@
             "height": 589
           },
           "file": "e2e/webkit_photo_medium.png"
-        },
-        {
-          "label": "medium_before_glowOn",
-          "quality": "medium",
-          "staged": {
-            "quality": "medium",
-            "variant": "v38r",
-            "glow": true,
-            "pixelRatio": 1.5,
-            "shots": [
-              {
-                "id": "star_dew_bobo#1",
-                "body": [
-                  385.2753449582733,
-                  157.96586343511865
-                ],
-                "eyes": [
-                  384.46940991382286,
-                  164.30230441114492
-                ],
-                "bodyBox": [
-                  357.8239691905069,
-                  133.18456447746905,
-                  409.5580204177273,
-                  183.42482842689665
-                ],
-                "eyesBox": [
-                  372.10780586371936,
-                  154.57805631978687,
-                  396.25866619711223,
-                  174.12688610824006
-                ]
-              },
-              {
-                "id": "star_dew_bobo#2",
-                "body": [
-                  425.95344178704784,
-                  148.19036487325982
-                ],
-                "eyes": [
-                  426.00031529468833,
-                  154.00741656973733
-                ],
-                "bodyBox": [
-                  402.4775708225168,
-                  124.76072842385983,
-                  449.4235607553196,
-                  172.22813160331958
-                ],
-                "eyesBox": [
-                  415.24139061703073,
-                  144.82843036586712,
-                  436.7592543778537,
-                  163.2762386283184
-                ]
-              },
-              {
-                "id": "star_dew_bobo#3",
-                "body": [
-                  466.626618344948,
-                  157.96586343511865
-                ],
-                "eyes": [
-                  467.53125476120977,
-                  164.30230441114492
-                ],
-                "bodyBox": [
-                  442.3496013012107,
-                  133.18456447746905,
-                  494.07159731775056,
-                  183.42482842689665
-                ],
-                "eyesBox": [
-                  455.74198319109394,
-                  154.57805631978687,
-                  479.89287484028864,
-                  174.12688610824006
-                ]
-              }
-            ]
-          },
-          "perf": {
-            "fps": 9.088060169225948,
-            "drawCalls": 105,
-            "activeMeshes": 41,
-            "pixelRatio": 1.5,
-            "quality": "medium",
-            "postProcess": true,
-            "bloom": true,
-            "shadowFilter": "pcf",
-            "shadowMap": 1024
-          },
-          "resources": {
-            "meshes": 51,
-            "materials": 24,
-            "textures": 10,
-            "geometries": 44,
-            "sprites": 3
-          },
-          "renderer": {
-            "webgl": 2,
-            "hardwareScaling": 0.6666666666666666,
-            "width": 1278,
-            "height": 589
-          },
-          "file": "e2e/webkit_photo_medium_before_glowOn.png"
         },
         {
           "label": "low",
@@ -10742,76 +10941,76 @@
               {
                 "id": "star_dew_bobo#1",
                 "body": [
-                  385.262449105521,
-                  158.03758315740674
+                  385.3636585312097,
+                  158.0348167899791
                 ],
                 "eyes": [
-                  384.4553163313759,
-                  164.35809192128684
+                  384.555680377026,
+                  164.44183698922532
                 ],
                 "bodyBox": [
-                  357.8223658359117,
-                  133.26668941307915,
-                  409.53638934104873,
-                  183.48707612909857
+                  358.0728785240549,
+                  132.96315428643226,
+                  409.48500402023797,
+                  183.74376693681285
                 ],
                 "eyesBox": [
-                  372.08951485402383,
-                  154.63054211722263,
-                  396.24857569916486,
-                  174.18600939775718
+                  372.25365018352977,
+                  154.59504123307002,
+                  396.28398618980935,
+                  174.38246592550678
                 ]
               },
               {
                 "id": "star_dew_bobo#2",
                 "body": [
-                  425.9533775867592,
-                  148.25808259002613
+                  426.3461129489017,
+                  148.0096404033409
                 ],
                 "eyes": [
-                  426.00032476493584,
-                  154.05970849903977
+                  426.36178336602836,
+                  153.80972590877175
                 ],
                 "bodyBox": [
-                  402.4878007249259,
-                  124.83854733794574,
-                  449.41319897042627,
-                  172.28657870686527
+                  403.4759037245681,
+                  123.92862737493707,
+                  450.06482078797166,
+                  172.65745587683898
                 ],
                 "eyesBox": [
-                  415.2377468805262,
-                  144.87760571796977,
-                  436.7629181952068,
-                  163.3316776371409
+                  415.71699723725106,
+                  144.34267874081237,
+                  437.2057167832951,
+                  163.35955837865177
                 ]
               },
               {
                 "id": "star_dew_bobo#3",
                 "body": [
-                  466.6393801230598,
-                  158.03758315740674
+                  466.82354210856175,
+                  158.50447510219294
                 ],
                 "eyes": [
-                  467.54536931835696,
-                  164.35809192128684
+                  467.73462920822476,
+                  164.7706693844642
                 ],
                 "bodyBox": [
-                  442.3711020345379,
-                  133.26668941307915,
-                  494.07306271013414,
-                  183.48707612909857
+                  442.0312793761866,
+                  134.01598681786243,
+                  494.8097857059398,
+                  183.73655955874239
                 ],
                 "eyesBox": [
-                  455.75209346899476,
-                  154.63054211722263,
-                  479.91118807743396,
-                  174.18600939775718
+                  455.6999610995068,
+                  155.11428571196407,
+                  480.34611856737956,
+                  174.53707860450118
                 ]
               }
             ]
           },
           "perf": {
-            "fps": 8.01496126102057,
+            "fps": 5.196032120925839,
             "drawCalls": 57,
             "activeMeshes": 41,
             "pixelRatio": 1.25,
@@ -10824,7 +11023,7 @@
           "resources": {
             "meshes": 51,
             "materials": 24,
-            "textures": 7,
+            "textures": 8,
             "geometries": 44,
             "sprites": 3
           },
@@ -10838,8 +11037,673 @@
         }
       ],
       "ok": true
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone 15 橫向 / 遊戲 V3.8R 動畫戰鬥（high）",
+      "checks": {
+        "畫質 high：V3.8R 載入、畫質正確、發光層停用": {
+          "ok": true,
+          "detail": {
+            "fps": 1.86219739292365,
+            "drawCalls": 57,
+            "activeMeshes": 41,
+            "pixelRatio": 2,
+            "quality": "high",
+            "postProcess": true,
+            "bloom": false,
+            "shadowFilter": "contact",
+            "shadowMap": 2048
+          }
+        },
+        "三隻都有獨立的 V3.8R 動畫，待機／移動與狀態一致": {
+          "ok": true,
+          "detail": [
+            [
+              "move",
+              "move"
+            ],
+            [
+              "idle",
+              "idle"
+            ],
+            [
+              "idle",
+              "idle"
+            ]
+          ]
+        },
+        "攻擊開始時播放 V3.8R 攻擊動畫（同一幀、時間一致、生氣表情）": {
+          "ok": true,
+          "detail": {
+            "id": "star_dew_bobo#1",
+            "anim": "attack",
+            "face": "angry",
+            "stateTime": 0.1,
+            "animTime": 0.1,
+            "attackId": 1
+          }
+        },
+        "命中後玩家扣 8 HP（每次命中剛好 8）": {
+          "ok": true,
+          "detail": {
+            "log": {
+              "started": 1,
+              "resolved": 1,
+              "cancelled": 0,
+              "duplicatesBlocked": 0,
+              "lastResolvedId": 1,
+              "lastCancelledId": null
+            },
+            "state": "attack",
+            "anim": "attack",
+            "hp": 92,
+            "hitsTaken": 1
+          }
+        },
+        "每一次邏輯攻擊都播放了攻擊動畫（動畫次數 = attackId 次數）": {
+          "ok": true,
+          "detail": {
+            "totals": {
+              "started": 3,
+              "resolved": 2,
+              "dup": 0,
+              "anims": 3
+            },
+            "per": [
+              [
+                2,
+                2
+              ],
+              [
+                1,
+                1
+              ],
+              [
+                0,
+                0
+              ]
+            ]
+          }
+        },
+        "命中去重：結算次數 ≤ 攻擊次數、沒有重複結算、扣血 = 8 × 受擊次數": {
+          "ok": true,
+          "detail": {
+            "totals": {
+              "started": 3,
+              "resolved": 2,
+              "dup": 0,
+              "anims": 3
+            },
+            "combat": {
+              "hp": 84,
+              "maxHp": 100,
+              "down": false,
+              "hitsTaken": 2,
+              "lockedId": "star_dew_bobo#1",
+              "tilt": 0
+            }
+          }
+        },
+        "攻擊冷卻 2 秒（從攻擊開始計算）：攻擊中冷卻尚未結束": {
+          "ok": true,
+          "detail": [
+            [
+              "attack",
+              1.9
+            ],
+            [
+              "attack",
+              1.4999999999999998
+            ],
+            [
+              "move",
+              0
+            ]
+          ]
+        },
+        "命中前受傷：攻擊取消（不結算）、播放受傷動畫": {
+          "ok": false,
+          "detail": {
+            "intr": {
+              "id": "star_dew_bobo#1",
+              "attackId": 2,
+              "stateTime": 0.2,
+              "r": {
+                "applied": true,
+                "killed": false,
+                "overlay": false,
+                "cancelledAttackId": 2
+              },
+              "before": 2
+            },
+            "hurt": {
+              "anim": "attack",
+              "face": "angry",
+              "log": {
+                "started": 2,
+                "resolved": 1,
+                "cancelled": 1,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": 1,
+                "lastCancelledId": 2
+              }
+            },
+            "log": {
+              "started": 2,
+              "resolved": 1,
+              "cancelled": 1,
+              "duplicatesBlocked": 0,
+              "lastResolvedId": 1,
+              "lastCancelledId": 2
+            }
+          }
+        },
+        "致命傷 → 死亡動畫 → 完成後移除（隱藏、星塵清除）": {
+          "ok": false,
+          "detail": {
+            "kill": {
+              "applied": true,
+              "killed": true
+            },
+            "dying": {
+              "anim": "move"
+            },
+            "dead": {
+              "anim": "death",
+              "visible": false,
+              "vis": 0,
+              "dust": 0
+            }
+          }
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "e2e/webkit_game_v38r_combat_high.png"
+      ],
+      "samples": [
+        {
+          "quality": "high",
+          "perf": {
+            "fps": 2.812675792237015,
+            "drawCalls": 52,
+            "activeMeshes": 35,
+            "pixelRatio": 1.5,
+            "quality": "high",
+            "postProcess": true,
+            "bloom": false,
+            "shadowFilter": "contact",
+            "shadowMap": 2048
+          },
+          "resources": {
+            "meshes": 51,
+            "materials": 25,
+            "textures": 11,
+            "geometries": 44,
+            "sprites": 3
+          }
+        }
+      ],
+      "ok": false
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone 15 橫向 / 遊戲 V3.8R 動畫戰鬥（medium）",
+      "checks": {
+        "畫質 medium：V3.8R 載入、畫質正確、發光層停用": {
+          "ok": true,
+          "detail": {
+            "fps": 1.953125,
+            "drawCalls": 58,
+            "activeMeshes": 41,
+            "pixelRatio": 1.5,
+            "quality": "medium",
+            "postProcess": true,
+            "bloom": false,
+            "shadowFilter": "pcf",
+            "shadowMap": 1024
+          }
+        },
+        "三隻都有獨立的 V3.8R 動畫，待機／移動與狀態一致": {
+          "ok": true,
+          "detail": [
+            [
+              "move",
+              "move"
+            ],
+            [
+              "idle",
+              "idle"
+            ],
+            [
+              "idle",
+              "idle"
+            ]
+          ]
+        },
+        "攻擊開始時播放 V3.8R 攻擊動畫（同一幀、時間一致、生氣表情）": {
+          "ok": true,
+          "detail": {
+            "id": "star_dew_bobo#1",
+            "anim": "attack",
+            "face": "angry",
+            "stateTime": 0.1,
+            "animTime": 0.1,
+            "attackId": 1
+          }
+        },
+        "命中後玩家扣 8 HP（每次命中剛好 8）": {
+          "ok": true,
+          "detail": {
+            "log": {
+              "started": 1,
+              "resolved": 1,
+              "cancelled": 0,
+              "duplicatesBlocked": 0,
+              "lastResolvedId": 1,
+              "lastCancelledId": null
+            },
+            "state": "attack",
+            "anim": "attack",
+            "hp": 92,
+            "hitsTaken": 1
+          }
+        },
+        "每一次邏輯攻擊都播放了攻擊動畫（動畫次數 = attackId 次數）": {
+          "ok": true,
+          "detail": {
+            "totals": {
+              "started": 9,
+              "resolved": 8,
+              "dup": 0,
+              "anims": 9
+            },
+            "per": [
+              [
+                4,
+                4
+              ],
+              [
+                3,
+                3
+              ],
+              [
+                2,
+                2
+              ]
+            ]
+          }
+        },
+        "命中去重：結算次數 ≤ 攻擊次數、沒有重複結算、扣血 = 8 × 受擊次數": {
+          "ok": true,
+          "detail": {
+            "totals": {
+              "started": 9,
+              "resolved": 8,
+              "dup": 0,
+              "anims": 9
+            },
+            "combat": {
+              "hp": 36,
+              "maxHp": 100,
+              "down": false,
+              "hitsTaken": 8,
+              "lockedId": "star_dew_bobo#1",
+              "tilt": 0
+            }
+          }
+        },
+        "攻擊冷卻 2 秒（從攻擊開始計算）：攻擊中冷卻尚未結束": {
+          "ok": true,
+          "detail": [
+            [
+              "attack",
+              1.6259999999999994
+            ],
+            [
+              "attack",
+              1.1690000000000005
+            ],
+            [
+              "idle",
+              0.43900000000000006
+            ]
+          ]
+        },
+        "命中前受傷：攻擊取消（不結算）、播放受傷動畫": {
+          "ok": false,
+          "detail": {
+            "intr": {
+              "id": "star_dew_bobo#3",
+              "attackId": 3,
+              "stateTime": 0.068,
+              "r": {
+                "applied": true,
+                "killed": false,
+                "overlay": false,
+                "cancelledAttackId": 3
+              },
+              "before": 9
+            },
+            "hurt": {
+              "anim": "attack",
+              "face": "angry",
+              "log": {
+                "started": 3,
+                "resolved": 2,
+                "cancelled": 1,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": 2,
+                "lastCancelledId": 3
+              }
+            },
+            "log": {
+              "started": 3,
+              "resolved": 2,
+              "cancelled": 1,
+              "duplicatesBlocked": 0,
+              "lastResolvedId": 2,
+              "lastCancelledId": 3
+            }
+          }
+        },
+        "致命傷 → 死亡動畫 → 完成後移除（隱藏、星塵清除）": {
+          "ok": false,
+          "detail": {
+            "kill": {
+              "applied": true,
+              "killed": true
+            },
+            "dying": {
+              "anim": "idle"
+            },
+            "dead": {
+              "anim": "death",
+              "visible": false,
+              "vis": 0,
+              "dust": 0
+            }
+          }
+        },
+        "10 秒後原出生點重生：待機姿勢淡入，結束後完全不透明、星星恢復": {
+          "ok": false,
+          "detail": {
+            "resp": {
+              "vis": 0.06075,
+              "anim": "idle",
+              "x": 2.3999999999999995,
+              "z": 8.6,
+              "sx": 2.3999999999999995,
+              "sz": 8.6,
+              "hp": 60
+            },
+            "idle": {
+              "vis": 0.9999252500000001,
+              "star": 1,
+              "temp": false
+            }
+          }
+        },
+        "死亡重生後資源數不增加（暫時材質與星塵已釋放）": {
+          "ok": true,
+          "detail": {
+            "before": {
+              "meshes": 51,
+              "materials": 24,
+              "textures": 11,
+              "geometries": 44,
+              "sprites": 3
+            },
+            "after": {
+              "meshes": 51,
+              "materials": 24,
+              "textures": 11,
+              "geometries": 44,
+              "sprites": 3
+            }
+          }
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "e2e/webkit_game_v38r_combat_medium.png"
+      ],
+      "samples": [
+        {
+          "quality": "medium",
+          "perf": {
+            "fps": 16.22498647917793,
+            "drawCalls": 59,
+            "activeMeshes": 41,
+            "pixelRatio": 1,
+            "quality": "medium",
+            "postProcess": true,
+            "bloom": false,
+            "shadowFilter": "pcf",
+            "shadowMap": 1024
+          },
+          "resources": {
+            "meshes": 51,
+            "materials": 24,
+            "textures": 11,
+            "geometries": 44,
+            "sprites": 3
+          }
+        }
+      ],
+      "ok": false
+    },
+    {
+      "browser": "webkit",
+      "viewport": "iPhone 15 橫向 / 遊戲 V3.8R 動畫戰鬥（low）",
+      "checks": {
+        "畫質 low：V3.8R 載入、畫質正確、發光層停用": {
+          "ok": true,
+          "detail": {
+            "fps": 2.0161290322580645,
+            "drawCalls": 56,
+            "activeMeshes": 41,
+            "pixelRatio": 1.25,
+            "quality": "low",
+            "postProcess": false,
+            "bloom": false,
+            "shadowFilter": "pcf",
+            "shadowMap": 512
+          }
+        },
+        "三隻都有獨立的 V3.8R 動畫，待機／移動與狀態一致": {
+          "ok": true,
+          "detail": [
+            [
+              "move",
+              "move"
+            ],
+            [
+              "idle",
+              "idle"
+            ],
+            [
+              "idle",
+              "idle"
+            ]
+          ]
+        },
+        "攻擊開始時播放 V3.8R 攻擊動畫（同一幀、時間一致、生氣表情）": {
+          "ok": true,
+          "detail": {
+            "id": "star_dew_bobo#1",
+            "anim": "attack",
+            "face": "angry",
+            "stateTime": 0.1,
+            "animTime": 0.1,
+            "attackId": 1
+          }
+        },
+        "命中後玩家扣 8 HP（每次命中剛好 8）": {
+          "ok": true,
+          "detail": {
+            "log": {
+              "started": 1,
+              "resolved": 1,
+              "cancelled": 0,
+              "duplicatesBlocked": 0,
+              "lastResolvedId": 1,
+              "lastCancelledId": null
+            },
+            "state": "attack",
+            "anim": "attack",
+            "hp": 92,
+            "hitsTaken": 1
+          }
+        },
+        "每一次邏輯攻擊都播放了攻擊動畫（動畫次數 = attackId 次數）": {
+          "ok": true,
+          "detail": {
+            "totals": {
+              "started": 7,
+              "resolved": 7,
+              "dup": 0,
+              "anims": 7
+            },
+            "per": [
+              [
+                3,
+                3
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                2,
+                2
+              ]
+            ]
+          }
+        },
+        "命中去重：結算次數 ≤ 攻擊次數、沒有重複結算、扣血 = 8 × 受擊次數": {
+          "ok": true,
+          "detail": {
+            "totals": {
+              "started": 7,
+              "resolved": 7,
+              "dup": 0,
+              "anims": 7
+            },
+            "combat": {
+              "hp": 44,
+              "maxHp": 100,
+              "down": false,
+              "hitsTaken": 7,
+              "lockedId": "star_dew_bobo#1",
+              "tilt": 0
+            }
+          }
+        },
+        "攻擊冷卻 2 秒（從攻擊開始計算）：攻擊中冷卻尚未結束": {
+          "ok": true,
+          "detail": [
+            [
+              "idle",
+              0.600000000000005
+            ],
+            [
+              "idle",
+              0.20000000000000595
+            ],
+            [
+              "attack",
+              1.6000000000000014
+            ]
+          ]
+        },
+        "命中前受傷：攻擊取消（不結算）、播放受傷動畫": {
+          "ok": false,
+          "detail": {
+            "intr": {
+              "id": "star_dew_bobo#2",
+              "attackId": 3,
+              "stateTime": 0.1,
+              "r": {
+                "applied": true,
+                "killed": false,
+                "overlay": false,
+                "cancelledAttackId": 3
+              },
+              "before": 7
+            },
+            "hurt": {
+              "anim": "attack",
+              "face": "angry",
+              "log": {
+                "started": 3,
+                "resolved": 2,
+                "cancelled": 1,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": 2,
+                "lastCancelledId": 3
+              }
+            },
+            "log": {
+              "started": 3,
+              "resolved": 2,
+              "cancelled": 1,
+              "duplicatesBlocked": 0,
+              "lastResolvedId": 2,
+              "lastCancelledId": 3
+            }
+          }
+        },
+        "致命傷 → 死亡動畫 → 完成後移除（隱藏、星塵清除）": {
+          "ok": false,
+          "detail": {
+            "kill": {
+              "applied": true,
+              "killed": true
+            },
+            "dying": {
+              "anim": "idle"
+            },
+            "dead": {
+              "anim": "death",
+              "visible": false,
+              "vis": 0,
+              "dust": 0
+            }
+          }
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "e2e/webkit_game_v38r_combat_low.png"
+      ],
+      "samples": [
+        {
+          "quality": "low",
+          "perf": {
+            "fps": 9.107468123861555,
+            "drawCalls": 51,
+            "activeMeshes": 35,
+            "pixelRatio": 1,
+            "quality": "low",
+            "postProcess": false,
+            "bloom": false,
+            "shadowFilter": "pcf",
+            "shadowMap": 512
+          },
+          "resources": {
+            "meshes": 51,
+            "materials": 25,
+            "textures": 8,
+            "geometries": 44,
+            "sprites": 3
+          }
+        }
+      ],
+      "ok": false
     }
   ],
-  "finishedAt": "2026-11-20T01:55:12.830Z",
-  "failures": 0
+  "finishedAt": "2026-11-20T02:26:00.418Z",
+  "failures": 4
 }
