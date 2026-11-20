@@ -1,0 +1,110 @@
+{
+ "version": "v1",
+ "fps": 30,
+ "Male": {
+  "height": 1.1714614162920043,
+  "minZ": -0.0010000000474974513,
+  "width": 0.5547000169754028,
+  "bones": [
+   "root",
+   "hips",
+   "spine",
+   "chest",
+   "neck",
+   "head",
+   "upperarm_l",
+   "lowerarm_l",
+   "hand_l",
+   "thigh_l",
+   "shin_l",
+   "foot_l",
+   "upperarm_r",
+   "lowerarm_r",
+   "hand_r",
+   "thigh_r",
+   "shin_r",
+   "foot_r"
+  ],
+  "animations": {
+   "Idle": 2.4,
+   "Walk": 0.9,
+   "Run": 0.56,
+   "Attack": 0.5,
+   "Hurt": 0.45,
+   "Death": 1.3
+  },
+  "lods": {
+   "high": {
+    "bytes": 1415152,
+    "triangles": {
+     "Body_M": 3844,
+     "Gloss_M": 5764,
+     "Face_M": 836
+    },
+    "triangles_total": 10444
+   },
+   "low": {
+    "bytes": 927492,
+    "triangles": {
+     "Body_M_low": 1922,
+     "Gloss_M_low": 2880,
+     "Face_M_low": 836
+    },
+    "triangles_total": 5638
+   }
+  }
+ },
+ "Female": {
+  "height": 1.1286216507432982,
+  "minZ": -0.0010000000474974513,
+  "width": 0.5668174624443054,
+  "bones": [
+   "root",
+   "hips",
+   "spine",
+   "chest",
+   "neck",
+   "head",
+   "upperarm_l",
+   "lowerarm_l",
+   "hand_l",
+   "thigh_l",
+   "shin_l",
+   "foot_l",
+   "upperarm_r",
+   "lowerarm_r",
+   "hand_r",
+   "thigh_r",
+   "shin_r",
+   "foot_r"
+  ],
+  "animations": {
+   "Idle": 2.4,
+   "Walk": 0.9,
+   "Run": 0.56,
+   "Attack": 0.5,
+   "Hurt": 0.45,
+   "Death": 1.3
+  },
+  "lods": {
+   "high": {
+    "bytes": 1501824,
+    "triangles": {
+     "Body_F": 3388,
+     "Gloss_F": 7268,
+     "Face_F": 824
+    },
+    "triangles_total": 11480
+   },
+   "low": {
+    "bytes": 999576,
+    "triangles": {
+     "Body_F_low": 1694,
+     "Gloss_F_low": 3634,
+     "Face_F_low": 824
+    },
+    "triangles_total": 6152
+   }
+  }
+ }
+}
