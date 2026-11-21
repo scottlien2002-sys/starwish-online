@@ -177,17 +177,17 @@ def female_skirt(parts):
     out.append(us)
     # 粉紅荷葉襯裙（加長）
     pet = Part("petticoat", "cloth", step=0.0025)
-    pet.add(lathe_shell(zpet, 0.49, lerp_fn([(zpet, 0.215), (0.42, 0.152), (0.49, 0.108)]),
-                        lerp_fn([(zpet, 0.19), (0.42, 0.132), (0.49, 0.09)]), 0.007, wave=ruffle(18, 0.1, 0.0, 0.4)))
+    pet.add(lathe_shell(zpet, 0.49, lerp_fn([(zpet, 0.232), (0.36, 0.2), (0.42, 0.155), (0.49, 0.108)]),
+                        lerp_fn([(zpet, 0.204), (0.36, 0.176), (0.42, 0.135), (0.49, 0.09)]), 0.008, wave=ruffle(16, 0.055, 0.0, 0.37)))
     out.append(pet)
     # 奶油色前裙（加長）＋金色飾邊
     rx = lerp_fn([(zp, 0.212), (0.44, 0.152), (0.5, 0.11)])
     ry = lerp_fn([(zp, 0.186), (0.44, 0.137), (0.5, 0.093)])
     pink = Part("skirt_pink", "cloth", step=0.0025)
-    pink.add(lathe_shell(zp, 0.5, rx, ry, 0.007, wave=ruffle(12, 0.09, 0.5, 0.41)))
+    pink.add(lathe_shell(zp, 0.5, rx, ry, 0.008, wave=ruffle(12, 0.04, 0.5, 0.41)))
     out.append(pink)
     st = Part("skirt_trim", "metal", step=0.0018)
-    st.add(lathe_shell(zp, zp + 0.015, lambda z: rx(z) + 0.004, lambda z: ry(z) + 0.004, 0.006, wave=ruffle(12, 0.09, 0.5, 0.41)))
+    st.add(lathe_shell(zp, zp + 0.016, lambda z: rx(z) + 0.007, lambda z: ry(z) + 0.007, 0.009, wave=ruffle(12, 0.04, 0.5, 0.41)))
     out.append(st)
     # 同色系安全短褲：腰到大腿上段，貼身、在裙內
     sh = Part("safety_shorts", "cloth", step=0.0025)
@@ -207,7 +207,7 @@ def female_skirt(parts):
     orx = lerp_fn([(0.14, 0.33), (0.25, 0.305), (0.34, 0.268), (0.42, 0.2), (0.5, 0.118)])
     ory = lerp_fn([(0.14, 0.215), (0.25, 0.2), (0.34, 0.19), (0.42, 0.15), (0.5, 0.099)])
     ocy = lerp_fn([(0.14, 0.06), (0.5, 0.0)])
-    wave = lambda th, z: 1 + 0.03 * np.sin(8 * th + 0.4) * np.clip((0.36 - z) / 0.2, 0, 1)   # 柔和布料摺
+    wave = lambda th, z: 1 + 0.03 * np.sin(8 * th + 0.4) * np.clip((0.36 - z) / 0.2, 0, 1) * np.clip((np.abs(th) - 1.0) / 0.5, 0, 1)   # 柔和布料摺（開口附近不摺）
     osk = Part("overskirt", "cloth2", step=0.003)
     osk.add(lathe_shell(0.14, 0.5, orx, ory, 0.012, cy_fn=ocy, open_front_deg=40, hem_fn=ohem, wave=wave))
     out.append(osk)
@@ -217,7 +217,7 @@ def female_skirt(parts):
     out.append(otrim)
     # 外裙背後的四芒星徽章：外裙往內收後，徽章跟著移到新的布面上
     emb = Part("overskirt_emblem", "metal", step=0.0015)
-    emb.add(NS.star_prim((0, 0.238, 0.33), (0, 1, 0.3), (0, 0, 1), 0.04, 0.016, 4, 0.005))
+    emb.add(NS.star_prim((0, 0.222, 0.33), (0, 1, 0.3), (0, 0, 1), 0.04, 0.016, 4, 0.005))
     out.append(emb)
     return keep + out
 
