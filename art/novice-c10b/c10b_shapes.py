@@ -63,25 +63,33 @@ def c10b_female_skirt(parts):
     drop = ("petticoat", "skirt_pink", "skirt_trim", "bloomers", "overskirt", "overskirt_trim", "overskirt_emblem")
     keep = [p for p in parts if p.name not in drop]
     out = []
-    # 奶油白內裙（下緣半徑沿原 A 字斜率外延）
-    us = Part("underskirt", "cloth", step=0.0025)
-    us.add(lathe_shell(UNDERSKIRT_HEM, 0.47, lerp_fn([(UNDERSKIRT_HEM, 0.2103), (0.4, 0.15), (0.47, 0.104)]),
-                       lerp_fn([(UNDERSKIRT_HEM, 0.1845), (0.4, 0.132), (0.47, 0.088)]), 0.006, wave=ruffle(10, 0.05, 1.2, 0.4)))
-    out.append(us)
-    pet = Part("petticoat", "cloth", step=0.0025)
-    zp0 = 0.31
-    pet.add(lathe_shell(PETTI_HEM, 0.49, lerp_fn([(PETTI_HEM, 0.2389), (zp0, 0.232), (0.36, 0.2), (0.42, 0.155), (0.49, 0.108)]),
-                        lerp_fn([(PETTI_HEM, 0.2096), (zp0, 0.204), (0.36, 0.176), (0.42, 0.135), (0.49, 0.09)]), 0.008, wave=ruffle(16, 0.055, 0.0, 0.37)))
     rx = lerp_fn([(FRONT_HEM, 0.2172), (0.344, 0.212), (0.44, 0.152), (0.5, 0.11)])
     ry = lerp_fn([(FRONT_HEM, 0.1906), (0.344, 0.186), (0.44, 0.137), (0.5, 0.093)])
     # 荷葉襯裙不可穿出奶油色前裙（C1.0-A 已有零星粉紅色斑點；裙襬下降後金色飾邊左側被穿出一個缺口）：
-    # 前裙下緣以上，荷葉限制在前裙內側（扣掉前裙荷葉波浪幅度＋4 mm）
-    def inside_pink(P):
-        z = P[..., 2]
-        rr = np.sqrt((P[..., 0] / rx(z)) ** 2 + (P[..., 1] / ry(z)) ** 2)
-        lim = (rr - 0.955) * np.minimum(rx(z), ry(z)) + 0.004
-        return np.where(z > FRONT_HEM + 0.002, lim, -1.0)
-    pet.inter(Prim(inside_pink, (-0.3, -0.3, PETTI_HEM - 0.01), (0.3, 0.3, 0.5)))
+    # 前裙下緣以上，荷葉半徑限制在前裙內側（前裙最小波浪半徑 ×0.94 − 6 mm），荷葉波浪只在前裙下緣以下出現。
+    prx0 = lerp_fn([(PETTI_HEM, 0.2389), (0.31, 0.232), (0.36, 0.2), (0.42, 0.155), (0.49, 0.108)])
+    pry0 = lerp_fn([(PETTI_HEM, 0.2096), (0.31, 0.204), (0.36, 0.176), (0.42, 0.135), (0.49, 0.09)])
+
+    def capped(f0, fp):
+        def f(z):
+            w = np.clip((z - (FRONT_HEM - 0.014)) / 0.014, 0, 1)
+            return f0(z) * (1 - w) + np.minimum(f0(z), fp(z) * 0.94 - 0.006) * w
+        return f
+
+    pwave = lambda th, z: 1 + 0.055 * np.sin(16 * th) * np.clip((FRONT_HEM - 0.004 - z) / 0.02, 0, 1)
+    # 奶油白內裙（下緣半徑沿原 A 字斜率外延；前裙下緣以上收在荷葉襯裙內側，避免三層裙互相穿插）
+    urx0 = lerp_fn([(UNDERSKIRT_HEM, 0.2103), (0.4, 0.15), (0.47, 0.104)])
+    ury0 = lerp_fn([(UNDERSKIRT_HEM, 0.1845), (0.4, 0.132), (0.47, 0.088)])
+    prx, pry = capped(prx0, rx), capped(pry0, ry)
+
+    def inside(f0, fo):
+        return lambda z: np.minimum(f0(z), (fo(z) - 0.011) / 1.05)
+
+    us = Part("underskirt", "cloth", step=0.0025)
+    us.add(lathe_shell(UNDERSKIRT_HEM, 0.47, inside(urx0, prx), inside(ury0, pry), 0.006, wave=ruffle(10, 0.05, 1.2, 0.4)))
+    out.append(us)
+    pet = Part("petticoat", "cloth", step=0.0025)
+    pet.add(lathe_shell(PETTI_HEM, 0.49, prx, pry, 0.008, wave=pwave))
     out.append(pet)
     pink = Part("skirt_pink", "cloth", step=0.0025)
     pink.add(lathe_shell(FRONT_HEM, 0.5, rx, ry, 0.008, wave=ruffle(12, 0.04, 0.5, 0.41)))
