@@ -217,8 +217,8 @@ def face_texture(g, size=2048, ss=2):
         # 下睫毛：外側短短一段
         lo = np.zeros_like(xx)
         for s_ in np.linspace(0, 1, 12):
-            lo = np.maximum(lo, ell(xx, yy, ex + outer * (0.18 + 0.3 * s_) * w, ez + 0.5 * h - 0.07 * h * s_, 0.028 * h, 0.013 * h, 1.0))
-        put(sl, lo, hx(sp["lash"]), 0.7)
+            lo = np.maximum(lo, ell(xx, yy, ex + outer * (0.22 + 0.24 * s_) * w, ez + 0.45 * h - 0.12 * h * s_ * s_, 0.022 * h, 0.011 * h, 1.0))
+        put(sl, lo, hx(sp["lash"]), 0.55)
         # 眉毛
         br = np.zeros_like(xx)
         for s_ in np.linspace(0, 1, 26):

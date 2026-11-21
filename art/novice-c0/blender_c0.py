@@ -174,7 +174,7 @@ def main():
         for v, yaw in VIEWS.items():
             shoot(cam, yaw, zc, H * PX, (W, H), os.path.join(OUT, f"c0_{g}_{v}.png"))
         for v in ("front", "left45"):
-            shoot(cam, VIEWS[v], 0.86, 0.5, (1100, 1100), os.path.join(OUT, f"c0_{g}_face_{v}.png"))
+            shoot(cam, VIEWS[v], 0.9, 0.6, (1100, 1100), os.path.join(OUT, f"c0_{g}_face_{v}.png"))
         hq = {o.name: sum(len(p.vertices) - 2 for p in o.data.polygons) for o in objs}
         export_glb(objs, os.path.join(OUT, f"novice_c0_{g}_hq.glb"))
         decimate_to(objs, LITE_TRIS)
