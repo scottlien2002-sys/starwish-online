@@ -46,7 +46,7 @@ import {
  *   - 視角：正面、45 度、側面、背面、低角度（正面／背面）、頭部、裙裝、自由旋轉
  *   - 效能測試：20 秒、3 分鐘長時間（每 30 秒一段，看發熱降頻）；平均、1% Low、卡頓、WebGL Context Lost
  *   - 結果可「複製報告」貼回給開發者
- * 金色金屬：專案沒有環境貼圖，金屬材質會發黑 → 只在角色的金屬材質掛上「天空＋草原」一次性反射探針（RENDER_ONCE）。
+ * 金色金屬：專案沒有環境貼圖，金屬材質會發黑 → 只在角色的金屬材質掛上「天空」一次性反射探針（RENDER_ONCE）。
  */
 
 interface CharInst {
@@ -153,11 +153,11 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
   const BASE_Y = heightAt(0, 0) + PLAZA_TOP;
   const groundMeshes = scene.meshes.filter((m) => /^PH_(ground|plaza)/.test(m.name));
 
-  // 金屬反射用：天空＋草原拍一次的反射探針（角色載入前的所有網格；只給角色金屬材質用）
+  // 金屬反射用：只拍天空一次的反射探針（只給角色金屬材質用）
   const probe = new ReflectionProbe("c10bEnv", 128, scene, true, true);
   probe.position = new Vector3(0, 0.8, 0);
-  for (const m of scene.meshes) probe.renderList!.push(m);
-  if (!probe.renderList!.includes(sky)) probe.renderList!.push(sky);
+  // 只拍天空（不含草地）：拍到草地時金邊會反射出綠色
+  probe.renderList!.push(sky);
   probe.refreshRate = RenderTargetTexture.REFRESHRATE_RENDER_ONCE;
 
   const camera = new ArcRotateCamera("c10bCam", Math.PI / 2, 1.42, 3.0, new Vector3(0, 0.6 + BASE_Y, 0), scene);
