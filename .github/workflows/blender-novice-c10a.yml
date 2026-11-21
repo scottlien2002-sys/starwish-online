@@ -1,0 +1,120 @@
+name: Blender — Novice C1.0-A art upgrade (Stage 5.4 C1.0-A)
+
+# Stage 5.4 V2 C0.3：局部修正（男生側面多餘眼睛＝臉部貼圖投影；男女後腦勺貼頭）。以 C0.2 為基礎，舊版檔案不改。
+# 不綁骨架、不做動畫、不接進遊戲。結果推到 art-novice-c10a 分支（不影響 B.2、遊戲網站與 main）。
+# 原始設定圖不放進儲存庫。
+on:
+  workflow_dispatch:
+  push:
+    branches: ["feature/novice-c10a-art"]
+    paths:
+      - "art/novice-c10a/**"
+      - "art/novice-c04/**"
+      - "art/novice-c03/**"
+      - "art/novice-c02/**"
+      - "art/novice-c01/**"
+      - "art/novice-c0/**"
+      - "art/novice-v2/novice_shapes.py"
+      - "art/novice-v2/sdf.py"
+      - ".github/workflows/blender-novice-c10a.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: blender-novice-c10a
+  cancel-in-progress: true
+
+env:
+  BLENDER_VERSION: "4.2.3"
+  BLENDER_SERIES: "4.2"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Sample SDF parts into meshes (numpy)
+        run: |
+          python3 -m pip install --quiet numpy pillow
+          mkdir -p out/parts
+          python3 art/novice-c10a/export_c10a.py out/parts both 2>&1 | tail -80
+          ls -la out/parts
+
+      - name: System libraries for Blender (headless)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libsm6 libxkbcommon0 >/dev/null
+
+      - name: Download Blender ${{ env.BLENDER_VERSION }} (official, free)
+        run: |
+          URL="https://download.blender.org/release/Blender${BLENDER_SERIES}/blender-${BLENDER_VERSION}-linux-x64.tar.xz"
+          curl -fsSL --retry 5 --retry-delay 10 "$URL" -o /tmp/blender.tar.xz || curl -fsSL --retry 5 "https://mirrors.ocf.berkeley.edu/blender/release/Blender${BLENDER_SERIES}/blender-${BLENDER_VERSION}-linux-x64.tar.xz" -o /tmp/blender.tar.xz
+          mkdir -p /opt/blender && tar -xf /tmp/blender.tar.xz -C /opt/blender --strip-components=1
+          /opt/blender/blender --version | head -2
+
+      - name: Colour renders (4 views + face close-ups) and GLB (hq + lite)
+        run: |
+          /opt/blender/blender -b --factory-startup -noaudio -P art/novice-c10a/blender_c10a.py -- --parts "$PWD/out/parts" --out "$PWD/out" 2>&1 | tee out/blender.log | grep -v "^Fra:" | grep -v "Sample" | tail -60
+          for g in male female; do for v in front side back left45; do test -f out/c10a_${g}_${v}.png; done; test -f out/novice_c10a_${g}_hq.glb; test -f out/novice_c10a_${g}_lite.glb; done
+
+      - name: Validate GLB (Khronos glTF-Validator)
+        run: |
+          mkdir -p /tmp/gv && cd /tmp/gv && npm init -y >/dev/null && npm i --no-save gltf-validator@latest 2>&1 | tail -3
+          cd "$GITHUB_WORKSPACE"
+          NODE_PATH=/tmp/gv/node_modules node -e '
+            const v = require("gltf-validator"); const fs = require("fs");
+            (async () => {
+              let bad = 0; const s = {};
+              for (const g of ["male","female"]) for (const q of ["hq","lite"]) {
+                const b = fs.readFileSync(`out/novice_c10a_${g}_${q}.glb`);
+                const r = await v.validateBytes(new Uint8Array(b));
+                const k = `${g}_${q}`;
+                s[k] = { errors: r.issues.numErrors, warnings: r.issues.numWarnings, bytes: b.length, triangles: r.info.totalTriangleCount, materials: r.info.materialCount, textures: (r.info.resources || []).filter(x => x.storage === "buffer-view" && x.image).map(x => x.image) };
+                { const j = (() => { const dv = new DataView(b.buffer, b.byteOffset); const len = dv.getUint32(12, true); return JSON.parse(Buffer.from(b.subarray(20, 20 + len)).toString()); })();
+                  s[k].color0_meshes = j.meshes.filter(m => m.primitives.some(p => "COLOR_0" in p.attributes)).length;
+                  s[k].meshes = j.meshes.length;
+                  s[k].textured_materials = j.materials.filter(m => m.pbrMetallicRoughness && m.pbrMetallicRoughness.baseColorTexture).length; }
+                console.log(k, JSON.stringify(s[k]));
+                bad += r.issues.numErrors;
+              }
+              fs.writeFileSync("out/validator_summary.json", JSON.stringify(s, null, 1));
+              if (bad) process.exit(1);
+            })();'
+
+      - name: Contact sheet
+        if: always()
+        run: |
+          python3 - <<'PY'
+          from PIL import Image
+          import os
+          rows = []
+          for g in ("male", "female"):
+              ims = [Image.open(f"out/c10a_{g}_{v}.png").convert("RGB") for v in ("front", "side", "back", "left45") if os.path.exists(f"out/c10a_{g}_{v}.png")]
+              if ims:
+                  rows.append(ims)
+          if rows:
+              w = max(sum(i.width for i in r) for r in rows); h = sum(max(i.height for i in r) for r in rows)
+              sheet = Image.new("RGB", (w, h), (235, 236, 242)); y = 0
+              for r in rows:
+                  x = 0
+                  for i in r:
+                      sheet.paste(i, (x, y)); x += i.width
+                  y += max(i.height for i in r)
+              sheet.save("out/contact_sheet.png")
+          PY
+
+      - name: Push results to art-novice-c10a branch
+        if: always()
+        run: |
+          mkdir -p out/textures && cp out/parts/c10a_face_*.png out/textures/ && rm -rf out/parts
+          echo "{\"commit\":\"${GITHUB_SHA}\",\"blender\":\"${BLENDER_VERSION}\",\"builtAt\":\"$(date -u +%FT%TZ)\"}" > out/build.json
+          cd out
+          git init -q -b work
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -qm "Novice C1.0-A ${GITHUB_SHA::7}"
+          git push -qf "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" HEAD:art-novice-c10a
