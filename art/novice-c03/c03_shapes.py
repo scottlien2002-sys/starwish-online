@@ -81,6 +81,10 @@ def c03_male_hair():
     H.c, H.r = np.asarray(BACK_M[0], float), np.asarray(BACK_M[1], float)   # C0.3：髮旋周圍也貼頭
     for az, el in ((120, 52), (230, 50), (180, 40)):
         F(W, az, el, 0.1, 0.034, 0.014, ex_root=0.004, belly=0.005, bend=28, plateau=0.3)
+    # 髮旋中心：補一個平順的小圓頂，避免髮束根部交會處出現凹洞（C0.3 後腦殼收窄後出現）
+    pw, nw = H.pt(W[0], W[1], 0.0)
+    t1 = unit(np.cross(nw, [0, 0, 1.0])) if abs(nw[2]) < 0.99 else np.array([1.0, 0, 0])
+    H.part.add(ellipsoid(pw + nw * 0.004, (0.05, 0.05, 0.016), np.column_stack([t1, np.cross(nw, t1), nw])), 0.02)
     H.c, H.r = np.asarray(SHELL_M[0], float), np.asarray(SHELL_M[1], float)
     for sx, (a1, a2) in ((1, (0.07, 0.12)), (-1, (0.05, 0.09))):
         p0, n = H.pt(8 * sx, 80, 0.01)
