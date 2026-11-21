@@ -148,6 +148,21 @@ def render_views(g, cam):
     return paths
 
 
+def render_heads(g, cam):
+    """頭部特寫：正面、側面、45 度（正交，畫面高 0.8 公尺，中心在頭部）"""
+    sc = bpy.context.scene
+    old = (sc.render.resolution_x, sc.render.resolution_y, cam.data.ortho_scale)
+    sc.render.resolution_x = sc.render.resolution_y = 1100
+    cam.data.ortho_scale = 0.8
+    for v in ("front", "side", "left45"):
+        a = math.radians(VIEWS[v])
+        cam.location = Vector((math.sin(a) * 5, -math.cos(a) * 5, 0.94))
+        cam.rotation_euler = (math.radians(90), 0, a)
+        sc.render.filepath = os.path.join(OUT, f"clay_{g}_head_{v}.png")
+        bpy.ops.render.render(write_still=True)
+    sc.render.resolution_x, sc.render.resolution_y, cam.data.ortho_scale = old
+
+
 def main():
     info = {}
     for g in ("male", "female"):
@@ -155,6 +170,7 @@ def main():
         objs = load(g)
         cam = setup_render()
         render_views(g, cam)
+        render_heads(g, cam)
         tris = decimate(objs)
         for o in bpy.context.scene.objects:
             o.select_set(o in objs)
