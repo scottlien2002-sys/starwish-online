@@ -83,6 +83,18 @@ function main(): void {
         });
       return;
     }
+    // ?lab=c10b：Stage 5.4 C1.0-B 男女初心者實機整合測試（靜態模型、HQ／Lite 切換、效能測試、複製報告）
+    if (lab === "c10b") {
+      document.body.classList.add("lab-mode");
+      void import("./lab/NoviceC10bLab.ts")
+        .then((m) => m.startNoviceC10bLab(canvas, hudRoot))
+        .then(() => hideBoot())
+        .catch((err: unknown) => {
+          console.error(err);
+          fail(`C1.0-B 測試頁載入失敗：${err instanceof Error ? err.message : String(err)}`);
+        });
+      return;
+    }
     const LAB_MONSTER: Record<string, string> = { bobo: "star_dew_bobo", dummy: "test_dummy" };
     if (lab && (lab in LAB_MONSTER || lab === "field")) {
       const start =

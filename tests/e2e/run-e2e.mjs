@@ -1902,6 +1902,78 @@ for (const name of browsers) {
     for (const e of run.errors) console.log(`   ! ${e}`);
   }
 
+  // ---------- Stage 5.4 C1.0-B：男女初心者實機整合測試（?lab=c10b；靜態 GLB、HQ／Lite、低角度、效能測試流程）----------
+  {
+    const vp = VIEWPORTS[0];
+    const run = { browser: name, viewport: `${vp.name} / Stage 5.4 C1.0-B 實機整合測試 ?lab=c10b`, checks: {}, errors: [], screenshots: [], results: [] };
+    const check = (key, ok, detail) => {
+      run.checks[key] = { ok, detail };
+    };
+    const shot = async (page, label) => {
+      const f = `${outDir}${name}_c10b_${label}.png`;
+      await page.screenshot({ path: f });
+      run.screenshots.push(f.split("/test-results/")[1]);
+    };
+    const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+    const page = await ctx.newPage();
+    page.on("pageerror", (e) => run.errors.push(`pageerror: ${e.message}`));
+    page.on("console", (m) => m.type() === "error" && run.errors.push(`console: ${m.text()}`));
+    try {
+      await page.goto(server.url + "/?lab=c10b&quality=high", { waitUntil: "load" });
+      await page.waitForFunction(() => window.__starwishC10b?.ready === true, null, { timeout: 120000 });
+      await page.waitForTimeout(800);
+      const hq = await page.evaluate(() => window.__starwishC10b.info());
+      run.results.push({ tag: "c10b hq", info: hq });
+      check("HQ：男女兩個角色載入（男 32、女 31 個網格）", hq.chars.length === 2 && hq.chars[0].gender === "male" && hq.chars[0].meshes === 32 && hq.chars[1].meshes === 31, hq.chars);
+      check("HQ：每個角色約 20 萬三角形（與 GLB 相同）", hq.chars.every((c) => c.triangles > 195000 && c.triangles < 205000), hq.chars.map((c) => c.triangles));
+      check("HQ：身高 1.0～1.35 公尺（與靜態展示同比例）", hq.chars.every((c) => c.height > 1.0 && c.height < 1.35), hq.chars.map((c) => c.height));
+      check("靜態模型：沒有骨架與動畫（不宣稱動畫完成）", hq.chars.every((c) => !c.skeleton && c.animations === 0), hq.chars);
+      check("沒有半透明材質（不會有透明排序錯誤）", hq.transparentMaterials.length === 0, hq.transparentMaterials);
+      check("金色金屬掛上環境反射（避免發黑）", hq.metalWithProbe >= 2, hq.metalWithProbe);
+      check("畫質設定與遊戲相同（PCSS32 陰影、HDR、MSAA 4x）", hq.shadowQuality === 1 && hq.hdr === true && hq.msaa === 4, hq);
+      check("載入時間有記錄", hq.loads.length === 1 && hq.loads[0].ms > 0 && hq.loads[0].files.length === 2, hq.loads);
+      for (const v of ["front", "left45", "side", "back", "low", "lowBack", "head", "skirt"]) {
+        await page.evaluate((x) => window.__starwishC10b.view(x), v);
+        await page.waitForTimeout(500);
+        await shot(page, `hq_${v}`);
+      }
+      await page.evaluate(() => window.__starwishC10b.setLod("lite"));
+      await page.waitForFunction(() => window.__starwishC10b.lod === "lite" && !window.__starwishC10b.loading, null, { timeout: 120000 });
+      await page.waitForTimeout(500);
+      const lite = await page.evaluate(() => window.__starwishC10b.info());
+      run.results.push({ tag: "c10b lite", info: lite });
+      check("HQ → Lite 切換：每個角色約 4 萬三角形、仍是 2 個角色", lite.chars.length === 2 && lite.chars.every((c) => c.triangles > 38000 && c.triangles < 42000), lite.chars.map((c) => c.triangles));
+      check("Lite 身高與 HQ 相同（±1 公分）", lite.chars.every((c, i) => Math.abs(c.height - hq.chars[i].height) < 0.01), [hq.chars.map((c) => c.height), lite.chars.map((c) => c.height)]);
+      for (const v of ["front", "low", "skirt"]) {
+        await page.evaluate((x) => window.__starwishC10b.view(x), v);
+        await page.waitForTimeout(500);
+        await shot(page, `lite_${v}`);
+      }
+      await page.evaluate(() => window.__starwishC10b.setLod("hq"));
+      await page.waitForFunction(() => window.__starwishC10b.lod === "hq" && !window.__starwishC10b.loading, null, { timeout: 120000 });
+      // 效能測試流程（CI 沒有 GPU：只檢查流程與數據完整；FPS 不代表 iPhone）
+      await page.evaluate(() => window.__starwishC10b.bench(4, "CI 4 秒"));
+      await page.waitForFunction(() => window.__starwishC10b.benchState().state === "done", null, { timeout: 180000 });
+      const b = await page.evaluate(() => window.__starwishC10b.benchState());
+      const rep = await page.evaluate(() => window.__starwishC10b.report());
+      const after = await page.evaluate(() => window.__starwishC10b.info());
+      run.results.push({ tag: "c10b bench", bench: b.result, report: rep });
+      check("效能測試產生平均／1% Low／卡頓結果、報告文字", !!b.result && b.result.frames > 0 && b.result.avgDrawCalls > 0 && /平均/.test(rep) && /載入/.test(rep), { r: b.result });
+      check("HQ ↔ Lite 來回切換 3 次載入、沒有 WebGL Context Lost", after.loads.length === 3 && after.contextLost === 0, { loads: after.loads, lost: after.contextLost });
+    } catch (e) {
+      run.errors.push(`exception: ${e.message}`);
+    }
+    await ctx.close();
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 12;
+    if (!run.ok) failures++;
+    report.runs.push(run);
+    console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
+    for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}${v.ok ? "" : "  " + JSON.stringify(v.detail).slice(0, 900)}`);
+    for (const r of run.results) if (r.bench) console.log(`   · ${r.tag}: ${JSON.stringify(r.bench)}`);
+    for (const r of run.results) if (r.info) console.log(`   · ${r.tag}: loads ${JSON.stringify(r.info.loads)} gpu ${r.info.gpuMemMB} MB draw ${r.info.drawCalls} tex ${JSON.stringify(r.info.textures)}`);
+    for (const e of run.errors) console.log(`   ! ${e}`);
+  }
+
   await browser.close();
 }
 
