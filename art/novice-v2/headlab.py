@@ -25,8 +25,8 @@ def body_parts(g):
 
 
 def main(g, sheet, out, mode="head"):
-    if mode == "head":
-        px, size, z0 = 0.0014, (560, 520), 0.58
+    if mode in ("head", "head_hi"):
+        px, size, z0 = (0.00105, (720, 760), 0.6) if mode == "head_hi" else (0.0014, (560, 520), 0.58)
         meshes = PV.build(head_parts(g))
     else:
         px, size, z0 = 0.0014, (560, 520), -0.02

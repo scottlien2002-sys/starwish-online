@@ -233,7 +233,8 @@ def main(male_sheet, female_sheet, out, which="both"):
                 continue
             ms = model_silhouette(meshes, view, px, size, z0)
             best = (-1, 0)
-            for sh in range(-12, 13) if view == "side" else [0]:
+            # 側面 ±12 像素、正背面 ±8 像素（設定圖中心線是人工估計，允許小幅水平對齊）
+            for sh in range(-12, 13) if view == "side" else range(-8, 9):
                 ss = sheet_silhouette(gender, view, px, size, z0, sh)
                 v = iou(ms, ss)
                 if v > best[0]:

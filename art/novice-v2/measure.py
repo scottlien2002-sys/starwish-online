@@ -92,7 +92,20 @@ def silhouette(img):
                     q.append((ny, nx))
         if n > best_n:
             best, best_n = cur, n
-    return lab == best
+    fg = lab == best
+    # 兩腿／兩靴之間被圍起來的白底（不與邊緣連通）也是背景：只處理畫面最下方 140 列（腿與靴子，沒有白色衣物）
+    try:
+        from scipy import ndimage
+
+        enc, n_enc = ndimage.label(bgish & fg)
+        for i in range(1, n_enc + 1):
+            m = enc == i
+            rows = np.nonzero(m)[0]
+            if m.sum() >= 60 and rows.min() > H - 140:
+                fg[m] = False
+    except ImportError:
+        pass
+    return fg
 
 
 def classify(img, gender):

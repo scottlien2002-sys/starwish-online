@@ -298,3 +298,56 @@ def cyl(x, y, z0, z1, r0, r1=None, round_=0.008):
 
     m = max(r0, r1)
     return Prim(f, (x - m, y - m, z0), (x + m, y + m, z1))
+
+
+def catmull(points, n):
+    """Catmull-Rom 曲線（端點外插），回傳 n 個點"""
+    P = np.asarray(points, float)
+    Q = np.vstack([2 * P[0] - P[1], P, 2 * P[-1] - P[-2]])
+    seg = len(P) - 1
+    out = []
+    for s in np.linspace(0, 1, n):
+        x = min(s * seg, seg - 1e-9)
+        i = int(x)
+        u = x - i
+        p0, p1, p2, p3 = Q[i], Q[i + 1], Q[i + 2], Q[i + 3]
+        out.append(0.5 * ((2 * p1) + (-p0 + p2) * u + (2 * p0 - 5 * p1 + 4 * p2 - p3) * u * u + (-p0 + 3 * p1 - 3 * p2 + p3) * u ** 3))
+    return np.array(out)
+
+
+def pillow(c, U, V, poly, thick, round_=0.008, puff=0.5):
+    """
+    蝴蝶結的圈、緞帶：在平面 (U, V) 上的凸多邊形，往法線方向長出厚度；中間較鼓（puff）、邊緣圓角 → 有稜角又柔和的立體布塊
+    poly：[(u, v), ...] 逆時針
+    """
+    c = np.asarray(c, float)
+    U = unit(np.asarray(U, float))
+    V = unit(np.asarray(V, float) - U * (np.asarray(V, float) @ U))
+    Nn = np.cross(U, V)
+    poly = np.asarray(poly, float)
+    area = 0.5 * np.sum(poly[:, 0] * np.roll(poly[:, 1], -1) - np.roll(poly[:, 0], -1) * poly[:, 1])
+    if area < 0:
+        poly = poly[::-1]
+    edges = []
+    for i in range(len(poly)):
+        a, b = poly[i], poly[(i + 1) % len(poly)]
+        t = (b - a) / np.linalg.norm(b - a)
+        nrm = np.array([t[1], -t[0]])  # 逆時針 → 往外
+        edges.append((a, nrm))
+
+    def f(P):
+        q = P - c
+        x, y, z = q @ U, q @ V, q @ Nn
+        # 平滑的最大值（log-sum-exp）：多邊形內部不會出現水晶般的稜線，外緣仍保留轉角
+        ds = np.stack([(x - a[0]) * nrm[0] + (y - a[1]) * nrm[1] for a, nrm in edges])
+        km = 0.012
+        mx = ds.max(0)
+        d2 = mx + km * np.log(np.exp((ds - mx) / km).sum(0))
+        d2 = d2 + round_
+        h = thick * ((1 - puff) + puff * np.sqrt(np.clip(-d2 / 0.06, 0, 1)))
+        dz = np.abs(z) - h
+        return np.sqrt(np.maximum(d2, 0) ** 2 + np.maximum(dz, 0) ** 2) + np.minimum(np.maximum(d2, dz), 0) - round_
+
+    pts3 = np.array([c + U * p[0] + V * p[1] for p in poly])
+    m = thick + round_ + 0.01
+    return Prim(f, pts3.min(0) - m, pts3.max(0) + m)

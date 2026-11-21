@@ -11,7 +11,7 @@ import math
 
 import numpy as np
 
-from sdf import cyl, Part, Prim, bezier3, capsule, ellipsoid, flat_tube, lathe_shell, rbox, rot, smin, sphere, torus, unit
+from sdf import cyl, catmull, pillow, Part, Prim, bezier3, capsule, ellipsoid, flat_tube, lathe_shell, rbox, rot, smin, sphere, torus, unit
 
 # 設定圖對齊用（設定圖像素座標；預覽比對用）
 SIDE_CENTER = {"male": 535.5, "female": 552.5}
@@ -97,6 +97,8 @@ class Hair:
         self.c = np.asarray(self.c, float)
         self.r = np.asarray(self.r, float)
         self.cap_extra = cap_extra
+        self.drop = True  # 往下垂的髮型（女生）；男生的短髮改成沿頭型（False）
+        self.ex_scale = 1.0  # 髮束離髮殼高度的整體倍率（調整整體髮量輪廓用）
         self.part = Part(name, "hair", step=step)
 
     def surf(self, az, el, extra=None):
@@ -152,6 +154,110 @@ class Hair:
         return pts
 
 
+    def pt(self, az, el, ex, drop=True):
+        """
+        髮殼外 ex 公尺的點與「厚度方向」：el ≥ 0 在髮殼上；el < 0 往下垂
+        （水平位置停在赤道附近並稍微內收，高度隨 sin(el) 下降；el < -90 繼續往下）
+        """
+        c, r = self.c, self.r
+        az_r, el_r = math.radians(az), math.radians(el)
+        hor = np.array([math.sin(az_r), -math.cos(az_r), 0.0])
+        if el >= 0 or not drop:
+            u = np.array([math.cos(el_r) * math.sin(az_r), -math.cos(el_r) * math.cos(az_r), math.sin(el_r)])
+            return c + u * (r + ex), unit(u / (r + ex))
+        shrink = 0.8 + 0.2 * math.cos(max(el_r, -math.pi / 2))
+        p = c + hor * (r + ex) * np.array([shrink, shrink, 1.0])
+        # 往下垂：ex 只往外推（水平），不影響高度
+        if el >= -90:
+            p[2] = c[2] + r[2] * math.sin(el_r)
+        else:
+            p[2] = c[2] - r[2] + (el_r + math.pi / 2) * r[2]
+        return p, hor
+
+    def strand(self, knots, w, t, tip=0.14, n=18, k=0.012, root_w=0.75, belly=0.0, side_tilt=0.0, drop=None):
+        """
+        柔和曲面的髮束：knots = [(方位角, 仰角, 離髮殼高度), ...]（3～6 個），用 Catmull-Rom 曲線串起來。
+        - 截面是扁橢圓；寬度：髮根略窄 → 前 1/3 最寬 → 往髮尾平順收成柔和的尖（tip = 髮尾寬度比例）
+        - 厚度隨寬度收薄，髮尾維持扁葉片（不是圓錐、不是圓管）
+        - belly：中段額外鼓起（髮量），side_tilt：厚度方向沿路徑側傾（髮束翻轉、互相重疊）
+        """
+        P, N = [], []
+        dr = self.drop if drop is None else drop
+        for az, el, ex in knots:
+            p, nv = self.pt(az, el, ex, dr)
+            P.append(p)
+            N.append(nv)
+        P = np.array(P)
+        N = np.array(N)
+        # Catmull-Rom（端點複製）
+        Q = np.vstack([2 * P[0] - P[1], P, 2 * P[-1] - P[-2]])
+        M = np.vstack([N[0], N, N[-1]])
+        seg = len(P) - 1
+        ts = np.linspace(0, 1, n)
+        pts, nrs = [], []
+        for s_ in ts:
+            x = min(s_ * seg, seg - 1e-9)
+            i = int(x)
+            u = x - i
+            p0, p1, p2, p3 = Q[i], Q[i + 1], Q[i + 2], Q[i + 3]
+            pp = 0.5 * ((2 * p1) + (-p0 + p2) * u + (2 * p0 - 5 * p1 + 4 * p2 - p3) * u * u + (-p0 + 3 * p1 - 3 * p2 + p3) * u ** 3)
+            nn = unit(M[i + 1] * (1 - u) + M[i + 2] * u)
+            pts.append(pp)
+            nrs.append(nn)
+        pts = np.array(pts)
+        if belly:
+            for j, s_ in enumerate(ts):
+                pts[j] = pts[j] + nrs[j] * belly * math.sin(math.pi * s_) ** 1.5
+        if side_tilt:
+            for j, s_ in enumerate(ts):
+                tg = unit(pts[min(j + 1, n - 1)] - pts[max(j - 1, 0)])
+                sd = np.cross(tg, nrs[j])
+                nrs[j] = unit(nrs[j] + sd * side_tilt * s_)
+        prof = np.where(ts < 0.3, root_w + (1 - root_w) * np.sin(ts / 0.3 * math.pi / 2),
+                        tip + (1 - tip) * np.cos((ts - 0.3) / 0.7 * math.pi / 2) ** 1.15)
+        hw = w / 2 * prof
+        ht = t / 2 * (1 - 0.45 * ts) + 0.0015
+        ht = np.minimum(ht, hw * 0.5 + 0.0012)
+        self.part.add(flat_tube(pts, hw, ht, nrs), k)
+        return pts
+
+    def flow(self, whorl, az_t, el_t, w, t, ex_t, ex_root=0.0, belly=0.012, tip=0.12, start=0.0, curl=0.0, bend=0.0, n=20, k=0.007, plateau=0.3):
+        """
+        從髮旋（whorl = (方位角, 仰角)）沿頭型（大圓弧）流到目標 (az_t, el_t) 的柔和髮束。
+        start：從弧上第幾成開始（0 = 髮旋；0.4 = 外層較短的髮束）
+        ex_t：髮尾離髮殼的高度（越大越蓬、越往外翹）；curl：髮尾往外的額外上勾
+        bend：沿路徑往側邊彎（度，正負決定方向），讓髮束有弧度、不是直線
+        """
+        def d(az, el):
+            a, e = math.radians(az), math.radians(el)
+            return np.array([math.cos(e) * math.sin(a), -math.cos(e) * math.cos(a), math.sin(e)])
+
+        d0, d1 = d(*whorl), d(az_t, el_t)
+        om = math.acos(float(np.clip(d0 @ d1, -1, 1)))
+        side = unit(np.cross(d0, d1)) if om > 1e-4 else np.array([1.0, 0, 0])
+        ts = np.linspace(0, 1, n)
+        pts, nrs = [], []
+        for s_ in ts:
+            g = start + (1 - start) * s_
+            dv = (math.sin((1 - g) * om) * d0 + math.sin(g * om) * d1) / max(math.sin(om), 1e-6)
+            if bend:
+                dv = unit(dv + side * math.radians(bend) * math.sin(math.pi * g) * 0.5)
+            ex = (ex_root + ex_t * s_ ** 1.5) * self.ex_scale + belly * math.sin(math.pi * s_)
+            p = self.c + dv * (self.r + ex)
+            nv = unit(dv / (self.r + ex))
+            if curl:
+                f = max(0.0, (s_ - 0.7) / 0.3)
+                p = p + nv * curl * f * f
+            pts.append(p)
+            nrs.append(nv)
+        # 寬度：髮根略窄 → 大半段維持寬（看得到的部分是寬的髮束）→ 最後一段柔和收尖
+        rise = np.clip(ts / 0.15, 0, 1)
+        fall = np.clip((ts - plateau) / (1 - plateau), 0, 1)
+        prof = (0.75 + 0.25 * np.sin(rise * math.pi / 2)) * (tip + (1 - tip) * (1 - fall ** 1.35))
+        hw = w / 2 * prof
+        ht = np.minimum(t / 2 * (1 - 0.35 * ts) + 0.0015, hw * 0.4 + 0.0012)
+        self.part.add(flat_tube(np.array(pts), hw, ht, nrs), k)
+
     def lock(self, az0, el0, az1, el1, w, t, lift=0.0, flare=0.0, curl=0.0, tip=0.14, n=12, k=0.01,
              base=None, wide_mid=0.15, twist_az=0.0):
         """
@@ -193,7 +299,7 @@ class Hair:
 
 
 MALE_SHELL = ((0.0, 0.08, 0.945), (0.25, 0.29, 0.245))
-FEMALE_SHELL = ((0.0, 0.035, 0.89), (0.212, 0.225, 0.215))
+FEMALE_SHELL = ((0.0, 0.035, 0.89), (0.228, 0.225, 0.215))
 
 
 def shell_cap(H, ear_cut=True):
@@ -209,115 +315,156 @@ def shell_cap(H, ear_cut=True):
 
 def male_hair():
     """
-    男生：蓬鬆、有層次的短髮。所有髮束都貼著髮殼由頭頂往下流，只在髮尾往外翹（不是往上豎的尖刺）。
-    設定圖量測：頭頂約 1.15（呆毛與小翹髮到 1.22）、兩側最寬 ±0.30～0.33（耳朵高度的外翹髮尾）、
-    側面前緣（瀏海）約 −0.25、後腦到 +0.36。
+    男生（B.1 精修）：蓬鬆有層次的短髮。每一束都是柔和曲面的扁髮束（Catmull-Rom 曲線，中段鼓、髮尾收成柔和的尖），
+    由頭頂後方的髮旋往前、往兩側、往後流，互相重疊。
+    - 頭頂：幾束從髮旋往前上方拱起，髮尾離開頭皮（設定圖頭頂的蓬鬆與高低層次）
+    - 瀏海：5 束不規則、有弧度的分束；中間一束垂到兩眼之間，眼睛上方的髮尾停在眼睛上緣以上
+    - 兩側：耳朵高度往外、往上翹的大髮束（正面最寬處）；臉頰旁一束往內收
+    - 後腦：兩層往下垂，髮尾微微外翹；後頸收短
     """
-    H = Hair("male", cap_extra=0.0, shell=MALE_SHELL)
+    H = Hair("male", cap_extra=0.0, shell=((0.0, 0.06, 0.905), (0.218, 0.238, 0.235)))
+    H.drop = False  # 短髮：髮束沿頭型往內收，不是垂直落下（避免像頭套）
+    H.ex_scale = 0.75  # 依設定圖輪廓比對，整體髮量外緣收 25%
     shell_cap(H)
-    # 第 1 層：頭頂的髮旋往四周放射（寬、厚、互相重疊）
-    for i, az in enumerate(range(0, 360, 26)):
-        H.lock(az, 88, az + 10 * (-1) ** i, 22, 0.17, 0.06, lift=0.018, flare=0.012, curl=0.0, tip=0.1, k=0.016)
-    # 第 2 層：臉側較短（露出臉頰），耳後與後腦往下垂，髮尾往外翹
-    for i, az in enumerate((62, 76)):
-        for sx in (1, -1):
-            H.lock(az * sx, 50, (az + 5) * sx, -6, 0.13, 0.055, lift=0.02, flare=0.03, curl=0.02, tip=0.08, k=0.012)
-    for i, az in enumerate(range(96, 266, 17)):
-        L = -36 if abs(az - 180) > 55 else -50
-        fl = (0.025, 0.065)[i % 2]
-        H.lock(az, 50, az + 7 * (-1) ** i, L + 8 * (i % 2), 0.175, 0.06, lift=0.018, flare=fl, curl=0.02 + fl * 0.4, tip=0.06, k=0.012)
-    # 後頸：短、內收
-    for az in (160, 180, 200):
-        H.lock(az, 10, az, -66, 0.11, 0.05, lift=0.0, flare=0.015, curl=0.0, tip=0.12, k=0.012)
-    # 耳朵上方的外翹髮尾（正面輪廓最寬處）
+    W = (180, 62)  # 髮旋：頭頂偏後
+    F = H.flow
+    # ---- 底層：從髮旋往四周流，蓋滿髮殼（start：髮束從弧線中途開始，看得到的部分保持寬）
+    # 瀏海：4 大束＋2 小束，有弧度、往同一側斜掃，長短不一；眼睛上方停在眼睛上緣以上，中間一束到兩眼之間
+    for az, el, w, bd, st in ((-44, -12, 0.15, 14, 0.45), (-22, -16, 0.17, 16, 0.42), (2, -24, 0.16, 16, 0.4),
+                              (24, -8, 0.17, 12, 0.42), (46, -14, 0.15, 8, 0.45), (-60, -20, 0.12, 6, 0.5)):
+        F(W, az, el, w, 0.06, 0.045, ex_root=0.01, belly=0.016, bend=bd, tip=0.16, start=st, plateau=0.3)
+    # 臉頰旁（往下、往內收）
     for sx in (1, -1):
-        for az, el1, fl in ((86, -20, 0.065), (104, -26, 0.075), (124, -30, 0.06)):
-            H.lock(az * sx, 35, (az + 6) * sx, el1, 0.16, 0.05, lift=0.02, flare=fl, curl=0.035, tip=0.07, k=0.012)
-    # 鬢角：耳朵前方往下、貼臉
+        F(W, 68 * sx, -44, 0.19, 0.058, 0.055, ex_root=0.01, belly=0.016, bend=-6, tip=0.18, start=0.4, plateau=0.32)
+    # 兩側：耳朵上方往外、往上翹（正面最寬 ±0.30～0.33）
     for sx in (1, -1):
-        H.lock(64 * sx, 30, 66 * sx, -36, 0.06, 0.03, lift=-0.02, flare=0.0, curl=0.0, tip=0.14, k=0.01)
-    # 瀏海：由頭頂往前、往下蓋住額頭到眉毛，前緣凸出臉，中間一束垂到兩眼之間
-    for az, el1, w in ((-54, -24, 0.1), (-38, -18, 0.1), (-21, -14, 0.1), (-5, -24, 0.09), (11, -14, 0.1), (27, -17, 0.1), (43, -19, 0.1), (57, -25, 0.09)):
-        H.lock(az * 0.5, 75, az, el1, w * 1.25, 0.05, lift=0.04, flare=0.0, curl=0.008, tip=0.06, k=0.01)
-    # 頭頂的翹髮：短、往外上方翹出（打破圓頂輪廓，像設定圖頭頂的亂翹）
-    for az, el, up, out in ((160, 66, 0.03, 0.06), (205, 64, 0.025, 0.06)):
-        p0, n = H.surf(az, el, 0.0)
-        hor = unit(np.array([n[0], n[1], 0.0]))
-        tipp = p0 + hor * out + np.array([0, 0, up])
-        pts = bezier3(p0 - n * 0.02 - hor * 0.06, p0 + n * 0.015, tipp - hor * 0.025 - np.array([0, 0, 0.01]), tipp, 9)
-        ts = np.linspace(0, 1, 9)
-        H.part.add(flat_tube(pts, 0.055 * (1 - ts) ** 0.9 + 0.004, 0.02 * (1 - 0.5 * ts) + 0.002, [n] * 9), 0.016)
-    # 呆毛：一撮往前彎
-    p0, n = H.surf(5, 86, 0.0)
-    pts = bezier3(p0 - n * 0.02, p0 + np.array([0, 0.0, 0.05]), p0 + np.array([0.0, -0.05, 0.085]), p0 + np.array([0.01, -0.09, 0.065]), 9)
-    ts = np.linspace(0, 1, 9)
-    H.part.add(flat_tube(pts, 0.03 * (1 - ts) + 0.005, 0.016 * (1 - 0.5 * ts) + 0.002, [np.array([1.0, 0, 0])] * 9), 0.012)
+        for az, el, ex, cu in ((84, -2, 0.1, 0.04), (102, -8, 0.105, 0.045), (120, -10, 0.09, 0.035), (138, -20, 0.07, 0.02)):
+            F(W, az * sx, el, 0.19, 0.065, ex, ex_root=0.012, belly=0.018, curl=cu, bend=8, tip=0.16, start=0.3, plateau=0.32)
+    # 後腦（往下到後頸，髮尾微翹）
+    for az, el, ex in ((150, -40, 0.05), (166, -58, 0.045), (180, -68, 0.04), (194, -58, 0.045), (210, -40, 0.05)):
+        F(W, az, el, 0.19, 0.065, ex, belly=0.018, bend=6, tip=0.16, start=0.1, plateau=0.4)
+    # ---- 外層：較短、較蓬，疊在底層上（高低層次、頭頂蓬鬆）
+    for az, el, ex, st in ((-34, 40, 0.06, 0.15), (14, 46, 0.065, 0.15), (58, 22, 0.075, 0.25), (-72, 30, 0.075, 0.25),
+                           (96, 8, 0.08, 0.3), (-104, 14, 0.08, 0.3), (128, 24, 0.065, 0.3), (-132, 2, 0.07, 0.35),
+                           (160, -16, 0.055, 0.35), (204, 6, 0.055, 0.3), (176, 22, 0.055, 0.25)):
+        F(W, az, el, 0.17, 0.06, ex, ex_root=0.02, belly=0.016, start=st, curl=0.02, bend=8, tip=0.16, plateau=0.32)
+    # 後腦第二排（蓋住髮殼下緣，髮尾錯落）
+    for i, (az, el) in enumerate(((146, -56), (162, -70), (178, -76), (194, -70), (212, -56), (170, -62), (188, -60))):
+        F(W, az, el, 0.13, 0.05, (0.03, 0.055)[i % 2], ex_root=0.015 + 0.012 * (i % 2), belly=0.016, start=0.4 + 0.08 * (i % 2), curl=0.015, tip=0.16, plateau=0.3)
+    # 頭頂幾束往上拱（設定圖頭頂的翹髮）：寬、短、髮尾柔和
+    for az, el, ex in ((-26, 66, 0.045), (24, 68, 0.05)):
+        F(W, az, el, 0.14, 0.054, ex, ex_root=0.02, belly=0.016, start=0.2, curl=0.035, tip=0.18, plateau=0.32)
+    # 呆毛：兩撮往上再往側彎
+    for sx, (a1, a2) in ((1, (0.08, 0.13)), (-1, (0.06, 0.1))):
+        p0, n = H.pt(6 * sx, 84, 0.03)
+        pts = bezier3(p0 - n * 0.02, p0 + np.array([0.0, -0.005, a1]), p0 + np.array([0.03 * sx, -0.03, a2]), p0 + np.array([0.07 * sx, -0.045, a2 * 0.8]), 10)
+        ts = np.linspace(0, 1, 10)
+        hw = 0.034 * np.cos(ts * math.pi / 2) ** 0.8 + 0.005
+        H.part.add(flat_tube(pts, hw, np.minimum(0.012 * (1 - 0.5 * ts) + 0.002, hw * 0.55 + 0.001), [np.array([0, 1.0, 0])] * 10), 0.012)
     return H.part
+
+
+def strand_pts(part, pts, w, t, nrm, tip=0.16, plateau=0.35, n=18, k=0.008, root_w=0.8, curl_up=None):
+    """一般 3D 控制點的柔和扁髮束（馬尾、垂髮用）；nrm：厚度方向（向量或函式 p → 向量）"""
+    P = catmull(pts, n)
+    ts = np.linspace(0, 1, n)
+    rise = np.clip(ts / 0.15, 0, 1)
+    fall = np.clip((ts - plateau) / (1 - plateau), 0, 1)
+    prof = (root_w + (1 - root_w) * np.sin(rise * math.pi / 2)) * (tip + (1 - tip) * (1 - fall ** 1.35))
+    hw = w / 2 * prof
+    ht = np.minimum(t / 2 * (1 - 0.35 * ts) + 0.0015, hw * 0.42 + 0.0012)
+    N = [unit(nrm(p) if callable(nrm) else np.asarray(nrm, float)) for p in P]
+    part.add(flat_tube(P, hw, ht, N), k)
 
 
 def female_hair():
     """
-    女生：圓潤的鮑伯，頭頂平順、下緣往外蓬（耳下最寬 ±0.375），臉頰兩側長鬢髮垂到 0.63，瀏海輕薄到眉下。
+    女生（B.1 精修）：
+    - 頭頂平順、由中分線往後梳向側馬尾
+    - 瀏海：中分、細束、有弧度（往兩側彎），束與束之間露出額頭，不是整片下垂
+    - 兩側：臉頰外側垂到肩上（約 0.66），髮尾柔和地往外捲，不是尖刺
     """
     H = Hair("female", cap_extra=0.0, shell=FEMALE_SHELL)
     shell_cap(H)
-    # 頭頂：平順、貼頭（往側馬尾方向梳）
-    for i, az in enumerate(range(0, 360, 30)):
-        H.lock(az + 6, 88, az + 14, 22, 0.15, 0.04, lift=0.006, flare=0.0, curl=0.0, tip=0.3, k=0.016, wide_mid=0.1)
-    # 下半部：直直垂到肩上，髮尾往外翹
-    for i, az in enumerate(range(62, 299, 15)):
-        L = -62 if abs(az - 180) > 40 else -56
-        H.lock(az, 34, az + 3 * (-1) ** i, L + 6 * (i % 2), 0.17, 0.045, lift=0.085,
-               flare=(0.11, 0.075)[i % 2], curl=0.02, tip=0.2, k=0.014)
-    # 臉頰兩側的長鬢髮（到 0.63，髮尾外翹）
+    F = H.flow
+    # ---- 頭頂：由中分線往後、往兩側梳（平順、薄、寬）
+    PART = (0, 80)
+    for az, el in ((60, 30), (90, 34), (118, 40), (145, 42), (170, 40), (195, 40), (220, 42), (245, 40), (-60, 30), (-90, 32), (-118, 36), (-140, 30)):
+        F(PART, az, el, 0.2, 0.04, 0.012, belly=0.008, tip=0.4, plateau=0.6, k=0.014)
+    # ---- 瀏海：中分，細束，往兩側彎；中間兩束到兩眼之間，眼睛上方的停在眼睛上緣附近
+    # 中分：中間留一條縫露出額頭，兩側的瀏海往外彎成括號形
+    for az, el, w, bd, pa in ((-13, -12, 0.085, 22, -3), (13, -10, 0.085, -22, 3), (-26, -4, 0.095, 18, -6), (26, -5, 0.095, -18, 6),
+                              (-40, -10, 0.09, 14, -8), (40, -12, 0.09, -14, 8), (-4, -20, 0.05, 8, -2)):
+        F((pa, 80), az, el, w, 0.034, 0.012, ex_root=0.003, belly=0.008, bend=bd, tip=0.24, start=0.25, plateau=0.4, k=0.006)
+    # ---- 兩側＋後面：往下垂到肩上，髮尾柔和外捲（每束長短、寬窄不同）
+    H.drop = True
+    S = H.strand
     for sx in (1, -1):
-        H.lock(46 * sx, 45, 54 * sx, -96, 0.11, 0.035, lift=0.03, flare=0.045, curl=0.0, tip=0.18, k=0.008)
-    # 瀏海：輕薄、到眉毛
-    for az, el1 in ((-46, -24), (-31, -18), (-16, -14), (-2, -19), (13, -14), (28, -17), (43, -22)):
-        H.lock(az * 0.5, 74, az, el1, 0.115, 0.032, lift=0.022, flare=0.0, curl=0.008, tip=0.08, k=0.009)
-    # 呆毛
-    for sx, (az, a_, b_) in ((1, (-6, 0.075, 0.06)), (-1, (8, 0.06, 0.045))):
-        p0, n = H.surf(az, 86, 0.0)
-        pts = bezier3(p0 - n * 0.02, p0 + np.array([0, 0, a_ * 0.6]), p0 + np.array([-0.04 * sx, -0.03, a_]), p0 + np.array([-0.065 * sx, -0.05, b_]), 8)
-        ts = np.linspace(0, 1, 8)
-        H.part.add(flat_tube(pts, 0.02 * (1 - ts) + 0.004, 0.011 * (1 - 0.5 * ts) + 0.002, [np.array([0, 1.0, 0])] * 8), 0.008)
+        # 臉頰外側（最前面的一束，到 0.64，髮尾往外捲）
+        S([(50 * sx, 44, 0.0), (56 * sx, 10, 0.05), (60 * sx, -40, 0.1), (63 * sx, -78, 0.13), (70 * sx, -96, 0.19)],
+          0.1, 0.036, tip=0.24, k=0.006)
+        for i, az in enumerate((64, 78, 92, 106, 120, 134)):
+            L = (-90, -100, -94, -104, -96, -88)[i]
+            o = 0.016 * (i % 2)  # 前後交錯，看得出一束一束
+            S([(az * sx, 42, 0.0), (az * sx, 4, 0.06 + o), ((az + 1) * sx, -42, 0.12 + o), ((az + 2) * sx, L + 22, 0.15 + o), ((az + 6) * sx, L, 0.2 + o)],
+              0.12, 0.045, tip=0.3, k=0.004)
+    for i, az in enumerate((148, 162, 176, 190, 204, 216)):
+        L = (-86, -96, -88, -98, -90, -84)[i]
+        o = 0.016 * (i % 2)
+        S([(az, 40, 0.0), (az, 0, 0.03 + o), (az, -46, 0.06 + o), (az + (2 if az > 180 else -2), L + 20, 0.08 + o), (az + (5 if az > 180 else -5), L, 0.13 + o)],
+          0.13, 0.045, tip=0.3, k=0.004)
+    # 呆毛：兩撮細細的弧（設定圖頭頂的兩根）
+    for sx, (az, a_, b_) in ((1, (-4, 0.07, 0.055)), (-1, (8, 0.055, 0.04))):
+        p0, n = H.pt(az, 84, 0.0, True)
+        pts = bezier3(p0 - n * 0.02, p0 + np.array([0, 0, a_ * 0.7]), p0 + np.array([-0.035 * sx, -0.03, a_]), p0 + np.array([-0.06 * sx, -0.06, b_ * 0.7]), 10)
+        ts = np.linspace(0, 1, 10)
+        hw = 0.016 * np.cos(ts * math.pi / 2) ** 0.7 + 0.003
+        H.part.add(flat_tube(pts, hw, np.minimum(0.009 * (1 - 0.4 * ts) + 0.002, hw * 0.6 + 0.001), [np.array([0, 1.0, 0])] * 10), 0.008)
     return H
 
 
-BOW_C = np.array([0.205, 0.215, 1.085])
+BOW_C = np.array([0.17, 0.16, 1.075])
 
 
 def female_ponytail_and_bow(H):
-    """側馬尾（角色左後上方，從蝴蝶結下方往後下垂到 0.66）＋大蝴蝶結（獨立零件，之後可換）"""
+    """
+    側馬尾（角色左後上方，從蝴蝶結下方往後拱、再往下垂到約 0.70，髮尾往外捲）＋大蝴蝶結（獨立零件，之後可換）
+    馬尾由 7 束不同寬度、彎曲的扁髮束疊成（蓬鬆、有層次），蝴蝶結的圈是有稜角的布塊（中間鼓、邊緣圓角）
+    """
     tail = Part("ponytail", "hair", step=0.003)
-    root = BOW_C + np.array([-0.03, 0.03, -0.02])
-    for dx, dy, dz, w, fl in ((0.0, 0.0, 0.0, 0.14, 0.0), (0.03, 0.03, 0.03, 0.12, 0.05), (-0.025, 0.05, -0.02, 0.12, -0.03), (0.015, 0.07, 0.05, 0.11, 0.07), (0.04, -0.02, -0.04, 0.11, 0.02)):
-        p0 = root + np.array([dx, dy, dz]) * 0.4
-        p1 = p0 + np.array([0.03, 0.09, 0.03])
-        p1 = p0 + np.array([0.02, 0.13, 0.02])
-        p2 = np.array([0.21 + dx, 0.48 + dy, 0.92 + dz])
-        p3 = np.array([0.19 + dx * 1.5, 0.47 + dy + fl, 0.68 + dz * 0.8])
-        pts = bezier3(p0, p1, p2, p3, 12)
-        ts = np.linspace(0, 1, 12)
-        hw = w / 2 * ((1 - ts) ** 0.8 * 0.88 + 0.12) * (1 + 0.45 * np.sin(np.pi * ts))
-        ht = w / 2 * 0.55 * (1 - 0.45 * ts) + 0.002
-        nr = [unit(np.array([1.0, 0.15, 0.0]))] * 12
-        tail.add(flat_tube(pts, hw, ht, nr), 0.03)
-    tail.add(ellipsoid(root, (0.05, 0.05, 0.045)), 0.02)
+    root = BOW_C + np.array([-0.02, 0.03, -0.03])
+    out = lambda p: unit(np.array([p[0] - 0.05, p[1] - 0.1, 0.0]) + np.array([0, 0, 0.0]))
+    for dx, dy, dz, w, fl, L in ((0.0, 0.0, 0.0, 0.13, 0.0, 0.0), (0.035, 0.02, 0.02, 0.11, 0.05, 0.03), (-0.03, 0.03, -0.01, 0.11, -0.04, 0.02),
+                                (0.015, 0.06, 0.04, 0.1, 0.07, -0.02), (0.045, -0.01, -0.02, 0.1, 0.02, 0.05), (-0.015, 0.07, 0.0, 0.09, 0.09, 0.01),
+                                (0.03, 0.04, 0.05, 0.09, -0.02, -0.04)):
+        p0 = root + np.array([dx, dy, dz]) * 0.35
+        pts = [p0,
+               p0 + np.array([0.02 + dx * 0.4, 0.09, 0.02]),
+               np.array([0.2 + dx, 0.29 + dy, 0.97 + dz * 0.5]),
+               np.array([0.22 + dx * 1.2, 0.36 + dy + fl * 0.4, 0.84 + dz * 0.6]),
+               np.array([0.21 + dx * 1.5, 0.38 + dy + fl * 1.2, 0.67 + L])]
+        strand_pts(tail, pts, w * 1.1, 0.065, lambda p: unit(np.array([1.0, 0.55, 0.0])), tip=0.22, plateau=0.45, n=20, k=0.012)
+    tail.add(ellipsoid(root, (0.045, 0.05, 0.04)), 0.02)
     bow = Part("bow", "cloth", step=0.002)
     bc = BOW_C
-    # 兩個大圈（側面看：前上方一個、後方一個），面向 +X
-    Rz = rot((0, 0, 1), -35)  # 蝴蝶結面向角色左前方（正面、側面都看得到）
-    for off, rad, ang in (((0.0, -0.075, 0.055), (0.022, 0.088, 0.064), 38), ((0.0, 0.085, 0.03), (0.022, 0.092, 0.066), -28)):
-        R = Rz @ rot((1, 0, 0), ang)
-        bow.add(ellipsoid(bc + Rz @ np.array(off), rad, R), 0.014)
-    bow.add(ellipsoid(bc + [0.008, 0, 0], (0.035, 0.036, 0.034)), 0.01)
-    # 兩條緞帶尾巴（往後下方）
-    for dy, L in ((0.02, 0.15), (0.07, 0.12)):
-        pts = bezier3(bc, bc + [0.005, dy * 0.6, -0.04], bc + [0.01, dy + 0.02, -0.09], bc + [0.012, dy + 0.04, -L], 7)
-        bow.add(flat_tube(pts, np.linspace(0.024, 0.034, 7), np.full(7, 0.007), [np.array([1.0, 0, 0])] * 7), 0.006)
+    Rz = rot((0, 0, 1), -45)
+    U = Rz @ np.array([0, 1.0, 0])   # 往後（並往角色左外側）
+    V = np.array([0, 0, 1.0])
+    Nf = np.cross(U, V)              # 蝴蝶結正面：朝角色左前方
+    sc = 1.25
+    loops = ([(0.0, 0.0), (0.03, 0.02), (0.04, 0.1), (-0.01, 0.13), (-0.06, 0.11), (-0.03, 0.03)],    # 上圈（往上、往頭頂中間）
+             [(0.0, -0.005), (0.05, 0.03), (0.15, 0.06), (0.17, 0.0), (0.14, -0.05), (0.05, -0.035)],  # 後圈（往後外側）
+             [(0.0, -0.01), (-0.04, 0.03), (-0.09, 0.02), (-0.1, -0.03), (-0.05, -0.05)])            # 前下小圈
+    for poly in loops:
+        bow.add(pillow(bc + Nf * 0.004, U, V, [(x * sc, y * sc) for x, y in poly], 0.026, 0.02, 0.85), 0.01)
+    # 結
+    bow.add(ellipsoid(bc + Nf * 0.012, (0.03, 0.03, 0.034), np.column_stack([U, Nf, V])), 0.008)
+    # 兩條緞帶尾巴（往下，末端 V 形剪口）
+    for poly in ([(0.0, -0.02), (0.042, -0.03), (0.1, -0.16), (0.08, -0.2), (0.05, -0.17)],
+                 [(-0.012, -0.022), (0.014, -0.03), (-0.002, -0.11), (-0.028, -0.13), (-0.04, -0.1)]):
+        bow.add(pillow(bc - Nf * 0.006, U, V, [(x * sc, y * sc) for x, y in poly], 0.009, 0.004, 0.3), 0.005)
     deco = Part("bow_star", "metal", step=0.0015)
-    deco.add(star_prim(bc + [0.04, -0.01, 0.0], (1, -0.2, 0.1), (0, 0, 1), 0.03, 0.013, 5, 0.012))
+    deco.add(star_prim(bc + Nf * 0.045 + V * 0.003, Nf, (0, 0, 1), 0.03, 0.013, 5, 0.012))
     return tail, bow, deco
 
 
@@ -350,14 +497,14 @@ def body_part(g):
 def arm_joints(g):
     """肩、肘、腕（角色左側；右側鏡像）"""
     if g == "male":
-        return (0.095, 0.0, 0.582), (0.18, 0.0, 0.5), (0.226, -0.008, 0.438)
-    return (0.09, 0.0, 0.598), (0.152, 0.0, 0.53), (0.195, -0.01, 0.472)
+        return (0.095, 0.0, 0.582), (0.172, 0.0, 0.5), (0.212, -0.008, 0.438)
+    return (0.09, 0.0, 0.598), (0.158, 0.0, 0.528), (0.212, -0.01, 0.47)
 
 
 def leg_joints(g):
     """髖、膝、踝（角色左側）；男生腳開、女生併腿（依設定圖站姿）"""
     if g == "male":
-        return (0.065, 0.0, 0.33), (0.1, -0.005, 0.205), (0.118, 0.0, 0.07)
+        return (0.065, 0.0, 0.33), (0.097, -0.005, 0.205), (0.112, 0.0, 0.07)
     return (0.055, 0.0, 0.34), (0.065, -0.005, 0.235), (0.067, 0.0, 0.07)
 
 
@@ -470,7 +617,7 @@ def boot_parts(g):
     out = []
     an = leg_joints(g)[2]
     if g == "male":
-        shaft_r, top, cuff, toe, heel, width, h = 0.066, 0.19, (0.126, 0.19), -0.151, 0.098, 0.172, 0.082
+        shaft_r, top, cuff, toe, heel, width, h = 0.062, 0.19, (0.126, 0.19), -0.151, 0.098, 0.165, 0.082
     else:
         shaft_r, top, cuff, toe, heel, width, h = 0.05, 0.198, (0.145, 0.198), -0.094, 0.109, 0.122, 0.07
     for sx, nm in ((1, "boot_l"), (-1, "boot_r")):
@@ -552,8 +699,11 @@ def male_clothes():
     pts = bezier3(np.array([0, -0.07, 0.668]), np.array([0, -0.11, 0.645]), np.array([0, -0.115, 0.62]), np.array([0, -0.108, 0.6]), 6)
     scarf.add(flat_tube(pts, np.linspace(0.075, 0.012, 6), np.full(6, 0.008), [np.array([0, -1.0, 0])] * 6), 0.015)
     # 背後一小段飄起的圍巾尾（設定圖側面：肩後短短飄出）
-    pts = bezier3(np.array([0.03, 0.07, 0.665]), np.array([0.05, 0.12, 0.645]), np.array([0.07, 0.15, 0.61]), np.array([0.075, 0.16, 0.56]), 8)
-    scarf.add(flat_tube(pts, np.linspace(0.045, 0.012, 8), np.full(8, 0.009), [unit(np.array([0.9, -0.3, 0.0]))] * 8), 0.02)
+    # 圍巾長尾：從脖子左後方往後、往下飄（設定圖側面：飄到臀部高度，尾端尖）
+    pts = catmull([(0.045, 0.07, 0.655), (0.085, 0.13, 0.6), (0.11, 0.18, 0.48), (0.12, 0.23, 0.37), (0.115, 0.27, 0.27)], 14)
+    ts = np.linspace(0, 1, 14)
+    hw = 0.06 * (0.8 + 0.2 * np.sin(np.clip(ts / 0.2, 0, 1) * math.pi / 2)) * (0.12 + 0.88 * (1 - np.clip((ts - 0.35) / 0.65, 0, 1) ** 1.3))
+    scarf.add(flat_tube(pts, hw, np.minimum(0.009, hw * 0.4 + 0.002), [unit(np.array([1.0, -0.15, 0.0]))] * 14), 0.02)
     out.append(scarf)
     # 腰帶、方扣、腰包
     belt = Part("belt", "leather", step=0.0025)
@@ -580,14 +730,14 @@ def male_clothes():
     def hem(th):
         a = np.degrees(np.abs(th))
         base = 0.245 - 0.01 * np.clip((a - 60) / 120, 0, 1)
-        tips = -0.075 * np.exp(-(((a - 36) / 8) ** 2)) - 0.04 * np.exp(-(((a - 122) / 9) ** 2)) - 0.05 * np.exp(-(((a - 180) / 10) ** 2))
+        tips = -0.1 * np.exp(-(((a - 36) / 9) ** 2)) - 0.08 * np.exp(-(((a - 82) / 12) ** 2)) - 0.04 * np.exp(-(((a - 122) / 9) ** 2)) - 0.05 * np.exp(-(((a - 180) / 10) ** 2))
         return base + tips
 
     OPEN_M = lerp_fn([(0.15, 30), (0.45, 32)])
     # 下擺：掛在腰帶上，正面大開口（短褲完全露出），兩側與背後往外、往後擺
-    rxf = lerp_fn([(0.15, 0.25), (0.3, 0.19), (0.45, 0.137)])
-    ryf = lerp_fn([(0.15, 0.2), (0.3, 0.145), (0.45, 0.096)])
-    cyf = lerp_fn([(0.15, 0.06), (0.45, 0.0)])
+    rxf = lerp_fn([(0.15, 0.29), (0.3, 0.2), (0.45, 0.137)])
+    ryf = lerp_fn([(0.15, 0.22), (0.3, 0.15), (0.45, 0.096)])
+    cyf = lerp_fn([(0.15, 0.085), (0.45, 0.0)])
     tab = Part("tabard", "cloth2", step=0.003)
     tab.add(lathe_shell(0.15, 0.45, rxf, ryf, 0.012, cy_fn=cyf, open_front_deg=OPEN_M, hem_fn=hem))
     out.append(tab)
@@ -662,13 +812,13 @@ def female_clothes():
     def ohem(th):
         a = np.degrees(np.abs(th))
         base = 0.255 - 0.0 * a
-        return base - 0.08 * np.exp(-(((a - 44) / 9) ** 2)) - 0.03 * np.exp(-(((a - 120) / 12) ** 2)) + 0.015 * np.cos(np.radians(a) * 9) * (a > 60)
+        return base - 0.1 * np.exp(-(((a - 46) / 10) ** 2)) - 0.05 * np.exp(-(((a - 80) / 14) ** 2)) - 0.035 * np.exp(-(((a - 125) / 12) ** 2)) + 0.015 * np.cos(np.radians(a) * 9) * (a > 60)
 
     osk = Part("overskirt", "cloth2", step=0.003)
-    osk.add(lathe_shell(0.17, 0.5, lerp_fn([(0.17, 0.35), (0.33, 0.225), (0.5, 0.115)]), lerp_fn([(0.17, 0.27), (0.33, 0.175), (0.5, 0.097)]), 0.012, cy_fn=lerp_fn([(0.17, 0.05), (0.5, 0.0)]), open_front_deg=40, hem_fn=ohem))
+    osk.add(lathe_shell(0.15, 0.5, lerp_fn([(0.15, 0.39), (0.33, 0.23), (0.5, 0.115)]), lerp_fn([(0.17, 0.22), (0.33, 0.16), (0.5, 0.097)]), 0.012, cy_fn=lerp_fn([(0.17, 0.085), (0.5, 0.0)]), open_front_deg=40, hem_fn=ohem))
     out.append(osk)
     otrim = Part("overskirt_trim", "metal", step=0.0025)
-    otrim.add(lathe_shell(0.17, 0.5, lerp_fn([(0.17, 0.354), (0.33, 0.229), (0.5, 0.119)]), lerp_fn([(0.17, 0.274), (0.33, 0.179), (0.5, 0.101)]), 0.01, cy_fn=lerp_fn([(0.17, 0.05), (0.5, 0.0)]), open_front_deg=40, hem_fn=ohem))
+    otrim.add(lathe_shell(0.15, 0.5, lerp_fn([(0.15, 0.394), (0.33, 0.234), (0.5, 0.119)]), lerp_fn([(0.17, 0.224), (0.33, 0.164), (0.5, 0.101)]), 0.01, cy_fn=lerp_fn([(0.17, 0.085), (0.5, 0.0)]), open_front_deg=40, hem_fn=ohem))
     otrim.inter(Prim(lambda P: P[..., 2] - (ohem(np.arctan2(P[..., 0], -(P[..., 1] - 0.0))) + 0.02), (-0.3, -0.3, 0.1), (0.3, 0.3, 0.5)))
     out.append(otrim)
     emb = Part("overskirt_emblem", "metal", step=0.0015)
