@@ -1914,6 +1914,8 @@ for (const name of browsers) {
       await page.screenshot({ path: f });
       run.screenshots.push(f.split("/test-results/")[1]);
     };
+    // 換視角後等 3 個影格真的畫出來再截圖（CI 沒有 GPU、每秒只有一兩格）
+    const settle = (page) => page.evaluate(() => new Promise((r) => { let n = 0; const f = () => (++n >= 3 ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); }));
     const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
     const page = await ctx.newPage();
     page.on("pageerror", (e) => run.errors.push(`pageerror: ${e.message}`));
@@ -1927,6 +1929,7 @@ for (const name of browsers) {
       check("HQ：男女兩個角色載入（男 32、女 31 個網格）", hq.chars.length === 2 && hq.chars[0].gender === "male" && hq.chars[0].meshes === 32 && hq.chars[1].meshes === 31, hq.chars);
       check("HQ：每個角色約 20 萬三角形（與 GLB 相同）", hq.chars.every((c) => c.triangles > 195000 && c.triangles < 205000), hq.chars.map((c) => c.triangles));
       check("HQ：身高 1.0～1.35 公尺（與靜態展示同比例）", hq.chars.every((c) => c.height > 1.0 && c.height < 1.35), hq.chars.map((c) => c.height));
+      check("角色站在廣場地台上（腳底高度 ≈ 地台頂面）", hq.feet.every((y) => Math.abs(y - hq.baseY) < 0.03), { feet: hq.feet, base: hq.baseY });
       check("靜態模型：沒有骨架與動畫（不宣稱動畫完成）", hq.chars.every((c) => !c.skeleton && c.animations === 0), hq.chars);
       check("沒有半透明材質（不會有透明排序錯誤）", hq.transparentMaterials.length === 0, hq.transparentMaterials);
       check("金色金屬掛上環境反射（避免發黑）", hq.metalWithProbe >= 2, hq.metalWithProbe);
@@ -1934,7 +1937,7 @@ for (const name of browsers) {
       check("載入時間有記錄", hq.loads.length === 1 && hq.loads[0].ms > 0 && hq.loads[0].files.length === 2, hq.loads);
       for (const v of ["front", "left45", "side", "back", "low", "lowBack", "head", "skirt"]) {
         await page.evaluate((x) => window.__starwishC10b.view(x), v);
-        await page.waitForTimeout(500);
+        await settle(page);
         await shot(page, `hq_${v}`);
       }
       await page.evaluate(() => window.__starwishC10b.setLod("lite"));
@@ -1946,7 +1949,7 @@ for (const name of browsers) {
       check("Lite 身高與 HQ 相同（±1 公分）", lite.chars.every((c, i) => Math.abs(c.height - hq.chars[i].height) < 0.01), [hq.chars.map((c) => c.height), lite.chars.map((c) => c.height)]);
       for (const v of ["front", "low", "skirt"]) {
         await page.evaluate((x) => window.__starwishC10b.view(x), v);
-        await page.waitForTimeout(500);
+        await settle(page);
         await shot(page, `lite_${v}`);
       }
       await page.evaluate(() => window.__starwishC10b.setLod("hq"));

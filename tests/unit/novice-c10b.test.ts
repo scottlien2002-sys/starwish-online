@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
-import { C10B_REFERENCE, C10B_VIEWS, c10bFile, c10bLayout, c10bOptionsFromSearch, countHitches, windowAverages } from "../../src/characters/noviceC10b.ts";
+import { C10B_REFERENCE, C10B_VIEWS, isLowView, c10bFile, c10bLayout, c10bOptionsFromSearch, countHitches, windowAverages } from "../../src/characters/noviceC10b.ts";
 
 test("C1.0-B：檔名與網址參數", () => {
   assert.equal(c10bFile("female", "lite"), "novice_c10b_female_lite.glb");
@@ -24,10 +24,11 @@ test("C1.0-B：站位（2 人男左女右；多人男女交替）", () => {
   assert.equal(ten.filter((p) => p.gender === "male").length, 5);
 });
 
-test("C1.0-B：低角度鏡頭不會穿到地面以下", () => {
-  for (const v of [C10B_VIEWS.low, C10B_VIEWS.lowBack]) {
+test("C1.0-B：低角度鏡頭在腳底附近往上看；其他視角在地面以上", () => {
+  for (const [k, v] of Object.entries(C10B_VIEWS)) {
     const camY = v.y + v.radius * Math.cos(v.beta);
-    assert.ok(camY > 0.02 && camY < 0.3, `camY ${camY}`);
+    if (isLowView(k as never)) assert.ok(camY > -0.2 && camY < 0.05 && v.beta > Math.PI / 2, `${k} camY ${camY}`);
+    else assert.ok(camY > 0.15, `${k} camY ${camY}`);
   }
 });
 

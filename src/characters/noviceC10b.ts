@@ -19,15 +19,15 @@ export const C10B_REFERENCE = Object.freeze({
 
 export type C10bView = "front" | "left45" | "side" | "back" | "low" | "lowBack" | "head" | "skirt" | "free";
 
-/** 鏡頭（ArcRotateCamera）：alpha、beta、radius、注視高度 y。從正面看（+Z）= alpha π/2 */
+/** 鏡頭（ArcRotateCamera）：alpha、beta、radius、注視高度 y（從腳底起算）。從正面看（+Z）= alpha π/2 */
 export const C10B_VIEWS: Readonly<Record<Exclude<C10bView, "free">, { alpha: number; beta: number; radius: number; y: number; label: string }>> = Object.freeze({
   front: { alpha: Math.PI / 2, beta: 1.42, radius: 3.0, y: 0.6, label: "正面" },
   left45: { alpha: Math.PI / 4, beta: 1.42, radius: 3.0, y: 0.6, label: "45 度" },
   side: { alpha: 0, beta: 1.42, radius: 3.0, y: 0.6, label: "側面" },
   back: { alpha: -Math.PI / 2, beta: 1.42, radius: 3.0, y: 0.6, label: "背面" },
-  // 低角度：鏡頭在腰下、由下往上看裙內（鏡頭高度約 0.1 公尺，不穿到地面以下）
-  low: { alpha: Math.PI / 2, beta: 1.74, radius: 1.55, y: 0.36, label: "低角度正面" },
-  lowBack: { alpha: -Math.PI / 2, beta: 1.74, radius: 1.55, y: 0.36, label: "低角度背面" },
+  // 低角度：鏡頭在腳底下方約 7 公分、由下往上看裙內（拍攝時暫時隱藏地面與廣場地台，與 Blender 低角度檢查相同）
+  low: { alpha: Math.PI / 2, beta: 1.85, radius: 1.55, y: 0.36, label: "低角度正面" },
+  lowBack: { alpha: -Math.PI / 2, beta: 1.85, radius: 1.55, y: 0.36, label: "低角度背面" },
   head: { alpha: Math.PI / 2, beta: 1.5, radius: 1.35, y: 0.9, label: "頭部" },
   skirt: { alpha: Math.PI / 3, beta: 1.5, radius: 1.45, y: 0.32, label: "裙裝" },
 });
@@ -94,3 +94,11 @@ export function windowAverages(dts: readonly number[], windowSec: number): numbe
 export function countHitches(dts: readonly number[], limitMs = 100): number {
   return dts.reduce((s, dt) => s + (dt * 1000 > limitMs ? 1 : 0), 0);
 }
+
+/** 低角度視角（需要暫時隱藏地面） */
+export function isLowView(v: C10bView): boolean {
+  return v === "low" || v === "lowBack";
+}
+
+/** 出生廣場的星形地台頂面比地形高 0.13 公尺（Meadow：廣場 0.04＋0.06、星形 +0.02＋0.07） */
+export const PLAZA_TOP = 0.13;

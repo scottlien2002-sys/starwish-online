@@ -22,6 +22,7 @@ import { PerfOverlay } from "../render/PerfOverlay.ts";
 import { summarizeFrames, type BenchmarkSummary } from "../render/benchmark.ts";
 import { contactShadowQuality, renderExperimentsFromSearch } from "../render/renderExperiments.ts";
 import { buildMeadow } from "../world/Meadow.ts";
+import { heightAt } from "../world/terrain.ts";
 import {
   C10B_REFERENCE,
   C10B_VIEWS,
@@ -29,6 +30,8 @@ import {
   c10bLayout,
   c10bOptionsFromSearch,
   countHitches,
+  isLowView,
+  PLAZA_TOP,
   windowAverages,
   type C10bGender,
   type C10bLod,
@@ -75,7 +78,9 @@ export interface C10bLabApi {
   view(v: C10bView): void;
   info(): {
     lod: C10bLod;
-    chars: { gender: C10bGender; meshes: number; triangles: number; height: number; width: number; skeleton: boolean; animations: number }[];
+    chars: { gender: C10bGender; meshes: number; triangles: number; height: number; width: number; feetY: number; skeleton: boolean; animations: number }[];
+    feet: number[];
+    baseY: number;
     triangles: number;
     drawCalls: number;
     activeMeshes: number;
@@ -144,6 +149,9 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
   const contactQ = contactShadowQuality(quality.shadows.filter, "v38r", renderExperimentsFromSearch(location.search));
   if (contactQ && shadows.useContactHardeningShadow) shadows.filteringQuality = contactQ === "medium" ? ShadowGenerator.QUALITY_MEDIUM : ShadowGenerator.QUALITY_HIGH;
   buildMeadow(scene, shadows);
+  // 角色站在出生廣場星形地台上（地形高度＋0.13 公尺；直接放在地形高度會讓靴子陷進地台）
+  const BASE_Y = heightAt(0, 0) + PLAZA_TOP;
+  const groundMeshes = scene.meshes.filter((m) => /^PH_(ground|plaza)/.test(m.name));
 
   // 金屬反射用：天空＋草原拍一次的反射探針（角色載入前的所有網格；只給角色金屬材質用）
   const probe = new ReflectionProbe("c10bEnv", 128, scene, true, true);
@@ -152,10 +160,10 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
   if (!probe.renderList!.includes(sky)) probe.renderList!.push(sky);
   probe.refreshRate = RenderTargetTexture.REFRESHRATE_RENDER_ONCE;
 
-  const camera = new ArcRotateCamera("c10bCam", Math.PI / 2, 1.42, 3.0, new Vector3(0, 0.6, 0), scene);
+  const camera = new ArcRotateCamera("c10bCam", Math.PI / 2, 1.42, 3.0, new Vector3(0, 0.6 + BASE_Y, 0), scene);
   camera.lowerRadiusLimit = 0.6;
   camera.upperRadiusLimit = 16;
-  camera.upperBetaLimit = 1.85;
+  camera.upperBetaLimit = 1.95;
   camera.wheelPrecision = 60;
   camera.pinchPrecision = 120;
   camera.minZ = 0.03;
@@ -221,7 +229,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
       const n = seq++;
       const ent = containers.get(p.gender)!.instantiateModelsToScene((name) => `${p.gender}${n}_${name}`, false, { doNotInstantiate: true });
       const root = ent.rootNodes[0] as TransformNode;
-      root.position.set(p.x, 0, p.z);
+      root.position.set(p.x, BASE_Y, p.z);
       const meshes = root.getChildMeshes(false);
       for (const m of meshes) {
         m.isPickable = false;
@@ -377,8 +385,10 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
         camera.alpha = c.alpha;
         camera.beta = c.beta;
         camera.radius = opts.count > 2 ? c.radius + Math.sqrt(opts.count) * 0.9 : c.radius;
-        camera.target.set(0, c.y, 0);
+        camera.target.set(0, c.y + BASE_Y, 0);
       }
+      // 低角度：暫時隱藏地面與廣場地台（鏡頭在腳底下方）；其他視角恢復
+      for (const m of groundMeshes) m.isVisible = !isLowView(v);
       for (const b of viewBtns) b.classList.toggle("active", b.dataset.view === v);
     },
     info: () => ({
@@ -403,10 +413,21 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
           triangles: triCount(c.meshes),
           height: +(maxY - minY).toFixed(3),
           width: +(maxX - minX).toFixed(3),
+          feetY: +minY.toFixed(3),
           skeleton: c.meshes.some((m) => !!m.skeleton),
           animations: containers.get(c.gender)?.animationGroups.length ?? 0,
         };
       }),
+      feet: chars.map((c) => {
+        let y = Infinity;
+        for (const m of c.meshes) {
+          m.computeWorldMatrix(true);
+          m.refreshBoundingInfo({});
+          y = Math.min(y, m.getBoundingInfo().boundingBox.minimumWorld.y);
+        }
+        return +y.toFixed(3);
+      }),
+      baseY: +BASE_Y.toFixed(3),
       triangles: triCount(chars.flatMap((c) => c.meshes)),
       drawCalls: perf.drawCalls,
       activeMeshes: scene.getActiveMeshes().length,
