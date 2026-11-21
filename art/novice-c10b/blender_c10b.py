@@ -177,7 +177,7 @@ def shoot(cam, yaw, zc, scale, res, path, elev=0.0):
     sc.render.resolution_x, sc.render.resolution_y = res
     cam.data.ortho_scale = scale
     cam.location = Vector((math.sin(a) * 6 * math.cos(e), -math.cos(a) * 6 * math.cos(e), zc + 6 * math.sin(e)))
-    cam.rotation_euler = (math.radians(90 + elev), 0, a)
+    cam.rotation_euler = (math.radians(90 - elev), 0, a)   # elev < 0：鏡頭在下方往上看
     plane = bpy.data.objects.get("Plane")
     if plane is not None:
         plane.hide_render = elev < 0      # 低角度：鏡頭在地面以下，暫時隱藏陰影板

@@ -5,7 +5,7 @@ C1.0-B 最終精修：材質（以 C1.0-A 為唯一基準；臉部貼圖、眼�
   白色布料（上衣、前裙、內裙）：亮度 >0.82 的部分壓暗最多 8% 並略帶暖色（修正過曝）
   皮革：皮紋深淺 ±4.5% → ±2.2%、頻率降低（修正男生靴子翻邊的直條紋）；縫線保留
   金屬：粗糙度 0.30→0.36、鏡面 0.45→0.40（裙邊金飾的火焰狀高光變柔和）
-  安全短褲：#f6d2da → #efc3cf（同色系略深，和膚色分得開，褲管下緣清楚）
+  安全短褲：沿用 C0.2 的淡粉色 #f6d2da（加深版在裙下陰影中偏灰，已還原）
 """
 import sys
 from pathlib import Path
@@ -18,7 +18,6 @@ import c10a_look as A  # noqa: E402
 from c10a_look import (CRANIUM, METAL_BASE, PALETTE, STITCH_ROWS, C0, face_texture, hx, noise3,  # noqa: F401,E402
                        part_key, skin_vertex, smooth, uv_of)
 
-PALETTE["female"]["safety_shorts"] = "#efc3cf"
 SURFACE = dict(A.SURFACE)
 SURFACE["metal"] = (0.72, 0.36, 0.40, 0.0)
 

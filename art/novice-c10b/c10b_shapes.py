@@ -72,9 +72,17 @@ def c10b_female_skirt(parts):
     zp0 = 0.31
     pet.add(lathe_shell(PETTI_HEM, 0.49, lerp_fn([(PETTI_HEM, 0.2389), (zp0, 0.232), (0.36, 0.2), (0.42, 0.155), (0.49, 0.108)]),
                         lerp_fn([(PETTI_HEM, 0.2096), (zp0, 0.204), (0.36, 0.176), (0.42, 0.135), (0.49, 0.09)]), 0.008, wave=ruffle(16, 0.055, 0.0, 0.37)))
-    out.append(pet)
     rx = lerp_fn([(FRONT_HEM, 0.2172), (0.344, 0.212), (0.44, 0.152), (0.5, 0.11)])
     ry = lerp_fn([(FRONT_HEM, 0.1906), (0.344, 0.186), (0.44, 0.137), (0.5, 0.093)])
+    # 荷葉襯裙不可穿出奶油色前裙（C1.0-A 已有零星粉紅色斑點；裙襬下降後金色飾邊左側被穿出一個缺口）：
+    # 前裙下緣以上，荷葉限制在前裙內側（扣掉前裙荷葉波浪幅度＋4 mm）
+    def inside_pink(P):
+        z = P[..., 2]
+        rr = np.sqrt((P[..., 0] / rx(z)) ** 2 + (P[..., 1] / ry(z)) ** 2)
+        lim = (rr - 0.955) * np.minimum(rx(z), ry(z)) + 0.004
+        return np.where(z > FRONT_HEM + 0.002, lim, -1.0)
+    pet.inter(Prim(inside_pink, (-0.3, -0.3, PETTI_HEM - 0.01), (0.3, 0.3, 0.5)))
+    out.append(pet)
     pink = Part("skirt_pink", "cloth", step=0.0025)
     pink.add(lathe_shell(FRONT_HEM, 0.5, rx, ry, 0.008, wave=ruffle(12, 0.04, 0.5, 0.41)))
     out.append(pink)
@@ -104,10 +112,22 @@ def c10b_female_skirt(parts):
     return keep + out
 
 
+def male_crotch_patch(parts):
+    """男生深灰短褲：胯下內側（x ±1 公分、z 0.26～0.31）原本露出一小塊膚色（C1.0-A 正面可見）。
+    在胯下內側補一片「身體表面外推 4 mm」的短褲布料；外輪廓不變。"""
+    body = next(p for p in parts if p.name == "body")
+    sh = next(p for p in parts if p.name == "shorts")
+    lo, hi = (-0.035, -0.08, 0.25), (0.035, 0.08, 0.34)
+    sh.add(Prim(lambda P: np.maximum(_eval(body, P) - 0.004,
+                                     np.maximum(np.abs(P[..., 0]) - 0.03, np.maximum(0.255 - P[..., 2], P[..., 2] - 0.335))), lo, hi), 0.004)
+    return parts
+
+
 def build(g):
     saved = C2.female_skirt
     C2.female_skirt = c10b_female_skirt
     try:
-        return C4.build(g)
+        parts = C4.build(g)
     finally:
         C2.female_skirt = saved
+    return male_crotch_patch(parts) if g == "male" else parts
