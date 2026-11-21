@@ -55,7 +55,7 @@ def safety_shorts():
     sh.add(Prim(lambda P: _eval(body, P) - SHORTS_OFF, lo, hi))
     sh.add(Prim(lambda P: np.maximum(_eval(body, P) - CUFF_OFF,
                                      np.maximum(_hem_z(P) - P[..., 2], P[..., 2] - (_hem_z(P) + 0.011))), lo, hi), 0.003)
-    sh.inter(Prim(lambda P: np.maximum(_hem_z(P) - P[..., 2], P[..., 2] - SHORTS_TOP), lo, hi))
+    sh.inter(Prim(lambda P: np.maximum(_hem_z(P) - P[..., 2], P[..., 2] - SHORTS_TOP), lo, hi), 0.003)   # 褲管下緣圓角
     return sh
 
 

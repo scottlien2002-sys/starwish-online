@@ -42,6 +42,8 @@ def export(g, out):
         ao = sdf_ao(vol, origin, st, verts, nrm)
         if L.part_key(g, p.name) == "skin":
             col = col * L.skin_vertex(ao)                # 皮膚：暖色環境光遮蔽
+        elif p.name == "safety_shorts":
+            col = col * (0.62 + 0.38 * ao)[:, None]      # C1.0-B：胯下夾縫環境光遮蔽太深會像破洞／污漬 → 遮蔽減弱
         else:
             col = col * (0.35 + 0.65 * ao)[:, None]
         if p.group == "hair":
