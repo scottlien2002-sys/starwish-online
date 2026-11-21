@@ -1,0 +1,141 @@
+{
+ "male": {
+  "triangles_raw_surface_nets": 1814972,
+  "triangles_hq": 199980,
+  "triangles_hq_by_part": {
+   "head": 26870,
+   "body": 8032,
+   "hand_l": 5458,
+   "hand_r": 5458,
+   "glove_l": 8118,
+   "rivet_l": 132,
+   "glove_r": 8106,
+   "rivet_r": 134,
+   "boot_l": 8630,
+   "boot_gem_l": 478,
+   "boot_r": 8630,
+   "boot_gem_r": 478,
+   "hair": 56106,
+   "shirt": 5402,
+   "sleeve_trim": 2170,
+   "vest": 7724,
+   "vest_trim": 1864,
+   "lace": 806,
+   "scarf": 5684,
+   "belt": 3586,
+   "buckle": 678,
+   "pouch": 3788,
+   "shorts": 3670,
+   "tabard": 19256,
+   "tabard_trim": 7106,
+   "tabard_star": 1616
+  },
+  "triangles_lite": 39974,
+  "parts": 26,
+  "materials": [
+   "face_male",
+   "male_belt",
+   "male_boot",
+   "male_boot_gem",
+   "male_buckle",
+   "male_glove",
+   "male_hair",
+   "male_lace",
+   "male_pouch",
+   "male_rivet",
+   "male_scarf",
+   "male_shirt",
+   "male_shorts",
+   "male_skin",
+   "male_sleeve_trim",
+   "male_tabard",
+   "male_tabard_star",
+   "male_tabard_trim",
+   "male_vest",
+   "male_vest_trim"
+  ],
+  "textures": [
+   {
+    "name": "c0_face_male.png",
+    "size": [
+     2048,
+     2048
+    ],
+    "use": "臉部（眼睛、眉毛、嘴巴、腮紅）baseColor"
+   }
+  ],
+  "vertex_colors": "COLOR_0（配色＋髮束深淺＋環境光遮蔽，乘在 baseColor 上）"
+ },
+ "female": {
+  "triangles_raw_surface_nets": 2121928,
+  "triangles_hq": 199974,
+  "triangles_hq_by_part": {
+   "head": 22606,
+   "body": 6586,
+   "hand_l": 2786,
+   "hand_r": 2780,
+   "glove_l": 4066,
+   "glove_r": 4062,
+   "boot_l": 5372,
+   "boot_strap_l": 482,
+   "boot_r": 5372,
+   "boot_strap_r": 482,
+   "hair": 59952,
+   "ponytail": 9070,
+   "bow": 12086,
+   "bow_star": 860,
+   "blouse": 3646,
+   "armband": 1192,
+   "choker": 1312,
+   "gems": 404,
+   "corset": 3756,
+   "belt": 2654,
+   "buckle": 430,
+   "front_panel": 756,
+   "petticoat": 10890,
+   "skirt_pink": 9834,
+   "bloomers": 1552,
+   "overskirt": 20668,
+   "overskirt_trim": 5408,
+   "overskirt_emblem": 910
+  },
+  "triangles_lite": 39979,
+  "parts": 28,
+  "materials": [
+   "face_female",
+   "female_armband",
+   "female_belt",
+   "female_bloomers",
+   "female_blouse",
+   "female_boot",
+   "female_boot_strap",
+   "female_bow",
+   "female_bow_star",
+   "female_buckle",
+   "female_choker",
+   "female_corset",
+   "female_front_panel",
+   "female_gems",
+   "female_glove",
+   "female_hair",
+   "female_overskirt",
+   "female_overskirt_emblem",
+   "female_overskirt_trim",
+   "female_petticoat",
+   "female_ponytail",
+   "female_skin",
+   "female_skirt_pink"
+  ],
+  "textures": [
+   {
+    "name": "c0_face_female.png",
+    "size": [
+     2048,
+     2048
+    ],
+    "use": "臉部（眼睛、眉毛、嘴巴、腮紅）baseColor"
+   }
+  ],
+  "vertex_colors": "COLOR_0（配色＋髮束深淺＋環境光遮蔽，乘在 baseColor 上）"
+ }
+}
