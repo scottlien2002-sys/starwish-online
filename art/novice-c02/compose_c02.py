@@ -51,12 +51,13 @@ def main(c01, c02, out):
             im = O(src / f"{pre}_female_{v}.png").crop((170, y0, 870, y1))
             d = ImageDraw.Draw(im)
             lines = [(zp, (200, 140, 40), "前裙"), (zpet, (230, 90, 140), "荷葉")] + ([(extra, (120, 120, 120), "內裙")] if extra else [])
-            for z, col, t in lines:
+            fs = ImageFont.truetype(FONT, 22)
+            for j, (z, col, t) in enumerate(lines):
                 yy = zrow(z) - y0
                 d.line((0, yy, im.width, yy), fill=col, width=3)
-                d.text((im.width - 250, yy - 40), f"{t} {z * 100:.1f} cm", fill=col, font=f)
+                d.text((8 + j * 170, yy + 4), f"{t} {z * 100:.1f}cm", fill=col, font=fs)
             tiles.append((f"{tag} {NAMES[v]}", im))
-    grid(tiles, 2, 700, y1 - y0, "裙長對照 上 C0.1／下 C0.2：前裙長 13.0→15.6cm（+20%）、荷葉 16.2→19.0cm（+17%）", f, out / "c02_female_skirt_length.png", half=False)
+    grid(tiles, 2, 700, y1 - y0, "裙長 上C0.1／下C0.2：前裙 13.0→15.6cm(+20%)、荷葉 16.2→19.0cm(+17%)", ImageFont.truetype(FONT, 26), out / "c02_female_skirt_length.png", half=False)
 
 
 if __name__ == "__main__":
