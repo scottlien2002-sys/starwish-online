@@ -390,7 +390,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
         let maxX = -Infinity;
         for (const m of c.meshes) {
           m.computeWorldMatrix(true);
-          m.refreshBoundingInfo();
+          m.refreshBoundingInfo({});
           const bb = m.getBoundingInfo().boundingBox;
           minY = Math.min(minY, bb.minimumWorld.y);
           maxY = Math.max(maxY, bb.maximumWorld.y);
