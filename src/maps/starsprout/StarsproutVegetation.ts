@@ -12,7 +12,7 @@ import type { MapLod } from "./StarsproutWorld.ts";
  * 名稱以 PH_ 開頭：程式產生的第一版場景模型，之後可由美術模型替換
  */
 
-interface Geo {
+export interface Geo {
   positions: number[];
   normals: number[];
   colors: number[];
@@ -23,7 +23,7 @@ type RGB = [number, number, number];
 const mixRGB = (a: RGB, b: RGB, t: number): RGB => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
 
 /** 取出網格資料並依位置上色（之後網格本身丟掉） */
-function geoOf(mesh: Mesh, color: (x: number, y: number, z: number, nx: number, ny: number, nz: number) => RGB): Geo {
+export function geoOf(mesh: Mesh, color: (x: number, y: number, z: number, nx: number, ny: number, nz: number) => RGB): Geo {
   mesh.bakeCurrentTransformIntoVertices();
   const positions = Array.from(mesh.getVerticesData(VertexBuffer.PositionKind) ?? []);
   const normals = Array.from(mesh.getVerticesData(VertexBuffer.NormalKind) ?? []);
@@ -37,7 +37,7 @@ function geoOf(mesh: Mesh, color: (x: number, y: number, z: number, nx: number, 
   return { positions, normals, colors, indices };
 }
 
-function joinGeo(parts: Geo[]): Geo {
+export function joinGeo(parts: Geo[]): Geo {
   const out: Geo = { positions: [], normals: [], colors: [], indices: [] };
   for (const p of parts) {
     const base = out.positions.length / 3;
@@ -253,7 +253,7 @@ function flowerTemplate(scene: Scene): Mesh {
 }
 
 // ---------------- 組合 ----------------
-interface Placed {
+export interface Placed {
   geo: Geo;
   x: number;
   y: number;
@@ -262,7 +262,7 @@ interface Placed {
   scale: number;
 }
 
-function bake(scene: Scene, name: string, items: Placed[], mat: StandardMaterial): Mesh | null {
+export function bake(scene: Scene, name: string, items: Placed[], mat: StandardMaterial): Mesh | null {
   if (!items.length) return null;
   let nv = 0;
   let ni = 0;

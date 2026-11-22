@@ -228,3 +228,63 @@ test("P2-1 植被：加上樹與岩石碰撞後，主路線仍約 57 秒、不�
     for (const c of VEG.colliders) assert.ok(Math.hypot(c.x - p.x, c.z - p.z) > c.r + 1, `碰撞物壓在 (${p.x},${p.z})`);
   }
 });
+
+// ---------------- Stage 6 P2-2：新手營地與胡蘿蔔園 ----------------
+import { CAMP_CENTER, FARM_CENTER, FARM_FENCE_R, PROPS, propColliders, propExclusions } from "../../src/maps/starsprout/props.ts";
+
+const PC = propColliders();
+
+test("P2-2 物件：營地有帳篷、營火、補給、旗、燈、路牌；胡蘿蔔園有田壟、胡蘿蔔、柵欄、農具；沒有怪物", () => {
+  const kinds = new Set(PROPS.map((p) => p.kind));
+  for (const k of ["pavilion", "tent", "campfire", "logBench", "crate", "rack", "barrel", "banner", "lantern", "signpost", "fencePost", "bed", "carrot", "hay", "cart", "hoe"]) assert.ok(kinds.has(k as never), k);
+  assert.ok(PROPS.filter((p) => p.kind === "carrot").length >= 60);
+  assert.ok(!JSON.stringify(PROPS).includes("monster"));
+});
+
+test("P2-2 物件：碰撞不壓主路（離主路中線 ≥ 2.3 公尺）、不在水或不可走地形上；出生點 4 公尺內空地", () => {
+  for (const c of PC) {
+    assert.ok(nearestOnPolyline(MAIN_PATH, c.x, c.z).d - c.r >= 2.3, `${c.kind} (${c.x.toFixed(1)},${c.z.toFixed(1)}) 太靠近主路`);
+    assert.ok(T.walkable(c.x, c.z), `${c.kind} 在不可走的地方`);
+    assert.ok(Math.hypot(c.x - CAMP_CENTER.x, c.z - CAMP_CENTER.z) - c.r >= 4, `${c.kind} 佔到出生點空地`);
+  }
+  for (const p of PROPS.filter((q) => q.area === "farm" && q.kind !== "barrel" && q.kind !== "hay" && q.kind !== "cart"))
+    assert.ok(Math.hypot(p.x - FARM_CENTER.x, p.z - FARM_CENTER.z) <= FARM_FENCE_R + 0.5, `${p.kind} 在胡蘿蔔園外`);
+});
+
+test("P2-2 物件：加上營地、胡蘿蔔園、植被、遺跡全部碰撞後，主路線仍約 57 秒、不卡、不被擋；植被避開物件", () => {
+  const veg = buildVegetation(T, VEG_HQ, undefined, propExclusions());
+  const r = simulateRoute(T, { colliders: [...MAP_COLLIDERS, ...veg.colliders, ...PC] });
+  assert.ok(r.reached && r.stuck.length === 0, JSON.stringify(r.stuck));
+  assert.equal(r.blockedFrames, 0);
+  assert.ok(r.seconds > 52 && r.seconds < 66);
+  const ex = propExclusions();
+  for (const tr of veg.trees) for (const e of ex) assert.ok(Math.hypot(tr.x - e.x, tr.z - e.z) >= e.r + 2.5 - 1e-6, "樹長在物件上");
+  for (const g of veg.grass) for (const e of ex) assert.ok(Math.hypot(g.x - e.x, g.z - e.z) >= e.r - 1e-6, "草長在物件上");
+});
+
+test("P2-2 物件：從出生點走得出營地、走得進胡蘿蔔園中央（碰撞不形成封閉區）", () => {
+  const all = [...MAP_COLLIDERS, ...PC];
+  const blockedAt = (x: number, z: number): boolean => !T.walkable(x, z) || all.some((c) => Math.hypot(c.x - x, c.z - z) < c.r + PLAYER_RADIUS);
+  const flood = (sx: number, sz: number, tx: number, tz: number): boolean => {
+    const S = 0.5;
+    const seen = new Set<string>();
+    const q: [number, number][] = [[Math.round(sx / S), Math.round(sz / S)]];
+    seen.add(q[0]!.join(","));
+    while (q.length) {
+      const [i, j] = q.pop()!;
+      if (Math.hypot(i * S - tx, j * S - tz) < 1) return true;
+      for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
+        const a = i + di;
+        const b = j + dj;
+        const k = `${a},${b}`;
+        if (seen.has(k) || Math.hypot(a * S - sx, b * S - sz) > 40) continue;
+        seen.add(k);
+        if (!blockedAt(a * S, b * S)) q.push([a, b]);
+      }
+    }
+    return false;
+  };
+  assert.ok(flood(CAMP_CENTER.x, CAMP_CENTER.z, MAIN_ROUTE[1]!.x, MAIN_ROUTE[1]!.z), "出不了營地");
+  const p11 = MAIN_ROUTE.find((p) => p.id === "P11")!;
+  assert.ok(flood(p11.x, p11.z, FARM_CENTER.x, FARM_CENTER.z), "進不了胡蘿蔔園");
+});

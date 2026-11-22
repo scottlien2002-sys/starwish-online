@@ -19,6 +19,8 @@ import { MAP_COLLIDERS, PLAYER_RADIUS, RouteFollower, routeTable } from "./route
 import { buildStarsproutWorld, type MapLod, type StarsproutWorld } from "./StarsproutWorld.ts";
 import { VEG_HQ, VEG_LITE, buildVegetation } from "./vegetation.ts";
 import { buildVegetationView, type VegetationView } from "./StarsproutVegetation.ts";
+import { propColliders, propExclusions } from "./props.ts";
+import { buildPropsView, type PropsView } from "./StarsproutProps.ts";
 import type { Collider } from "./terrain.ts";
 
 /**
@@ -137,6 +139,9 @@ class StarsproutPage {
   private veg: VegetationView | null = null;
   private colliders: readonly Collider[] = MAP_COLLIDERS;
   private vegMs = 0;
+  /** P2-2 新手營地與胡蘿蔔園（&props=0 關閉，對照用） */
+  private props: PropsView | null = null;
+  private propsMs = 0;
   private panel!: HTMLDivElement;
   private info!: HTMLDivElement;
   private reportBox!: HTMLTextAreaElement;
@@ -202,14 +207,25 @@ class StarsproutPage {
       runeOff: this.diag.has("norune"),
       portalOff: this.diag.has("noportal"),
     });
+    const propsOn = params.get("props") !== "0";
+    const contactShadows = this.quality.shadows.filter === "contact" ? this.shadows : null;
+    let colliders: Collider[] = [...MAP_COLLIDERS];
+    if (propsOn) {
+      const tp = performance.now();
+      this.props = buildPropsView(scene, this.terrain, this.lod, contactShadows);
+      colliders = colliders.concat(propColliders());
+      this.propsMs = performance.now() - tp;
+      this.props.update(this.pos.x, this.pos.z, false, 0);
+    }
     if (params.get("veg") !== "0") {
       const tv = performance.now();
-      const layout = buildVegetation(this.terrain, this.lod === "hq" ? VEG_HQ : VEG_LITE);
-      this.veg = buildVegetationView(scene, layout, this.lod, this.quality.shadows.filter === "contact" ? this.shadows : null);
-      this.colliders = [...MAP_COLLIDERS, ...layout.colliders];
+      const layout = buildVegetation(this.terrain, this.lod === "hq" ? VEG_HQ : VEG_LITE, undefined, propsOn ? propExclusions() : []);
+      this.veg = buildVegetationView(scene, layout, this.lod, contactShadows);
+      colliders = colliders.concat(layout.colliders);
       this.vegMs = performance.now() - tv;
       this.veg.update(this.pos.x, this.pos.z, false);
     }
+    this.colliders = colliders;
     if (params.get("labels") === "0") this.world.setLabels(false);
     if (params.get("nav") === "1") this.world.setNav(true);
 
@@ -217,7 +233,7 @@ class StarsproutPage {
     this.hud.setLevel(1);
     this.hud.setBars({ hp: 100, maxHp: 100, mp: 40, maxMp: 40, exp: 0, expToNext: 100 });
     const build = hudRoot.querySelector<HTMLSpanElement>(".hud-build");
-    if (build) build.textContent = `Stage 6 P2-1 ${this.modeName()}`;
+    if (build) build.textContent = `Stage 6 P2-2 ${this.modeName()}`;
     this.hud.events.on("skillPressed", () => this.hud.toast("地形測試頁：這一階段沒有怪物與戰鬥", 1500));
     new VirtualJoystick(this.hud.joystickZone, this.input, TUNING.joystick.radius, TUNING.joystick.deadZone);
     new CameraTouchControl(canvas, this.input, TUNING.camera.rotateSensitivity, TUNING.camera.pitchSensitivity, TUNING.camera.pinchSensitivity);
@@ -318,6 +334,7 @@ class StarsproutPage {
     this.sun.position.copyFrom(this.pos).subtractInPlace(this.sun.direction.scale(45));
     this.world.update(dt, this.overview ? 1e6 : this.pos.x, this.overview ? 1e6 : this.pos.z);
     this.veg?.update(this.pos.x, this.pos.z, this.overview);
+    this.props?.update(this.pos.x, this.pos.z, this.overview, dt);
     this.checkPortal();
     this.scene.render();
     this.perf.update(dt);
@@ -401,6 +418,21 @@ class StarsproutPage {
         break;
       case "field":
         at(-30, 30, 300, 1.1, 11);
+        break;
+      case "campwide":
+        at(-50, -57, 225, 1.08, 15);
+        break;
+      case "campfire":
+        at(-57, -63, 230, 1.12, 8);
+        break;
+      case "campgate":
+        at(-42, -50, 222, 1.1, 12);
+        break;
+      case "farmwide":
+        at(-12, 24, 0, 0.95, 15);
+        break;
+      case "farmnear":
+        at(-12, 31, 0, 1.0, 7);
         break;
       case "flowersea":
         at(-22, -62, 110, 1.1, 10);
@@ -551,7 +583,7 @@ class StarsproutPage {
     const r = this.lastResult;
     const lines: string[] = [];
     const now = new Date();
-    lines.push(`星願物語 Stage 6 P2-1 星芽原野 地表與植被測試報告`);
+    lines.push(`星願物語 Stage 6 P2-2 星芽原野 營地與胡蘿蔔園測試報告`);
     lines.push(`時間 ${now.toLocaleString("zh-TW", { hour12: false })}`);
     lines.push(`網址參數 ${location.search || "(無)"}`);
     lines.push(`裝置 ${navigator.userAgent}`);
@@ -560,6 +592,8 @@ class StarsproutPage {
     lines.push(`發光效果 ${this.fxLegacy ? "修正前（fx=old）" : "修正後"}；診斷 ${[...this.diag].join(",") || "無"}`);
     lines.push(`對照設定：陰影 ${this.shadowQ === "medium" ? "PCSS32（中）" : "預設（高）"}／發光層 ${this.glowOff || !this.render.glow ? "關" : "開"}／測試解析度 ${this.lockRatio ? this.lockRatio + "x" : "畫質上限"}`);
     const vs = this.veg?.stats();
+    const ps = this.props?.stats();
+    lines.push(ps ? `營地與胡蘿蔔園 物件 ${ps.props}、網格 ${ps.meshes}、三角形 ${Math.round(ps.triangles)}（建立 ${Math.round(this.propsMs)} ms）` : "營地與胡蘿蔔園 關閉（props=0）");
     lines.push(vs ? `植被 樹 ${vs.trees}、灌木岩石 ${vs.smalls}、草叢 ${vs.grass}、花 ${vs.flowers}（建立 ${Math.round(this.vegMs)} ms）；碰撞物 ${this.colliders.length}` : "植被 關閉（veg=0）");
     lines.push(`地形 ${this.world.chunks.length} 塊、${this.world.terrainVerts} 頂點、${this.world.terrainTris} 三角形`);
     const table = routeTable();
@@ -597,7 +631,7 @@ class StarsproutPage {
     panel.addEventListener("pointerdown", stop);
     const title = document.createElement("div");
     title.className = "map-title";
-    title.textContent = "星芽原野 Stage 6 P2-1　地表與植被";
+    title.textContent = "星芽原野 Stage 6 P2-2　營地與胡蘿蔔園";
     this.info = document.createElement("div");
     this.info.className = "map-info";
     const section = (name: string): HTMLDivElement => {
@@ -735,6 +769,7 @@ class StarsproutPage {
         materials: this.scene.materials.length,
         textures: this.scene.textures.length,
         labels: this.world.labelsOn,
+        props: this.props ? { ...this.props.stats(), buildMs: Math.round(this.propsMs) } : null,
         veg: this.veg ? { ...this.veg.stats(), buildMs: Math.round(this.vegMs), colliders: this.colliders.length } : null,
         nav: this.world.navOn,
         contextLost: this.contextLost,
@@ -758,6 +793,7 @@ class StarsproutPage {
         this.player.root.rotation.y = this.yaw;
         this.player.update(0.016, 0);
         this.veg?.update(this.pos.x, this.pos.z, false);
+        this.props?.update(this.pos.x, this.pos.z, false, 0);
         // 截圖固定在畫質上限解析度（不受動態降解析度影響）
         this.perf.lockResolution(this.lockRatio ?? Math.min(window.devicePixelRatio || 1, this.quality.maxPixelRatio));
         const b = (o.camBearingDeg * Math.PI) / 180;

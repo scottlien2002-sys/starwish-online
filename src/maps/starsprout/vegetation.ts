@@ -164,8 +164,15 @@ function baseY(t: StarsproutTerrain, x: number, z: number, r: number): number {
   return y;
 }
 
-export function buildVegetation(t: StarsproutTerrain, opt: VegetationOptions, seed = 20261122): VegetationLayout {
+export function buildVegetation(
+  t: StarsproutTerrain,
+  opt: VegetationOptions,
+  seed = 20261122,
+  /** P2-2：場景物件（帳篷、田壟等）佔用的區域，植被避開 */
+  exclusions: readonly { x: number; z: number; r: number }[] = [],
+): VegetationLayout {
   const rng = createRng(seed);
+  const excluded = (x: number, z: number, pad: number): boolean => exclusions.some((e) => Math.abs(x - e.x) < e.r + pad && Math.abs(z - e.z) < e.r + pad && Math.hypot(x - e.x, z - e.z) < e.r + pad);
   const trees: TreePlacement[] = [];
   const smalls: SmallPlacement[] = [];
   const colliders: Collider[] = [];
@@ -194,6 +201,7 @@ export function buildVegetation(t: StarsproutTerrain, opt: VegetationOptions, se
     // 遺跡戰鬥場外圈與傳送門周圍 10 公尺不種樹（保留遺跡與傳送門的視線）
     if (c.arena < ARENA.r + 6 || c.portal < 10) continue;
     if (fightArea(x, z) > 0.05) continue;
+    if (excluded(x, z, 2.5)) continue;
     const edge = Math.max(Math.abs(x), Math.abs(z));
     const slope = t.terrainSlopeDeg(x, z);
     if (slope > (edge > 82 ? 38 : 26)) continue;
@@ -227,6 +235,7 @@ export function buildVegetation(t: StarsproutTerrain, opt: VegetationOptions, se
     if (!isRock && !isBush) continue;
     if (blocked(c, x, z, isRock ? 2.4 : 1.4, isRock ? 1.6 : 0.9, isRock ? 0.8 : 2)) continue;
     if (fightArea(x, z) > (isRock ? 0.05 : 0.3)) continue;
+    if (excluded(x, z, 0.6)) continue;
     if (slope > 34) continue;
     if (smalls.some((s) => Math.abs(s.x - x) < 2.2 && Math.abs(s.z - z) < 2.2)) continue;
     if (trees.some((tp) => Math.abs(tp.x - x) < 1.6 && Math.abs(tp.z - z) < 1.6)) continue;
@@ -246,6 +255,7 @@ export function buildVegetation(t: StarsproutTerrain, opt: VegetationOptions, se
       const z = gz + rng.range(-0.45, 0.45) * step;
       const c = clearance(t, x, z);
       if (blocked(c, x, z, 0.35, 0.25, 0.5)) continue;
+      if (excluded(x, z, 0)) continue;
       const slope = t.terrainSlopeDeg(x, z);
       if (slope > 38) continue;
       const camp = Math.hypot(x + 56, z + 64);
@@ -308,6 +318,7 @@ export function buildVegetation(t: StarsproutTerrain, opt: VegetationOptions, se
       if (rng.next() > p * opt.flowerScale) continue;
       const c = clearance(t, x, z);
       if (blocked(c, x, z, 0.4, 0.3, 0.8)) continue;
+      if (excluded(x, z, 0)) continue;
       if (t.terrainSlopeDeg(x, z) > 32) continue;
       const col = palette[Math.floor(rng.next() * palette.length)]!;
       const v = rng.range(-0.05, 0.03);
