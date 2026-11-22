@@ -6,7 +6,7 @@ import { C10B_REFERENCE, C10B_VIEWS, c10pAbLabel, c10pShadowMode, c10pMergeGroup
 test("C1.0-B：檔名與網址參數", () => {
   assert.equal(c10bFile("female", "lite"), "novice_c10b_female_lite.glb");
   const d = c10bOptionsFromSearch("?lab=c10b");
-  assert.deepEqual(d, { lod: "hq", count: 2, bench: 0, warmup: 2, view: "front", p1: false, p2: false, diag: [], gpuProbe: false, shadowRefresh: "every", shadowFilter: "default", shadowMap: null, rest: 0, fixSize: false });
+  assert.deepEqual(d, { lod: "hq", count: 2, bench: 0, warmup: 2, view: "front", p1: false, p2: false, diag: [], gpuProbe: false, shadowRefresh: "every", shadowFilter: "default", shadowMap: null, rest: 0, fixSize: false, star: false, p3: false });
   assert.deepEqual(c10bOptionsFromSearch("?diag=noshadow,bogus,nopost&gpu=1").diag, ["noshadow", "nopost"]);
   assert.equal(c10bOptionsFromSearch("?lab=c10b&p1=1").p1, true);
   const o = c10bOptionsFromSearch("?lab=c10b&lod=lite&count=99&bench=30&view=low");
@@ -133,3 +133,25 @@ test("C1.0-P P3-1：陰影診斷參數與代號", () => {
   assert.match(c10pShadowMode({ ...base, shadowFilter: "pcf" }), /^S3c/);
   assert.match(c10pShadowMode({ ...base, shadowMap: 1024 }), /^S4/);
 });
+
+test("C1.0-P P3-2：徽記修正版檔名與優化開關", () => {
+  assert.equal(c10bFile("male", "hq", true), "novice_c10b1_male_hq.glb");
+  assert.equal(c10bFile("female", "lite", true), "novice_c10b_female_lite.glb");
+  assert.equal(c10bFile("male", "lite"), "novice_c10b_male_lite.glb");
+  const o = c10bOptionsFromSearch("?lab=c10b&star=1&p3=1");
+  assert.equal(o.star, true);
+  assert.equal(o.p3, true);
+});
+
+// C1.0-B1：男生披風徽記修正版（art-novice-c10b1，Blender CI＋glTF Validator 0/0）
+for (const [l, bytes] of [["hq", 5237036], ["lite", 1340840]] as const) {
+  const p = `public/models/novice_c10b1_male_${l}.glb`;
+  test(`C1.0-B1 GLB male ${l}：檔案、32 網格、26 材質、不透明、無骨架`, { skip: !existsSync(p) }, () => {
+    assert.equal(readFileSync(p).length, bytes);
+    const j = glbJson(p);
+    assert.equal(j.meshes.length, 32);
+    assert.equal(j.materials.length, 26);
+    assert.ok(j.materials.every((m) => !m.alphaMode || m.alphaMode === "OPAQUE"));
+    assert.ok(!j.skins?.length && !j.animations?.length);
+  });
+}

@@ -34,6 +34,7 @@ import {
   c10pAbLabel,
   c10pMergeGroups,
   c10pShadowMode,
+  C10P_P3_ITEMS,
   C10P_DIAG_LABEL,
   frameTimeline,
   type FrameSample,
@@ -131,6 +132,8 @@ export interface C10bLabApi {
   bench(seconds: number, label?: string): void;
   benchState(): { state: "off" | "warmup" | "running" | "done"; progress: number; result: BenchResult | null; all: BenchResult[] };
   report(): string;
+  moveChar(index: number, dx: number): void;
+  renderInfo(): { p3: boolean; star: boolean; pipeline: boolean; canvasAntialias: boolean; glowEnabled: boolean; toneMappingInMaterials: boolean; shadowSkipped: number; files: string[] };
   shadowState(): { renders: number; frozenAt: number | null; refreshRate: number; mapSize: number; contact: boolean; pcf: boolean; filteringQuality: number; casters: number; lastFrameShadowDraws: number; counter: boolean; mode: string };
   /** 效能分析：開關各項目各量一格 Draw Calls（只量測，不改畫面；量完恢復） */
   breakdown(): Promise<Record<string, unknown>>;
@@ -145,7 +148,10 @@ declare global {
 export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTMLElement): Promise<void> {
   const opts = c10bOptionsFromSearch(location.search);
   const quality = pickQuality();
-  const engine = createEngine(canvas, quality);
+  // P3-2（?p3=1）：不建立半浮點 HDR 後製管線；色調映射改在材質內，MSAA 4x 改由畫布原生提供（建立引擎時就要決定）
+  const p3NoPipe = opts.p3 && quality.postProcess;
+  const renderQ = p3NoPipe ? { ...quality, postProcess: false, canvasAntialias: true } : quality;
+  const engine = createEngine(canvas, renderQ);
   const scene = new Scene(engine);
   const sky = createSkyDome(scene);
   scene.ambientColor = new Color3(0.35, 0.33, 0.4);
@@ -208,6 +214,51 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
     smRenders++;
     smDrawStart = drawCounter?.current ?? 0;
   });
+  // ---------- P3-2：陰影貼圖「有變化才重畫」 ----------
+  // 每格比對：投影者清單、每個投影者的世界矩陣與顯示狀態、太陽位置與方向；有骨架的網格（之後的動畫）每格都算有變化。
+  // 沒變化就不重畫，畫面與每格重畫完全相同；角色或怪物一移動，同一格就會重畫。
+  const shadowDirty = (() => {
+    const last = new Map<number, Float32Array>();
+    let lastSun = "";
+    let lastList = "";
+    let force = 0;
+    return {
+      forceFrames(n: number): void {
+        force = Math.max(force, n);
+      },
+      check(): boolean {
+        let dirty = force > 0;
+        if (force > 0) force--;
+        const list = shadowMap.renderList ?? [];
+        const ids = list.map((m) => m.uniqueId).join(",");
+        if (ids !== lastList) {
+          lastList = ids;
+          dirty = true;
+        }
+        const sunKey = `${sun.position.x},${sun.position.y},${sun.position.z},${sun.direction.x},${sun.direction.y},${sun.direction.z}`;
+        if (sunKey !== lastSun) {
+          lastSun = sunKey;
+          dirty = true;
+        }
+        for (const m of list) {
+          if (m.skeleton) dirty = true;
+          const w = m.computeWorldMatrix(true).m;
+          const prev = last.get(m.uniqueId);
+          const vis = m.isEnabled() && m.isVisible ? 1 : 0;
+          if (!prev || prev[16] !== vis || prev.some((v, i) => i < 16 && v !== w[i])) {
+            const a = new Float32Array(17);
+            a.set(w);
+            a[16] = vis;
+            last.set(m.uniqueId, a);
+            dirty = true;
+          }
+        }
+        return dirty;
+      },
+    };
+  })();
+  let smSkipped = 0;
+  if (opts.p3 && opts.shadowRefresh !== "once") shadowMap.refreshRate = RenderTargetTexture.REFRESHRATE_RENDER_ONCE;
   shadowMap.onAfterRenderObservable.add(() => {
     smDrawsFrame += drawCounter ? drawCounter.current - smDrawStart : (shadowMap.renderList ?? []).reduce((n, m) => n + (m.isEnabled() ? (m.subMeshes?.length ?? 0) : 0), 0);
     // S2：載入完成後讓陰影貼圖完整畫 3 次（確保所有投影者都已就緒），之後不再重畫
@@ -238,7 +289,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
   camera.minZ = 0.03;
   camera.attachControl(canvas, true);
   scene.activeCamera = camera;
-  const render = setupRendering(scene, camera, quality);
+  const render = setupRendering(scene, camera, renderQ);
   // C1.0-P P1（?p1=1）：發光層只處理 metadata.glow === true 的物件（與正式遊戲只加入星星、光環的做法相同）。
   // 原始（A0）測試頁沒有指定任何發光物件 → Babylon 發光層會把天空、地圖、角色全部重畫一次。
   let glowExcluded = 0;
@@ -251,6 +302,14 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
     };
     for (const m of scene.meshes) exclude(m);
     scene.onNewMeshAddedObservable.add(exclude);
+  }
+  // P3-2：沒有任何發光物件時暫停發光層；之後加入 metadata.glow 的物件會自動開啟
+  if (opts.p3 && render.glow) {
+    const glow = render.glow;
+    glow.isEnabled = scene.meshes.some((m) => wantsGlow(m.metadata));
+    scene.onNewMeshAddedObservable.add((m) => {
+      if (wantsGlow(m.metadata)) glow.isEnabled = true;
+    });
   }
   const perf = new PerfOverlay(engine, scene, quality, hudRoot);
   perf.lockResolution(Math.min(window.devicePixelRatio || 1, quality.maxPixelRatio));
@@ -383,7 +442,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
     await Promise.all(
       (["male", "female"] as C10bGender[]).map(async (g) => {
         const s = performance.now();
-        const file = c10bFile(g, l);
+        const file = c10bFile(g, l, opts.star);
         const c = await SceneLoader.LoadAssetContainerAsync(base, file, scene);
         rec.files.push({ file, ms: Math.round(performance.now() - s), bytes: fileBytes(file) });
         for (const m of c.materials) prepMaterial(m);
@@ -411,6 +470,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
     rec.ms = Math.round(performance.now() - t0);
     lastLoadDone = performance.now();
     if (opts.shadowRefresh === "once") smFreezeAfter = smRenders + 3;
+    if (opts.p3) shadowDirty.forceFrames(3);
     rec.files.sort((a, b) => a.file.localeCompare(b.file));
     loads.push(rec);
     lod = l;
@@ -425,7 +485,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
   const title = document.createElement("div");
   title.className = "lab-title";
   title.innerHTML =
-    `<div class="lab-name">男女初心者 C1.0-B <small>實機整合測試　${c10pAbLabel(opts)}${opts.diag.length ? `　診斷：${diagLabel}` : ""}${opts.gpuProbe ? "　GPU 探測" : ""}　${c10pShadowMode(opts)}</small></div>` +
+    `<div class="lab-name">男女初心者 C1.0-B <small>實機整合測試　${c10pAbLabel(opts)}${opts.diag.length ? `　診斷：${diagLabel}` : ""}${opts.gpuProbe ? "　GPU 探測" : ""}　${c10pShadowMode(opts)}${opts.p3 ? "　P3-2 優化" : ""}${opts.star ? "　徽記修正" : ""}</small></div>` +
     `<div class="lab-state" data-c10b-state></div>` +
     `<div class="lab-msg">靜態模型（尚未綁骨架、沒有動畫）；燈光、陰影、HDR 與遊戲相同</div>`;
   top.append(title);
@@ -442,10 +502,19 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
     parent.append(b);
     return b;
   };
-  for (const v of ["front", "left45", "side", "back", "low", "lowBack", "head", "skirt", "free"] as C10bView[]) {
+  for (const v of ["front", "left45", "side", "back", "low", "lowBack", "head", "skirt", "emblem", "free"] as C10bView[]) {
     const b = addBtn(views, v === "free" ? "旋轉" : C10B_VIEWS[v as Exclude<C10bView, "free">].label, "lab-view-btn", () => api.view(v));
     b.dataset.view = v;
     viewBtns.push(b);
+  }
+  for (const [label, on] of [["原始 HQ", false], ["P3-2 優化", true]] as const) {
+    const b = addBtn(views, label, "lab-view-btn", () => {
+      const u = new URL(location.href);
+      if (on) u.searchParams.set("p3", "1");
+      else u.searchParams.delete("p3");
+      location.href = u.toString();
+    });
+    b.classList.toggle("active", opts.p3 === on);
   }
   for (const [label, p1, p2] of [["A0 原始", false, false], ["A1 P1", true, false], ["A2 P1+P2", true, true]] as const) {
     const b = addBtn(views, label, "lab-view-btn", () => {
@@ -570,7 +639,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
   let auto = false;
 
   const shadowConfigText = (): string =>
-    `貼圖 ${quality.shadows.mapSize}×${quality.shadows.mapSize}｜取樣 ${shadowFilterLabel()}｜刷新 ${opts.shadowRefresh === "once" ? `只畫一次（${smFrozenAt !== null ? `第 ${smFrozenAt} 次後停止` : "尚未停止"}）` : "每格"}｜投影者 ${shadowMap.renderList?.length ?? 0}`;
+    `貼圖 ${quality.shadows.mapSize}×${quality.shadows.mapSize}｜取樣 ${shadowFilterLabel()}｜刷新 ${opts.shadowRefresh === "once" ? `只畫一次（${smFrozenAt !== null ? `第 ${smFrozenAt} 次後停止` : "尚未停止"}）` : opts.p3 ? "有變化才重畫（P3-2）" : "每格"}｜投影者 ${shadowMap.renderList?.length ?? 0}`;
   const fmt = (r: BenchResult): string =>
     `${r.label}（${r.lod === "hq" ? "HQ" : "Lite"}、${r.count} 角色）平均 ${r.avgFps.toFixed(1)} FPS　1% Low ${r.low1Fps.toFixed(1)}　最低 ${r.minFps.toFixed(1)}　卡頓(>100ms) ${r.hitches100}　Draw ${r.avgDrawCalls.toFixed(0)}` +
     (r.windows.length > 1 ? `\n  每 30 秒平均：${r.windows.map((w) => w.toFixed(1)).join(" → ")}` : "") +
@@ -604,7 +673,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
         camera.alpha = c.alpha;
         camera.beta = c.beta;
         camera.radius = opts.count > 2 ? c.radius + Math.sqrt(opts.count) * 0.9 : c.radius;
-        camera.target.set(0, c.y + BASE_Y, 0);
+        camera.target.set(c.x ?? 0, c.y + BASE_Y, 0);
       }
       // 低角度：暫時隱藏地面與廣場地台（鏡頭在腳底下方）；其他視角恢復
       for (const m of groundMeshes) m.isVisible = !isLowView(v);
@@ -687,6 +756,20 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
       api.view("free");
     },
     benchState: () => ({ state: benchState, progress: recProgress(), result: benchResult, all: allResults }),
+    moveChar: (index: number, dx: number) => {
+      const c = chars[index];
+      if (c) c.root.position.x += dx;
+    },
+    renderInfo: () => ({
+      p3: opts.p3,
+      star: opts.star,
+      pipeline: !!render.pipeline,
+      canvasAntialias: !!(engine as unknown as { _gl: WebGLRenderingContext })._gl.getContextAttributes()?.antialias,
+      glowEnabled: !!render.glow && render.glow.isEnabled,
+      toneMappingInMaterials: !render.pipeline && scene.imageProcessingConfiguration.toneMappingEnabled,
+      shadowSkipped: smSkipped,
+      files: loads[loads.length - 1]?.files.map((f) => f.file) ?? [],
+    }),
     shadowState: () => ({
       renders: smRenders,
       frozenAt: smFrozenAt,
@@ -773,6 +856,8 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
         `螢幕：${screen.width}×${screen.height} @${window.devicePixelRatio}x　畫布 ${engine.getRenderWidth()}×${engine.getRenderHeight()}　解析度倍率 ${i.pixelRatio}　畫質 ${i.quality}　HDR ${i.hdr}　MSAA ${i.msaa}　陰影品質 ${i.shadowQuality}`,
         `診斷開關：${diagLabel}　GPU 探測 ${opts.gpuProbe ? "開" : "關"}　畫布鎖定 ${opts.fixSize ? "開" : "關"}　載入後休息 ${opts.rest} 秒`,
         `陰影模式 ${c10pShadowMode(opts)}｜${shadowConfigText()}｜目前累計更新 ${smRenders} 次`,
+        `渲染組合：${opts.p3 ? "P3-2 優化" : "原始 HQ"}｜HDR 後製管線 ${render.pipeline ? `開（MSAA ${render.pipeline.samples}x）` : "關（色調映射在材質內）"}｜畫布 MSAA ${(engine as unknown as { _gl: WebGLRenderingContext })._gl.getContextAttributes()?.antialias ? "開" : "關"}｜發光層 ${render.glow ? (render.glow.isEnabled ? "開" : "暫停") : "無"}｜男生模型 ${opts.star ? "C1.0-B1（徽記修正）" : "C1.0-B"}`,
+        ...(opts.p3 ? C10P_P3_ITEMS.map((t) => `  · ${t}`) : []),
         `目前：${i.lod === "hq" ? "HQ" : "Lite"}　角色 ${i.chars.length}　三角形 ${i.triangles}　Draw Calls ${i.drawCalls}　材質 ${i.materials}　貼圖 ${i.textures.map((t) => `${t.w}×${t.h}`).join("、")}`,
         `估計 GPU 記憶體（角色幾何＋貼圖）${i.gpuMemMB} MB${i.jsHeapMB != null ? `　JS heap ${i.jsHeapMB} MB` : "　（Safari 不提供 JS 記憶體數據）"}`,
         `載入：` + i.loads.map((l) => `${l.lod === "hq" ? "HQ" : "Lite"} ${(l.ms / 1000).toFixed(2)} 秒（${l.files.map((f) => `${f.file} ${(f.bytes / 1048576).toFixed(2)} MB ${(f.ms / 1000).toFixed(2)} 秒`).join("、")}）`).join("；"),
@@ -794,6 +879,10 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
     if (auto) camera.alpha += dt * 0.5;
     const t0 = performance.now();
     smDrawsFrame = 0;
+    if (opts.p3 && opts.shadowRefresh !== "once") {
+      if (shadowDirty.check()) shadowMap.resetRefreshCounter();
+      else smSkipped++;
+    }
     scene.render();
     const cpu = performance.now() - t0;
     let gpu: number | null = null;
