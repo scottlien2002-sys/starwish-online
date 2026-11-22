@@ -206,7 +206,7 @@ for (const name of browsers) {
         return out;
       });
       run.results.cameraAvoid = avoid;
-      check("鏡頭避障：對照組（關閉）鏡頭會進到帳篷裡", avoid.off.horiz < avoid.off.coneR && !avoid.off.aboveTop, avoid.off);
+      check("鏡頭避障：對照組（關閉）鏡頭維持 9 m（視線穿過帳篷）", avoid.off.radius > 8.9 && avoid.on.allowed < 4.5, { off: avoid.off, allowedWhenOn: avoid.on.allowed });
       check("鏡頭避障：帳篷擋住時鏡頭拉近、在帳篷外", avoid.on.radius < 4.5 && avoid.on.radius >= 1.39 && (avoid.on.horiz > avoid.on.coneR || avoid.on.aboveTop) && Math.abs(avoid.on.desired - 9) < 0.01, avoid.on);
       check("鏡頭避障：停住時距離不抖動（40 幀變化 < 2 公分）", avoid.jitter < 0.02, avoid.jitter);
       check("鏡頭避障：轉開後平滑回到玩家設定距離、角度不重置", avoid.recover.end > 8.8 && Math.abs(avoid.recover.desired - 9) < 0.01 && avoid.recover.maxDrop < 0.05 && avoid.recover.maxStep < 1.2 && Math.abs(avoid.recover.dAlpha) > 1, avoid.recover);
