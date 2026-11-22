@@ -97,9 +97,9 @@ for (const name of browsers) {
       await page.evaluate(() => window.__starwishMap.setNav(false));
 
       // 傳送門：平時可見、走進去會提示尚未開放
-      await page.evaluate(() => window.__starwishMap.teleport(0, 79));
+      await page.evaluate(() => window.__starwishMap.teleport(0, 80.6));
       await page.evaluate(() => window.__starwishMap.setMove({ x: 0, y: 1 }));
-      await page.waitForFunction(() => window.__starwishMap.player().z > 81, null, { timeout: 30000 }).catch(() => null);
+      await page.waitForFunction(() => window.__starwishMap.player().z > 81.2, null, { timeout: 90000 }).catch(() => null);
       await page.evaluate(() => window.__starwishMap.setMove(null));
       await settle(page, 2);
       const toast = await page.evaluate(() => document.querySelector(".hud-toast")?.textContent ?? "");

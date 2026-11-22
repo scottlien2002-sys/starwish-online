@@ -72,17 +72,17 @@ function trunkGeo(scene: Scene, h: number, dTop: number, dBot: number, tess: num
 
 function blobTree(scene: Scene, kind: Exclude<TreeKind, "pine">, hi: boolean): Geo {
   const s = STYLE[kind];
-  const seg = hi ? 6 : 3;
-  const parts: Geo[] = [trunkGeo(scene, kind === "cherry" ? 2.4 : 2.6, 0.3, 0.52, hi ? 8 : 5, s.trunk)];
+  const seg = hi ? 4 : 2;
+  const parts: Geo[] = [trunkGeo(scene, kind === "cherry" ? 2.4 : 2.6, 0.3, 0.52, hi ? 7 : 4, s.trunk)];
   const blobs: [number, number, number, number][] =
     kind === "cherry"
       ? [[0, 3.3, 0, 3.4], [1.2, 3.0, 0.3, 2.4], [-1.1, 3.1, -0.4, 2.5], [0.2, 4.1, -0.3, 2.4], [-0.3, 2.8, 1.1, 2.0], [0.6, 3.4, -1.1, 2.0]]
       : kind === "broadLight"
         ? [[0, 3.4, 0, 3.0], [0.8, 3.1, 0.4, 2.1], [-0.7, 3.2, -0.3, 2.1], [0.1, 4.2, 0, 2.0]]
         : [[0, 3.5, 0, 3.2], [0.95, 3.1, 0.3, 2.2], [-0.85, 3.2, -0.45, 2.3], [0.2, 4.4, -0.2, 2.2], [-0.3, 2.8, 0.95, 1.8]];
-  const used = hi ? blobs : blobs.slice(0, 3);
+  const used = hi ? blobs : blobs.slice(0, 2);
   for (const [bx, by, bz, d] of used) {
-    const m = MeshBuilder.CreateSphere("PH_vegTmp", { diameter: d * (hi ? 1 : 1.12), segments: seg }, scene);
+    const m = MeshBuilder.CreateSphere("PH_vegTmp", { diameter: d * (hi ? 1 : 1.25), segments: seg }, scene);
     m.position.set(bx, by, bz);
     parts.push(
       geoOf(m, (x, y, z, _nx, ny) => {
@@ -98,7 +98,7 @@ function blobTree(scene: Scene, kind: Exclude<TreeKind, "pine">, hi: boolean): G
 }
 
 function pineTree(scene: Scene, hi: boolean): Geo {
-  const tess = hi ? 9 : 6;
+  const tess = hi ? 12 : 6;
   const parts: Geo[] = [trunkGeo(scene, 1.6, 0.24, 0.42, hi ? 7 : 5, [0.48, 0.34, 0.26])];
   const tiers: [number, number, number][] = [
     [1.3, 3.2, 1.9],
@@ -124,11 +124,12 @@ function pineTree(scene: Scene, hi: boolean): Geo {
 
 // ---------------- 灌木、岩石 ----------------
 function bushGeo(scene: Scene, flowered: boolean, hi: boolean): Geo {
-  const seg = hi ? 5 : 3;
+  const seg = hi ? 3 : 2;
   const dark: RGB = [0.3, 0.58, 0.3];
   const light: RGB = [0.56, 0.82, 0.42];
   const parts: Geo[] = [];
-  for (const [bx, by, bz, d] of [[0, 0.42, 0, 1.1], [0.45, 0.32, 0.15, 0.8], [-0.4, 0.34, -0.1, 0.85]] as const) {
+  const blobs: [number, number, number, number][] = [[0, 0.42, 0, 1.1], [0.45, 0.32, 0.15, 0.8], [-0.4, 0.34, -0.1, 0.85]];
+  for (const [bx, by, bz, d] of hi ? blobs : blobs.slice(0, 2)) {
     const m = MeshBuilder.CreateSphere("PH_vegTmp", { diameter: d, segments: seg }, scene);
     m.position.set(bx, by, bz);
     parts.push(geoOf(m, (x, y, z, _nx, ny) => {
@@ -150,7 +151,7 @@ function bushGeo(scene: Scene, flowered: boolean, hi: boolean): Geo {
 }
 
 function rockGeo(scene: Scene, flat: boolean, hi: boolean): Geo {
-  const m = MeshBuilder.CreateIcoSphere("PH_vegTmp", { radius: 0.6, subdivisions: hi ? 2 : 1, flat: false }, scene);
+  const m = MeshBuilder.CreateIcoSphere("PH_vegTmp", { radius: 0.6, subdivisions: hi ? 1 : 1, flat: false }, scene);
   m.scaling.set(flat ? 1.35 : 1.1, flat ? 0.38 : 0.72, flat ? 1.05 : 0.95);
   m.position.y = flat ? 0.12 : 0.26;
   // 輕微不規則：沿法線推動頂點
@@ -184,7 +185,7 @@ function grassTemplate(scene: Scene): Mesh {
   const base: RGB = [0.4, 0.64, 0.3];
   const mid: RGB = [0.56, 0.8, 0.38];
   const tip: RGB = [0.78, 0.92, 0.5];
-  const blades = 5;
+  const blades = 4;
   for (let b = 0; b < blades; b++) {
     const a = (b / blades) * Math.PI + (b % 2) * 0.3;
     const ox = Math.cos(a + 1.3) * 0.06 * (b % 3);
@@ -388,14 +389,16 @@ export function buildVegetationView(scene: Scene, layout: VegetationLayout, lod:
   fTemplate.isPickable = false;
   fTemplate.setEnabled(false);
   const gsize = (2 * MAP_HALF) / GC;
-  const gIndex = (x: number, z: number): number => {
-    const i = Math.min(GC - 1, Math.max(0, Math.floor((x + MAP_HALF) / gsize)));
-    const j = Math.min(GC - 1, Math.max(0, Math.floor((z + MAP_HALF) / gsize)));
-    return j * GC + i;
-  };
-  const makeCells = (template: Mesh, list: TuftPlacement[], tag: string): { mesh: Mesh; cx: number; cz: number }[] => {
-    const per: TuftPlacement[][] = Array.from({ length: GC * GC }, () => []);
-    for (const p of list) per[gIndex(p.x, p.z)]!.push(p);
+  const makeCells = (template: Mesh, list: TuftPlacement[], tag: string, grid: number): { mesh: Mesh; cx: number; cz: number }[] => {
+    const tplData = VertexData.ExtractFromMesh(template);
+    const csize = (2 * MAP_HALF) / grid;
+    const cellOf = (x: number, z: number): number => {
+      const i = Math.min(grid - 1, Math.max(0, Math.floor((x + MAP_HALF) / csize)));
+      const j = Math.min(grid - 1, Math.max(0, Math.floor((z + MAP_HALF) / csize)));
+      return j * grid + i;
+    };
+    const per: TuftPlacement[][] = Array.from({ length: grid * grid }, () => []);
+    for (const p of list) per[cellOf(p.x, p.z)]!.push(p);
     const out: { mesh: Mesh; cx: number; cz: number }[] = [];
     const m = new Matrix();
     const q = new Quaternion();
@@ -403,8 +406,10 @@ export function buildVegetationView(scene: Scene, layout: VegetationLayout, lod:
     const tv = new Vector3();
     per.forEach((items, idx) => {
       if (!items.length) return;
-      const mesh = template.clone(`PH_${tag}_${idx}`);
-      mesh.setEnabled(true);
+      // 每格一份獨立模型資料（不共用幾何：共用時 thin instance 的實例資料會互相干擾，WebKit 會拒絕繪製）
+      const mesh = new Mesh(`PH_${tag}_${idx}`, scene);
+      tplData.applyToMesh(mesh);
+      mesh.material = template.material;
       const mats = new Float32Array(items.length * 16);
       const cols = new Float32Array(items.length * 4);
       items.forEach((p, i) => {
@@ -425,18 +430,19 @@ export function buildVegetationView(scene: Scene, layout: VegetationLayout, lod:
       mesh.isPickable = false;
       mesh.alwaysSelectAsActiveMesh = false;
       mesh.freezeWorldMatrix();
-      out.push({ mesh, cx: -MAP_HALF + ((idx % GC) + 0.5) * gsize, cz: -MAP_HALF + (Math.floor(idx / GC) + 0.5) * gsize });
+      out.push({ mesh, cx: -MAP_HALF + ((idx % grid) + 0.5) * csize, cz: -MAP_HALF + (Math.floor(idx / grid) + 0.5) * csize });
     });
     return out;
   };
-  const grassCells = makeCells(gTemplate, layout.grass, "grass");
-  const flowerCells = makeCells(fTemplate, layout.flowers, "flowers");
+  // 草：8×8 小格（22.5 公尺）；花：4×4（45 公尺，花比較少，用大格減少繪製次數）
+  const grassCells = makeCells(gTemplate, layout.grass, "grass", GC);
+  const flowerCells = makeCells(fTemplate, layout.flowers, "flowers", CH);
 
   // 距離（以格中心算，加上半個對角線）
-  const HI_R = hq ? 52 : 34;
-  const GRASS_R = hq ? 48 : 30;
-  const FLOWER_R = hq ? 62 : 40;
-  const SHADOW_R = 40;
+  const HI_R = hq ? 40 : 28;
+  const GRASS_R = hq ? 40 : 28;
+  const FLOWER_R = hq ? 46 : 32;
+  const SHADOW_R = 20;
   const halfDiag = (size / 2) * Math.SQRT2;
   const gHalfDiag = (gsize / 2) * Math.SQRT2;
   let enabled = true;
@@ -476,7 +482,7 @@ export function buildVegetationView(scene: Scene, layout: VegetationLayout, lod:
         if (on) gOn++;
       }
       for (const f of flowerCells) {
-        const on = !overview && Math.hypot(f.cx - px, f.cz - pz) - gHalfDiag < FLOWER_R;
+        const on = !overview && Math.hypot(f.cx - px, f.cz - pz) - halfDiag < FLOWER_R;
         if (on !== f.mesh.isEnabled()) f.mesh.setEnabled(on);
         if (on) fOn++;
       }
