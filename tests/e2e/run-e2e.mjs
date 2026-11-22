@@ -2358,7 +2358,7 @@ for (const name of browsers) {
         const x0 = Math.round(i.width * 0.35), y0 = Math.round(i.height * 0.42), w = Math.round(i.width * 0.3), h = Math.round(i.height * 0.16);
         const d = g.getImageData(x0, y0, w, h).data;
         let n = 0;
-        for (let k = 0; k < d.length; k += 4) if (d[k] > 150 && d[k + 1] > 105 && d[k + 2] < 110 && d[k] - d[k + 2] > 80) n++;
+        for (let k = 0; k < d.length; k += 4) if (d[k] > 150 && d[k + 1] > 100 && d[k + 1] < 195 && d[k + 2] < 92 && d[k] - d[k + 2] > 110) n++; // 金色徽記；排除廣場地台的淡黃色（約 242,206,103）
         return n;
       }, buf.toString("base64"));
     const shoot = async (tag, views) => {
@@ -2384,7 +2384,7 @@ for (const name of browsers) {
       check("HQ：男生 C1.0-B2、女生 C1.0-B（未修改）", ri.star === 2 && ri.files.includes("novice_c10b2_male_hq.glb") && ri.files.includes("novice_c10b_female_hq.glb") && ri.files.length === 2, ri);
       const hq = await page.evaluate(() => window.__starwishC10b.info());
       run.results.push({ tag: "C1.0-B2 HQ", triangles: hq.triangles, drawCalls: hq.drawCalls, materials: hq.materials, contextLost: hq.contextLost, chars: hq.chars, loads: hq.loads });
-      check("HQ：男 32、女 31 網格，各約 20 萬三角形、身高 1.0～1.35 m、無骨架", hq.chars.length === 2 && hq.chars[0].meshes === 32 && hq.chars[1].meshes === 31 && hq.chars.every((c) => c.triangles > 195000 && c.triangles < 205000 && c.height > 1 && c.height < 1.35 && !c.skeleton), hq.chars);
+      check("HQ：男女各約 20 萬三角形、身高 1.0～1.35 m、無骨架（P2 合併後各 12 個網格）", hq.chars.length === 2 && hq.chars.every((c) => c.meshes === 12) && hq.chars.every((c) => c.triangles > 195000 && c.triangles < 205000 && c.height > 1 && c.height < 1.35 && !c.skeleton), hq.chars);
       check("HQ：沒有半透明材質、腳底在地台上", hq.transparentMaterials.length === 0 && hq.feet.every((y) => Math.abs(y - hq.baseY) < 0.03), { t: hq.transparentMaterials, feet: hq.feet, base: hq.baseY });
       const gHq = await shoot("hq", ["back", "side", "lowBack", ...EMB]);
       run.results.push({ tag: "HQ 徽記金色像素（畫面中央小框）", gold: gHq });
