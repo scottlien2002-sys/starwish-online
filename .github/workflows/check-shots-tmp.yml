@@ -3,7 +3,7 @@ on:
   push:
     branches: ["check/novice-c10p-p32-shots"]
 permissions:
-  contents: read
+  contents: write
 jobs:
   shots:
     runs-on: ubuntu-latest
@@ -17,7 +17,11 @@ jobs:
       - run: npm run build
       - run: npx playwright install --with-deps webkit
       - run: node tests/e2e/shots-p32.mjs
-      - uses: actions/upload-artifact@v4
-        with:
-          name: shots
-          path: shots/
+      - name: Push screenshots to check-shots-p32 branch (no deploy)
+        run: |
+          cd shots
+          git init -q -b work
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -qm "P3-2 screenshots ${GITHUB_SHA}"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" work:refs/heads/check-shots-p32
