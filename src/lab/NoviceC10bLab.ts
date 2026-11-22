@@ -28,6 +28,8 @@ import {
   C10B_REFERENCE,
   C10B_VIEWS,
   c10bFile,
+  c10bStarLabel,
+  type C10bStar,
   c10bLayout,
   c10bOptionsFromSearch,
   countHitches,
@@ -133,7 +135,7 @@ export interface C10bLabApi {
   benchState(): { state: "off" | "warmup" | "running" | "done"; progress: number; result: BenchResult | null; all: BenchResult[] };
   report(): string;
   moveChar(index: number, dx: number): void;
-  renderInfo(): { p3: boolean; star: boolean; pipeline: boolean; canvasAntialias: boolean; glowEnabled: boolean; toneMappingInMaterials: boolean; shadowSkipped: number; files: string[] };
+  renderInfo(): { p3: boolean; star: C10bStar; pipeline: boolean; canvasAntialias: boolean; glowEnabled: boolean; toneMappingInMaterials: boolean; shadowSkipped: number; files: string[] };
   shadowState(): { renders: number; frozenAt: number | null; refreshRate: number; mapSize: number; contact: boolean; pcf: boolean; filteringQuality: number; casters: number; lastFrameShadowDraws: number; counter: boolean; mode: string };
   /** 效能分析：開關各項目各量一格 Draw Calls（只量測，不改畫面；量完恢復） */
   breakdown(): Promise<Record<string, unknown>>;
@@ -485,7 +487,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
   const title = document.createElement("div");
   title.className = "lab-title";
   title.innerHTML =
-    `<div class="lab-name">男女初心者 C1.0-B <small>實機整合測試　${c10pAbLabel(opts)}${opts.diag.length ? `　診斷：${diagLabel}` : ""}${opts.gpuProbe ? "　GPU 探測" : ""}　${c10pShadowMode(opts)}${opts.p3 ? "　P3-2 優化" : ""}${opts.star ? "　徽記修正" : ""}</small></div>` +
+    `<div class="lab-name">男女初心者 C1.0-B <small>實機整合測試　${c10pAbLabel(opts)}${opts.diag.length ? `　診斷：${diagLabel}` : ""}${opts.gpuProbe ? "　GPU 探測" : ""}　${c10pShadowMode(opts)}${opts.p3 ? "　P3-2 優化" : ""}${opts.star ? `　男 ${c10bStarLabel(opts.star)}` : ""}</small></div>` +
     `<div class="lab-state" data-c10b-state></div>` +
     `<div class="lab-msg">靜態模型（尚未綁骨架、沒有動畫）；燈光、陰影、HDR 與遊戲相同</div>`;
   top.append(title);
@@ -673,7 +675,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
         camera.alpha = c.alpha;
         camera.beta = c.beta;
         camera.radius = opts.count > 2 ? c.radius + Math.sqrt(opts.count) * 0.9 : c.radius;
-        camera.target.set(c.x ?? 0, c.y + BASE_Y, 0);
+        camera.target.set(c.x ?? 0, c.y + BASE_Y, c.z ?? 0);
       }
       // 低角度：暫時隱藏地面與廣場地台（鏡頭在腳底下方）；其他視角恢復
       for (const m of groundMeshes) m.isVisible = !isLowView(v);
@@ -856,7 +858,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
         `螢幕：${screen.width}×${screen.height} @${window.devicePixelRatio}x　畫布 ${engine.getRenderWidth()}×${engine.getRenderHeight()}　解析度倍率 ${i.pixelRatio}　畫質 ${i.quality}　HDR ${i.hdr}　MSAA ${i.msaa}　陰影品質 ${i.shadowQuality}`,
         `診斷開關：${diagLabel}　GPU 探測 ${opts.gpuProbe ? "開" : "關"}　畫布鎖定 ${opts.fixSize ? "開" : "關"}　載入後休息 ${opts.rest} 秒`,
         `陰影模式 ${c10pShadowMode(opts)}｜${shadowConfigText()}｜目前累計更新 ${smRenders} 次`,
-        `渲染組合：${opts.p3 ? "P3-2 優化" : "原始 HQ"}｜HDR 後製管線 ${render.pipeline ? `開（MSAA ${render.pipeline.samples}x）` : "關（色調映射在材質內）"}｜畫布 MSAA ${(engine as unknown as { _gl: WebGLRenderingContext })._gl.getContextAttributes()?.antialias ? "開" : "關"}｜發光層 ${render.glow ? (render.glow.isEnabled ? "開" : "暫停") : "無"}｜男生模型 ${opts.star ? "C1.0-B1（徽記修正）" : "C1.0-B"}`,
+        `渲染組合：${opts.p3 ? "P3-2 優化" : "原始 HQ"}｜HDR 後製管線 ${render.pipeline ? `開（MSAA ${render.pipeline.samples}x）` : "關（色調映射在材質內）"}｜畫布 MSAA ${(engine as unknown as { _gl: WebGLRenderingContext })._gl.getContextAttributes()?.antialias ? "開" : "關"}｜發光層 ${render.glow ? (render.glow.isEnabled ? "開" : "暫停") : "無"}｜男生模型 ${c10bStarLabel(opts.star)}`,
         ...(opts.p3 ? C10P_P3_ITEMS.map((t) => `  · ${t}`) : []),
         `目前：${i.lod === "hq" ? "HQ" : "Lite"}　角色 ${i.chars.length}　三角形 ${i.triangles}　Draw Calls ${i.drawCalls}　材質 ${i.materials}　貼圖 ${i.textures.map((t) => `${t.w}×${t.h}`).join("、")}`,
         `估計 GPU 記憶體（角色幾何＋貼圖）${i.gpuMemMB} MB${i.jsHeapMB != null ? `　JS heap ${i.jsHeapMB} MB` : "　（Safari 不提供 JS 記憶體數據）"}`,

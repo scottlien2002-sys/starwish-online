@@ -2333,6 +2333,98 @@ for (const name of browsers) {
     for (const e of run.errors) console.log(`   ! ${e}`);
   }
 
+  // ---------- C1.0-B2：男生披風徽記縮小版（正式美術基準）獨立測試頁整合（WebKit）----------
+  if (name === "webkit") {
+    const vp = VIEWPORTS[0];
+    const run = { browser: name, viewport: `${vp.name} / C1.0-B2 徽記縮小版整合 ?lab=c10b&star=2&p3=1`, checks: {}, errors: [], screenshots: [], results: [] };
+    const check = (key, ok, detail) => {
+      run.checks[key] = { ok, detail };
+    };
+    const frames = (page, n) => page.evaluate((k) => new Promise((r) => { let i = 0; const f = () => (++i >= k ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); }), n);
+    const EMB = ["emblem", "emblemL45", "emblemR45", "femEmblem", "femEmblemL45", "femEmblemR45"];
+    const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+    const page = await ctx.newPage();
+    page.on("pageerror", (e) => run.errors.push(`pageerror: ${e.message}`));
+    page.on("console", (m) => m.type() === "error" && run.errors.push(`console: ${m.text()}`));
+    // 畫面中央小框（寬 30%、高 16%）內的金色像素數：鏡頭對準徽記、男女同距離 → 徽記大小的粗略比較（框內不含披風下緣的金色滾邊）
+    const goldPx = (buf) =>
+      page.evaluate(async (b64) => {
+        const i = await new Promise((r) => { const im = new Image(); im.onload = () => r(im); im.src = "data:image/png;base64," + b64; });
+        const c = document.createElement("canvas");
+        c.width = i.width;
+        c.height = i.height;
+        const g = c.getContext("2d");
+        g.drawImage(i, 0, 0);
+        const x0 = Math.round(i.width * 0.35), y0 = Math.round(i.height * 0.42), w = Math.round(i.width * 0.3), h = Math.round(i.height * 0.16);
+        const d = g.getImageData(x0, y0, w, h).data;
+        let n = 0;
+        for (let k = 0; k < d.length; k += 4) if (d[k] > 150 && d[k + 1] > 105 && d[k + 2] < 110 && d[k] - d[k + 2] > 80) n++;
+        return n;
+      }, buf.toString("base64"));
+    const shoot = async (tag, views) => {
+      const out = {};
+      await page.evaluate(() => document.querySelectorAll(".v3-top,.lab-panel,.perf-panel,.lab-bench-result").forEach((e) => (e.style.visibility = "hidden")));
+      for (const v of views) {
+        await page.evaluate((x) => window.__starwishC10b.view(x), v);
+        await frames(page, 3);
+        const f = `${outDir}${name}_c10b2_${tag}_${v}.png`;
+        const buf = await page.screenshot({ path: f });
+        run.screenshots.push(f.split("/test-results/")[1]);
+        if (EMB.includes(v)) out[v] = await goldPx(buf);
+      }
+      await page.evaluate(() => document.querySelectorAll(".v3-top,.lab-panel,.perf-panel,.lab-bench-result").forEach((e) => (e.style.visibility = "")));
+      return out;
+    };
+    const ratioOk = (g) => g.emblem > 0 && g.femEmblem > 0 && g.emblem / g.femEmblem > 0.6 && g.emblem / g.femEmblem < 1.6;
+    try {
+      await page.goto(server.url + "/?lab=c10b&quality=high&p1=1&p2=1&star=2&p3=1", { waitUntil: "load" });
+      await page.waitForFunction(() => window.__starwishC10b?.ready === true, null, { timeout: 120000 });
+      await frames(page, 4);
+      const ri = await page.evaluate(() => window.__starwishC10b.renderInfo());
+      check("HQ：男生 C1.0-B2、女生 C1.0-B（未修改）", ri.star === 2 && ri.files.includes("novice_c10b2_male_hq.glb") && ri.files.includes("novice_c10b_female_hq.glb") && ri.files.length === 2, ri);
+      const hq = await page.evaluate(() => window.__starwishC10b.info());
+      run.results.push({ tag: "C1.0-B2 HQ", triangles: hq.triangles, drawCalls: hq.drawCalls, materials: hq.materials, contextLost: hq.contextLost, chars: hq.chars, loads: hq.loads });
+      check("HQ：男 32、女 31 網格，各約 20 萬三角形、身高 1.0～1.35 m、無骨架", hq.chars.length === 2 && hq.chars[0].meshes === 32 && hq.chars[1].meshes === 31 && hq.chars.every((c) => c.triangles > 195000 && c.triangles < 205000 && c.height > 1 && c.height < 1.35 && !c.skeleton), hq.chars);
+      check("HQ：沒有半透明材質、腳底在地台上", hq.transparentMaterials.length === 0 && hq.feet.every((y) => Math.abs(y - hq.baseY) < 0.03), { t: hq.transparentMaterials, feet: hq.feet, base: hq.baseY });
+      const gHq = await shoot("hq", ["back", "side", "lowBack", ...EMB]);
+      run.results.push({ tag: "HQ 徽記金色像素（畫面中央小框）", gold: gHq });
+      check("HQ：男生徽記與女生徽記大小相近（金色像素比 0.6～1.6）", ratioOk(gHq), gHq);
+      check("HQ：左右 45° 都看得到男生徽記", gHq.emblemL45 > gHq.emblem * 0.3 && gHq.emblemR45 > gHq.emblem * 0.3, gHq);
+      const bdHq = await page.evaluate(() => window.__starwishC10b.breakdown());
+      run.results.push({ tag: "C1.0-B2 HQ breakdown", breakdown: bdHq });
+
+      await page.evaluate(() => window.__starwishC10b.setLod("lite"));
+      await page.waitForFunction(() => window.__starwishC10b.lod === "lite" && !window.__starwishC10b.loading, null, { timeout: 120000 });
+      await frames(page, 4);
+      const rl = await page.evaluate(() => window.__starwishC10b.renderInfo());
+      check("Lite：男生 C1.0-B2 Lite、女生 C1.0-B Lite", rl.files.includes("novice_c10b2_male_lite.glb") && rl.files.includes("novice_c10b_female_lite.glb") && rl.files.length === 2, rl);
+      const lite = await page.evaluate(() => window.__starwishC10b.info());
+      run.results.push({ tag: "C1.0-B2 Lite", triangles: lite.triangles, drawCalls: lite.drawCalls, materials: lite.materials, contextLost: lite.contextLost, chars: lite.chars });
+      check("Lite：各約 4 萬三角形、身高與 HQ 相同（±1 cm）", lite.chars.length === 2 && lite.chars.every((c, i) => c.triangles > 38000 && c.triangles < 42000 && Math.abs(c.height - hq.chars[i].height) < 0.01), lite.chars);
+      const gLite = await shoot("lite", ["back", ...EMB]);
+      run.results.push({ tag: "Lite 徽記金色像素（畫面中央小框）", gold: gLite });
+      check("Lite：男生徽記與女生徽記大小相近、左右 45° 看得到", ratioOk(gLite) && gLite.emblemL45 > gLite.emblem * 0.3 && gLite.emblemR45 > gLite.emblem * 0.3, gLite);
+      const bdLite = await page.evaluate(() => window.__starwishC10b.breakdown());
+      run.results.push({ tag: "C1.0-B2 Lite breakdown", breakdown: bdLite });
+
+      await page.evaluate(() => window.__starwishC10b.setLod("hq"));
+      await page.waitForFunction(() => window.__starwishC10b.lod === "hq" && !window.__starwishC10b.loading, null, { timeout: 120000 });
+      await frames(page, 4);
+      const end = await page.evaluate(() => window.__starwishC10b.info());
+      check("HQ → Lite → HQ 共 3 次載入、沒有 WebGL Context Lost", end.loads.length === 3 && end.contextLost === 0, { loads: end.loads.length, lost: end.contextLost });
+    } catch (e) {
+      run.errors.push(`exception: ${e.message}`);
+    }
+    await ctx.close();
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 9;
+    if (!run.ok) failures++;
+    report.runs.push(run);
+    console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
+    for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}${v.ok ? "" : "  " + JSON.stringify(v.detail).slice(0, 900)}`);
+    for (const r of run.results) console.log(`   · ${r.tag}: ${JSON.stringify(r)}`.slice(0, 3000));
+    for (const e of run.errors) console.log(`   ! ${e}`);
+  }
+
   await browser.close();
 }
 
