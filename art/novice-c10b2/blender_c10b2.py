@@ -171,13 +171,13 @@ def setup_scene():
     return co
 
 
-def shoot(cam, yaw, zc, scale, res, path, elev=0.0):
+def shoot(cam, yaw, zc, scale, res, path, elev=0.0, at=(0.0, 0.0)):
     sc = bpy.context.scene
     a = math.radians(yaw)
     e = math.radians(elev)
     sc.render.resolution_x, sc.render.resolution_y = res
     cam.data.ortho_scale = scale
-    cam.location = Vector((math.sin(a) * 6 * math.cos(e), -math.cos(a) * 6 * math.cos(e), zc + 6 * math.sin(e)))
+    cam.location = Vector((at[0] + math.sin(a) * 6 * math.cos(e), at[1] - math.cos(a) * 6 * math.cos(e), zc + 6 * math.sin(e)))
     cam.rotation_euler = (math.radians(90 - elev), 0, a)   # elev < 0：鏡頭在下方往上看
     plane = bpy.data.objects.get("Plane")
     if plane is not None:
@@ -208,8 +208,9 @@ def main():
     report = {}
     def emblem_shots(cam, pre, g):
         # 披風徽記特寫：背面、左後、右後 45 度、側面（z 0.33，範圍 0.26 公尺）
+        # C1.0-B2：鏡頭對準徽記所在位置（x 0、y 0.2；背面在 +y），45 度時徽記才會在畫面中央、不被畫面邊緣切掉
         for v, yaw in (("back", 180), ("back45", 135), ("backr45", -135), ("side", 90)):
-            shoot(cam, yaw, 0.33, 0.26, (1100, 1100), os.path.join(OUT, f"{pre}_{g}_emblem_{v}.png"))
+            shoot(cam, yaw, 0.33, 0.26, (1100, 1100), os.path.join(OUT, f"{pre}_{g}_emblem_{v}.png"), at=(0.0, 0.2))
 
     if PARTS_A:   # 修正前：C1.0-B1 男生，同場景、同鏡頭
         bpy.ops.wm.read_factory_settings(use_empty=True)
