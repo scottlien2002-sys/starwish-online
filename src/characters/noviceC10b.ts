@@ -41,6 +41,8 @@ export interface C10bOptions {
   warmup: number;
   /** 視角 */
   view: Exclude<C10bView, "free">;
+  /** C1.0-P 第一階段 P1：發光層只處理標記為發光的物件（?p1=1） */
+  p1: boolean;
 }
 
 /** ?lab=c10b&lod=lite&count=10&bench=30&view=low */
@@ -57,6 +59,7 @@ export function c10bOptionsFromSearch(search: string): C10bOptions {
     bench: num("bench", 0, 0, 600),
     warmup: num("warmup", 2, 0, 10),
     view: (v in C10B_VIEWS ? v : "front") as Exclude<C10bView, "free">,
+    p1: p.get("p1") === "1",
   };
 }
 
@@ -102,3 +105,13 @@ export function isLowView(v: C10bView): boolean {
 
 /** 出生廣場的星形地台頂面比地形高 0.13 公尺（Meadow：廣場 0.04＋0.06、星形 +0.02＋0.07） */
 export const PLAZA_TOP = 0.13;
+
+/** A/B 組名（C1.0-P：每次只改一項） */
+export function c10pAbLabel(o: Pick<C10bOptions, "p1">): string {
+  return o.p1 ? "A1（P1 發光層只處理發光物件）" : "A0（原始 C1.0-B）";
+}
+
+/** 物件是否標記為要發光（P1：只有 metadata.glow === true 的物件進發光層） */
+export function wantsGlow(metadata: unknown): boolean {
+  return !!metadata && typeof metadata === "object" && (metadata as { glow?: unknown }).glow === true;
+}

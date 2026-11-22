@@ -3,6 +3,7 @@ import {
   type AbstractMesh,
   ArcRotateCamera,
   type AssetContainer,
+  type Mesh,
   type BaseTexture,
   Color3,
   DirectionalLight,
@@ -30,7 +31,9 @@ import {
   c10bLayout,
   c10bOptionsFromSearch,
   countHitches,
+  c10pAbLabel,
   isLowView,
+  wantsGlow,
   PLAZA_TOP,
   windowAverages,
   type C10bGender,
@@ -172,6 +175,19 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
   camera.attachControl(canvas, true);
   scene.activeCamera = camera;
   const render = setupRendering(scene, camera, quality);
+  // C1.0-P P1（?p1=1）：發光層只處理 metadata.glow === true 的物件（與正式遊戲只加入星星、光環的做法相同）。
+  // 原始（A0）測試頁沒有指定任何發光物件 → Babylon 發光層會把天空、地圖、角色全部重畫一次。
+  let glowExcluded = 0;
+  if (opts.p1 && render.glow) {
+    const glow = render.glow;
+    const exclude = (m: AbstractMesh): void => {
+      if (wantsGlow(m.metadata)) return;
+      glow.addExcludedMesh(m as Mesh);
+      glowExcluded++;
+    };
+    for (const m of scene.meshes) exclude(m);
+    scene.onNewMeshAddedObservable.add(exclude);
+  }
   const perf = new PerfOverlay(engine, scene, quality, hudRoot);
   perf.lockResolution(Math.min(window.devicePixelRatio || 1, quality.maxPixelRatio));
 
@@ -257,7 +273,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
   const title = document.createElement("div");
   title.className = "lab-title";
   title.innerHTML =
-    `<div class="lab-name">男女初心者 C1.0-B <small>實機整合測試</small></div>` +
+    `<div class="lab-name">男女初心者 C1.0-B <small>實機整合測試　${c10pAbLabel(opts)}</small></div>` +
     `<div class="lab-state" data-c10b-state></div>` +
     `<div class="lab-msg">靜態模型（尚未綁骨架、沒有動畫）；燈光、陰影、HDR 與遊戲相同</div>`;
   top.append(title);
@@ -278,6 +294,15 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
     const b = addBtn(views, v === "free" ? "旋轉" : C10B_VIEWS[v as Exclude<C10bView, "free">].label, "lab-view-btn", () => api.view(v));
     b.dataset.view = v;
     viewBtns.push(b);
+  }
+  for (const [label, on] of [["A0 原始", false], ["A1 P1", true]] as const) {
+    const b = addBtn(views, label, "lab-view-btn", () => {
+      const u = new URL(location.href);
+      if (on) u.searchParams.set("p1", "1");
+      else u.searchParams.delete("p1");
+      location.href = u.toString();
+    });
+    b.classList.toggle("active", opts.p1 === on);
   }
   top.append(views);
   hudRoot.append(top);
@@ -507,7 +532,8 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
         msaa: render.pipeline?.samples ?? 0,
         fxaa: render.pipeline?.fxaaEnabled ?? false,
         hdr: !!render.pipeline,
-        glow: render.glow ? { enabled: true, rendersAllMeshes: glowAll, ratio: quality.bloom.textureRatio, kernel: quality.bloom.kernel } : null,
+        ab: c10pAbLabel(opts),
+        glow: render.glow ? { enabled: true, rendersAllMeshes: glowAll && glowExcluded === 0, excluded: glowExcluded, ratio: quality.bloom.textureRatio, kernel: quality.bloom.kernel } : null,
         shadow: { mapSize: quality.shadows.mapSize, filter: quality.shadows.filter, casters: smList.length, characterCasters: smList.filter((m) => charSet.has(m as AbstractMesh)).length },
         meshes: { character: charMeshes.length, activeTotal: scene.getActiveMeshes().length, sceneTotal: scene.meshes.length },
         materials: { character: new Set(charMeshes.map((m) => m.material)).size, scene: scene.materials.length },
@@ -526,7 +552,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
       const i = api.info();
       const ua = navigator.userAgent;
       const lines = [
-        `星願物語 C1.0-B 實機測試報告　${new Date().toLocaleString()}`,
+        `星願物語 C1.0-B 實機測試報告　${c10pAbLabel(opts)}　${new Date().toLocaleString()}`,
         `裝置：${ua}`,
         `螢幕：${screen.width}×${screen.height} @${window.devicePixelRatio}x　畫布 ${engine.getRenderWidth()}×${engine.getRenderHeight()}　解析度倍率 ${i.pixelRatio}　畫質 ${i.quality}　HDR ${i.hdr}　MSAA ${i.msaa}　陰影品質 ${i.shadowQuality}`,
         `目前：${i.lod === "hq" ? "HQ" : "Lite"}　角色 ${i.chars.length}　三角形 ${i.triangles}　Draw Calls ${i.drawCalls}　材質 ${i.materials}　貼圖 ${i.textures.map((t) => `${t.w}×${t.h}`).join("、")}`,

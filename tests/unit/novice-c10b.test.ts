@@ -1,12 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
-import { C10B_REFERENCE, C10B_VIEWS, isLowView, c10bFile, c10bLayout, c10bOptionsFromSearch, countHitches, windowAverages } from "../../src/characters/noviceC10b.ts";
+import { C10B_REFERENCE, C10B_VIEWS, c10pAbLabel, isLowView, wantsGlow, c10bFile, c10bLayout, c10bOptionsFromSearch, countHitches, windowAverages } from "../../src/characters/noviceC10b.ts";
 
 test("C1.0-B：檔名與網址參數", () => {
   assert.equal(c10bFile("female", "lite"), "novice_c10b_female_lite.glb");
   const d = c10bOptionsFromSearch("?lab=c10b");
-  assert.deepEqual(d, { lod: "hq", count: 2, bench: 0, warmup: 2, view: "front" });
+  assert.deepEqual(d, { lod: "hq", count: 2, bench: 0, warmup: 2, view: "front", p1: false });
+  assert.equal(c10bOptionsFromSearch("?lab=c10b&p1=1").p1, true);
   const o = c10bOptionsFromSearch("?lab=c10b&lod=lite&count=99&bench=30&view=low");
   assert.equal(o.lod, "lite");
   assert.equal(o.count, 20);
@@ -59,3 +60,11 @@ for (const g of ["male", "female"] as const)
       assert.ok(!j.skins?.length && !j.animations?.length);
     });
   }
+
+test("C1.0-P P1：A/B 組名與發光標記", () => {
+  assert.match(c10pAbLabel({ p1: false }), /^A0/);
+  assert.match(c10pAbLabel({ p1: true }), /^A1/);
+  assert.equal(wantsGlow(undefined), false);
+  assert.equal(wantsGlow({ glow: true }), true);
+  assert.equal(wantsGlow({ glow: 1 }), false);
+});

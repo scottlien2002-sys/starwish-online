@@ -2002,6 +2002,86 @@ for (const name of browsers) {
     for (const e of run.errors) console.log(`   ! ${e}`);
   }
 
+  // ---------- C1.0-P 第一階段 P1：發光層 A/B（A0 原始 vs A1 只處理發光物件；高畫質、同鏡頭）----------
+  {
+    const vp = VIEWPORTS[0];
+    const run = { browser: name, viewport: `${vp.name} / C1.0-P P1 發光層 A/B ?lab=c10b&p1=1`, checks: {}, errors: [], screenshots: [], results: [] };
+    const check = (key, ok, detail) => {
+      run.checks[key] = { ok, detail };
+    };
+    const settle = (page) => page.evaluate(() => new Promise((r) => { let n = 0; const f = () => (++n >= 3 ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); }));
+    const VIEWS = ["front", "left45", "back", "low", "head", "skirt"];
+    const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+    const shots = {};
+    const bds = {};
+    try {
+      for (const [ab, q] of [["A0", ""], ["A0b", ""], ["A1", "&p1=1"]]) {
+        const page = await ctx.newPage();
+        page.on("pageerror", (e) => run.errors.push(`${ab} pageerror: ${e.message}`));
+        await page.goto(server.url + `/?lab=c10b&quality=high${q}`, { waitUntil: "load" });
+        await page.waitForFunction(() => window.__starwishC10b?.ready === true, null, { timeout: 120000 });
+        bds[ab] = { hq: await page.evaluate(() => window.__starwishC10b.breakdown()) };
+        shots[ab] = {};
+        for (const v of VIEWS) {
+          await page.evaluate((x) => window.__starwishC10b.view(x), v);
+          await settle(page);
+          // 截圖前隱藏介面（A0／A1 標題文字不同，避免算進畫面差異）
+          await page.evaluate(() => document.querySelectorAll(".v3-top,.lab-panel,.perf-panel,.lab-bench-result").forEach((e) => (e.style.visibility = "hidden")));
+          const f = `${outDir}${name}_c10p_${ab}_hq_${v}.png`;
+          shots[ab][v] = await page.screenshot({ path: ab === "A0b" ? undefined : f });
+          if (ab !== "A0b") run.screenshots.push(f.split("/test-results/")[1]);
+        }
+        await page.evaluate(() => window.__starwishC10b.setLod("lite"));
+        await page.waitForFunction(() => window.__starwishC10b.lod === "lite" && !window.__starwishC10b.loading, null, { timeout: 120000 });
+        bds[ab].lite = await page.evaluate(() => window.__starwishC10b.breakdown());
+        await page.close();
+      }
+      // 逐像素差異（在瀏覽器裡解 PNG）：A0 vs A0b（同設定重拍 = 雜訊底線）、A0 vs A1
+      const dp = await ctx.newPage();
+      const diff = (a, b) =>
+        dp.evaluate(async ([x, y]) => {
+          const load = (b64) => new Promise((r) => { const i = new Image(); i.onload = () => r(i); i.src = "data:image/png;base64," + b64; });
+          const [ia, ib] = await Promise.all([load(x), load(y)]);
+          const c = document.createElement("canvas");
+          c.width = ia.width;
+          c.height = ia.height;
+          const g = c.getContext("2d");
+          g.drawImage(ia, 0, 0);
+          const da = g.getImageData(0, 0, c.width, c.height).data;
+          g.drawImage(ib, 0, 0);
+          const db = g.getImageData(0, 0, c.width, c.height).data;
+          let changed = 0, sum = 0, max = 0;
+          for (let k = 0; k < da.length; k += 4) {
+            const d = Math.max(Math.abs(da[k] - db[k]), Math.abs(da[k + 1] - db[k + 1]), Math.abs(da[k + 2] - db[k + 2]));
+            sum += d;
+            if (d > max) max = d;
+            if (d > 8) changed++;
+          }
+          const n = da.length / 4;
+          return { changedPct: +((changed / n) * 100).toFixed(3), meanDiff: +(sum / n).toFixed(3), maxDiff: max };
+        }, [a.toString("base64"), b.toString("base64")]);
+      const diffs = {};
+      for (const v of VIEWS) diffs[v] = { noise: await diff(shots.A0[v], shots.A0b[v]), p1: await diff(shots.A0[v], shots.A1[v]) };
+      await dp.close();
+      run.results.push({ tag: "c10p P1", breakdown: bds, diffs });
+      check("A0 與重拍 A0b 的 Draw Calls 相同（量測可重現）", bds.A0.hq.draws.all === bds.A0b.hq.draws.all, [bds.A0.hq.draws, bds.A0b.hq.draws]);
+      check("P1：發光層排除角色（關掉發光層時角色 Draw Calls 不再減少）", bds.A1.hq.share.glowLayer < bds.A0.hq.share.glowLayer && bds.A1.hq.glow.excluded > 0, [bds.A0.hq.share, bds.A1.hq.share]);
+      check("P1：HQ 總 Draw Calls 下降", bds.A1.hq.draws.all < bds.A0.hq.draws.all, [bds.A0.hq.draws.all, bds.A1.hq.draws.all]);
+      check("P1：Lite 總 Draw Calls 下降", bds.A1.lite.draws.all < bds.A0.lite.draws.all, [bds.A0.lite.draws.all, bds.A1.lite.draws.all]);
+      check("P1：每格處理的三角形下降（HQ）", bds.A1.hq.tris.mainPass < bds.A0.hq.tris.mainPass, [bds.A0.hq.tris, bds.A1.hq.tris]);
+    } catch (e) {
+      run.errors.push(`exception: ${e.message}`);
+    }
+    await ctx.close();
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 5;
+    if (!run.ok) failures++;
+    report.runs.push(run);
+    console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
+    for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}${v.ok ? "" : "  " + JSON.stringify(v.detail).slice(0, 900)}`);
+    for (const r of run.results) console.log(`   · ${r.tag}: ${JSON.stringify(r)}`);
+    for (const e of run.errors) console.log(`   ! ${e}`);
+  }
+
   await browser.close();
 }
 
