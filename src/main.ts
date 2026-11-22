@@ -37,7 +37,20 @@ function main(): void {
     return;
   }
   const lab = new URLSearchParams(location.search).get("lab");
+  const map = new URLSearchParams(location.search).get("map");
   try {
+    // ?map=starsprout：Stage 6 星芽原野（第一階段：地形與主要路線，沒有怪物）；&lod=lite、&autoplay=route&loops=3
+    if (map === "starsprout") {
+      document.body.classList.add("map-mode");
+      void import("./maps/starsprout/StarsproutPage.ts")
+        .then((m) => m.startStarsproutMap(canvas, hudRoot))
+        .then(() => hideBoot())
+        .catch((err: unknown) => {
+          console.error(err);
+          fail(`星芽原野載入失敗：${err instanceof Error ? err.message : String(err)}`);
+        });
+      return;
+    }
     // 怪物測試頁（只在需要時載入）：?lab=bobo 星露啵啵、?lab=dummy 測試方塊、?lab=field 多怪物 AI
     // ?lab=bobo3：星露啵啵 V3 模型預覽（只看外觀，不接戰鬥）
     // ?lab=bobo31：星露啵啵 V3.1 美術精修預覽（V3 保留不變，可在頁面上切換對照）

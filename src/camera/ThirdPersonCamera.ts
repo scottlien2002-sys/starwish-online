@@ -11,8 +11,11 @@ export class ThirdPersonCamera {
   readonly camera: ArcRotateCamera;
   private readonly smoothTarget = new Vector3();
   private desiredRadius: number = TUNING.camera.distance;
+  /** 地面高度（防止鏡頭鑽進地面）；預設為新手草原，其他地圖傳入自己的高度函式 */
+  private readonly groundHeight: (x: number, z: number) => number;
 
-  constructor(scene: Scene, initialTarget: Vector3) {
+  constructor(scene: Scene, initialTarget: Vector3, groundHeight: (x: number, z: number) => number = heightAt) {
+    this.groundHeight = groundHeight;
     const c = TUNING.camera;
     this.smoothTarget.copyFrom(initialTarget).addInPlaceFromFloats(0, c.targetHeight, 0);
     this.camera = new ArcRotateCamera("mainCamera", -Math.PI / 2, c.defaultBeta, c.distance, this.smoothTarget.clone(), scene);
@@ -56,7 +59,7 @@ export class ThirdPersonCamera {
     // 不讓攝影機鑽進地面：必要時抬高俯角
     const camX = cam.target.x + cam.radius * Math.cos(cam.alpha) * Math.sin(cam.beta);
     const camZ = cam.target.z + cam.radius * Math.sin(cam.alpha) * Math.sin(cam.beta);
-    const minY = heightAt(camX, camZ) + 0.6;
+    const minY = this.groundHeight(camX, camZ) + 0.6;
     const camY = cam.target.y + cam.radius * Math.cos(cam.beta);
     if (camY < minY) {
       const cosB = clamp((minY - cam.target.y) / cam.radius, -1, 1);

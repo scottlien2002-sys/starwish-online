@@ -39,6 +39,11 @@ jobs:
       - name: Install test browsers
         run: npx playwright install --with-deps chromium webkit
 
+      - name: Stage 6 map E2E (Chromium + WebKit)
+        id: mape2e
+        continue-on-error: true
+        run: node tests/e2e/run-map-e2e.mjs dist chromium,webkit
+
       - name: HUD layout test (WebKit)
         id: hud
         continue-on-error: true
@@ -54,7 +59,7 @@ jobs:
           mkdir -p dist/ci-report
           cp -r test-results/. dist/ci-report/ 2>/dev/null || true
           cat > dist/ci-report/summary.json <<EOF
-          {"commit":"${GITHUB_SHA}","runId":"${GITHUB_RUN_ID}","hud":"${{ steps.hud.outcome }}","e2e":"${{ steps.e2e.outcome }}","builtAt":"$(date -u +%FT%TZ)"}
+          {"commit":"${GITHUB_SHA}","runId":"${GITHUB_RUN_ID}","hud":"${{ steps.hud.outcome }}","e2e":"${{ steps.e2e.outcome }}","mapE2e":"${{ steps.mape2e.outcome }}","builtAt":"$(date -u +%FT%TZ)"}
           EOF
           cp package-lock.json dist/ci-report/package-lock.json
 
@@ -102,7 +107,7 @@ jobs:
           exit 1
 
       - name: Fail job if browser tests failed
-        if: steps.hud.outcome == 'failure' || steps.e2e.outcome == 'failure'
+        if: steps.hud.outcome == 'failure' || steps.e2e.outcome == 'failure' || steps.mape2e.outcome == 'failure'
         run: |
           echo "瀏覽器測試未通過，詳見網站 ci-report/ 或上方記錄"
           exit 1
