@@ -47,6 +47,7 @@ for (const name of browsers) {
       check("啟動", ready, bootError ?? "ok");
       if (!ready) throw new Error("地圖未啟動");
       await page.waitForTimeout(1200);
+      await settle(page, 4);
       const info = await page.evaluate(() => window.__starwishMap.info());
       run.results.info = info;
       check("地形 16 塊", info.chunks === 16, info.chunks);

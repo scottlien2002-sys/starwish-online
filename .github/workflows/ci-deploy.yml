@@ -44,6 +44,40 @@ jobs:
         continue-on-error: true
         run: node tests/e2e/run-map-e2e.mjs dist chromium,webkit
 
+      - name: Attach map test report (early, for the preview)
+        if: startsWith(github.ref, 'refs/heads/feature/render')
+        run: |
+          mkdir -p dist/ci-report
+          cp -r test-results/. dist/ci-report/ 2>/dev/null || true
+          echo "{\"commit\":\"${GITHUB_SHA}\",\"runId\":\"${GITHUB_RUN_ID}\",\"mapE2e\":\"${{ steps.mape2e.outcome }}\",\"note\":\"preview deployed before the long legacy E2E; see the Actions log for its result\"}" > dist/ci-report/summary.json
+
+      - name: Deploy preview (own folder only)
+        # feature/render-* 分支各自部署到獨立子路徑，只替換自己的資料夾，不影響正式版與其他預覽版
+        #   feature/render-upgrade → /preview/          （第一階段）
+        #   feature/render-<名稱>  → /preview-<名稱>/    （例：render-bobo-v2 → /preview-bobo-v2/）
+        if: startsWith(github.ref, 'refs/heads/feature/render')
+        run: |
+          if [ "${GITHUB_REF_NAME}" = "feature/render-upgrade" ]; then DIR=preview; else DIR="preview-${GITHUB_REF_NAME#feature/render-}"; fi
+          case "$DIR" in preview|preview-[a-z0-9-]*) ;; *) echo "invalid preview dir: $DIR"; exit 1;; esac
+          echo "預覽路徑：/$DIR/"
+          for attempt in 1 2 3 4 5; do
+            rm -rf /tmp/pages
+            git clone -q --depth 1 -b gh-pages "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" /tmp/pages
+            rm -rf "/tmp/pages/$DIR"
+            mkdir -p "/tmp/pages/$DIR"
+            cp -r dist/. "/tmp/pages/$DIR/"
+            echo "{\"branch\":\"${GITHUB_REF_NAME}\",\"commit\":\"${GITHUB_SHA}\",\"path\":\"/$DIR/\",\"builtAt\":\"$(date -u +%FT%TZ)\"}" > "/tmp/pages/$DIR/preview.json"
+            cd /tmp/pages
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -qm "Preview /$DIR/ ${GITHUB_REF_NAME} ${GITHUB_SHA::7}"
+            if git push -q origin gh-pages; then echo "deployed /$DIR/"; exit 0; fi
+            cd - >/dev/null
+            echo "push rejected (another deploy in progress), retry $attempt"; sleep $((attempt * 5))
+          done
+          exit 1
+
       - name: HUD layout test (WebKit)
         id: hud
         continue-on-error: true
@@ -78,33 +112,6 @@ jobs:
           git add -A
           git commit -qm "Deploy ${GITHUB_SHA::7}"
           git push -qf "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh-pages
-
-      - name: Deploy preview (own folder only)
-        # feature/render-* 分支各自部署到獨立子路徑，只替換自己的資料夾，不影響正式版與其他預覽版
-        #   feature/render-upgrade → /preview/          （第一階段）
-        #   feature/render-<名稱>  → /preview-<名稱>/    （例：render-bobo-v2 → /preview-bobo-v2/）
-        if: startsWith(github.ref, 'refs/heads/feature/render')
-        run: |
-          if [ "${GITHUB_REF_NAME}" = "feature/render-upgrade" ]; then DIR=preview; else DIR="preview-${GITHUB_REF_NAME#feature/render-}"; fi
-          case "$DIR" in preview|preview-[a-z0-9-]*) ;; *) echo "invalid preview dir: $DIR"; exit 1;; esac
-          echo "預覽路徑：/$DIR/"
-          for attempt in 1 2 3 4 5; do
-            rm -rf /tmp/pages
-            git clone -q --depth 1 -b gh-pages "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" /tmp/pages
-            rm -rf "/tmp/pages/$DIR"
-            mkdir -p "/tmp/pages/$DIR"
-            cp -r dist/. "/tmp/pages/$DIR/"
-            echo "{\"branch\":\"${GITHUB_REF_NAME}\",\"commit\":\"${GITHUB_SHA}\",\"path\":\"/$DIR/\",\"builtAt\":\"$(date -u +%FT%TZ)\"}" > "/tmp/pages/$DIR/preview.json"
-            cd /tmp/pages
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add -A
-            git commit -qm "Preview /$DIR/ ${GITHUB_REF_NAME} ${GITHUB_SHA::7}"
-            if git push -q origin gh-pages; then echo "deployed /$DIR/"; exit 0; fi
-            cd - >/dev/null
-            echo "push rejected (another deploy in progress), retry $attempt"; sleep $((attempt * 5))
-          done
-          exit 1
 
       - name: Fail job if browser tests failed
         if: steps.hud.outcome == 'failure' || steps.e2e.outcome == 'failure' || steps.mape2e.outcome == 'failure'

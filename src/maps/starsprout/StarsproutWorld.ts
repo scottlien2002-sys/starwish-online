@@ -39,7 +39,8 @@ export interface StarsproutWorld {
   /** 重新上色（可走範圍除錯顯示） */
   setNav(on: boolean): void;
   readonly navOn: boolean;
-  update(dt: number): void;
+  /** px/pz：玩家位置（太靠近玩家的文字標籤暫時隱藏，避免擋住角色） */
+  update(dt: number, px: number, pz: number): void;
 }
 
 const CHUNKS = 4;
@@ -206,8 +207,14 @@ export function buildStarsproutWorld(
       navOn = on;
       paintGround(on);
     },
-    update(dt: number) {
+    update(dt: number, px: number, pz: number) {
       time += dt;
+      if (labelsOn) {
+        for (const sp of labels.sprites) {
+          const near = Math.hypot(sp.position.x - px, sp.position.z - pz) < (sp.width > 5 ? 11 : 4);
+          sp.isVisible = !near;
+        }
+      }
       // 水流：貼圖沿流向捲動
       water.tex.vOffset = -time * 0.35;
       // 傳送門光芯緩慢呼吸

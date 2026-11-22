@@ -259,7 +259,7 @@ class StarsproutPage {
       }
     }
     this.sun.position.copyFrom(this.pos).subtractInPlace(this.sun.direction.scale(45));
-    this.world.update(dt);
+    this.world.update(dt, this.overview ? 1e6 : this.pos.x, this.overview ? 1e6 : this.pos.z);
     this.checkPortal();
     this.scene.render();
     this.perf.update(dt);
