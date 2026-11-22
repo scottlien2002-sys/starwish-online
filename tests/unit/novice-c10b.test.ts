@@ -1,12 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
-import { C10B_REFERENCE, C10B_VIEWS, c10pAbLabel, c10pMergeGroups, c10pSlot, frameHistogram, windowHistograms, isLowView, wantsGlow, c10bFile, c10bLayout, c10bOptionsFromSearch, countHitches, windowAverages } from "../../src/characters/noviceC10b.ts";
+import { C10B_REFERENCE, C10B_VIEWS, c10pAbLabel, c10pMergeGroups, c10pSlot, frameHistogram, frameTimeline, windowHistograms, isLowView, wantsGlow, c10bFile, c10bLayout, c10bOptionsFromSearch, countHitches, windowAverages } from "../../src/characters/noviceC10b.ts";
 
 test("C1.0-B：檔名與網址參數", () => {
   assert.equal(c10bFile("female", "lite"), "novice_c10b_female_lite.glb");
   const d = c10bOptionsFromSearch("?lab=c10b");
-  assert.deepEqual(d, { lod: "hq", count: 2, bench: 0, warmup: 2, view: "front", p1: false, p2: false });
+  assert.deepEqual(d, { lod: "hq", count: 2, bench: 0, warmup: 2, view: "front", p1: false, p2: false, diag: [], gpuProbe: false });
+  assert.deepEqual(c10bOptionsFromSearch("?diag=noshadow,bogus,nopost&gpu=1").diag, ["noshadow", "nopost"]);
   assert.equal(c10bOptionsFromSearch("?lab=c10b&p1=1").p1, true);
   const o = c10bOptionsFromSearch("?lab=c10b&lod=lite&count=99&bench=30&view=low");
   assert.equal(o.lod, "lite");
@@ -97,4 +98,16 @@ test("C1.0-P：影格時間分布與分段", () => {
   const w = windowHistograms(Array.from({ length: 120 }, () => 1 / 60), 1);
   assert.equal(w.length, 2);
   assert.equal(w[0]!.le20, 60);
+});
+
+test("C1.0-P P3 診斷：時間軸分段（FPS、CPU、GPU 探測、掉幀分布）", () => {
+  const smp = Array.from({ length: 600 }, (_, i) => ({ dt: i < 300 ? 1 / 60 : 1 / 30, cpu: i < 300 ? 4 : 5, gpu: i % 30 === 0 ? 20 : null }));
+  const w = frameTimeline(smp, 5);
+  assert.equal(w.length, 3);
+  assert.equal(w[0]!.fps, 60);
+  assert.equal(w[1]!.fps, 30);
+  assert.equal(w[0]!.le20, 300);
+  assert.equal(w[1]!.le37, 150);
+  assert.equal(w[0]!.cpuAvg, 4);
+  assert.equal(w[0]!.gpuAvg, 20);
 });

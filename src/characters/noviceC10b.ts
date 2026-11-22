@@ -45,7 +45,20 @@ export interface C10bOptions {
   p1: boolean;
   /** C1.0-P 第一階段 P2：同模組、同材質設定的零件合併（?p2=1） */
   p2: boolean;
+  /** P3 診斷開關（只用來量成本，不是優化方案）：?diag=noshadow,noglow,nopost,nomsaa,nochars */
+  diag: C10pDiag[];
+  /** P3 診斷：每 30 格用 gl.finish() 量一次「CPU 提交＋GPU 完成」時間（?gpu=1） */
+  gpuProbe: boolean;
 }
+
+export type C10pDiag = "noshadow" | "noglow" | "nopost" | "nomsaa" | "nochars";
+export const C10P_DIAG_LABEL: Readonly<Record<C10pDiag, string>> = Object.freeze({
+  noshadow: "不畫陰影",
+  noglow: "關發光層",
+  nopost: "關 HDR 後製",
+  nomsaa: "關 MSAA",
+  nochars: "隱藏角色",
+});
 
 /** ?lab=c10b&lod=lite&count=10&bench=30&view=low */
 export function c10bOptionsFromSearch(search: string): C10bOptions {
@@ -63,6 +76,8 @@ export function c10bOptionsFromSearch(search: string): C10bOptions {
     view: (v in C10B_VIEWS ? v : "front") as Exclude<C10bView, "free">,
     p1: p.get("p1") === "1",
     p2: p.get("p2") === "1",
+    diag: (p.get("diag") ?? "").split(",").filter((d): d is C10pDiag => d in C10P_DIAG_LABEL),
+    gpuProbe: p.get("gpu") === "1",
   };
 }
 
@@ -183,4 +198,60 @@ export function windowHistograms(dts: readonly number[], windowSec: number): Ret
 /** 物件是否標記為要發光（P1：只有 metadata.glow === true 的物件進發光層） */
 export function wantsGlow(metadata: unknown): boolean {
   return !!metadata && typeof metadata === "object" && (metadata as { glow?: unknown }).glow === true;
+}
+
+export interface FrameSample {
+  /** 與上一格的間隔（秒） */
+  dt: number;
+  /** scene.render() 的 JS（CPU 提交）時間（毫秒） */
+  cpu: number;
+  /** gl.finish() 量到的 CPU＋GPU 完成時間（毫秒）；沒量的格為 null */
+  gpu: number | null;
+}
+
+export interface TimelineWindow {
+  t0: number;
+  fps: number;
+  cpuAvg: number;
+  cpuP95: number;
+  gpuAvg: number | null;
+  gpuN: number;
+  le20: number;
+  le37: number;
+  le54: number;
+  gt54: number;
+}
+
+/** P3 診斷：每 windowSec 秒一段的 FPS、CPU 時間、GPU 探測時間與 60 Hz 掉幀分布 */
+export function frameTimeline(samples: readonly FrameSample[], windowSec: number): TimelineWindow[] {
+  const out: TimelineWindow[] = [];
+  let cur: FrameSample[] = [];
+  let t = 0;
+  let t0 = 0;
+  const flush = (): void => {
+    const span = cur.reduce((a, s) => a + s.dt, 0);
+    const cpus = cur.map((s) => s.cpu).sort((a, b) => a - b);
+    const gpus = cur.filter((s) => s.gpu !== null).map((s) => s.gpu!);
+    const h = frameHistogram(cur.map((s) => s.dt));
+    out.push({
+      t0: Math.round(t0),
+      fps: +(cur.length / span).toFixed(1),
+      cpuAvg: +(cpus.reduce((a, b) => a + b, 0) / cpus.length).toFixed(2),
+      cpuP95: +cpus[Math.min(cpus.length - 1, Math.floor(cpus.length * 0.95))]!.toFixed(2),
+      gpuAvg: gpus.length ? +(gpus.reduce((a, b) => a + b, 0) / gpus.length).toFixed(2) : null,
+      gpuN: gpus.length,
+      ...h,
+    });
+  };
+  for (const s of samples) {
+    cur.push(s);
+    t += s.dt;
+    if (t - t0 >= windowSec - 1e-6) {
+      flush();
+      t0 = t;
+      cur = [];
+    }
+  }
+  if (cur.length && t - t0 > windowSec * 0.5) flush();
+  return out;
 }

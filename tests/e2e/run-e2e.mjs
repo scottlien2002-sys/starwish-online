@@ -2072,6 +2072,22 @@ for (const name of browsers) {
       check("P2：角色網格數下降（男 32→、女 31→）", bds.A2.hq.meshes.character < bds.A1.hq.meshes.character && !!bds.A2.hq.merge, [bds.A1.hq.meshes, bds.A2.hq.meshes, bds.A2.hq.merge]);
       check("P2：HQ 與 Lite 總 Draw Calls 下降", bds.A2.hq.draws.all < bds.A1.hq.draws.all && bds.A2.lite.draws.all < bds.A1.lite.draws.all, [bds.A1.hq.draws.all, bds.A2.hq.draws.all, bds.A1.lite.draws.all, bds.A2.lite.draws.all]);
       check("P2：三角形數不變（只合併、不減面）", bds.A2.hq.tris.mainPass === bds.A1.hq.tris.mainPass && bds.A2.lite.tris.mainPass === bds.A1.lite.tris.mainPass, [bds.A1.hq.tris, bds.A2.hq.tris]);
+      // P3 診斷工具：GPU 探測＋診斷開關＋時間軸（只檢查流程；CI 無 GPU，數字不代表 iPhone）
+      {
+        const pg = await ctx.newPage();
+        pg.on("pageerror", (e) => run.errors.push(`diag pageerror: ${e.message}`));
+        await pg.goto(server.url + "/?lab=c10b&quality=high&p1=1&p2=1&gpu=1&diag=noshadow,noglow", { waitUntil: "load" });
+        await pg.waitForFunction(() => window.__starwishC10b?.ready === true, null, { timeout: 120000 });
+        const bd = await pg.evaluate(() => window.__starwishC10b.breakdown());
+        await pg.evaluate(() => window.__starwishC10b.bench(6, "CI 診斷 6 秒"));
+        await pg.waitForFunction(() => window.__starwishC10b.benchState().state === "done", null, { timeout: 240000 });
+        const br = await pg.evaluate(() => window.__starwishC10b.benchState().result);
+        const rep = await pg.evaluate(() => window.__starwishC10b.report());
+        run.results.push({ tag: "c10p P3 diag", breakdown: bd, bench: br });
+        check("P3 診斷：關陰影＋關發光時陰影與發光層不再畫角色", bd.share.shadowMap === 0 && bd.draws.all < bds.A2.hq.draws.all, [bd.draws, bd.share]);
+        check("P3 診斷：時間軸含 CPU 時間、GPU 探測、解析度紀錄", !!br && br.timeline.length >= 1 && br.timeline.some((w) => w.gpuN > 0) && br.sizeChanges === 0 && /時間軸/.test(rep) && /診斷開關/.test(rep), br && { tl: br.timeline, sz: br.renderSize });
+        await pg.close();
+      }
       check("P2：A1 與 A2 畫面逐像素比較（不同像素 ≤ 0.05%）", VIEWS.every((v) => diffs[v].p2.changedPct <= 0.05), Object.fromEntries(VIEWS.map((v) => [v, diffs[v].p2])));
     } catch (e) {
       run.errors.push(`exception: ${e.message}`);
