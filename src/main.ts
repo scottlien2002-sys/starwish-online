@@ -51,6 +51,18 @@ function main(): void {
         });
       return;
     }
+    // ?map=village：Stage 6 P2-3 星芽村（第一階段 Grey-box：配置、佔位建築、道路、碰撞；沒有 NPC 功能）
+    if (map === "village") {
+      document.body.classList.add("map-mode");
+      void import("./maps/village/VillagePage.ts")
+        .then((m) => m.startVillageMap(canvas, hudRoot))
+        .then(() => hideBoot())
+        .catch((err: unknown) => {
+          console.error(err);
+          fail(`星芽村載入失敗：${err instanceof Error ? err.message : String(err)}`);
+        });
+      return;
+    }
     // 怪物測試頁（只在需要時載入）：?lab=bobo 星露啵啵、?lab=dummy 測試方塊、?lab=field 多怪物 AI
     // ?lab=bobo3：星露啵啵 V3 模型預覽（只看外觀，不接戰鬥）
     // ?lab=bobo31：星露啵啵 V3.1 美術精修預覽（V3 保留不變，可在頁面上切換對照）
