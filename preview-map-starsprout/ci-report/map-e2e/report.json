@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-11-22T08:02:01.508Z",
+  "startedAt": "2026-11-22T08:14:51.085Z",
   "runs": [
     {
       "browser": "chromium",
@@ -28,11 +28,11 @@
             "smalls": 561,
             "grass": 25315,
             "flowers": 2276,
-            "hiChunks": 5,
-            "grassCells": 15,
-            "flowerCells": 20,
-            "shadowChunks": 4,
-            "buildMs": 357,
+            "hiChunks": 4,
+            "grassCells": 13,
+            "flowerCells": 4,
+            "shadowChunks": 3,
+            "buildMs": 392,
             "colliders": 595
           }
         },
@@ -40,7 +40,7 @@
           "ok": true,
           "detail": {
             "samples": 6348,
-            "distinctColors": 372,
+            "distinctColors": 479,
             "opaqueRatio": 1
           }
         },
@@ -54,10 +54,10 @@
               "yaw": 0.7266423406817256
             },
             "p1": {
-              "x": -55.335636161170086,
+              "x": -55.66781808058504,
               "y": 2,
-              "z": -63.252590681316335,
-              "yaw": 0.726642340681726
+              "z": -63.62629534065817,
+              "yaw": 0.7266423406817258
             },
             "ground": 2
           }
@@ -77,8 +77,8 @@
           }
         },
         "傳送門平時可見，走進去提示需擊敗 Boss 並達成條件": {
-          "ok": false,
-          "detail": "星芽原野 第一階段：地形與主要路線（沒有怪物）。右上「地圖」可傳送與做路線測試"
+          "ok": true,
+          "detail": "傳送門：擊敗王冠重錘兔並達成通關條件後才能使用（第一階段尚無 Boss）"
         },
         "標示可開關": {
           "ok": true,
@@ -90,14 +90,14 @@
             "st": {
               "phase": "running",
               "loop": 0,
-              "t": 1.4000000000000001,
+              "t": 0.9999999999999999,
               "result": null
             },
             "pl": {
-              "x": -51.01727120877559,
+              "x": -52.34599888643544,
               "y": 2,
-              "z": -58.39443010987253,
-              "yaw": 0.7266423406817271
+              "z": -59.88924874723986,
+              "yaw": 0.7266423406817262
             }
           }
         },
@@ -126,23 +126,23 @@
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 192.37540959868497
+              "meanLuma": 192.08874142737025
             },
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 199.82868006333794
+              "meanLuma": 199.7354378635723
             },
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 206.59760781167176
+              "meanLuma": 206.66911338754574
             }
           ]
         },
         "報告文字（含模式）": {
           "ok": true,
-          "detail": "星願物語 Stage 6 P2-1 星芽原野 地表與植被測試報告\n時間 2026/11/22 08:06:55\n網址參數 ?map=starsprout&quality=high&lod=hq\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 HQ：渲染畫質 high（解析度上限 2x、後製 開、陰影 柔和 PCSS 2048）／地圖 HQ／載入 821 ms\n發光效果 修正後；診斷 無\n對照設定：陰影 預"
+          "detail": "星願物語 Stage 6 P2-1 星芽原野 地表與植被測試報告\n時間 2026/11/22 08:21:01\n網址參數 ?map=starsprout&quality=high&lod=hq\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 HQ：渲染畫質 high（解析度上限 2x、後製 開、陰影 柔和 PCSS 2048）／地圖 HQ／載入 1031 ms\n發光效果 修正後；診斷 無\n對照設定：陰影 "
         },
         "沒有 WebGL Context Lost": {
           "ok": true,
@@ -170,14 +170,14 @@
         "info": {
           "quality": "high",
           "lod": "hq",
-          "loadMs": 821,
+          "loadMs": 1030.8000000000175,
           "chunks": 16,
           "terrainVerts": 33856,
           "terrainTris": 64800,
-          "drawCalls": 110,
-          "activeMeshes": 81,
-          "trianglesActive": 801127.3333333334,
-          "meshes": 200,
+          "drawCalls": 92,
+          "activeMeshes": 64,
+          "trianglesActive": 460020.3333333333,
+          "meshes": 152,
           "materials": 16,
           "textures": 9,
           "labels": true,
@@ -186,11 +186,11 @@
             "smalls": 561,
             "grass": 25315,
             "flowers": 2276,
-            "hiChunks": 5,
-            "grassCells": 15,
-            "flowerCells": 20,
-            "shadowChunks": 4,
-            "buildMs": 357,
+            "hiChunks": 4,
+            "grassCells": 13,
+            "flowerCells": 4,
+            "shadowChunks": 3,
+            "buildMs": 392,
             "colliders": 595
           },
           "nav": false,
@@ -218,44 +218,44 @@
           "st": {
             "phase": "running",
             "loop": 0,
-            "t": 1.4000000000000001,
+            "t": 0.9999999999999999,
             "result": null
           },
           "pl": {
-            "x": -51.01727120877559,
+            "x": -52.34599888643544,
             "y": 2,
-            "z": -58.39443010987253,
-            "yaw": 0.7266423406817271
+            "z": -59.88924874723986,
+            "yaw": 0.7266423406817262
           }
         },
         "exposure": [
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 192.37540959868497
+            "meanLuma": 192.08874142737025
           },
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 199.82868006333794
+            "meanLuma": 199.7354378635723
           },
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 206.59760781167176
+            "meanLuma": 206.66911338754574
           }
         ],
         "after": {
           "quality": "high",
           "lod": "hq",
-          "loadMs": 821,
+          "loadMs": 1030.8000000000175,
           "chunks": 16,
           "terrainVerts": 33856,
           "terrainTris": 64800,
-          "drawCalls": 107,
-          "activeMeshes": 76,
-          "trianglesActive": 779366.3333333334,
-          "meshes": 200,
+          "drawCalls": 92,
+          "activeMeshes": 63,
+          "trianglesActive": 378672.3333333333,
+          "meshes": 152,
           "materials": 16,
           "textures": 9,
           "labels": true,
@@ -264,11 +264,11 @@
             "smalls": 561,
             "grass": 25315,
             "flowers": 2276,
-            "hiChunks": 8,
-            "grassCells": 20,
-            "flowerCells": 25,
-            "shadowChunks": 6,
-            "buildMs": 357,
+            "hiChunks": 6,
+            "grassCells": 14,
+            "flowerCells": 6,
+            "shadowChunks": 4,
+            "buildMs": 392,
             "colliders": 595
           },
           "nav": false,
@@ -293,7 +293,7 @@
           }
         }
       },
-      "ok": false
+      "ok": true
     },
     {
       "browser": "chromium",
@@ -323,10 +323,10 @@
             "grass": 11474,
             "flowers": 1349,
             "hiChunks": 4,
-            "grassCells": 10,
-            "flowerCells": 13,
+            "grassCells": 9,
+            "flowerCells": 4,
             "shadowChunks": 0,
-            "buildMs": 262,
+            "buildMs": 313,
             "colliders": 595
           }
         },
@@ -334,493 +334,7 @@
           "ok": true,
           "detail": {
             "samples": 3568,
-            "distinctColors": 310,
-            "opaqueRatio": 1
-          }
-        },
-        "搖桿移動、角色貼地": {
-          "ok": true,
-          "detail": {
-            "p0": {
-              "x": -56,
-              "y": 2,
-              "z": -64,
-              "yaw": 0.7266423406817256
-            },
-            "p1": {
-              "x": -53.01036272526539,
-              "y": 2,
-              "z": -60.636658065923505,
-              "yaw": 0.726642340681726
-            },
-            "ground": 2
-          }
-        },
-        "溪流河道不可走、岸邊可走": {
-          "ok": true,
-          "detail": {
-            "here": true,
-            "water": false
-          }
-        },
-        "B1 橋中央可走、橋面高於水面": {
-          "ok": true,
-          "detail": {
-            "mid": true,
-            "y": 6.747612551936899
-          }
-        },
-        "傳送門平時可見，走進去提示需擊敗 Boss 並達成條件": {
-          "ok": false,
-          "detail": "星芽原野 第一階段：地形與主要路線（沒有怪物）。右上「地圖」可傳送與做路線測試"
-        },
-        "標示可開關": {
-          "ok": true,
-          "detail": false
-        },
-        "傳送門平台、符文附近畫面中央沒有過曝（純白像素 < 3%）": {
-          "ok": true,
-          "detail": [
-            {
-              "whiteAll": 0,
-              "whiteCenter": 0,
-              "meanLuma": 192.74951985686755
-            },
-            {
-              "whiteAll": 0,
-              "whiteCenter": 0,
-              "meanLuma": 199.91288691587727
-            },
-            {
-              "whiteAll": 0,
-              "whiteCenter": 0,
-              "meanLuma": 207.30891281566466
-            }
-          ]
-        },
-        "報告文字（含模式）": {
-          "ok": true,
-          "detail": "星願物語 Stage 6 P2-1 星芽原野 地表與植被測試報告\n時間 2026/11/22 08:07:45\n網址參數 ?map=starsprout&quality=medium&lod=lite\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 Lite 中畫質：渲染畫質 medium（解析度上限 1.5x、後製 開、陰影 PCF 1024）／地圖 Lite／載入 635 ms\n發光效果 修正後；診斷"
-        },
-        "沒有 WebGL Context Lost": {
-          "ok": true,
-          "detail": 0
-        }
-      },
-      "errors": [],
-      "screenshots": [
-        "map-e2e/chromium_lite-mid_spawn.png",
-        "map-e2e/chromium_lite-mid_camp.png",
-        "map-e2e/chromium_lite-mid_bridge.png",
-        "map-e2e/chromium_lite-mid_highland.png",
-        "map-e2e/chromium_lite-mid_farm.png",
-        "map-e2e/chromium_lite-mid_ruins.png",
-        "map-e2e/chromium_lite-mid_arena.png",
-        "map-e2e/chromium_lite-mid_forest.png",
-        "map-e2e/chromium_lite-mid_hill.png",
-        "map-e2e/chromium_lite-mid_field.png",
-        "map-e2e/chromium_lite-mid_overview.png",
-        "map-e2e/chromium_lite-mid_overview_nav.png",
-        "map-e2e/chromium_lite-mid_portal.png"
-      ],
-      "results": {
-        "info": {
-          "quality": "medium",
-          "lod": "lite",
-          "loadMs": 635.2000000000698,
-          "chunks": 16,
-          "terrainVerts": 15376,
-          "terrainTris": 28800,
-          "drawCalls": 90,
-          "activeMeshes": 68,
-          "trianglesActive": 440740.3333333333,
-          "meshes": 200,
-          "materials": 16,
-          "textures": 9,
-          "labels": true,
-          "veg": {
-            "trees": 521,
-            "smalls": 561,
-            "grass": 11474,
-            "flowers": 1349,
-            "hiChunks": 4,
-            "grassCells": 10,
-            "flowerCells": 13,
-            "shadowChunks": 0,
-            "buildMs": 262,
-            "colliders": 595
-          },
-          "nav": false,
-          "contextLost": 0,
-          "render": "1278×589 @1.5x",
-          "bridges": [
-            "B1",
-            "B2"
-          ],
-          "arena": {
-            "x": 0,
-            "z": 66,
-            "r": 12,
-            "y": 17
-          },
-          "portal": {
-            "x": 0,
-            "z": 82,
-            "r": 5,
-            "y": 17,
-            "facing": 3.141592653589793
-          }
-        },
-        "exposure": [
-          {
-            "whiteAll": 0,
-            "whiteCenter": 0,
-            "meanLuma": 192.74951985686755
-          },
-          {
-            "whiteAll": 0,
-            "whiteCenter": 0,
-            "meanLuma": 199.91288691587727
-          },
-          {
-            "whiteAll": 0,
-            "whiteCenter": 0,
-            "meanLuma": 207.30891281566466
-          }
-        ],
-        "after": {
-          "quality": "medium",
-          "lod": "lite",
-          "loadMs": 635.2000000000698,
-          "chunks": 16,
-          "terrainVerts": 15376,
-          "terrainTris": 28800,
-          "drawCalls": 87,
-          "activeMeshes": 65,
-          "trianglesActive": 357463.3333333333,
-          "meshes": 200,
-          "materials": 16,
-          "textures": 9,
-          "labels": true,
-          "veg": {
-            "trees": 521,
-            "smalls": 561,
-            "grass": 11474,
-            "flowers": 1349,
-            "hiChunks": 4,
-            "grassCells": 10,
-            "flowerCells": 14,
-            "shadowChunks": 0,
-            "buildMs": 262,
-            "colliders": 595
-          },
-          "nav": false,
-          "contextLost": 0,
-          "render": "1278×589 @1x",
-          "bridges": [
-            "B1",
-            "B2"
-          ],
-          "arena": {
-            "x": 0,
-            "z": 66,
-            "r": 12,
-            "y": 17
-          },
-          "portal": {
-            "x": 0,
-            "z": 82,
-            "r": 5,
-            "y": 17,
-            "facing": 3.141592653589793
-          }
-        }
-      },
-      "ok": false
-    },
-    {
-      "browser": "chromium",
-      "lod": "lite-low",
-      "checks": {
-        "啟動": {
-          "ok": true,
-          "detail": "ok"
-        },
-        "地形 16 塊": {
-          "ok": true,
-          "detail": 16
-        },
-        "lite-low 使用 low 畫質渲染": {
-          "ok": true,
-          "detail": "low"
-        },
-        "Lite 地形 1.5 公尺網格（約 2.9 萬三角形）": {
-          "ok": true,
-          "detail": 28800
-        },
-        "植被：樹 ≥ 400、草叢與花有建立": {
-          "ok": true,
-          "detail": {
-            "trees": 521,
-            "smalls": 561,
-            "grass": 11474,
-            "flowers": 1349,
-            "hiChunks": 4,
-            "grassCells": 10,
-            "flowerCells": 13,
-            "shadowChunks": 0,
-            "buildMs": 279,
-            "colliders": 595
-          }
-        },
-        "3D 畫面有繪製": {
-          "ok": true,
-          "detail": {
-            "samples": 2479,
-            "distinctColors": 262,
-            "opaqueRatio": 1
-          }
-        },
-        "搖桿移動、角色貼地": {
-          "ok": true,
-          "detail": {
-            "p0": {
-              "x": -56,
-              "y": 2,
-              "z": -64,
-              "yaw": 0.7266423406817256
-            },
-            "p1": {
-              "x": -52.345998886435474,
-              "y": 2,
-              "z": -59.88924874723984,
-              "yaw": 0.726642340681726
-            },
-            "ground": 2
-          }
-        },
-        "溪流河道不可走、岸邊可走": {
-          "ok": true,
-          "detail": {
-            "here": true,
-            "water": false
-          }
-        },
-        "B1 橋中央可走、橋面高於水面": {
-          "ok": true,
-          "detail": {
-            "mid": true,
-            "y": 6.747612551936899
-          }
-        },
-        "傳送門平時可見，走進去提示需擊敗 Boss 並達成條件": {
-          "ok": false,
-          "detail": "星芽原野 第一階段：地形與主要路線（沒有怪物）。右上「地圖」可傳送與做路線測試"
-        },
-        "標示可開關": {
-          "ok": true,
-          "detail": false
-        },
-        "傳送門平台、符文附近畫面中央沒有過曝（純白像素 < 3%）": {
-          "ok": true,
-          "detail": [
-            {
-              "whiteAll": 0,
-              "whiteCenter": 0,
-              "meanLuma": 189.05480765411014
-            },
-            {
-              "whiteAll": 0,
-              "whiteCenter": 0,
-              "meanLuma": 197.78069892171436
-            },
-            {
-              "whiteAll": 0.0046217910584359125,
-              "whiteCenter": 0,
-              "meanLuma": 206.13403422739924
-            }
-          ]
-        },
-        "報告文字（含模式）": {
-          "ok": true,
-          "detail": "星願物語 Stage 6 P2-1 星芽原野 地表與植被測試報告\n時間 2026/11/22 08:08:35\n網址參數 ?map=starsprout&quality=low&lod=lite\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 Lite 低畫質：渲染畫質 low（解析度上限 1.25x、後製 關、陰影 PCF 512）／地圖 Lite／載入 664 ms\n發光效果 修正後；診斷 無\n對照設"
-        },
-        "沒有 WebGL Context Lost": {
-          "ok": true,
-          "detail": 0
-        }
-      },
-      "errors": [],
-      "screenshots": [
-        "map-e2e/chromium_lite-low_spawn.png",
-        "map-e2e/chromium_lite-low_camp.png",
-        "map-e2e/chromium_lite-low_bridge.png",
-        "map-e2e/chromium_lite-low_highland.png",
-        "map-e2e/chromium_lite-low_farm.png",
-        "map-e2e/chromium_lite-low_ruins.png",
-        "map-e2e/chromium_lite-low_arena.png",
-        "map-e2e/chromium_lite-low_forest.png",
-        "map-e2e/chromium_lite-low_hill.png",
-        "map-e2e/chromium_lite-low_field.png",
-        "map-e2e/chromium_lite-low_overview.png",
-        "map-e2e/chromium_lite-low_overview_nav.png",
-        "map-e2e/chromium_lite-low_portal.png"
-      ],
-      "results": {
-        "info": {
-          "quality": "low",
-          "lod": "lite",
-          "loadMs": 664,
-          "chunks": 16,
-          "terrainVerts": 15376,
-          "terrainTris": 28800,
-          "drawCalls": 83,
-          "activeMeshes": 68,
-          "trianglesActive": 440740.3333333333,
-          "meshes": 200,
-          "materials": 16,
-          "textures": 6,
-          "labels": true,
-          "veg": {
-            "trees": 521,
-            "smalls": 561,
-            "grass": 11474,
-            "flowers": 1349,
-            "hiChunks": 4,
-            "grassCells": 10,
-            "flowerCells": 13,
-            "shadowChunks": 0,
-            "buildMs": 279,
-            "colliders": 595
-          },
-          "nav": false,
-          "contextLost": 0,
-          "render": "1065×491 @1.25x",
-          "bridges": [
-            "B1",
-            "B2"
-          ],
-          "arena": {
-            "x": 0,
-            "z": 66,
-            "r": 12,
-            "y": 17
-          },
-          "portal": {
-            "x": 0,
-            "z": 82,
-            "r": 5,
-            "y": 17,
-            "facing": 3.141592653589793
-          }
-        },
-        "exposure": [
-          {
-            "whiteAll": 0,
-            "whiteCenter": 0,
-            "meanLuma": 189.05480765411014
-          },
-          {
-            "whiteAll": 0,
-            "whiteCenter": 0,
-            "meanLuma": 197.78069892171436
-          },
-          {
-            "whiteAll": 0.0046217910584359125,
-            "whiteCenter": 0,
-            "meanLuma": 206.13403422739924
-          }
-        ],
-        "after": {
-          "quality": "low",
-          "lod": "lite",
-          "loadMs": 664,
-          "chunks": 16,
-          "terrainVerts": 15376,
-          "terrainTris": 28800,
-          "drawCalls": 80,
-          "activeMeshes": 65,
-          "trianglesActive": 357463.3333333333,
-          "meshes": 200,
-          "materials": 16,
-          "textures": 6,
-          "labels": true,
-          "veg": {
-            "trees": 521,
-            "smalls": 561,
-            "grass": 11474,
-            "flowers": 1349,
-            "hiChunks": 4,
-            "grassCells": 10,
-            "flowerCells": 14,
-            "shadowChunks": 0,
-            "buildMs": 279,
-            "colliders": 595
-          },
-          "nav": false,
-          "contextLost": 0,
-          "render": "1065×491 @1x",
-          "bridges": [
-            "B1",
-            "B2"
-          ],
-          "arena": {
-            "x": 0,
-            "z": 66,
-            "r": 12,
-            "y": 17
-          },
-          "portal": {
-            "x": 0,
-            "z": 82,
-            "r": 5,
-            "y": 17,
-            "facing": 3.141592653589793
-          }
-        }
-      },
-      "ok": false
-    },
-    {
-      "browser": "webkit",
-      "lod": "hq",
-      "checks": {
-        "啟動": {
-          "ok": true,
-          "detail": "ok"
-        },
-        "地形 16 塊": {
-          "ok": true,
-          "detail": 16
-        },
-        "hq 使用 high 畫質渲染": {
-          "ok": true,
-          "detail": "high"
-        },
-        "HQ 地形 1 公尺網格（約 6.5 萬三角形）": {
-          "ok": true,
-          "detail": 64800
-        },
-        "植被：樹 ≥ 400、草叢與花有建立": {
-          "ok": true,
-          "detail": {
-            "trees": 521,
-            "smalls": 561,
-            "grass": 25315,
-            "flowers": 2276,
-            "hiChunks": 5,
-            "grassCells": 15,
-            "flowerCells": 20,
-            "shadowChunks": 4,
-            "buildMs": 340,
-            "colliders": 595
-          }
-        },
-        "3D 畫面有繪製": {
-          "ok": true,
-          "detail": {
-            "samples": 6348,
-            "distinctColors": 380,
+            "distinctColors": 336,
             "opaqueRatio": 1
           }
         },
@@ -857,8 +371,494 @@
           }
         },
         "傳送門平時可見，走進去提示需擊敗 Boss 並達成條件": {
-          "ok": false,
-          "detail": "星芽原野 第一階段：地形與主要路線（沒有怪物）。右上「地圖」可傳送與做路線測試"
+          "ok": true,
+          "detail": "傳送門：擊敗王冠重錘兔並達成通關條件後才能使用（第一階段尚無 Boss）"
+        },
+        "標示可開關": {
+          "ok": true,
+          "detail": false
+        },
+        "傳送門平台、符文附近畫面中央沒有過曝（純白像素 < 3%）": {
+          "ok": true,
+          "detail": [
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 192.60230813410314
+            },
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 199.86005282447042
+            },
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 207.3992601910631
+            }
+          ]
+        },
+        "報告文字（含模式）": {
+          "ok": true,
+          "detail": "星願物語 Stage 6 P2-1 星芽原野 地表與植被測試報告\n時間 2026/11/22 08:22:08\n網址參數 ?map=starsprout&quality=medium&lod=lite\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 Lite 中畫質：渲染畫質 medium（解析度上限 1.5x、後製 開、陰影 PCF 1024）／地圖 Lite／載入 867 ms\n發光效果 修正後；診斷"
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": 0
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "map-e2e/chromium_lite-mid_spawn.png",
+        "map-e2e/chromium_lite-mid_camp.png",
+        "map-e2e/chromium_lite-mid_bridge.png",
+        "map-e2e/chromium_lite-mid_highland.png",
+        "map-e2e/chromium_lite-mid_farm.png",
+        "map-e2e/chromium_lite-mid_ruins.png",
+        "map-e2e/chromium_lite-mid_arena.png",
+        "map-e2e/chromium_lite-mid_forest.png",
+        "map-e2e/chromium_lite-mid_hill.png",
+        "map-e2e/chromium_lite-mid_field.png",
+        "map-e2e/chromium_lite-mid_overview.png",
+        "map-e2e/chromium_lite-mid_overview_nav.png",
+        "map-e2e/chromium_lite-mid_portal.png"
+      ],
+      "results": {
+        "info": {
+          "quality": "medium",
+          "lod": "lite",
+          "loadMs": 866.5999999999767,
+          "chunks": 16,
+          "terrainVerts": 15376,
+          "terrainTris": 28800,
+          "drawCalls": 82,
+          "activeMeshes": 60,
+          "trianglesActive": 268733.3333333333,
+          "meshes": 152,
+          "materials": 16,
+          "textures": 9,
+          "labels": true,
+          "veg": {
+            "trees": 521,
+            "smalls": 561,
+            "grass": 11474,
+            "flowers": 1349,
+            "hiChunks": 4,
+            "grassCells": 9,
+            "flowerCells": 4,
+            "shadowChunks": 0,
+            "buildMs": 313,
+            "colliders": 595
+          },
+          "nav": false,
+          "contextLost": 0,
+          "render": "1278×589 @1.5x",
+          "bridges": [
+            "B1",
+            "B2"
+          ],
+          "arena": {
+            "x": 0,
+            "z": 66,
+            "r": 12,
+            "y": 17
+          },
+          "portal": {
+            "x": 0,
+            "z": 82,
+            "r": 5,
+            "y": 17,
+            "facing": 3.141592653589793
+          }
+        },
+        "exposure": [
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 192.60230813410314
+          },
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 199.86005282447042
+          },
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 207.3992601910631
+          }
+        ],
+        "after": {
+          "quality": "medium",
+          "lod": "lite",
+          "loadMs": 866.5999999999767,
+          "chunks": 16,
+          "terrainVerts": 15376,
+          "terrainTris": 28800,
+          "drawCalls": 82,
+          "activeMeshes": 60,
+          "trianglesActive": 230369.33333333334,
+          "meshes": 152,
+          "materials": 16,
+          "textures": 9,
+          "labels": true,
+          "veg": {
+            "trees": 521,
+            "smalls": 561,
+            "grass": 11474,
+            "flowers": 1349,
+            "hiChunks": 4,
+            "grassCells": 10,
+            "flowerCells": 4,
+            "shadowChunks": 0,
+            "buildMs": 313,
+            "colliders": 595
+          },
+          "nav": false,
+          "contextLost": 0,
+          "render": "1278×589 @1x",
+          "bridges": [
+            "B1",
+            "B2"
+          ],
+          "arena": {
+            "x": 0,
+            "z": 66,
+            "r": 12,
+            "y": 17
+          },
+          "portal": {
+            "x": 0,
+            "z": 82,
+            "r": 5,
+            "y": 17,
+            "facing": 3.141592653589793
+          }
+        }
+      },
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "lod": "lite-low",
+      "checks": {
+        "啟動": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "地形 16 塊": {
+          "ok": true,
+          "detail": 16
+        },
+        "lite-low 使用 low 畫質渲染": {
+          "ok": true,
+          "detail": "low"
+        },
+        "Lite 地形 1.5 公尺網格（約 2.9 萬三角形）": {
+          "ok": true,
+          "detail": 28800
+        },
+        "植被：樹 ≥ 400、草叢與花有建立": {
+          "ok": true,
+          "detail": {
+            "trees": 521,
+            "smalls": 561,
+            "grass": 11474,
+            "flowers": 1349,
+            "hiChunks": 4,
+            "grassCells": 9,
+            "flowerCells": 4,
+            "shadowChunks": 0,
+            "buildMs": 359,
+            "colliders": 595
+          }
+        },
+        "3D 畫面有繪製": {
+          "ok": true,
+          "detail": {
+            "samples": 2479,
+            "distinctColors": 297,
+            "opaqueRatio": 1
+          }
+        },
+        "搖桿移動、角色貼地": {
+          "ok": true,
+          "detail": {
+            "p0": {
+              "x": -56,
+              "y": 2,
+              "z": -64,
+              "yaw": 0.7266423406817256
+            },
+            "p1": {
+              "x": -53.01036272526539,
+              "y": 2,
+              "z": -60.636658065923505,
+              "yaw": 0.726642340681726
+            },
+            "ground": 2
+          }
+        },
+        "溪流河道不可走、岸邊可走": {
+          "ok": true,
+          "detail": {
+            "here": true,
+            "water": false
+          }
+        },
+        "B1 橋中央可走、橋面高於水面": {
+          "ok": true,
+          "detail": {
+            "mid": true,
+            "y": 6.747612551936899
+          }
+        },
+        "傳送門平時可見，走進去提示需擊敗 Boss 並達成條件": {
+          "ok": true,
+          "detail": "傳送門：擊敗王冠重錘兔並達成通關條件後才能使用（第一階段尚無 Boss）"
+        },
+        "標示可開關": {
+          "ok": true,
+          "detail": false
+        },
+        "傳送門平台、符文附近畫面中央沒有過曝（純白像素 < 3%）": {
+          "ok": true,
+          "detail": [
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 189.12725403215933
+            },
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 197.809560940643
+            },
+            {
+              "whiteAll": 0.004736191827209079,
+              "whiteCenter": 0,
+              "meanLuma": 206.21145236220818
+            }
+          ]
+        },
+        "報告文字（含模式）": {
+          "ok": true,
+          "detail": "星願物語 Stage 6 P2-1 星芽原野 地表與植被測試報告\n時間 2026/11/22 08:23:07\n網址參數 ?map=starsprout&quality=low&lod=lite\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 Lite 低畫質：渲染畫質 low（解析度上限 1.25x、後製 關、陰影 PCF 512）／地圖 Lite／載入 885 ms\n發光效果 修正後；診斷 無\n對照設"
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": 0
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "map-e2e/chromium_lite-low_spawn.png",
+        "map-e2e/chromium_lite-low_camp.png",
+        "map-e2e/chromium_lite-low_bridge.png",
+        "map-e2e/chromium_lite-low_highland.png",
+        "map-e2e/chromium_lite-low_farm.png",
+        "map-e2e/chromium_lite-low_ruins.png",
+        "map-e2e/chromium_lite-low_arena.png",
+        "map-e2e/chromium_lite-low_forest.png",
+        "map-e2e/chromium_lite-low_hill.png",
+        "map-e2e/chromium_lite-low_field.png",
+        "map-e2e/chromium_lite-low_overview.png",
+        "map-e2e/chromium_lite-low_overview_nav.png",
+        "map-e2e/chromium_lite-low_portal.png"
+      ],
+      "results": {
+        "info": {
+          "quality": "low",
+          "lod": "lite",
+          "loadMs": 885.1999999999534,
+          "chunks": 16,
+          "terrainVerts": 15376,
+          "terrainTris": 28800,
+          "drawCalls": 75,
+          "activeMeshes": 60,
+          "trianglesActive": 268733.3333333333,
+          "meshes": 152,
+          "materials": 16,
+          "textures": 6,
+          "labels": true,
+          "veg": {
+            "trees": 521,
+            "smalls": 561,
+            "grass": 11474,
+            "flowers": 1349,
+            "hiChunks": 4,
+            "grassCells": 9,
+            "flowerCells": 4,
+            "shadowChunks": 0,
+            "buildMs": 359,
+            "colliders": 595
+          },
+          "nav": false,
+          "contextLost": 0,
+          "render": "1065×491 @1.25x",
+          "bridges": [
+            "B1",
+            "B2"
+          ],
+          "arena": {
+            "x": 0,
+            "z": 66,
+            "r": 12,
+            "y": 17
+          },
+          "portal": {
+            "x": 0,
+            "z": 82,
+            "r": 5,
+            "y": 17,
+            "facing": 3.141592653589793
+          }
+        },
+        "exposure": [
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 189.12725403215933
+          },
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 197.809560940643
+          },
+          {
+            "whiteAll": 0.004736191827209079,
+            "whiteCenter": 0,
+            "meanLuma": 206.21145236220818
+          }
+        ],
+        "after": {
+          "quality": "low",
+          "lod": "lite",
+          "loadMs": 885.1999999999534,
+          "chunks": 16,
+          "terrainVerts": 15376,
+          "terrainTris": 28800,
+          "drawCalls": 75,
+          "activeMeshes": 60,
+          "trianglesActive": 230369.33333333334,
+          "meshes": 152,
+          "materials": 16,
+          "textures": 6,
+          "labels": true,
+          "veg": {
+            "trees": 521,
+            "smalls": 561,
+            "grass": 11474,
+            "flowers": 1349,
+            "hiChunks": 4,
+            "grassCells": 10,
+            "flowerCells": 4,
+            "shadowChunks": 0,
+            "buildMs": 359,
+            "colliders": 595
+          },
+          "nav": false,
+          "contextLost": 0,
+          "render": "1065×491 @1x",
+          "bridges": [
+            "B1",
+            "B2"
+          ],
+          "arena": {
+            "x": 0,
+            "z": 66,
+            "r": 12,
+            "y": 17
+          },
+          "portal": {
+            "x": 0,
+            "z": 82,
+            "r": 5,
+            "y": 17,
+            "facing": 3.141592653589793
+          }
+        }
+      },
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "lod": "hq",
+      "checks": {
+        "啟動": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "地形 16 塊": {
+          "ok": true,
+          "detail": 16
+        },
+        "hq 使用 high 畫質渲染": {
+          "ok": true,
+          "detail": "high"
+        },
+        "HQ 地形 1 公尺網格（約 6.5 萬三角形）": {
+          "ok": true,
+          "detail": 64800
+        },
+        "植被：樹 ≥ 400、草叢與花有建立": {
+          "ok": true,
+          "detail": {
+            "trees": 521,
+            "smalls": 561,
+            "grass": 25315,
+            "flowers": 2276,
+            "hiChunks": 4,
+            "grassCells": 13,
+            "flowerCells": 4,
+            "shadowChunks": 3,
+            "buildMs": 342,
+            "colliders": 595
+          }
+        },
+        "3D 畫面有繪製": {
+          "ok": true,
+          "detail": {
+            "samples": 6348,
+            "distinctColors": 483,
+            "opaqueRatio": 1
+          }
+        },
+        "搖桿移動、角色貼地": {
+          "ok": true,
+          "detail": {
+            "p0": {
+              "x": -56,
+              "y": 2,
+              "z": -64,
+              "yaw": 0.7266423406817256
+            },
+            "p1": {
+              "x": -54.67127232234017,
+              "y": 2,
+              "z": -62.50518136263267,
+              "yaw": 0.726642340681726
+            },
+            "ground": 2
+          }
+        },
+        "溪流河道不可走、岸邊可走": {
+          "ok": true,
+          "detail": {
+            "here": true,
+            "water": false
+          }
+        },
+        "B1 橋中央可走、橋面高於水面": {
+          "ok": true,
+          "detail": {
+            "mid": true,
+            "y": 6.747612551936899
+          }
+        },
+        "傳送門平時可見，走進去提示需擊敗 Boss 並達成條件": {
+          "ok": true,
+          "detail": "傳送門：擊敗王冠重錘兔並達成通關條件後才能使用（第一階段尚無 Boss）"
         },
         "標示可開關": {
           "ok": true,
@@ -870,14 +870,14 @@
             "st": {
               "phase": "running",
               "loop": 0,
-              "t": 5.599999999999996,
+              "t": 4.300000000000001,
               "result": null
             },
             "pl": {
-              "x": -38.81085394344478,
-              "y": 2.4826307502198453,
-              "z": -42.09508448286499,
-              "yaw": 0.14708084207257413
+              "x": -42.23207398545861,
+              "y": 2.2884300879229906,
+              "z": -47.50029640765226,
+              "yaw": 0.6561603847781823
             }
           }
         },
@@ -906,47 +906,30 @@
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 192.37182926382883
+              "meanLuma": 192.06568327889389
             },
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 199.81911364394202
+              "meanLuma": 199.7154332565247
             },
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 206.57854886099608
+              "meanLuma": 206.6365145230029
             }
           ]
         },
         "報告文字（含模式）": {
           "ok": true,
-          "detail": "星願物語 Stage 6 P2-1 星芽原野 地表與植被測試報告\n時間 2026/11/22 08:09:56\n網址參數 ?map=starsprout&quality=high&lod=hq\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 HQ：渲染畫質 high（解析度上限 2x、後製 開、陰影 柔和 PCSS 2048）／地圖 HQ／載入 1514 ms\n發光效果 修正後；診斷 無\n對照設定"
+          "detail": "星願物語 Stage 6 P2-1 星芽原野 地表與植被測試報告\n時間 2026/11/22 08:24:39\n網址參數 ?map=starsprout&quality=high&lod=hq\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 HQ：渲染畫質 high（解析度上限 2x、後製 開、陰影 柔和 PCSS 2048）／地圖 HQ／載入 1963 ms\n發光效果 修正後；診斷 無\n對照設定"
         },
         "沒有 WebGL Context Lost": {
           "ok": true,
           "detail": 0
         }
       },
-      "errors": [
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call. (No more validation messages will be reported)"
-      ],
+      "errors": [],
       "screenshots": [
         "map-e2e/webkit_hq_spawn.png",
         "map-e2e/webkit_hq_camp.png",
@@ -967,14 +950,14 @@
         "info": {
           "quality": "high",
           "lod": "hq",
-          "loadMs": 1514,
+          "loadMs": 1963,
           "chunks": 16,
           "terrainVerts": 33856,
           "terrainTris": 64800,
-          "drawCalls": 110,
-          "activeMeshes": 81,
-          "trianglesActive": 801127.3333333334,
-          "meshes": 200,
+          "drawCalls": 92,
+          "activeMeshes": 64,
+          "trianglesActive": 460020.3333333333,
+          "meshes": 152,
           "materials": 16,
           "textures": 9,
           "labels": true,
@@ -983,11 +966,11 @@
             "smalls": 561,
             "grass": 25315,
             "flowers": 2276,
-            "hiChunks": 5,
-            "grassCells": 15,
-            "flowerCells": 20,
-            "shadowChunks": 4,
-            "buildMs": 340,
+            "hiChunks": 4,
+            "grassCells": 13,
+            "flowerCells": 4,
+            "shadowChunks": 3,
+            "buildMs": 342,
             "colliders": 595
           },
           "nav": false,
@@ -1015,44 +998,44 @@
           "st": {
             "phase": "running",
             "loop": 0,
-            "t": 5.599999999999996,
+            "t": 4.300000000000001,
             "result": null
           },
           "pl": {
-            "x": -38.81085394344478,
-            "y": 2.4826307502198453,
-            "z": -42.09508448286499,
-            "yaw": 0.14708084207257413
+            "x": -42.23207398545861,
+            "y": 2.2884300879229906,
+            "z": -47.50029640765226,
+            "yaw": 0.6561603847781823
           }
         },
         "exposure": [
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 192.37182926382883
+            "meanLuma": 192.06568327889389
           },
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 199.81911364394202
+            "meanLuma": 199.7154332565247
           },
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 206.57854886099608
+            "meanLuma": 206.6365145230029
           }
         ],
         "after": {
           "quality": "high",
           "lod": "hq",
-          "loadMs": 1514,
+          "loadMs": 1963,
           "chunks": 16,
           "terrainVerts": 33856,
           "terrainTris": 64800,
-          "drawCalls": 107,
-          "activeMeshes": 76,
-          "trianglesActive": 782399.3333333334,
-          "meshes": 200,
+          "drawCalls": 93,
+          "activeMeshes": 64,
+          "trianglesActive": 385356.3333333333,
+          "meshes": 152,
           "materials": 16,
           "textures": 9,
           "labels": true,
@@ -1061,11 +1044,11 @@
             "smalls": 561,
             "grass": 25315,
             "flowers": 2276,
-            "hiChunks": 8,
-            "grassCells": 19,
-            "flowerCells": 24,
-            "shadowChunks": 6,
-            "buildMs": 340,
+            "hiChunks": 6,
+            "grassCells": 14,
+            "flowerCells": 6,
+            "shadowChunks": 4,
+            "buildMs": 342,
             "colliders": 595
           },
           "nav": false,
@@ -1090,7 +1073,7 @@
           }
         }
       },
-      "ok": false
+      "ok": true
     },
     {
       "browser": "webkit",
@@ -1120,10 +1103,10 @@
             "grass": 11474,
             "flowers": 1349,
             "hiChunks": 4,
-            "grassCells": 10,
-            "flowerCells": 13,
+            "grassCells": 9,
+            "flowerCells": 4,
             "shadowChunks": 0,
-            "buildMs": 293,
+            "buildMs": 300,
             "colliders": 595
           }
         },
@@ -1131,7 +1114,7 @@
           "ok": true,
           "detail": {
             "samples": 3568,
-            "distinctColors": 317,
+            "distinctColors": 343,
             "opaqueRatio": 1
           }
         },
@@ -1145,9 +1128,9 @@
               "yaw": 0.7266423406817256
             },
             "p1": {
-              "x": -49.11386881052788,
+              "x": -50.020725450530776,
               "y": 2,
-              "z": -56.253102411843855,
+              "z": -57.27331613184701,
               "yaw": 0.726642340681726
             },
             "ground": 2
@@ -1168,8 +1151,8 @@
           }
         },
         "傳送門平時可見，走進去提示需擊敗 Boss 並達成條件": {
-          "ok": false,
-          "detail": "星芽原野 第一階段：地形與主要路線（沒有怪物）。右上「地圖」可傳送與做路線測試"
+          "ok": true,
+          "detail": "傳送門：擊敗王冠重錘兔並達成通關條件後才能使用（第一階段尚無 Boss）"
         },
         "標示可開關": {
           "ok": true,
@@ -1181,47 +1164,30 @@
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 192.81076031203267
+              "meanLuma": 192.56058362175474
             },
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 199.92323698616008
+              "meanLuma": 199.82611903172952
             },
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 207.26979480604996
+              "meanLuma": 207.34068663491382
             }
           ]
         },
         "報告文字（含模式）": {
           "ok": true,
-          "detail": "星願物語 Stage 6 P2-1 星芽原野 地表與植被測試報告\n時間 2026/11/22 08:10:13\n網址參數 ?map=starsprout&quality=medium&lod=lite\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 Lite 中畫質：渲染畫質 medium（解析度上限 1.5x、後製 開、陰影 PCF 1024）／地圖 Lite／載入 896 ms\n發光效果 修正"
+          "detail": "星願物語 Stage 6 P2-1 星芽原野 地表與植被測試報告\n時間 2026/11/22 08:25:00\n網址參數 ?map=starsprout&quality=medium&lod=lite\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 Lite 中畫質：渲染畫質 medium（解析度上限 1.5x、後製 開、陰影 PCF 1024）／地圖 Lite／載入 1115 ms\n發光效果 修"
         },
         "沒有 WebGL Context Lost": {
           "ok": true,
           "detail": 0
         }
       },
-      "errors": [
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call. (No more validation messages will be reported)"
-      ],
+      "errors": [],
       "screenshots": [
         "map-e2e/webkit_lite-mid_spawn.png",
         "map-e2e/webkit_lite-mid_camp.png",
@@ -1241,14 +1207,14 @@
         "info": {
           "quality": "medium",
           "lod": "lite",
-          "loadMs": 896,
+          "loadMs": 1115,
           "chunks": 16,
           "terrainVerts": 15376,
           "terrainTris": 28800,
-          "drawCalls": 90,
-          "activeMeshes": 68,
-          "trianglesActive": 440740.3333333333,
-          "meshes": 200,
+          "drawCalls": 82,
+          "activeMeshes": 60,
+          "trianglesActive": 268733.3333333333,
+          "meshes": 152,
           "materials": 16,
           "textures": 9,
           "labels": true,
@@ -1258,10 +1224,10 @@
             "grass": 11474,
             "flowers": 1349,
             "hiChunks": 4,
-            "grassCells": 10,
-            "flowerCells": 13,
+            "grassCells": 9,
+            "flowerCells": 4,
             "shadowChunks": 0,
-            "buildMs": 293,
+            "buildMs": 300,
             "colliders": 595
           },
           "nav": false,
@@ -1289,30 +1255,30 @@
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 192.81076031203267
+            "meanLuma": 192.56058362175474
           },
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 199.92323698616008
+            "meanLuma": 199.82611903172952
           },
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 207.26979480604996
+            "meanLuma": 207.34068663491382
           }
         ],
         "after": {
           "quality": "medium",
           "lod": "lite",
-          "loadMs": 896,
+          "loadMs": 1115,
           "chunks": 16,
           "terrainVerts": 15376,
           "terrainTris": 28800,
-          "drawCalls": 87,
-          "activeMeshes": 65,
-          "trianglesActive": 357463.3333333333,
-          "meshes": 200,
+          "drawCalls": 82,
+          "activeMeshes": 60,
+          "trianglesActive": 230369.33333333334,
+          "meshes": 152,
           "materials": 16,
           "textures": 9,
           "labels": true,
@@ -1323,9 +1289,9 @@
             "flowers": 1349,
             "hiChunks": 4,
             "grassCells": 10,
-            "flowerCells": 14,
+            "flowerCells": 4,
             "shadowChunks": 0,
-            "buildMs": 293,
+            "buildMs": 300,
             "colliders": 595
           },
           "nav": false,
@@ -1350,7 +1316,7 @@
           }
         }
       },
-      "ok": false
+      "ok": true
     },
     {
       "browser": "webkit",
@@ -1380,10 +1346,10 @@
             "grass": 11474,
             "flowers": 1349,
             "hiChunks": 4,
-            "grassCells": 10,
-            "flowerCells": 13,
+            "grassCells": 9,
+            "flowerCells": 4,
             "shadowChunks": 0,
-            "buildMs": 269,
+            "buildMs": 324,
             "colliders": 595
           }
         },
@@ -1391,7 +1357,7 @@
           "ok": true,
           "detail": {
             "samples": 2479,
-            "distinctColors": 262,
+            "distinctColors": 299,
             "opaqueRatio": 1
           }
         },
@@ -1405,9 +1371,9 @@
               "yaw": 0.7266423406817256
             },
             "p1": {
-              "x": -49.160374279245985,
+              "x": -50.35290736994573,
               "y": 2,
-              "z": -56.3054210641517,
+              "z": -57.647020791188844,
               "yaw": 0.726642340681726
             },
             "ground": 2
@@ -1428,8 +1394,8 @@
           }
         },
         "傳送門平時可見，走進去提示需擊敗 Boss 並達成條件": {
-          "ok": false,
-          "detail": "星芽原野 第一階段：地形與主要路線（沒有怪物）。右上「地圖」可傳送與做路線測試"
+          "ok": true,
+          "detail": "傳送門：擊敗王冠重錘兔並達成通關條件後才能使用（第一階段尚無 Boss）"
         },
         "標示可開關": {
           "ok": true,
@@ -1441,47 +1407,30 @@
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 189.4421661388208
+              "meanLuma": 189.56751050953412
             },
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 197.92329869138223
+              "meanLuma": 197.9709833235373
             },
             {
-              "whiteAll": 0.004545523879253802,
+              "whiteAll": 0.004553150597172013,
               "whiteCenter": 0,
-              "meanLuma": 206.08994285626915
+              "meanLuma": 206.16180058289564
             }
           ]
         },
         "報告文字（含模式）": {
           "ok": true,
-          "detail": "星願物語 Stage 6 P2-1 星芽原野 地表與植被測試報告\n時間 2026/11/22 08:10:32\n網址參數 ?map=starsprout&quality=low&lod=lite\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 Lite 低畫質：渲染畫質 low（解析度上限 1.25x、後製 關、陰影 PCF 512）／地圖 Lite／載入 830 ms\n發光效果 修正後；診斷 無"
+          "detail": "星願物語 Stage 6 P2-1 星芽原野 地表與植被測試報告\n時間 2026/11/22 08:25:23\n網址參數 ?map=starsprout&quality=low&lod=lite\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 Lite 低畫質：渲染畫質 low（解析度上限 1.25x、後製 關、陰影 PCF 512）／地圖 Lite／載入 1104 ms\n發光效果 修正後；診斷 "
         },
         "沒有 WebGL Context Lost": {
           "ok": true,
           "detail": 0
         }
       },
-      "errors": [
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call.",
-        "console: WebGL: INVALID_OPERATION: glDrawElementsInstanced: Vertex buffer is not big enough for the draw call. (No more validation messages will be reported)"
-      ],
+      "errors": [],
       "screenshots": [
         "map-e2e/webkit_lite-low_spawn.png",
         "map-e2e/webkit_lite-low_camp.png",
@@ -1501,14 +1450,14 @@
         "info": {
           "quality": "low",
           "lod": "lite",
-          "loadMs": 830,
+          "loadMs": 1104,
           "chunks": 16,
           "terrainVerts": 15376,
           "terrainTris": 28800,
-          "drawCalls": 83,
-          "activeMeshes": 68,
-          "trianglesActive": 440740.3333333333,
-          "meshes": 200,
+          "drawCalls": 75,
+          "activeMeshes": 60,
+          "trianglesActive": 268733.3333333333,
+          "meshes": 152,
           "materials": 16,
           "textures": 6,
           "labels": true,
@@ -1518,10 +1467,10 @@
             "grass": 11474,
             "flowers": 1349,
             "hiChunks": 4,
-            "grassCells": 10,
-            "flowerCells": 13,
+            "grassCells": 9,
+            "flowerCells": 4,
             "shadowChunks": 0,
-            "buildMs": 269,
+            "buildMs": 324,
             "colliders": 595
           },
           "nav": false,
@@ -1549,30 +1498,30 @@
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 189.4421661388208
+            "meanLuma": 189.56751050953412
           },
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 197.92329869138223
+            "meanLuma": 197.9709833235373
           },
           {
-            "whiteAll": 0.004545523879253802,
+            "whiteAll": 0.004553150597172013,
             "whiteCenter": 0,
-            "meanLuma": 206.08994285626915
+            "meanLuma": 206.16180058289564
           }
         ],
         "after": {
           "quality": "low",
           "lod": "lite",
-          "loadMs": 830,
+          "loadMs": 1104,
           "chunks": 16,
           "terrainVerts": 15376,
           "terrainTris": 28800,
-          "drawCalls": 80,
-          "activeMeshes": 65,
-          "trianglesActive": 357463.3333333333,
-          "meshes": 200,
+          "drawCalls": 75,
+          "activeMeshes": 60,
+          "trianglesActive": 230369.33333333334,
+          "meshes": 152,
           "materials": 16,
           "textures": 6,
           "labels": true,
@@ -1583,9 +1532,9 @@
             "flowers": 1349,
             "hiChunks": 4,
             "grassCells": 10,
-            "flowerCells": 14,
+            "flowerCells": 4,
             "shadowChunks": 0,
-            "buildMs": 269,
+            "buildMs": 324,
             "colliders": 595
           },
           "nav": false,
@@ -1610,9 +1559,9 @@
           }
         }
       },
-      "ok": false
+      "ok": true
     }
   ],
-  "finishedAt": "2026-11-22T08:10:32.776Z",
-  "failures": 6
+  "finishedAt": "2026-11-22T08:25:23.528Z",
+  "failures": 0
 }
