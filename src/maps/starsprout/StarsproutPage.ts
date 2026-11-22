@@ -236,13 +236,14 @@ class StarsproutPage {
     const build = hudRoot.querySelector<HTMLSpanElement>(".hud-build");
     if (build) build.textContent = `Stage 6 P2-2 ${this.modeName()}`;
     this.hud.events.on("skillPressed", () => this.hud.toast("地形測試頁：這一階段沒有怪物與戰鬥", 1500));
-    new VirtualJoystick(this.hud.joystickZone, this.input, TUNING.joystick.radius, TUNING.joystick.deadZone);
+    const joystick = new VirtualJoystick(this.hud.joystickZone, this.input, TUNING.joystick.radius, TUNING.joystick.deadZone);
     this.camTouch = new CameraTouchControl(canvas, this.input, TUNING.camera.rotateSensitivity, TUNING.camera.pitchSensitivity, TUNING.camera.pinchSensitivity);
     // Safari：擋掉頁面自己的雙指縮放手勢與長按選單（不影響遊戲內的雙指縮放鏡頭）
     const block = (e: Event): void => e.preventDefault();
     for (const ev of ["gesturestart", "gesturechange", "gestureend"]) document.addEventListener(ev, block, { passive: false });
     canvas.addEventListener("contextmenu", block);
-    this.keyboard = new KeyboardInput(this.input, () => false);
+    // 搖桿按住時以搖桿為準（原本傳 false，鍵盤每幀把搖桿輸入清成 0：手指停住角色就停）
+    this.keyboard = new KeyboardInput(this.input, () => joystick.active);
     this.perf = new PerfOverlay(this.engine, scene, this.quality, hudRoot);
     this.buildPanel(hudRoot);
     window.addEventListener("resize", () => this.engine.resize());

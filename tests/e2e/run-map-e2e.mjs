@@ -106,14 +106,19 @@ for (const name of browsers) {
         // 左下搖桿：只移動、不轉鏡頭
         const c0 = api.camera();
         const p0 = api.player();
-        const jel = await drag(20, W * 0.12, H * 0.82, W * 0.12, H * 0.82 - 60, true, false);
+        // 從搖桿區中央往上推（搖桿底座會被夾在區域內，所以從中央開始）
+        const zr = document.elementFromPoint(W * 0.12, H * 0.82).closest("[class*=joystick-zone], #joystick-zone") ?? document.elementFromPoint(W * 0.12, H * 0.82);
+        const zb = zr.getBoundingClientRect();
+        const jx = zb.left + zb.width / 2, jy = zb.top + zb.height / 2;
+        const jel = await drag(20, jx, jy, jx, jy - 60, true, false);
         await wait(500);
         const c1 = api.camera();
         const p1 = api.player();
-        jel.dispatchEvent(new PointerEvent("pointerup", { pointerId: 20, clientX: W * 0.12, clientY: H * 0.82 - 60, isPrimary: true, pointerType: "touch", bubbles: true, cancelable: true }));
+        jel.dispatchEvent(new PointerEvent("pointerup", { pointerId: 20, clientX: jx, clientY: jy - 60, isPrimary: true, pointerType: "touch", bubbles: true, cancelable: true }));
         out.joystick = { target: jel.className || jel.tagName, dAlpha: c1.alpha - c0.alpha, moved: Math.hypot(p1.x - p0.x, p1.z - p0.z) };
         // 右下技能鍵與右上面板不是 canvas
-        out.buttons = [[W - 60, H - 60], [W - 30, 20]].map(([x, y]) => document.elementFromPoint(x, y)?.tagName);
+        const tg = document.querySelector(".map-toggle")?.getBoundingClientRect();
+        out.buttons = [[W - 60, H - 60], tg ? [tg.left + tg.width / 2, tg.top + tg.height / 2] : [0, 0]].map(([x, y]) => document.elementFromPoint(x, y)?.tagName);
         // 雙指縮放：張開 = 拉近，距離有上下限
         const d0 = api.camera();
         const e1 = document.elementFromPoint(W * 0.5, H * 0.4);
