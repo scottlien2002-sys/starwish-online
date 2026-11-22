@@ -189,7 +189,10 @@ export function buildVegetation(t: StarsproutTerrain, opt: VegetationOptions, se
     const f = forestDensity(t, x, z);
     if (rng.next() > f) continue;
     const c = clearance(t, x, z);
-    if (blocked(c, x, z, 3.2, 2.2, 2.6)) continue;
+    // 樹離主路中線 ≥ 6.5 公尺、支線 ≥ 4 公尺：樹冠半徑約 2 公尺，鏡頭跟在角色後方時不會穿進樹冠
+    if (blocked(c, x, z, 4.75, 3, 2.6)) continue;
+    // 遺跡戰鬥場外圈與傳送門周圍 10 公尺不種樹（保留遺跡與傳送門的視線）
+    if (c.arena < ARENA.r + 6 || c.portal < 10) continue;
     if (fightArea(x, z) > 0.05) continue;
     const edge = Math.max(Math.abs(x), Math.abs(z));
     const slope = t.terrainSlopeDeg(x, z);

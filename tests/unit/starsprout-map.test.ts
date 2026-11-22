@@ -199,7 +199,7 @@ test("P2-1 植被：數量合理、同種子結果相同、Lite 只減少草花�
 test("P2-1 植被：不長在主路、支線、河道、Boss 場、傳送門平台與石階上", () => {
   for (const t of VEG.trees) {
     const c = clearance(T, t.x, t.z);
-    assert.ok(c.main >= MRH + 3.2 && c.side >= SRH + 2.2 && c.river >= RH + 2.6 && c.arena >= 14 && c.portal >= 4.5, `樹 (${t.x.toFixed(1)},${t.z.toFixed(1)})`);
+    assert.ok(c.main >= MRH + 4.75 && c.side >= SRH + 3 && c.river >= RH + 2.6 && c.arena >= 18 && c.portal >= 10, `樹 (${t.x.toFixed(1)},${t.z.toFixed(1)})`);
   }
   for (const s of VEG.smalls) {
     const c = clearance(T, s.x, s.z);
