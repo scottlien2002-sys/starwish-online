@@ -1,4 +1,4 @@
-import { Color3, DirectionalLight, type Engine, HemisphericLight, Scene, type ShadowGenerator, Vector3 } from "@babylonjs/core";
+import { Color3, DirectionalLight, type Engine, HemisphericLight, Scene, ShadowGenerator, Vector3 } from "@babylonjs/core";
 import { TUNING } from "../../config/tuning.ts";
 import { angleDelta, damp } from "../../core/math.ts";
 import { InputState } from "../../input/InputState.ts";
@@ -123,6 +123,9 @@ class StarsproutPage {
   private inPortal = false;
   private loadMs = 0;
   private fpsTimer = 0;
+  private shadowQ: "default" | "medium" = "default";
+  private glowOff = false;
+  private lockRatio: number | null = null;
   private panel!: HTMLDivElement;
   private info!: HTMLDivElement;
   private reportBox!: HTMLTextAreaElement;
@@ -160,6 +163,11 @@ class StarsproutPage {
     this.sun.shadowMaxZ = 90;
     this.shadows = createShadows(this.sun, this.quality);
     this.shadows.darkness = 0.35;
+    // 效能對照（預設不變）：&shadowq=medium = 與正式遊戲 V3.8R 相同的 PCSS32 柔和陰影取樣
+    this.shadowQ = params.get("shadowq") === "medium" && this.shadows.useContactHardeningShadow ? "medium" : "default";
+    if (this.shadowQ === "medium") this.shadows.filteringQuality = ShadowGenerator.QUALITY_MEDIUM;
+    const res = Number(params.get("res"));
+    this.lockRatio = res >= 1 && res <= 3 ? res : null;
 
     this.terrain = new StarsproutTerrain();
     const start = MAIN_ROUTE[0]!;
@@ -172,6 +180,9 @@ class StarsproutPage {
     this.yaw = Math.atan2(MAIN_ROUTE[1]!.x - start.x, MAIN_ROUTE[1]!.z - start.z);
     this.camera.snap(this.pos, this.alphaBehind(this.yaw), TUNING.camera.defaultBeta, TUNING.camera.distance);
     this.render = setupRendering(scene, this.camera.camera, this.quality);
+    // 效能對照：&glow=0 關閉發光層（遺跡符文、傳送門不發光暈）
+    this.glowOff = params.get("glow") === "0";
+    if (this.glowOff && this.render.glow) this.render.glow.isEnabled = false;
     this.world = buildStarsproutWorld(scene, this.terrain, this.shadows, this.render.glow, this.lod);
     if (params.get("labels") === "0") this.world.setLabels(false);
     if (params.get("nav") === "1") this.world.setNav(true);
@@ -345,7 +356,7 @@ class StarsproutPage {
     this.setOverview(false);
     this.teleport(MAIN_ROUTE[0]!.x, MAIN_ROUTE[0]!.z, Math.atan2(MAIN_ROUTE[1]!.x - MAIN_ROUTE[0]!.x, MAIN_ROUTE[1]!.z - MAIN_ROUTE[0]!.z));
     // 測試期間固定解析度（畫質上限），結果才能互相比較
-    const ratio = Math.min(window.devicePixelRatio || 1, this.quality.maxPixelRatio);
+    const ratio = this.lockRatio ?? Math.min(window.devicePixelRatio || 1, this.quality.maxPixelRatio);
     this.perf.lockResolution(ratio);
     this.run = {
       loops,
@@ -479,6 +490,7 @@ class StarsproutPage {
     lines.push(`網址參數 ${location.search || "(無)"}`);
     lines.push(`裝置 ${navigator.userAgent}`);
     lines.push(`畫質 ${this.quality.level}／地圖 ${this.lod === "hq" ? "HQ" : "Lite"}／載入 ${Math.round(this.loadMs)} ms`);
+    lines.push(`對照設定：陰影 ${this.shadowQ === "medium" ? "PCSS32（中）" : "預設（高）"}／發光層 ${this.glowOff || !this.render.glow ? "關" : "開"}／測試解析度 ${this.lockRatio ? this.lockRatio + "x" : "畫質上限"}`);
     lines.push(`地形 ${this.world.chunks.length} 塊、${this.world.terrainVerts} 頂點、${this.world.terrainTris} 三角形`);
     const table = routeTable();
     lines.push(`主路線（直線）${table[table.length - 1]!.cum.toFixed(1)} 公尺；移動速度 ${WALK_SPEED} m/s`);
