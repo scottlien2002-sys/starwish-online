@@ -97,9 +97,11 @@ for (const name of browsers) {
       await page.evaluate(() => window.__starwishMap.setNav(false));
 
       // 傳送門：平時可見、走進去會提示尚未開放
-      await page.evaluate(() => window.__starwishMap.teleport(0, 80.6));
+      // 先讓角色面向北方（傳送門方向）、鏡頭在後方，再往前走進傳送門
+      await page.evaluate(() => window.__starwishMap.pose({ x: 0, z: 79.5, playerYawDeg: 0, camBearingDeg: 180, beta: 1.15, radius: 8, freeze: false }));
+      await page.evaluate(() => window.__starwishMap.unfreeze());
       await page.evaluate(() => window.__starwishMap.setMove({ x: 0, y: 1 }));
-      await page.waitForFunction(() => window.__starwishMap.player().z > 81.2, null, { timeout: 90000 }).catch(() => null);
+      await page.waitForFunction(() => window.__starwishMap.player().z > 80.6, null, { timeout: 90000 }).catch(() => null);
       await page.evaluate(() => window.__starwishMap.setMove(null));
       await settle(page, 2);
       const toast = await page.evaluate(() => document.querySelector(".hud-toast")?.textContent ?? "");
