@@ -1,6 +1,7 @@
 name: Check — P3-2 screenshots (temporary, no deploy)
 on:
-  workflow_dispatch:
+  push:
+    branches: ["check/novice-c10p-p32-shots"]
 permissions:
   contents: read
 jobs:
