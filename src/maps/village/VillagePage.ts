@@ -382,7 +382,7 @@ class VillagePage {
       north: [0, 16, 0, 1.2, 10],
       smith: [-17, -4, 245, 1.2, 9],
       circus: [11, -11, 135, 1.2, 10],
-      terrace: [-4, 26, 300, 1.2, 9],
+      terrace: [-6, 24.5, 270, 1.15, 10],
     };
     if (name === "overview") {
       this.setOverview(true);
