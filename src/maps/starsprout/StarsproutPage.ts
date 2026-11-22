@@ -687,7 +687,10 @@ class StarsproutPage {
       pose: (o: { x: number; z: number; playerYawDeg: number; camBearingDeg: number; beta: number; radius: number; freeze?: boolean }) => {
         this.frozen = false;
         this.teleport(o.x, o.z, (o.playerYawDeg * Math.PI) / 180);
+        this.player.root.rotation.y = this.yaw;
         this.player.update(0.016, 0);
+        // 截圖固定在畫質上限解析度（不受動態降解析度影響）
+        this.perf.lockResolution(this.lockRatio ?? Math.min(window.devicePixelRatio || 1, this.quality.maxPixelRatio));
         const b = (o.camBearingDeg * Math.PI) / 180;
         this.camera.snap(this.pos, Math.atan2(Math.cos(b), Math.sin(b)), o.beta, o.radius);
         this.sun.position.copyFrom(this.pos).subtractInPlace(this.sun.direction.scale(45));
@@ -695,6 +698,7 @@ class StarsproutPage {
       },
       unfreeze: () => {
         this.frozen = false;
+        this.perf.lockResolution(null);
       },
       /** 陰影取樣品質：default = 原始高品質、medium = PCSS32（只影響高畫質的柔和陰影） */
       setShadowQuality: (q: "default" | "medium") => {
