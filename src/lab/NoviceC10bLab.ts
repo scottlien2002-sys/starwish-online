@@ -3,7 +3,7 @@ import {
   type AbstractMesh,
   ArcRotateCamera,
   type AssetContainer,
-  type Mesh,
+  Mesh,
   type BaseTexture,
   Color3,
   DirectionalLight,
@@ -32,6 +32,8 @@ import {
   c10bOptionsFromSearch,
   countHitches,
   c10pAbLabel,
+  c10pMergeGroups,
+  windowHistograms,
   isLowView,
   wantsGlow,
   PLAZA_TOP,
@@ -66,6 +68,10 @@ interface LoadRecord {
 
 interface BenchResult extends BenchmarkSummary {
   label: string;
+  ab: string;
+  windows5: number[];
+  hist30: { le20: number; le37: number; le54: number; gt54: number }[];
+  renderSize: [number, number][];
   lod: C10bLod;
   count: number;
   hitches100: number;
@@ -214,6 +220,70 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
     }
   };
 
+  // ---------- P2：同模組、同材質設定的零件合併（?p2=1） ----------
+  const matKey = (m: Material | null): string => {
+    if (!(m instanceof PBRMaterial)) return m ? `other:${m.uniqueId}` : "none";
+    const c = (x: { r: number; g: number; b: number } | null | undefined): string => (x ? `${x.r.toFixed(4)},${x.g.toFixed(4)},${x.b.toFixed(4)}` : "-");
+    return [
+      m.metallic,
+      m.roughness,
+      c(m.albedoColor),
+      c(m.emissiveColor),
+      m.albedoTexture?.uniqueId ?? "-",
+      m.reflectionTexture?.uniqueId ?? "-",
+      m.metallicF0Factor,
+      c(m.metallicReflectanceColor),
+      m.sheen.isEnabled,
+      m.sheen.intensity,
+      c(m.sheen.color),
+      m.sheen.roughness,
+      m.backFaceCulling,
+      m.twoSidedLighting,
+      m.alpha,
+      m.transparencyMode,
+      m.environmentIntensity,
+      m.directIntensity,
+    ].join("|");
+  };
+  let mergeLog: { gender: C10bGender; before: number; after: number; groups: { slot: string; parts: string[] }[] }[] = [];
+  const mergeChar = (gender: C10bGender, meshes: AbstractMesh[]): AbstractMesh[] => {
+    const real = meshes.filter((m): m is Mesh => m instanceof Mesh && m.getTotalVertices() > 0);
+    const groups = c10pMergeGroups(real.map((m) => ({ name: m.name, materialKey: matKey(m.material) })));
+    const out: AbstractMesh[] = [];
+    const logGroups: { slot: string; parts: string[] }[] = [];
+    for (const g of groups) {
+      const ms = g.indices.map((i) => real[i]!);
+      const names = ms.map((m) => m.name.replace(/^(male|female)\d+_/, ""));
+      logGroups.push({ slot: g.slot, parts: names });
+      const parent = ms[0]!.parent;
+      if (ms.length === 1 || ms.some((m) => m.parent !== parent)) {
+        for (const m of ms) {
+          m.metadata = { ...(m.metadata ?? {}), slot: g.slot, parts: [m.name] };
+          out.push(m);
+        }
+        continue;
+      }
+      // 在 glTF 根節點的座標系裡合併（不烘入左右手轉換），合併後再掛回同一個根節點 → 頂點、頂點色、UV、法線與原本完全相同
+      const hasAlpha = ms[0]!.hasVertexAlpha;
+      for (const m of ms) m.parent = null;
+      const merged = Mesh.MergeMeshes(ms, true, true);
+      if (!merged) {
+        for (const m of ms) {
+          m.parent = parent;
+          out.push(m);
+        }
+        continue;
+      }
+      merged.name = `${ms[0]!.name.match(/^(male|female)\d+_/)?.[0] ?? ""}${g.slot}_${names[0]}_x${ms.length}`;
+      merged.parent = parent;
+      merged.hasVertexAlpha = hasAlpha;
+      merged.metadata = { slot: g.slot, parts: names };
+      out.push(merged);
+    }
+    mergeLog.push({ gender, before: real.length, after: out.length, groups: logGroups });
+    return out;
+  };
+
   const clear = (): void => {
     for (const c of chars) {
       for (const m of c.meshes) shadows.removeShadowCaster(m, false);
@@ -229,6 +299,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
     updateStatus();
     clear();
     metalWithProbe = 0;
+    mergeLog = [];
     performance.clearResourceTimings?.();
     const t0 = performance.now();
     const rec: LoadRecord = { lod: l, ms: 0, files: [] };
@@ -248,7 +319,8 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
       const ent = containers.get(p.gender)!.instantiateModelsToScene((name) => `${p.gender}${n}_${name}`, false, { doNotInstantiate: true });
       const root = ent.rootNodes[0] as TransformNode;
       root.position.set(p.x, BASE_Y, p.z);
-      const meshes = root.getChildMeshes(false);
+      let meshes = root.getChildMeshes(false);
+      if (opts.p2) meshes = mergeChar(p.gender, meshes);
       for (const m of meshes) {
         m.isPickable = false;
         m.receiveShadows = false;
@@ -295,14 +367,16 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
     b.dataset.view = v;
     viewBtns.push(b);
   }
-  for (const [label, on] of [["A0 原始", false], ["A1 P1", true]] as const) {
+  for (const [label, p1, p2] of [["A0 原始", false, false], ["A1 P1", true, false], ["A2 P1+P2", true, true]] as const) {
     const b = addBtn(views, label, "lab-view-btn", () => {
       const u = new URL(location.href);
-      if (on) u.searchParams.set("p1", "1");
-      else u.searchParams.delete("p1");
+      for (const [k, on] of [["p1", p1], ["p2", p2]] as const) {
+        if (on) u.searchParams.set(k, "1");
+        else u.searchParams.delete(k);
+      }
       location.href = u.toString();
     });
-    b.classList.toggle("active", opts.p1 === on);
+    b.classList.toggle("active", opts.p1 === p1 && opts.p2 === p2);
   }
   top.append(views);
   hudRoot.append(top);
@@ -383,6 +457,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
   let dts: number[] = [];
   let draws: number[] = [];
   let lostAtStart = 0;
+  let sizeAtStart: [number, number] = [0, 0];
   let benchResult: BenchResult | null = null;
   const allResults: BenchResult[] = [];
   const recProgress = (): number => Math.min(1, benchElapsed / (benchSec + opts.warmup || 1));
@@ -391,6 +466,9 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
   const fmt = (r: BenchResult): string =>
     `${r.label}（${r.lod === "hq" ? "HQ" : "Lite"}、${r.count} 角色）平均 ${r.avgFps.toFixed(1)} FPS　1% Low ${r.low1Fps.toFixed(1)}　最低 ${r.minFps.toFixed(1)}　卡頓(>100ms) ${r.hitches100}　Draw ${r.avgDrawCalls.toFixed(0)}` +
     (r.windows.length > 1 ? `\n  每 30 秒平均：${r.windows.map((w) => w.toFixed(1)).join(" → ")}` : "") +
+    (r.windows5.length > 1 ? `\n  每 5 秒平均：${r.windows5.map((w) => w.toFixed(0)).join(" ")}` : "") +
+    (r.hist30.length ? `\n  每 30 秒影格分布（≤20ms／≤37ms／≤54ms／>54ms）：${r.hist30.map((h) => `${h.le20}/${h.le37}/${h.le54}/${h.gt54}`).join(" → ")}` : "") +
+    `\n  渲染解析度 開始 ${r.renderSize[0]!.join("×")} 結束 ${r.renderSize[1]!.join("×")}　${r.ab}` +
     (r.contextLost ? `\n  ⚠ 測試中 WebGL Context Lost ×${r.contextLost}` : "");
 
   const api: C10bLabApi = {
@@ -483,6 +561,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
       dts = [];
       draws = [];
       lostAtStart = contextLost;
+      sizeAtStart = [engine.getRenderWidth(), engine.getRenderHeight()];
       benchState = "warmup";
       api.view("free");
     },
@@ -533,6 +612,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
         fxaa: render.pipeline?.fxaaEnabled ?? false,
         hdr: !!render.pipeline,
         ab: c10pAbLabel(opts),
+        merge: opts.p2 ? mergeLog.slice(0, 2) : null,
         glow: render.glow ? { enabled: true, rendersAllMeshes: glowAll && glowExcluded === 0, excluded: glowExcluded, ratio: quality.bloom.textureRatio, kernel: quality.bloom.kernel } : null,
         shadow: { mapSize: quality.shadows.mapSize, filter: quality.shadows.filter, casters: smList.length, characterCasters: smList.filter((m) => charSet.has(m as AbstractMesh)).length },
         meshes: { character: charMeshes.length, activeTotal: scene.getActiveMeshes().length, sceneTotal: scene.meshes.length },
@@ -586,7 +666,20 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
       if (benchElapsed >= benchSec + opts.warmup) {
         benchState = "done";
         const s = summarizeFrames(dts, draws);
-        benchResult = { ...s, label: benchLabel, lod, count: chars.length, hitches100: countHitches(dts, 100), windows: windowAverages(dts, 30), contextLost: contextLost - lostAtStart };
+        benchResult = {
+          ...s,
+          label: benchLabel,
+          ab: c10pAbLabel(opts),
+        merge: opts.p2 ? mergeLog.slice(0, 2) : null,
+          lod,
+          count: chars.length,
+          hitches100: countHitches(dts, 100),
+          windows: windowAverages(dts, 30),
+          windows5: windowAverages(dts, 5),
+          hist30: windowHistograms(dts, 30),
+          renderSize: [sizeAtStart, [engine.getRenderWidth(), engine.getRenderHeight()]],
+          contextLost: contextLost - lostAtStart,
+        };
         allResults.push(benchResult);
         result.hidden = false;
         result.textContent = `效能測試結果\n${allResults.map(fmt).join("\n")}\n解析度 ${perf.pixelRatio}x　畫質 ${quality.level}`;

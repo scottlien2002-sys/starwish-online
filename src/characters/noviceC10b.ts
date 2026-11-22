@@ -43,6 +43,8 @@ export interface C10bOptions {
   view: Exclude<C10bView, "free">;
   /** C1.0-P 第一階段 P1：發光層只處理標記為發光的物件（?p1=1） */
   p1: boolean;
+  /** C1.0-P 第一階段 P2：同模組、同材質設定的零件合併（?p2=1） */
+  p2: boolean;
 }
 
 /** ?lab=c10b&lod=lite&count=10&bench=30&view=low */
@@ -60,6 +62,7 @@ export function c10bOptionsFromSearch(search: string): C10bOptions {
     warmup: num("warmup", 2, 0, 10),
     view: (v in C10B_VIEWS ? v : "front") as Exclude<C10bView, "free">,
     p1: p.get("p1") === "1",
+    p2: p.get("p2") === "1",
   };
 }
 
@@ -107,8 +110,74 @@ export function isLowView(v: C10bView): boolean {
 export const PLAZA_TOP = 0.13;
 
 /** A/B 組名（C1.0-P：每次只改一項） */
-export function c10pAbLabel(o: Pick<C10bOptions, "p1">): string {
+export function c10pAbLabel(o: Pick<C10bOptions, "p1" | "p2">): string {
+  if (o.p1 && o.p2) return "A2（P1＋P2 材質合併）";
+  if (o.p2) return "P2 單獨（未含 P1）";
   return o.p1 ? "A1（P1 發光層只處理發光物件）" : "A0（原始 C1.0-B）";
+}
+
+/**
+ * P2 合併時的模組分類：不同模組永遠不合併，之後換髮型、換職業服裝、換手套靴子裝備時可以整組替換。
+ *   face  臉（唯一有 UV 與貼圖的零件）
+ *   body  身體皮膚（身體、手）
+ *   hair  髮型（頭髮、馬尾、髮飾蝴蝶結）
+ *   hands 手部裝備（手套、鉚釘、手套金環）
+ *   feet  腳部裝備（靴子、靴底、靴帶、扣環、寶石）
+ *   outfit 服裝（其他：上衣、背心、披風／外裙、腰帶、飾品）
+ */
+export type C10pSlot = "face" | "body" | "hair" | "hands" | "feet" | "outfit";
+
+export function c10pSlot(partName: string): C10pSlot {
+  const n = partName.replace(/^(male|female)\d+_/, "");
+  if (n === "head") return "face";
+  if (n === "body" || /^hand_[lr]$/.test(n)) return "body";
+  if (/^(hair|ponytail|bow|bow_star)$/.test(n)) return "hair";
+  if (/^(glove|rivet|glove_band)/.test(n)) return "hands";
+  if (/^boot/.test(n)) return "feet";
+  return "outfit";
+}
+
+/** 依（模組, 材質設定）分組；回傳每組的零件索引（保持原順序） */
+export function c10pMergeGroups(parts: readonly { name: string; materialKey: string }[]): { slot: C10pSlot; materialKey: string; indices: number[] }[] {
+  const map = new Map<string, { slot: C10pSlot; materialKey: string; indices: number[] }>();
+  parts.forEach((p, i) => {
+    const slot = c10pSlot(p.name);
+    const k = `${slot}|${p.materialKey}`;
+    if (!map.has(k)) map.set(k, { slot, materialKey: p.materialKey, indices: [] });
+    map.get(k)!.indices.push(i);
+  });
+  return [...map.values()];
+}
+
+/** 影格時間分布（Safari 60 Hz：16.7／33.3／50 ms 量化），用來判斷 FPS 掉落是 GPU 變慢還是偶發卡頓 */
+export function frameHistogram(dts: readonly number[]): { le20: number; le37: number; le54: number; gt54: number } {
+  const h = { le20: 0, le37: 0, le54: 0, gt54: 0 };
+  for (const dt of dts) {
+    const ms = dt * 1000;
+    if (ms <= 20) h.le20++;
+    else if (ms <= 37) h.le37++;
+    else if (ms <= 54) h.le54++;
+    else h.gt54++;
+  }
+  return h;
+}
+
+/** 依 windowSec 秒切段的影格時間分布 */
+export function windowHistograms(dts: readonly number[], windowSec: number): ReturnType<typeof frameHistogram>[] {
+  const out: ReturnType<typeof frameHistogram>[] = [];
+  let t = 0;
+  let cur: number[] = [];
+  for (const dt of dts) {
+    t += dt;
+    cur.push(dt);
+    if (t >= windowSec) {
+      out.push(frameHistogram(cur));
+      t = 0;
+      cur = [];
+    }
+  }
+  if (cur.length && t > windowSec * 0.5) out.push(frameHistogram(cur));
+  return out;
 }
 
 /** 物件是否標記為要發光（P1：只有 metadata.glow === true 的物件進發光層） */

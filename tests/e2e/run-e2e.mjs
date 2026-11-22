@@ -2015,7 +2015,7 @@ for (const name of browsers) {
     const shots = {};
     const bds = {};
     try {
-      for (const [ab, q] of [["A0", ""], ["A0b", ""], ["A1", "&p1=1"]]) {
+      for (const [ab, q] of [["A0", ""], ["A0b", ""], ["A1", "&p1=1"], ["A2", "&p1=1&p2=1"]]) {
         const page = await ctx.newPage();
         page.on("pageerror", (e) => run.errors.push(`${ab} pageerror: ${e.message}`));
         await page.goto(server.url + `/?lab=c10b&quality=high${q}`, { waitUntil: "load" });
@@ -2061,7 +2061,7 @@ for (const name of browsers) {
           return { changedPct: +((changed / n) * 100).toFixed(3), meanDiff: +(sum / n).toFixed(3), maxDiff: max };
         }, [a.toString("base64"), b.toString("base64")]);
       const diffs = {};
-      for (const v of VIEWS) diffs[v] = { noise: await diff(shots.A0[v], shots.A0b[v]), p1: await diff(shots.A0[v], shots.A1[v]) };
+      for (const v of VIEWS) diffs[v] = { noise: await diff(shots.A0[v], shots.A0b[v]), p1: await diff(shots.A0[v], shots.A1[v]), p2: await diff(shots.A1[v], shots.A2[v]) };
       await dp.close();
       run.results.push({ tag: "c10p P1", breakdown: bds, diffs });
       check("A0 與重拍 A0b 的 Draw Calls 相同（量測可重現）", bds.A0.hq.draws.all === bds.A0b.hq.draws.all, [bds.A0.hq.draws, bds.A0b.hq.draws]);
@@ -2069,6 +2069,10 @@ for (const name of browsers) {
       check("P1：HQ 總 Draw Calls 下降", bds.A1.hq.draws.all < bds.A0.hq.draws.all, [bds.A0.hq.draws.all, bds.A1.hq.draws.all]);
       check("P1：Lite 總 Draw Calls 下降", bds.A1.lite.draws.all < bds.A0.lite.draws.all, [bds.A0.lite.draws.all, bds.A1.lite.draws.all]);
       check("P1：每格處理的三角形下降（HQ）", bds.A1.hq.tris.mainPass < bds.A0.hq.tris.mainPass, [bds.A0.hq.tris, bds.A1.hq.tris]);
+      check("P2：角色網格數下降（男 32→、女 31→）", bds.A2.hq.meshes.character < bds.A1.hq.meshes.character && !!bds.A2.hq.merge, [bds.A1.hq.meshes, bds.A2.hq.meshes, bds.A2.hq.merge]);
+      check("P2：HQ 與 Lite 總 Draw Calls 下降", bds.A2.hq.draws.all < bds.A1.hq.draws.all && bds.A2.lite.draws.all < bds.A1.lite.draws.all, [bds.A1.hq.draws.all, bds.A2.hq.draws.all, bds.A1.lite.draws.all, bds.A2.lite.draws.all]);
+      check("P2：三角形數不變（只合併、不減面）", bds.A2.hq.tris.mainPass === bds.A1.hq.tris.mainPass && bds.A2.lite.tris.mainPass === bds.A1.lite.tris.mainPass, [bds.A1.hq.tris, bds.A2.hq.tris]);
+      check("P2：A1 與 A2 畫面逐像素比較（不同像素 ≤ 0.05%）", VIEWS.every((v) => diffs[v].p2.changedPct <= 0.05), Object.fromEntries(VIEWS.map((v) => [v, diffs[v].p2])));
     } catch (e) {
       run.errors.push(`exception: ${e.message}`);
     }

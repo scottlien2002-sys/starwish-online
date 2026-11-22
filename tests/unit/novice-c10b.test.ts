@@ -1,12 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
-import { C10B_REFERENCE, C10B_VIEWS, c10pAbLabel, isLowView, wantsGlow, c10bFile, c10bLayout, c10bOptionsFromSearch, countHitches, windowAverages } from "../../src/characters/noviceC10b.ts";
+import { C10B_REFERENCE, C10B_VIEWS, c10pAbLabel, c10pMergeGroups, c10pSlot, frameHistogram, windowHistograms, isLowView, wantsGlow, c10bFile, c10bLayout, c10bOptionsFromSearch, countHitches, windowAverages } from "../../src/characters/noviceC10b.ts";
 
 test("C1.0-B：檔名與網址參數", () => {
   assert.equal(c10bFile("female", "lite"), "novice_c10b_female_lite.glb");
   const d = c10bOptionsFromSearch("?lab=c10b");
-  assert.deepEqual(d, { lod: "hq", count: 2, bench: 0, warmup: 2, view: "front", p1: false });
+  assert.deepEqual(d, { lod: "hq", count: 2, bench: 0, warmup: 2, view: "front", p1: false, p2: false });
   assert.equal(c10bOptionsFromSearch("?lab=c10b&p1=1").p1, true);
   const o = c10bOptionsFromSearch("?lab=c10b&lod=lite&count=99&bench=30&view=low");
   assert.equal(o.lod, "lite");
@@ -62,9 +62,39 @@ for (const g of ["male", "female"] as const)
   }
 
 test("C1.0-P P1：A/B 組名與發光標記", () => {
-  assert.match(c10pAbLabel({ p1: false }), /^A0/);
-  assert.match(c10pAbLabel({ p1: true }), /^A1/);
+  assert.match(c10pAbLabel({ p1: false, p2: false }), /^A0/);
+  assert.match(c10pAbLabel({ p1: true, p2: false }), /^A1/);
+  assert.match(c10pAbLabel({ p1: true, p2: true }), /^A2/);
   assert.equal(wantsGlow(undefined), false);
   assert.equal(wantsGlow({ glow: true }), true);
   assert.equal(wantsGlow({ glow: 1 }), false);
+});
+
+test("C1.0-P P2：模組分類（臉、身體、髮型、手、腳、服裝各自獨立）", () => {
+  assert.equal(c10pSlot("female0_head"), "face");
+  assert.equal(c10pSlot("male3_hand_l"), "body");
+  assert.equal(c10pSlot("female1_ponytail"), "hair");
+  assert.equal(c10pSlot("female1_bow_star"), "hair");
+  assert.equal(c10pSlot("male0_rivet_r"), "hands");
+  assert.equal(c10pSlot("male0_boot_sole"), "feet");
+  assert.equal(c10pSlot("female0_safety_shorts"), "outfit");
+  assert.equal(c10pSlot("male0_tabard_star"), "outfit");
+});
+
+test("C1.0-P P2：分組只合併同模組、同材質", () => {
+  const g = c10pMergeGroups([
+    { name: "hair", materialKey: "m6" },
+    { name: "shirt", materialKey: "c86" },
+    { name: "shorts", materialKey: "c86" },
+    { name: "bow", materialKey: "c86" },
+    { name: "ponytail", materialKey: "m6" },
+  ]);
+  assert.deepEqual(g.map((x) => [x.slot, x.indices]), [["hair", [0, 4]], ["outfit", [1, 2]], ["hair", [3]]]);
+});
+
+test("C1.0-P：影格時間分布與分段", () => {
+  assert.deepEqual(frameHistogram([1 / 60, 1 / 30, 1 / 20, 0.1]), { le20: 1, le37: 1, le54: 1, gt54: 1 });
+  const w = windowHistograms(Array.from({ length: 120 }, () => 1 / 60), 1);
+  assert.equal(w.length, 2);
+  assert.equal(w[0]!.le20, 60);
 });
