@@ -503,6 +503,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
   let benchStartLoad = 0;
   let sizeChanges = 0;
   let frameNo = 0;
+  let lastProbe = 0;
   let lastW = 0;
   let lastH = 0;
   let benchResult: BenchResult | null = null;
@@ -638,9 +639,10 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
       // 2) 發光層（GlowLayer）關閉
       let noGlow = all;
       if (render.glow) {
+        const was = render.glow.isEnabled;
         render.glow.isEnabled = false;
         noGlow = await measure();
-        render.glow.isEnabled = true;
+        render.glow.isEnabled = was;
       }
       // 3) 陰影貼圖不畫任何物件
       let noShadow = all;
@@ -650,9 +652,10 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
         sm.renderList.push(...smList);
       }
       // 4) 後製（HDR 管線）關閉
+      const postWas = scene.postProcessesEnabled;
       scene.postProcessesEnabled = false;
       const noPost = await measure();
-      scene.postProcessesEnabled = true;
+      scene.postProcessesEnabled = postWas;
       const after = await measure();
       const charSet = new Set<AbstractMesh>(charMeshes);
       const glowAll = !!render.glow && (render.glow as unknown as { _includedOnlyMeshes?: number[] })._includedOnlyMeshes?.length === 0;
@@ -715,9 +718,11 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
     const cpu = performance.now() - t0;
     let gpu: number | null = null;
     frameNo++;
-    if (opts.gpuProbe && frameNo % 30 === 0) {
+    // 每 0.5 秒量一次（約每 15～30 格）：gl.finish() 會等 GPU 畫完，所以這格的時間 ≈ CPU 提交＋GPU 執行
+    if (opts.gpuProbe && t0 - lastProbe >= 500) {
       gl.finish();
       gpu = performance.now() - t0;
+      lastProbe = t0;
     }
     const w = engine.getRenderWidth();
     const h = engine.getRenderHeight();

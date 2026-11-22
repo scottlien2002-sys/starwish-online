@@ -2084,7 +2084,7 @@ for (const name of browsers) {
         const br = await pg.evaluate(() => window.__starwishC10b.benchState().result);
         const rep = await pg.evaluate(() => window.__starwishC10b.report());
         run.results.push({ tag: "c10p P3 diag", breakdown: bd, bench: br });
-        check("P3 診斷：關陰影＋關發光時陰影與發光層不再畫角色", bd.share.shadowMap === 0 && bd.draws.all < bds.A2.hq.draws.all, [bd.draws, bd.share]);
+        check("P3 診斷：關陰影＋關發光時陰影與發光層都是 0 個繪製", bd.share.shadowMap === 0 && bd.share.glowLayer === 0 && bd.draws.all < bds.A2.hq.draws.all, [bd.draws, bd.share]);
         check("P3 診斷：時間軸含 CPU 時間、GPU 探測、解析度紀錄", !!br && br.timeline.length >= 1 && br.timeline.some((w) => w.gpuN > 0) && br.sizeChanges === 0 && /時間軸/.test(rep) && /診斷開關/.test(rep), br && { tl: br.timeline, sz: br.renderSize });
         await pg.close();
       }

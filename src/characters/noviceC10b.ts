@@ -47,7 +47,7 @@ export interface C10bOptions {
   p2: boolean;
   /** P3 診斷開關（只用來量成本，不是優化方案）：?diag=noshadow,noglow,nopost,nomsaa,nochars */
   diag: C10pDiag[];
-  /** P3 診斷：每 30 格用 gl.finish() 量一次「CPU 提交＋GPU 完成」時間（?gpu=1） */
+  /** P3 診斷：每 0.5 秒用 gl.finish() 量一次「CPU 提交＋GPU 完成」時間（?gpu=1） */
   gpuProbe: boolean;
 }
 
