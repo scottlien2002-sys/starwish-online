@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-11-22T08:28:25.721Z",
+  "startedAt": "2026-11-22T08:52:29.339Z",
   "runs": [
     {
       "browser": "chromium",
@@ -24,23 +24,23 @@
         "植被：樹 ≥ 400、草叢與花有建立": {
           "ok": true,
           "detail": {
-            "trees": 521,
-            "smalls": 561,
-            "grass": 25315,
-            "flowers": 4349,
+            "trees": 501,
+            "smalls": 567,
+            "grass": 25253,
+            "flowers": 4329,
             "hiChunks": 4,
             "grassCells": 13,
             "flowerCells": 4,
             "shadowChunks": 3,
-            "buildMs": 400,
-            "colliders": 595
+            "buildMs": 297,
+            "colliders": 574
           }
         },
         "3D 畫面有繪製": {
           "ok": true,
           "detail": {
             "samples": 6348,
-            "distinctColors": 509,
+            "distinctColors": 527,
             "opaqueRatio": 1
           }
         },
@@ -90,14 +90,14 @@
             "st": {
               "phase": "running",
               "loop": 0,
-              "t": 0.8999999999999999,
+              "t": 1.0999999999999999,
               "result": null
             },
             "pl": {
-              "x": -52.678180805850396,
+              "x": -52.013816967020475,
               "y": 2,
-              "z": -60.262953406581694,
-              "yaw": 0.7266423406817285
+              "z": -59.51554408789803,
+              "yaw": 0.7266423406817272
             }
           }
         },
@@ -126,23 +126,23 @@
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 191.7738829330975
+              "meanLuma": 193.28824025480992
             },
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 199.60230231723438
+              "meanLuma": 201.2846010455107
             },
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 206.7318579072546
+              "meanLuma": 207.10305619595567
             }
           ]
         },
         "報告文字（含模式）": {
           "ok": true,
-          "detail": "星願物語 Stage 6 P2-1 星芽原野 地表與植被測試報告\n時間 2026/11/22 08:36:51\n網址參數 ?map=starsprout&quality=high&lod=hq\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 HQ：渲染畫質 high（解析度上限 2x、後製 開、陰影 柔和 PCSS 2048）／地圖 HQ／載入 1099 ms\n發光效果 修正後；診斷 無\n對照設定：陰影 "
+          "detail": "星願物語 Stage 6 P2-1 星芽原野 地表與植被測試報告\n時間 2026/11/22 08:59:26\n網址參數 ?map=starsprout&quality=high&lod=hq\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 HQ：渲染畫質 high（解析度上限 2x、後製 開、陰影 柔和 PCSS 2048）／地圖 HQ／載入 792 ms\n發光效果 修正後；診斷 無\n對照設定：陰影 預"
         },
         "沒有 WebGL Context Lost": {
           "ok": true,
@@ -171,28 +171,28 @@
         "info": {
           "quality": "high",
           "lod": "hq",
-          "loadMs": 1098.9000000000087,
+          "loadMs": 792.3999999999942,
           "chunks": 16,
           "terrainVerts": 33856,
           "terrainTris": 64800,
           "drawCalls": 92,
           "activeMeshes": 64,
-          "trianglesActive": 487331.3333333333,
+          "trianglesActive": 475353.3333333333,
           "meshes": 152,
           "materials": 16,
           "textures": 9,
           "labels": true,
           "veg": {
-            "trees": 521,
-            "smalls": 561,
-            "grass": 25315,
-            "flowers": 4349,
+            "trees": 501,
+            "smalls": 567,
+            "grass": 25253,
+            "flowers": 4329,
             "hiChunks": 4,
             "grassCells": 13,
             "flowerCells": 4,
             "shadowChunks": 3,
-            "buildMs": 400,
-            "colliders": 595
+            "buildMs": 297,
+            "colliders": 574
           },
           "nav": false,
           "contextLost": 0,
@@ -219,58 +219,58 @@
           "st": {
             "phase": "running",
             "loop": 0,
-            "t": 0.8999999999999999,
+            "t": 1.0999999999999999,
             "result": null
           },
           "pl": {
-            "x": -52.678180805850396,
+            "x": -52.013816967020475,
             "y": 2,
-            "z": -60.262953406581694,
-            "yaw": 0.7266423406817285
+            "z": -59.51554408789803,
+            "yaw": 0.7266423406817272
           }
         },
         "exposure": [
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 191.7738829330975
+            "meanLuma": 193.28824025480992
           },
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 199.60230231723438
+            "meanLuma": 201.2846010455107
           },
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 206.7318579072546
+            "meanLuma": 207.10305619595567
           }
         ],
         "after": {
           "quality": "high",
           "lod": "hq",
-          "loadMs": 1098.9000000000087,
+          "loadMs": 792.3999999999942,
           "chunks": 16,
           "terrainVerts": 33856,
           "terrainTris": 64800,
           "drawCalls": 92,
           "activeMeshes": 63,
-          "trianglesActive": 401819.3333333333,
+          "trianglesActive": 396949.3333333333,
           "meshes": 152,
           "materials": 16,
           "textures": 9,
           "labels": true,
           "veg": {
-            "trees": 521,
-            "smalls": 561,
-            "grass": 25315,
-            "flowers": 4349,
+            "trees": 501,
+            "smalls": 567,
+            "grass": 25253,
+            "flowers": 4329,
             "hiChunks": 6,
             "grassCells": 14,
             "flowerCells": 6,
             "shadowChunks": 4,
-            "buildMs": 400,
-            "colliders": 595
+            "buildMs": 297,
+            "colliders": 574
           },
           "nav": false,
           "contextLost": 0,
@@ -319,16 +319,16 @@
         "植被：樹 ≥ 400、草叢與花有建立": {
           "ok": true,
           "detail": {
-            "trees": 521,
-            "smalls": 561,
-            "grass": 11474,
-            "flowers": 2570,
+            "trees": 501,
+            "smalls": 567,
+            "grass": 11525,
+            "flowers": 2523,
             "hiChunks": 4,
             "grassCells": 9,
             "flowerCells": 4,
             "shadowChunks": 0,
-            "buildMs": 338,
-            "colliders": 595
+            "buildMs": 230,
+            "colliders": 574
           }
         },
         "3D 畫面有繪製": {
@@ -349,9 +349,9 @@
               "yaw": 0.7266423406817256
             },
             "p1": {
-              "x": -54.00690848351026,
+              "x": -53.6747265640953,
               "y": 2,
-              "z": -61.757772043949004,
+              "z": -61.38406738460717,
               "yaw": 0.726642340681726
             },
             "ground": 2
@@ -385,23 +385,23 @@
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 192.4496675144899
+              "meanLuma": 193.80963345913304
             },
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 199.7527894033398
+              "meanLuma": 201.30758324644148
             },
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 207.4159276226958
+              "meanLuma": 207.89498752349635
             }
           ]
         },
         "報告文字（含模式）": {
           "ok": true,
-          "detail": "星願物語 Stage 6 P2-1 星芽原野 地表與植被測試報告\n時間 2026/11/22 08:39:39\n網址參數 ?map=starsprout&quality=medium&lod=lite\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 Lite 中畫質：渲染畫質 medium（解析度上限 1.5x、後製 開、陰影 PCF 1024）／地圖 Lite／載入 915 ms\n發光效果 修正後；診斷"
+          "detail": "星願物語 Stage 6 P2-1 星芽原野 地表與植被測試報告\n時間 2026/11/22 09:01:54\n網址參數 ?map=starsprout&quality=medium&lod=lite\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 Lite 中畫質：渲染畫質 medium（解析度上限 1.5x、後製 開、陰影 PCF 1024）／地圖 Lite／載入 642 ms\n發光效果 修正後；診斷"
         },
         "沒有 WebGL Context Lost": {
           "ok": true,
@@ -429,28 +429,28 @@
         "info": {
           "quality": "medium",
           "lod": "lite",
-          "loadMs": 914.5,
+          "loadMs": 642.0999999999767,
           "chunks": 16,
           "terrainVerts": 15376,
           "terrainTris": 28800,
           "drawCalls": 82,
           "activeMeshes": 60,
-          "trianglesActive": 285145.3333333333,
+          "trianglesActive": 279035.3333333333,
           "meshes": 152,
           "materials": 16,
           "textures": 9,
           "labels": true,
           "veg": {
-            "trees": 521,
-            "smalls": 561,
-            "grass": 11474,
-            "flowers": 2570,
+            "trees": 501,
+            "smalls": 567,
+            "grass": 11525,
+            "flowers": 2523,
             "hiChunks": 4,
             "grassCells": 9,
             "flowerCells": 4,
             "shadowChunks": 0,
-            "buildMs": 338,
-            "colliders": 595
+            "buildMs": 230,
+            "colliders": 574
           },
           "nav": false,
           "contextLost": 0,
@@ -477,44 +477,44 @@
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 192.4496675144899
+            "meanLuma": 193.80963345913304
           },
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 199.7527894033398
+            "meanLuma": 201.30758324644148
           },
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 207.4159276226958
+            "meanLuma": 207.89498752349635
           }
         ],
         "after": {
           "quality": "medium",
           "lod": "lite",
-          "loadMs": 914.5,
+          "loadMs": 642.0999999999767,
           "chunks": 16,
           "terrainVerts": 15376,
           "terrainTris": 28800,
           "drawCalls": 82,
           "activeMeshes": 60,
-          "trianglesActive": 244311.33333333334,
+          "trianglesActive": 241083.33333333334,
           "meshes": 152,
           "materials": 16,
           "textures": 9,
           "labels": true,
           "veg": {
-            "trees": 521,
-            "smalls": 561,
-            "grass": 11474,
-            "flowers": 2570,
+            "trees": 501,
+            "smalls": 567,
+            "grass": 11525,
+            "flowers": 2523,
             "hiChunks": 4,
             "grassCells": 10,
             "flowerCells": 4,
             "shadowChunks": 0,
-            "buildMs": 338,
-            "colliders": 595
+            "buildMs": 230,
+            "colliders": 574
           },
           "nav": false,
           "contextLost": 0,
@@ -563,23 +563,23 @@
         "植被：樹 ≥ 400、草叢與花有建立": {
           "ok": true,
           "detail": {
-            "trees": 521,
-            "smalls": 561,
-            "grass": 11474,
-            "flowers": 2570,
+            "trees": 501,
+            "smalls": 567,
+            "grass": 11525,
+            "flowers": 2523,
             "hiChunks": 4,
             "grassCells": 9,
             "flowerCells": 4,
             "shadowChunks": 0,
-            "buildMs": 316,
-            "colliders": 595
+            "buildMs": 235,
+            "colliders": 574
           }
         },
         "3D 畫面有繪製": {
           "ok": true,
           "detail": {
             "samples": 2479,
-            "distinctColors": 318,
+            "distinctColors": 340,
             "opaqueRatio": 1
           }
         },
@@ -593,9 +593,9 @@
               "yaw": 0.7266423406817256
             },
             "p1": {
-              "x": -53.01036272526539,
+              "x": -51.68163504760556,
               "y": 2,
-              "z": -60.636658065923505,
+              "z": -59.141839428556175,
               "yaw": 0.726642340681726
             },
             "ground": 2
@@ -629,23 +629,23 @@
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 188.85112311043744
+              "meanLuma": 190.08719442785755
             },
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 197.65377784604152
+              "meanLuma": 199.13823911298238
             },
             {
-              "whiteAll": 0.004736191827209079,
+              "whiteAll": 0.004705684955536234,
               "whiteCenter": 0,
-              "meanLuma": 206.22557464900387
+              "meanLuma": 206.69113275696265
             }
           ]
         },
         "報告文字（含模式）": {
           "ok": true,
-          "detail": "星願物語 Stage 6 P2-1 星芽原野 地表與植被測試報告\n時間 2026/11/22 08:42:16\n網址參數 ?map=starsprout&quality=low&lod=lite\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 Lite 低畫質：渲染畫質 low（解析度上限 1.25x、後製 關、陰影 PCF 512）／地圖 Lite／載入 847 ms\n發光效果 修正後；診斷 無\n對照設"
+          "detail": "星願物語 Stage 6 P2-1 星芽原野 地表與植被測試報告\n時間 2026/11/22 09:04:15\n網址參數 ?map=starsprout&quality=low&lod=lite\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 Lite 低畫質：渲染畫質 low（解析度上限 1.25x、後製 關、陰影 PCF 512）／地圖 Lite／載入 632 ms\n發光效果 修正後；診斷 無\n對照設"
         },
         "沒有 WebGL Context Lost": {
           "ok": true,
@@ -673,28 +673,28 @@
         "info": {
           "quality": "low",
           "lod": "lite",
-          "loadMs": 847,
+          "loadMs": 632,
           "chunks": 16,
           "terrainVerts": 15376,
           "terrainTris": 28800,
           "drawCalls": 75,
           "activeMeshes": 60,
-          "trianglesActive": 285145.3333333333,
+          "trianglesActive": 279035.3333333333,
           "meshes": 152,
           "materials": 16,
           "textures": 6,
           "labels": true,
           "veg": {
-            "trees": 521,
-            "smalls": 561,
-            "grass": 11474,
-            "flowers": 2570,
+            "trees": 501,
+            "smalls": 567,
+            "grass": 11525,
+            "flowers": 2523,
             "hiChunks": 4,
             "grassCells": 9,
             "flowerCells": 4,
             "shadowChunks": 0,
-            "buildMs": 316,
-            "colliders": 595
+            "buildMs": 235,
+            "colliders": 574
           },
           "nav": false,
           "contextLost": 0,
@@ -721,44 +721,44 @@
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 188.85112311043744
+            "meanLuma": 190.08719442785755
           },
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 197.65377784604152
+            "meanLuma": 199.13823911298238
           },
           {
-            "whiteAll": 0.004736191827209079,
+            "whiteAll": 0.004705684955536234,
             "whiteCenter": 0,
-            "meanLuma": 206.22557464900387
+            "meanLuma": 206.69113275696265
           }
         ],
         "after": {
           "quality": "low",
           "lod": "lite",
-          "loadMs": 847,
+          "loadMs": 632,
           "chunks": 16,
           "terrainVerts": 15376,
           "terrainTris": 28800,
           "drawCalls": 75,
           "activeMeshes": 60,
-          "trianglesActive": 244311.33333333334,
+          "trianglesActive": 241083.33333333334,
           "meshes": 152,
           "materials": 16,
           "textures": 6,
           "labels": true,
           "veg": {
-            "trees": 521,
-            "smalls": 561,
-            "grass": 11474,
-            "flowers": 2570,
+            "trees": 501,
+            "smalls": 567,
+            "grass": 11525,
+            "flowers": 2523,
             "hiChunks": 4,
             "grassCells": 10,
             "flowerCells": 4,
             "shadowChunks": 0,
-            "buildMs": 316,
-            "colliders": 595
+            "buildMs": 235,
+            "colliders": 574
           },
           "nav": false,
           "contextLost": 0,
@@ -807,23 +807,23 @@
         "植被：樹 ≥ 400、草叢與花有建立": {
           "ok": true,
           "detail": {
-            "trees": 521,
-            "smalls": 561,
-            "grass": 25315,
-            "flowers": 4349,
+            "trees": 501,
+            "smalls": 567,
+            "grass": 25253,
+            "flowers": 4329,
             "hiChunks": 4,
             "grassCells": 13,
             "flowerCells": 4,
             "shadowChunks": 3,
-            "buildMs": 412,
-            "colliders": 595
+            "buildMs": 301,
+            "colliders": 574
           }
         },
         "3D 畫面有繪製": {
           "ok": true,
           "detail": {
             "samples": 6348,
-            "distinctColors": 513,
+            "distinctColors": 531,
             "opaqueRatio": 1
           }
         },
@@ -837,9 +837,9 @@
               "yaw": 0.7266423406817256
             },
             "p1": {
-              "x": -54.67127232234017,
+              "x": -54.339090402925216,
               "y": 2,
-              "z": -62.50518136263267,
+              "z": -62.131476703290836,
               "yaw": 0.726642340681726
             },
             "ground": 2
@@ -873,14 +873,14 @@
             "st": {
               "phase": "running",
               "loop": 0,
-              "t": 4.100000000000001,
+              "t": 5.4999999999999964,
               "result": null
             },
             "pl": {
-              "x": -42.84216518974139,
-              "y": 2.2579446266211187,
-              "z": -48.29262760078523,
-              "yaw": 0.6564218112819421
+              "x": -38.85809675755895,
+              "y": 2.469724914969235,
+              "z": -42.59284759571545,
+              "yaw": 0.30733848064206226
             }
           }
         },
@@ -909,23 +909,23 @@
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 191.69286568524996
+              "meanLuma": 193.24766950494512
             },
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 199.56000985643595
+              "meanLuma": 201.25885115122054
             },
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 206.70319124355052
+              "meanLuma": 207.07017081980712
             }
           ]
         },
         "報告文字（含模式）": {
           "ok": true,
-          "detail": "星願物語 Stage 6 P2-1 星芽原野 地表與植被測試報告\n時間 2026/11/22 08:45:25\n網址參數 ?map=starsprout&quality=high&lod=hq\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 HQ：渲染畫質 high（解析度上限 2x、後製 開、陰影 柔和 PCSS 2048）／地圖 HQ／載入 2238 ms\n發光效果 修正後；診斷 無\n對照設定"
+          "detail": "星願物語 Stage 6 P2-1 星芽原野 地表與植被測試報告\n時間 2026/11/22 09:07:09\n網址參數 ?map=starsprout&quality=high&lod=hq\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 HQ：渲染畫質 high（解析度上限 2x、後製 開、陰影 柔和 PCSS 2048）／地圖 HQ／載入 1658 ms\n發光效果 修正後；診斷 無\n對照設定"
         },
         "沒有 WebGL Context Lost": {
           "ok": true,
@@ -954,28 +954,28 @@
         "info": {
           "quality": "high",
           "lod": "hq",
-          "loadMs": 2238,
+          "loadMs": 1658,
           "chunks": 16,
           "terrainVerts": 33856,
           "terrainTris": 64800,
           "drawCalls": 92,
           "activeMeshes": 64,
-          "trianglesActive": 487331.3333333333,
+          "trianglesActive": 475353.3333333333,
           "meshes": 152,
           "materials": 16,
           "textures": 9,
           "labels": true,
           "veg": {
-            "trees": 521,
-            "smalls": 561,
-            "grass": 25315,
-            "flowers": 4349,
+            "trees": 501,
+            "smalls": 567,
+            "grass": 25253,
+            "flowers": 4329,
             "hiChunks": 4,
             "grassCells": 13,
             "flowerCells": 4,
             "shadowChunks": 3,
-            "buildMs": 412,
-            "colliders": 595
+            "buildMs": 301,
+            "colliders": 574
           },
           "nav": false,
           "contextLost": 0,
@@ -1002,58 +1002,58 @@
           "st": {
             "phase": "running",
             "loop": 0,
-            "t": 4.100000000000001,
+            "t": 5.4999999999999964,
             "result": null
           },
           "pl": {
-            "x": -42.84216518974139,
-            "y": 2.2579446266211187,
-            "z": -48.29262760078523,
-            "yaw": 0.6564218112819421
+            "x": -38.85809675755895,
+            "y": 2.469724914969235,
+            "z": -42.59284759571545,
+            "yaw": 0.30733848064206226
           }
         },
         "exposure": [
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 191.69286568524996
+            "meanLuma": 193.24766950494512
           },
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 199.56000985643595
+            "meanLuma": 201.25885115122054
           },
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 206.70319124355052
+            "meanLuma": 207.07017081980712
           }
         ],
         "after": {
           "quality": "high",
           "lod": "hq",
-          "loadMs": 2238,
+          "loadMs": 1658,
           "chunks": 16,
           "terrainVerts": 33856,
           "terrainTris": 64800,
           "drawCalls": 93,
           "activeMeshes": 64,
-          "trianglesActive": 408503.3333333333,
+          "trianglesActive": 403633.3333333333,
           "meshes": 152,
           "materials": 16,
           "textures": 9,
           "labels": true,
           "veg": {
-            "trees": 521,
-            "smalls": 561,
-            "grass": 25315,
-            "flowers": 4349,
+            "trees": 501,
+            "smalls": 567,
+            "grass": 25253,
+            "flowers": 4329,
             "hiChunks": 6,
             "grassCells": 14,
             "flowerCells": 6,
             "shadowChunks": 4,
-            "buildMs": 412,
-            "colliders": 595
+            "buildMs": 301,
+            "colliders": 574
           },
           "nav": false,
           "contextLost": 0,
@@ -1102,23 +1102,23 @@
         "植被：樹 ≥ 400、草叢與花有建立": {
           "ok": true,
           "detail": {
-            "trees": 521,
-            "smalls": 561,
-            "grass": 11474,
-            "flowers": 2570,
+            "trees": 501,
+            "smalls": 567,
+            "grass": 11501,
+            "flowers": 2707,
             "hiChunks": 4,
             "grassCells": 9,
             "flowerCells": 4,
             "shadowChunks": 0,
-            "buildMs": 329,
-            "colliders": 595
+            "buildMs": 270,
+            "colliders": 574
           }
         },
         "3D 畫面有繪製": {
           "ok": true,
           "detail": {
             "samples": 3568,
-            "distinctColors": 368,
+            "distinctColors": 367,
             "opaqueRatio": 1
           }
         },
@@ -1132,9 +1132,9 @@
               "yaw": 0.7266423406817256
             },
             "p1": {
-              "x": -50.020725450530776,
+              "x": -49.306534323788576,
               "y": 2,
-              "z": -57.27331613184701,
+              "z": -56.46985111426212,
               "yaw": 0.726642340681726
             },
             "ground": 2
@@ -1168,23 +1168,23 @@
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 192.41817241886892
+              "meanLuma": 193.6413365513511
             },
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 199.72437843280426
+              "meanLuma": 201.2470777468503
             },
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 207.3595644217098
+              "meanLuma": 207.83546680201957
             }
           ]
         },
         "報告文字（含模式）": {
           "ok": true,
-          "detail": "星願物語 Stage 6 P2-1 星芽原野 地表與植被測試報告\n時間 2026/11/22 08:47:17\n網址參數 ?map=starsprout&quality=medium&lod=lite\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 Lite 中畫質：渲染畫質 medium（解析度上限 1.5x、後製 開、陰影 PCF 1024）／地圖 Lite／載入 1189 ms\n發光效果 修"
+          "detail": "星願物語 Stage 6 P2-1 星芽原野 地表與植被測試報告\n時間 2026/11/22 09:08:58\n網址參數 ?map=starsprout&quality=medium&lod=lite\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 Lite 中畫質：渲染畫質 medium（解析度上限 1.5x、後製 開、陰影 PCF 1024）／地圖 Lite／載入 964 ms\n發光效果 修正"
         },
         "沒有 WebGL Context Lost": {
           "ok": true,
@@ -1212,28 +1212,28 @@
         "info": {
           "quality": "medium",
           "lod": "lite",
-          "loadMs": 1189,
+          "loadMs": 964,
           "chunks": 16,
           "terrainVerts": 15376,
           "terrainTris": 28800,
           "drawCalls": 82,
           "activeMeshes": 60,
-          "trianglesActive": 285145.3333333333,
+          "trianglesActive": 280267.3333333333,
           "meshes": 152,
           "materials": 16,
           "textures": 9,
           "labels": true,
           "veg": {
-            "trees": 521,
-            "smalls": 561,
-            "grass": 11474,
-            "flowers": 2570,
+            "trees": 501,
+            "smalls": 567,
+            "grass": 11501,
+            "flowers": 2707,
             "hiChunks": 4,
             "grassCells": 9,
             "flowerCells": 4,
             "shadowChunks": 0,
-            "buildMs": 329,
-            "colliders": 595
+            "buildMs": 270,
+            "colliders": 574
           },
           "nav": false,
           "contextLost": 0,
@@ -1260,44 +1260,44 @@
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 192.41817241886892
+            "meanLuma": 193.6413365513511
           },
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 199.72437843280426
+            "meanLuma": 201.2470777468503
           },
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 207.3595644217098
+            "meanLuma": 207.83546680201957
           }
         ],
         "after": {
           "quality": "medium",
           "lod": "lite",
-          "loadMs": 1189,
+          "loadMs": 964,
           "chunks": 16,
           "terrainVerts": 15376,
           "terrainTris": 28800,
           "drawCalls": 82,
           "activeMeshes": 60,
-          "trianglesActive": 244311.33333333334,
+          "trianglesActive": 241231.33333333334,
           "meshes": 152,
           "materials": 16,
           "textures": 9,
           "labels": true,
           "veg": {
-            "trees": 521,
-            "smalls": 561,
-            "grass": 11474,
-            "flowers": 2570,
+            "trees": 501,
+            "smalls": 567,
+            "grass": 11501,
+            "flowers": 2707,
             "hiChunks": 4,
             "grassCells": 10,
             "flowerCells": 4,
             "shadowChunks": 0,
-            "buildMs": 329,
-            "colliders": 595
+            "buildMs": 270,
+            "colliders": 574
           },
           "nav": false,
           "contextLost": 0,
@@ -1346,23 +1346,23 @@
         "植被：樹 ≥ 400、草叢與花有建立": {
           "ok": true,
           "detail": {
-            "trees": 521,
-            "smalls": 561,
-            "grass": 11474,
-            "flowers": 2570,
+            "trees": 501,
+            "smalls": 567,
+            "grass": 11501,
+            "flowers": 2707,
             "hiChunks": 4,
             "grassCells": 9,
             "flowerCells": 4,
             "shadowChunks": 0,
-            "buildMs": 320,
-            "colliders": 595
+            "buildMs": 226,
+            "colliders": 574
           }
         },
         "3D 畫面有繪製": {
           "ok": true,
           "detail": {
             "samples": 2479,
-            "distinctColors": 314,
+            "distinctColors": 340,
             "opaqueRatio": 1
           }
         },
@@ -1376,9 +1376,9 @@
               "yaw": 0.7266423406817256
             },
             "p1": {
-              "x": -50.68508928936069,
+              "x": -49.695187169504116,
               "y": 2,
-              "z": -58.020725450530676,
+              "z": -56.907085565692014,
               "yaw": 0.726642340681726
             },
             "ground": 2
@@ -1412,23 +1412,23 @@
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 189.40576066591493
+              "meanLuma": 190.02236562174522
             },
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 197.86426304563207
+              "meanLuma": 199.13354807437815
             },
             {
-              "whiteAll": 0.004553150597172013,
+              "whiteAll": 0.004522643725499168,
               "whiteCenter": 0,
-              "meanLuma": 206.18116353230022
+              "meanLuma": 206.64016474341796
             }
           ]
         },
         "報告文字（含模式）": {
           "ok": true,
-          "detail": "星願物語 Stage 6 P2-1 星芽原野 地表與植被測試報告\n時間 2026/11/22 08:49:13\n網址參數 ?map=starsprout&quality=low&lod=lite\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 Lite 低畫質：渲染畫質 low（解析度上限 1.25x、後製 關、陰影 PCF 512）／地圖 Lite／載入 1088 ms\n發光效果 修正後；診斷 "
+          "detail": "星願物語 Stage 6 P2-1 星芽原野 地表與植被測試報告\n時間 2026/11/22 09:10:49\n網址參數 ?map=starsprout&quality=low&lod=lite\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 Lite 低畫質：渲染畫質 low（解析度上限 1.25x、後製 關、陰影 PCF 512）／地圖 Lite／載入 823 ms\n發光效果 修正後；診斷 無"
         },
         "沒有 WebGL Context Lost": {
           "ok": true,
@@ -1456,28 +1456,28 @@
         "info": {
           "quality": "low",
           "lod": "lite",
-          "loadMs": 1088,
+          "loadMs": 823,
           "chunks": 16,
           "terrainVerts": 15376,
           "terrainTris": 28800,
           "drawCalls": 75,
           "activeMeshes": 60,
-          "trianglesActive": 285145.3333333333,
+          "trianglesActive": 280267.3333333333,
           "meshes": 152,
           "materials": 16,
           "textures": 6,
           "labels": true,
           "veg": {
-            "trees": 521,
-            "smalls": 561,
-            "grass": 11474,
-            "flowers": 2570,
+            "trees": 501,
+            "smalls": 567,
+            "grass": 11501,
+            "flowers": 2707,
             "hiChunks": 4,
             "grassCells": 9,
             "flowerCells": 4,
             "shadowChunks": 0,
-            "buildMs": 320,
-            "colliders": 595
+            "buildMs": 226,
+            "colliders": 574
           },
           "nav": false,
           "contextLost": 0,
@@ -1504,44 +1504,44 @@
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 189.40576066591493
+            "meanLuma": 190.02236562174522
           },
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 197.86426304563207
+            "meanLuma": 199.13354807437815
           },
           {
-            "whiteAll": 0.004553150597172013,
+            "whiteAll": 0.004522643725499168,
             "whiteCenter": 0,
-            "meanLuma": 206.18116353230022
+            "meanLuma": 206.64016474341796
           }
         ],
         "after": {
           "quality": "low",
           "lod": "lite",
-          "loadMs": 1088,
+          "loadMs": 823,
           "chunks": 16,
           "terrainVerts": 15376,
           "terrainTris": 28800,
           "drawCalls": 75,
           "activeMeshes": 60,
-          "trianglesActive": 244311.33333333334,
+          "trianglesActive": 241231.33333333334,
           "meshes": 152,
           "materials": 16,
           "textures": 6,
           "labels": true,
           "veg": {
-            "trees": 521,
-            "smalls": 561,
-            "grass": 11474,
-            "flowers": 2570,
+            "trees": 501,
+            "smalls": 567,
+            "grass": 11501,
+            "flowers": 2707,
             "hiChunks": 4,
             "grassCells": 10,
             "flowerCells": 4,
             "shadowChunks": 0,
-            "buildMs": 320,
-            "colliders": 595
+            "buildMs": 226,
+            "colliders": 574
           },
           "nav": false,
           "contextLost": 0,
@@ -1568,6 +1568,6 @@
       "ok": true
     }
   ],
-  "finishedAt": "2026-11-22T08:49:13.606Z",
+  "finishedAt": "2026-11-22T09:10:49.149Z",
   "failures": 0
 }
