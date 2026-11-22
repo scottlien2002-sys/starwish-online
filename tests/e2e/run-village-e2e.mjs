@@ -65,11 +65,13 @@ for (const name of browsers) {
       // 走路：從傳送陣往北走 3 秒（5 m/s）
       const walk = await page.evaluate(async () => {
         const api = window.__starwishVillage;
+        const frames = (n) => new Promise((r) => { let i = 0; const f = () => (++i >= n ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); });
         api.teleport(0, -42.5, 0);
-        await new Promise((r) => setTimeout(r, 200));
+        await frames(3);
         const p0 = api.player();
         api.setMove({ x: 0, y: 1 });
-        await new Promise((r) => setTimeout(r, 1500));
+        // CI 軟體繪圖很慢：用幀數等待（每幀最多走 0.5 m）
+        await frames(40);
         api.setMove(null);
         const p1 = api.player();
         return { moved: Math.hypot(p1.x - p0.x, p1.z - p0.z), p1 };
@@ -79,13 +81,13 @@ for (const name of browsers) {
       // 往騎士軍團石階走：上高台（Y 2.5），再往城堡走：停在牆外
       const climb = await page.evaluate(async () => {
         const api = window.__starwishVillage;
+        const frames = (n) => new Promise((r) => { let i = 0; const f = () => (++i >= n ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); });
         api.teleport(0, 15, 0);
-        await new Promise((r) => setTimeout(r, 200));
+        await frames(3);
         api.setMove({ x: 0, y: 1 });
-        const t0 = performance.now();
-        while (performance.now() - t0 < 8000 && api.player().z < 24.2) await new Promise((r) => setTimeout(r, 50));
+        for (let i = 0; i < 600 && api.player().z < 24.2; i++) await frames(1);
         const top = api.player();
-        await new Promise((r) => setTimeout(r, 1500));
+        await frames(60);
         const wall = api.player();
         api.setMove(null);
         return { top, wall };
@@ -98,9 +100,10 @@ for (const name of browsers) {
         const api = window.__starwishVillage;
         // 教堂高台（獨立）南側邊緣
         api.teleport(30, -8.5, 180);
-        await new Promise((r) => setTimeout(r, 200));
+        const frames = (n) => new Promise((r) => { let i = 0; const f = () => (++i >= n ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); });
+        await frames(3);
         api.setMove({ x: 0, y: 1 });
-        await new Promise((r) => setTimeout(r, 1500));
+        await frames(60);
         api.setMove(null);
         return api.player();
       });
@@ -109,10 +112,11 @@ for (const name of browsers) {
       // 噴泉水池擋住
       const pool = await page.evaluate(async () => {
         const api = window.__starwishVillage;
+        const frames = (n) => new Promise((r) => { let i = 0; const f = () => (++i >= n ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); });
         api.teleport(0, -12, 0);
-        await new Promise((r) => setTimeout(r, 200));
+        await frames(3);
         api.setMove({ x: 0, y: 1 });
-        await new Promise((r) => setTimeout(r, 2000));
+        await frames(80);
         api.setMove(null);
         const p = api.player();
         return { ...p, r: Math.hypot(p.x, p.z) };

@@ -318,8 +318,11 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
     add(buildingGeo(scene, b), c.x, b.floor, c.z, (b.bearing * Math.PI) / 180);
   }
   // 星願之泉（佔位）：外池、內池、中央柱、星形水晶（另在發光網格）、金環
-  add(cyl(scene, FOUNTAIN.basinR * 2, FOUNTAIN.basinR * 2 + 0.4, 0.6, lite ? 36 : 56, 0, 0.3, 0, STONE));
-  add(cyl(scene, 6, 4, 0.6, 28, 0, 1.9, 0, STONE));
+  // 水池：池底（較低）＋池緣圓環；水面在池緣內側
+  add(cyl(scene, FOUNTAIN.basinR * 2, FOUNTAIN.basinR * 2 + 0.4, 0.2, lite ? 36 : 56, 0, 0.1, 0, STONE_DARK));
+  add(torus(scene, FOUNTAIN.basinR * 2 - 0.5, 0.6, lite ? 36 : 56, 0, 0.32, 0, STONE));
+  add(cyl(scene, 6, 4, 0.4, 28, 0, 1.8, 0, STONE));
+  add(torus(scene, 5.8, 0.35, 28, 0, 2.05, 0, STONE));
   add(cyl(scene, 1.6, 2.2, 1.6, 16, 0, 0.8, 0, STONE));
   add(cyl(scene, 1.2, 1.4, 3.5, 16, 0, 2.2 + 1.75, 0, STONE));
   // 燈座、長椅、路燈、門柱、傳送陣石柱
@@ -330,11 +333,12 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
       add(joinGeo([box(scene, 1.8, 0.12, 0.55, 0, 0.45, 0, WOOD), box(scene, 1.8, 0.5, 0.1, 0, 0.75, 0.25, WOOD), box(scene, 1.6, 0.4, 0.4, 0, 0.2, 0, STONE_DARK)]), cc.x, 0, cc.z, rot);
     }
     if (cc.kind === "lamp") add(joinGeo([cyl(scene, 0.14, 0.2, 3.2, 8, 0, 1.6, 0, [0.28, 0.28, 0.32]), cyl(scene, 0.5, 0.3, 0.5, 8, 0, 3.4, 0, GOLD)]), cc.x, 0, cc.z);
-    if (cc.kind === "gatePost") add(cyl(scene, 1, 1.2, 4.5, 10, cc.x, 2.25, cc.z, STONE));
+    if (cc.kind === "gatePost") add(cyl(scene, 1, 1.2, 6.6, 10, cc.x, 3.3, cc.z, STONE));
     if (cc.kind === "portalStone") add(cyl(scene, 0.7, 0.9, 1.6, 8, cc.x, 0.8, cc.z, STONE_DARK));
   }
-  add(box(scene, SOUTH_GATE.halfW * 2 + 1.2, 0.8, 1, 0, 4.6, SOUTH_GATE.z, STONE));
-  add(box(scene, 1, 0.8, WEST_GATE.halfW * 2 + 1.2, WEST_GATE.x, 4.6, 0, STONE));
+  // 拱門橫樑放高（6.6 m），進村時鏡頭不會被擋住
+  add(box(scene, SOUTH_GATE.halfW * 2 + 1.2, 0.8, 1, 0, 6.6, SOUTH_GATE.z, STONE));
+  add(box(scene, 1, 0.8, WEST_GATE.halfW * 2 + 1.2, WEST_GATE.x, 6.6, 0, STONE));
   add(box(scene, 0.4, 3.6, WEST_GATE.halfW * 2 - 0.8, WEST_GATE.x - 0.5, 1.8, 0, DOOR));
   // 戶外鍛造台（鐵砧、火爐、遮雨棚）
   add(joinGeo([box(scene, 2.4, 0.9, 2, 0, 0.45, 0, STONE_DARK), box(scene, 0.8, 0.6, 0.5, -0.5, 1.2, 0, [0.3, 0.3, 0.34]), box(scene, 2.8, 0.15, 2.4, 0, 2.3, 0, WOOD)]), FORGE.x, 0, FORGE.z, FORGE.rot);
@@ -375,11 +379,11 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
   waterMat.emissiveColor = new Color3(0.12, 0.22, 0.3);
   waterMat.specularColor = new Color3(0.3, 0.3, 0.3);
   const water = MeshBuilder.CreateCylinder("PH_vWater", { diameter: FOUNTAIN.basinR * 2 - 0.6, height: 0.05, tessellation: lite ? 36 : 56 }, scene);
-  water.position.y = 0.48;
+  water.position.y = 0.42;
   water.material = waterMat;
   water.isPickable = false;
-  const water2 = MeshBuilder.CreateCylinder("PH_vWater2", { diameter: 5.4, height: 0.05, tessellation: 28 }, scene);
-  water2.position.y = 2.15;
+  const water2 = MeshBuilder.CreateCylinder("PH_vWater2", { diameter: 5.5, height: 0.05, tessellation: 28 }, scene);
+  water2.position.y = 2.06;
   water2.material = waterMat;
   water2.isPickable = false;
   const waterMesh = Mesh.MergeMeshes([water, water2], true, true)!;
@@ -457,11 +461,12 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
   void shadows;
 
   // 文字標籤：建築名稱、NPC、傳送陣、噴泉
-  const labels: { mesh: Mesh; x: number; z: number }[] = [];
+  const labels: { mesh: Mesh; x: number; z: number; hide: number }[] = [];
   const label = (text: string, sub: string, x: number, y: number, z: number, w: number): void => {
     const p = textPlane(scene, text, sub, w);
     p.position.set(x, y, z);
-    labels.push({ mesh: p, x, z });
+    // 大標籤在角色附近 6 m 內隱藏、小標籤 2.5 m（不擋住角色）
+    labels.push({ mesh: p, x, z, hide: w >= 3.5 ? 6 : 2.5 });
   };
   for (const b of BUILDINGS) {
     const c = buildingCenter(b);
@@ -481,7 +486,7 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
       ringA.rotation.y += dt * 0.25;
       if (!labelsOn) return;
       // 角色附近 2.5 m 內的標籤隱藏（不擋住角色）
-      for (const l of labels) l.mesh.isVisible = Math.hypot(l.x - px, l.z - pz) > 2.5;
+      for (const l of labels) l.mesh.isVisible = Math.hypot(l.x - px, l.z - pz) > l.hide;
     },
     setLabels(on: boolean): void {
       labelsOn = on;

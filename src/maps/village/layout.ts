@@ -243,7 +243,7 @@ export const BOX_COLLIDERS: readonly BoxCollider[] = (() => {
   out.push({ kind: "forge", x: FORGE.x, z: FORGE.z, hw: FORGE.w / 2, hd: FORGE.d / 2, rot: FORGE.rot, y0: -0.5, y1: 2.2 });
   out.push({ kind: "board", x: BOARD.x, z: BOARD.z, hw: BOARD.w / 2, hd: BOARD.d / 2, rot: BOARD.rot, y0: -0.5, y1: 3.5 });
   // 西門關閉：門板擋住
-  out.push({ kind: "westGate", x: WEST_GATE.x - 0.5, z: 0, hw: 0.3, hd: WEST_GATE.halfW, rot: 0, y0: -0.5, y1: 4.5 });
+  out.push({ kind: "westGate", x: WEST_GATE.x - 0.5, z: 0, hw: 0.3, hd: WEST_GATE.halfW, rot: 0, y0: -0.5, y1: 3.6 });
   return out;
 })();
 
