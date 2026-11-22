@@ -126,6 +126,8 @@ class StarsproutPage {
   private shadowQ: "default" | "medium" = "default";
   private glowOff = false;
   private lockRatio: number | null = null;
+  /** 截圖用：畫面完全靜止（角色、鏡頭、水流、傳送門呼吸都停住） */
+  private frozen = false;
   private panel!: HTMLDivElement;
   private info!: HTMLDivElement;
   private reportBox!: HTMLTextAreaElement;
@@ -219,6 +221,12 @@ class StarsproutPage {
   private frame = (): void => {
     const rawDt = this.engine.getDeltaTime() / 1000;
     const dt = Math.min(rawDt, 0.1);
+    if (this.frozen) {
+      this.input.consumeCamera();
+      this.scene.render();
+      this.perf.update(dt);
+      return;
+    }
     this.keyboard.update();
     const run = this.run;
     let moveX = 0;
@@ -489,7 +497,8 @@ class StarsproutPage {
     lines.push(`時間 ${now.toLocaleString("zh-TW", { hour12: false })}`);
     lines.push(`網址參數 ${location.search || "(無)"}`);
     lines.push(`裝置 ${navigator.userAgent}`);
-    lines.push(`畫質 ${this.quality.level}／地圖 ${this.lod === "hq" ? "HQ" : "Lite"}／載入 ${Math.round(this.loadMs)} ms`);
+    const mode = this.quality.level === "low" && this.lod === "lite" ? "完整 Lite" : this.quality.level === "high" && this.lod === "hq" ? "HQ" : "混合（非標準組合）";
+    lines.push(`模式 ${mode}：渲染畫質 ${this.quality.level}（解析度上限 ${this.quality.maxPixelRatio}x、後製 ${this.quality.postProcess ? "開" : "關"}、陰影 ${this.quality.shadows.filter === "contact" ? "柔和 PCSS" : "PCF"} ${this.quality.shadows.mapSize}）／地圖 ${this.lod === "hq" ? "HQ" : "Lite"}／載入 ${Math.round(this.loadMs)} ms`);
     lines.push(`對照設定：陰影 ${this.shadowQ === "medium" ? "PCSS32（中）" : "預設（高）"}／發光層 ${this.glowOff || !this.render.glow ? "關" : "開"}／測試解析度 ${this.lockRatio ? this.lockRatio + "x" : "畫質上限"}`);
     lines.push(`地形 ${this.world.chunks.length} 塊、${this.world.terrainVerts} 頂點、${this.world.terrainTris} 三角形`);
     const table = routeTable();
@@ -576,9 +585,13 @@ class StarsproutPage {
       ovBtn.textContent = this.overview ? "回到角色" : "全景";
       panel.classList.remove("open");
     });
-    const lodBtn = btn(show, this.lod === "hq" ? "切換 Lite" : "切換 HQ", () => {
+    // 完整 Lite = 低畫質渲染（不走後製管線、PCF 陰影、解析度上限 1.25x、沒有發光層）＋Lite 地形；HQ = 高畫質＋HQ 地形
+    const fullLite = this.quality.level === "low" && this.lod === "lite";
+    const lodBtn = btn(show, fullLite ? "切換 HQ" : "切換完整 Lite", () => {
       const url = new URL(location.href);
-      url.searchParams.set("lod", this.lod === "hq" ? "lite" : "hq");
+      url.searchParams.set("lod", fullLite ? "hq" : "lite");
+      url.searchParams.set("quality", fullLite ? "high" : "low");
+      if (!fullLite) url.searchParams.delete("shadowq");
       location.replace(url.toString());
     });
     lodBtn.classList.add("alt");
@@ -670,6 +683,27 @@ class StarsproutPage {
         this.input.moveOverride = m;
       },
       setLabels: (on: boolean) => this.world.setLabels(on),
+      /** 截圖用：角色站在 (x,z) 面向 playerYawDeg（0 = 北），鏡頭從 camBearingDeg 方向看角色，並停住畫面 */
+      pose: (o: { x: number; z: number; playerYawDeg: number; camBearingDeg: number; beta: number; radius: number; freeze?: boolean }) => {
+        this.frozen = false;
+        this.teleport(o.x, o.z, (o.playerYawDeg * Math.PI) / 180);
+        this.player.update(0.016, 0);
+        const b = (o.camBearingDeg * Math.PI) / 180;
+        this.camera.snap(this.pos, Math.atan2(Math.cos(b), Math.sin(b)), o.beta, o.radius);
+        this.sun.position.copyFrom(this.pos).subtractInPlace(this.sun.direction.scale(45));
+        this.frozen = o.freeze ?? true;
+      },
+      unfreeze: () => {
+        this.frozen = false;
+      },
+      /** 陰影取樣品質：default = 原始高品質、medium = PCSS32（只影響高畫質的柔和陰影） */
+      setShadowQuality: (q: "default" | "medium") => {
+        if (!this.shadows.useContactHardeningShadow) return false;
+        this.shadowQ = q;
+        this.shadows.filteringQuality = q === "medium" ? ShadowGenerator.QUALITY_MEDIUM : ShadowGenerator.QUALITY_HIGH;
+        return true;
+      },
+      shadowInfo: () => ({ q: this.shadowQ, filtering: this.shadows.filteringQuality, contact: this.shadows.useContactHardeningShadow, mapSize: this.quality.shadows.mapSize }),
       setNav: (on: boolean) => this.world.setNav(on),
       view: (name: string) => this.view(name),
       startRoute: (loops: number) => this.startRoute(loops),

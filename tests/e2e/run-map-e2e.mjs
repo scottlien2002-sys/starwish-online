@@ -38,7 +38,8 @@ for (const name of browsers) {
     page.on("pageerror", (e) => run.errors.push(`pageerror: ${e.message}`));
     page.on("console", (m) => m.type() === "error" && run.errors.push(`console: ${m.text()}`));
     try {
-      await page.goto(server.url + `/?map=starsprout&quality=high&lod=${lod}`, { waitUntil: "load" });
+      // HQ = 高畫質＋HQ 地形；完整 Lite = 低畫質渲染＋Lite 地形
+      await page.goto(server.url + `/?map=starsprout&quality=${lod === "hq" ? "high" : "low"}&lod=${lod}`, { waitUntil: "load" });
       const ready = await page
         .waitForFunction(() => window.__starwishMap?.ready === true || document.querySelector(".boot-status.error"), null, { timeout: 90000 })
         .then(() => page.evaluate(() => window.__starwishMap?.ready === true))
@@ -51,6 +52,7 @@ for (const name of browsers) {
       const info = await page.evaluate(() => window.__starwishMap.info());
       run.results.info = info;
       check("地形 16 塊", info.chunks === 16, info.chunks);
+      check(lod === "hq" ? "HQ 使用高畫質渲染" : "完整 Lite 使用低畫質渲染（不是高畫質＋Lite 地形）", info.quality === (lod === "hq" ? "high" : "low"), info.quality);
       check(lod === "hq" ? "HQ 地形 1 公尺網格（約 6.5 萬三角形）" : "Lite 地形 1.5 公尺網格（約 2.9 萬三角形）", lod === "hq" ? info.terrainTris === 64800 : info.terrainTris === 28800, info.terrainTris);
       const px = await page.evaluate(() => window.__starwishMap.pixelStats());
       check("3D 畫面有繪製", px.distinctColors >= 20 && px.opaqueRatio > 0.3, px);
@@ -119,8 +121,13 @@ for (const name of browsers) {
         check("路線測試：自動沿主路前進、沒有卡住", st.phase === "running" && st.t > 0 && Math.hypot(pl.x + 56, pl.z + 64) > 3 && !(st.result && st.result.stuck.length), { st, pl });
         await shot(page, "route");
       }
+      if (lod === "hq") {
+        // 陰影品質可在同一頁切換（畫質對照用）
+        const sq = await page.evaluate(() => [window.__starwishMap.setShadowQuality("medium"), window.__starwishMap.shadowInfo(), window.__starwishMap.setShadowQuality("default"), window.__starwishMap.shadowInfo()]);
+        check("陰影品質可切換（原始 ↔ PCSS32）", sq[0] === true && sq[1].q === "medium" && sq[3].q === "default" && sq[1].filtering !== sq[3].filtering, sq);
+      }
       const rep = await page.evaluate(() => window.__starwishMap.report());
-      check("報告文字", /Stage 6 P1/.test(rep) && /主路線/.test(rep), rep.slice(0, 200));
+      check("報告文字（含模式）", /Stage 6 P1/.test(rep) && /主路線/.test(rep) && (lod === "hq" ? /模式 HQ/.test(rep) : /模式 完整 Lite/.test(rep)), rep.slice(0, 300));
       const after = await page.evaluate(() => window.__starwishMap.info());
       check("沒有 WebGL Context Lost", after.contextLost === 0, after.contextLost);
       run.results.after = after;
