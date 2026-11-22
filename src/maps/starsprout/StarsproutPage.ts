@@ -126,6 +126,8 @@ class StarsproutPage {
   private shadowQ: "default" | "medium" = "default";
   private glowOff = false;
   private lockRatio: number | null = null;
+  private diag = new Set<string>();
+  private fxLegacy = false;
   /** 截圖用：畫面完全靜止（角色、鏡頭、水流、傳送門呼吸都停住） */
   private frozen = false;
   private panel!: HTMLDivElement;
@@ -181,11 +183,18 @@ class StarsproutPage {
     // 出生時面向第一段路（往東北）
     this.yaw = Math.atan2(MAIN_ROUTE[1]!.x - start.x, MAIN_ROUTE[1]!.z - start.z);
     this.camera.snap(this.pos, this.alphaBehind(this.yaw), TUNING.camera.defaultBeta, TUNING.camera.distance);
-    this.render = setupRendering(scene, this.camera.camera, this.quality);
+    // 診斷開關（預設全部關閉）：&diag=noglow,nohdr,norune,noportal；&fx=old 重現修正前的發光效果
+    this.diag = new Set((params.get("diag") ?? "").split(",").filter(Boolean));
+    this.fxLegacy = params.get("fx") === "old";
+    this.render = setupRendering(scene, this.camera.camera, this.quality, this.diag.has("nohdr") ? { hdr: false } : {});
     // 效能對照：&glow=0 關閉發光層（遺跡符文、傳送門不發光暈）
-    this.glowOff = params.get("glow") === "0";
+    this.glowOff = params.get("glow") === "0" || this.diag.has("noglow");
     if (this.glowOff && this.render.glow) this.render.glow.isEnabled = false;
-    this.world = buildStarsproutWorld(scene, this.terrain, this.shadows, this.render.glow, this.lod);
+    this.world = buildStarsproutWorld(scene, this.terrain, this.shadows, this.render.glow, this.lod, {
+      legacy: this.fxLegacy,
+      runeOff: this.diag.has("norune"),
+      portalOff: this.diag.has("noportal"),
+    });
     if (params.get("labels") === "0") this.world.setLabels(false);
     if (params.get("nav") === "1") this.world.setNav(true);
 
@@ -489,6 +498,13 @@ class StarsproutPage {
     this.hud.toast(`${run.label}${why}：${run.loopTimes.map((t) => t.toFixed(1) + " 秒").join("、") || "未走完"}`, 4000);
   }
 
+  modeName(): string {
+    if (this.quality.level === "high" && this.lod === "hq") return "HQ";
+    if (this.quality.level === "medium" && this.lod === "lite") return "Lite 中畫質";
+    if (this.quality.level === "low" && this.lod === "lite") return "Lite 低畫質";
+    return `非標準組合（${this.quality.level}＋${this.lod}）`;
+  }
+
   report(): string {
     const r = this.lastResult;
     const lines: string[] = [];
@@ -497,8 +513,9 @@ class StarsproutPage {
     lines.push(`時間 ${now.toLocaleString("zh-TW", { hour12: false })}`);
     lines.push(`網址參數 ${location.search || "(無)"}`);
     lines.push(`裝置 ${navigator.userAgent}`);
-    const mode = this.quality.level === "low" && this.lod === "lite" ? "完整 Lite" : this.quality.level === "high" && this.lod === "hq" ? "HQ" : "混合（非標準組合）";
+    const mode = this.modeName();
     lines.push(`模式 ${mode}：渲染畫質 ${this.quality.level}（解析度上限 ${this.quality.maxPixelRatio}x、後製 ${this.quality.postProcess ? "開" : "關"}、陰影 ${this.quality.shadows.filter === "contact" ? "柔和 PCSS" : "PCF"} ${this.quality.shadows.mapSize}）／地圖 ${this.lod === "hq" ? "HQ" : "Lite"}／載入 ${Math.round(this.loadMs)} ms`);
+    lines.push(`發光效果 ${this.fxLegacy ? "修正前（fx=old）" : "修正後"}；診斷 ${[...this.diag].join(",") || "無"}`);
     lines.push(`對照設定：陰影 ${this.shadowQ === "medium" ? "PCSS32（中）" : "預設（高）"}／發光層 ${this.glowOff || !this.render.glow ? "關" : "開"}／測試解析度 ${this.lockRatio ? this.lockRatio + "x" : "畫質上限"}`);
     lines.push(`地形 ${this.world.chunks.length} 塊、${this.world.terrainVerts} 頂點、${this.world.terrainTris} 三角形`);
     const table = routeTable();
@@ -585,16 +602,22 @@ class StarsproutPage {
       ovBtn.textContent = this.overview ? "回到角色" : "全景";
       panel.classList.remove("open");
     });
-    // 完整 Lite = 低畫質渲染（不走後製管線、PCF 陰影、解析度上限 1.25x、沒有發光層）＋Lite 地形；HQ = 高畫質＋HQ 地形
-    const fullLite = this.quality.level === "low" && this.lod === "lite";
-    const lodBtn = btn(show, fullLite ? "切換 HQ" : "切換完整 Lite", () => {
-      const url = new URL(location.href);
-      url.searchParams.set("lod", fullLite ? "hq" : "lite");
-      url.searchParams.set("quality", fullLite ? "high" : "low");
-      if (!fullLite) url.searchParams.delete("shadowq");
-      location.replace(url.toString());
-    });
-    lodBtn.classList.add("alt");
+    // 三種標準模式：HQ（高畫質＋HQ 地形）、Lite 中畫質（中畫質＋Lite 地形）、Lite 低畫質（低畫質＋Lite 地形）
+    const modes: [string, string, string][] = [
+      ["HQ", "high", "hq"],
+      ["Lite 中", "medium", "lite"],
+      ["Lite 低", "low", "lite"],
+    ];
+    for (const [label, q, l] of modes) {
+      const b = btn(show, label, () => {
+        const url = new URL(location.href);
+        url.searchParams.set("quality", q);
+        url.searchParams.set("lod", l);
+        location.replace(url.toString());
+      }, "alt");
+      if (this.quality.level === q && this.lod === l) b.classList.add("go");
+    }
+
     const test = section("測試");
     btn(test, "路線 1 圈", () => {
       panel.classList.remove("open");
@@ -707,6 +730,36 @@ class StarsproutPage {
         this.shadows.filteringQuality = q === "medium" ? ShadowGenerator.QUALITY_MEDIUM : ShadowGenerator.QUALITY_HIGH;
         return true;
       },
+      /** 過曝量測：整個畫面與中央（角色附近）接近純白（RGB 都 ≥ 245）的像素比例 */
+      exposure: () =>
+        new Promise<{ whiteAll: number; whiteCenter: number; meanLuma: number }>((resolve, reject) => {
+          this.scene.onAfterRenderObservable.addOnce(() => {
+            const w = this.engine.getRenderWidth();
+            const h = this.engine.getRenderHeight();
+            this.engine
+              .readPixels(0, 0, w, h)
+              .then((view) => {
+                const d = new Uint8Array(view.buffer, view.byteOffset, view.byteLength);
+                let all = 0, white = 0, cAll = 0, cWhite = 0, luma = 0;
+                for (let y = 0; y < h; y += 2) {
+                  for (let x = 0; x < w; x += 2) {
+                    const k = (y * w + x) * 4;
+                    const r = d[k]!, g = d[k + 1]!, b = d[k + 2]!;
+                    const wht = r >= 245 && g >= 245 && b >= 245 ? 1 : 0;
+                    all++;
+                    white += wht;
+                    luma += 0.2126 * r + 0.7152 * g + 0.0722 * b;
+                    if (x > w * 0.3 && x < w * 0.7 && y > h * 0.25 && y < h * 0.85) {
+                      cAll++;
+                      cWhite += wht;
+                    }
+                  }
+                }
+                resolve({ whiteAll: white / all, whiteCenter: cWhite / Math.max(1, cAll), meanLuma: luma / all });
+              })
+              .catch(reject);
+          });
+        }),
       shadowInfo: () => ({ q: this.shadowQ, filtering: this.shadows.filteringQuality, contact: this.shadows.useContactHardeningShadow, mapSize: this.quality.shadows.mapSize }),
       setNav: (on: boolean) => this.world.setNav(on),
       view: (name: string) => this.view(name),

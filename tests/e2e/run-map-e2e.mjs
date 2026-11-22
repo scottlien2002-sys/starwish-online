@@ -25,11 +25,11 @@ for (const name of browsers) {
     failures++;
     continue;
   }
-  for (const lod of ["hq", "lite"]) {
-    const run = { browser: name, lod, checks: {}, errors: [], screenshots: [], results: {} };
+  for (const [mode, q, lod] of [["hq", "high", "hq"], ["lite-mid", "medium", "lite"], ["lite-low", "low", "lite"]]) {
+    const run = { browser: name, lod: mode, checks: {}, errors: [], screenshots: [], results: {} };
     const check = (k, ok, detail) => (run.checks[k] = { ok, detail });
     const shot = async (page, label) => {
-      const f = `${outDir}${name}_${lod}_${label}.png`;
+      const f = `${outDir}${name}_${mode}_${label}.png`;
       await page.screenshot({ path: f });
       run.screenshots.push(f.split("/test-results/")[1]);
     };
@@ -39,7 +39,7 @@ for (const name of browsers) {
     page.on("console", (m) => m.type() === "error" && run.errors.push(`console: ${m.text()}`));
     try {
       // HQ = 高畫質＋HQ 地形；完整 Lite = 低畫質渲染＋Lite 地形
-      await page.goto(server.url + `/?map=starsprout&quality=${lod === "hq" ? "high" : "low"}&lod=${lod}`, { waitUntil: "load" });
+      await page.goto(server.url + `/?map=starsprout&quality=${q}&lod=${lod}`, { waitUntil: "load" });
       const ready = await page
         .waitForFunction(() => window.__starwishMap?.ready === true || document.querySelector(".boot-status.error"), null, { timeout: 90000 })
         .then(() => page.evaluate(() => window.__starwishMap?.ready === true))
@@ -52,7 +52,7 @@ for (const name of browsers) {
       const info = await page.evaluate(() => window.__starwishMap.info());
       run.results.info = info;
       check("地形 16 塊", info.chunks === 16, info.chunks);
-      check(lod === "hq" ? "HQ 使用高畫質渲染" : "完整 Lite 使用低畫質渲染（不是高畫質＋Lite 地形）", info.quality === (lod === "hq" ? "high" : "low"), info.quality);
+      check(`${mode} 使用 ${q} 畫質渲染`, info.quality === q, info.quality);
       check(lod === "hq" ? "HQ 地形 1 公尺網格（約 6.5 萬三角形）" : "Lite 地形 1.5 公尺網格（約 2.9 萬三角形）", lod === "hq" ? info.terrainTris === 64800 : info.terrainTris === 28800, info.terrainTris);
       const px = await page.evaluate(() => window.__starwishMap.pixelStats());
       check("3D 畫面有繪製", px.distinctColors >= 20 && px.opaqueRatio > 0.3, px);
@@ -126,8 +126,22 @@ for (const name of browsers) {
         const sq = await page.evaluate(() => [window.__starwishMap.setShadowQuality("medium"), window.__starwishMap.shadowInfo(), window.__starwishMap.setShadowQuality("default"), window.__starwishMap.shadowInfo()]);
         check("陰影品質可切換（原始 ↔ PCSS32）", sq[0] === true && sq[1].q === "medium" && sq[3].q === "default" && sq[1].filtering !== sq[3].filtering, sq);
       }
+      // 傳送門平台：角色站在平台與符文上時不過曝
+      const expo = [];
+      for (const v of [
+        { x: 0, z: 74, playerYawDeg: 0, camBearingDeg: 180, beta: 1.05, radius: 9 },
+        { x: 0, z: 66, playerYawDeg: 0, camBearingDeg: 180, beta: 1.05, radius: 9 },
+        { x: 0, z: 66, playerYawDeg: 180, camBearingDeg: 0, beta: 1.0, radius: 6 },
+      ]) {
+        await page.evaluate((o) => window.__starwishMap.pose(o), v);
+        await settle(page, 4);
+        expo.push(await page.evaluate(() => window.__starwishMap.exposure()));
+      }
+      await page.evaluate(() => window.__starwishMap.unfreeze());
+      run.results.exposure = expo;
+      check("傳送門平台、符文附近畫面中央沒有過曝（純白像素 < 3%）", expo.every((e) => e.whiteCenter < 0.03), expo);
       const rep = await page.evaluate(() => window.__starwishMap.report());
-      check("報告文字（含模式）", /Stage 6 P1/.test(rep) && /主路線/.test(rep) && (lod === "hq" ? /模式 HQ/.test(rep) : /模式 完整 Lite/.test(rep)), rep.slice(0, 300));
+      check("報告文字（含模式）", /Stage 6 P1/.test(rep) && /主路線/.test(rep) && (mode === "hq" ? /模式 HQ/.test(rep) : mode === "lite-mid" ? /模式 Lite 中畫質/.test(rep) : /模式 Lite 低畫質/.test(rep)), rep.slice(0, 300));
       const after = await page.evaluate(() => window.__starwishMap.info());
       check("沒有 WebGL Context Lost", after.contextLost === 0, after.contextLost);
       run.results.after = after;
@@ -135,10 +149,10 @@ for (const name of browsers) {
       run.errors.push(`exception: ${e.message}`);
     }
     await ctx.close();
-    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 10;
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 11;
     if (!run.ok) failures++;
     report.runs.push(run);
-    console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / map ${lod}`);
+    console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / map ${mode}`);
     for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}${v.ok ? "" : "  " + JSON.stringify(v.detail).slice(0, 600)}`);
     console.log(`   · info ${JSON.stringify(run.results.info)}`);
     for (const e of run.errors) console.log(`   ! ${e}`);

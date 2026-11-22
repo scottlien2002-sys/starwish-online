@@ -29,6 +29,18 @@ import { RIVER_PATH, pointAt, type StarsproutTerrain } from "./terrain.ts";
  */
 export type MapLod = "hq" | "lite";
 
+/**
+ * 發光效果設定。
+ * legacy = 修正前（實心發光星形符文＋傳送門光芯自發光最高約 1.8 倍，全部以原強度進入發光層）——只用於重現與對照。
+ * 預設（修正後）：符文改為細線金色紋路、傳送門光芯自發光上限 1.0，並以每個物件各自的發光強度進入發光層。
+ * runeOff／portalOff：診斷用，關閉符文或傳送門光芯的自發光。
+ */
+export interface MapFxOptions {
+  legacy: boolean;
+  runeOff: boolean;
+  portalOff: boolean;
+}
+
 export interface StarsproutWorld {
   chunks: Mesh[];
   /** 地形頂點／三角形數 */
@@ -78,6 +90,7 @@ export function buildStarsproutWorld(
   shadows: ShadowGenerator,
   glow: GlowLayer | null,
   lod: MapLod,
+  fx: MapFxOptions = { legacy: false, runeOff: false, portalOff: false },
 ): StarsproutWorld {
   // ---------- 地形（4×4 分區） ----------
   const groundMat = litMaterial("PH_mapGroundMat", scene, 0.02);
@@ -173,12 +186,23 @@ export function buildStarsproutWorld(
   const stoneMat = litMaterial("PH_mapStoneMat", scene, 0.06);
   const ruins = buildRuins(scene, t, stoneMat);
   if (lod === "hq") shadows.addShadowCaster(ruins.pillars);
-  const rune = buildRune(scene);
+  const rune = fx.legacy ? buildRune(scene) : buildRuneLines(scene);
+  for (const m of rune) m.setEnabled(!fx.runeOff);
   if (glow) for (const m of rune) glow.addIncludedOnlyMesh(m);
 
   // ---------- 傳送門（平時可見；擊敗 Boss 並達成條件後才可使用） ----------
   const portal = buildPortal(scene, stoneMat);
   if (glow) glow.addIncludedOnlyMesh(portal.core);
+  if (fx.portalOff) portal.core.setEnabled(false);
+  if (glow && !fx.legacy) {
+    // 每個發光物件各自的發光量：符文只留淡淡金光，傳送門保留夢幻光暈；其他物件不發光
+    const runeSet = new Set<Mesh>(rune);
+    glow.customEmissiveColorSelector = (mesh, _sub, material, result) => {
+      const e = (material as StandardMaterial).emissiveColor ?? Color3.Black();
+      const k = runeSet.has(mesh as Mesh) ? 0.35 : mesh === portal.core ? 0.6 : 0;
+      result.set(e.r * k, e.g * k, e.b * k, 1);
+    };
+  }
   if (lod === "hq") shadows.addShadowCaster(portal.frame);
 
   // ---------- 標示：區域範圍、路線（1 次繪製）＋文字標籤（SpriteManager，2 次繪製） ----------
@@ -218,8 +242,14 @@ export function buildStarsproutWorld(
       // 水流：貼圖沿流向捲動
       water.tex.vOffset = -time * 0.35;
       // 傳送門光芯緩慢呼吸
-      const pulse = 0.35 + 0.1 * Math.sin(time * 1.6);
-      portal.coreMat.emissiveColor.set(0.55 * pulse * 2, 0.45 * pulse * 2, 1 * pulse * 2);
+      if (fx.legacy) {
+        const pulse = 0.35 + 0.1 * Math.sin(time * 1.6);
+        portal.coreMat.emissiveColor.set(0.55 * pulse * 2, 0.45 * pulse * 2, 1 * pulse * 2);
+      } else {
+        // 自發光上限 1.0（不超過色調映射範圍，避免整片泛白）
+        const pulse = 0.82 + 0.1 * Math.sin(time * 1.6);
+        portal.coreMat.emissiveColor.set(0.58 * pulse, 0.48 * pulse, 1 * pulse);
+      }
     },
   };
 }
@@ -450,6 +480,48 @@ function buildRune(scene: Scene): Mesh[] {
   star.freezeWorldMatrix();
   ring.freezeWorldMatrix();
   return [star, ring];
+}
+
+/**
+ * 修正後的符文：細線金色魔法紋路（星形外框＋內外兩圈），不是整片實心發光面。
+ * 實心發光星形直徑 7 公尺，鏡頭靠近時佔滿大半畫面，經發光層模糊後整片泛白（過曝根因之一）。
+ */
+function buildRuneLines(scene: Scene): Mesh[] {
+  const mat = new StandardMaterial("PH_runeLineMat", scene);
+  mat.disableLighting = true;
+  mat.emissiveColor = new Color3(0.86, 0.7, 0.36);
+  mat.diffuseColor = Color3.Black();
+  mat.specularColor = Color3.Black();
+  const parts: Mesh[] = [];
+  const pts: Vector3[] = [];
+  for (let i = 0; i < 10; i++) {
+    const a = (i / 10) * Math.PI * 2;
+    const r = i % 2 === 0 ? 3.4 : 1.35;
+    pts.push(new Vector3(ARENA.x + Math.sin(a) * r, ARENA.y + 0.06, ARENA.z + Math.cos(a) * r));
+  }
+  for (let i = 0; i < 10; i++) {
+    const a = pts[i]!;
+    const b = pts[(i + 1) % 10]!;
+    const len = Vector3.Distance(a, b);
+    const seg = MeshBuilder.CreateBox(`PH_runeSeg_${i}`, { width: 0.14, height: 0.02, depth: len + 0.12 }, scene);
+    seg.position.copyFrom(a.add(b).scale(0.5));
+    seg.rotation.y = Math.atan2(b.x - a.x, b.z - a.z);
+    parts.push(seg);
+  }
+  const inner = MeshBuilder.CreateTorus("PH_runeRingIn", { diameter: 8.2, thickness: 0.1, tessellation: 72 }, scene);
+  inner.position.set(ARENA.x, ARENA.y + 0.05, ARENA.z);
+  inner.scaling.y = 0.2;
+  const outer = MeshBuilder.CreateTorus("PH_runeRingOut", { diameter: 9.4, thickness: 0.07, tessellation: 72 }, scene);
+  outer.position.set(ARENA.x, ARENA.y + 0.05, ARENA.z);
+  outer.scaling.y = 0.2;
+  parts.push(inner, outer);
+  const m = Mesh.MergeMeshes(parts, true, true);
+  if (!m) throw new Error("rune merge failed");
+  m.name = "PH_runeLines";
+  m.material = mat;
+  m.isPickable = false;
+  m.freezeWorldMatrix();
+  return [m];
 }
 
 function buildPortal(scene: Scene, stoneMat: StandardMaterial): { frame: Mesh; core: Mesh; coreMat: StandardMaterial } {
