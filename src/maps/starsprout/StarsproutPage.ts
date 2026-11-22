@@ -22,6 +22,7 @@ import { buildVegetationView, type VegetationView } from "./StarsproutVegetation
 import { propColliders, propExclusions } from "./props.ts";
 import { buildPropsView, type PropsView } from "./StarsproutProps.ts";
 import type { Collider } from "./terrain.ts";
+import { CameraObstacleQuery, cameraObstaclesFrom } from "./cameraObstacles.ts";
 
 /**
  * Stage 6 第一階段：星芽原野地形與主要路線測試頁（?map=starsprout）。
@@ -120,6 +121,7 @@ class StarsproutPage {
   private readonly input = new InputState();
   private readonly keyboard: KeyboardInput;
   private camTouch!: CameraTouchControl;
+  private camObs: CameraObstacleQuery | null = null;
   private readonly pos = new Vector3();
   private yaw = 0;
   private overview = false;
@@ -191,7 +193,10 @@ class StarsproutPage {
     this.pos.set(start.x, this.terrain.surface(start.x, start.z), start.z);
     this.player = new PlayerAvatar(scene, this.shadows);
     this.player.root.position.copyFrom(this.pos);
-    this.camera = new ThirdPersonCamera(scene, this.pos, (x, z) => this.terrain.surface(x, z), { keepPitch: true });
+    this.camera = new ThirdPersonCamera(scene, this.pos, (x, z) => this.terrain.surface(x, z), {
+      keepPitch: true,
+      obstruct: (tx, ty, tz, dx, dy, dz, maxR) => (this.camObs ? this.camObs.distance(tx, ty, tz, dx, dy, dz, maxR) : maxR),
+    });
     scene.activeCamera = this.camera.camera;
     // 出生時面向第一段路（往東北）
     this.yaw = Math.atan2(MAIN_ROUTE[1]!.x - start.x, MAIN_ROUTE[1]!.z - start.z);
@@ -227,6 +232,9 @@ class StarsproutPage {
       this.veg.update(this.pos.x, this.pos.z, false);
     }
     this.colliders = colliders;
+    // 鏡頭避障：用現有碰撞資料中的大型障礙物（帳篷、涼亭、樹幹、石柱、拱門、傳送門柱）
+    this.camObs = new CameraObstacleQuery(cameraObstaclesFrom(colliders, (x, z) => this.terrain.surface(x, z)), TUNING.camera.maxDistance);
+    this.camera.obstructEnabled = params.get("camcol") !== "0";
     if (params.get("labels") === "0") this.world.setLabels(false);
     if (params.get("nav") === "1") this.world.setNav(true);
 
@@ -234,7 +242,7 @@ class StarsproutPage {
     this.hud.setLevel(1);
     this.hud.setBars({ hp: 100, maxHp: 100, mp: 40, maxMp: 40, exp: 0, expToNext: 100 });
     const build = hudRoot.querySelector<HTMLSpanElement>(".hud-build");
-    if (build) build.textContent = `Stage 6 P2-2 ${this.modeName()}`;
+    if (build) build.textContent = `Stage 6 P2-2 鏡頭避障 ${this.modeName()}`;
     this.hud.events.on("skillPressed", () => this.hud.toast("地形測試頁：這一階段沒有怪物與戰鬥", 1500));
     const joystick = new VirtualJoystick(this.hud.joystickZone, this.input, TUNING.joystick.radius, TUNING.joystick.deadZone);
     this.camTouch = new CameraTouchControl(canvas, this.input, TUNING.camera.rotateSensitivity, TUNING.camera.pitchSensitivity, TUNING.camera.pinchSensitivity);
@@ -599,6 +607,7 @@ class StarsproutPage {
     lines.push(`對照設定：陰影 ${this.shadowQ === "medium" ? "PCSS32（中）" : "預設（高）"}／發光層 ${this.glowOff || !this.render.glow ? "關" : "開"}／測試解析度 ${this.lockRatio ? this.lockRatio + "x" : "畫質上限"}`);
     const vs = this.veg?.stats();
     const ps = this.props?.stats();
+    lines.push(`鏡頭避障 ${this.camera.obstructEnabled ? "開" : "關（camcol=0）"}：大型障礙物 ${this.camObs?.total ?? 0}（附近 ${this.camObs?.nearby ?? 0}）`);
     lines.push(ps ? `營地與胡蘿蔔園 物件 ${ps.props}、網格 ${ps.meshes}、三角形 ${Math.round(ps.triangles)}（建立 ${Math.round(this.propsMs)} ms）` : "營地與胡蘿蔔園 關閉（props=0）");
     lines.push(vs ? `植被 樹 ${vs.trees}、灌木岩石 ${vs.smalls}、草叢 ${vs.grass}、花 ${vs.flowers}（建立 ${Math.round(this.vegMs)} ms）；碰撞物 ${this.colliders.length}` : "植被 關閉（veg=0）");
     lines.push(`地形 ${this.world.chunks.length} 塊、${this.world.terrainVerts} 頂點、${this.world.terrainTris} 三角形`);
@@ -785,7 +794,22 @@ class StarsproutPage {
         portal: PORTAL,
       }),
       player: () => ({ x: this.pos.x, y: this.pos.y, z: this.pos.z, yaw: this.yaw }),
-      camera: () => ({ alpha: this.camera.camera.alpha, beta: this.camera.camera.beta, radius: this.camera.camera.radius, touches: this.camTouch.activePointers }),
+      camera: () => ({
+        alpha: this.camera.camera.alpha,
+        beta: this.camera.camera.beta,
+        radius: this.camera.camera.radius,
+        desired: this.camera.desiredDistance,
+        allowed: this.camera.allowedRadius,
+        collision: this.camera.obstructEnabled,
+        obstacles: this.camObs?.total ?? 0,
+        nearby: this.camObs?.nearby ?? 0,
+        touches: this.camTouch.activePointers,
+        pos: { x: this.camera.camera.position.x, y: this.camera.camera.position.y, z: this.camera.camera.position.z },
+      }),
+      setCameraCollision: (on: boolean) => {
+        this.camera.obstructEnabled = on;
+      },
+      cameraObstacles: () => this.camObs?.list() ?? [],
       teleport: (x: number, z: number) => this.teleport(x, z),
       walkable: (x: number, z: number) => this.terrain.walkable(x, z),
       surface: (x: number, z: number) => this.terrain.surface(x, z),

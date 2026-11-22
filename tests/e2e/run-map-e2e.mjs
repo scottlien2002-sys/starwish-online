@@ -150,6 +150,67 @@ for (const name of browsers) {
       check("鏡頭：雙指張開拉近，距離 5–15 公尺，縮放時不旋轉", touch.pinch.r1 < touch.pinch.r0 - 0.5 && touch.pinch.r1 >= 4.99 && Math.abs(touch.pinch.dAlpha) < 0.001, touch.pinch);
       check("鏡頭：俯角限制內、鏡頭不鑽進地面", touch.pitch.beta >= 0.55 - 1e-6 && touch.pitch.beta <= 1.38 + 1e-6 && touch.pitch.aboveGround > 0.3, touch.pitch);
 
+      // 鏡頭避障：站在營地帳篷東南方 4 m，鏡頭從帳篷那一側看角色
+      const avoid = await page.evaluate(async () => {
+        const api = window.__starwishMap;
+        const W = innerWidth, H = innerHeight;
+        const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+        const frames = (n) => new Promise((r) => { let i = 0; const f = () => (++i >= n ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); });
+        const tent = api.cameraObstacles().find((o) => o.kind === "tent" && o.z > -60);
+        const px = tent.x + 3.2, pz = tent.z - 2.4;
+        const bearing = (Math.atan2(tent.x - px, tent.z - pz) * 180) / Math.PI;
+        const out = { tent: { x: tent.x, z: tent.z }, obstacles: api.camera().obstacles };
+        const outside = (c) => {
+          const h = Math.hypot(c.pos.x - tent.x, c.pos.z - tent.z);
+          const f = Math.min(1, Math.max(0, (c.pos.y - tent.y0) / (tent.y1 - tent.y0)));
+          return { horiz: h, coneR: tent.rBottom + (tent.rTop - tent.rBottom) * f, aboveTop: c.pos.y > tent.y1 };
+        };
+        // 關閉避障：鏡頭會在帳篷裡（對照）
+        api.setCameraCollision(false);
+        api.pose({ x: px, z: pz, playerYawDeg: 0, camBearingDeg: bearing, beta: 1.25, radius: 9, freeze: false });
+        await wait(500);
+        const off = api.camera();
+        out.off = { radius: off.radius, ...outside(off) };
+        // 開啟避障
+        api.setCameraCollision(true);
+        await wait(700);
+        const on = api.camera();
+        out.on = { radius: on.radius, desired: on.desired, allowed: on.allowed, ...outside(on) };
+        // 停住不動 40 幀：距離不抖動
+        const rs = [];
+        for (let i = 0; i < 40; i++) { await frames(1); rs.push(api.camera().radius); }
+        out.jitter = Math.max(...rs) - Math.min(...rs);
+        // 單指拖曳轉開（約 90°）：等障礙物離開後平滑回到 9 m，角度不重置
+        const a0 = api.camera().alpha;
+        const el = document.elementFromPoint(W * 0.6, H * 0.4);
+        const send = (t, x) => el.dispatchEvent(new PointerEvent(t, { pointerId: 60, clientX: x, clientY: H * 0.4, isPrimary: true, pointerType: "touch", bubbles: true, cancelable: true }));
+        send("pointerdown", W * 0.3);
+        for (let i = 1; i <= 20; i++) { send("pointermove", W * 0.3 + i * 12); await frames(1); }
+        send("pointerup", W * 0.3 + 240);
+        const rec = [];
+        for (let i = 0; i < 50; i++) { await wait(50); rec.push(api.camera().radius); }
+        const end = api.camera();
+        let maxDrop = 0;
+        for (let i = 1; i < rec.length; i++) maxDrop = Math.max(maxDrop, rec[i - 1] - rec[i]);
+        out.recover = { dAlpha: end.alpha - a0, start: rec[0], end: end.radius, desired: end.desired, maxDrop, maxStep: Math.max(...rec.slice(1).map((v, i) => Math.abs(v - rec[i]))) };
+        // 開關比較（同一位置）：Draw Calls
+        api.pose({ x: px, z: pz, playerYawDeg: 0, camBearingDeg: bearing, beta: 1.25, radius: 9, freeze: false });
+        await wait(800);
+        const dcOn = api.info().drawCalls;
+        api.setCameraCollision(false);
+        api.pose({ x: px, z: pz, playerYawDeg: 0, camBearingDeg: bearing, beta: 1.25, radius: 9, freeze: false });
+        await wait(800);
+        const dcOff = api.info().drawCalls;
+        api.setCameraCollision(true);
+        out.drawCalls = { on: dcOn, off: dcOff };
+        return out;
+      });
+      run.results.cameraAvoid = avoid;
+      check("鏡頭避障：對照組（關閉）鏡頭會進到帳篷裡", avoid.off.horiz < avoid.off.coneR && !avoid.off.aboveTop, avoid.off);
+      check("鏡頭避障：帳篷擋住時鏡頭拉近、在帳篷外", avoid.on.radius < 4.5 && avoid.on.radius >= 1.39 && (avoid.on.horiz > avoid.on.coneR || avoid.on.aboveTop) && Math.abs(avoid.on.desired - 9) < 0.01, avoid.on);
+      check("鏡頭避障：停住時距離不抖動（40 幀變化 < 2 公分）", avoid.jitter < 0.02, avoid.jitter);
+      check("鏡頭避障：轉開後平滑回到玩家設定距離、角度不重置", avoid.recover.end > 8.8 && Math.abs(avoid.recover.desired - 9) < 0.01 && avoid.recover.maxDrop < 0.05 && avoid.recover.maxStep < 1.2 && Math.abs(avoid.recover.dAlpha) > 1, avoid.recover);
+
       // 溪流不可走：從北岸往河裡走，會停在岸邊
       await page.evaluate(() => window.__starwishMap.teleport(-6, -3));
       await page.evaluate(() => window.__starwishMap.setMove({ x: 0, y: 0 }));
@@ -226,7 +287,7 @@ for (const name of browsers) {
       run.results.exposure = expo;
       check("傳送門平台、符文附近畫面中央沒有過曝（純白像素 < 3%）", expo.every((e) => e.whiteCenter < 0.03), expo);
       const rep = await page.evaluate(() => window.__starwishMap.report());
-      check("報告文字（含模式）", /Stage 6 P2-2/.test(rep) && /營地與胡蘿蔔園 物件/.test(rep) && /植被 樹/.test(rep) && /主路線/.test(rep) && (mode === "hq" ? /模式 HQ/.test(rep) : mode === "lite-mid" ? /模式 Lite 中畫質/.test(rep) : /模式 Lite 低畫質/.test(rep)), rep.slice(0, 300));
+      check("報告文字（含模式）", /Stage 6 P2-2/.test(rep) && /鏡頭避障 開/.test(rep) && /營地與胡蘿蔔園 物件/.test(rep) && /植被 樹/.test(rep) && /主路線/.test(rep) && (mode === "hq" ? /模式 HQ/.test(rep) : mode === "lite-mid" ? /模式 Lite 中畫質/.test(rep) : /模式 Lite 低畫質/.test(rep)), rep.slice(0, 300));
       const after = await page.evaluate(() => window.__starwishMap.info());
       check("沒有 WebGL Context Lost", after.contextLost === 0, after.contextLost);
       run.results.after = after;

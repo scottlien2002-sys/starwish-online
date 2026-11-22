@@ -20,15 +20,37 @@ export class ThirdPersonCamera {
   private readonly keepPitch: boolean;
   private userBeta: number = TUNING.camera.defaultBeta;
 
-  constructor(scene: Scene, initialTarget: Vector3, groundHeight: (x: number, z: number) => number = heightAt, opts: { keepPitch?: boolean } = {}) {
+  /**
+   * 鏡頭避障（選用）：回傳從角色沿鏡頭方向可放的最遠距離。
+   * 被擋時快速拉近、障礙物離開後平滑回到玩家設定的距離（desiredRadius 不會被改動）
+   */
+  private readonly obstruct: ((tx: number, ty: number, tz: number, dx: number, dy: number, dz: number, maxR: number) => number) | null;
+  private obstructClearT = 0;
+  private pulledIn = false;
+  /** 目前避障允許的距離（測試用） */
+  allowedRadius = Number.POSITIVE_INFINITY;
+  obstructEnabled = true;
+
+  constructor(
+    scene: Scene,
+    initialTarget: Vector3,
+    groundHeight: (x: number, z: number) => number = heightAt,
+    opts: { keepPitch?: boolean; obstruct?: (tx: number, ty: number, tz: number, dx: number, dy: number, dz: number, maxR: number) => number } = {},
+  ) {
     this.groundHeight = groundHeight;
     this.keepPitch = opts.keepPitch ?? false;
+    this.obstruct = opts.obstruct ?? null;
     const c = TUNING.camera;
     this.smoothTarget.copyFrom(initialTarget).addInPlaceFromFloats(0, c.targetHeight, 0);
     this.camera = new ArcRotateCamera("mainCamera", -Math.PI / 2, c.defaultBeta, c.distance, this.smoothTarget.clone(), scene);
     this.camera.minZ = 0.1;
     this.camera.maxZ = 400;
     this.camera.fov = 0.9;
+  }
+
+  /** 玩家設定的鏡頭距離（雙指縮放的目標，不受避障影響） */
+  get desiredDistance(): number {
+    return this.desiredRadius;
   }
 
   /** 攝影機看向的水平方向角（與 movement.inputToWorld 相同定義） */
@@ -47,6 +69,7 @@ export class ThirdPersonCamera {
     this.camera.radius = radius;
     this.desiredRadius = radius;
     this.userBeta = beta;
+    this.pulledIn = false;
   }
 
   update(dt: number, follow: Vector3, rotate: { yaw: number; pitch: number; zoom: number }): void {
@@ -57,13 +80,39 @@ export class ThirdPersonCamera {
     if (this.keepPitch) this.userBeta = clamp(this.userBeta - rotate.pitch, c.minBeta, c.maxBeta);
     else cam.beta = clamp(cam.beta - rotate.pitch, c.minBeta, c.maxBeta);
     this.desiredRadius = clamp(this.desiredRadius + rotate.zoom, c.minDistance, c.maxDistance);
-    cam.radius += (this.desiredRadius - cam.radius) * damp(12, dt);
 
     const k = damp(c.followSharpness, dt);
     this.smoothTarget.x += (follow.x - this.smoothTarget.x) * k;
     this.smoothTarget.y += (follow.y + c.targetHeight - this.smoothTarget.y) * k;
     this.smoothTarget.z += (follow.z - this.smoothTarget.z) * k;
     cam.target.copyFrom(this.smoothTarget);
+
+    if (this.obstruct && this.obstructEnabled) {
+      // 以玩家設定的距離與目前角度檢查「角色 → 鏡頭」線段（用玩家俯角，避免地面抬高造成來回）
+      const b = this.keepPitch ? Math.min(this.userBeta, cam.beta) : cam.beta;
+      const sb = Math.sin(b);
+      const allowed = this.obstruct(cam.target.x, cam.target.y, cam.target.z, Math.cos(cam.alpha) * sb, Math.cos(b), Math.sin(cam.alpha) * sb, this.desiredRadius);
+      this.allowedRadius = allowed;
+      const goal = Math.min(this.desiredRadius, allowed);
+      if (goal < cam.radius - 1e-3) {
+        // 被擋：很快拉近（不讓畫面看穿物件）
+        this.obstructClearT = 0;
+        this.pulledIn = true;
+        cam.radius += (goal - cam.radius) * damp(25, dt);
+      } else if (this.pulledIn && rotate.zoom === 0) {
+        // 擋住後：先等 0.25 秒確定真的離開（掠過樹幹時不會來回縮放），再平滑拉回玩家設定的距離
+        this.obstructClearT += dt;
+        if (this.obstructClearT >= 0.25) cam.radius += (goal - cam.radius) * damp(3.5, dt);
+        if (Math.abs(this.desiredRadius - cam.radius) < 0.03) this.pulledIn = false;
+      } else {
+        // 一般情況（含雙指縮放）：與原本相同
+        this.pulledIn = false;
+        cam.radius += (goal - cam.radius) * damp(12, dt);
+      }
+    } else {
+      this.allowedRadius = Number.POSITIVE_INFINITY;
+      cam.radius += (this.desiredRadius - cam.radius) * damp(12, dt);
+    }
 
     if (this.keepPitch) {
       // 依玩家俯角算出鏡頭位置；若會鑽進地面，求出「剛好在地面上方」的俯角（只取較高的那個），再平順移過去
