@@ -68,30 +68,28 @@ function p(kind: PropKind, pos: Vec2, rot: number, area: "camp" | "farm", big: b
 function buildCamp(): PropPlacement[] {
   const C = CAMP_CENTER;
   const out: PropPlacement[] = [];
-  // 帳篷：西南、西、西北，入口朝營地中央
-  const pav = at(C, 250, 8.2);
+  // 出生時鏡頭在角色西南方（約 222°）看向大門 → 西南方向只放低矮物件（營火、長椅），帳篷放在西北與東南
+  const pav = at(C, 292, 8.4);
   out.push(p("pavilion", pav, facing(pav, C), "camp", true));
-  const tA = at(C, 200, 8.6);
-  out.push(p("tent", tA, facing(tA, C), "camp", true));
-  const tB = at(C, 305, 8.6);
-  out.push(p("tent", tB, facing(tB, C), "camp", true, 0.95));
-  // 營火與兩張木頭長椅（營火在西南側，離出生點 6.4 公尺）
-  const fire = at(C, 222, 6.4);
+  const tA = at(C, 332, 8.8);
+  out.push(p("tent", tA, facing(tA, C), "camp", true, 0.95));
+  const tB = at(C, 168, 8.8);
+  out.push(p("tent", tB, facing(tB, C), "camp", true));
+  // 營火與兩張木頭長椅（營火在西南側，離出生點 6.4 公尺；長椅在營火外側）
+  const fire = at(C, 238, 6.4);
   out.push(p("campfire", fire, 0, "camp", true));
-  // 長椅在營火外側（遠離出生點那一側）
-  for (const b of [157, 287]) {
+  for (const b of [175, 300]) {
     const bp = at(fire, b, 2.1);
     out.push(p("logBench", bp, facing(bp, fire) + Math.PI / 2, "camp", false));
   }
-  // 補給：箱子、堆疊箱、物資架、木桶（南側到東南側，靠近小帳篷）
-  const cr = at(C, 168, 7.2);
-  out.push(p("crateStack", cr, rad(15), "camp", false));
-  out.push(p("crate", at(C, 160, 6.1), rad(-20), "camp", false, 0.85));
-  const rack = at(C, 140, 8.3);
+  // 補給：箱子、堆疊箱、物資架、木桶（東南側，靠近小帳篷）
+  out.push(p("crateStack", at(C, 140, 7.6), rad(15), "camp", false));
+  out.push(p("crate", at(C, 150, 6.3), rad(-20), "camp", false, 0.85));
+  const rack = at(C, 118, 8.6);
   out.push(p("rack", rack, facing(rack, C), "camp", false));
-  out.push(p("barrel", at(C, 128, 8.6), 0, "camp", false));
-  out.push(p("barrel", at(C, 124, 9.4), 0.8, "camp", false, 0.9));
-  out.push(p("crate", at(C, 268, 5.6), rad(35), "camp", false, 0.8));
+  out.push(p("barrel", at(C, 104, 8.8), 0, "camp", false));
+  out.push(p("barrel", at(C, 98, 9.6), 0.8, "camp", false, 0.9));
+  out.push(p("crate", at(C, 312, 5.8), rad(35), "camp", false, 0.8));
   // 大門：兩支布旗、兩盞燈、路牌（都在主路兩側 3 公尺外）
   const gateDir = { x: Math.sin(rad(CAMP_GATE_BEARING)), z: Math.cos(rad(CAMP_GATE_BEARING)) };
   const perp = { x: gateDir.z, z: -gateDir.x };

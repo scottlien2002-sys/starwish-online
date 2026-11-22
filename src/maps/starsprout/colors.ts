@@ -37,7 +37,8 @@ const ZONE_TINT: Record<string, ZoneTint> = {
   "03": { color: [0.62, 0.86, 0.5], strength: 0.4, speckle: [0.98, 0.72, 0.84] },
   "04": { color: [0.55, 0.82, 0.6], strength: 0.4, speckle: [0.85, 0.92, 1] },
   "05": { color: [0.62, 0.8, 0.5], strength: 0.4, speckle: [0.76, 0.62, 0.95] },
-  "06": { color: [0.66, 0.48, 0.32], strength: 0.85, rows: [0.45, 0.72, 0.35] },
+  // P2-2：田壟改為 3D 模型，地面只保留柔和的翻土色（不再畫條紋）
+  "06": { color: [0.62, 0.5, 0.36], strength: 0.7 },
   "07": { color: STONE, strength: 1 },
 };
 

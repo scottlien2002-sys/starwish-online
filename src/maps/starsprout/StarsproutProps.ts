@@ -55,15 +55,26 @@ function sphere(scene: Scene, d: number, seg: number, x: number, y: number, z: n
   return geoOf(m, (_x, _y, _z, _nx, ny) => shade(col, 0.88 + Math.max(0, ny) * 0.18));
 }
 
-/** 依角度交錯條紋（帳篷布） */
-const stripes = (a: RGB, b: RGB, n: number) => (x: number, _y: number, z: number): RGB => (Math.floor(((Math.atan2(x, z) / (Math.PI * 2)) + 1) * n) % 2 ? a : b);
+/** 條紋布（帳篷、屋頂）：每一條是獨立的弧面，顏色邊界清楚，不會互相漸層 */
+function stripedCone(scene: Scene, dTop: number, dBot: number, h: number, y: number, n: number, a: RGB, b: RGB): Geo {
+  const parts: Geo[] = [];
+  for (let k = 0; k < n; k++) {
+    const m = MeshBuilder.CreateCylinder("PH_propTmp", { diameterTop: dTop, diameterBottom: dBot, height: h, tessellation: n * 2, arc: 1 / n, cap: Mesh.NO_CAP, enclose: false }, scene);
+    m.position.y = y;
+    m.rotation.y = (k / n) * Math.PI * 2;
+    const col = k % 2 ? a : b;
+    parts.push(geoOf(m, (px, py, pz, _nx, ny) => shade(col, (0.94 + Math.max(0, ny) * 0.12) * (0.97 + noise(px, py, pz) * 0.06))));
+  }
+  return joinGeo(parts);
+}
 
 // ---------------- 各種物件（本地座標：正面朝 +Z、底部在 y=0） ----------------
 function pavilion(scene: Scene): Geo {
   const parts: Geo[] = [];
-  parts.push(cyl(scene, 5.2, 5.2, 1.6, 16, 0, 0.8, 0, stripes(CREAM, [0.9, 0.86, 0.96], 16), 0, 0, 0, false));
+  parts.push(stripedCone(scene, 5.2, 5.2, 1.6, 0.8, 12, CREAM, [0.9, 0.86, 0.97]));
   // 屋頂：紫／奶油條紋，下緣金邊
-  parts.push(cyl(scene, 0.35, 6.1, 2.3, 16, 0, 1.6 + 1.15, 0, (x, y, z) => (y < 1.85 ? GOLD : stripes(PURPLE, CREAM, 8)(x, y, z))));
+  parts.push(stripedCone(scene, 0.35, 6.1, 2.3, 1.6 + 1.15, 10, PURPLE, CREAM));
+  parts.push(cyl(scene, 6.05, 6.2, 0.2, 24, 0, 1.68, 0, GOLD, 0, 0, 0, false));
   parts.push(cyl(scene, 0.05, 0.3, 0.6, 8, 0, 4.1, 0, GOLD));
   parts.push(box(scene, 0.04, 0.5, 0.75, 0.38, 4.35, 0, PURPLE));
   // 入口（深色門洞＋兩片掀起的門簾）與門上金色星徽
@@ -75,7 +86,7 @@ function pavilion(scene: Scene): Geo {
 
 function tent(scene: Scene, color: RGB): Geo {
   const parts: Geo[] = [];
-  parts.push(cyl(scene, 0.12, 3.4, 2.6, 12, 0, 1.3, 0, stripes(color, CREAM, 6)));
+  parts.push(stripedCone(scene, 0.12, 3.4, 2.6, 1.3, 8, color, CREAM));
   parts.push(sphere(scene, 0.22, 4, 0, 2.65, 0, GOLD));
   parts.push(box(scene, 0.85, 1.15, 0.05, 0, 0.58, 1.5, [0.3, 0.24, 0.26], -0.48));
   // 營釘拉繩的木樁
@@ -143,7 +154,10 @@ function banner(scene: Scene): Geo {
   const parts: Geo[] = [cyl(scene, 0.1, 0.13, 3.8, 8, 0, 1.9, 0, WOOD_DARK)];
   parts.push(box(scene, 1.2, 0.08, 0.08, 0, 3.55, 0, WOOD_DARK));
   parts.push(sphere(scene, 0.18, 4, 0, 3.85, 0, GOLD));
-  parts.push(box(scene, 1.0, 1.9, 0.04, 0, 2.55, 0, (_x, y) => (y < 1.75 ? GOLD : y > 3.42 ? GOLD : PURPLE)));
+  // 旗布：紫色主體＋上下金色飾邊（分開的方塊，顏色邊界清楚）
+  parts.push(box(scene, 1.0, 1.55, 0.04, 0, 2.55, 0, PURPLE));
+  parts.push(box(scene, 1.04, 0.14, 0.05, 0, 3.38, 0, GOLD));
+  parts.push(box(scene, 1.04, 0.14, 0.05, 0, 1.72, 0, GOLD));
   parts.push(cyl(scene, 0.42, 0.42, 0.05, 5, 0, 2.7, 0.03, GOLD, Math.PI / 2));
   return joinGeo(parts);
 }
