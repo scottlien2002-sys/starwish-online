@@ -98,7 +98,7 @@ function blobTree(scene: Scene, kind: Exclude<TreeKind, "pine">, hi: boolean): G
 }
 
 function pineTree(scene: Scene, hi: boolean): Geo {
-  const tess = hi ? 12 : 6;
+  const tess = hi ? 16 : 7;
   const parts: Geo[] = [trunkGeo(scene, 1.6, 0.24, 0.42, hi ? 7 : 5, [0.48, 0.34, 0.26])];
   const tiers: [number, number, number][] = [
     [1.3, 3.2, 1.9],
@@ -193,11 +193,11 @@ function grassTemplate(scene: Scene): Mesh {
     const dx = Math.cos(a);
     const dz = Math.sin(a);
     const lean = 0.08 + (b % 3) * 0.05;
-    const h = 0.34 + (b % 3) * 0.1;
+    const h = 0.42 + (b % 3) * 0.12;
     const i0 = positions.length / 3;
     // 底部兩點、中段兩點、尖端一點（稍微往外彎）
-    positions.push(ox - dx * 0.075, 0, oz - dz * 0.075, ox + dx * 0.075, 0, oz + dz * 0.075);
-    positions.push(ox - dx * 0.05 - dz * lean * 0.4, h * 0.55, oz - dz * 0.05 + dx * lean * 0.4, ox + dx * 0.05 - dz * lean * 0.4, h * 0.55, oz + dz * 0.05 + dx * lean * 0.4);
+    positions.push(ox - dx * 0.11, 0, oz - dz * 0.11, ox + dx * 0.11, 0, oz + dz * 0.11);
+    positions.push(ox - dx * 0.075 - dz * lean * 0.4, h * 0.55, oz - dz * 0.075 + dx * lean * 0.4, ox + dx * 0.075 - dz * lean * 0.4, h * 0.55, oz + dz * 0.075 + dx * lean * 0.4);
     positions.push(ox - dz * lean, h, oz + dx * lean);
     for (const c of [base, base, mid, mid, tip]) colors.push(c[0], c[1], c[2], 1);
     indices.push(i0, i0 + 1, i0 + 2, i0 + 1, i0 + 3, i0 + 2, i0 + 2, i0 + 3, i0 + 4);
@@ -219,14 +219,15 @@ function flowerTemplate(scene: Scene): Mesh {
   const indices: number[] = [];
   const stem: RGB = [0.45, 0.72, 0.38];
   const heads: [number, number, number, number][] = [
-    [0, 0, 0.3, 0.085],
-    [0.13, 0.06, 0.22, 0.07],
-    [-0.09, 0.11, 0.26, 0.075],
+    [0, 0, 0.32, 0.13],
+    [0.18, 0.08, 0.24, 0.11],
+    [-0.12, 0.15, 0.28, 0.115],
+    [0.05, -0.17, 0.22, 0.1],
   ];
   for (const [hx, hz, hy, r] of heads) {
     // 莖（細長三角形，兩面）
     const s0 = positions.length / 3;
-    positions.push(hx - 0.012, 0, hz, hx + 0.012, 0, hz, hx, hy, hz);
+    positions.push(hx - 0.018, 0, hz, hx + 0.018, 0, hz, hx, hy, hz);
     for (let k = 0; k < 3; k++) colors.push(stem[0], stem[1], stem[2], 1);
     indices.push(s0, s0 + 1, s0 + 2);
     // 花：中心＋6 片花瓣（白色，實例顏色決定花色）；中心偏黃

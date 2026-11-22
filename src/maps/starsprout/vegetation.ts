@@ -273,7 +273,7 @@ export function buildVegetation(t: StarsproutTerrain, opt: VegetationOptions, se
   const field = zoneById("05");
   const sea = POIS.find((p) => p.id === "flowers")!;
   const cherries = trees.filter((tp) => tp.kind === "cherry");
-  const fstep = 0.9;
+  const fstep = 0.75;
   for (let gz = -LIMIT; gz < LIMIT; gz += fstep) {
     for (let gx = -LIMIT; gx < LIMIT; gx += fstep) {
       const x = gx + rng.range(-0.45, 0.45) * fstep;
@@ -281,16 +281,16 @@ export function buildVegetation(t: StarsproutTerrain, opt: VegetationOptions, se
       const dh = Math.hypot(x - hill.x, z - hill.z) / (hill.r + 6);
       const df = Math.hypot(x - field.x, z - field.z) / (field.r + 6);
       const ds = Math.hypot(x - sea.x, z - sea.z) / 16;
-      let p = 0.035;
+      let p = 0.04;
       let palette: [number, number, number][] = [YELLOW, WHITE, SKY];
       if (dh < 1) {
-        p = 0.55 * (1 - dh * dh);
+        p = 0.8 * (1 - dh * dh * 0.7);
         palette = [PINK, PINK, WHITE];
       } else if (df < 1) {
-        p = 0.6 * (1 - df * df);
+        p = 0.85 * (1 - df * df * 0.7);
         palette = [LAV, VIOLET, LAV, WHITE];
       } else if (ds < 1) {
-        p = 0.6 * (1 - ds * ds);
+        p = 0.8 * (1 - ds * ds * 0.7);
         palette = [PINK, YELLOW, WHITE, LAV, SKY];
       } else {
         for (const ch of cherries) {

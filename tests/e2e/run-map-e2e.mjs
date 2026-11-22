@@ -83,7 +83,7 @@ for (const name of browsers) {
       check("B1 橋中央可走、橋面高於水面", bridge.mid && bridge.y > 5.7, bridge);
 
       // 截圖：各視角
-      for (const v of ["camp", "bridge", "highland", "farm", "ruins", "arena", "forest", "hill", "field"]) {
+      for (const v of ["camp", "bridge", "highland", "farm", "ruins", "arena", "forest", "hill", "field", "flowersea"]) {
         await page.evaluate((x) => window.__starwishMap.view(x), v);
         await settle(page, 4);
         await shot(page, v);
