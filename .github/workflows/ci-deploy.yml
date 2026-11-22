@@ -16,7 +16,7 @@ concurrency:
 jobs:
   build-test-deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 70
     steps:
       - uses: actions/checkout@v5
 
