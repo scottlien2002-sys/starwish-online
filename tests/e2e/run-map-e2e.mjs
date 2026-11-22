@@ -30,7 +30,13 @@ for (const name of browsers) {
     const check = (k, ok, detail) => (run.checks[k] = { ok, detail });
     const shot = async (page, label) => {
       const f = `${outDir}${name}_${mode}_${label}.png`;
-      await page.screenshot({ path: f });
+      // 軟體繪圖（swiftshader）的 HQ 偶爾一幀超過 30 秒：放寬並重試一次
+      try {
+        await page.screenshot({ path: f, timeout: 60000 });
+      } catch {
+        await settle(page, 2);
+        await page.screenshot({ path: f, timeout: 90000 });
+      }
       run.screenshots.push(f.split("/test-results/")[1]);
     };
     const ctx = await browser.newContext({ viewport: { width: 852, height: 393 }, deviceScaleFactor: 2, hasTouch: true });
@@ -173,7 +179,8 @@ for (const name of browsers) {
         out.off = { radius: off.radius, ...outside(off) };
         // 開啟避障
         api.setCameraCollision(true);
-        await wait(700);
+        // CI 軟體繪圖很慢（每幀時間上限 0.1 秒），用幀數等待而不是毫秒
+        await frames(45);
         const on = api.camera();
         out.on = { radius: on.radius, desired: on.desired, allowed: on.allowed, ...outside(on) };
         // 停住不動 40 幀：距離不抖動
@@ -188,7 +195,7 @@ for (const name of browsers) {
         for (let i = 1; i <= 20; i++) { send("pointermove", W * 0.3 + i * 12); await frames(1); }
         send("pointerup", W * 0.3 + 240);
         const rec = [];
-        for (let i = 0; i < 50; i++) { await wait(50); rec.push(api.camera().radius); }
+        for (let i = 0; i < 60; i++) { await frames(2); rec.push(api.camera().radius); }
         const end = api.camera();
         let maxDrop = 0;
         for (let i = 1; i < rec.length; i++) maxDrop = Math.max(maxDrop, rec[i - 1] - rec[i]);
