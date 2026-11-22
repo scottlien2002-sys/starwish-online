@@ -1,0 +1,22 @@
+name: Check — P3-2 screenshots (temporary, no deploy)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  shots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npm run build
+      - run: npx playwright install --with-deps webkit
+      - run: node tests/e2e/shots-p32.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: shots
+          path: shots/
