@@ -11,7 +11,7 @@ import { inputToWorld, turnTowards } from "../../actors/movement.ts";
 import { ThirdPersonCamera } from "../../camera/ThirdPersonCamera.ts";
 import { SKY_COLORS, createEngine, createShadows, createSkyDome, pickQuality, setupRendering, type RenderSetup } from "../../render/RenderQuality.ts";
 import { PerfOverlay } from "../../render/PerfOverlay.ts";
-import type { QualitySettings } from "../../render/quality.ts";
+import { qualitySettings, type QualitySettings } from "../../render/quality.ts";
 import { summarizeFrames } from "../../render/benchmark.ts";
 import { ARENA, BRIDGES, MAIN_ROUTE, POIS, PORTAL, WALK_SPEED, ZONES } from "./layout.ts";
 import { StarsproutTerrain, resolveMove } from "./terrain.ts";
@@ -123,7 +123,8 @@ class StarsproutPage {
   private inPortal = false;
   private loadMs = 0;
   private fpsTimer = 0;
-  private shadowQ: "default" | "medium" = "default";
+  private shadowQ: "high" | "medium" | "pcf" = "medium";
+  private preset: "hq" | "lite" | null = null;
   private glowOff = false;
   private lockRatio: number | null = null;
   private panel!: HTMLDivElement;
@@ -133,8 +134,14 @@ class StarsproutPage {
   constructor(canvas: HTMLCanvasElement, hudRoot: HTMLElement) {
     const t0 = performance.now();
     const params = new URLSearchParams(location.search);
-    this.lod = params.get("lod") === "lite" ? "lite" : "hq";
-    this.quality = pickQuality();
+    // 預設組合（Stage 6 P1 驗收用）：
+    //   preset=hq   = 高畫質（2 倍上限、MSAA 4x、HDR、PCSS32 中品質柔和陰影、發光層）＋HQ 地形
+    //   preset=lite = 中畫質（遊戲手機預設：1.5 倍上限、FXAA、PCF 1024 陰影、0.25 發光層）＋Lite 地形
+    // 沒有 preset 時沿用 quality／lod 參數（舊網址照常可用）
+    const pr = params.get("preset");
+    this.preset = pr === "hq" || pr === "lite" ? pr : null;
+    this.lod = this.preset ? this.preset : params.get("lod") === "lite" ? "lite" : "hq";
+    this.quality = this.preset === "lite" ? qualitySettings("medium") : this.preset === "hq" ? qualitySettings("high") : pickQuality();
     this.engine = createEngine(canvas, this.quality);
     this.engine.onContextLostObservable.add(() => this.contextLost++);
     const scene = new Scene(this.engine);
@@ -163,9 +170,14 @@ class StarsproutPage {
     this.sun.shadowMaxZ = 90;
     this.shadows = createShadows(this.sun, this.quality);
     this.shadows.darkness = 0.35;
-    // 效能對照（預設不變）：&shadowq=medium = 與正式遊戲 V3.8R 相同的 PCSS32 柔和陰影取樣
-    this.shadowQ = params.get("shadowq") === "medium" && this.shadows.useContactHardeningShadow ? "medium" : "default";
-    if (this.shadowQ === "medium") this.shadows.filteringQuality = ShadowGenerator.QUALITY_MEDIUM;
+    // 高畫質柔和陰影：預設改為與正式遊戲 V3.8R 相同的 PCSS32（中品質取樣）＝ Stage 6 HQ 預設候選
+    //   &shadowq=high 可切回原本的高品質取樣（只做畫質對照）
+    if (this.shadows.useContactHardeningShadow) {
+      this.shadowQ = params.get("shadowq") === "high" ? "high" : "medium";
+      this.shadows.filteringQuality = this.shadowQ === "high" ? ShadowGenerator.QUALITY_HIGH : ShadowGenerator.QUALITY_MEDIUM;
+    } else {
+      this.shadowQ = "pcf";
+    }
     const res = Number(params.get("res"));
     this.lockRatio = res >= 1 && res <= 3 ? res : null;
 
@@ -191,7 +203,7 @@ class StarsproutPage {
     this.hud.setLevel(1);
     this.hud.setBars({ hp: 100, maxHp: 100, mp: 40, maxMp: 40, exp: 0, expToNext: 100 });
     const build = hudRoot.querySelector<HTMLSpanElement>(".hud-build");
-    if (build) build.textContent = `Stage 6 P1 ${this.lod === "hq" ? "HQ" : "Lite"}`;
+    if (build) build.textContent = `Stage 6 P1 ${this.presetLabel()}`;
     this.hud.events.on("skillPressed", () => this.hud.toast("地形測試頁：這一階段沒有怪物與戰鬥", 1500));
     new VirtualJoystick(this.hud.joystickZone, this.input, TUNING.joystick.radius, TUNING.joystick.deadZone);
     new CameraTouchControl(canvas, this.input, TUNING.camera.rotateSensitivity, TUNING.camera.pitchSensitivity, TUNING.camera.pinchSensitivity);
@@ -319,6 +331,18 @@ class StarsproutPage {
   }
 
   /** 截圖用固定視角 */
+  private presetLabel(): string {
+    if (this.preset === "lite") return "Lite（中畫質＋Lite 地形）";
+    if (this.preset === "hq") return "HQ（高畫質＋PCSS32＋HQ 地形）";
+    return `自訂（畫質 ${this.quality.level}＋${this.lod === "hq" ? "HQ" : "Lite"} 地形）`;
+  }
+
+  private shadowLabel(): string {
+    if (this.shadowQ === "high") return "PCSS 高品質（原始對照）";
+    if (this.shadowQ === "medium") return "PCSS32 中品質";
+    return `PCF ${this.quality.shadows.pcfQuality}`;
+  }
+
   view(name: string): void {
     const at = (x: number, z: number, yawDeg: number, beta: number, radius: number): void => {
       this.teleport(x, z, (yawDeg * Math.PI) / 180);
@@ -346,6 +370,15 @@ class StarsproutPage {
       case "farm":
         at(-24, 30, 60, 1.0, 15);
         break;
+      // 角色近距離（遺跡戰鬥場旁，有石柱陰影）：正面、側面、背面
+      case "charFront":
+      case "charSide":
+      case "charBack": {
+        this.teleport(-5, 62, Math.PI / 2);
+        const off = name === "charFront" ? Math.PI : name === "charSide" ? Math.PI / 2 : 0;
+        this.camera.snap(this.pos, this.alphaBehind(this.yaw) + off, 1.25, 4.2);
+        break;
+      }
       default:
         break;
     }
@@ -489,8 +522,10 @@ class StarsproutPage {
     lines.push(`時間 ${now.toLocaleString("zh-TW", { hour12: false })}`);
     lines.push(`網址參數 ${location.search || "(無)"}`);
     lines.push(`裝置 ${navigator.userAgent}`);
-    lines.push(`畫質 ${this.quality.level}／地圖 ${this.lod === "hq" ? "HQ" : "Lite"}／載入 ${Math.round(this.loadMs)} ms`);
-    lines.push(`對照設定：陰影 ${this.shadowQ === "medium" ? "PCSS32（中）" : "預設（高）"}／發光層 ${this.glowOff || !this.render.glow ? "關" : "開"}／測試解析度 ${this.lockRatio ? this.lockRatio + "x" : "畫質上限"}`);
+    lines.push(`組合 ${this.presetLabel()}／畫質 ${this.quality.level}／地圖 ${this.lod === "hq" ? "HQ" : "Lite"}／載入 ${Math.round(this.loadMs)} ms`);
+    lines.push(
+      `設定：陰影 ${this.shadowLabel()}（${this.quality.shadows.mapSize}）／抗鋸齒 ${this.quality.msaaSamples > 1 ? `MSAA ${this.quality.msaaSamples}x` : this.quality.fxaa ? "FXAA" : this.quality.canvasAntialias ? "畫布內建" : "無"}／HDR 後製 ${this.quality.postProcess ? "開" : "關"}／發光層 ${this.glowOff || !this.render.glow ? "關" : `開（${this.quality.bloom.textureRatio}）`}／解析度上限 ${this.lockRatio ? this.lockRatio + "x（測試）" : this.quality.maxPixelRatio + "x"}`,
+    );
     lines.push(`地形 ${this.world.chunks.length} 塊、${this.world.terrainVerts} 頂點、${this.world.terrainTris} 三角形`);
     const table = routeTable();
     lines.push(`主路線（直線）${table[table.length - 1]!.cum.toFixed(1)} 公尺；移動速度 ${WALK_SPEED} m/s`);
@@ -577,8 +612,10 @@ class StarsproutPage {
       panel.classList.remove("open");
     });
     const lodBtn = btn(show, this.lod === "hq" ? "切換 Lite" : "切換 HQ", () => {
+      // 一起切換畫質與地形（preset），不是只換地形
       const url = new URL(location.href);
-      url.searchParams.set("lod", this.lod === "hq" ? "lite" : "hq");
+      url.searchParams.set("preset", this.lod === "hq" ? "lite" : "hq");
+      for (const k of ["quality", "lod", "shadowq"]) url.searchParams.delete(k);
       location.replace(url.toString());
     });
     lodBtn.classList.add("alt");
@@ -642,6 +679,11 @@ class StarsproutPage {
       ready: true,
       lod: this.lod,
       info: () => ({
+        preset: this.preset,
+        shadow: this.shadowQ,
+        glow: !this.glowOff && !!this.render.glow,
+        msaa: this.quality.msaaSamples,
+        fxaa: this.quality.fxaa,
         quality: this.quality.level,
         lod: this.lod,
         loadMs: this.loadMs,
