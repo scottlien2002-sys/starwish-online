@@ -1,0 +1,711 @@
+{
+  "startedAt": "2026-11-22T04:31:01.077Z",
+  "runs": [
+    {
+      "browser": "chromium",
+      "lod": "hq",
+      "checks": {
+        "啟動": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "地形 16 塊": {
+          "ok": true,
+          "detail": 16
+        },
+        "HQ 地形 1 公尺網格（約 6.5 萬三角形）": {
+          "ok": true,
+          "detail": 64800
+        },
+        "3D 畫面有繪製": {
+          "ok": true,
+          "detail": {
+            "samples": 6348,
+            "distinctColors": 201,
+            "opaqueRatio": 1
+          }
+        },
+        "搖桿移動、角色貼地": {
+          "ok": true,
+          "detail": {
+            "p0": {
+              "x": -56,
+              "y": 2,
+              "z": -64,
+              "yaw": 0.7266423406817256
+            },
+            "p1": {
+              "x": -55.335636161170086,
+              "y": 2,
+              "z": -63.252590681316335,
+              "yaw": 0.726642340681726
+            },
+            "ground": 2
+          }
+        },
+        "溪流河道不可走、岸邊可走": {
+          "ok": true,
+          "detail": {
+            "here": true,
+            "water": false
+          }
+        },
+        "B1 橋中央可走、橋面高於水面": {
+          "ok": true,
+          "detail": {
+            "mid": true,
+            "y": 6.747612551936899
+          }
+        },
+        "傳送門平時可見，走進去提示需擊敗 Boss 並達成條件": {
+          "ok": true,
+          "detail": "傳送門：擊敗王冠重錘兔並達成通關條件後才能使用（第一階段尚無 Boss）"
+        },
+        "標示可開關": {
+          "ok": true,
+          "detail": false
+        },
+        "路線測試：自動沿主路前進、沒有卡住": {
+          "ok": true,
+          "detail": {
+            "st": {
+              "phase": "running",
+              "loop": 0,
+              "t": 1.7000000000000004,
+              "result": null
+            },
+            "pl": {
+              "x": -50.020725450530705,
+              "y": 2,
+              "z": -57.27331613184704,
+              "yaw": 0.7266423406817285
+            }
+          }
+        },
+        "報告文字": {
+          "ok": true,
+          "detail": "星願物語 Stage 6 P1 星芽原野 地形與路線測試報告\n時間 2026/11/22 04:33:54\n網址參數 ?map=starsprout&quality=high&lod=hq\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Sa"
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": 0
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "map-e2e/chromium_hq_spawn.png",
+        "map-e2e/chromium_hq_camp.png",
+        "map-e2e/chromium_hq_bridge.png",
+        "map-e2e/chromium_hq_highland.png",
+        "map-e2e/chromium_hq_farm.png",
+        "map-e2e/chromium_hq_ruins.png",
+        "map-e2e/chromium_hq_arena.png",
+        "map-e2e/chromium_hq_overview.png",
+        "map-e2e/chromium_hq_overview_nav.png",
+        "map-e2e/chromium_hq_portal.png",
+        "map-e2e/chromium_hq_route.png"
+      ],
+      "results": {
+        "info": {
+          "quality": "high",
+          "lod": "hq",
+          "loadMs": 591.8000000000175,
+          "chunks": 16,
+          "terrainVerts": 33856,
+          "terrainTris": 64800,
+          "drawCalls": 57,
+          "activeMeshes": 32,
+          "trianglesActive": 87255.33333333333,
+          "meshes": 39,
+          "materials": 14,
+          "textures": 8,
+          "labels": true,
+          "nav": false,
+          "contextLost": 0,
+          "render": "1704×786 @2x",
+          "bridges": [
+            "B1",
+            "B2"
+          ],
+          "arena": {
+            "x": 0,
+            "z": 66,
+            "r": 12,
+            "y": 17
+          },
+          "portal": {
+            "x": 0,
+            "z": 82,
+            "r": 5,
+            "y": 17,
+            "facing": 3.141592653589793
+          }
+        },
+        "route": {
+          "st": {
+            "phase": "running",
+            "loop": 0,
+            "t": 1.7000000000000004,
+            "result": null
+          },
+          "pl": {
+            "x": -50.020725450530705,
+            "y": 2,
+            "z": -57.27331613184704,
+            "yaw": 0.7266423406817285
+          }
+        },
+        "after": {
+          "quality": "high",
+          "lod": "hq",
+          "loadMs": 591.8000000000175,
+          "chunks": 16,
+          "terrainVerts": 33856,
+          "terrainTris": 64800,
+          "drawCalls": 57,
+          "activeMeshes": 32,
+          "trianglesActive": 87255.33333333333,
+          "meshes": 39,
+          "materials": 14,
+          "textures": 8,
+          "labels": true,
+          "nav": false,
+          "contextLost": 0,
+          "render": "1704×786 @1x",
+          "bridges": [
+            "B1",
+            "B2"
+          ],
+          "arena": {
+            "x": 0,
+            "z": 66,
+            "r": 12,
+            "y": 17
+          },
+          "portal": {
+            "x": 0,
+            "z": 82,
+            "r": 5,
+            "y": 17,
+            "facing": 3.141592653589793
+          }
+        }
+      },
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "lod": "lite",
+      "checks": {
+        "啟動": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "地形 16 塊": {
+          "ok": true,
+          "detail": 16
+        },
+        "Lite 地形 1.5 公尺網格（約 2.9 萬三角形）": {
+          "ok": true,
+          "detail": 28800
+        },
+        "3D 畫面有繪製": {
+          "ok": true,
+          "detail": {
+            "samples": 6348,
+            "distinctColors": 231,
+            "opaqueRatio": 1
+          }
+        },
+        "搖桿移動、角色貼地": {
+          "ok": true,
+          "detail": {
+            "p0": {
+              "x": -56,
+              "y": 2,
+              "z": -64,
+              "yaw": 0.7266423406817256
+            },
+            "p1": {
+              "x": -55.335636161170086,
+              "y": 2,
+              "z": -63.252590681316335,
+              "yaw": 0.726642340681726
+            },
+            "ground": 2
+          }
+        },
+        "溪流河道不可走、岸邊可走": {
+          "ok": true,
+          "detail": {
+            "here": true,
+            "water": false
+          }
+        },
+        "B1 橋中央可走、橋面高於水面": {
+          "ok": true,
+          "detail": {
+            "mid": true,
+            "y": 6.747612551936899
+          }
+        },
+        "傳送門平時可見，走進去提示需擊敗 Boss 並達成條件": {
+          "ok": true,
+          "detail": "傳送門：擊敗王冠重錘兔並達成通關條件後才能使用（第一階段尚無 Boss）"
+        },
+        "標示可開關": {
+          "ok": true,
+          "detail": false
+        },
+        "報告文字": {
+          "ok": true,
+          "detail": "星願物語 Stage 6 P1 星芽原野 地形與路線測試報告\n時間 2026/11/22 04:35:47\n網址參數 ?map=starsprout&quality=high&lod=lite\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 "
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": 0
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "map-e2e/chromium_lite_spawn.png",
+        "map-e2e/chromium_lite_camp.png",
+        "map-e2e/chromium_lite_bridge.png",
+        "map-e2e/chromium_lite_highland.png",
+        "map-e2e/chromium_lite_farm.png",
+        "map-e2e/chromium_lite_ruins.png",
+        "map-e2e/chromium_lite_arena.png",
+        "map-e2e/chromium_lite_overview.png",
+        "map-e2e/chromium_lite_overview_nav.png",
+        "map-e2e/chromium_lite_portal.png"
+      ],
+      "results": {
+        "info": {
+          "quality": "high",
+          "lod": "lite",
+          "loadMs": 569.2999999999884,
+          "chunks": 16,
+          "terrainVerts": 15376,
+          "terrainTris": 28800,
+          "drawCalls": 53,
+          "activeMeshes": 32,
+          "trianglesActive": 44049.333333333336,
+          "meshes": 39,
+          "materials": 14,
+          "textures": 8,
+          "labels": true,
+          "nav": false,
+          "contextLost": 0,
+          "render": "1704×786 @2x",
+          "bridges": [
+            "B1",
+            "B2"
+          ],
+          "arena": {
+            "x": 0,
+            "z": 66,
+            "r": 12,
+            "y": 17
+          },
+          "portal": {
+            "x": 0,
+            "z": 82,
+            "r": 5,
+            "y": 17,
+            "facing": 3.141592653589793
+          }
+        },
+        "after": {
+          "quality": "high",
+          "lod": "lite",
+          "loadMs": 569.2999999999884,
+          "chunks": 16,
+          "terrainVerts": 15376,
+          "terrainTris": 28800,
+          "drawCalls": 42,
+          "activeMeshes": 20,
+          "trianglesActive": 32249.333333333332,
+          "meshes": 39,
+          "materials": 14,
+          "textures": 8,
+          "labels": true,
+          "nav": false,
+          "contextLost": 0,
+          "render": "852×393 @1x",
+          "bridges": [
+            "B1",
+            "B2"
+          ],
+          "arena": {
+            "x": 0,
+            "z": 66,
+            "r": 12,
+            "y": 17
+          },
+          "portal": {
+            "x": 0,
+            "z": 82,
+            "r": 5,
+            "y": 17,
+            "facing": 3.141592653589793
+          }
+        }
+      },
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "lod": "hq",
+      "checks": {
+        "啟動": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "地形 16 塊": {
+          "ok": true,
+          "detail": 16
+        },
+        "HQ 地形 1 公尺網格（約 6.5 萬三角形）": {
+          "ok": true,
+          "detail": 64800
+        },
+        "3D 畫面有繪製": {
+          "ok": true,
+          "detail": {
+            "samples": 6348,
+            "distinctColors": 208,
+            "opaqueRatio": 1
+          }
+        },
+        "搖桿移動、角色貼地": {
+          "ok": true,
+          "detail": {
+            "p0": {
+              "x": -56,
+              "y": 2,
+              "z": -64,
+              "yaw": 0.7266423406817256
+            },
+            "p1": {
+              "x": -53.342544644680345,
+              "y": 2,
+              "z": -61.01036272526534,
+              "yaw": 0.726642340681726
+            },
+            "ground": 2
+          }
+        },
+        "溪流河道不可走、岸邊可走": {
+          "ok": true,
+          "detail": {
+            "here": true,
+            "water": false
+          }
+        },
+        "B1 橋中央可走、橋面高於水面": {
+          "ok": true,
+          "detail": {
+            "mid": true,
+            "y": 6.747612551936899
+          }
+        },
+        "傳送門平時可見，走進去提示需擊敗 Boss 並達成條件": {
+          "ok": true,
+          "detail": "傳送門：擊敗王冠重錘兔並達成通關條件後才能使用（第一階段尚無 Boss）"
+        },
+        "標示可開關": {
+          "ok": true,
+          "detail": false
+        },
+        "路線測試：自動沿主路前進、沒有卡住": {
+          "ok": true,
+          "detail": {
+            "st": {
+              "phase": "running",
+              "loop": 0,
+              "t": 9.799999999999981,
+              "result": null
+            },
+            "pl": {
+              "x": -42.58711501817673,
+              "y": 4.279231964725824,
+              "z": -23.502157149509838,
+              "yaw": 0.8351127925126066
+            }
+          }
+        },
+        "報告文字": {
+          "ok": true,
+          "detail": "星願物語 Stage 6 P1 星芽原野 地形與路線測試報告\n時間 2026/11/22 04:36:44\n網址參數 ?map=starsprout&quality=high&lod=hq\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 "
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": 0
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "map-e2e/webkit_hq_spawn.png",
+        "map-e2e/webkit_hq_camp.png",
+        "map-e2e/webkit_hq_bridge.png",
+        "map-e2e/webkit_hq_highland.png",
+        "map-e2e/webkit_hq_farm.png",
+        "map-e2e/webkit_hq_ruins.png",
+        "map-e2e/webkit_hq_arena.png",
+        "map-e2e/webkit_hq_overview.png",
+        "map-e2e/webkit_hq_overview_nav.png",
+        "map-e2e/webkit_hq_portal.png",
+        "map-e2e/webkit_hq_route.png"
+      ],
+      "results": {
+        "info": {
+          "quality": "high",
+          "lod": "hq",
+          "loadMs": 1450,
+          "chunks": 16,
+          "terrainVerts": 33856,
+          "terrainTris": 64800,
+          "drawCalls": 20,
+          "activeMeshes": 32,
+          "trianglesActive": 13032,
+          "meshes": 39,
+          "materials": 14,
+          "textures": 8,
+          "labels": true,
+          "nav": false,
+          "contextLost": 0,
+          "render": "1704×786 @2x",
+          "bridges": [
+            "B1",
+            "B2"
+          ],
+          "arena": {
+            "x": 0,
+            "z": 66,
+            "r": 12,
+            "y": 17
+          },
+          "portal": {
+            "x": 0,
+            "z": 82,
+            "r": 5,
+            "y": 17,
+            "facing": 3.141592653589793
+          }
+        },
+        "route": {
+          "st": {
+            "phase": "running",
+            "loop": 0,
+            "t": 9.799999999999981,
+            "result": null
+          },
+          "pl": {
+            "x": -42.58711501817673,
+            "y": 4.279231964725824,
+            "z": -23.502157149509838,
+            "yaw": 0.8351127925126066
+          }
+        },
+        "after": {
+          "quality": "high",
+          "lod": "hq",
+          "loadMs": 1450,
+          "chunks": 16,
+          "terrainVerts": 33856,
+          "terrainTris": 64800,
+          "drawCalls": 54,
+          "activeMeshes": 29,
+          "trianglesActive": 80085.33333333333,
+          "meshes": 39,
+          "materials": 14,
+          "textures": 8,
+          "labels": true,
+          "nav": false,
+          "contextLost": 0,
+          "render": "1704×786 @1.25x",
+          "bridges": [
+            "B1",
+            "B2"
+          ],
+          "arena": {
+            "x": 0,
+            "z": 66,
+            "r": 12,
+            "y": 17
+          },
+          "portal": {
+            "x": 0,
+            "z": 82,
+            "r": 5,
+            "y": 17,
+            "facing": 3.141592653589793
+          }
+        }
+      },
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "lod": "lite",
+      "checks": {
+        "啟動": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "地形 16 塊": {
+          "ok": true,
+          "detail": 16
+        },
+        "Lite 地形 1.5 公尺網格（約 2.9 萬三角形）": {
+          "ok": true,
+          "detail": 28800
+        },
+        "3D 畫面有繪製": {
+          "ok": true,
+          "detail": {
+            "samples": 6348,
+            "distinctColors": 237,
+            "opaqueRatio": 1
+          }
+        },
+        "搖桿移動、角色貼地": {
+          "ok": true,
+          "detail": {
+            "p0": {
+              "x": -56,
+              "y": 2,
+              "z": -64,
+              "yaw": 0.7266423406817256
+            },
+            "p1": {
+              "x": -53.01036272526539,
+              "y": 2,
+              "z": -60.636658065923505,
+              "yaw": 0.726642340681726
+            },
+            "ground": 2
+          }
+        },
+        "溪流河道不可走、岸邊可走": {
+          "ok": true,
+          "detail": {
+            "here": true,
+            "water": false
+          }
+        },
+        "B1 橋中央可走、橋面高於水面": {
+          "ok": true,
+          "detail": {
+            "mid": true,
+            "y": 6.747612551936899
+          }
+        },
+        "傳送門平時可見，走進去提示需擊敗 Boss 並達成條件": {
+          "ok": true,
+          "detail": "傳送門：擊敗王冠重錘兔並達成通關條件後才能使用（第一階段尚無 Boss）"
+        },
+        "標示可開關": {
+          "ok": true,
+          "detail": false
+        },
+        "報告文字": {
+          "ok": true,
+          "detail": "星願物語 Stage 6 P1 星芽原野 地形與路線測試報告\n時間 2026/11/22 04:37:04\n網址參數 ?map=starsprout&quality=high&lod=lite\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26."
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": 0
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "map-e2e/webkit_lite_spawn.png",
+        "map-e2e/webkit_lite_camp.png",
+        "map-e2e/webkit_lite_bridge.png",
+        "map-e2e/webkit_lite_highland.png",
+        "map-e2e/webkit_lite_farm.png",
+        "map-e2e/webkit_lite_ruins.png",
+        "map-e2e/webkit_lite_arena.png",
+        "map-e2e/webkit_lite_overview.png",
+        "map-e2e/webkit_lite_overview_nav.png",
+        "map-e2e/webkit_lite_portal.png"
+      ],
+      "results": {
+        "info": {
+          "quality": "high",
+          "lod": "lite",
+          "loadMs": 814,
+          "chunks": 16,
+          "terrainVerts": 15376,
+          "terrainTris": 28800,
+          "drawCalls": 53,
+          "activeMeshes": 32,
+          "trianglesActive": 44049.333333333336,
+          "meshes": 39,
+          "materials": 14,
+          "textures": 8,
+          "labels": true,
+          "nav": false,
+          "contextLost": 0,
+          "render": "1704×786 @2x",
+          "bridges": [
+            "B1",
+            "B2"
+          ],
+          "arena": {
+            "x": 0,
+            "z": 66,
+            "r": 12,
+            "y": 17
+          },
+          "portal": {
+            "x": 0,
+            "z": 82,
+            "r": 5,
+            "y": 17,
+            "facing": 3.141592653589793
+          }
+        },
+        "after": {
+          "quality": "high",
+          "lod": "lite",
+          "loadMs": 814,
+          "chunks": 16,
+          "terrainVerts": 15376,
+          "terrainTris": 28800,
+          "drawCalls": 42,
+          "activeMeshes": 20,
+          "trianglesActive": 32249.333333333332,
+          "meshes": 39,
+          "materials": 14,
+          "textures": 8,
+          "labels": true,
+          "nav": false,
+          "contextLost": 0,
+          "render": "1065×491 @1.25x",
+          "bridges": [
+            "B1",
+            "B2"
+          ],
+          "arena": {
+            "x": 0,
+            "z": 66,
+            "r": 12,
+            "y": 17
+          },
+          "portal": {
+            "x": 0,
+            "z": 82,
+            "r": 5,
+            "y": 17,
+            "facing": 3.141592653589793
+          }
+        }
+      },
+      "ok": true
+    }
+  ],
+  "finishedAt": "2026-11-22T04:37:04.915Z",
+  "failures": 0
+}
