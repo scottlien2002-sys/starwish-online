@@ -119,6 +119,7 @@ class StarsproutPage {
   private readonly hud: Hud;
   private readonly input = new InputState();
   private readonly keyboard: KeyboardInput;
+  private camTouch!: CameraTouchControl;
   private readonly pos = new Vector3();
   private yaw = 0;
   private overview = false;
@@ -190,7 +191,7 @@ class StarsproutPage {
     this.pos.set(start.x, this.terrain.surface(start.x, start.z), start.z);
     this.player = new PlayerAvatar(scene, this.shadows);
     this.player.root.position.copyFrom(this.pos);
-    this.camera = new ThirdPersonCamera(scene, this.pos, (x, z) => this.terrain.surface(x, z));
+    this.camera = new ThirdPersonCamera(scene, this.pos, (x, z) => this.terrain.surface(x, z), { keepPitch: true });
     scene.activeCamera = this.camera.camera;
     // 出生時面向第一段路（往東北）
     this.yaw = Math.atan2(MAIN_ROUTE[1]!.x - start.x, MAIN_ROUTE[1]!.z - start.z);
@@ -236,7 +237,11 @@ class StarsproutPage {
     if (build) build.textContent = `Stage 6 P2-2 ${this.modeName()}`;
     this.hud.events.on("skillPressed", () => this.hud.toast("地形測試頁：這一階段沒有怪物與戰鬥", 1500));
     new VirtualJoystick(this.hud.joystickZone, this.input, TUNING.joystick.radius, TUNING.joystick.deadZone);
-    new CameraTouchControl(canvas, this.input, TUNING.camera.rotateSensitivity, TUNING.camera.pitchSensitivity, TUNING.camera.pinchSensitivity);
+    this.camTouch = new CameraTouchControl(canvas, this.input, TUNING.camera.rotateSensitivity, TUNING.camera.pitchSensitivity, TUNING.camera.pinchSensitivity);
+    // Safari：擋掉頁面自己的雙指縮放手勢與長按選單（不影響遊戲內的雙指縮放鏡頭）
+    const block = (e: Event): void => e.preventDefault();
+    for (const ev of ["gesturestart", "gesturechange", "gestureend"]) document.addEventListener(ev, block, { passive: false });
+    canvas.addEventListener("contextmenu", block);
     this.keyboard = new KeyboardInput(this.input, () => false);
     this.perf = new PerfOverlay(this.engine, scene, this.quality, hudRoot);
     this.buildPanel(hudRoot);
@@ -779,6 +784,7 @@ class StarsproutPage {
         portal: PORTAL,
       }),
       player: () => ({ x: this.pos.x, y: this.pos.y, z: this.pos.z, yaw: this.yaw }),
+      camera: () => ({ alpha: this.camera.camera.alpha, beta: this.camera.camera.beta, radius: this.camera.camera.radius, touches: this.camTouch.activePointers }),
       teleport: (x: number, z: number) => this.teleport(x, z),
       walkable: (x: number, z: number) => this.terrain.walkable(x, z),
       surface: (x: number, z: number) => this.terrain.surface(x, z),

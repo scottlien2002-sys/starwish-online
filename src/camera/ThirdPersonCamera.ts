@@ -13,9 +13,16 @@ export class ThirdPersonCamera {
   private desiredRadius: number = TUNING.camera.distance;
   /** 地面高度（防止鏡頭鑽進地面）；預設為新手草原，其他地圖傳入自己的高度函式 */
   private readonly groundHeight: (x: number, z: number) => number;
+  /**
+   * 保留玩家調整的俯角（選用；預設關閉＝與原本行為相同）：
+   * 地面太高時只「暫時」抬高鏡頭，地面不擋了就平順回到玩家原本的俯角，不會突然跳動
+   */
+  private readonly keepPitch: boolean;
+  private userBeta: number = TUNING.camera.defaultBeta;
 
-  constructor(scene: Scene, initialTarget: Vector3, groundHeight: (x: number, z: number) => number = heightAt) {
+  constructor(scene: Scene, initialTarget: Vector3, groundHeight: (x: number, z: number) => number = heightAt, opts: { keepPitch?: boolean } = {}) {
     this.groundHeight = groundHeight;
+    this.keepPitch = opts.keepPitch ?? false;
     const c = TUNING.camera;
     this.smoothTarget.copyFrom(initialTarget).addInPlaceFromFloats(0, c.targetHeight, 0);
     this.camera = new ArcRotateCamera("mainCamera", -Math.PI / 2, c.defaultBeta, c.distance, this.smoothTarget.clone(), scene);
@@ -39,6 +46,7 @@ export class ThirdPersonCamera {
     this.camera.beta = beta;
     this.camera.radius = radius;
     this.desiredRadius = radius;
+    this.userBeta = beta;
   }
 
   update(dt: number, follow: Vector3, rotate: { yaw: number; pitch: number; zoom: number }): void {
@@ -46,7 +54,8 @@ export class ThirdPersonCamera {
     const cam = this.camera;
 
     cam.alpha -= rotate.yaw;
-    cam.beta = clamp(cam.beta - rotate.pitch, c.minBeta, c.maxBeta);
+    if (this.keepPitch) this.userBeta = clamp(this.userBeta - rotate.pitch, c.minBeta, c.maxBeta);
+    else cam.beta = clamp(cam.beta - rotate.pitch, c.minBeta, c.maxBeta);
     this.desiredRadius = clamp(this.desiredRadius + rotate.zoom, c.minDistance, c.maxDistance);
     cam.radius += (this.desiredRadius - cam.radius) * damp(12, dt);
 
@@ -56,6 +65,22 @@ export class ThirdPersonCamera {
     this.smoothTarget.z += (follow.z - this.smoothTarget.z) * k;
     cam.target.copyFrom(this.smoothTarget);
 
+    if (this.keepPitch) {
+      // 依玩家俯角算出鏡頭位置；若會鑽進地面，求出「剛好在地面上方」的俯角（只取較高的那個），再平順移過去
+      let beta = this.userBeta;
+      for (let i = 0; i < 2; i++) {
+        const camX = cam.target.x + cam.radius * Math.cos(cam.alpha) * Math.sin(beta);
+        const camZ = cam.target.z + cam.radius * Math.sin(cam.alpha) * Math.sin(beta);
+        const minY = this.groundHeight(camX, camZ) + 0.6;
+        const camY = cam.target.y + cam.radius * Math.cos(beta);
+        if (camY >= minY) break;
+        beta = clamp(Math.acos(clamp((minY - cam.target.y) / cam.radius, -1, 1)), c.minBeta, c.maxBeta);
+      }
+      // 往上避開地面、或玩家正在拖曳時要跟手；地面不擋後回到玩家俯角則慢一點（避免跳動）
+      const fast = beta < cam.beta || rotate.pitch !== 0;
+      cam.beta += (beta - cam.beta) * damp(fast ? 18 : 5, dt);
+      return;
+    }
     // 不讓攝影機鑽進地面：必要時抬高俯角
     const camX = cam.target.x + cam.radius * Math.cos(cam.alpha) * Math.sin(cam.beta);
     const camZ = cam.target.z + cam.radius * Math.sin(cam.alpha) * Math.sin(cam.beta);

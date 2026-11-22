@@ -69,6 +69,82 @@ for (const name of browsers) {
       const ground = await page.evaluate(([x, z]) => window.__starwishMap.surface(x, z), [p1.x, p1.z]);
       check("搖桿移動、角色貼地", Math.hypot(p1.x - p0.x, p1.z - p0.z) > 0.5 && Math.abs(p1.y - ground) < 0.01, { p0, p1, ground });
 
+      // 手機鏡頭操作（胡蘿蔔園旁）：用合成的觸控 PointerEvent 走實際的元素路由
+      await page.evaluate(() => window.__starwishMap.teleport(-12, 25));
+      await page.waitForTimeout(600);
+      const touch = await page.evaluate(async () => {
+        const api = window.__starwishMap;
+        const W = innerWidth, H = innerHeight;
+        const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+        const fire = (type, id, x, y, primary) => {
+          const el = document.elementFromPoint(x, y);
+          el.dispatchEvent(new PointerEvent(type, { pointerId: id, clientX: x, clientY: y, isPrimary: primary, pointerType: "touch", bubbles: true, cancelable: true }));
+          return el;
+        };
+        // 同一個元素連續送事件（模擬 pointer capture）
+        const drag = async (id, x0, y0, x1, y1, primary = true, up = true) => {
+          const el = document.elementFromPoint(x0, y0);
+          const send = (type, x, y) => el.dispatchEvent(new PointerEvent(type, { pointerId: id, clientX: x, clientY: y, isPrimary: primary, pointerType: "touch", bubbles: true, cancelable: true }));
+          send("pointerdown", x0, y0);
+          for (let i = 1; i <= 10; i++) { send("pointermove", x0 + ((x1 - x0) * i) / 10, y0 + ((y1 - y0) * i) / 10); await wait(16); }
+          if (up) send("pointerup", x1, y1);
+          await wait(120);
+          return el;
+        };
+        const out = {};
+        const a0 = api.camera();
+        const el1 = await drag(1, W * 0.6, H * 0.4, W * 0.6 + 120, H * 0.4);
+        const a1 = api.camera();
+        out.rotate = { target: el1.tagName, dAlpha: a1.alpha - a0.alpha, touches: a1.touches };
+        // iOS 漏送 pointerup：殘留一根，再開始新的單指拖曳
+        fire("pointerdown", 7, W * 0.7, H * 0.3, true);
+        await wait(50);
+        const b0 = api.camera();
+        await drag(8, W * 0.55, H * 0.35, W * 0.55 - 120, H * 0.35, true);
+        const b1 = api.camera();
+        out.stale = { dAlpha: b1.alpha - b0.alpha, dRadius: b1.radius - b0.radius, touches: b1.touches };
+        // 左下搖桿：只移動、不轉鏡頭
+        const c0 = api.camera();
+        const p0 = api.player();
+        const jel = await drag(20, W * 0.12, H * 0.82, W * 0.12, H * 0.82 - 60, true, false);
+        await wait(500);
+        const c1 = api.camera();
+        const p1 = api.player();
+        jel.dispatchEvent(new PointerEvent("pointerup", { pointerId: 20, clientX: W * 0.12, clientY: H * 0.82 - 60, isPrimary: true, pointerType: "touch", bubbles: true, cancelable: true }));
+        out.joystick = { target: jel.className || jel.tagName, dAlpha: c1.alpha - c0.alpha, moved: Math.hypot(p1.x - p0.x, p1.z - p0.z) };
+        // 右下技能鍵與右上面板不是 canvas
+        out.buttons = [[W - 60, H - 60], [W - 30, 20]].map(([x, y]) => document.elementFromPoint(x, y)?.tagName);
+        // 雙指縮放：張開 = 拉近，距離有上下限
+        const d0 = api.camera();
+        const e1 = document.elementFromPoint(W * 0.5, H * 0.4);
+        const send = (type, id, x, y, pr) => e1.dispatchEvent(new PointerEvent(type, { pointerId: id, clientX: x, clientY: y, isPrimary: pr, pointerType: "touch", bubbles: true, cancelable: true }));
+        send("pointerdown", 30, W * 0.5 - 20, H * 0.4, true);
+        send("pointerdown", 31, W * 0.5 + 20, H * 0.4, false);
+        for (let i = 1; i <= 15; i++) { send("pointermove", 30, W * 0.5 - 20 - i * 12, H * 0.4, true); send("pointermove", 31, W * 0.5 + 20 + i * 12, H * 0.4, false); await wait(16); }
+        send("pointerup", 30, 0, 0, true); send("pointerup", 31, 0, 0, false);
+        await wait(600);
+        const d1 = api.camera();
+        out.pinch = { r0: d0.radius, r1: d1.radius, dAlpha: d1.alpha - d0.alpha };
+        // 往下拖到底（俯角下限），鏡頭仍在地面上方
+        await drag(40, W * 0.6, H * 0.2, W * 0.6, H * 0.9);
+        await wait(500);
+        const f = api.camera();
+        const pl = api.player();
+        const tx = pl.x, tz = pl.z;
+        const camX = tx + f.radius * Math.cos(f.alpha) * Math.sin(f.beta);
+        const camZ = tz + f.radius * Math.sin(f.alpha) * Math.sin(f.beta);
+        const camY = pl.y + 0.85 + f.radius * Math.cos(f.beta);
+        out.pitch = { beta: f.beta, aboveGround: camY - api.surface(camX, camZ) };
+        return out;
+      });
+      run.results.cameraTouch = touch;
+      check("鏡頭：畫面右側單指拖曳可旋轉（canvas 接收）", touch.rotate.target === "CANVAS" && Math.abs(touch.rotate.dAlpha) > 0.4 && touch.rotate.touches === 0, touch.rotate);
+      check("鏡頭：iOS 漏送 pointerup 後，下一次單指拖曳仍是旋轉（不會誤判成縮放）", Math.abs(touch.stale.dAlpha) > 0.4 && Math.abs(touch.stale.dRadius) < 0.05 && touch.stale.touches === 0, touch.stale);
+      check("鏡頭：左下搖桿只移動角色，不轉鏡頭", touch.joystick.target !== "CANVAS" && Math.abs(touch.joystick.dAlpha) < 0.001 && touch.joystick.moved > 0.5, touch.joystick);
+      check("鏡頭：技能鍵／面板按鈕不會觸發鏡頭（不是 canvas）", touch.buttons.every((t) => t !== "CANVAS"), touch.buttons);
+      check("鏡頭：雙指張開拉近，距離 5–15 公尺，縮放時不旋轉", touch.pinch.r1 < touch.pinch.r0 - 0.5 && touch.pinch.r1 >= 4.99 && Math.abs(touch.pinch.dAlpha) < 0.001, touch.pinch);
+      check("鏡頭：俯角限制內、鏡頭不鑽進地面", touch.pitch.beta >= 0.55 - 1e-6 && touch.pitch.beta <= 1.38 + 1e-6 && touch.pitch.aboveGround > 0.3, touch.pitch);
+
       // 溪流不可走：從北岸往河裡走，會停在岸邊
       await page.evaluate(() => window.__starwishMap.teleport(-6, -3));
       await page.evaluate(() => window.__starwishMap.setMove({ x: 0, y: 0 }));
