@@ -102,6 +102,8 @@ export interface C10bLabApi {
   bench(seconds: number, label?: string): void;
   benchState(): { state: "off" | "warmup" | "running" | "done"; progress: number; result: BenchResult | null; all: BenchResult[] };
   report(): string;
+  /** 效能分析：開關各項目各量一格 Draw Calls（只量測，不改畫面；量完恢復） */
+  breakdown(): Promise<Record<string, unknown>>;
 }
 
 declare global {
@@ -460,6 +462,66 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
       api.view("free");
     },
     benchState: () => ({ state: benchState, progress: recProgress(), result: benchResult, all: allResults }),
+    breakdown: async () => {
+      const frame = (): Promise<void> => new Promise((r) => scene.onAfterRenderObservable.addOnce(() => r()));
+      const measure = async (): Promise<{ draws: number; tris: number }> => {
+        await frame();
+        await frame();
+        return { draws: perf.drawCalls, tris: Math.round(scene.getActiveIndices() / 3) };
+      };
+      const charMeshes = chars.flatMap((c) => c.meshes);
+      const sm = shadows.getShadowMap();
+      const smList = sm?.renderList ? [...sm.renderList] : [];
+      const all = await measure();
+      // 1) 角色全部隱藏
+      for (const m of charMeshes) m.setEnabled(false);
+      const noChars = await measure();
+      for (const m of charMeshes) m.setEnabled(true);
+      // 2) 發光層（GlowLayer）關閉
+      let noGlow = all;
+      if (render.glow) {
+        render.glow.isEnabled = false;
+        noGlow = await measure();
+        render.glow.isEnabled = true;
+      }
+      // 3) 陰影貼圖不畫任何物件
+      let noShadow = all;
+      if (sm?.renderList) {
+        sm.renderList.length = 0;
+        noShadow = await measure();
+        sm.renderList.push(...smList);
+      }
+      // 4) 後製（HDR 管線）關閉
+      scene.postProcessesEnabled = false;
+      const noPost = await measure();
+      scene.postProcessesEnabled = true;
+      const after = await measure();
+      const charSet = new Set<AbstractMesh>(charMeshes);
+      const glowAll = !!render.glow && (render.glow as unknown as { _includedOnlyMeshes?: number[] })._includedOnlyMeshes?.length === 0;
+      return {
+        quality: quality.level,
+        renderSize: [engine.getRenderWidth(), engine.getRenderHeight()],
+        canvasCss: [canvas.clientWidth, canvas.clientHeight],
+        hardwareScaling: engine.getHardwareScalingLevel(),
+        devicePixelRatio: window.devicePixelRatio,
+        msaa: render.pipeline?.samples ?? 0,
+        fxaa: render.pipeline?.fxaaEnabled ?? false,
+        hdr: !!render.pipeline,
+        glow: render.glow ? { enabled: true, rendersAllMeshes: glowAll, ratio: quality.bloom.textureRatio, kernel: quality.bloom.kernel } : null,
+        shadow: { mapSize: quality.shadows.mapSize, filter: quality.shadows.filter, casters: smList.length, characterCasters: smList.filter((m) => charSet.has(m as AbstractMesh)).length },
+        meshes: { character: charMeshes.length, activeTotal: scene.getActiveMeshes().length, sceneTotal: scene.meshes.length },
+        materials: { character: new Set(charMeshes.map((m) => m.material)).size, scene: scene.materials.length },
+        lod,
+        draws: { all: all.draws, noChars: noChars.draws, noGlow: noGlow.draws, noShadow: noShadow.draws, noPost: noPost.draws, after: after.draws },
+        tris: { mainPass: all.tris, mainPassNoChars: noChars.tris },
+        share: {
+          characters: all.draws - noChars.draws,
+          glowLayer: all.draws - noGlow.draws,
+          shadowMap: all.draws - noShadow.draws,
+          postProcess: all.draws - noPost.draws,
+        },
+      };
+    },
     report: () => {
       const i = api.info();
       const ua = navigator.userAgent;

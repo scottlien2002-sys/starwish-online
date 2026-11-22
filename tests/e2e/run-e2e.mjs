@@ -1899,6 +1899,7 @@ for (const name of browsers) {
     console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
     for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}${v.ok ? "" : "  " + JSON.stringify(v.detail).slice(0, 900)}`);
     for (const r of run.results) if (r.bench) console.log(`   · ${r.tag}: ${JSON.stringify(r.bench)}`);
+    for (const r of run.results) if (r.breakdown) console.log(`   · ${r.tag}: ${JSON.stringify(r.breakdown)}`);
     for (const e of run.errors) console.log(`   ! ${e}`);
   }
 
@@ -1963,8 +1964,31 @@ for (const name of browsers) {
       run.results.push({ tag: "c10b bench", bench: b.result, report: rep });
       check("效能測試產生平均／1% Low／卡頓結果、報告文字", !!b.result && b.result.frames > 0 && b.result.avgDrawCalls > 0 && /平均/.test(rep) && /載入/.test(rep), { r: b.result });
       check("HQ ↔ Lite 來回切換 3 次載入、沒有 WebGL Context Lost", after.loads.length === 3 && after.contextLost === 0, { loads: after.loads, lost: after.contextLost });
+      // C1.0-P 效能分析：Draw Calls 分項（高畫質 HQ／Lite；之後再開中畫質頁量一次）
+      for (const l of ["hq", "lite"]) {
+        await page.evaluate((x) => window.__starwishC10b.setLod(x), l);
+        await page.waitForFunction((x) => window.__starwishC10b.lod === x && !window.__starwishC10b.loading, l, { timeout: 120000 });
+        await page.evaluate(() => window.__starwishC10b.view("front"));
+        const bd = await page.evaluate(() => window.__starwishC10b.breakdown());
+        run.results.push({ tag: `c10p breakdown high ${l}`, breakdown: bd });
+      }
     } catch (e) {
       run.errors.push(`exception: ${e.message}`);
+    }
+    // 中畫質（iPhone 預設）也量一次 Draw Calls 分項
+    try {
+      const p2 = await ctx.newPage();
+      await p2.goto(server.url + "/?lab=c10b&quality=medium", { waitUntil: "load" });
+      await p2.waitForFunction(() => window.__starwishC10b?.ready === true, null, { timeout: 120000 });
+      for (const l of ["hq", "lite"]) {
+        await p2.evaluate((x) => window.__starwishC10b.setLod(x), l);
+        await p2.waitForFunction((x) => window.__starwishC10b.lod === x && !window.__starwishC10b.loading, l, { timeout: 120000 });
+        const bd = await p2.evaluate(() => window.__starwishC10b.breakdown());
+        run.results.push({ tag: `c10p breakdown medium ${l}`, breakdown: bd });
+      }
+      await p2.close();
+    } catch (e) {
+      run.errors.push(`medium breakdown: ${e.message}`);
     }
     await ctx.close();
     run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 12;
@@ -1973,6 +1997,7 @@ for (const name of browsers) {
     console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
     for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}${v.ok ? "" : "  " + JSON.stringify(v.detail).slice(0, 900)}`);
     for (const r of run.results) if (r.bench) console.log(`   · ${r.tag}: ${JSON.stringify(r.bench)}`);
+    for (const r of run.results) if (r.breakdown) console.log(`   · ${r.tag}: ${JSON.stringify(r.breakdown)}`);
     for (const r of run.results) if (r.info) console.log(`   · ${r.tag}: loads ${JSON.stringify(r.info.loads)} gpu ${r.info.gpuMemMB} MB draw ${r.info.drawCalls} tex ${JSON.stringify(r.info.textures)}`);
     for (const e of run.errors) console.log(`   ! ${e}`);
   }
