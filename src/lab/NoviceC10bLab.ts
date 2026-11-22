@@ -77,6 +77,9 @@ interface BenchResult extends BenchmarkSummary {
   hist30: { le20: number; le37: number; le54: number; gt54: number }[];
   renderSize: [number, number][];
   timeline: TimelineWindow[];
+  /** 開始測試時距離頁面開啟／最後一次載入完成的秒數（判斷是否為載入後背景工作） */
+  sinceOpen: number;
+  sinceLoad: number;
   sizeChanges: number;
   diag: string;
   lod: C10bLod;
@@ -212,6 +215,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
   const loads: LoadRecord[] = [];
   let metalWithProbe = 0;
   let loading = false;
+  let lastLoadDone = 0;
 
   const fileBytes = (file: string): number => {
     const e = performance.getEntriesByType("resource").filter((r) => r.name.endsWith(file)) as PerformanceResourceTiming[];
@@ -352,6 +356,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
     applyDiag();
     await scene.whenReadyAsync();
     rec.ms = Math.round(performance.now() - t0);
+    lastLoadDone = performance.now();
     rec.files.sort((a, b) => a.file.localeCompare(b.file));
     loads.push(rec);
     lod = l;
@@ -494,6 +499,8 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
   let lostAtStart = 0;
   let sizeAtStart: [number, number] = [0, 0];
   let samples: FrameSample[] = [];
+  let benchStartOpen = 0;
+  let benchStartLoad = 0;
   let sizeChanges = 0;
   let frameNo = 0;
   let lastW = 0;
@@ -509,6 +516,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
     (r.windows5.length > 1 ? `\n  每 5 秒平均：${r.windows5.map((w) => w.toFixed(0)).join(" ")}` : "") +
     (r.hist30.length ? `\n  每 30 秒影格分布（≤20ms／≤37ms／≤54ms／>54ms）：${r.hist30.map((h) => `${h.le20}/${h.le37}/${h.le54}/${h.gt54}`).join(" → ")}` : "") +
     `\n  渲染解析度 開始 ${r.renderSize[0]!.join("×")} 結束 ${r.renderSize[1]!.join("×")}（測試中改變 ${r.sizeChanges} 次）　${r.ab}　診斷：${r.diag}` +
+    `\n  開始測試時：開頁後 ${r.sinceOpen} 秒、最後一次載入後 ${r.sinceLoad} 秒` +
     `\n  時間軸（秒｜FPS｜CPU 平均/95%ms｜GPU探測ms｜影格 ≤20/≤37/≤54/>54ms）：` +
     r.timeline.map((w) => `\n   ${w.t0}s｜${w.fps}｜${w.cpuAvg}/${w.cpuP95}｜${w.gpuAvg ?? "-"}｜${w.le20}/${w.le37}/${w.le54}/${w.gt54}`).join("") +
     (r.contextLost ? `\n  ⚠ 測試中 WebGL Context Lost ×${r.contextLost}` : "");
@@ -606,6 +614,8 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
       sizeChanges = 0;
       lostAtStart = contextLost;
       sizeAtStart = [engine.getRenderWidth(), engine.getRenderHeight()];
+      benchStartOpen = Math.round(performance.now() / 1000);
+      benchStartLoad = Math.round((performance.now() - lastLoadDone) / 1000);
       benchState = "warmup";
       api.view("free");
     },
@@ -738,6 +748,8 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
           hist30: windowHistograms(dts, 30),
           renderSize: [sizeAtStart, [engine.getRenderWidth(), engine.getRenderHeight()]],
           timeline: frameTimeline(samples, 5),
+          sinceOpen: benchStartOpen,
+          sinceLoad: benchStartLoad,
           sizeChanges,
           diag: `${diagLabel}${opts.gpuProbe ? "（GPU 探測開啟：每 30 格多等一次 GPU）" : ""}`,
           contextLost: contextLost - lostAtStart,
