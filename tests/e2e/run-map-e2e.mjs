@@ -54,6 +54,7 @@ for (const name of browsers) {
       check("地形 16 塊", info.chunks === 16, info.chunks);
       check(`${mode} 使用 ${q} 畫質渲染`, info.quality === q, info.quality);
       check(lod === "hq" ? "HQ 地形 1 公尺網格（約 6.5 萬三角形）" : "Lite 地形 1.5 公尺網格（約 2.9 萬三角形）", lod === "hq" ? info.terrainTris === 64800 : info.terrainTris === 28800, info.terrainTris);
+      check("植被：樹 ≥ 400、草叢與花有建立", !!info.veg && info.veg.trees >= 400 && info.veg.grass > 8000 && info.veg.flowers > 800, info.veg);
       const px = await page.evaluate(() => window.__starwishMap.pixelStats());
       check("3D 畫面有繪製", px.distinctColors >= 20 && px.opaqueRatio > 0.3, px);
       await shot(page, "spawn");
@@ -82,7 +83,7 @@ for (const name of browsers) {
       check("B1 橋中央可走、橋面高於水面", bridge.mid && bridge.y > 5.7, bridge);
 
       // 截圖：各視角
-      for (const v of ["camp", "bridge", "highland", "farm", "ruins", "arena"]) {
+      for (const v of ["camp", "bridge", "highland", "farm", "ruins", "arena", "forest", "hill", "field"]) {
         await page.evaluate((x) => window.__starwishMap.view(x), v);
         await settle(page, 4);
         await shot(page, v);
@@ -141,7 +142,7 @@ for (const name of browsers) {
       run.results.exposure = expo;
       check("傳送門平台、符文附近畫面中央沒有過曝（純白像素 < 3%）", expo.every((e) => e.whiteCenter < 0.03), expo);
       const rep = await page.evaluate(() => window.__starwishMap.report());
-      check("報告文字（含模式）", /Stage 6 P1/.test(rep) && /主路線/.test(rep) && (mode === "hq" ? /模式 HQ/.test(rep) : mode === "lite-mid" ? /模式 Lite 中畫質/.test(rep) : /模式 Lite 低畫質/.test(rep)), rep.slice(0, 300));
+      check("報告文字（含模式）", /Stage 6 P2-1/.test(rep) && /植被 樹/.test(rep) && /主路線/.test(rep) && (mode === "hq" ? /模式 HQ/.test(rep) : mode === "lite-mid" ? /模式 Lite 中畫質/.test(rep) : /模式 Lite 低畫質/.test(rep)), rep.slice(0, 300));
       const after = await page.evaluate(() => window.__starwishMap.info());
       check("沒有 WebGL Context Lost", after.contextLost === 0, after.contextLost);
       run.results.after = after;

@@ -176,3 +176,55 @@ test("星芽原野：地表顏色是合法 RGB、主路是石板色", () => {
   const road = terrainColor(T, p.x, p.z);
   assert.ok(road[0] > 0.8 && road[1] > 0.7, `主路顏色 ${road}`);
 });
+
+// ---------------- Stage 6 P2-1：地表與植被 ----------------
+import { VEG_HQ, VEG_LITE, buildVegetation, clearance } from "../../src/maps/starsprout/vegetation.ts";
+import { MAIN_ROAD_HALF as MRH, RIVER_HALF as RH, SIDE_ROAD_HALF as SRH } from "../../src/maps/starsprout/layout.ts";
+
+const VEG = buildVegetation(T, VEG_HQ);
+
+test("P2-1 植被：數量合理、同種子結果相同、Lite 只減少草花不改樹與碰撞", () => {
+  assert.ok(VEG.trees.length >= 400 && VEG.trees.length <= 700, `樹 ${VEG.trees.length}`);
+  assert.ok(new Set(VEG.trees.map((t) => t.kind)).size === 4, "四種樹（含櫻花）");
+  assert.ok(VEG.trees.filter((t) => t.kind === "cherry").length >= 30);
+  assert.ok(VEG.grass.length > 15000 && VEG.flowers.length > 1500);
+  const again = buildVegetation(T, VEG_HQ);
+  assert.deepEqual(again.trees.slice(0, 20), VEG.trees.slice(0, 20));
+  const lite = buildVegetation(T, VEG_LITE);
+  assert.equal(lite.trees.length, VEG.trees.length);
+  assert.equal(lite.colliders.length, VEG.colliders.length);
+  assert.ok(lite.grass.length < VEG.grass.length * 0.6);
+});
+
+test("P2-1 植被：不長在主路、支線、河道、Boss 場、傳送門平台與石階上", () => {
+  for (const t of VEG.trees) {
+    const c = clearance(T, t.x, t.z);
+    assert.ok(c.main >= MRH + 3.2 && c.side >= SRH + 2.2 && c.river >= RH + 2.6 && c.arena >= 14 && c.portal >= 4.5, `樹 (${t.x.toFixed(1)},${t.z.toFixed(1)})`);
+  }
+  for (const s of VEG.smalls) {
+    const c = clearance(T, s.x, s.z);
+    assert.ok(c.main >= MRH + 1.4 && c.river >= RH + 0.8 && c.arena >= 14, `灌木/岩石 (${s.x.toFixed(1)},${s.z.toFixed(1)})`);
+  }
+  for (const g of [...VEG.grass, ...VEG.flowers]) {
+    const c = clearance(T, g.x, g.z);
+    assert.ok(c.main >= MRH + 0.35 && c.river >= RH + 0.5 && c.arena >= 14 && c.portal >= 4.5);
+  }
+});
+
+test("P2-1 植被：樹與岩石貼地不漂浮（底部 ≤ 周圍地面）", () => {
+  for (const t of VEG.trees) assert.ok(t.y <= T.height(t.x, t.z) + 1e-6, `樹 (${t.x},${t.z}) 漂浮`);
+  for (const s of VEG.smalls) assert.ok(s.y <= T.height(s.x, s.z) + 1e-6);
+  for (const g of VEG.grass) assert.ok(Math.abs(g.y - (T.height(g.x, g.z) - 0.04)) < 1e-6);
+});
+
+test("P2-1 植被：加上樹與岩石碰撞後，主路線仍約 57 秒、不卡住、不被擋", () => {
+  const all = [...MAP_COLLIDERS, ...VEG.colliders];
+  const r = simulateRoute(T, { colliders: all });
+  assert.ok(r.reached && r.stuck.length === 0, JSON.stringify(r.stuck));
+  assert.equal(r.blockedFrames, 0);
+  assert.ok(r.seconds > 52 && r.seconds < 66);
+  // 碰撞物不壓在練功區中心、探索點、傳送門
+  for (const p of [...ZONES.map((z) => ({ x: z.x, z: z.z })), ...POIS, { x: PORTAL.x, z: PORTAL.z }]) {
+    for (const c of VEG.colliders) assert.ok(Math.hypot(c.x - p.x, c.z - p.z) > c.r + 1, `碰撞物壓在 (${p.x},${p.z})`);
+  }
+});

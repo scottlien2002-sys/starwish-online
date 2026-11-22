@@ -94,6 +94,8 @@ export function buildStarsproutWorld(
 ): StarsproutWorld {
   // ---------- 地形（4×4 分區） ----------
   const groundMat = litMaterial("PH_mapGroundMat", scene, 0.02);
+  // P2-1：地面細節貼圖（草紋、細碎明暗；乘在各區頂點色上，所以生態色不變）
+  groundMat.diffuseTexture = groundDetailTexture(scene, lod === "hq" ? 512 : 256);
   const step = lod === "hq" ? 1 : 1.5;
   const size = (2 * MAP_HALF) / CHUNKS;
   const per = Math.round(size / step);
@@ -108,6 +110,7 @@ export function buildStarsproutWorld(
       const vn = per + 1;
       const positions = new Float32Array(vn * vn * 3);
       const normals = new Float32Array(vn * vn * 3);
+      const uvs = new Float32Array(vn * vn * 2);
       const xs = new Float32Array(vn * vn);
       const zs = new Float32Array(vn * vn);
       const indices: number[] = [];
@@ -121,6 +124,9 @@ export function buildStarsproutWorld(
           positions[k * 3] = x;
           positions[k * 3 + 1] = t.height(x, z);
           positions[k * 3 + 2] = z;
+          // 世界座標貼圖座標：細節貼圖每 3 公尺重複一次，跨分區無接縫
+          uvs[k * 2] = x / 3;
+          uvs[k * 2 + 1] = z / 3;
           // 法線由高度場直接算（分區接縫處完全一致，不會有明暗接縫）
           const e = 0.5;
           const gx = (t.height(x + e, z) - t.height(x - e, z)) / (2 * e);
@@ -145,6 +151,7 @@ export function buildStarsproutWorld(
       const vd = new VertexData();
       vd.positions = positions;
       vd.normals = normals;
+      vd.uvs = uvs;
       vd.indices = indices;
       vd.applyToMesh(mesh, true);
       mesh.material = groundMat;
@@ -256,6 +263,53 @@ export function buildStarsproutWorld(
 }
 
 // ======================= 各部件 =======================
+
+/** 程式產生的地面細節貼圖：短草紋＋細碎斑點，平均亮度約 0.93，可無縫平鋪 */
+function groundDetailTexture(scene: Scene, size: number): DynamicTexture {
+  const tex = new DynamicTexture("PH_groundDetail", { width: size, height: size }, scene, true);
+  const ctx = tex.getContext() as unknown as CanvasRenderingContext2D;
+  ctx.fillStyle = "rgb(236,238,232)";
+  ctx.fillRect(0, 0, size, size);
+  let seed = 7;
+  const rnd = (): number => {
+    seed = (seed * 16807) % 2147483647;
+    return seed / 2147483647;
+  };
+  const k = size / 256;
+  // 大片柔和明暗
+  for (let i = 0; i < 40; i++) {
+    const x = rnd() * size;
+    const y = rnd() * size;
+    const r = (14 + rnd() * 30) * k;
+    const v = 220 + Math.floor(rnd() * 35);
+    for (const [ox, oy] of [[0, 0], [size, 0], [-size, 0], [0, size], [0, -size]] as const) {
+      const g = ctx.createRadialGradient(x + ox, y + oy, 0, x + ox, y + oy, r);
+      g.addColorStop(0, `rgba(${v},${v + 4},${v - 6},0.35)`);
+      g.addColorStop(1, `rgba(${v},${v + 4},${v - 6},0)`);
+      ctx.fillStyle = g;
+      ctx.fillRect(x + ox - r, y + oy - r, r * 2, r * 2);
+    }
+  }
+  // 短草紋與小點
+  for (let i = 0; i < 2600 * k * k; i++) {
+    const x = rnd() * size;
+    const y = rnd() * size;
+    const v = 200 + Math.floor(rnd() * 55);
+    ctx.strokeStyle = `rgba(${v - 8},${v},${v - 18},0.55)`;
+    ctx.lineWidth = Math.max(1, k * 0.9);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    const a = -Math.PI / 2 + (rnd() - 0.5) * 1.2;
+    const l = (2 + rnd() * 4) * k;
+    ctx.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l);
+    ctx.stroke();
+  }
+  tex.update(true);
+  tex.wrapU = Texture.WRAP_ADDRESSMODE;
+  tex.wrapV = Texture.WRAP_ADDRESSMODE;
+  tex.anisotropicFilteringLevel = 4;
+  return tex;
+}
 
 function buildWater(scene: Scene): { mesh: Mesh; tex: DynamicTexture } {
   const half = RIVER_HALF + 0.7;
