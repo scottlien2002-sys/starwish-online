@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-11-22T06:42:59.186Z",
+  "startedAt": "2026-11-22T06:50:52.297Z",
   "runs": [
     {
       "browser": "chromium",
@@ -13,7 +13,7 @@
           "ok": true,
           "detail": 16
         },
-        "HQ 使用高畫質渲染": {
+        "hq 使用 high 畫質渲染": {
           "ok": true,
           "detail": "high"
         },
@@ -75,14 +75,14 @@
             "st": {
               "phase": "running",
               "loop": 0,
-              "t": 1.8000000000000005,
+              "t": 2.1000000000000005,
               "result": null
             },
             "pl": {
-              "x": -49.68854353111575,
+              "x": -48.70617494487512,
               "y": 2,
-              "z": -56.89961147250521,
-              "yaw": 0.7266423406817262
+              "z": -55.76615440511441,
+              "yaw": 0.705698469977513
             }
           }
         },
@@ -105,9 +105,29 @@
             }
           ]
         },
+        "傳送門平台、符文附近畫面中央沒有過曝（純白像素 < 3%）": {
+          "ok": true,
+          "detail": [
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 200.68810189949556
+            },
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 208.5963262982111
+            },
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 215.67329935777096
+            }
+          ]
+        },
         "報告文字（含模式）": {
           "ok": true,
-          "detail": "星願物語 Stage 6 P1 星芽原野 地形與路線測試報告\n時間 2026/11/22 06:45:57\n網址參數 ?map=starsprout&quality=high&lod=hq\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 HQ：渲染畫質 high（解析度上限 2x、後製 開、陰影 柔和 PCSS 2048）／地圖 HQ／載入 625 ms\n對照設定：陰影 預設（高）／發光層 開／測試解析度"
+          "detail": "星願物語 Stage 6 P1 星芽原野 地形與路線測試報告\n時間 2026/11/22 06:53:55\n網址參數 ?map=starsprout&quality=high&lod=hq\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 HQ：渲染畫質 high（解析度上限 2x、後製 開、陰影 柔和 PCSS 2048）／地圖 HQ／載入 481 ms\n發光效果 修正後；診斷 無\n對照設定：陰影 預設（"
         },
         "沒有 WebGL Context Lost": {
           "ok": true,
@@ -132,14 +152,14 @@
         "info": {
           "quality": "high",
           "lod": "hq",
-          "loadMs": 624.8999999999942,
+          "loadMs": 481.1000000000058,
           "chunks": 16,
           "terrainVerts": 33856,
           "terrainTris": 64800,
           "drawCalls": 57,
           "activeMeshes": 32,
           "trianglesActive": 87255.33333333333,
-          "meshes": 39,
+          "meshes": 38,
           "materials": 14,
           "textures": 8,
           "labels": true,
@@ -168,27 +188,44 @@
           "st": {
             "phase": "running",
             "loop": 0,
-            "t": 1.8000000000000005,
+            "t": 2.1000000000000005,
             "result": null
           },
           "pl": {
-            "x": -49.68854353111575,
+            "x": -48.70617494487512,
             "y": 2,
-            "z": -56.89961147250521,
-            "yaw": 0.7266423406817262
+            "z": -55.76615440511441,
+            "yaw": 0.705698469977513
           }
         },
+        "exposure": [
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 200.68810189949556
+          },
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 208.5963262982111
+          },
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 215.67329935777096
+          }
+        ],
         "after": {
           "quality": "high",
           "lod": "hq",
-          "loadMs": 624.8999999999942,
+          "loadMs": 481.1000000000058,
           "chunks": 16,
           "terrainVerts": 33856,
           "terrainTris": 64800,
-          "drawCalls": 57,
-          "activeMeshes": 32,
-          "trianglesActive": 87255.33333333333,
-          "meshes": 39,
+          "drawCalls": 60,
+          "activeMeshes": 34,
+          "trianglesActive": 131873.33333333334,
+          "meshes": 38,
           "materials": 14,
           "textures": 8,
           "labels": true,
@@ -218,7 +255,7 @@
     },
     {
       "browser": "chromium",
-      "lod": "lite",
+      "lod": "lite-mid",
       "checks": {
         "啟動": {
           "ok": true,
@@ -228,9 +265,9 @@
           "ok": true,
           "detail": 16
         },
-        "完整 Lite 使用低畫質渲染（不是高畫質＋Lite 地形）": {
+        "lite-mid 使用 medium 畫質渲染": {
           "ok": true,
-          "detail": "low"
+          "detail": "medium"
         },
         "Lite 地形 1.5 公尺網格（約 2.9 萬三角形）": {
           "ok": true,
@@ -239,8 +276,8 @@
         "3D 畫面有繪製": {
           "ok": true,
           "detail": {
-            "samples": 2479,
-            "distinctColors": 147,
+            "samples": 3568,
+            "distinctColors": 175,
             "opaqueRatio": 1
           }
         },
@@ -254,9 +291,9 @@
               "yaw": 0.7266423406817256
             },
             "p1": {
-              "x": -49.34373869876307,
+              "x": -52.01381696702052,
               "y": 2,
-              "z": -56.51170603610847,
+              "z": -59.51554408789801,
               "yaw": 0.726642340681726
             },
             "ground": 2
@@ -284,9 +321,29 @@
           "ok": true,
           "detail": false
         },
+        "傳送門平台、符文附近畫面中央沒有過曝（純白像素 < 3%）": {
+          "ok": true,
+          "detail": [
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 200.26489643579472
+            },
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 207.7848534260493
+            },
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 215.25787344057264
+            }
+          ]
+        },
         "報告文字（含模式）": {
           "ok": true,
-          "detail": "星願物語 Stage 6 P1 星芽原野 地形與路線測試報告\n時間 2026/11/22 06:46:25\n網址參數 ?map=starsprout&quality=low&lod=lite\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 完整 Lite：渲染畫質 low（解析度上限 1.25x、後製 關、陰影 PCF 512）／地圖 Lite／載入 517 ms\n對照設定：陰影 預設（高）／發光層 關／"
+          "detail": "星願物語 Stage 6 P1 星芽原野 地形與路線測試報告\n時間 2026/11/22 06:54:29\n網址參數 ?map=starsprout&quality=medium&lod=lite\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 Lite 中畫質：渲染畫質 medium（解析度上限 1.5x、後製 開、陰影 PCF 1024）／地圖 Lite／載入 406 ms\n發光效果 修正後；診斷 無"
         },
         "沒有 WebGL Context Lost": {
           "ok": true,
@@ -295,29 +352,230 @@
       },
       "errors": [],
       "screenshots": [
-        "map-e2e/chromium_lite_spawn.png",
-        "map-e2e/chromium_lite_camp.png",
-        "map-e2e/chromium_lite_bridge.png",
-        "map-e2e/chromium_lite_highland.png",
-        "map-e2e/chromium_lite_farm.png",
-        "map-e2e/chromium_lite_ruins.png",
-        "map-e2e/chromium_lite_arena.png",
-        "map-e2e/chromium_lite_overview.png",
-        "map-e2e/chromium_lite_overview_nav.png",
-        "map-e2e/chromium_lite_portal.png"
+        "map-e2e/chromium_lite-mid_spawn.png",
+        "map-e2e/chromium_lite-mid_camp.png",
+        "map-e2e/chromium_lite-mid_bridge.png",
+        "map-e2e/chromium_lite-mid_highland.png",
+        "map-e2e/chromium_lite-mid_farm.png",
+        "map-e2e/chromium_lite-mid_ruins.png",
+        "map-e2e/chromium_lite-mid_arena.png",
+        "map-e2e/chromium_lite-mid_overview.png",
+        "map-e2e/chromium_lite-mid_overview_nav.png",
+        "map-e2e/chromium_lite-mid_portal.png"
+      ],
+      "results": {
+        "info": {
+          "quality": "medium",
+          "lod": "lite",
+          "loadMs": 406.1000000000058,
+          "chunks": 16,
+          "terrainVerts": 15376,
+          "terrainTris": 28800,
+          "drawCalls": 54,
+          "activeMeshes": 32,
+          "trianglesActive": 44049.333333333336,
+          "meshes": 38,
+          "materials": 14,
+          "textures": 8,
+          "labels": true,
+          "nav": false,
+          "contextLost": 0,
+          "render": "1278×589 @1.5x",
+          "bridges": [
+            "B1",
+            "B2"
+          ],
+          "arena": {
+            "x": 0,
+            "z": 66,
+            "r": 12,
+            "y": 17
+          },
+          "portal": {
+            "x": 0,
+            "z": 82,
+            "r": 5,
+            "y": 17,
+            "facing": 3.141592653589793
+          }
+        },
+        "exposure": [
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 200.26489643579472
+          },
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 207.7848534260493
+          },
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 215.25787344057264
+          }
+        ],
+        "after": {
+          "quality": "medium",
+          "lod": "lite",
+          "loadMs": 406.1000000000058,
+          "chunks": 16,
+          "terrainVerts": 15376,
+          "terrainTris": 28800,
+          "drawCalls": 57,
+          "activeMeshes": 34,
+          "trianglesActive": 93167.33333333333,
+          "meshes": 38,
+          "materials": 14,
+          "textures": 8,
+          "labels": true,
+          "nav": false,
+          "contextLost": 0,
+          "render": "1278×589 @1x",
+          "bridges": [
+            "B1",
+            "B2"
+          ],
+          "arena": {
+            "x": 0,
+            "z": 66,
+            "r": 12,
+            "y": 17
+          },
+          "portal": {
+            "x": 0,
+            "z": 82,
+            "r": 5,
+            "y": 17,
+            "facing": 3.141592653589793
+          }
+        }
+      },
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "lod": "lite-low",
+      "checks": {
+        "啟動": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "地形 16 塊": {
+          "ok": true,
+          "detail": 16
+        },
+        "lite-low 使用 low 畫質渲染": {
+          "ok": true,
+          "detail": "low"
+        },
+        "Lite 地形 1.5 公尺網格（約 2.9 萬三角形）": {
+          "ok": true,
+          "detail": 28800
+        },
+        "3D 畫面有繪製": {
+          "ok": true,
+          "detail": {
+            "samples": 2479,
+            "distinctColors": 148,
+            "opaqueRatio": 1
+          }
+        },
+        "搖桿移動、角色貼地": {
+          "ok": true,
+          "detail": {
+            "p0": {
+              "x": -56,
+              "y": 2,
+              "z": -64,
+              "yaw": 0.7266423406817256
+            },
+            "p1": {
+              "x": -49.28660340862368,
+              "y": 2,
+              "z": -56.44742883470162,
+              "yaw": 0.726642340681726
+            },
+            "ground": 2
+          }
+        },
+        "溪流河道不可走、岸邊可走": {
+          "ok": true,
+          "detail": {
+            "here": true,
+            "water": false
+          }
+        },
+        "B1 橋中央可走、橋面高於水面": {
+          "ok": true,
+          "detail": {
+            "mid": true,
+            "y": 6.747612551936899
+          }
+        },
+        "傳送門平時可見，走進去提示需擊敗 Boss 並達成條件": {
+          "ok": true,
+          "detail": "傳送門：擊敗王冠重錘兔並達成通關條件後才能使用（第一階段尚無 Boss）"
+        },
+        "標示可開關": {
+          "ok": true,
+          "detail": false
+        },
+        "傳送門平台、符文附近畫面中央沒有過曝（純白像素 < 3%）": {
+          "ok": true,
+          "detail": [
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 196.45435937395848
+            },
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 204.2097413186273
+            },
+            {
+              "whiteAll": 0.007092847663936302,
+              "whiteCenter": 0,
+              "meanLuma": 211.71207456201608
+            }
+          ]
+        },
+        "報告文字（含模式）": {
+          "ok": true,
+          "detail": "星願物語 Stage 6 P1 星芽原野 地形與路線測試報告\n時間 2026/11/22 06:54:52\n網址參數 ?map=starsprout&quality=low&lod=lite\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 Lite 低畫質：渲染畫質 low（解析度上限 1.25x、後製 關、陰影 PCF 512）／地圖 Lite／載入 418 ms\n發光效果 修正後；診斷 無\n對照設定："
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": 0
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "map-e2e/chromium_lite-low_spawn.png",
+        "map-e2e/chromium_lite-low_camp.png",
+        "map-e2e/chromium_lite-low_bridge.png",
+        "map-e2e/chromium_lite-low_highland.png",
+        "map-e2e/chromium_lite-low_farm.png",
+        "map-e2e/chromium_lite-low_ruins.png",
+        "map-e2e/chromium_lite-low_arena.png",
+        "map-e2e/chromium_lite-low_overview.png",
+        "map-e2e/chromium_lite-low_overview_nav.png",
+        "map-e2e/chromium_lite-low_portal.png"
       ],
       "results": {
         "info": {
           "quality": "low",
           "lod": "lite",
-          "loadMs": 516.5,
+          "loadMs": 418.20000000001164,
           "chunks": 16,
           "terrainVerts": 15376,
           "terrainTris": 28800,
           "drawCalls": 47,
           "activeMeshes": 32,
           "trianglesActive": 44049.333333333336,
-          "meshes": 39,
+          "meshes": 38,
           "materials": 14,
           "textures": 5,
           "labels": true,
@@ -342,23 +600,40 @@
             "facing": 3.141592653589793
           }
         },
+        "exposure": [
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 196.45435937395848
+          },
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 204.2097413186273
+          },
+          {
+            "whiteAll": 0.007092847663936302,
+            "whiteCenter": 0,
+            "meanLuma": 211.71207456201608
+          }
+        ],
         "after": {
           "quality": "low",
           "lod": "lite",
-          "loadMs": 516.5,
+          "loadMs": 418.20000000001164,
           "chunks": 16,
           "terrainVerts": 15376,
           "terrainTris": 28800,
-          "drawCalls": 35,
-          "activeMeshes": 20,
-          "trianglesActive": 32209.333333333332,
-          "meshes": 39,
+          "drawCalls": 49,
+          "activeMeshes": 34,
+          "trianglesActive": 71731.33333333333,
+          "meshes": 38,
           "materials": 14,
           "textures": 5,
           "labels": true,
           "nav": false,
           "contextLost": 0,
-          "render": "852×393 @1x",
+          "render": "1065×491 @1x",
           "bridges": [
             "B1",
             "B2"
@@ -392,7 +667,7 @@
           "ok": true,
           "detail": 16
         },
-        "HQ 使用高畫質渲染": {
+        "hq 使用 high 畫質渲染": {
           "ok": true,
           "detail": "high"
         },
@@ -418,9 +693,9 @@
               "yaw": 0.7266423406817256
             },
             "p1": {
-              "x": -53.01036272526539,
+              "x": -52.67818080585043,
               "y": 2,
-              "z": -60.636658065923505,
+              "z": -60.26295340658167,
               "yaw": 0.726642340681726
             },
             "ground": 2
@@ -454,14 +729,14 @@
             "st": {
               "phase": "running",
               "loop": 0,
-              "t": 9.799999999999981,
+              "t": 12.099999999999973,
               "result": null
             },
             "pl": {
-              "x": -42.58711501817673,
-              "y": 4.279231964725824,
-              "z": -23.502157149509838,
-              "yaw": 0.8351127925126066
+              "x": -33.60877454527405,
+              "y": 5.0387446960053195,
+              "z": -16.31803564283764,
+              "yaw": 0.9070483784466231
             }
           }
         },
@@ -484,9 +759,29 @@
             }
           ]
         },
+        "傳送門平台、符文附近畫面中央沒有過曝（純白像素 < 3%）": {
+          "ok": true,
+          "detail": [
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 200.7551776834278
+            },
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 208.60379203310893
+            },
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 215.6317432317254
+            }
+          ]
+        },
         "報告文字（含模式）": {
           "ok": true,
-          "detail": "星願物語 Stage 6 P1 星芽原野 地形與路線測試報告\n時間 2026/11/22 06:47:24\n網址參數 ?map=starsprout&quality=high&lod=hq\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 HQ：渲染畫質 high（解析度上限 2x、後製 開、陰影 柔和 PCSS 2048）／地圖 HQ／載入 1516 ms\n對照設定：陰影 預設（高）／發光層 開／"
+          "detail": "星願物語 Stage 6 P1 星芽原野 地形與路線測試報告\n時間 2026/11/22 06:55:50\n網址參數 ?map=starsprout&quality=high&lod=hq\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 HQ：渲染畫質 high（解析度上限 2x、後製 開、陰影 柔和 PCSS 2048）／地圖 HQ／載入 1337 ms\n發光效果 修正後；診斷 無\n對照設定：陰"
         },
         "沒有 WebGL Context Lost": {
           "ok": true,
@@ -511,14 +806,14 @@
         "info": {
           "quality": "high",
           "lod": "hq",
-          "loadMs": 1516,
+          "loadMs": 1337,
           "chunks": 16,
           "terrainVerts": 33856,
           "terrainTris": 64800,
           "drawCalls": 57,
           "activeMeshes": 32,
           "trianglesActive": 87255.33333333333,
-          "meshes": 39,
+          "meshes": 38,
           "materials": 14,
           "textures": 8,
           "labels": true,
@@ -547,33 +842,50 @@
           "st": {
             "phase": "running",
             "loop": 0,
-            "t": 9.799999999999981,
+            "t": 12.099999999999973,
             "result": null
           },
           "pl": {
-            "x": -42.58711501817673,
-            "y": 4.279231964725824,
-            "z": -23.502157149509838,
-            "yaw": 0.8351127925126066
+            "x": -33.60877454527405,
+            "y": 5.0387446960053195,
+            "z": -16.31803564283764,
+            "yaw": 0.9070483784466231
           }
         },
+        "exposure": [
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 200.7551776834278
+          },
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 208.60379203310893
+          },
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 215.6317432317254
+          }
+        ],
         "after": {
           "quality": "high",
           "lod": "hq",
-          "loadMs": 1516,
+          "loadMs": 1337,
           "chunks": 16,
           "terrainVerts": 33856,
           "terrainTris": 64800,
-          "drawCalls": 54,
-          "activeMeshes": 29,
-          "trianglesActive": 80085.33333333333,
-          "meshes": 39,
+          "drawCalls": 60,
+          "activeMeshes": 34,
+          "trianglesActive": 131873.33333333334,
+          "meshes": 38,
           "materials": 14,
           "textures": 8,
           "labels": true,
           "nav": false,
           "contextLost": 0,
-          "render": "1704×786 @1.25x",
+          "render": "852×393 @1x",
           "bridges": [
             "B1",
             "B2"
@@ -597,7 +909,7 @@
     },
     {
       "browser": "webkit",
-      "lod": "lite",
+      "lod": "lite-mid",
       "checks": {
         "啟動": {
           "ok": true,
@@ -607,9 +919,9 @@
           "ok": true,
           "detail": 16
         },
-        "完整 Lite 使用低畫質渲染（不是高畫質＋Lite 地形）": {
+        "lite-mid 使用 medium 畫質渲染": {
           "ok": true,
-          "detail": "low"
+          "detail": "medium"
         },
         "Lite 地形 1.5 公尺網格（約 2.9 萬三角形）": {
           "ok": true,
@@ -618,8 +930,8 @@
         "3D 畫面有繪製": {
           "ok": true,
           "detail": {
-            "samples": 2479,
-            "distinctColors": 149,
+            "samples": 3568,
+            "distinctColors": 181,
             "opaqueRatio": 1
           }
         },
@@ -633,9 +945,9 @@
               "yaw": 0.7266423406817256
             },
             "p1": {
-              "x": -49.25338521668215,
+              "x": -49.2434197590997,
               "y": 2,
-              "z": -56.410058368767444,
+              "z": -56.398847228987165,
               "yaw": 0.726642340681726
             },
             "ground": 2
@@ -663,9 +975,29 @@
           "ok": true,
           "detail": false
         },
+        "傳送門平台、符文附近畫面中央沒有過曝（純白像素 < 3%）": {
+          "ok": true,
+          "detail": [
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 200.08538474113217
+            },
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 207.6682491449963
+            },
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 215.17219284217407
+            }
+          ]
+        },
         "報告文字（含模式）": {
           "ok": true,
-          "detail": "星願物語 Stage 6 P1 星芽原野 地形與路線測試報告\n時間 2026/11/22 06:47:38\n網址參數 ?map=starsprout&quality=low&lod=lite\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 完整 Lite：渲染畫質 low（解析度上限 1.25x、後製 關、陰影 PCF 512）／地圖 Lite／載入 784 ms\n對照設定：陰影 預設（高）／發光"
+          "detail": "星願物語 Stage 6 P1 星芽原野 地形與路線測試報告\n時間 2026/11/22 06:56:03\n網址參數 ?map=starsprout&quality=medium&lod=lite\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 Lite 中畫質：渲染畫質 medium（解析度上限 1.5x、後製 開、陰影 PCF 1024）／地圖 Lite／載入 653 ms\n發光效果 修正後；"
         },
         "沒有 WebGL Context Lost": {
           "ok": true,
@@ -674,29 +1006,230 @@
       },
       "errors": [],
       "screenshots": [
-        "map-e2e/webkit_lite_spawn.png",
-        "map-e2e/webkit_lite_camp.png",
-        "map-e2e/webkit_lite_bridge.png",
-        "map-e2e/webkit_lite_highland.png",
-        "map-e2e/webkit_lite_farm.png",
-        "map-e2e/webkit_lite_ruins.png",
-        "map-e2e/webkit_lite_arena.png",
-        "map-e2e/webkit_lite_overview.png",
-        "map-e2e/webkit_lite_overview_nav.png",
-        "map-e2e/webkit_lite_portal.png"
+        "map-e2e/webkit_lite-mid_spawn.png",
+        "map-e2e/webkit_lite-mid_camp.png",
+        "map-e2e/webkit_lite-mid_bridge.png",
+        "map-e2e/webkit_lite-mid_highland.png",
+        "map-e2e/webkit_lite-mid_farm.png",
+        "map-e2e/webkit_lite-mid_ruins.png",
+        "map-e2e/webkit_lite-mid_arena.png",
+        "map-e2e/webkit_lite-mid_overview.png",
+        "map-e2e/webkit_lite-mid_overview_nav.png",
+        "map-e2e/webkit_lite-mid_portal.png"
+      ],
+      "results": {
+        "info": {
+          "quality": "medium",
+          "lod": "lite",
+          "loadMs": 653,
+          "chunks": 16,
+          "terrainVerts": 15376,
+          "terrainTris": 28800,
+          "drawCalls": 54,
+          "activeMeshes": 32,
+          "trianglesActive": 44049.333333333336,
+          "meshes": 38,
+          "materials": 14,
+          "textures": 8,
+          "labels": true,
+          "nav": false,
+          "contextLost": 0,
+          "render": "1278×589 @1.5x",
+          "bridges": [
+            "B1",
+            "B2"
+          ],
+          "arena": {
+            "x": 0,
+            "z": 66,
+            "r": 12,
+            "y": 17
+          },
+          "portal": {
+            "x": 0,
+            "z": 82,
+            "r": 5,
+            "y": 17,
+            "facing": 3.141592653589793
+          }
+        },
+        "exposure": [
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 200.08538474113217
+          },
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 207.6682491449963
+          },
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 215.17219284217407
+          }
+        ],
+        "after": {
+          "quality": "medium",
+          "lod": "lite",
+          "loadMs": 653,
+          "chunks": 16,
+          "terrainVerts": 15376,
+          "terrainTris": 28800,
+          "drawCalls": 57,
+          "activeMeshes": 34,
+          "trianglesActive": 93167.33333333333,
+          "meshes": 38,
+          "materials": 14,
+          "textures": 8,
+          "labels": true,
+          "nav": false,
+          "contextLost": 0,
+          "render": "1278×589 @1x",
+          "bridges": [
+            "B1",
+            "B2"
+          ],
+          "arena": {
+            "x": 0,
+            "z": 66,
+            "r": 12,
+            "y": 17
+          },
+          "portal": {
+            "x": 0,
+            "z": 82,
+            "r": 5,
+            "y": 17,
+            "facing": 3.141592653589793
+          }
+        }
+      },
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "lod": "lite-low",
+      "checks": {
+        "啟動": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "地形 16 塊": {
+          "ok": true,
+          "detail": 16
+        },
+        "lite-low 使用 low 畫質渲染": {
+          "ok": true,
+          "detail": "low"
+        },
+        "Lite 地形 1.5 公尺網格（約 2.9 萬三角形）": {
+          "ok": true,
+          "detail": 28800
+        },
+        "3D 畫面有繪製": {
+          "ok": true,
+          "detail": {
+            "samples": 2479,
+            "distinctColors": 149,
+            "opaqueRatio": 1
+          }
+        },
+        "搖桿移動、角色貼地": {
+          "ok": true,
+          "detail": {
+            "p0": {
+              "x": -56,
+              "y": 2,
+              "z": -64,
+              "yaw": 0.7266423406817256
+            },
+            "p1": {
+              "x": -49.206879747964045,
+              "y": 2,
+              "z": -56.35773971645962,
+              "yaw": 0.726642340681726
+            },
+            "ground": 2
+          }
+        },
+        "溪流河道不可走、岸邊可走": {
+          "ok": true,
+          "detail": {
+            "here": true,
+            "water": false
+          }
+        },
+        "B1 橋中央可走、橋面高於水面": {
+          "ok": true,
+          "detail": {
+            "mid": true,
+            "y": 6.747612551936899
+          }
+        },
+        "傳送門平時可見，走進去提示需擊敗 Boss 並達成條件": {
+          "ok": true,
+          "detail": "傳送門：擊敗王冠重錘兔並達成通關條件後才能使用（第一階段尚無 Boss）"
+        },
+        "標示可開關": {
+          "ok": true,
+          "detail": false
+        },
+        "傳送門平台、符文附近畫面中央沒有過曝（純白像素 < 3%）": {
+          "ok": true,
+          "detail": [
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 196.09221277473188
+            },
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 204.0634767157606
+            },
+            {
+              "whiteAll": 0.00672676520386217,
+              "whiteCenter": 0,
+              "meanLuma": 211.66379768317486
+            }
+          ]
+        },
+        "報告文字（含模式）": {
+          "ok": true,
+          "detail": "星願物語 Stage 6 P1 星芽原野 地形與路線測試報告\n時間 2026/11/22 06:56:16\n網址參數 ?map=starsprout&quality=low&lod=lite\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 Lite 低畫質：渲染畫質 low（解析度上限 1.25x、後製 關、陰影 PCF 512）／地圖 Lite／載入 593 ms\n發光效果 修正後；診斷 無\n對"
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": 0
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "map-e2e/webkit_lite-low_spawn.png",
+        "map-e2e/webkit_lite-low_camp.png",
+        "map-e2e/webkit_lite-low_bridge.png",
+        "map-e2e/webkit_lite-low_highland.png",
+        "map-e2e/webkit_lite-low_farm.png",
+        "map-e2e/webkit_lite-low_ruins.png",
+        "map-e2e/webkit_lite-low_arena.png",
+        "map-e2e/webkit_lite-low_overview.png",
+        "map-e2e/webkit_lite-low_overview_nav.png",
+        "map-e2e/webkit_lite-low_portal.png"
       ],
       "results": {
         "info": {
           "quality": "low",
           "lod": "lite",
-          "loadMs": 784,
+          "loadMs": 593,
           "chunks": 16,
           "terrainVerts": 15376,
           "terrainTris": 28800,
           "drawCalls": 47,
           "activeMeshes": 32,
           "trianglesActive": 44049.333333333336,
-          "meshes": 39,
+          "meshes": 38,
           "materials": 14,
           "textures": 5,
           "labels": true,
@@ -721,23 +1254,40 @@
             "facing": 3.141592653589793
           }
         },
+        "exposure": [
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 196.09221277473188
+          },
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 204.0634767157606
+          },
+          {
+            "whiteAll": 0.00672676520386217,
+            "whiteCenter": 0,
+            "meanLuma": 211.66379768317486
+          }
+        ],
         "after": {
           "quality": "low",
           "lod": "lite",
-          "loadMs": 784,
+          "loadMs": 593,
           "chunks": 16,
           "terrainVerts": 15376,
           "terrainTris": 28800,
-          "drawCalls": 35,
-          "activeMeshes": 20,
-          "trianglesActive": 32209.333333333332,
-          "meshes": 39,
+          "drawCalls": 49,
+          "activeMeshes": 34,
+          "trianglesActive": 71731.33333333333,
+          "meshes": 38,
           "materials": 14,
           "textures": 5,
           "labels": true,
           "nav": false,
           "contextLost": 0,
-          "render": "852×393 @1x",
+          "render": "1065×491 @1x",
           "bridges": [
             "B1",
             "B2"
@@ -760,6 +1310,6 @@
       "ok": true
     }
   ],
-  "finishedAt": "2026-11-22T06:47:38.381Z",
+  "finishedAt": "2026-11-22T06:56:16.274Z",
   "failures": 0
 }
