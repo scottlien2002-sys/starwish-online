@@ -670,7 +670,6 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
           ...s,
           label: benchLabel,
           ab: c10pAbLabel(opts),
-        merge: opts.p2 ? mergeLog.slice(0, 2) : null,
           lod,
           count: chars.length,
           hitches100: countHitches(dts, 100),
