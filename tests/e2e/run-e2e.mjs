@@ -2102,6 +2102,137 @@ for (const name of browsers) {
     for (const e of run.errors) console.log(`   ! ${e}`);
   }
 
+  // ---------- C1.0-P P3-1：陰影診斷模式（WebKit；只檢查模式與量測正確，CI 沒有 GPU，FPS 不代表 iPhone）----------
+  if (name === "webkit") {
+    const vp = VIEWPORTS[0];
+    const run = { browser: name, viewport: `${vp.name} / C1.0-P P3-1 陰影診斷 S0～S4`, checks: {}, errors: [], screenshots: [], results: [] };
+    const check = (key, ok, detail) => {
+      run.checks[key] = { ok, detail };
+    };
+    const frames = (page, n) => page.evaluate((k) => new Promise((r) => { let i = 0; const f = () => (++i >= k ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); }), n);
+    const BASE = "/?lab=c10b&quality=high&p1=1&p2=1";
+    const VIEWS = ["front", "left45", "back", "low"];
+    const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+    const open = async (q) => {
+      const page = await ctx.newPage();
+      page.on("pageerror", (e) => run.errors.push(`${q} pageerror: ${e.message}`));
+      await page.goto(server.url + BASE + q, { waitUntil: "load" });
+      await page.waitForFunction(() => window.__starwishC10b?.ready === true, null, { timeout: 120000 });
+      return page;
+    };
+    const shots = {};
+    const take = async (page, tag) => {
+      shots[tag] = {};
+      await page.evaluate(() => document.querySelectorAll(".v3-top,.lab-panel,.perf-panel,.lab-bench-result").forEach((e) => (e.style.visibility = "hidden")));
+      for (const v of VIEWS) {
+        await page.evaluate((x) => window.__starwishC10b.view(x), v);
+        await frames(page, 3);
+        const f = `${outDir}${name}_c10p_p31_${tag}_${v}.png`;
+        shots[tag][v] = await page.screenshot({ path: f });
+        run.screenshots.push(f.split("/test-results/")[1]);
+      }
+    };
+    try {
+      // S0：每格重畫陰影貼圖
+      const p0 = await open("&gpu=1");
+      await frames(p0, 3);
+      const s0a = await p0.evaluate(() => window.__starwishC10b.shadowState());
+      await frames(p0, 4);
+      const s0b = await p0.evaluate(() => window.__starwishC10b.shadowState());
+      run.results.push({ tag: "S0", a: s0a, b: s0b });
+      check("S0：陰影貼圖每格重畫（4 格內更新 ≥4 次）、PCSS32 中品質、2048", s0b.renders - s0a.renders >= 4 && s0b.contact && s0b.filteringQuality === 1 && s0b.mapSize === 2048, [s0a, s0b]);
+      check("S0：陰影貼圖每次約 28 個 Draw（角色 24＋草原 4）", s0b.lastFrameShadowDraws >= 20 && s0b.lastFrameShadowDraws <= 40, s0b);
+      await take(p0, "S0");
+      await p0.close();
+
+      // S2：陰影貼圖只畫一次
+      const p2 = await open("&gpu=1&shadowrefresh=once");
+      await p2.waitForFunction(() => window.__starwishC10b.shadowState().frozenAt !== null, null, { timeout: 120000 });
+      await frames(p2, 3);
+      const s2a = await p2.evaluate(() => window.__starwishC10b.shadowState());
+      await frames(p2, 6);
+      const s2b = await p2.evaluate(() => window.__starwishC10b.shadowState());
+      run.results.push({ tag: "S2", a: s2a, b: s2b });
+      check("S2：凍結後 6 格陰影貼圖更新 0 次、陰影 Draw 0", s2b.renders === s2a.renders && s2b.lastFrameShadowDraws === 0 && s2b.refreshRate === 0, [s2a, s2b]);
+      await take(p2, "S2");
+      // 切換 Lite 後會重新畫、再凍結
+      await p2.evaluate(() => window.__starwishC10b.setLod("lite"));
+      await p2.waitForFunction(() => window.__starwishC10b.lod === "lite" && !window.__starwishC10b.loading, null, { timeout: 120000 });
+      await p2.waitForFunction(() => window.__starwishC10b.shadowState().frozenAt !== null, null, { timeout: 120000 });
+      const s2c = await p2.evaluate(() => window.__starwishC10b.shadowState());
+      check("S2：切換 Lite 後陰影貼圖重新畫並再次凍結", s2c.renders > s2b.renders && s2c.frozenAt !== null, s2c);
+      await p2.close();
+
+      // 逐像素比較 S0 vs S2
+      const dp = await ctx.newPage();
+      const diff = (a, b) =>
+        dp.evaluate(async ([x, y]) => {
+          const load = (b64) => new Promise((r) => { const i = new Image(); i.onload = () => r(i); i.src = "data:image/png;base64," + b64; });
+          const [ia, ib] = await Promise.all([load(x), load(y)]);
+          const c = document.createElement("canvas");
+          c.width = ia.width;
+          c.height = ia.height;
+          const g = c.getContext("2d");
+          g.drawImage(ia, 0, 0);
+          const da = g.getImageData(0, 0, c.width, c.height).data;
+          g.drawImage(ib, 0, 0);
+          const db = g.getImageData(0, 0, c.width, c.height).data;
+          let changed = 0, max = 0;
+          for (let k = 0; k < da.length; k += 4) {
+            const d = Math.max(Math.abs(da[k] - db[k]), Math.abs(da[k + 1] - db[k + 1]), Math.abs(da[k + 2] - db[k + 2]));
+            if (d > max) max = d;
+            if (d > 8) changed++;
+          }
+          return { changedPct: +((changed / (da.length / 4)) * 100).toFixed(4), maxDiff: max };
+        }, [a.toString("base64"), b.toString("base64")]);
+      const diffs = {};
+      for (const v of VIEWS) diffs[v] = await diff(shots.S0[v], shots.S2[v]);
+      await dp.close();
+      run.results.push({ tag: "S0 vs S2 畫面", diffs });
+      check("S2 與 S0 截圖相同（每個視角不同像素 ≤ 0.05%）", VIEWS.every((v) => diffs[v].changedPct <= 0.05), diffs);
+
+      // S1、S3、S4 設定生效
+      const p1 = await open("&gpu=1&diag=noshadow");
+      await frames(p1, 3);
+      const s1 = await p1.evaluate(() => window.__starwishC10b.shadowState());
+      check("S1：關陰影後陰影貼圖 Draw 0", s1.lastFrameShadowDraws === 0 && s1.casters === 0, s1);
+      await p1.close();
+      const modes = {};
+      for (const [tag, q] of [["S3a", "&shadowfilter=low"], ["S3b", "&shadowfilter=high"], ["S3c", "&shadowfilter=pcf"], ["S4", "&shadowmap=1024"]]) {
+        const pg = await open("&gpu=1" + q);
+        await frames(pg, 2);
+        modes[tag] = await pg.evaluate(() => window.__starwishC10b.shadowState());
+        await pg.close();
+      }
+      run.results.push({ tag: "S3/S4", modes });
+      check("S3a：PCSS 低取樣", modes.S3a.contact && modes.S3a.filteringQuality === 2 && /S3a/.test(modes.S3a.mode), modes.S3a);
+      check("S3b：PCSS 高取樣", modes.S3b.contact && modes.S3b.filteringQuality === 0 && /S3b/.test(modes.S3b.mode), modes.S3b);
+      check("S3c：一般 PCF（非 PCSS）", !modes.S3c.contact && modes.S3c.pcf && /S3c/.test(modes.S3c.mode), modes.S3c);
+      check("S4：陰影貼圖 1024、仍是 PCSS32", modes.S4.mapSize === 1024 && modes.S4.contact && modes.S4.filteringQuality === 1, modes.S4);
+
+      // 載入後休息＋自動測試＋畫布鎖定＋報告欄位（S2、不開 GPU 探測）
+      const pb = await open("&shadowrefresh=once&rest=3&bench=6&warmup=10&fixsize=1");
+      const resting = await pb.evaluate(() => window.__starwishC10b.benchState().state);
+      await pb.waitForFunction(() => window.__starwishC10b.benchState().state === "done", null, { timeout: 300000 });
+      const br = await pb.evaluate(() => window.__starwishC10b.benchState().result);
+      const rep = await pb.evaluate(() => window.__starwishC10b.report());
+      run.results.push({ tag: "S2 自動測試", resting, bench: br });
+      check("rest=3：載入後先不開始，之後自動測試", resting === "off" && !!br && /載入後先停 3 秒/.test(br.label), { resting, label: br && br.label });
+      check("報告：主場景／陰影 Draw、測試期間陰影更新 0 次、GPU 探測關、畫布鎖定、resize 紀錄", !!br && br.shadowRendersInTest === 0 && br.avgShadowDraws === 0 && br.avgMainDraws > 0 && br.gpuProbe === false && br.fixSize === true && Array.isArray(br.resizeEvents) && /陰影模式 S2/.test(rep) && /主場景/.test(rep) && /GPU 探測 關/.test(rep), br);
+      await pb.close();
+    } catch (e) {
+      run.errors.push(`exception: ${e.message}`);
+    }
+    await ctx.close();
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 11;
+    if (!run.ok) failures++;
+    report.runs.push(run);
+    console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
+    for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}${v.ok ? "" : "  " + JSON.stringify(v.detail).slice(0, 900)}`);
+    for (const r of run.results) console.log(`   · ${r.tag}: ${JSON.stringify(r)}`.slice(0, 3000));
+    for (const e of run.errors) console.log(`   ! ${e}`);
+  }
+
   await browser.close();
 }
 

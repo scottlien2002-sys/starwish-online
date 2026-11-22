@@ -33,6 +33,7 @@ import {
   countHitches,
   c10pAbLabel,
   c10pMergeGroups,
+  c10pShadowMode,
   C10P_DIAG_LABEL,
   frameTimeline,
   type FrameSample,
@@ -82,6 +83,15 @@ interface BenchResult extends BenchmarkSummary {
   sinceLoad: number;
   sizeChanges: number;
   diag: string;
+  shadowMode: string;
+  shadowConfig: string;
+  shadowRendersInTest: number;
+  shadowFrozen: boolean;
+  avgShadowDraws: number;
+  avgMainDraws: number;
+  gpuProbe: boolean;
+  fixSize: boolean;
+  resizeEvents: string[];
   lod: C10bLod;
   count: number;
   hitches100: number;
@@ -121,6 +131,7 @@ export interface C10bLabApi {
   bench(seconds: number, label?: string): void;
   benchState(): { state: "off" | "warmup" | "running" | "done"; progress: number; result: BenchResult | null; all: BenchResult[] };
   report(): string;
+  shadowState(): { renders: number; frozenAt: number | null; refreshRate: number; mapSize: number; contact: boolean; pcf: boolean; filteringQuality: number; casters: number; lastFrameShadowDraws: number; counter: boolean; mode: string };
   /** 效能分析：開關各項目各量一格 Draw Calls（只量測，不改畫面；量完恢復） */
   breakdown(): Promise<Record<string, unknown>>;
 }
@@ -165,10 +176,47 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
   sun.orthoBottom = -22;
   sun.shadowMinZ = 1;
   sun.shadowMaxZ = 90;
+  // P3-1 診斷：陰影貼圖解析度對照（?shadowmap=1024；只在測試頁）
+  if (opts.shadowMap) quality.shadows.mapSize = opts.shadowMap;
   const shadows = createShadows(sun, quality);
   shadows.darkness = 0.35;
   const contactQ = contactShadowQuality(quality.shadows.filter, "v38r", renderExperimentsFromSearch(location.search));
   if (contactQ && shadows.useContactHardeningShadow) shadows.filteringQuality = contactQ === "medium" ? ShadowGenerator.QUALITY_MEDIUM : ShadowGenerator.QUALITY_HIGH;
+  // P3-1 診斷：陰影取樣對照（?shadowfilter=low|high|pcf；預設 = 正式 PCSS32 中品質）
+  if (opts.shadowFilter === "low" && shadows.useContactHardeningShadow) shadows.filteringQuality = ShadowGenerator.QUALITY_LOW;
+  else if (opts.shadowFilter === "high" && shadows.useContactHardeningShadow) shadows.filteringQuality = ShadowGenerator.QUALITY_HIGH;
+  else if (opts.shadowFilter === "pcf") {
+    shadows.useContactHardeningShadow = false;
+    shadows.usePercentageCloserFiltering = true;
+    shadows.filteringQuality = ShadowGenerator.QUALITY_HIGH;
+  }
+  const shadowFilterLabel = (): string =>
+    shadows.useContactHardeningShadow
+      ? `PCSS ${shadows.filteringQuality === ShadowGenerator.QUALITY_LOW ? "低（16）" : shadows.filteringQuality === ShadowGenerator.QUALITY_HIGH ? "高（64）" : "中（32）"}`
+      : `PCF ${shadows.filteringQuality === ShadowGenerator.QUALITY_HIGH ? "高" : shadows.filteringQuality === ShadowGenerator.QUALITY_MEDIUM ? "中" : "低"}`;
+
+  // P3-1：陰影貼圖（Render Target）實際更新次數與每次的 Draw Calls
+  //   引擎的 Draw Call 計數器在陰影貼圖繪製前後的差 = 陰影貼圖 Draw Calls；拿不到計數器時改用投影者子網格數
+  const shadowMap = shadows.getShadowMap()!;
+  const drawCounter = (engine as unknown as { _drawCalls?: { current: number } })._drawCalls;
+  let smRenders = 0;
+  let smDrawsFrame = 0;
+  let smDrawStart = 0;
+  let smFrozenAt: number | null = null;
+  let smFreezeAfter = -1;
+  shadowMap.onBeforeRenderObservable.add(() => {
+    smRenders++;
+    smDrawStart = drawCounter?.current ?? 0;
+  });
+  shadowMap.onAfterRenderObservable.add(() => {
+    smDrawsFrame += drawCounter ? drawCounter.current - smDrawStart : (shadowMap.renderList ?? []).reduce((n, m) => n + (m.isEnabled() ? (m.subMeshes?.length ?? 0) : 0), 0);
+    // S2：載入完成後讓陰影貼圖完整畫 3 次（確保所有投影者都已就緒），之後不再重畫
+    if (opts.shadowRefresh === "once" && smFreezeAfter >= 0 && smRenders >= smFreezeAfter) {
+      smFreezeAfter = -1;
+      shadowMap.refreshRate = RenderTargetTexture.REFRESHRATE_RENDER_ONCE;
+      smFrozenAt = smRenders;
+    }
+  });
   buildMeadow(scene, shadows);
   // 角色站在出生廣場星形地台上（地形高度＋0.13 公尺；直接放在地形高度會讓靴子陷進地台）
   const BASE_Y = heightAt(0, 0) + PLAZA_TOP;
@@ -322,6 +370,11 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
     loading = true;
     updateStatus();
     clear();
+    if (opts.shadowRefresh === "once") {
+      shadowMap.refreshRate = 1;
+      smFrozenAt = null;
+      smFreezeAfter = -1;
+    }
     metalWithProbe = 0;
     mergeLog = [];
     performance.clearResourceTimings?.();
@@ -357,6 +410,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
     await scene.whenReadyAsync();
     rec.ms = Math.round(performance.now() - t0);
     lastLoadDone = performance.now();
+    if (opts.shadowRefresh === "once") smFreezeAfter = smRenders + 3;
     rec.files.sort((a, b) => a.file.localeCompare(b.file));
     loads.push(rec);
     lod = l;
@@ -371,7 +425,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
   const title = document.createElement("div");
   title.className = "lab-title";
   title.innerHTML =
-    `<div class="lab-name">男女初心者 C1.0-B <small>實機整合測試　${c10pAbLabel(opts)}${opts.diag.length ? `　診斷：${diagLabel}` : ""}${opts.gpuProbe ? "　GPU 探測" : ""}</small></div>` +
+    `<div class="lab-name">男女初心者 C1.0-B <small>實機整合測試　${c10pAbLabel(opts)}${opts.diag.length ? `　診斷：${diagLabel}` : ""}${opts.gpuProbe ? "　GPU 探測" : ""}　${c10pShadowMode(opts)}</small></div>` +
     `<div class="lab-state" data-c10b-state></div>` +
     `<div class="lab-msg">靜態模型（尚未綁骨架、沒有動畫）；燈光、陰影、HDR 與遊戲相同</div>`;
   top.append(title);
@@ -458,7 +512,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
     const last = loads[loads.length - 1];
     const bs = benchState === "off" || benchState === "done" ? "" : `　測試中 ${Math.round(recProgress() * 100)}%`;
     stateEl.textContent = resting
-      ? "停止繪製 30 秒中（讓 GPU 休息）…"
+      ? `停止繪製中（${opts.rest > 0 && benchState === "off" ? `載入後休息 ${opts.rest} 秒，之後自動開始測試` : "30 秒"}）…`
       : loading
       ? `載入 ${lod === "hq" ? "HQ" : "Lite"} 中…`
       : `${lod === "hq" ? "HQ" : "Lite"}　角色 ${chars.length}　載入 ${last ? (last.ms / 1000).toFixed(2) : "-"} 秒${contextLost ? `　⚠ Context Lost ×${contextLost}` : ""}${bs}`;
@@ -499,7 +553,11 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
   let lostAtStart = 0;
   let sizeAtStart: [number, number] = [0, 0];
   let samples: FrameSample[] = [];
+  let shadowDrawsArr: number[] = [];
+  let smRendersAtRun = -1;
+  const resizeLog: { t: number; text: string }[] = [];
   let benchStartOpen = 0;
+  let benchStartT = 0;
   let benchStartLoad = 0;
   let sizeChanges = 0;
   let frameNo = 0;
@@ -511,12 +569,17 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
   const recProgress = (): number => Math.min(1, benchElapsed / (benchSec + opts.warmup || 1));
   let auto = false;
 
+  const shadowConfigText = (): string =>
+    `貼圖 ${quality.shadows.mapSize}×${quality.shadows.mapSize}｜取樣 ${shadowFilterLabel()}｜刷新 ${opts.shadowRefresh === "once" ? `只畫一次（${smFrozenAt !== null ? `第 ${smFrozenAt} 次後停止` : "尚未停止"}）` : "每格"}｜投影者 ${shadowMap.renderList?.length ?? 0}`;
   const fmt = (r: BenchResult): string =>
     `${r.label}（${r.lod === "hq" ? "HQ" : "Lite"}、${r.count} 角色）平均 ${r.avgFps.toFixed(1)} FPS　1% Low ${r.low1Fps.toFixed(1)}　最低 ${r.minFps.toFixed(1)}　卡頓(>100ms) ${r.hitches100}　Draw ${r.avgDrawCalls.toFixed(0)}` +
     (r.windows.length > 1 ? `\n  每 30 秒平均：${r.windows.map((w) => w.toFixed(1)).join(" → ")}` : "") +
     (r.windows5.length > 1 ? `\n  每 5 秒平均：${r.windows5.map((w) => w.toFixed(0)).join(" ")}` : "") +
     (r.hist30.length ? `\n  每 30 秒影格分布（≤20ms／≤37ms／≤54ms／>54ms）：${r.hist30.map((h) => `${h.le20}/${h.le37}/${h.le54}/${h.gt54}`).join(" → ")}` : "") +
     `\n  渲染解析度 開始 ${r.renderSize[0]!.join("×")} 結束 ${r.renderSize[1]!.join("×")}（測試中改變 ${r.sizeChanges} 次）　${r.ab}　診斷：${r.diag}` +
+    `\n  陰影模式 ${r.shadowMode}｜${r.shadowConfig}` +
+    `\n  Draw Calls 平均：主場景 ${r.avgMainDraws}、陰影貼圖 ${r.avgShadowDraws}（總計 ${r.avgDrawCalls.toFixed(1)}）｜測試期間陰影貼圖更新 ${r.shadowRendersInTest} 次` +
+    `\n  GPU 探測 ${r.gpuProbe ? "開" : "關"}｜畫布尺寸鎖定 ${r.fixSize ? "開" : "關"}｜視窗 resize 事件 ${r.resizeEvents.length} 次${r.resizeEvents.length ? `：${r.resizeEvents.join("；")}` : ""}` +
     `\n  開始測試時：開頁後 ${r.sinceOpen} 秒、最後一次載入後 ${r.sinceLoad} 秒` +
     `\n  時間軸（秒｜FPS｜CPU 平均/95%ms｜GPU探測ms｜影格 ≤20/≤37/≤54/>54ms）：` +
     r.timeline.map((w) => `\n   ${w.t0}s｜${w.fps}｜${w.cpuAvg}/${w.cpuP95}｜${w.gpuAvg ?? "-"}｜${w.le20}/${w.le37}/${w.le54}/${w.gt54}`).join("") +
@@ -612,15 +675,31 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
       dts = [];
       draws = [];
       samples = [];
+      shadowDrawsArr = [];
+      smRendersAtRun = -1;
       sizeChanges = 0;
       lostAtStart = contextLost;
       sizeAtStart = [engine.getRenderWidth(), engine.getRenderHeight()];
       benchStartOpen = Math.round(performance.now() / 1000);
+      benchStartT = performance.now() / 1000;
       benchStartLoad = Math.round((performance.now() - lastLoadDone) / 1000);
       benchState = "warmup";
       api.view("free");
     },
     benchState: () => ({ state: benchState, progress: recProgress(), result: benchResult, all: allResults }),
+    shadowState: () => ({
+      renders: smRenders,
+      frozenAt: smFrozenAt,
+      refreshRate: shadowMap.refreshRate,
+      mapSize: shadowMap.getSize().width,
+      contact: shadows.useContactHardeningShadow,
+      pcf: shadows.usePercentageCloserFiltering,
+      filteringQuality: shadows.filteringQuality,
+      casters: shadowMap.renderList?.length ?? 0,
+      lastFrameShadowDraws: smDrawsFrame,
+      counter: !!drawCounter,
+      mode: c10pShadowMode(opts),
+    }),
     breakdown: async () => {
       const frame = (): Promise<void> => new Promise((r) => scene.onAfterRenderObservable.addOnce(() => r()));
       const measure = async (): Promise<{ draws: number; tris: number }> => {
@@ -692,7 +771,8 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
         `星願物語 C1.0-B 實機測試報告　${c10pAbLabel(opts)}　${new Date().toLocaleString()}`,
         `裝置：${ua}`,
         `螢幕：${screen.width}×${screen.height} @${window.devicePixelRatio}x　畫布 ${engine.getRenderWidth()}×${engine.getRenderHeight()}　解析度倍率 ${i.pixelRatio}　畫質 ${i.quality}　HDR ${i.hdr}　MSAA ${i.msaa}　陰影品質 ${i.shadowQuality}`,
-        `診斷開關：${diagLabel}${opts.gpuProbe ? "　GPU 探測開啟" : ""}`,
+        `診斷開關：${diagLabel}　GPU 探測 ${opts.gpuProbe ? "開" : "關"}　畫布鎖定 ${opts.fixSize ? "開" : "關"}　載入後休息 ${opts.rest} 秒`,
+        `陰影模式 ${c10pShadowMode(opts)}｜${shadowConfigText()}｜目前累計更新 ${smRenders} 次`,
         `目前：${i.lod === "hq" ? "HQ" : "Lite"}　角色 ${i.chars.length}　三角形 ${i.triangles}　Draw Calls ${i.drawCalls}　材質 ${i.materials}　貼圖 ${i.textures.map((t) => `${t.w}×${t.h}`).join("、")}`,
         `估計 GPU 記憶體（角色幾何＋貼圖）${i.gpuMemMB} MB${i.jsHeapMB != null ? `　JS heap ${i.jsHeapMB} MB` : "　（Safari 不提供 JS 記憶體數據）"}`,
         `載入：` + i.loads.map((l) => `${l.lod === "hq" ? "HQ" : "Lite"} ${(l.ms / 1000).toFixed(2)} 秒（${l.files.map((f) => `${f.file} ${(f.bytes / 1048576).toFixed(2)} MB ${(f.ms / 1000).toFixed(2)} 秒`).join("、")}）`).join("；"),
@@ -707,13 +787,13 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
 
   await load(lod);
   api.view(opts.view);
-  if (opts.bench > 0) api.bench(opts.bench, `${opts.bench} 秒（自動）`);
 
   const gl = (engine as unknown as { _gl: WebGLRenderingContext })._gl;
   function loop(): void {
     const dt = engine.getDeltaTime() / 1000;
     if (auto) camera.alpha += dt * 0.5;
     const t0 = performance.now();
+    smDrawsFrame = 0;
     scene.render();
     const cpu = performance.now() - t0;
     let gpu: number | null = null;
@@ -734,8 +814,10 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
       benchElapsed += dt;
       if (benchElapsed > opts.warmup) {
         benchState = "running";
+        if (smRendersAtRun < 0) smRendersAtRun = smRenders;
         dts.push(dt);
         draws.push(perf.drawCalls);
+        shadowDrawsArr.push(smDrawsFrame);
         samples.push({ dt, cpu, gpu });
       }
       if (benchElapsed >= benchSec + opts.warmup) {
@@ -756,7 +838,16 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
           sinceOpen: benchStartOpen,
           sinceLoad: benchStartLoad,
           sizeChanges,
-          diag: `${diagLabel}${opts.gpuProbe ? "（GPU 探測開啟：每 30 格多等一次 GPU）" : ""}`,
+          diag: `${diagLabel}${opts.gpuProbe ? "（GPU 探測開啟：每 0.5 秒多等一次 GPU）" : ""}`,
+          shadowMode: c10pShadowMode(opts),
+          shadowConfig: shadowConfigText(),
+          shadowRendersInTest: smRenders - Math.max(0, smRendersAtRun),
+          shadowFrozen: smFrozenAt !== null,
+          avgShadowDraws: +(shadowDrawsArr.reduce((a, b) => a + b, 0) / Math.max(1, shadowDrawsArr.length)).toFixed(1),
+          avgMainDraws: +((draws.reduce((a, b) => a + b, 0) - shadowDrawsArr.reduce((a, b) => a + b, 0)) / Math.max(1, draws.length)).toFixed(1),
+          gpuProbe: opts.gpuProbe,
+          fixSize: opts.fixSize,
+          resizeEvents: resizeLog.filter((e) => e.t >= benchStartT).map((e) => e.text),
           contextLost: contextLost - lostAtStart,
         };
         allResults.push(benchResult);
@@ -767,8 +858,30 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
       if (Math.round(benchElapsed * 2) !== Math.round((benchElapsed - dt) * 2)) updateStatus();
     }
   }
-  engine.runRenderLoop(loop);
-  window.addEventListener("resize", () => engine.resize());
+  // P3-1：視窗尺寸改變（Safari 工具列收放、轉向）全部記錄；?fixsize=1 時測試期間不改畫布尺寸
+  window.addEventListener("resize", () => {
+    const testing = benchState === "warmup" || benchState === "running";
+    const apply = !(opts.fixSize && testing);
+    if (apply) engine.resize();
+    const vv = window.visualViewport;
+    resizeLog.push({
+      t: performance.now() / 1000,
+      text: `${(performance.now() / 1000).toFixed(1)}s 視窗 ${window.innerWidth}×${window.innerHeight}${vv ? ` 可視 ${Math.round(vv.width)}×${Math.round(vv.height)}` : ""}${apply ? "（已套用）" : "（測試中鎖定，未套用）"}`,
+    });
+  });
+  const startAll = (): void => {
+    resting = false;
+    engine.runRenderLoop(loop);
+    if (opts.bench > 0) api.bench(opts.bench, `${opts.bench} 秒（自動${opts.rest ? `，載入後先停 ${opts.rest} 秒` : ""}）`);
+    updateStatus();
+  };
   api.ready = true;
-  updateStatus();
+  if (opts.rest > 0) {
+    // 載入後先停止繪製，讓每一組都從相同狀態開始
+    resting = true;
+    updateStatus();
+    setTimeout(startAll, opts.rest * 1000);
+  } else {
+    startAll();
+  }
 }

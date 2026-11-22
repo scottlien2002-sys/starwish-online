@@ -1,12 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
-import { C10B_REFERENCE, C10B_VIEWS, c10pAbLabel, c10pMergeGroups, c10pSlot, frameHistogram, frameTimeline, windowHistograms, isLowView, wantsGlow, c10bFile, c10bLayout, c10bOptionsFromSearch, countHitches, windowAverages } from "../../src/characters/noviceC10b.ts";
+import { C10B_REFERENCE, C10B_VIEWS, c10pAbLabel, c10pShadowMode, c10pMergeGroups, c10pSlot, frameHistogram, frameTimeline, windowHistograms, isLowView, wantsGlow, c10bFile, c10bLayout, c10bOptionsFromSearch, countHitches, windowAverages } from "../../src/characters/noviceC10b.ts";
 
 test("C1.0-B：檔名與網址參數", () => {
   assert.equal(c10bFile("female", "lite"), "novice_c10b_female_lite.glb");
   const d = c10bOptionsFromSearch("?lab=c10b");
-  assert.deepEqual(d, { lod: "hq", count: 2, bench: 0, warmup: 2, view: "front", p1: false, p2: false, diag: [], gpuProbe: false });
+  assert.deepEqual(d, { lod: "hq", count: 2, bench: 0, warmup: 2, view: "front", p1: false, p2: false, diag: [], gpuProbe: false, shadowRefresh: "every", shadowFilter: "default", shadowMap: null, rest: 0, fixSize: false });
   assert.deepEqual(c10bOptionsFromSearch("?diag=noshadow,bogus,nopost&gpu=1").diag, ["noshadow", "nopost"]);
   assert.equal(c10bOptionsFromSearch("?lab=c10b&p1=1").p1, true);
   const o = c10bOptionsFromSearch("?lab=c10b&lod=lite&count=99&bench=30&view=low");
@@ -110,4 +110,26 @@ test("C1.0-P P3 診斷：時間軸分段（FPS、CPU、GPU 探測、掉幀分布
   assert.equal(w[1]!.le37, 150);
   assert.equal(w[0]!.cpuAvg, 4);
   assert.equal(w[0]!.gpuAvg, 20);
+});
+
+test("C1.0-P P3-1：陰影診斷參數與代號", () => {
+  const o = c10bOptionsFromSearch("?lab=c10b&shadowrefresh=once&shadowfilter=pcf&shadowmap=1024&rest=30&fixsize=1&bench=60&gpu=1");
+  assert.equal(o.shadowRefresh, "once");
+  assert.equal(o.shadowFilter, "pcf");
+  assert.equal(o.shadowMap, 1024);
+  assert.equal(o.rest, 30);
+  assert.equal(o.fixSize, true);
+  assert.equal(o.bench, 60);
+  assert.equal(c10bOptionsFromSearch("?shadowfilter=ultra&shadowmap=512&rest=999").shadowFilter, "default");
+  assert.equal(c10bOptionsFromSearch("?shadowmap=512").shadowMap, null);
+  assert.equal(c10bOptionsFromSearch("?rest=999").rest, 120);
+  const base = { diag: [] as never[], shadowRefresh: "every" as const, shadowFilter: "default" as const, shadowMap: null, gpuProbe: true };
+  assert.equal(c10pShadowMode(base), "S0 原始 HQ 陰影");
+  assert.match(c10pShadowMode({ ...base, gpuProbe: false }), /^S0n/);
+  assert.match(c10pShadowMode({ ...base, diag: ["noshadow"] as never[] }), /^S1/);
+  assert.match(c10pShadowMode({ ...base, shadowRefresh: "once" }), /^S2/);
+  assert.match(c10pShadowMode({ ...base, shadowFilter: "low" }), /^S3a/);
+  assert.match(c10pShadowMode({ ...base, shadowFilter: "high" }), /^S3b/);
+  assert.match(c10pShadowMode({ ...base, shadowFilter: "pcf" }), /^S3c/);
+  assert.match(c10pShadowMode({ ...base, shadowMap: 1024 }), /^S4/);
 });

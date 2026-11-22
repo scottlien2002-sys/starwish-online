@@ -49,6 +49,29 @@ export interface C10bOptions {
   diag: C10pDiag[];
   /** P3 診斷：每 0.5 秒用 gl.finish() 量一次「CPU 提交＋GPU 完成」時間（?gpu=1） */
   gpuProbe: boolean;
+  /** P3-1 陰影診斷（只量成本，不是正式設定）：once = 陰影貼圖載入後只畫一次（?shadowrefresh=once） */
+  shadowRefresh: "every" | "once";
+  /** P3-1：陰影取樣對照（?shadowfilter=low|high|pcf；default = 正式 PCSS32 中品質） */
+  shadowFilter: "default" | "low" | "high" | "pcf";
+  /** P3-1：陰影貼圖解析度對照（?shadowmap=1024；null = 畫質預設 2048） */
+  shadowMap: 1024 | 2048 | null;
+  /** P3-1：載入後先停止繪製幾秒再開始（?rest=30，0～120） */
+  rest: number;
+  /** P3-1：測試期間鎖定畫布尺寸（?fixsize=1），Safari 工具列收放不改變渲染解析度 */
+  fixSize: boolean;
+}
+
+/** P3-1 陰影診斷代號（報告與畫面標題用） */
+export function c10pShadowMode(o: Pick<C10bOptions, "diag" | "shadowRefresh" | "shadowFilter" | "shadowMap" | "gpuProbe">): string {
+  const parts: string[] = [];
+  if (o.diag.includes("noshadow")) parts.push("S1 關陰影");
+  if (o.shadowRefresh === "once") parts.push("S2 陰影貼圖只畫一次");
+  if (o.shadowFilter === "low") parts.push("S3a PCSS 低取樣");
+  if (o.shadowFilter === "high") parts.push("S3b PCSS 高取樣");
+  if (o.shadowFilter === "pcf") parts.push("S3c 一般 PCF");
+  if (o.shadowMap === 1024) parts.push("S4 陰影貼圖 1024");
+  if (!parts.length) parts.push(o.gpuProbe ? "S0 原始 HQ 陰影" : "S0n 原始 HQ 陰影（無 GPU 探測）");
+  return parts.join("＋");
 }
 
 export type C10pDiag = "noshadow" | "noglow" | "nopost" | "nomsaa" | "nochars";
@@ -78,6 +101,11 @@ export function c10bOptionsFromSearch(search: string): C10bOptions {
     p2: p.get("p2") === "1",
     diag: (p.get("diag") ?? "").split(",").filter((d): d is C10pDiag => d in C10P_DIAG_LABEL),
     gpuProbe: p.get("gpu") === "1",
+    shadowRefresh: p.get("shadowrefresh") === "once" ? "once" : "every",
+    shadowFilter: ((f) => (f === "low" || f === "high" || f === "pcf" ? f : "default"))(p.get("shadowfilter")),
+    shadowMap: p.get("shadowmap") === "1024" ? 1024 : p.get("shadowmap") === "2048" ? 2048 : null,
+    rest: Math.round(num("rest", 0, 0, 120)),
+    fixSize: p.get("fixsize") === "1",
   };
 }
 
