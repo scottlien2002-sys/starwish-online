@@ -188,7 +188,8 @@ export function buildStarsproutWorld(
   if (lod === "hq") shadows.addShadowCaster(ruins.pillars);
   const rune = fx.legacy ? buildRune(scene) : buildRuneLines(scene);
   for (const m of rune) m.setEnabled(!fx.runeOff);
-  if (glow) for (const m of rune) glow.addIncludedOnlyMesh(m);
+  // 修正後：符文不進發光層。發光層只畫指定物件、不畫角色，因此地面符文的光暈會直接蓋在站在上面的角色身上
+  if (glow && fx.legacy) for (const m of rune) glow.addIncludedOnlyMesh(m);
 
   // ---------- 傳送門（平時可見；擊敗 Boss 並達成條件後才可使用） ----------
   const portal = buildPortal(scene, stoneMat);
@@ -199,7 +200,7 @@ export function buildStarsproutWorld(
     const runeSet = new Set<Mesh>(rune);
     glow.customEmissiveColorSelector = (mesh, _sub, material, result) => {
       const e = (material as StandardMaterial).emissiveColor ?? Color3.Black();
-      const k = runeSet.has(mesh as Mesh) ? 0.35 : mesh === portal.core ? 0.6 : 0;
+      const k = runeSet.has(mesh as Mesh) ? 0 : mesh === portal.core ? 0.6 : 0;
       result.set(e.r * k, e.g * k, e.b * k, 1);
     };
   }

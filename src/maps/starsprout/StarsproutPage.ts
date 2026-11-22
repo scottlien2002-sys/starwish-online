@@ -213,6 +213,20 @@ class StarsproutPage {
     this.loadMs = performance.now() - t0;
     this.installApi();
 
+    // 指定位置與視角（iPhone 截圖對照用；不會停住畫面）：&pose=far|arena|gate|gateback
+    const POSES: Record<string, { x: number; z: number; playerYawDeg: number; camBearingDeg: number; beta: number; radius: number }> = {
+      far: { x: 0, z: 58, playerYawDeg: 0, camBearingDeg: 180, beta: 1.12, radius: 13 },
+      arena: { x: 0, z: 66, playerYawDeg: 0, camBearingDeg: 180, beta: 1.05, radius: 9 },
+      gate: { x: 0, z: 76, playerYawDeg: 0, camBearingDeg: 180, beta: 1.15, radius: 6 },
+      gateback: { x: 0, z: 76, playerYawDeg: 180, camBearingDeg: 180, beta: 1.15, radius: 6 },
+    };
+    const pose = POSES[params.get("pose") ?? ""];
+    if (pose) {
+      this.teleport(pose.x, pose.z, (pose.playerYawDeg * Math.PI) / 180);
+      const b = (pose.camBearingDeg * Math.PI) / 180;
+      this.camera.snap(this.pos, Math.atan2(Math.cos(b), Math.sin(b)), pose.beta, pose.radius);
+    }
+
     const auto = params.get("autoplay");
     if (auto === "route") window.setTimeout(() => this.startRoute(Math.max(1, Math.min(10, Number(params.get("loops") ?? 1) || 1))), 300);
   }
