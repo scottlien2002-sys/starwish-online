@@ -167,16 +167,30 @@ def ring3d(mb, c, R, tilt_axis_b, tilt, seg, radius, sides, col):
 
 
 def window(stone, glow, gm, gcol, Fr, w, h0, hgt, lite, mullion):
-    """尖拱窗（石框＋發光玻璃＋金色窗櫺），朝 −y"""
-    seg = 3 if lite else 5
+    """尖拱窗：雙層石框（外框＋內退縮框）、拱頂滴水線腳、窗台＋托架、發光玻璃、金色窗櫺與拱頂小金星，朝 −y"""
+    seg = 3 if lite else 6
     hs = h0 + hgt - w * 0.866
-    vextrude(stone, Fr, lancet(w + 0.24, h0 - 0.12, hs - 0.02, seg), -0.03, 0.12, C["trim"])
-    vpoly(glow, Fr, lancet(w, h0, hs, seg), -0.05, C["glass"], -1)
-    vpoly(glow, Fr, lancet(w * 0.5, hs + 0.05, hs + 0.05 + (w * 0.866 - w * 0.5 * 0.866) * 0.4, seg), -0.055, C["glass_hi"], -1)
-    G.box(stone, Fr, -w / 2 - 0.14, w / 2 + 0.14, -0.16, 0.0, h0 - 0.22, h0 - 0.1, C["trim"])
+    vextrude(stone, Fr, lancet(w + 0.32, h0 - 0.14, hs - 0.03, seg), -0.03, 0.15, C["trim"])
+    vextrude(stone, Fr, lancet(w + 0.12, h0 - 0.04, hs - 0.01, seg), -0.065, 0.05, C["wall2"])
+    vpoly(glow, Fr, lancet(w, h0, hs, seg), -0.075, C["glass"], -1)
+    G.box(stone, Fr, -w / 2 - 0.2, w / 2 + 0.2, -0.2, 0.0, h0 - 0.26, h0 - 0.12, C["trim"])
+    apex = hs + w * 0.866
+    gc = gcol if not lite else C["gold_vc"]
+    gmesh = gm
+    if not lite:
+        # 拱頂滴水線腳（沿外框上半段）＋窗台托架
+        L = [p for p in lancet(w + 0.46, h0, hs, seg) if p[1] >= hs - 0.01]
+        L.sort(key=lambda p: p[0])
+        G.tube(stone, [Fr(x, -0.2, h + 0.02) for x, h in L], 0.05, 4, C["trim"])
+        for sx in (-w / 2 - 0.08, w / 2 - 0.04):
+            G.box(stone, Fr, sx, sx + 0.12, -0.17, 0.0, h0 - 0.48, h0 - 0.26, C["trim"])
     if mullion:
-        G.box(gm, Fr, -0.025, 0.025, -0.075, -0.055, h0, hs + w * 0.8, gcol)
-        G.box(gm, Fr, -w / 2, w / 2, -0.075, -0.055, h0 + (hs - h0) * 0.55, h0 + (hs - h0) * 0.55 + 0.05, gcol)
+        G.box(gm, Fr, -0.025, 0.025, -0.095, -0.075, h0, apex - 0.12, gcol)
+        G.box(gm, Fr, -w / 2, w / 2, -0.095, -0.075, h0 + (hs - h0) * 0.55, h0 + (hs - h0) * 0.55 + 0.05, gcol)
+        annulus(gm, Fr, 0, hs + w * 0.3, w * 0.17, w * 0.21, -0.096, gcol, 10)
+    elif lite:
+        G.box(gmesh, Fr, -0.03, 0.03, -0.09, -0.078, h0, apex - 0.15, gc)
+    vpoly(gmesh, Fr, star_outline(0, apex + 0.24, 4, 0.13, 0.04), -0.19, gc, -1)
 
 
 def banner(props, gm, gcol, Fr, x0, x1, h_top, h_bot, y, lite):
@@ -252,6 +266,30 @@ def build(lod):
     if not lite:
         for h in (6.12, 11.32):
             G.lathe(gm, tcx, tcz, FLOOR, [(3.12 if h < 7 else 3.12, h - 0.04), (3.15 if h < 7 else 3.15, h), (3.12 if h < 7 else 3.12, h + 0.04)], P["tower"], gcol)
+        # 下段塔身石肋（8 道，避開窗）
+        for k in range(8):
+            b = FACE + 22.5 + 45 * k
+            px, pz = G.pol(b, 3.28, tcx, tcz)
+            G.box(stone, G.frame(px, pz, b, FLOOR), -0.18, 0.18, -0.02, 0.07, 1.05, 5.75, C["wall2"])
+        # 星象帶（金色雙線＋12 顆小星＋星座連線），避開正面團徽
+        for h in (10.4, 10.86):
+            G.lathe(gm, tcx, tcz, FLOOR, [(3.0, h - 0.025), (3.035, h), (3.0, h + 0.025)], P["tower"], gcol)
+        pts = []
+        for k in range(12):
+            off = 15 + 30 * k
+            if abs(((off + 180) % 360) - 180) < 25:
+                pts.append(None)
+                continue
+            b = FACE + off
+            hh = 10.63 + (0.12 if k % 2 else -0.1)
+            px, pz = G.pol(b, 3.0, tcx, tcz)
+            Fz = G.frame(px, pz, b + 180, FLOOR)
+            vpoly(gm, Fz, star_outline(0, hh, 4, 0.12, 0.035), -0.03, gcol, -1)
+            pts.append((b, hh))
+        for a, c in zip(pts, pts[1:]):
+            if a and c:
+                seq = [(*G.pol(a[0] + t * (c[0] - a[0]), 3.035, tcx, tcz), FLOOR + a[1] + t * (c[1] - a[1]) + 0.08 * math.sin(t * math.pi)) for t in (0.15, 0.5, 0.85)]
+                G.tube(gm, seq, 0.012, 3, gcol)
         # 塔頂護欄下的托架
         for k in range(24):
             b = k * 15
@@ -273,13 +311,28 @@ def build(lod):
     rprof = [(3.85, 14.35), (3.4, 14.8), (2.7, 15.45), (1.98, 16.25), (1.34, 17.1), (0.8, 17.95), (0.38, 18.7), (0.12, 19.15), (0.0, ROOF_TIP)]
     G.lathe(roof, tcx, tcz, FLOOR, rprof, P["roof"], lambda h: C["roof"] if h > FLOOR + 14.8 else C["roof_d"], bottom=True)
     G.lathe(gm, tcx, tcz, FLOOR, [(3.87, 14.3), (3.9, 14.37), (3.85, 14.44)], P["roof"], gcol)
+    # 屋簷下的石雕簷板（雙層）
+    G.lathe(stone, tcx, tcz, FLOOR, [(3.78, 14.12), (3.84, 14.2), (3.84, 14.3), (0.0, 14.3)], P["roof"], C["trim"])
+    if not lite:
+        # 屋簷上一圈小金星（16 顆，朝外）
+        for k in range(16):
+            b = FACE + 11.25 + 22.5 * k
+            px, pz = G.pol(b, 3.72, tcx, tcz)
+            Fz = G.frame(px, pz, b + 180, FLOOR)
+            vpoly(gm, Fz, star_outline(0, 14.62, 4, 0.11, 0.035), 0.0, gcol, -1)
+            vpoly(gm, Fz, star_outline(0, 14.62, 4, 0.11, 0.035), 0.004, gcol, 1)
+    else:
+        for k in range(8):
+            b = FACE + 22.5 + 45 * k
+            px, pz = G.pol(b, 3.72, tcx, tcz)
+            vpoly(props, G.frame(px, pz, b + 180, FLOOR), star_outline(0, 14.6, 4, 0.12, 0.04), 0.0, C["gold_vc"], -1)
     if P["ridges"]:
         for k in range(8):
             b = FACE + 22.5 + 45 * k
             pts = [(*G.pol(b, r, tcx, tcz), FLOOR + h + 0.03) for r, h in rprof[:-1]]
             G.tube(gm, pts, 0.035, 4, gcol, taper=0.5)
         # 尖頂兩扇小星窗（正面左右）
-        for off in (-28, 28):
+        for off in (-28, 28, -152, 152):
             b = FACE + off
             px, pz = G.pol(b, 2.2, tcx, tcz)
             Dm = G.frame(px, pz, b + 180, FLOOR)
@@ -375,6 +428,12 @@ def build(lod):
         G.lathe(roof, cx, cz, FLOOR, prof, P["turret"], C["roof"], bottom=True)
         G.lathe(gm, cx, cz, FLOOR, [(rb + 0.02, base - 0.05), (rb + 0.05, base + 0.02), (rb, base + 0.09)], P["turret"], gcol)
         G.lathe(gm, cx, cz, FLOOR, [(0.07, tip - 0.1), (0.11, tip + 0.05), (0.04, tip + 0.18), (0.0, tip + 0.22)], P["small"], gcol)
+        G.lathe(gm, cx, cz, FLOOR, [(r + 0.24, shaft + 0.82), (r + 0.27, shaft + 0.86), (r + 0.24, shaft + 0.9)], P["turret"], gcol)
+        if not lite:
+            for k in range(12):
+                b = k * 30
+                px, pz = G.pol(b, r - 0.02, cx, cz)
+                G.box(stone, G.frame(px, pz, b, FLOOR), -0.07, 0.07, 0.0, 0.2, shaft - 0.3, shaft + 0.05, C["trim"])
         Fs2 = G.frame(cx, cz, FACE + 180, FLOOR)
         vpoly(gm, Fs2, star_outline(0, tip + 0.36, 4, 0.13, 0.04), -0.01, gcol, -1)
         vpoly(gm, Fs2, star_outline(0, tip + 0.36, 4, 0.13, 0.04), 0.01, gcol, 1)
@@ -392,6 +451,7 @@ def build(lod):
     # ---- 漂浮小晶石（塔身周圍 3 顆）----
     for lx, ly, h, rr in ((3.55, 4.5, 10.6, 0.3), (-3.75, 9.7, 11.9, 0.28), (0.3, 11.95, 9.3, 0.27)):
         bipyramid(glow, F(lx, ly, h), rr, rr * 1.7, rr * 1.4, 6, (C["crystal_top"], C["crystal_mid"], C["crystal_bot"]))
+        ring3d(gm, F(lx, ly, h), rr * 1.9, FACE + lx * 20, 20, 16 if not lite else 10, 0.018 if not lite else 0.03, 4 if not lite else 3, gcol)
     return {k: v for k, v in (("stone", stone), ("roof", roof), ("gold", gold), ("props", props), ("glow", glow)) if v.f}
 
 
