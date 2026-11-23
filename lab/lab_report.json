@@ -1,5 +1,5 @@
 {
- "startedAt": "2026-11-23T12:09:32.685Z",
+ "startedAt": "2026-11-23T12:26:36.729Z",
  "checks": {
   "benches 位置＝既有碰撞（誤差 < 1 cm）": {
    "ok": true,
@@ -82,6 +82,12 @@
      "h": 0
     }
    ]
+  },
+  "Lite 接地陰影帶頂點透明度（COLOR_0 為 RGBA）": {
+   "ok": true,
+   "detail": {
+    "type": "VEC4"
+   }
   }
  },
  "runs": [
@@ -101,7 +107,7 @@
     "chromium_hq_close_compass.png",
     "chromium_hq_close_wall.png"
    ],
-   "loadMs": 13176,
+   "loadMs": 9606,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -157,15 +163,15 @@
    "fountainDrawCalls": 10,
    "flicker": {
     "player_spawn": {
-     "maxRatio": 0.0010230654761904762,
-     "meanRatio": 0.0009325396825396826
+     "maxRatio": 0.001029265873015873,
+     "meanRatio": 0.0009337797619047619
     },
     "pano": {
      "maxRatio": 0.0031498015873015874,
-     "meanRatio": 0.0030158730158730157
+     "meanRatio": 0.003015252976190476
     }
    },
-   "frameMsSoftware": 1.7999999998137355
+   "frameMsSoftware": 2.199999999953434
   },
   {
    "browser": "chromium",
@@ -178,7 +184,7 @@
     "chromium_lite-low_pano.png",
     "chromium_lite-low_close_lamp.png"
    ],
-   "loadMs": 2918,
+   "loadMs": 2284,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -233,15 +239,15 @@
    "fountainDrawCalls": 7,
    "flicker": {
     "player_spawn": {
-     "maxRatio": 0.00208953373015873,
-     "meanRatio": 0.0017578125000000003
+     "maxRatio": 0.0005642361111111111,
+     "meanRatio": 0.0004966517857142857
     },
     "pano": {
-     "maxRatio": 0.003546626984126984,
-     "meanRatio": 0.003377976190476191
+     "maxRatio": 0.00261656746031746,
+     "meanRatio": 0.0024795386904761904
     }
    },
-   "frameMsSoftware": 1.4500000000116415
+   "frameMsSoftware": 1.5999999999379118
   },
   {
    "browser": "webkit",
@@ -251,7 +257,7 @@
     "webkit_hq_player_spawn.png",
     "webkit_hq_pano.png"
    ],
-   "loadMs": 4310,
+   "loadMs": 3347,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -313,7 +319,7 @@
    "shots": [
     "webkit_lite-low_player_spawn.png"
    ],
-   "loadMs": 1338,
+   "loadMs": 999,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -368,5 +374,5 @@
    "fountainDrawCalls": 7
   }
  ],
- "finishedAt": "2026-11-23T12:22:06.322Z"
+ "finishedAt": "2026-11-23T12:36:44.791Z"
 }
