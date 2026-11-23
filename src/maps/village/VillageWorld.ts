@@ -475,8 +475,9 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
     r1.position.y = 0.12;
     const r2 = MeshBuilder.CreateCylinder("PH_vTmp", { diameter: p.r * 2 - 1.4, height: 0.03, tessellation: 48 }, scene);
     r2.position.y = 0.1;
-    const ring: RGB = p.open ? [0.78, 0.62, 1] : [0.36, 0.34, 0.42];
-    const fill: RGB = p.open ? [0.5, 0.42, 0.8] : [0.24, 0.23, 0.28];
+    // 未開放：灰紫色、低亮度（休眠），不要看起來像黑洞
+    const ring: RGB = p.open ? [0.78, 0.62, 1] : [0.6, 0.57, 0.68];
+    const fill: RGB = p.open ? [0.5, 0.42, 0.8] : [0.5, 0.48, 0.56];
     mark(joinGeo([m(r1, ring), m(r2, fill)]), p.x, p.floor, p.z);
   }
   // 從原野返回的抵達點（藍色三角）
