@@ -1,5 +1,5 @@
 {
- "startedAt": "2026-11-23T12:41:00.183Z",
+ "startedAt": "2026-11-23T13:07:30.145Z",
  "checks": {
   "benches 位置＝既有碰撞（誤差 < 1 cm）": {
    "ok": true,
@@ -88,6 +88,120 @@
    "detail": {
     "type": "VEC4"
    }
+  },
+  "騎士軍團尺寸、方位與 V1.3 相同": {
+   "ok": true,
+   "detail": {
+    "v13": {
+     "id": "knight",
+     "name": "騎士軍團",
+     "role": "騎士轉職",
+     "bearing": 332,
+     "w": 16,
+     "d": 14,
+     "eave": 9,
+     "top": 19,
+     "floor": 2,
+     "front": 27,
+     "shape": "castle"
+    },
+    "model": {
+     "bearing": 332,
+     "front": 27,
+     "w": 16,
+     "d": 14,
+     "top": 19,
+     "floor": 2,
+     "door": [
+      -14.07,
+      26.462
+     ]
+    }
+   }
+  },
+  "騎士軍團 lite 模型完全在原碰撞箱內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "x": [
+      -7.999,
+      7.999
+     ],
+     "y": [
+      0,
+      13.95
+     ],
+     "h": [
+      0,
+      19
+     ]
+    },
+    "collider": {
+     "kind": "building:knight",
+     "x": -15.962033134720288,
+     "z": 30.020218157203516,
+     "hw": 8,
+     "hd": 7,
+     "rot": 5.794493116621174,
+     "y0": 1.5,
+     "y1": 21
+    }
+   }
+  },
+  "騎士軍團 hq 模型完全在原碰撞箱內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "x": [
+      -7.989,
+      7.989
+     ],
+     "y": [
+      0,
+      13.95
+     ],
+     "h": [
+      0,
+      19
+     ]
+    },
+    "collider": {
+     "kind": "building:knight",
+     "x": -15.962033134720288,
+     "z": 30.020218157203516,
+     "hw": 8,
+     "hd": 7,
+     "rot": 5.794493116621174,
+     "y0": 1.5,
+     "y1": 21
+    }
+   }
+  },
+  "正門面向噴泉（門比建築中心更靠近噴泉）": {
+   "ok": true,
+   "detail": {
+    "door": [
+     -14.07,
+     26.462
+    ],
+    "doorR": "29.97",
+    "centerR": "34.00"
+   }
+  },
+  "騎士轉職 NPC 站位不變（正門前 2 m、在碰撞箱外）": {
+   "ok": true,
+   "detail": {
+    "npc": {
+     "id": "knight",
+     "name": "騎士軍團",
+     "role": "騎士轉職",
+     "x": -11.736789069647271,
+     "z": 22.073689821473174,
+     "yaw": 2.652900463031381,
+     "floor": 2,
+     "interactR": 3
+    }
+   }
   }
  },
  "runs": [
@@ -96,18 +210,18 @@
    "mode": "hq",
    "errors": [],
    "shots": [
-    "chromium_hq_top.png",
-    "chromium_hq_topwide.png",
+    "chromium_hq_knight_front.png",
+    "chromium_hq_knight_q45.png",
+    "chromium_hq_knight_q45r.png",
+    "chromium_hq_knight_player.png",
+    "chromium_hq_knight_player_up.png",
+    "chromium_hq_knight_npc.png",
+    "chromium_hq_knight_door.png",
     "chromium_hq_player_spawn.png",
-    "chromium_hq_player_south.png",
     "chromium_hq_pano.png",
-    "chromium_hq_pano_ne.png",
-    "chromium_hq_close_bench.png",
-    "chromium_hq_close_lamp.png",
-    "chromium_hq_close_compass.png",
-    "chromium_hq_close_wall.png"
+    "chromium_hq_top.png"
    ],
-   "loadMs": 9341,
+   "loadMs": 10442,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -143,48 +257,70 @@
      "textures": 3,
      "texturePixels": 655360,
      "shadowCasters": 3
+    },
+    "knight": {
+     "meshes": 4,
+     "triangles": 8362,
+     "byMesh": {
+      "stone": 3991,
+      "roof": 646,
+      "gold": 2313,
+      "props": 1412
+     },
+     "materials": 4,
+     "shadowCasters": 4,
+     "textureUrls": [
+      "./models/tex/stone_hq.png",
+      "./models/tex/stone_nrm_512.png",
+      "./models/tex/roof_512.png",
+      "./models/tex/roof_nrm_512.png"
+     ]
     }
    },
    "drawCalls": {
     "none": {
-     "drawCalls": 127,
-     "activeMeshes": 60
+     "drawCalls": 123,
+     "activeMeshes": 59
     },
     "fountain": {
-     "drawCalls": 137,
-     "activeMeshes": 67
+     "drawCalls": 133,
+     "activeMeshes": 66
     },
     "both": {
-     "drawCalls": 145,
-     "activeMeshes": 72
+     "drawCalls": 141,
+     "activeMeshes": 71
+    },
+    "all": {
+     "drawCalls": 149,
+     "activeMeshes": 75
     }
    },
    "plazaDrawCalls": 8,
    "fountainDrawCalls": 10,
+   "knightDrawCalls": 8,
    "flicker": {
-    "player_spawn": {
-     "maxRatio": 0.0010478670634920635,
-     "meanRatio": 0.0009281994047619048
+    "knight_front": {
+     "maxRatio": 0.0009796626984126984,
+     "meanRatio": 0.0008513144841269842
     },
-    "pano": {
-     "maxRatio": 0.003131200396825397,
-     "meanRatio": 0.0030158730158730157
+    "knight_player_up": {
+     "maxRatio": 0.003943452380952381,
+     "meanRatio": 0.0037394593253968255
     }
    },
-   "frameMsSoftware": 4.900000000023283
+   "frameMsSoftware": 1.8000000000465661
   },
   {
    "browser": "chromium",
    "mode": "lite-low",
    "errors": [],
    "shots": [
-    "chromium_lite-low_top.png",
-    "chromium_lite-low_player_spawn.png",
-    "chromium_lite-low_player_south.png",
-    "chromium_lite-low_pano.png",
-    "chromium_lite-low_close_lamp.png"
+    "chromium_lite-low_knight_front.png",
+    "chromium_lite-low_knight_q45.png",
+    "chromium_lite-low_knight_player_up.png",
+    "chromium_lite-low_knight_npc.png"
    ],
-   "loadMs": 2222,
+   "loadMs": 2186,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -219,45 +355,65 @@
      "textures": 1,
      "texturePixels": 65536,
      "shadowCasters": 0
+    },
+    "knight": {
+     "meshes": 3,
+     "triangles": 3488,
+     "byMesh": {
+      "stone": 1557,
+      "roof": 246,
+      "props": 1685
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/stone_lite.png",
+      "./models/tex/roof_256.png"
+     ]
     }
    },
    "drawCalls": {
     "none": {
-     "drawCalls": 58,
-     "activeMeshes": 60
+     "drawCalls": 56,
+     "activeMeshes": 59
     },
     "fountain": {
-     "drawCalls": 65,
-     "activeMeshes": 67
+     "drawCalls": 63,
+     "activeMeshes": 66
     },
     "both": {
-     "drawCalls": 69,
-     "activeMeshes": 71
+     "drawCalls": 67,
+     "activeMeshes": 70
+    },
+    "all": {
+     "drawCalls": 70,
+     "activeMeshes": 73
     }
    },
    "plazaDrawCalls": 4,
    "fountainDrawCalls": 7,
+   "knightDrawCalls": 3,
    "flicker": {
-    "player_spawn": {
-     "maxRatio": 0.0005890376984126984,
-     "meanRatio": 0.0004904513888888889
+    "knight_front": {
+     "maxRatio": 0.0006076388888888889,
+     "meanRatio": 0.000550595238095238
     },
-    "pano": {
-     "maxRatio": 0.0026413690476190478,
-     "meanRatio": 0.0025006200396825396
+    "knight_player_up": {
+     "maxRatio": 0.0027591765873015875,
+     "meanRatio": 0.002635788690476191
     }
    },
-   "frameMsSoftware": 1.6666666666666667
+   "frameMsSoftware": 1.2999999999883585
   },
   {
    "browser": "webkit",
    "mode": "hq",
    "errors": [],
    "shots": [
-    "webkit_hq_player_spawn.png",
-    "webkit_hq_pano.png"
+    "webkit_hq_knight_front.png",
+    "webkit_hq_knight_player_up.png"
    ],
-   "loadMs": 3566,
+   "loadMs": 6022,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -293,33 +449,56 @@
      "textures": 3,
      "texturePixels": 655360,
      "shadowCasters": 3
+    },
+    "knight": {
+     "meshes": 4,
+     "triangles": 8362,
+     "byMesh": {
+      "stone": 3991,
+      "roof": 646,
+      "gold": 2313,
+      "props": 1412
+     },
+     "materials": 4,
+     "shadowCasters": 4,
+     "textureUrls": [
+      "./models/tex/stone_hq.png",
+      "./models/tex/stone_nrm_512.png",
+      "./models/tex/roof_512.png",
+      "./models/tex/roof_nrm_512.png"
+     ]
     }
    },
    "drawCalls": {
     "none": {
-     "drawCalls": 127,
-     "activeMeshes": 60
+     "drawCalls": 123,
+     "activeMeshes": 59
     },
     "fountain": {
-     "drawCalls": 137,
-     "activeMeshes": 67
+     "drawCalls": 133,
+     "activeMeshes": 66
     },
     "both": {
-     "drawCalls": 145,
-     "activeMeshes": 72
+     "drawCalls": 141,
+     "activeMeshes": 71
+    },
+    "all": {
+     "drawCalls": 149,
+     "activeMeshes": 75
     }
    },
    "plazaDrawCalls": 8,
-   "fountainDrawCalls": 10
+   "fountainDrawCalls": 10,
+   "knightDrawCalls": 8
   },
   {
    "browser": "webkit",
    "mode": "lite-low",
    "errors": [],
    "shots": [
-    "webkit_lite-low_player_spawn.png"
+    "webkit_lite-low_knight_front.png"
    ],
-   "loadMs": 1113,
+   "loadMs": 2676,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -354,25 +533,45 @@
      "textures": 1,
      "texturePixels": 65536,
      "shadowCasters": 0
+    },
+    "knight": {
+     "meshes": 3,
+     "triangles": 3488,
+     "byMesh": {
+      "stone": 1557,
+      "roof": 246,
+      "props": 1685
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/stone_lite.png",
+      "./models/tex/roof_256.png"
+     ]
     }
    },
    "drawCalls": {
     "none": {
-     "drawCalls": 58,
-     "activeMeshes": 60
+     "drawCalls": 56,
+     "activeMeshes": 59
     },
     "fountain": {
-     "drawCalls": 65,
-     "activeMeshes": 67
+     "drawCalls": 63,
+     "activeMeshes": 66
     },
     "both": {
-     "drawCalls": 69,
-     "activeMeshes": 71
+     "drawCalls": 67,
+     "activeMeshes": 70
+    },
+    "all": {
+     "drawCalls": 70,
+     "activeMeshes": 73
     }
    },
    "plazaDrawCalls": 4,
-   "fountainDrawCalls": 7
+   "fountainDrawCalls": 7,
+   "knightDrawCalls": 3
   }
  ],
- "finishedAt": "2026-11-23T12:49:22.595Z"
+ "finishedAt": "2026-11-23T13:20:04.700Z"
 }
