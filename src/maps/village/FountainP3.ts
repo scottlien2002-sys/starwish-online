@@ -166,7 +166,8 @@ export function setupFountainP3(scene: Scene, meshes: AbstractMesh[], parent: Tr
   fxMat.disableLighting = true;
   fxMat.diffuseColor = Color3.Black();
   fxMat.specularColor = Color3.Black();
-  const fxBase = new Color3(0.5, 0.74, 1.0);
+  // 魔法陣亮度依畫質平衡（HQ 有色調映射會壓暗；Lite 低畫質沒有，加法混合看起來較亮）
+  const fxBase = hq ? new Color3(0.66, 0.9, 1.0) : new Color3(0.4, 0.6, 0.85);
   fxMat.emissiveColor = fxBase.clone();
   fxMat.alphaMode = Constants.ALPHA_ADD;
   fxMat.disableDepthWrite = true;

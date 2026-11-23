@@ -48,8 +48,8 @@ CRYSTAL_BOTTOM = 4.3
 CRYSTAL_TOP = 6.5
 CRYSTAL_C = 5.35
 # P3-2E 漂浮星晶：靜止時頂 6.38、底 4.86；上下浮動 ±0.06（最高 6.44 ≤ 6.5）；下方金色八芒星魔法環在 4.62
-FLOAT_TOP, FLOAT_GIRDLE, FLOAT_BOTTOM, BOB = 6.38, 5.58, 4.86, 0.06
-MAGIC_RING_Z = 4.62
+FLOAT_TOP, FLOAT_GIRDLE, FLOAT_BOTTOM, BOB = 6.4, 5.5, 4.66, 0.06
+MAGIC_RING_Z = 4.5
 RING_C = 5.2  # 雙環中心（傾角壓低，環頂不超過 Y≈6.5）
 RING_A_R = 1.75  # 直徑 3.5 m
 RING_B_R = 2.1  # 直徑 4.2 m
@@ -236,24 +236,24 @@ def star_crystal(name, mat, lod):
 
     c0 = Vector((0, 0, FLOAT_GIRDLE + 0.02))
     # 內核：雙錐，最亮
-    core = ring(c0.z, 0.17, 0.0, 6)
-    top_c, bot_c = c0 + Vector((0, 0, 0.3)), c0 - Vector((0, 0, 0.26))
+    core = ring(c0.z, 0.21, 0.0, 6)
+    top_c, bot_c = c0 + Vector((0, 0, 0.36)), c0 - Vector((0, 0, 0.32))
     for i in range(6):
         j = (i + 1) % 6
         k = 1.0 if i % 2 else 0.9
         tri(core[i], core[j], top_c, (0.9 * k, 0.97 * k, 1.0, 1.0))
         tri(core[j], core[i], bot_c, (0.8 * k, 0.92 * k, 1.0, 1.0))
     # 外殼
-    A = 0.58  # 外殼透明度
+    A = 0.68  # 外殼透明度
     apex = Vector((0, 0, FLOAT_TOP))
     bottom = Vector((0, 0, FLOAT_BOTTOM))
-    crown1 = ring(6.02, 0.24, math.pi / 8)
-    crown2 = ring(5.78, 0.42, 0.0) if hq else None
-    girdle = ring(FLOAT_GIRDLE, 0.52, math.pi / 8 if hq else 0.0)
-    pav = ring(5.18, 0.3, 0.0 if hq else math.pi / 8)
-    upper = [(0.82, 0.95, 1.0), (0.72, 0.9, 1.0)]
-    mid = [(0.6, 0.85, 1.0), (0.5, 0.78, 0.98)]
-    low = [(0.46, 0.72, 0.97), (0.38, 0.64, 0.94)]
+    crown1 = ring(6.02, 0.3, math.pi / 8)
+    crown2 = ring(5.74, 0.5, 0.0) if hq else None
+    girdle = ring(FLOAT_GIRDLE, 0.62, math.pi / 8 if hq else 0.0)
+    pav = ring(5.05, 0.36, 0.0 if hq else math.pi / 8)
+    upper = [(0.72, 0.9, 1.0), (0.6, 0.84, 1.0)]
+    mid = [(0.46, 0.76, 1.0), (0.38, 0.68, 0.98)]
+    low = [(0.32, 0.58, 0.95), (0.26, 0.5, 0.9)]
     for i in range(8):
         j = (i + 1) % 8
         tri(crown1[i], crown1[j], apex, (*upper[i % 2], A))
@@ -273,9 +273,9 @@ def star_crystal(name, mat, lod):
         a = math.pi / 8 + i * math.tau / 8
         d = Vector((math.cos(a), math.sin(a), 0))
         s = Vector((-d.y, d.x, 0))
-        base = d * 0.46 + Vector((0, 0, FLOAT_GIRDLE))
-        tip = base + d * (0.4 if i % 2 == 0 else 0.24)
-        w, h = 0.07, 0.07
+        base = d * 0.55 + Vector((0, 0, FLOAT_GIRDLE))
+        tip = base + d * (0.44 if i % 2 == 0 else 0.27)
+        w, h = 0.08, 0.08
         q = [base + s * w, base + Vector((0, 0, h)), base - s * w, base - Vector((0, 0, h))]
         for k in range(4):
             tri(q[k], q[(k + 1) % 4], tip, (0.78, 0.93, 1.0, 0.75) if k % 2 == 0 else (0.62, 0.86, 1.0, 0.75))
