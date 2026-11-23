@@ -39,6 +39,8 @@ const VIEWS: Record<string, View> = {
   topwide: { target: [0, 0, 0], alpha: -H, beta: 0.0001, radius: 120, ortho: 52 },
   // 玩家視角（遊戲鏡頭：距離 9、beta 1.05、目標高 0.85、fov 0.9）：創角出生點面向北
   player_spawn: { target: [0, 0.85, -12.5], alpha: -H, beta: 1.05, radius: 9, fov: 0.9 },
+  // 創角出生點、把遊戲鏡頭往上抬（看得到漂浮星晶）
+  player_spawn_up: { target: [0, 0.85, -12.5], alpha: -H, beta: 1.32, radius: 9, fov: 0.9 },
   // 玩家視角：從南路走進廣場
   player_south: { target: [0, 0.85, -24], alpha: -H, beta: 1.12, radius: 9, fov: 0.9 },
   // 斜角全景

@@ -107,8 +107,8 @@ let fail = 0;
 const pw = await loadPlaywright();
 const server = await serve(dist);
 const plan = [
-  ["chromium", "hq", "high", "hq", ["player_spawn", "fountain_front", "fountain_close", "fountain_q45", "fountain_top", "fountain_falls", "fountain_water", "top", "pano"]],
-  ["chromium", "lite-low", "low", "lite", ["player_spawn", "fountain_front", "fountain_close", "fountain_q45", "fountain_top"]],
+  ["chromium", "hq", "high", "hq", ["player_spawn", "player_spawn_up", "fountain_front", "fountain_close", "fountain_q45", "fountain_top", "fountain_falls", "fountain_water", "top", "pano"]],
+  ["chromium", "lite-low", "low", "lite", ["player_spawn", "player_spawn_up", "fountain_front", "fountain_close", "fountain_q45", "fountain_top"]],
   ["webkit", "hq", "high", "hq", ["player_spawn", "fountain_close"]],
   ["webkit", "lite-low", "low", "lite", ["player_spawn", "fountain_close"]],
 ];
