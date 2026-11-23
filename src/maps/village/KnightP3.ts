@@ -1,5 +1,5 @@
-import { type AbstractMesh, Color3, FresnelParameters, type Material, PBRMaterial, type Scene, type ShadowGenerator, StandardMaterial } from "@babylonjs/core";
-import { villageTexture } from "./villageTextures.ts";
+import type { AbstractMesh, Material, Scene, ShadowGenerator } from "@babylonjs/core";
+import { villageAshlar, villageGold, villageProps, villageSlate } from "./villageMaterials.ts";
 
 /**
  * Stage 6 P3-2B 騎士軍團：材質設定（只在獨立預覽頁使用；尚未接進村莊，整合等確認後）。
@@ -36,56 +36,12 @@ export function setupKnightP3(scene: Scene, meshes: AbstractMesh[], opt: KnightP
   }
   const mats: Material[] = [];
   const urls: string[] = [];
-  const tex = (file: string) => {
-    const u = `${opt.texBase}${file}`;
-    urls.push(u);
-    return villageTexture(scene, u, hq);
-  };
-
-  const stone = new PBRMaterial("VP3K_stone", scene);
-  stone.albedoTexture = tex(hq ? "stone_hq.png" : "stone_lite.png");
-  // 暖白石牆：石紋貼圖偏灰，提亮並略帶暖色（只影響建築，星願之泉材質不變）
-  stone.albedoColor = new Color3(1.26, 1.22, 1.14);
-  stone.metallic = 0;
-  stone.roughness = 0.85;
-  if (hq) {
-    const nrm = tex("stone_nrm_512.png");
-    nrm.level = 0.6;
-    stone.bumpTexture = nrm;
-  }
-  mats.push(stone);
-
-  const roof = new PBRMaterial("VP3K_roof", scene);
-  roof.albedoTexture = tex(hq ? "roof_512.png" : "roof_256.png");
-  roof.albedoColor = new Color3(1.05, 1.05, 1.08);
-  roof.metallic = 0;
-  roof.roughness = 0.5;
-  if (hq) {
-    const nrm = tex("roof_nrm_512.png");
-    nrm.level = 0.7;
-    roof.bumpTexture = nrm;
-  }
-  mats.push(roof);
-
-  const gold = new StandardMaterial("VP3K_gold", scene);
-  gold.diffuseColor = new Color3(0.78, 0.6, 0.28);
-  gold.specularColor = new Color3(1, 0.86, 0.55);
-  gold.specularPower = 48;
-  gold.emissiveColor = new Color3(0.26, 0.2, 0.08);
-  const gf = new FresnelParameters();
-  gf.leftColor = new Color3(0.9, 0.9, 0.9);
-  gf.rightColor = new Color3(0.14, 0.14, 0.14);
-  gf.bias = 0.1;
-  gf.power = 1.5;
-  gold.emissiveFresnelParameters = gf;
-  mats.push(gold);
-
-  const props = new StandardMaterial("VP3K_props", scene);
-  props.diffuseColor = new Color3(1, 1, 1);
-  props.specularColor = new Color3(0.14, 0.14, 0.16);
-  props.specularPower = 32;
-  props.emissiveColor = new Color3(0.05, 0.05, 0.06);
-  mats.push(props);
+  // P3-2D：全村共用材質——城牆砌石（ashlar）、魚鱗瓦（slate）、金、物件；與噴泉、廣場同一組金屬與物件材質
+  const stone = villageAshlar(scene, opt.texBase, hq);
+  const roof = villageSlate(scene, opt.texBase, hq);
+  const gold = villageGold(scene);
+  const props = villageProps(scene);
+  for (const m of [stone, roof]) for (const t of m.getActiveTextures()) urls.push(t.name);
 
   const assign: Record<string, Material> = { stone, roof, gold, props };
   let casters = 0;
@@ -108,7 +64,7 @@ export function setupKnightP3(scene: Scene, meshes: AbstractMesh[], opt: KnightP
       meshes: all.length,
       triangles: Object.values(byMesh).reduce((a, b) => a + b, 0),
       byMesh,
-      materials: mats.length,
+      materials: 4,
       shadowCasters: casters,
       textureUrls: urls,
     },

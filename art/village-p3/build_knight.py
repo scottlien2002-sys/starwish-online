@@ -169,12 +169,20 @@ def window(stone, props, gold, Fr, x, h0, w, hgt, lite, gm, gcol):
         plank(gm, Fr, (x * 0 + 0, h0), (0, h0 + hgt), 0.04, -0.06, -0.045, gcol)
         plank(gm, Fr, (-w / 2, h0 + hgt * 0.55), (w / 2, h0 + hgt * 0.55), 0.035, -0.06, -0.045, gcol)
     G.box(stone, Fr, -w / 2 - 0.12, w / 2 + 0.12, -0.14, 0.0, h0 - 0.18, h0 - 0.08, C["trim"])
+    if not lite:
+        # P3-2D：拱頂拱心石＋窗台下兩個小托架
+        G.box(stone, Fr, -0.09, 0.09, -0.08, 0.0, h0 + hgt - 0.02, h0 + hgt + 0.2, C["trim"])
+        for sx in (-w / 2 + 0.02, w / 2 - 0.1):
+            G.box(stone, Fr, sx, sx + 0.08, -0.1, 0.0, h0 - 0.34, h0 - 0.18, C["trim"])
 
 
 def banner(props, gm, gcol, Fr, x0, x1, h_top, h_bot, y, wave, lite):
     """騎士旗：藍底、金邊、金色盾徽、燕尾下緣；正反兩面（背面只有藍底）"""
-    cols = [x0, (x0 + x1) / 2, x1]
+    nc = 3 if lite else 5
+    cols = [x0 + (x1 - x0) * i / (nc - 1) for i in range(nc)]
+    mid = nc // 2
     rows = 3 if lite else 6
+    shade = [1.0, 0.86, 1.06, 0.88, 1.0] if not lite else [1.0, 0.9, 1.0]
     for side in (-1, 1):
         grid = []
         for r in range(rows + 1):
@@ -182,12 +190,17 @@ def banner(props, gm, gcol, Fr, x0, x1, h_top, h_bot, y, wave, lite):
             h = h_top - v * (h_top - h_bot)
             row = []
             for ci, x in enumerate(cols):
-                hh = h if r < rows else (h_bot + (h_top - h_bot) * 0.08 if ci == 1 else h_bot)
-                yy = y + wave * math.sin(v * 3.0 + ci) + side * 0.002
-                row.append(props.vert(Fr(x, yy, hh), C["blue"]))
+                if r < rows:
+                    hh = h
+                else:
+                    hh = h_bot + (h_top - h_bot) * 0.08 * (1 - abs(ci - mid) / mid)
+                fold = 0.025 * (1 if ci % 2 else -1) * (0 if ci in (0, nc - 1) else 1)
+                yy = y + wave * math.sin(v * 3.0 + ci) + fold + side * 0.002
+                k = shade[ci]
+                row.append(props.vert(Fr(x, yy, hh), tuple(min(1.0, c * k) for c in C["blue"])))
             grid.append(row)
         for r in range(rows):
-            for ci in range(2):
+            for ci in range(nc - 1):
                 props.face([grid[r][ci], grid[r][ci + 1], grid[r + 1][ci + 1], grid[r + 1][ci]], G.sub(Fr(0, side, 0), Fr(0, 0, 0)))
     # 正面金色飾邊與徽章（朝 −y，略浮在旗面前）
     yf = y - 0.012
@@ -202,6 +215,10 @@ def banner(props, gm, gcol, Fr, x0, x1, h_top, h_bot, y, wave, lite):
     vpoly(props, Fr, shield_outline(sw * 0.72, top - sw * 0.1, sw * 0.95, cx=cx), yf - 0.006, C["blue"], -1)
     star_fan(gm, Fr, cx, top - sw * 0.5, 4, sw * 0.22, sw * 0.08, yf - 0.012, gcol)
     vpoly(gm, Fr, [(x0, h_bot + (h_top - h_bot) * 0.2), (x1, h_bot + (h_top - h_bot) * 0.2), (x1, h_bot + (h_top - h_bot) * 0.24), (x0, h_bot + (h_top - h_bot) * 0.24)], yf, gcol, -1)
+    if not lite:
+        # P3-2D：燕尾兩端金色流蘇
+        for x in (x0, x1):
+            G.blob(gm, Fr(x, y, h_bot - 0.06), 0.035, 0.035, 0.06, gcol)
 
 
 def statue(stone, props, gm, gcol, sx, lite):
@@ -211,7 +228,7 @@ def statue(stone, props, gm, gcol, sx, lite):
     G.box(stone, F, sx - 0.44, sx + 0.44, 2.01, 2.89, 1.35, 1.45, C["plinth"])
     px, pz, _ = F(sx, 2.45, 0)
     S = G.frame(px, pz, FACE, FLOOR + 1.45)  # 雕像自身座標：+y 面向廣場
-    seg = 8 if not lite else 6
+    seg = 12 if not lite else 6
     for lx in (-0.11, 0.11):
         G.box(props, S, lx - 0.08, lx + 0.08, -0.1, 0.1, 0.0, 0.75, C["steel_d"])
         G.box(props, S, lx - 0.09, lx + 0.09, -0.11, 0.17, 0.0, 0.1, C["steel_d"])
@@ -222,6 +239,16 @@ def statue(stone, props, gm, gcol, sx, lite):
     for lx in (-0.3, 0.3):
         G.blob(props, S(lx, 0, 1.36), 0.13, 0.13, 0.08, C["steel"])
         G.tube(props, [S(lx, 0.0, 1.33), S(lx * 0.85, 0.16, 1.08), S(lx * 0.2, 0.3, 1.1)], 0.06, 5 if not lite else 4, C["steel_d"])
+    if not lite:
+        # P3-2D：腰帶（金）、護膝、護手、頭盔金飾脊、雙層肩甲
+        G.lathe(gm, px, pz, FLOOR + 1.45, [(0.27, 0.95), (0.285, 0.98), (0.27, 1.01)], seg, gcol)
+        for lx in (-0.11, 0.11):
+            G.blob(props, S(lx, 0.1, 0.42), 0.07, 0.05, 0.06, C["steel"])
+        for lx in (-0.07, 0.07):
+            G.blob(props, S(lx, 0.3, 1.12), 0.05, 0.05, 0.045, C["steel_d"])
+        G.box(gm, S, -0.012, 0.012, -0.12, 0.13, 1.8, 1.9, gcol)
+        for lx in (-0.3, 0.3):
+            G.blob(props, S(lx * 1.05, 0, 1.3), 0.12, 0.12, 0.06, C["steel_d"])
     # 劍（劍尖朝下拄地）
     G.box(props, S, -0.035, 0.035, 0.3, 0.33, 0.04, 0.98, C["steel"])
     G.box(gm, S, -0.2, 0.2, 0.28, 0.35, 0.98, 1.03, gcol)
@@ -229,12 +256,27 @@ def statue(stone, props, gm, gcol, sx, lite):
     G.blob(gm, S(0, 0.315, 1.2), 0.045, 0.045, 0.045, gcol)
     if not lite:
         # 披風（正反兩面）、面罩縫、盾（靠在腳邊）、金色名牌
+        # 披風：4 欄 × 3 列、交錯前後成布褶，正反兩面
         for side in (1, -1):
-            q = [props.vert(S(x, y, h), C["blue"]) for x, y, h in ((-0.3, -0.13, 1.42), (0.3, -0.13, 1.42), (0.4, -0.24 - 0.003 * side, 0.12), (-0.4, -0.24 - 0.003 * side, 0.12))]
-            props.face(q, G.sub(S(0, -side, 0), S(0, 0, 0)))
+            grid = []
+            for r in range(4):
+                t = r / 3
+                row = []
+                for ci in range(5):
+                    u = ci / 4 - 0.5
+                    fold = 0.04 * t * (1 if ci % 2 else -1)
+                    k = 0.88 if ci % 2 else 1.0
+                    row.append(props.vert(S(u * (0.6 + 0.24 * t), -0.13 - 0.11 * t + fold - 0.003 * side, 1.42 - 1.3 * t), tuple(c * k for c in C["blue"])))
+                grid.append(row)
+            for r in range(3):
+                for ci in range(4):
+                    props.face([grid[r][ci], grid[r][ci + 1], grid[r + 1][ci + 1], grid[r + 1][ci]], G.sub(S(0, -side, 0), S(0, 0, 0)))
         G.box(props, S, -0.08, 0.08, 0.12, 0.15, 1.68, 1.71, (0.1, 0.12, 0.16))
-        vextrude(props, S, shield_outline(0.36, 0.72, 0.6, cx=-0.45), 0.2, 0.04, C["blue"], facing=1)
-        vpoly(gm, S, star_outline(-0.45, 0.48, 4, 0.08, 0.03), 0.205, gcol, 1)
+        vextrude(gm, S, shield_outline(0.4, 0.74, 0.66, cx=-0.45), 0.19, 0.03, gcol, facing=1)
+        vextrude(props, S, shield_outline(0.33, 0.71, 0.56, cx=-0.45), 0.2, 0.02, C["blue"], facing=1)
+        vpoly(gm, S, star_outline(-0.45, 0.48, 4, 0.08, 0.03), 0.225, gcol, 1)
+        # 底座線腳
+        G.box(stone, F, sx - 0.42, sx + 0.42, 2.03, 2.87, 1.2, 1.28, C["trim"])
         G.box(gm, F, sx - 0.2, sx + 0.2, 2.05, 2.07, 0.95, 1.12, gcol)
 
 
@@ -257,12 +299,16 @@ def build(lod):
         px, pz, _ = F(sx * 4.92, 0.35, 0)
         G.box(stone, G.frame(px, pz, FACE, FLOOR), -0.3, 0.3, -0.3, 0.3, 1.0, 1.35, C["trim"])
         G.lathe(gm, px, pz, FLOOR + 1.35, [(0.12, 0.0), (0.2, 0.1), (0.21, 0.22), (0.13, 0.33), (0.06, 0.4), (0.0, 0.48)], P["small"], gcol)
+    # P3-2D：基座頂線腳
+    G.box(stone, F, -7.7, 7.7, 1.95, 13.9, 0.56, 0.68, C["trim"])
     # 中央門樓
     G.box(stone, F, -4.2, 4.2, 3.0, 8.0, 0.6, 11.0, C["wall"])
     G.box(stone, F, -4.4, 4.4, 2.72, 3.0, 10.3, 11.0, C["trim"])
     for k in range(8):
         x = -3.85 + 1.1 * k
         G.box(stone, F, x - 0.3, x + 0.3, 2.72, 3.3, 11.0, 11.8, C["wall"])
+        if not lite:
+            G.box(stone, F, x - 0.34, x + 0.34, 2.68, 3.34, 11.8, 11.9, C["trim"])  # P3-2D：城垛壓頂
     if P["corbels"]:
         for k in range(15):
             x = -3.85 + 0.55 * k
@@ -288,6 +334,30 @@ def build(lod):
                 G.box(gm, F, x - 0.035, x + 0.035, 2.89, 2.91, h + 0.015, h + 0.085, gcol)
     for sx in (-0.25, 0.25):
         G.lathe(gm, *F(sx, 2.9, 0)[:2], FLOOR + 2.4, [(0.0, 0.0), (0.09, 0.02), (0.1, 0.1), (0.0, 0.12)], 6, gcol)
+    if not lite:
+        # P3-2D：門板浮雕框（深藍）、每扇門金色渦捲雕花與小金星、拱門內緣金線
+        for sx in (-1, 1):
+            for h0, h1 in ((0.85, 1.2), (1.5, 2.45), (2.75, 3.7)):
+                G.box(props, F, min(sx * 0.18, sx * 1.42), max(sx * 0.18, sx * 1.42), 2.93, 2.965, h0, h1, C["door_d"])
+            for k, (hc, rr) in enumerate(((4.55, 0.55), (2.0, 0.42))):
+                pts = [F(sx * (0.8 + math.cos(a) * rr), 2.9, hc + math.sin(a) * rr * 0.8) for a in [math.pi * (0.15 + 0.7 * t / 7) for t in range(8)]]
+                G.tube(gm, pts, 0.03, 4, gcol)
+            vpoly(gm, F, star_outline(sx * 0.8, 3.22, 4, 0.16, 0.06), 2.89, gcol, -1)
+        arch_ring(gm, F, hs, 1.6, 1.68, 2.92, 2.97, 10, gcol)
+    # P3-2D：騎士團徽月桂枝（金）＋下方藍色緞帶
+    if not lite:
+        for sg in (-1, 1):
+            for k in range(9):
+                t = k / 8
+                a = math.radians(-100 + 150 * t)
+                lx, lh = sg * (1.45 * math.cos(a) + 0.05), 8.2 + 1.45 * math.sin(a)
+                ta = a + math.pi / 2
+                L, Wd = 0.26, 0.09
+                leaf = [(lx - sg * math.cos(ta) * L / 2, lh - math.sin(ta) * L / 2), (lx + sg * math.sin(ta) * Wd, lh - math.cos(ta) * Wd), (lx + sg * math.cos(ta) * L / 2, lh + math.sin(ta) * L / 2), (lx - sg * math.sin(ta) * Wd, lh + math.cos(ta) * Wd)]
+                vpoly(gm, F, leaf, 2.84, gcol, -1)
+        rib = [(-1.5, 6.88), (1.5, 6.88), (1.65, 7.12), (1.5, 7.36), (-1.5, 7.36), (-1.65, 7.12)]
+        vpoly(props, F, rib, 2.8, C["blue"], -1)
+        vpoly(gm, F, [(-1.45, 7.06), (1.45, 7.06), (1.45, 7.18), (-1.45, 7.18)], 2.79, gcol, -1)
     # 騎士團徽：金邊盾＋藍底＋金色八芒星＋交叉雙劍＋王冠（門上）
     # 盾貼在門樓牆面（y 3.0）；交叉雙劍在盾後；王冠在盾上、托架前
     if P["sword_emblem"]:
@@ -305,13 +375,27 @@ def build(lod):
         banner(props, gm, gcol, F, x0, x1, 9.62, 5.3, 2.92, 0.0, lite)
     # 兩側圓塔：塔身、腰線、托架、深藍圓錐屋頂、金尖頂、小三角旗
     seg = P["tower"]
-    tprof = [(2.05, 0.0), (2.05, 0.6), (1.95, 0.72), (1.9, 0.8), (1.9, 5.9), (1.98, 5.95), (1.98, 6.15), (1.9, 6.2), (1.9, 11.6), (2.02, 11.75), (2.16, 12.0), (2.2, 12.1), (2.2, 12.9), (2.0, 12.95), (0.0, 12.95)]
+    tprof = [(2.05, 0.0), (2.05, 0.6), (1.95, 0.72), (1.9, 0.8), (1.9, 5.9), (1.98, 5.95), (1.98, 6.15), (1.9, 6.2), (1.9, 9.3), (1.97, 9.35), (1.97, 9.5), (1.9, 9.55), (1.9, 11.6), (2.02, 11.75), (2.16, 12.0), (2.2, 12.1), (2.2, 12.9), (2.0, 12.95), (0.0, 12.95)]
     for tx, ty in TOWERS:
         cx, cz, _ = F(tx, ty, 0)
         G.lathe(stone, cx, cz, FLOOR, tprof, seg, C["wall"])
         G.lathe(roof, cx, cz, FLOOR, [(2.36, 12.75), (2.12, 13.1), (1.76, 13.9), (1.26, 15.2), (0.7, 16.6), (0.0, 18.3)], P["roof"], C["roof"], bottom=True)
         G.lathe(gm, cx, cz, FLOOR, [(2.38, 12.72), (2.4, 12.8), (2.36, 12.86)], P["roof"], gcol)
         G.lathe(gm, cx, cz, FLOOR, [(0.1, 18.15), (0.16, 18.35), (0.07, 18.55), (0.11, 18.75), (0.0, 19.0)], P["small"], gcol)
+        if not lite:
+            # P3-2D：圓錐屋頂 8 道金色屋脊、正面小老虎窗、尖頂小星
+            for k in range(8):
+                b = FACE + 22.5 + k * 45
+                p0 = (*G.pol(b, 2.3, cx, cz), FLOOR + 12.8)
+                p1 = (*G.pol(b, 1.3, cx, cz), FLOOR + 15.25)
+                p2 = (*G.pol(b, 0.12, cx, cz), FLOOR + 18.15)
+                G.tube(gm, [p0, p1, p2], 0.035, 4, gcol, taper=0.6)
+            dx, dz = G.pol(FACE, 1.95, cx, cz)
+            Dm = G.frame(dx, dz, FACE + 180, FLOOR)
+            G.box(stone, Dm, -0.32, 0.32, -0.25, 0.35, 13.55, 14.35, C["wall"])
+            vextrude(roof, Dm, [(-0.42, 14.3), (0.42, 14.3), (0.0, 14.75)], -0.3, 0.7, C["roof"])
+            vpoly(props, Dm, arch_outline(0.34, 13.68, 14.05, 4), -0.26, C["glass"], -1)
+            vpoly(gm, G.frame(cx, cz, FACE, FLOOR), star_outline(0, 18.82, 4, 0.16, 0.05), -0.12, gcol, -1)
         if P["corbels"]:
             for k in range(20):
                 b = k * 18
@@ -349,6 +433,26 @@ def build(lod):
     roof.face([rv(A), rv(Dd), rv(R1)], dirv(-1, 0, 0.8))
     roof.face([rv(B_), rv(Cc), rv(R2)], dirv(1, 0, 0.8))
     G.box(gm, F, -2.6, 2.6, 10.5, 10.6, ridge_h - 0.02, ridge_h + 0.12, gcol)
+    # P3-2D：四坡屋頂金色屋簷線與斜脊
+    for a, b in ((A, B_), (B_, Cc), (Cc, Dd), (Dd, A), (A, R1), (Dd, R1), (B_, R2), (Cc, R2)):
+        G.tube(gm, [a, b], 0.045, 4 if not lite else 3, gcol)
+    # P3-2D：主樓四角隅石（長短交錯）
+    for qx, qy in ((-6.0, 7.5), (6.0, 7.5), (-6.0, 13.6), (6.0, 13.6)):
+        sxn = 1 if qx > 0 else -1
+        syn = 1 if qy > 10 else -1
+        h = 0.7
+        k = 0
+        while h < 13.6:
+            long_ = k % 2 == 0
+            lx = 0.7 if long_ else 0.4
+            ly = 0.4 if long_ else 0.7
+            xa, xb = sorted((qx - sxn * lx, qx + sxn * 0.04))
+            ya, yb = sorted((qy - syn * ly, qy + syn * 0.04))
+            G.box(stone, F, xa, xb, ya, yb, h, h + 0.56, C["trim"])
+            h += 0.62
+            k += 1
+            if lite and k > 30:
+                break
     for sx in (-2.6, 2.6):
         G.lathe(gm, *F(sx, 10.55, 0)[:2], FLOOR, [(0.08, ridge_h), (0.14, ridge_h + 0.2), (0.06, ridge_h + 0.42), (0.0, ridge_h + 0.7)], P["small"], gcol)
     Kf = G.frame(*F(0, 7.5, 0)[:2], BEARING, FLOOR)  # 主樓正面（y＝0 在 7.5）
@@ -386,7 +490,7 @@ def _n(pts):
 TOWER_PLAN = [F(tx, ty, 0)[:2] for tx, ty in TOWERS]
 
 
-def stone_uv(pts, tile=2.0):
+def stone_uv(pts, tile=2.4):
     n = _n(pts)
     c = G.centroid(pts)
     if abs(n[2]) > 0.7:
