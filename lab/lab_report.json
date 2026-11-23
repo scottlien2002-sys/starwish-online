@@ -1,5 +1,5 @@
 {
- "startedAt": "2026-11-23T14:10:12.954Z",
+ "startedAt": "2026-11-23T15:10:04.158Z",
  "checks": {
   "benches 位置＝既有碰撞（誤差 < 1 cm）": {
    "ok": true,
@@ -203,25 +203,27 @@
     }
    }
   },
-  "噴泉 lite 外徑 r ≤ 7.0（＝碰撞半徑 7）、高 6.5": {
+  "噴泉 lite 外徑 r ≤ 7.0（＝碰撞半徑 7）、最高（含星晶浮動）≤ 6.5、面數在額度內": {
    "ok": true,
    "detail": {
     "bounds": {
      "radius": 7,
-     "top": 6.5
+     "top": 6.38
     },
-    "triangles": 10800,
+    "crystalTopMax": 6.44,
+    "triangles": 10460,
     "budget": 11000
    }
   },
-  "噴泉 hq 外徑 r ≤ 7.0（＝碰撞半徑 7）、高 6.5": {
+  "噴泉 hq 外徑 r ≤ 7.0（＝碰撞半徑 7）、最高（含星晶浮動）≤ 6.5、面數在額度內": {
    "ok": true,
    "detail": {
     "bounds": {
      "radius": 7,
-     "top": 6.5
+     "top": 6.38
     },
-    "triangles": 27376,
+    "crystalTopMax": 6.44,
+    "triangles": 25644,
     "budget": 28000
    }
   }
@@ -233,44 +235,35 @@
    "errors": [],
    "shots": [
     "chromium_hq_player_spawn.png",
-    "chromium_hq_player_south.png",
-    "chromium_hq_pano.png",
-    "chromium_hq_top.png",
-    "chromium_hq_close_bench.png",
-    "chromium_hq_close_lamp.png",
-    "chromium_hq_close_compass.png",
+    "chromium_hq_fountain_front.png",
     "chromium_hq_fountain_close.png",
-    "chromium_hq_fountain_falls.png",
     "chromium_hq_fountain_q45.png",
+    "chromium_hq_fountain_top.png",
+    "chromium_hq_fountain_falls.png",
     "chromium_hq_fountain_water.png",
-    "chromium_hq_knight_front.png",
-    "chromium_hq_knight_q45.png",
-    "chromium_hq_knight_q45r.png",
-    "chromium_hq_knight_eye.png",
-    "chromium_hq_knight_player_up.png",
-    "chromium_hq_knight_door.png",
-    "chromium_hq_knight_npc.png"
+    "chromium_hq_top.png",
+    "chromium_hq_pano.png"
    ],
-   "loadMs": 12847,
+   "loadMs": 7262,
    "stats": {
     "fountain": {
      "meshes": 7,
-     "triangles": 27378,
+     "triangles": 25644,
      "byMesh": {
-      "stone": 15696,
-      "gold": 9152,
-      "crystal": 96,
+      "stone": 16000,
+      "gold": 7064,
+      "crystal": 108,
       "water": 704,
       "falls": 1344,
       "foam": 384,
-      "halo": 2
+      "fx": 40
      },
      "materials": 6,
-     "opaqueMeshes": 4,
-     "transparentMeshes": 3,
+     "opaqueMeshes": 3,
+     "transparentMeshes": 4,
      "textures": 8,
-     "texturePixels": 1310720,
-     "shadowCasters": 3
+     "texturePixels": 1277952,
+     "shadowCasters": 2
     },
     "plaza": {
      "meshes": 5,
@@ -309,8 +302,8 @@
    },
    "textureMemory": {
     "count": 13,
-    "pixels": 3276800,
-    "mb": 16.63,
+    "pixels": 3244032,
+    "mb": 16.46,
     "list": [
      {
       "name": "slab_hq.png",
@@ -328,7 +321,7 @@
       "h": 512
      },
      {
-      "name": "caustic_hq.png",
+      "name": "caustic_star_hq.png",
       "w": 256,
       "h": 256
      },
@@ -348,9 +341,9 @@
       "h": 256
      },
      {
-      "name": "fx_halo_hq.png",
+      "name": "fx_magic_hq.png",
       "w": 256,
-      "h": 256
+      "h": 128
      },
      {
       "name": "banner2_hq.png",
@@ -385,20 +378,20 @@
      "activeMeshes": 59
     },
     "fountain": {
-     "drawCalls": 133,
+     "drawCalls": 132,
      "activeMeshes": 66
     },
     "both": {
-     "drawCalls": 141,
+     "drawCalls": 140,
      "activeMeshes": 71
     },
     "all": {
-     "drawCalls": 149,
+     "drawCalls": 148,
      "activeMeshes": 75
     }
    },
    "plazaDrawCalls": 8,
-   "fountainDrawCalls": 10,
+   "fountainDrawCalls": 9,
    "knightDrawCalls": 8,
    "flicker": {
     "player_spawn": {
@@ -406,19 +399,15 @@
      "meanRatio": 0.0009399801587301587
     },
     "fountain_q45": {
-     "maxRatio": 0.0022569444444444442,
-     "meanRatio": 0.0020393105158730157
+     "maxRatio": 0.0022507440476190474,
+     "meanRatio": 0.0020504712301587296
     },
-    "knight_front": {
-     "maxRatio": 0.0009362599206349207,
-     "meanRatio": 0.0007657490079365079
-    },
-    "knight_player_up": {
-     "maxRatio": 0.00376984126984127,
-     "meanRatio": 0.0036049107142857146
+    "fountain_close": {
+     "maxRatio": 0.007142857142857143,
+     "meanRatio": 0.006889260912698414
     }
    },
-   "frameMsSoftware": 2
+   "frameMsSoftware": 1.3999999999068677
   },
   {
    "browser": "chromium",
@@ -426,32 +415,30 @@
    "errors": [],
    "shots": [
     "chromium_lite-low_player_spawn.png",
-    "chromium_lite-low_pano.png",
+    "chromium_lite-low_fountain_front.png",
     "chromium_lite-low_fountain_close.png",
-    "chromium_lite-low_fountain_water.png",
-    "chromium_lite-low_knight_front.png",
-    "chromium_lite-low_knight_q45.png",
-    "chromium_lite-low_knight_eye.png"
+    "chromium_lite-low_fountain_q45.png",
+    "chromium_lite-low_fountain_top.png"
    ],
-   "loadMs": 2272,
+   "loadMs": 1735,
    "stats": {
     "fountain": {
      "meshes": 7,
-     "triangles": 10802,
+     "triangles": 10460,
      "byMesh": {
       "stone": 6856,
-      "gold": 3000,
-      "crystal": 96,
+      "gold": 2624,
+      "crystal": 92,
       "water": 144,
       "falls": 512,
       "foam": 192,
-      "halo": 2
+      "fx": 40
      },
      "materials": 6,
-     "opaqueMeshes": 4,
-     "transparentMeshes": 3,
+     "opaqueMeshes": 3,
+     "transparentMeshes": 4,
      "textures": 6,
-     "texturePixels": 196608,
+     "texturePixels": 188416,
      "shadowCasters": 0
     },
     "plaza": {
@@ -487,8 +474,8 @@
    },
    "textureMemory": {
     "count": 8,
-    "pixels": 524288,
-    "mb": 2.66,
+    "pixels": 516096,
+    "mb": 2.62,
     "list": [
      {
       "name": "slab_lite.png",
@@ -501,7 +488,7 @@
       "h": 256
      },
      {
-      "name": "caustic_lite.png",
+      "name": "caustic_star_lite.png",
       "w": 128,
       "h": 128
      },
@@ -516,9 +503,9 @@
       "h": 128
      },
      {
-      "name": "fx_halo_lite.png",
+      "name": "fx_magic_lite.png",
       "w": 128,
-      "h": 128
+      "h": 64
      },
      {
       "name": "ashlar_lite.png",
@@ -556,22 +543,18 @@
    "flicker": {
     "player_spawn": {
      "maxRatio": 0.0007874503968253968,
-     "meanRatio": 0.0006634424603174603
+     "meanRatio": 0.0006628224206349206
     },
     "fountain_q45": {
-     "maxRatio": 0.0015314980158730159,
-     "meanRatio": 0.0014012896825396828
+     "maxRatio": 0.0015438988095238095,
+     "meanRatio": 0.0014056299603174606
     },
-    "knight_front": {
-     "maxRatio": 0.0007254464285714286,
-     "meanRatio": 0.0006293402777777777
-    },
-    "knight_player_up": {
-     "maxRatio": 0.0027901785714285715,
-     "meanRatio": 0.0026500496031746034
+    "fountain_close": {
+     "maxRatio": 0.005704365079365079,
+     "meanRatio": 0.005308779761904763
     }
    },
-   "frameMsSoftware": 1.200000000031044
+   "frameMsSoftware": 1
   },
   {
    "browser": "webkit",
@@ -579,28 +562,28 @@
    "errors": [],
    "shots": [
     "webkit_hq_player_spawn.png",
-    "webkit_hq_knight_front.png"
+    "webkit_hq_fountain_close.png"
    ],
-   "loadMs": 3412,
+   "loadMs": 2726,
    "stats": {
     "fountain": {
      "meshes": 7,
-     "triangles": 27378,
+     "triangles": 25644,
      "byMesh": {
-      "stone": 15696,
-      "gold": 9152,
-      "crystal": 96,
+      "stone": 16000,
+      "gold": 7064,
+      "crystal": 108,
       "water": 704,
       "falls": 1344,
       "foam": 384,
-      "halo": 2
+      "fx": 40
      },
      "materials": 6,
-     "opaqueMeshes": 4,
-     "transparentMeshes": 3,
+     "opaqueMeshes": 3,
+     "transparentMeshes": 4,
      "textures": 8,
-     "texturePixels": 1310720,
-     "shadowCasters": 3
+     "texturePixels": 1277952,
+     "shadowCasters": 2
     },
     "plaza": {
      "meshes": 5,
@@ -639,8 +622,8 @@
    },
    "textureMemory": {
     "count": 13,
-    "pixels": 3276800,
-    "mb": 16.63,
+    "pixels": 3244032,
+    "mb": 16.46,
     "list": [
      {
       "name": "slab_hq.png",
@@ -658,7 +641,7 @@
       "h": 512
      },
      {
-      "name": "caustic_hq.png",
+      "name": "caustic_star_hq.png",
       "w": 256,
       "h": 256
      },
@@ -678,9 +661,9 @@
       "h": 256
      },
      {
-      "name": "fx_halo_hq.png",
+      "name": "fx_magic_hq.png",
       "w": 256,
-      "h": 256
+      "h": 128
      },
      {
       "name": "banner2_hq.png",
@@ -715,20 +698,20 @@
      "activeMeshes": 59
     },
     "fountain": {
-     "drawCalls": 133,
+     "drawCalls": 132,
      "activeMeshes": 66
     },
     "both": {
-     "drawCalls": 141,
+     "drawCalls": 140,
      "activeMeshes": 71
     },
     "all": {
-     "drawCalls": 149,
+     "drawCalls": 148,
      "activeMeshes": 75
     }
    },
    "plazaDrawCalls": 8,
-   "fountainDrawCalls": 10,
+   "fountainDrawCalls": 9,
    "knightDrawCalls": 8
   },
   {
@@ -737,27 +720,27 @@
    "errors": [],
    "shots": [
     "webkit_lite-low_player_spawn.png",
-    "webkit_lite-low_knight_front.png"
+    "webkit_lite-low_fountain_close.png"
    ],
-   "loadMs": 2163,
+   "loadMs": 1757,
    "stats": {
     "fountain": {
      "meshes": 7,
-     "triangles": 10802,
+     "triangles": 10460,
      "byMesh": {
       "stone": 6856,
-      "gold": 3000,
-      "crystal": 96,
+      "gold": 2624,
+      "crystal": 92,
       "water": 144,
       "falls": 512,
       "foam": 192,
-      "halo": 2
+      "fx": 40
      },
      "materials": 6,
-     "opaqueMeshes": 4,
-     "transparentMeshes": 3,
+     "opaqueMeshes": 3,
+     "transparentMeshes": 4,
      "textures": 6,
-     "texturePixels": 196608,
+     "texturePixels": 188416,
      "shadowCasters": 0
     },
     "plaza": {
@@ -793,8 +776,8 @@
    },
    "textureMemory": {
     "count": 8,
-    "pixels": 524288,
-    "mb": 2.66,
+    "pixels": 516096,
+    "mb": 2.62,
     "list": [
      {
       "name": "slab_lite.png",
@@ -807,7 +790,7 @@
       "h": 256
      },
      {
-      "name": "caustic_lite.png",
+      "name": "caustic_star_lite.png",
       "w": 128,
       "h": 128
      },
@@ -822,9 +805,9 @@
       "h": 128
      },
      {
-      "name": "fx_halo_lite.png",
+      "name": "fx_magic_lite.png",
       "w": 128,
-      "h": 128
+      "h": 64
      },
      {
       "name": "ashlar_lite.png",
@@ -861,5 +844,5 @@
    "knightDrawCalls": 3
   }
  ],
- "finishedAt": "2026-11-23T14:26:21.998Z"
+ "finishedAt": "2026-11-23T15:19:44.290Z"
 }

@@ -1,42 +1,44 @@
 {
  "lods": {
   "lite": {
-   "triangles": 10800,
+   "triangles": 10460,
    "within_budget": true,
    "by_mesh": {
     "stone": 6856,
-    "gold": 3000,
-    "crystal": 96,
+    "gold": 2624,
+    "crystal": 92,
     "water": 144,
     "falls": 512,
-    "foam": 192
+    "foam": 192,
+    "fx": 40
    },
-   "meshes": 6,
+   "meshes": 7,
    "ao_baked": 1,
    "bounds": {
     "radius": 7.0,
-    "top": 6.5
+    "top": 6.38
    },
-   "bytes": 633500
+   "bytes": 624240
   },
   "hq": {
-   "triangles": 27376,
+   "triangles": 25644,
    "within_budget": true,
    "by_mesh": {
-    "stone": 15696,
-    "gold": 9152,
-    "crystal": 96,
+    "stone": 16000,
+    "gold": 7064,
+    "crystal": 108,
     "water": 704,
     "falls": 1344,
-    "foam": 384
+    "foam": 384,
+    "fx": 40
    },
-   "meshes": 6,
+   "meshes": 7,
    "ao_baked": 1,
    "bounds": {
     "radius": 7.0,
-    "top": 6.5
+    "top": 6.38
    },
-   "bytes": 1318320
+   "bytes": 1336168
   }
  },
  "budget": {
@@ -142,7 +144,7 @@
   }
  ],
  "log": [],
- "seconds": 2.5,
+ "seconds": 1.7,
  "dims": {
   "outer_diameter": 14.0,
   "basin_inner_diameter": 12.0,
@@ -151,9 +153,12 @@
   "bowl_diameter": 6.0,
   "bowl_top": 2.34,
   "crystal": [
-   4.3,
-   6.5
+   4.86,
+   6.38
   ],
+  "crystal_bob": 0.06,
+  "crystal_top_max": 6.44,
+  "magic_ring_z": 4.62,
   "rings_diameter": [
    3.5,
    4.2
