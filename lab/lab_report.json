@@ -1,5 +1,5 @@
 {
- "startedAt": "2026-11-23T15:25:22.593Z",
+ "startedAt": "2026-11-23T15:38:28.420Z",
  "checks": {
   "benches 位置＝既有碰撞（誤差 < 1 cm）": {
    "ok": true,
@@ -235,6 +235,7 @@
    "errors": [],
    "shots": [
     "chromium_hq_player_spawn.png",
+    "chromium_hq_player_spawn_up.png",
     "chromium_hq_fountain_front.png",
     "chromium_hq_fountain_close.png",
     "chromium_hq_fountain_q45.png",
@@ -244,7 +245,7 @@
     "chromium_hq_top.png",
     "chromium_hq_pano.png"
    ],
-   "loadMs": 5123,
+   "loadMs": 7785,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -400,14 +401,14 @@
     },
     "fountain_q45": {
      "maxRatio": 0.0022507440476190474,
-     "meanRatio": 0.002044890873015873
+     "meanRatio": 0.0020455109126984125
     },
     "fountain_close": {
      "maxRatio": 0.007099454365079365,
-     "meanRatio": 0.0068402777777777785
+     "meanRatio": 0.006844618055555555
     }
    },
-   "frameMsSoftware": 1.8999999999068677
+   "frameMsSoftware": 2.1000000000931323
   },
   {
    "browser": "chromium",
@@ -415,12 +416,13 @@
    "errors": [],
    "shots": [
     "chromium_lite-low_player_spawn.png",
+    "chromium_lite-low_player_spawn_up.png",
     "chromium_lite-low_fountain_front.png",
     "chromium_lite-low_fountain_close.png",
     "chromium_lite-low_fountain_q45.png",
     "chromium_lite-low_fountain_top.png"
    ],
-   "loadMs": 1388,
+   "loadMs": 1942,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -542,19 +544,19 @@
    "knightDrawCalls": 3,
    "flicker": {
     "player_spawn": {
-     "maxRatio": 0.0007936507936507937,
-     "meanRatio": 0.0006646825396825396
+     "maxRatio": 0.0007874503968253968,
+     "meanRatio": 0.0006634424603174603
     },
     "fountain_q45": {
      "maxRatio": 0.0015314980158730159,
-     "meanRatio": 0.0014006696428571432
+     "meanRatio": 0.0013994295634920638
     },
     "fountain_close": {
      "maxRatio": 0.005648561507936508,
-     "meanRatio": 0.005265376984126985
+     "meanRatio": 0.005264756944444445
     }
    },
-   "frameMsSoftware": 1.1600000000093131
+   "frameMsSoftware": 1.3500000000349246
   },
   {
    "browser": "webkit",
@@ -564,7 +566,7 @@
     "webkit_hq_player_spawn.png",
     "webkit_hq_fountain_close.png"
    ],
-   "loadMs": 2186,
+   "loadMs": 2794,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -722,7 +724,7 @@
     "webkit_lite-low_player_spawn.png",
     "webkit_lite-low_fountain_close.png"
    ],
-   "loadMs": 1350,
+   "loadMs": 1821,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -844,5 +846,5 @@
    "knightDrawCalls": 3
   }
  ],
- "finishedAt": "2026-11-23T15:32:12.253Z"
+ "finishedAt": "2026-11-23T15:48:43.463Z"
 }
