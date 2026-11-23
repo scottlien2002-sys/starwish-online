@@ -1,0 +1,108 @@
+name: Blender — Village P3 art (Stage 6 P3)
+
+# Stage 6 P3 星芽村正式美術：免費 Blender 自動建模 → GLB（HQ／Lite）＋預覽圖。
+# 結果推到 art-village-p3 分支（一般 push，不 force；不影響遊戲網站與 main）。
+# 概念圖不放進儲存庫。
+on:
+  workflow_dispatch:
+  push:
+    branches: ["feature/render-village-p3"]
+    paths:
+      - "art/village-p3/**"
+      - ".github/workflows/blender-village-p3.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: blender-village-p3
+  cancel-in-progress: false
+
+env:
+  BLENDER_VERSION: "4.2.3"
+  BLENDER_SERIES: "4.2"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Generate textures (numpy + Pillow)
+        run: |
+          python3 -m pip install --quiet numpy pillow
+          python3 art/village-p3/gen_textures.py out/textures | tail -3
+
+      - name: System libraries for Blender (headless)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libsm6 libxkbcommon0 >/dev/null
+
+      - name: Download Blender ${{ env.BLENDER_VERSION }} (official, free)
+        run: |
+          URL="https://download.blender.org/release/Blender${BLENDER_SERIES}/blender-${BLENDER_VERSION}-linux-x64.tar.xz"
+          curl -fsSL --retry 5 --retry-delay 10 "$URL" -o /tmp/blender.tar.xz || curl -fsSL --retry 5 "https://mirrors.ocf.berkeley.edu/blender/release/Blender${BLENDER_SERIES}/blender-${BLENDER_VERSION}-linux-x64.tar.xz" -o /tmp/blender.tar.xz
+          mkdir -p /opt/blender && tar -xf /tmp/blender.tar.xz -C /opt/blender --strip-components=1
+          /opt/blender/blender --version | head -2
+
+      - name: P3-0 pipeline sample (model, AO bake, GLB hq/lite, previews)
+        run: |
+          /opt/blender/blender -b --factory-startup -noaudio -P art/village-p3/build_p30.py -- --tex "$PWD/out/textures" --out "$PWD/out" 2>&1 | tee out/blender.log | grep -v "^Fra:" | grep -v "Sample" | tail -40
+          for f in p30_sample_hq.glb p30_sample_lite.glb p30_front.png p30_q45.png p30_top.png p30_close.png p30_report.json; do test -f "out/$f"; done
+
+      - name: Validate GLB (Khronos glTF-Validator)
+        run: |
+          mkdir -p /tmp/gv && cd /tmp/gv && npm init -y >/dev/null && npm i --no-save gltf-validator@latest 2>&1 | tail -3
+          cd "$GITHUB_WORKSPACE"
+          NODE_PATH=/tmp/gv/node_modules node -e '
+            const v = require("gltf-validator"); const fs = require("fs");
+            (async () => {
+              let bad = 0; const s = {};
+              for (const q of ["hq", "lite"]) {
+                const b = fs.readFileSync(`out/p30_sample_${q}.glb`);
+                const r = await v.validateBytes(new Uint8Array(b));
+                const dv = new DataView(b.buffer, b.byteOffset); const len = dv.getUint32(12, true);
+                const j = JSON.parse(Buffer.from(b.subarray(20, 20 + len)).toString());
+                s[q] = { errors: r.issues.numErrors, warnings: r.issues.numWarnings, bytes: b.length, triangles: r.info.totalTriangleCount, materials: r.info.materialCount, meshes: j.meshes.length,
+                  images: (j.images || []).length, normalMaps: (j.materials || []).filter((m) => m.normalTexture).length,
+                  color0: j.meshes.filter((m) => m.primitives.some((p) => "COLOR_0" in p.attributes)).length };
+                console.log(q, JSON.stringify(s[q]));
+                bad += r.issues.numErrors;
+              }
+              fs.writeFileSync("out/validator_summary.json", JSON.stringify(s, null, 1));
+              if (bad) process.exit(1);
+            })();'
+
+      - name: Contact sheet
+        if: always()
+        run: |
+          python3 - <<'PY'
+          from PIL import Image
+          import os
+          ims = [Image.open(f"out/p30_{v}.png").convert("RGB") for v in ("front", "q45", "top", "close") if os.path.exists(f"out/p30_{v}.png")]
+          if ims:
+              w, h = ims[0].size
+              sheet = Image.new("RGB", (w * 2, h * 2), (235, 236, 242))
+              for i, im in enumerate(ims):
+                  sheet.paste(im, ((i % 2) * w, (i // 2) * h))
+              sheet.save("out/p30_contact_sheet.png")
+          PY
+
+      - name: Push results to art-village-p3 branch (normal push, no force)
+        if: always()
+        run: |
+          echo "{\"commit\":\"${GITHUB_SHA}\",\"blender\":\"${BLENDER_VERSION}\",\"builtAt\":\"$(date -u +%FT%TZ)\"}" > out/build.json
+          REPO="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads "$REPO" art-village-p3 >/dev/null 2>&1; then
+            git clone -q --depth 1 --branch art-village-p3 "$REPO" /tmp/artp3
+          else
+            mkdir -p /tmp/artp3 && cd /tmp/artp3 && git init -q -b art-village-p3 && git remote add origin "$REPO" && cd -
+          fi
+          rsync -a --delete --exclude .git out/ /tmp/artp3/
+          cd /tmp/artp3
+          git add -A
+          git commit -qm "Village P3 ${GITHUB_SHA::7}" || echo "no changes"
+          git push -q origin HEAD:art-village-p3
