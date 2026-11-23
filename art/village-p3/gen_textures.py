@@ -213,7 +213,7 @@ def noise2(n, scale, octaves=3):
 
 def make_pool(n):
     """池底馬賽克（可重複）：小方磚＋淺灰縫，淡水色、偶有較深的青綠磚；顏色再由頂點色調成淺藍→青綠深淺"""
-    tiles = 16
+    tiles = 24
     yy, xx = np.mgrid[0:n, 0:n] / n
     gx, gy = (xx * tiles) % 1.0, (yy * tiles) % 1.0
     ix, iy = np.floor(xx * tiles).astype(int), np.floor(yy * tiles).astype(int)
@@ -221,12 +221,13 @@ def make_pool(n):
     edge = np.minimum(np.minimum(gx, 1 - gx), np.minimum(gy, 1 - gy))
     grout = np.clip((0.07 - edge) / 0.03, 0, 1)
     fine = noise2(n, 24, 2)
-    base = 0.9 + (rnd - 0.5) * 0.1 + (fine - 0.5) * 0.05
-    deep = (rnd > 0.88).astype(float)
-    r = base * (1 - deep * 0.22)
-    g = base * (1 - deep * 0.08)
+    soft = noise2(n, 3, 2)
+    base = 0.92 + (rnd - 0.5) * 0.05 + (fine - 0.5) * 0.04 + (soft - 0.5) * 0.08
+    deep = (rnd > 0.9).astype(float)
+    r = base * (1 - deep * 0.1)
+    g = base * (1 - deep * 0.03)
     b = base
-    rgb = np.stack([r, g, b], -1) * (1 - grout[..., None] * 0.18)
+    rgb = np.stack([r, g, b], -1) * (1 - grout[..., None] * 0.07)
     return np.clip(rgb, 0, 1)
 
 

@@ -258,7 +258,7 @@ def build(lod, M):
         parts.append(star_prism(f"relief{i}", 5 if i % 2 else 8, 0.2, 0.08, 0.06, M["stone"] if i % 2 else M["gold"], mat))
     # P3-2D：池緣頂面金色細環（HQ；Lite 面數已用滿）
     if lod == "hq":
-        ring = lathe("rimGold", [(6.23, RIM_TOP - 0.004), (6.23, RIM_TOP + 0.007), (6.42, RIM_TOP + 0.007), (6.42, RIM_TOP - 0.004)], 96, M["gold"], smooth_angle=20)
+        ring = lathe("rimGold", [(6.28, RIM_TOP - 0.004), (6.28, RIM_TOP + 0.007), (6.38, RIM_TOP + 0.007), (6.38, RIM_TOP - 0.004)], 96, M["gold"], smooth_angle=20)
         ensure_up(ring)
         parts.append(ring)
     # 8 根矮扶壁（池壁外側，每 45°）

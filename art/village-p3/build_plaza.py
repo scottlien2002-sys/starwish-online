@@ -311,11 +311,12 @@ def build_paving(P, rng, pave, gold, meta):
 
     # 噴泉步道：4 圈錯縫
     ring_rows([7.0, 7.95, 8.9, 9.85, 10.8], lambda ri, a: PAL["cream"] if ri % 2 else PAL["warm"], True)
-    # 步道外緣金色細環（r 10.8～11.1）
-    A = [gm.vert((*pol(k * 360 / seg, 10.82), PAVE_TOP + 0.003), gcol) for k in range(seg)]
-    B = [gm.vert((*pol(k * 360 / seg, 11.08), PAVE_TOP + 0.003), gcol) for k in range(seg)]
-    for k in range(seg):
-        gm.face([A[k], A[(k + 1) % seg], B[(k + 1) % seg], B[k]], UP)
+    # 步道外緣（P3-2D）：兩道金色細線夾一圈奶油色石帶（取代原本單一寬金環）
+    for r0, r1, mb, col, dh in ((10.8, 11.1, pave, PAL["cream"], 0.0), (10.82, 10.88, gm, gcol, 0.003), (11.02, 11.08, gm, gcol, 0.003)):
+        A = [mb.vert((*pol(k * 360 / seg, r0), PAVE_TOP + dh), col) for k in range(seg)]
+        B = [mb.vert((*pol(k * 360 / seg, r1), PAVE_TOP + dh), col) for k in range(seg)]
+        for k in range(seg):
+            mb.face([A[k], A[(k + 1) % seg], B[(k + 1) % seg], B[k]], UP)
     # 環形廣場：8 圈，16 個扇區交錯暖白／奶油色，第 1、5、8 圈為米色帶（拼花）
     def plaza_tone(ri, a):
         if ri in (0, 4, 7):

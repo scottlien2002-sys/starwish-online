@@ -34,11 +34,11 @@ function fresnel(left: number, right: number, bias: number, power: number): Fres
 export function villageGold(scene: Scene): StandardMaterial {
   return once(scene, "gold", () => {
     const m = new StandardMaterial("VP3_gold", scene);
-    m.diffuseColor = new Color3(0.78, 0.6, 0.28);
-    m.specularColor = new Color3(1, 0.86, 0.55);
+    m.diffuseColor = new Color3(0.74, 0.57, 0.27);
+    m.specularColor = new Color3(0.95, 0.82, 0.52);
     m.specularPower = 48;
-    m.emissiveColor = new Color3(0.22, 0.17, 0.07);
-    m.emissiveFresnelParameters = fresnel(0.85, 0.14, 0.1, 1.5);
+    m.emissiveColor = new Color3(0.17, 0.13, 0.05);
+    m.emissiveFresnelParameters = fresnel(0.75, 0.14, 0.1, 1.5);
     return m;
   });
 }

@@ -114,7 +114,7 @@ export function setupFountainP3(scene: Scene, meshes: AbstractMesh[], parent: Tr
   const cTex = ownTex(tex(scene, `${opt.texBase}caustic_${q}.png`, hq));
   cTex.uScale = 0.75;
   cTex.vScale = 0.75;
-  cTex.level = hq ? 0.32 : 0.26;
+  cTex.level = hq ? 0.55 : 0.45;
   waterMat.emissiveTexture = cTex;
   waterMat.emissiveColor = new Color3(0.07, 0.1, 0.12);
   waterMat.specularColor = hq ? new Color3(0.6, 0.65, 0.7) : new Color3(0.42, 0.46, 0.5);
