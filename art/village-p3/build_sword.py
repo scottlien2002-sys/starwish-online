@@ -30,8 +30,8 @@ F = G.frame(OX, OZ, BEARING, FLOOR)
 FACE = BEARING + 180
 BUDGET = {"hq": 22000, "lite": 9000}
 LOD = {
-    "hq": dict(arch=10, col=12, small=10, studs=True, hq=True),
-    "lite": dict(arch=6, col=6, small=6, studs=False, hq=False),
+    "hq": dict(arch=12, col=16, small=12, studs=True, hq=True, roof_sub=3),
+    "lite": dict(arch=6, col=6, small=6, studs=False, hq=False, roof_sub=1),
 }
 C = {
     "wall": (0.97, 0.94, 0.88),
@@ -39,8 +39,8 @@ C = {
     "trim": (0.99, 0.97, 0.93),
     "plinth": (0.86, 0.80, 0.71),
     "step": (0.93, 0.89, 0.81),
-    "roof": (0.80, 0.30, 0.28),
-    "roof_d": (0.66, 0.24, 0.23),
+    "roof": (0.88, 0.37, 0.33),
+    "roof_d": (0.72, 0.29, 0.27),
     "door": (0.50, 0.22, 0.17),
     "door_d": (0.36, 0.15, 0.12),
     "glass": (0.16, 0.25, 0.46),
@@ -111,8 +111,25 @@ def shield_outline(w, top, height, seg=6, cx=0.0):
     return pts
 
 
+def smooth(prof, sub):
+    """Catmull-Rom 細分屋頂曲線"""
+    if sub <= 1:
+        return prof
+    out = []
+    n = len(prof)
+    for i in range(n - 1):
+        p0, p1, p2, p3 = prof[max(i - 1, 0)], prof[i], prof[i + 1], prof[min(i + 2, n - 1)]
+        for k in range(sub):
+            t = k / sub
+            t2, t3 = t * t, t * t * t
+            out.append(tuple(0.5 * ((2 * p1[j]) + (-p0[j] + p2[j]) * t + (2 * p0[j] - 5 * p1[j] + 4 * p2[j] - p3[j]) * t2 + (-p0[j] + 3 * p1[j] - 3 * p2[j] + p3[j]) * t3) for j in range(2)))
+    out.append(prof[-1])
+    return out
+
+
 def curved_roof(roof, gm, gcol, prof, y0, y1, h_off, P, ridge_r):
     """反曲線雙坡屋頂：山牆朝 −y；上下兩面；金色屋脊與兩端博風線"""
+    prof = smooth(prof, P["roof_sub"])
     for sx in (-1, 1):
         for a, b in zip(prof, prof[1:]):
             q = [F(sx * a[0], y0, a[1] + h_off), F(sx * b[0], y0, b[1] + h_off), F(sx * b[0], y1, b[1] + h_off), F(sx * a[0], y1, a[1] + h_off)]
@@ -130,8 +147,9 @@ def curved_roof(roof, gm, gcol, prof, y0, y1, h_off, P, ridge_r):
     G.tube(gm, [F(0, y0, prof[-1][1] + h_off + 0.03), F(0, y1, prof[-1][1] + h_off + 0.03)], ridge_r, 5 if P["hq"] else 3, gcol)
 
 
-def gable_wall(mb, prof, y, h_base, h_off, col, inset=0.12):
+def gable_wall(mb, prof, y, h_base, h_off, col, inset=0.12, sub=1):
     """山牆面（凹多邊形用底部中心扇形）"""
+    prof = smooth(prof, sub)
     pts = [(-x + inset * (x / max(prof[0][0], 1e-6)), h + h_off - 0.05) for x, h in prof] + [(x - inset * (x / max(prof[0][0], 1e-6)), h + h_off - 0.05) for x, h in reversed(prof[:-1])]
     pts = [p for p in pts if p[1] >= h_base - 1e-6]
     c = mb.vert(F(0, y, h_base), col)
@@ -146,14 +164,21 @@ def great_sword(stone, props, gm, gcol, lx, ly, P):
     G.box(stone, F, lx - 0.46, lx + 0.46, ly - 0.46, ly + 0.46, 0.2, 0.85, C["trim"])
     G.box(stone, F, lx - 0.52, lx + 0.52, ly - 0.52, ly + 0.52, 0.85, 0.97, C["plinth"])
     px, pz, _ = F(lx, ly, 0)
-    S = G.frame(px, pz, FACE, FLOOR)  # 劍面朝廣場
-    vextrude(props, S, [(-0.17, 0.97), (0.17, 0.97), (0.17, 3.55), (-0.17, 3.55)], -0.04, 0.08, C["steel"])
-    vextrude(props, S, [(-0.05, 1.05), (0.05, 1.05), (0.05, 3.45), (-0.05, 3.45)], -0.05, 0.1, C["steel_d"])
-    vextrude(gm, S, [(-0.62, 3.55), (0.62, 3.55), (0.68, 3.66), (0.62, 3.77), (-0.62, 3.77), (-0.68, 3.66)], -0.09, 0.18, gcol)
-    vextrude(props, S, [(-0.075, 3.77), (0.075, 3.77), (0.075, 4.32), (-0.075, 4.32)], -0.07, 0.14, C["leather"])
-    G.lathe(gm, px, pz, FLOOR, [(0.0, 4.3), (0.13, 4.36), (0.15, 4.46), (0.1, 4.56), (0.0, 4.6)], P["small"], gcol)
+    S = G.frame(px, pz, BEARING, FLOOR)  # −y＝劍面朝廣場
+    # 劍身（劍尖插入石座）：寬 0.5、雙面、中央血槽較暗；兩面都做
+    for fy, fc in ((-0.05, -1), (0.05, 1)):
+        vpoly(props, S, [(0.0, 0.8), (0.25, 1.25), (0.25, 4.05), (-0.25, 4.05), (-0.25, 1.25)], fy, C["steel"], fc)
+        vpoly(props, S, [(-0.06, 1.3), (0.06, 1.3), (0.06, 3.95), (-0.06, 3.95)], fy + 0.006 * fc, C["steel_d"], fc)
+    for (x0, h0), (x1, h1) in (((0.25, 1.25), (0.25, 4.05)), ((-0.25, 1.25), (-0.25, 4.05)), ((0.0, 0.8), (0.25, 1.25)), ((0.0, 0.8), (-0.25, 1.25))):
+        q = [props.vert(S(x0, -0.05, h0), C["steel_d"]), props.vert(S(x1, -0.05, h1), C["steel_d"]), props.vert(S(x1, 0.05, h1), C["steel_d"]), props.vert(S(x0, 0.05, h0), C["steel_d"])]
+        props.face(q, G.sub(S(x0 + x1, 0, 0), S(0, 0, 0)))
+    vextrude(gm, S, [(-0.85, 4.05), (0.85, 4.05), (0.95, 4.18), (0.85, 4.31), (-0.85, 4.31), (-0.95, 4.18)], -0.11, 0.22, gcol)
+    vextrude(gm, S, [(-0.85, 4.05), (0.85, 4.05), (0.95, 4.18), (0.85, 4.31), (-0.85, 4.31), (-0.95, 4.18)], 0.11, 0.22, gcol, facing=1)
+    vextrude(props, S, [(-0.1, 4.31), (0.1, 4.31), (0.1, 5.0), (-0.1, 5.0)], -0.09, 0.18, C["leather"])
+    vextrude(props, S, [(-0.1, 4.31), (0.1, 4.31), (0.1, 5.0), (-0.1, 5.0)], 0.09, 0.18, C["leather"], facing=1)
+    G.lathe(gm, px, pz, FLOOR, [(0.0, 4.98), (0.17, 5.05), (0.2, 5.17), (0.13, 5.29), (0.0, 5.34)], P["small"], gcol)
     if P["hq"]:
-        vpoly(gm, S, star_outline(0, 3.66, 4, 0.09, 0.03), -0.1, gcol, -1)
+        vpoly(gm, S, star_outline(0, 4.18, 4, 0.12, 0.04), -0.115, gcol, -1)
         G.box(gm, F, lx - 0.3, lx + 0.3, ly - 0.47, ly - 0.45, 0.45, 0.62, gcol)
 
 
@@ -189,6 +214,18 @@ def build(lod):
             for sx in (-1, 1):
                 xa, xb = sorted((sx * WALL_X, sx * (WALL_X + 0.22)))
                 G.box(stone, F, xa, xb, y - 0.08, y + 0.08, 6.4, 6.75, C["trim"])
+    # 腰線（4.0 m，繞三面）＋高窗圓窗
+    for sx in (-1, 1):
+        xa, xb = sorted((sx * WALL_X, sx * (WALL_X + 0.1)))
+        G.box(stone, F, xa, xb, WALL_Y0, WALL_Y1, 4.0, 4.18, C["trim"])
+    G.box(stone, F, -WALL_X, WALL_X, WALL_Y1, WALL_Y1 + 0.1, 4.0, 4.18, C["trim"])
+    if hq:
+        for y in (6.65, 9.55):
+            for sx in (-1, 1):
+                Fo = G.frame(*F(sx * WALL_X, y, 0)[:2], BEARING + 90 * sx + 180, FLOOR)
+                vextrude(stone, Fo, circle(0, 5.55, 0.42, 12), -0.02, 0.1, C["trim"])
+                vpoly(props, Fo, circle(0, 5.55, 0.3, 12), -0.03, C["glass"], -1)
+                vpoly(gm, Fo, star_outline(0, 5.55, 4, 0.26, 0.06), -0.035, gcol, -1)
     # 正面兩角隅石
     for sx in (-1, 1):
         h = 1.15
@@ -237,9 +274,10 @@ def build(lod):
 
     # ---- 主屋頂（反曲線、山牆朝廣場）＋山牆 ----
     curved_roof(roof, gm, gcol, ROOF, WALL_Y0 - 0.45, WALL_Y1 + 0.15, 0.0, P, 0.07)
-    gable_wall(stone, ROOF, WALL_Y0, 7.0, 0.0, C["wall"])
+    gable_wall(stone, ROOF, WALL_Y0, 7.0, 0.0, C["wall"], sub=P["roof_sub"])
     Fg = G.frame(*F(0, WALL_Y1, 0)[:2], BEARING + 180, FLOOR)  # 後山牆（朝外）
-    pts = [(x * 0.97, h - 0.06) for x, h in ROOF] + [(-x * 0.97, h - 0.06) for x, h in reversed(ROOF[:-1])]
+    RS = smooth(ROOF, P["roof_sub"])
+    pts = [(x * 0.97, h - 0.06) for x, h in RS] + [(-x * 0.97, h - 0.06) for x, h in reversed(RS[:-1])]
     c = stone.vert(Fg(0, 0, 7.0), C["wall"])
     ids = [stone.vert(Fg(x, 0, h), C["wall"]) for x, h in pts if h >= 7.0]
     for i in range(len(ids) - 1):
@@ -259,6 +297,12 @@ def build(lod):
     vextrude(props, F, shield_outline(1.3, 9.5, 1.62), yE - 0.11, 0.03, C["banner"])
     vpoly(gm, F, star_outline(0, 8.75, 4, 0.38, 0.12), yE - 0.125, gcol, -1)
     if hq:
+        # 團徽後方金色光芒
+        for k in range(11):
+            a = math.radians(-75 + 15 * k)
+            x0, h0 = math.sin(a) * 1.25, 8.75 + math.cos(a) * 1.25
+            x1, h1 = math.sin(a) * 1.75, 8.75 + math.cos(a) * 1.75
+            plank(gm, F, (x0, h0), (x1, h1), 0.05, yE - 0.03, yE - 0.01, gcol)
         for sg in (-1, 1):
             for k in range(6):
                 t = k / 5
@@ -285,7 +329,7 @@ def build(lod):
         roof.face(q2, (0, 0, -1))
         G.tube(gm, [a, ap], 0.035, 4 if hq else 3, gcol)
     px, pz, _ = F(0, yc, 0)
-    Sf = G.frame(px, pz, FACE, FLOOR)
+    Sf = G.frame(px, pz, BEARING, FLOOR)
     vextrude(gm, Sf, [(-0.05, 12.55), (0.05, 12.55), (0.05, 12.9), (0.0, 12.99), (-0.05, 12.9)], -0.015, 0.03, gcol)
     vextrude(gm, Sf, [(-0.22, 12.52), (0.22, 12.52), (0.22, 12.58), (-0.22, 12.58)], -0.03, 0.06, gcol)
 
@@ -300,7 +344,7 @@ def build(lod):
     if hq:
         G.box(gm, F, -3.71, 3.71, 1.94, 1.95, 5.12, 5.18, gcol)
     curved_roof(roof, gm, gcol, PORCH, 1.62, 3.5, 0.0, P, 0.05)
-    gable_wall(stone, PORCH, 1.95, 5.38, 0.0, C["wall"], inset=0.15)
+    gable_wall(stone, PORCH, 1.95, 5.38, 0.0, C["wall"], inset=0.15, sub=P["roof_sub"])
     # 門廊山牆：金色八芒星圓章
     vextrude(stone, F, circle(0, 6.15, 0.52, 12 if hq else 8), 1.9, 0.06, C["trim"])
     vpoly(gm, F, star_outline(0, 6.15, 8 if hq else 4, 0.42, 0.17), 1.885, gcol, -1)
@@ -315,6 +359,14 @@ def build(lod):
             G.box(stone, F, min(sx * (r_out - 0.22), sx * r_out), max(sx * (r_out - 0.22), sx * r_out), yf, WALL_Y0, 0.68, hs, col)
         arch_ring(stone, F, hs, r_out - 0.22, r_out, yf, WALL_Y0, P["arch"], col)
     G.box(stone, F, -0.2, 0.2, WALL_Y0 - 0.17, WALL_Y0, hs + 1.42, hs + 1.78, C["trim"])
+    if hq:
+        # 拱石（深淺交錯）
+        for k in range(9):
+            a = math.pi * (k + 0.5) / 9
+            if k == 4:
+                continue
+            c, s_ = math.cos(a), math.sin(a)
+            G.box(stone, F, c * 1.74 - 0.12, c * 1.74 + 0.12, WALL_Y0 - 0.16, WALL_Y0, hs + s_ * 1.74 - 0.1, hs + s_ * 1.74 + 0.1, C["trim"] if k % 2 else C["wall2"])
     vextrude(props, F, arch_outline(2.36, 0.68, hs, P["arch"]), WALL_Y0 - 0.02, 0.04, C["door"])
     G.box(props, F, -0.025, 0.025, WALL_Y0 - 0.05, WALL_Y0 - 0.02, 0.68, hs + 1.15, C["door_d"])
     for h in (1.35, 2.45, 3.5):
