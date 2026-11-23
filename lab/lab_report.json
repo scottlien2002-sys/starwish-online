@@ -1,5 +1,5 @@
 {
- "startedAt": "2026-11-23T13:23:55.648Z",
+ "startedAt": "2026-11-23T13:49:59.313Z",
  "checks": {
   "benches 位置＝既有碰撞（誤差 < 1 cm）": {
    "ok": true,
@@ -202,6 +202,28 @@
      "interactR": 3
     }
    }
+  },
+  "噴泉 lite 外徑 r ≤ 7.0（＝碰撞半徑 7）、高 6.5": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "radius": 7,
+     "top": 6.5
+    },
+    "triangles": 10800,
+    "budget": 11000
+   }
+  },
+  "噴泉 hq 外徑 r ≤ 7.0（＝碰撞半徑 7）、高 6.5": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "radius": 7,
+     "top": 6.5
+    },
+    "triangles": 27376,
+    "budget": 28000
+   }
   }
  },
  "runs": [
@@ -210,50 +232,57 @@
    "mode": "hq",
    "errors": [],
    "shots": [
+    "chromium_hq_player_spawn.png",
+    "chromium_hq_player_south.png",
+    "chromium_hq_pano.png",
+    "chromium_hq_top.png",
+    "chromium_hq_close_bench.png",
+    "chromium_hq_close_lamp.png",
+    "chromium_hq_close_compass.png",
+    "chromium_hq_fountain_close.png",
+    "chromium_hq_fountain_falls.png",
+    "chromium_hq_fountain_q45.png",
+    "chromium_hq_fountain_water.png",
     "chromium_hq_knight_front.png",
     "chromium_hq_knight_q45.png",
     "chromium_hq_knight_q45r.png",
     "chromium_hq_knight_eye.png",
-    "chromium_hq_knight_player.png",
     "chromium_hq_knight_player_up.png",
-    "chromium_hq_knight_npc.png",
     "chromium_hq_knight_door.png",
-    "chromium_hq_player_spawn.png",
-    "chromium_hq_pano.png",
-    "chromium_hq_top.png"
+    "chromium_hq_knight_npc.png"
    ],
-   "loadMs": 6119,
+   "loadMs": 9714,
    "stats": {
     "fountain": {
      "meshes": 7,
-     "triangles": 26802,
+     "triangles": 27378,
      "byMesh": {
-      "stone": 16832,
-      "gold": 7440,
+      "stone": 15696,
+      "gold": 9152,
       "crystal": 96,
       "water": 704,
       "falls": 1344,
       "foam": 384,
       "halo": 2
      },
-     "materials": 7,
+     "materials": 6,
      "opaqueMeshes": 4,
      "transparentMeshes": 3,
-     "textures": 7,
-     "texturePixels": 4390912,
+     "textures": 8,
+     "texturePixels": 1310720,
      "shadowCasters": 3
     },
     "plaza": {
      "meshes": 5,
-     "triangles": 24138,
+     "triangles": 25926,
      "byMesh": {
-      "paving": 10508,
-      "gold": 2596,
-      "props": 10628,
+      "paving": 10536,
+      "gold": 2980,
+      "props": 12004,
       "glass": 154,
       "banner": 252
      },
-     "materials": 5,
+     "materials": 1,
      "transparentMeshes": 0,
      "textures": 3,
      "texturePixels": 655360,
@@ -277,6 +306,78 @@
       "./models/tex/roof_nrm_512.png"
      ]
     }
+   },
+   "textureMemory": {
+    "count": 13,
+    "pixels": 3276800,
+    "mb": 16.63,
+    "list": [
+     {
+      "name": "slab_hq.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "slab_nrm_hq.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "pool_hq.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "caustic_hq.png",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "name": "water_nrm_512.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "fx_fall_hq.png",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "name": "fx_foam_hq.png",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "name": "fx_halo_hq.png",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "name": "banner2_hq.png",
+      "w": 256,
+      "h": 512
+     },
+     {
+      "name": "stone_hq.png",
+      "w": 1024,
+      "h": 1024
+     },
+     {
+      "name": "stone_nrm_512.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "roof_512.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "roof_nrm_512.png",
+      "w": 512,
+      "h": 512
+     }
+    ]
    },
    "drawCalls": {
     "none": {
@@ -300,59 +401,69 @@
    "fountainDrawCalls": 10,
    "knightDrawCalls": 8,
    "flicker": {
+    "player_spawn": {
+     "maxRatio": 0.001171875,
+     "meanRatio": 0.0010801091269841269
+    },
+    "fountain_q45": {
+     "maxRatio": 0.0023933531746031748,
+     "meanRatio": 0.002191840277777778
+    },
     "knight_front": {
-     "maxRatio": 0.0010478670634920635,
-     "meanRatio": 0.0008761160714285714
+     "maxRatio": 0.0010416666666666667,
+     "meanRatio": 0.0008748759920634921
     },
     "knight_player_up": {
-     "maxRatio": 0.003937251984126984,
-     "meanRatio": 0.0037295386904761902
+     "maxRatio": 0.003738839285714286,
+     "meanRatio": 0.003573288690476191
     }
    },
-   "frameMsSoftware": 1.8000000000465661
+   "frameMsSoftware": 1.6000000000931323
   },
   {
    "browser": "chromium",
    "mode": "lite-low",
    "errors": [],
    "shots": [
+    "chromium_lite-low_player_spawn.png",
+    "chromium_lite-low_pano.png",
+    "chromium_lite-low_fountain_close.png",
+    "chromium_lite-low_fountain_water.png",
     "chromium_lite-low_knight_front.png",
     "chromium_lite-low_knight_q45.png",
-    "chromium_lite-low_knight_eye.png",
-    "chromium_lite-low_knight_player_up.png",
-    "chromium_lite-low_knight_npc.png"
+    "chromium_lite-low_knight_eye.png"
    ],
-   "loadMs": 1434,
+   "loadMs": 2030,
    "stats": {
     "fountain": {
      "meshes": 7,
      "triangles": 10802,
      "byMesh": {
-      "stone": 7360,
-      "gold": 2496,
+      "stone": 6856,
+      "gold": 3000,
       "crystal": 96,
       "water": 144,
       "falls": 512,
       "foam": 192,
       "halo": 2
      },
-     "materials": 7,
+     "materials": 6,
      "opaqueMeshes": 4,
      "transparentMeshes": 3,
-     "textures": 5,
-     "texturePixels": 573440,
+     "textures": 6,
+     "texturePixels": 196608,
      "shadowCasters": 0
     },
     "plaza": {
      "meshes": 4,
-     "triangles": 8788,
+     "triangles": 8976,
      "byMesh": {
-      "paving": 2948,
-      "props": 5390,
+      "paving": 2976,
+      "props": 5550,
       "glass": 154,
       "contact": 296
      },
-     "materials": 5,
+     "materials": 2,
      "transparentMeshes": 1,
      "textures": 1,
      "texturePixels": 65536,
@@ -373,6 +484,53 @@
       "./models/tex/roof_256.png"
      ]
     }
+   },
+   "textureMemory": {
+    "count": 8,
+    "pixels": 524288,
+    "mb": 2.66,
+    "list": [
+     {
+      "name": "slab_lite.png",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "name": "pool_lite.png",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "name": "caustic_lite.png",
+      "w": 128,
+      "h": 128
+     },
+     {
+      "name": "fx_fall_lite.png",
+      "w": 128,
+      "h": 128
+     },
+     {
+      "name": "fx_foam_lite.png",
+      "w": 128,
+      "h": 128
+     },
+     {
+      "name": "fx_halo_lite.png",
+      "w": 128,
+      "h": 128
+     },
+     {
+      "name": "stone_lite.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "roof_256.png",
+      "w": 256,
+      "h": 256
+     }
+    ]
    },
    "drawCalls": {
     "none": {
@@ -396,57 +554,65 @@
    "fountainDrawCalls": 7,
    "knightDrawCalls": 3,
    "flicker": {
+    "player_spawn": {
+     "maxRatio": 0.0006882440476190477,
+     "meanRatio": 0.0005970982142857143
+    },
+    "fountain_q45": {
+     "maxRatio": 0.0015314980158730159,
+     "meanRatio": 0.0013981894841269844
+    },
     "knight_front": {
      "maxRatio": 0.0006138392857142857,
-     "meanRatio": 0.0005586557539682538
+     "meanRatio": 0.0005580357142857143
     },
     "knight_player_up": {
-     "maxRatio": 0.0027529761904761907,
-     "meanRatio": 0.002624007936507937
+     "maxRatio": 0.002771577380952381,
+     "meanRatio": 0.002626488095238096
     }
    },
-   "frameMsSoftware": 1.6249999999708962
+   "frameMsSoftware": 1.0333333332867671
   },
   {
    "browser": "webkit",
    "mode": "hq",
    "errors": [],
    "shots": [
-    "webkit_hq_knight_front.png",
-    "webkit_hq_knight_player_up.png"
+    "webkit_hq_player_spawn.png",
+    "webkit_hq_knight_front.png"
    ],
-   "loadMs": 4115,
+   "loadMs": 3160,
    "stats": {
     "fountain": {
      "meshes": 7,
-     "triangles": 26802,
+     "triangles": 27378,
      "byMesh": {
-      "stone": 16832,
-      "gold": 7440,
+      "stone": 15696,
+      "gold": 9152,
       "crystal": 96,
       "water": 704,
       "falls": 1344,
       "foam": 384,
       "halo": 2
      },
-     "materials": 7,
+     "materials": 6,
      "opaqueMeshes": 4,
      "transparentMeshes": 3,
-     "textures": 7,
-     "texturePixels": 4390912,
+     "textures": 8,
+     "texturePixels": 1310720,
      "shadowCasters": 3
     },
     "plaza": {
      "meshes": 5,
-     "triangles": 24138,
+     "triangles": 25926,
      "byMesh": {
-      "paving": 10508,
-      "gold": 2596,
-      "props": 10628,
+      "paving": 10536,
+      "gold": 2980,
+      "props": 12004,
       "glass": 154,
       "banner": 252
      },
-     "materials": 5,
+     "materials": 1,
      "transparentMeshes": 0,
      "textures": 3,
      "texturePixels": 655360,
@@ -470,6 +636,78 @@
       "./models/tex/roof_nrm_512.png"
      ]
     }
+   },
+   "textureMemory": {
+    "count": 13,
+    "pixels": 3276800,
+    "mb": 16.63,
+    "list": [
+     {
+      "name": "slab_hq.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "slab_nrm_hq.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "pool_hq.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "caustic_hq.png",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "name": "water_nrm_512.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "fx_fall_hq.png",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "name": "fx_foam_hq.png",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "name": "fx_halo_hq.png",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "name": "banner2_hq.png",
+      "w": 256,
+      "h": 512
+     },
+     {
+      "name": "stone_hq.png",
+      "w": 1024,
+      "h": 1024
+     },
+     {
+      "name": "stone_nrm_512.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "roof_512.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "roof_nrm_512.png",
+      "w": 512,
+      "h": 512
+     }
+    ]
    },
    "drawCalls": {
     "none": {
@@ -498,39 +736,40 @@
    "mode": "lite-low",
    "errors": [],
    "shots": [
+    "webkit_lite-low_player_spawn.png",
     "webkit_lite-low_knight_front.png"
    ],
-   "loadMs": 1898,
+   "loadMs": 1943,
    "stats": {
     "fountain": {
      "meshes": 7,
      "triangles": 10802,
      "byMesh": {
-      "stone": 7360,
-      "gold": 2496,
+      "stone": 6856,
+      "gold": 3000,
       "crystal": 96,
       "water": 144,
       "falls": 512,
       "foam": 192,
       "halo": 2
      },
-     "materials": 7,
+     "materials": 6,
      "opaqueMeshes": 4,
      "transparentMeshes": 3,
-     "textures": 5,
-     "texturePixels": 573440,
+     "textures": 6,
+     "texturePixels": 196608,
      "shadowCasters": 0
     },
     "plaza": {
      "meshes": 4,
-     "triangles": 8788,
+     "triangles": 8976,
      "byMesh": {
-      "paving": 2948,
-      "props": 5390,
+      "paving": 2976,
+      "props": 5550,
       "glass": 154,
       "contact": 296
      },
-     "materials": 5,
+     "materials": 2,
      "transparentMeshes": 1,
      "textures": 1,
      "texturePixels": 65536,
@@ -551,6 +790,53 @@
       "./models/tex/roof_256.png"
      ]
     }
+   },
+   "textureMemory": {
+    "count": 8,
+    "pixels": 524288,
+    "mb": 2.66,
+    "list": [
+     {
+      "name": "slab_lite.png",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "name": "pool_lite.png",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "name": "caustic_lite.png",
+      "w": 128,
+      "h": 128
+     },
+     {
+      "name": "fx_fall_lite.png",
+      "w": 128,
+      "h": 128
+     },
+     {
+      "name": "fx_foam_lite.png",
+      "w": 128,
+      "h": 128
+     },
+     {
+      "name": "fx_halo_lite.png",
+      "w": 128,
+      "h": 128
+     },
+     {
+      "name": "stone_lite.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "roof_256.png",
+      "w": 256,
+      "h": 256
+     }
+    ]
    },
    "drawCalls": {
     "none": {
@@ -575,5 +861,5 @@
    "knightDrawCalls": 3
   }
  ],
- "finishedAt": "2026-11-23T13:31:46.860Z"
+ "finishedAt": "2026-11-23T14:03:32.419Z"
 }
