@@ -34,6 +34,12 @@ import {
   C10D_COOLDOWN_SEC,
   firstBelow,
   firstLastFps,
+  FENCE_NOTE,
+  intervalStats,
+  latencyStats,
+  rafFps,
+  timeWindows,
+  type TimedValue,
   type C10bStar,
   c10bLayout,
   c10bOptionsFromSearch,
@@ -112,6 +118,12 @@ interface BenchResult extends BenchmarkSummary {
   runNo: number;
   pixelRatio: number;
   shadowSampling: string;
+  /** 第二輪：獨立畫面更新量測（另一個 requestAnimationFrame 迴圈的時間戳） */
+  raf: { all: ReturnType<typeof intervalStats>; w30: (number | null)[]; w5: (number | null)[] };
+  /** 第二輪：非阻塞 GPU 完成時間（WebGL2 fence）；不支援時 null */
+  fence: { all: ReturnType<typeof latencyStats>; overFrame: number; timeouts: number; w30: (ReturnType<typeof latencyStats> | null)[]; w5: (ReturnType<typeof latencyStats> | null)[] } | null;
+  /** 第二輪 E1：角色網格是否參與主場景與陰影 */
+  charsInScene: { meshes: number; enabled: number; active: number; shadowCasting: number };
   windows: number[];
   contextLost: number;
 }
@@ -163,6 +175,12 @@ declare global {
 
 export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTMLElement): Promise<void> {
   const opts = c10bOptionsFromSearch(location.search);
+  if (opts.raf) {
+    // 第二輪 E2：不建立 3D（不建立引擎、不載入模型），只量 requestAnimationFrame
+    const { startRafProbe } = await import("./RafProbeLab.ts");
+    startRafProbe(canvas, hudRoot, opts);
+    return;
+  }
   const quality = pickQuality();
   // P3-2（?p3=1）：不建立半浮點 HDR 後製管線；色調映射改在材質內，MSAA 4x 改由畫布原生提供（建立引擎時就要決定）
   const p3NoPipe = opts.p3 && quality.postProcess;
@@ -678,6 +696,20 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
   let benchStartT = 0;
   let benchStartLoad = 0;
   let sizeChanges = 0;
+  // ---------- 第二輪：獨立畫面更新（rAF 時間戳）與非阻塞 GPU 完成時間（WebGL2 fence）----------
+  let runT0 = 0; // 進入 running 的 performance.now()
+  let rafPts: TimedValue[] = [];
+  let fencePts: TimedValue[] = [];
+  let fenceTimeouts = 0;
+  {
+    let prevTs = 0;
+    const tick = (ts: number): void => {
+      if (benchState === "running" && prevTs > 0 && runT0 > 0) rafPts.push({ t: (ts - runT0) / 1000, v: ts - prevTs });
+      prevTs = ts;
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
   let frameNo = 0;
   let lastProbe = 0;
   let lastW = 0;
@@ -694,6 +726,16 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
     `\n  前 30 秒 ${r.firstLast.first} FPS → 最後 30 秒 ${r.firstLast.last} FPS（差距 ${r.firstLast.diff} FPS、${r.firstLast.diffPct}%）　首次低於 45 FPS：${r.firstBelow45 === null ? "未發生" : `第 ${r.firstBelow45} 秒`}（5 秒平均）` +
     `\n  實際渲染解析度 ${r.renderSize[0]!.join("×")}（倍率 ${r.pixelRatio}x）｜陰影取樣 ${r.shadowSampling}` +
     `\n  冷卻：距上一次測試結束 ${cooldownText(r.cooldownSec)}｜開始前 ${r.startState}` +
+    `\n  每 30 秒 FPS（原始）：${r.windows.map((w) => w.toFixed(1)).join(" → ")}` +
+    `\n  獨立畫面更新（rAF 時間戳）：平均 ${r.raf.all.fps} FPS｜每 30 秒 ${r.raf.w30.map((v) => v ?? "-").join(" → ")}｜間隔分布 ≤20/≤37/≤54/>54ms：${r.raf.all.le20}/${r.raf.all.le37}/${r.raf.all.le54}/${r.raf.all.gt54}` +
+    (r.fence
+      ? `\n  GPU 完成時間（fence，非阻塞）：平均 ${r.fence.all.avg} ms、95% ${r.fence.all.p95} ms（${r.fence.all.n} 筆）｜超過 20 ms 的比例 ${r.fence.overFrame}%｜逾時 ${r.fence.timeouts}｜每 30 秒平均 ${r.fence.w30.map((w) => (w ? w.avg : "-")).join(" → ")} ms` +
+        `\n  ※ ${FENCE_NOTE}`
+      : opts.round === 2
+      ? "\n  GPU 完成時間：此瀏覽器不支援 WebGL2 fence，未量測"
+      : "") +
+    `\n  角色網格：共 ${r.charsInScene.meshes}、啟用 ${r.charsInScene.enabled}、主場景實際繪製 ${r.charsInScene.active}、投影到陰影 ${r.charsInScene.shadowCasting}` +
+    `\n  實際渲染解析度：開始 ${r.renderSize[0]!.join("×")}、結束 ${r.renderSize[1]!.join("×")}` +
     `\n  ${r.label}（${r.lod === "hq" ? "HQ" : "Lite"}、${r.count} 角色）平均 ${r.avgFps.toFixed(1)} FPS　1% Low ${r.low1Fps.toFixed(1)}　最低 ${r.minFps.toFixed(1)}　卡頓(>100ms) ${r.hitches100}　Draw ${r.avgDrawCalls.toFixed(0)}` +
     (r.windows.length > 1 ? `\n  每 30 秒平均：${r.windows.map((w) => w.toFixed(1)).join(" → ")}` : "") +
     (r.windows5.length > 1 ? `\n  每 5 秒平均：${r.windows5.map((w) => w.toFixed(0)).join(" ")}` : "") +
@@ -703,8 +745,8 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
     `\n  Draw Calls 平均：主場景 ${r.avgMainDraws}、陰影貼圖 ${r.avgShadowDraws}（總計 ${r.avgDrawCalls.toFixed(1)}）｜測試期間陰影貼圖更新 ${r.shadowRendersInTest} 次` +
     `\n  GPU 探測 ${r.gpuProbe ? "開" : "關"}｜畫布尺寸鎖定 ${r.fixSize ? "開" : "關"}｜視窗 resize 事件 ${r.resizeEvents.length} 次${r.resizeEvents.length ? `：${r.resizeEvents.join("；")}` : ""}` +
     `\n  開始測試時：開頁後 ${r.sinceOpen} 秒、最後一次載入後 ${r.sinceLoad} 秒` +
-    `\n  時間軸（秒｜FPS｜CPU 平均/95%ms｜GPU探測ms｜影格 ≤20/≤37/≤54/>54ms）：` +
-    r.timeline.map((w) => `\n   ${w.t0}s｜${w.fps}｜${w.cpuAvg}/${w.cpuP95}｜${w.gpuAvg ?? "-"}｜${w.le20}/${w.le37}/${w.le54}/${w.gt54}`).join("") +
+    `\n  時間軸（秒｜FPS｜CPU 平均/95%ms｜GPU探測ms｜影格 ≤20/≤37/≤54/>54ms｜rAF FPS｜fence 平均/95% ms）：` +
+    r.timeline.map((w, i) => `\n   ${w.t0}s｜${w.fps}｜${w.cpuAvg}/${w.cpuP95}｜${w.gpuAvg ?? "-"}｜${w.le20}/${w.le37}/${w.le54}/${w.gt54}｜rAF ${r.raf.w5[i] ?? "-"}${r.fence ? `｜fence ${r.fence.w5[i] ? `${r.fence.w5[i]!.avg}/${r.fence.w5[i]!.p95}` : "-"}` : ""}`).join("") +
     (r.contextLost ? `\n  ⚠ 測試中 WebGL Context Lost ×${r.contextLost}` : "");
 
   const api: C10bLabApi = {
@@ -806,6 +848,10 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
       benchStartT = performance.now() / 1000;
       benchStartLoad = Math.round((performance.now() - lastLoadDone) / 1000);
       benchState = "warmup";
+      runT0 = 0;
+      rafPts = [];
+      fencePts = [];
+      fenceTimeouts = 0;
       {
         const d = readDiag();
         cooldownAtStart = d.lastEnd === null ? null : Math.max(0, Math.round((Date.now() - d.lastEnd) / 1000));
@@ -932,8 +978,28 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
   api.view(opts.view);
 
   const gl = (engine as unknown as { _gl: WebGLRenderingContext })._gl;
+  const gl2 = typeof WebGL2RenderingContext !== "undefined" && gl instanceof WebGL2RenderingContext ? gl : null;
+  const pendingFences: { sync: WebGLSync; t: number }[] = [];
+  /** 查詢之前放的 fence 是否已完成（getSyncParameter 不會等待） */
+  const pollFences = (): void => {
+    if (!gl2) return;
+    const now = performance.now();
+    for (let i = 0; i < pendingFences.length; ) {
+      const f = pendingFences[i]!;
+      if (gl2.getSyncParameter(f.sync, gl2.SYNC_STATUS) === gl2.SIGNALED) {
+        if (runT0 > 0 && f.t >= runT0) fencePts.push({ t: (f.t - runT0) / 1000, v: now - f.t });
+        gl2.deleteSync(f.sync);
+        pendingFences.splice(i, 1);
+      } else if (now - f.t > 250) {
+        fenceTimeouts++; // 超過 250 ms 還沒完成：記一次逾時，不再等
+        gl2.deleteSync(f.sync);
+        pendingFences.splice(i, 1);
+      } else i++;
+    }
+  };
   function loop(): void {
     const dt = engine.getDeltaTime() / 1000;
+    if (opts.round === 2) pollFences();
     if (auto) camera.alpha += dt * 0.5;
     const t0 = performance.now();
     smDrawsFrame = 0;
@@ -943,6 +1009,11 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
     }
     scene.render();
     const cpu = performance.now() - t0;
+    // 第二輪：每 2 格放一個 fence（不 flush、不等待；下次畫面更新時才查）
+    if (opts.round === 2 && gl2 && benchState === "running" && frameNo % 2 === 0 && pendingFences.length < 16) {
+      const sync = gl2.fenceSync(gl2.SYNC_GPU_COMMANDS_COMPLETE, 0);
+      if (sync) pendingFences.push({ sync, t: performance.now() });
+    }
     let gpu: number | null = null;
     frameNo++;
     // 每 0.5 秒量一次（約每 15～30 格）：gl.finish() 會等 GPU 畫完，所以這格的時間 ≈ CPU 提交＋GPU 執行
@@ -961,6 +1032,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
       benchElapsed += dt;
       if (benchElapsed > opts.warmup) {
         benchState = "running";
+        if (runT0 === 0) runT0 = performance.now();
         if (smRendersAtRun < 0) smRendersAtRun = smRenders;
         dts.push(dt);
         draws.push(perf.drawCalls);
@@ -1004,6 +1076,33 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
           runNo: readDiag().runs + 1,
           pixelRatio: +(1 / engine.getHardwareScalingLevel()).toFixed(2),
           shadowSampling: shadowFilterLabel(),
+          raf: {
+            all: intervalStats(rafPts.map((p) => p.v)),
+            w30: timeWindows(rafPts, 30, benchSec, rafFps).map((w) => w.value),
+            w5: timeWindows(rafPts, 5, benchSec, rafFps).map((w) => w.value),
+          },
+          fence:
+            opts.round === 2 && gl2
+              ? {
+                  all: latencyStats(fencePts.map((p) => p.v)),
+                  overFrame: fencePts.length ? +((fencePts.filter((p) => p.v > 20).length / fencePts.length) * 100).toFixed(1) : 0,
+                  timeouts: fenceTimeouts,
+                  w30: timeWindows(fencePts, 30, benchSec, latencyStats).map((w) => w.value),
+                  w5: timeWindows(fencePts, 5, benchSec, latencyStats).map((w) => w.value),
+                }
+              : null,
+          charsInScene: (() => {
+            const cm = chars.flatMap((c) => c.meshes);
+            const am = scene.getActiveMeshes();
+            const active = new Set(am.data.slice(0, am.length));
+            const casters = shadowMap.renderList ?? [];
+            return {
+              meshes: cm.length,
+              enabled: cm.filter((m) => m.isEnabled()).length,
+              active: cm.filter((m) => active.has(m)).length,
+              shadowCasting: cm.filter((m) => casters.includes(m) && m.isEnabled()).length,
+            };
+          })(),
         };
         writeDiag({ lastEnd: Date.now(), runs: benchResult.runNo });
         allResults.push(benchResult);

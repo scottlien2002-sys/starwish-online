@@ -2481,6 +2481,61 @@ for (const name of browsers) {
     for (const e of run.errors) console.log(`   ! ${e}`);
   }
 
+  // ---------- C1.0-B2 效能診斷第二輪（E0／E1／E2）：rAF 時間戳、非阻塞 fence、無角色、不繪製 3D（WebKit）----------
+  if (name === "webkit") {
+    const vp = VIEWPORTS[0];
+    const run = { browser: name, viewport: `${vp.name} / C1.0-B2 效能診斷第二輪 E0／E1／E2`, checks: {}, errors: [], screenshots: [], results: [] };
+    const check = (key, ok, detail) => {
+      run.checks[key] = { ok, detail };
+    };
+    const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+    const page = await ctx.newPage();
+    page.on("pageerror", (e) => run.errors.push(`pageerror: ${e.message}`));
+    page.on("console", (m) => m.type() === "error" && run.errors.push(`console: ${m.text()}`));
+    const base = "/?lab=c10b&quality=high&p1=1&p2=1&star=2&p3=1&fixsize=1&round=2&bench=5&warmup=0";
+    const run3d = async (extra) => {
+      await page.goto(server.url + base + extra, { waitUntil: "load" });
+      await page.waitForFunction(() => window.__starwishC10b?.ready === true, null, { timeout: 120000 });
+      await page.waitForFunction(() => window.__starwishC10b.benchState().state === "done", null, { timeout: 120000 });
+      return {
+        st: await page.evaluate(() => window.__starwishC10b.benchState().result),
+        rep: await page.evaluate(() => window.__starwishC10b.report()),
+        gl2: await page.evaluate(() => !!document.createElement("canvas").getContext("webgl2")),
+      };
+    };
+    try {
+      const e0 = await run3d("");
+      run.results.push({ tag: "E0", group: e0.st.group, draws: e0.st.avgDrawCalls, raf: e0.st.raf.all, fence: e0.st.fence && e0.st.fence.all, chars: e0.st.charsInScene, size: e0.st.renderSize, lost: e0.st.contextLost });
+      check("E0：組別 E0、角色網格都在主場景與陰影中", /^E0 /.test(e0.st.group) && e0.st.charsInScene.meshes > 0 && e0.st.charsInScene.active === e0.st.charsInScene.meshes && e0.st.charsInScene.shadowCasting === e0.st.charsInScene.meshes, e0.st.charsInScene);
+      check("E0：獨立 rAF 時間戳量測有資料（每 30 秒、間隔分布）", e0.st.raf.all.n > 10 && e0.st.raf.all.fps > 0 && e0.st.raf.w30.length >= 1, e0.st.raf);
+      check("E0：fence（非阻塞）有量到資料；不支援 WebGL2 時報告註明", e0.st.fence ? e0.st.fence.all.n > 0 : !e0.gl2 && e0.rep.includes("不支援 WebGL2 fence"), { fence: e0.st.fence && e0.st.fence.all, gl2: e0.gl2 });
+      check("E0 報告：原始與 rAF FPS、間隔分布、fence 精度說明、開始／結束解析度、角色網格", ["每 30 秒 FPS（原始）", "獨立畫面更新（rAF 時間戳）", "間隔分布", "實際渲染解析度：開始", "角色網格：共"].every((k) => e0.rep.includes(k)) && (!e0.st.fence || e0.rep.includes("精度約 1 格")), e0.rep.slice(0, 900));
+      const e1 = await run3d("&diag=nochars");
+      run.results.push({ tag: "E1", group: e1.st.group, draws: e1.st.avgDrawCalls, chars: e1.st.charsInScene, size: e1.st.renderSize });
+      check("E1：角色網格不參與主場景（0）與陰影（0）", /^E1 /.test(e1.st.group) && e1.st.charsInScene.meshes > 0 && e1.st.charsInScene.enabled === 0 && e1.st.charsInScene.active === 0 && e1.st.charsInScene.shadowCasting === 0, e1.st.charsInScene);
+      check("E1：Draw Calls 比 E0 少、解析度與 E0 相同", e1.st.avgDrawCalls < e0.st.avgDrawCalls && e1.st.renderSize[0].join() === e0.st.renderSize[0].join(), { e0: e0.st.avgDrawCalls, e1: e1.st.avgDrawCalls });
+      await page.goto(server.url + "/?lab=c10b&raf=1&round=2&bench=5", { waitUntil: "load" });
+      await page.waitForFunction(() => window.__starwishC10bRaf?.ready === true, null, { timeout: 60000 });
+      await page.waitForFunction(() => window.__starwishC10bRaf.state().state === "done", null, { timeout: 60000 });
+      const e2 = await page.evaluate(() => window.__starwishC10bRaf.state().result);
+      const e2rep = await page.evaluate(() => window.__starwishC10bRaf.report());
+      const noGl = await page.evaluate(() => !window.__starwishC10b && getComputedStyle(document.querySelector("canvas")).visibility === "hidden");
+      run.results.push({ tag: "E2", group: e2.group, all: e2.all, w5: e2.w5, run: e2.runNo, cooldown: e2.cooldownSec });
+      check("E2：不建立 3D、只量 rAF，報告有前後 30 秒、間隔分布、冷卻", /^E2 /.test(e2.group) && noGl && e2.all.n > 10 && ["前 30 秒", "間隔分布", "冷卻：", "首次低於 45 FPS"].every((k) => e2rep.includes(k)), { e2: e2.all, noGl });
+      check("E2：冷卻紀錄與 3D 測試頁共用（第 3 次、冷卻不足）", e2.runNo >= 3 && typeof e2.cooldownSec === "number" && e2rep.includes("冷卻不足"), { run: e2.runNo, c: e2.cooldownSec });
+    } catch (e) {
+      run.errors.push(`exception: ${e.message}`);
+    }
+    await ctx.close();
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 8;
+    if (!run.ok) failures++;
+    report.runs.push(run);
+    console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
+    for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}${v.ok ? "" : "  " + JSON.stringify(v.detail).slice(0, 900)}`);
+    for (const r of run.results) console.log(`   · ${r.tag}: ${JSON.stringify(r)}`.slice(0, 1500));
+    for (const e of run.errors) console.log(`   ! ${e}`);
+  }
+
   await browser.close();
 }
 

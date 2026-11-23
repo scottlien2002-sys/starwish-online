@@ -1,12 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
-import { C10B_REFERENCE, C10B_VIEWS, c10pAbLabel, c10pShadowMode, c10pMergeGroups, c10pSlot, frameHistogram, frameTimeline, windowHistograms, isLowView, wantsGlow, c10bFile, c10bLayout, c10bOptionsFromSearch, countHitches, windowAverages, c10dGroup, firstLastFps, firstBelow, cooldownText } from "../../src/characters/noviceC10b.ts";
+import { C10B_REFERENCE, C10B_VIEWS, c10pAbLabel, c10pShadowMode, c10pMergeGroups, c10pSlot, frameHistogram, frameTimeline, windowHistograms, isLowView, wantsGlow, c10bFile, c10bLayout, c10bOptionsFromSearch, countHitches, windowAverages, c10dGroup, firstLastFps, firstBelow, cooldownText, intervalStats, timeWindows, latencyStats, rafFps } from "../../src/characters/noviceC10b.ts";
 
 test("C1.0-B：檔名與網址參數", () => {
   assert.equal(c10bFile("female", "lite"), "novice_c10b_female_lite.glb");
   const d = c10bOptionsFromSearch("?lab=c10b");
-  assert.deepEqual(d, { lod: "hq", count: 2, bench: 0, warmup: 2, view: "front", p1: false, p2: false, diag: [], gpuProbe: false, shadowRefresh: "every", shadowFilter: "default", shadowMap: null, rest: 0, fixSize: false, star: 0, p3: false, res: null });
+  assert.deepEqual(d, { lod: "hq", count: 2, bench: 0, warmup: 2, view: "front", p1: false, p2: false, diag: [], gpuProbe: false, shadowRefresh: "every", shadowFilter: "default", shadowMap: null, rest: 0, fixSize: false, star: 0, p3: false, res: null, round: 1, raf: false });
   assert.deepEqual(c10bOptionsFromSearch("?diag=noshadow,bogus,nopost&gpu=1").diag, ["noshadow", "nopost"]);
   assert.equal(c10bOptionsFromSearch("?lab=c10b&p1=1").p1, true);
   const o = c10bOptionsFromSearch("?lab=c10b&lod=lite&count=99&bench=30&view=low");
@@ -206,4 +206,34 @@ test("C1.0-B2 效能診斷：前 30 秒／最後 30 秒 FPS、首次低於 45、
   assert.match(cooldownText(null), /沒有上一次/);
   assert.match(cooldownText(300), /冷卻不足/);
   assert.match(cooldownText(600), /已滿 10 分鐘/);
+});
+
+test("C1.0-B2 第二輪：E0／E1／E2 組別（每組只改一個因素）", () => {
+  const base = "?lab=c10b&quality=high&p1=1&p2=1&star=2&p3=1&rest=30&bench=120&fixsize=1&round=2";
+  const g = (q: string): string => c10dGroup(c10bOptionsFromSearch(base + q));
+  assert.match(g(""), /^E0 /);
+  assert.match(g("&diag=nochars"), /^E1 /);
+  assert.match(g("&raf=1"), /^E2 /);
+  assert.match(g("&diag=nochars&res=1.5"), /^混合/);
+  assert.match(g("&diag=noshadow"), /^混合/);
+  // 第一輪網址不受影響
+  assert.equal(c10dGroup(c10bOptionsFromSearch(base.replace("&round=2", ""))), "D0 原始 HQ");
+});
+
+test("C1.0-B2 第二輪：間隔分布、時間分段、fence 延遲統計", () => {
+  const st = intervalStats([16.7, 16.7, 33.3, 33.3, 50]);
+  assert.equal(st.n, 5);
+  assert.deepEqual([st.le20, st.le37, st.le54, st.gt54], [2, 2, 1, 0]);
+  assert.ok(Math.abs(st.fps - 5000 / 150) < 0.1);
+  const pts = [...Array(300)].map((_, i) => ({ t: i / 60, v: 1000 / 60 }));
+  const w = timeWindows(pts, 2, 6, rafFps);
+  assert.equal(w.length, 3);
+  assert.ok(Math.abs(w[0]!.value! - 60) < 0.2, JSON.stringify(w));
+  assert.ok(w[2]!.value !== null && Math.abs(w[2]!.value - 60) < 0.2);
+  assert.deepEqual(timeWindows([], 30, 60, rafFps).map((x) => x.value), [null, null]);
+  const l = latencyStats([10, 12, 14, 40]);
+  assert.equal(l.n, 4);
+  assert.equal(l.avg, 19);
+  assert.equal(l.p95, 40);
+  assert.deepEqual(latencyStats([]), { avg: 0, p95: 0, n: 0 });
 });

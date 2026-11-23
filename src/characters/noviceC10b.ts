@@ -84,6 +84,10 @@ export interface C10bOptions {
   p3: boolean;
   /** C1.0-B2 效能診斷 D2：固定解析度倍率（?res=1|1.25|1.5|2；null = 畫質預設，iPhone 高畫質為 2） */
   res: C10dRes | null;
+  /** 第二輪診斷：?round=2 → 組別標 E0／E1／E2 */
+  round: 1 | 2;
+  /** 第二輪 E2：?raf=1 → 不建立 3D，只量 requestAnimationFrame */
+  raf: boolean;
 }
 
 /** C1.0-B2 效能診斷：可用的解析度倍率 */
@@ -95,7 +99,16 @@ const C10D_RES: readonly C10dRes[] = [1, 1.25, 1.5, 2];
  * D0 原始 HQ、D1 只降陰影取樣（shadowfilter=low）、D2 只降解析度（res=1.5）。
  * 同時改了兩個以上（或其他診斷開關）時標「混合」，報告會提醒不能直接比較。
  */
-export function c10dGroup(o: Pick<C10bOptions, "res" | "shadowFilter" | "shadowMap" | "shadowRefresh" | "diag" | "gpuProbe">): string {
+export function c10dGroup(o: Pick<C10bOptions, "res" | "shadowFilter" | "shadowMap" | "shadowRefresh" | "diag" | "gpuProbe"> & Partial<Pick<C10bOptions, "round" | "raf">>): string {
+  if (o.round === 2) {
+    // 第二輪：E0 雙角色（＋新量測）、E1 只隱藏角色、E2 不繪製 3D
+    const others = o.res !== null || o.shadowFilter !== "default" || o.shadowMap !== null || o.shadowRefresh !== "every" || o.gpuProbe;
+    if (o.raf) return "E2 不繪製 3D（只量畫面更新）";
+    const d = o.diag.join(",");
+    if (!others && d === "") return "E0 雙角色 HQ";
+    if (!others && d === "nochars") return "E1 無角色（其餘場景相同）";
+    return `混合（第二輪）— 不只改一個因素，不能直接比較`;
+  }
   const changes: string[] = [];
   if (o.shadowFilter !== "default") changes.push(o.shadowFilter === "low" ? "D1 陰影取樣降低（PCSS 低）" : `陰影取樣 ${o.shadowFilter}`);
   if (o.res !== null) changes.push(o.res === 1.5 ? "D2 解析度降低（1.5x）" : `解析度 ${o.res}x`);
@@ -194,6 +207,8 @@ export function c10bOptionsFromSearch(search: string): C10bOptions {
     fixSize: p.get("fixsize") === "1",
     star: p.get("star") === "2" ? 2 : p.get("star") === "1" ? 1 : 0,
     p3: p.get("p3") === "1",
+    round: p.get("round") === "2" ? 2 : 1,
+    raf: p.get("raf") === "1",
     res: ((r) => (C10D_RES as readonly number[]).includes(r) ? (r as C10dRes) : null)(Number(p.get("res") ?? NaN)),
   };
 }
@@ -372,3 +387,43 @@ export function frameTimeline(samples: readonly FrameSample[], windowSec: number
   if (cur.length && t - t0 > windowSec * 0.5) flush();
   return out;
 }
+
+
+// ---------- 第二輪效能診斷：獨立畫面更新時間（rAF 時間戳）與非阻塞 GPU 完成時間（WebGL2 fence）----------
+
+/** 一個時間點的量測值（t = 從量測開始算的秒數） */
+export interface TimedValue {
+  t: number;
+  v: number;
+}
+
+/** 間隔（毫秒）→ FPS 與分布 */
+export function intervalStats(intervalsMs: readonly number[]): { fps: number; n: number; le20: number; le37: number; le54: number; gt54: number } {
+  const total = intervalsMs.reduce((a, b) => a + b, 0);
+  const h = frameHistogram(intervalsMs.map((x) => x / 1000));
+  return { fps: total > 0 ? +((intervalsMs.length / total) * 1000).toFixed(1) : 0, n: intervalsMs.length, ...h };
+}
+
+/** 依時間切段（windowSec 秒），每段回傳該段的值 */
+export function timeWindows<T>(points: readonly TimedValue[], windowSec: number, durationSec: number, f: (vs: number[]) => T): { t0: number; value: T | null }[] {
+  const out: { t0: number; value: T | null }[] = [];
+  for (let t0 = 0; t0 < durationSec - 1e-6; t0 += windowSec) {
+    const vs = points.filter((p) => p.t >= t0 && p.t < t0 + windowSec).map((p) => p.v);
+    out.push({ t0: Math.round(t0), value: vs.length ? f(vs) : null });
+  }
+  return out;
+}
+
+/** rAF 時間戳間隔 → 每段 FPS */
+export const rafFps = (vs: number[]): number => intervalStats(vs).fps;
+
+/** fence 完成延遲（毫秒）的平均與 95 百分位 */
+export function latencyStats(vs: readonly number[]): { avg: number; p95: number; n: number } {
+  if (!vs.length) return { avg: 0, p95: 0, n: 0 };
+  const s = [...vs].sort((a, b) => a - b);
+  return { avg: +(s.reduce((a, b) => a + b, 0) / s.length).toFixed(1), p95: +s[Math.min(s.length - 1, Math.floor(s.length * 0.95))]!.toFixed(1), n: s.length };
+}
+
+/** fence 精度說明（報告用） */
+export const FENCE_NOTE =
+  "GPU 完成時間＝送出後放 WebGL2 fence，之後每次畫面更新時查詢（不等待、不阻塞）；只能在畫面更新時查到，精度約 1 格（約 16.7 ms），數值是「最晚何時已完成」的上限，不是 GPU 實際工作時間。";
