@@ -1,0 +1,210 @@
+{
+ "startedAt": "2026-11-23T10:36:08.713Z",
+ "runs": [
+  {
+   "browser": "chromium",
+   "mode": "hq",
+   "errors": [],
+   "shots": [
+    "chromium_hq_front.png",
+    "chromium_hq_q45.png",
+    "chromium_hq_top.png",
+    "chromium_hq_close.png",
+    "chromium_hq_falls.png",
+    "chromium_hq_game.png"
+   ],
+   "loadMs": 7849,
+   "stats": {
+    "meshes": 7,
+    "triangles": 26802,
+    "byMesh": {
+     "stone": 16832,
+     "gold": 7440,
+     "crystal": 96,
+     "water": 704,
+     "falls": 1344,
+     "foam": 384,
+     "halo": 2
+    },
+    "materials": 7,
+    "opaqueMeshes": 4,
+    "transparentMeshes": 3,
+    "textures": 7,
+    "texturePixels": 4390912,
+    "shadowCasters": 3
+   },
+   "size": {
+    "w": 1280,
+    "h": 720
+   },
+   "withFountain": {
+    "drawCalls": 17,
+    "activeMeshes": 13
+   },
+   "withoutFountain": {
+    "drawCalls": 7,
+    "activeMeshes": 6
+   },
+   "fountainDrawCalls": 10,
+   "flicker": {
+    "game_camera": {
+     "maxRatio": 0.00035342261904761904,
+     "meanRatio": 0.0002976190476190476
+    },
+    "q45_camera": {
+     "maxRatio": 0.0001984126984126984,
+     "meanRatio": 0.00016431051587301589
+    },
+    "game_time": {
+     "maxRatio": 0,
+     "meanRatio": 0
+    }
+   },
+   "frameMsSoftware": 1.400000000023283
+  },
+  {
+   "browser": "chromium",
+   "mode": "lite-low",
+   "errors": [],
+   "shots": [
+    "chromium_lite-low_front.png",
+    "chromium_lite-low_q45.png",
+    "chromium_lite-low_close.png",
+    "chromium_lite-low_falls.png",
+    "chromium_lite-low_game.png"
+   ],
+   "loadMs": 1799,
+   "stats": {
+    "meshes": 7,
+    "triangles": 10802,
+    "byMesh": {
+     "stone": 7360,
+     "gold": 2496,
+     "crystal": 96,
+     "water": 144,
+     "falls": 512,
+     "foam": 192,
+     "halo": 2
+    },
+    "materials": 7,
+    "opaqueMeshes": 4,
+    "transparentMeshes": 3,
+    "textures": 5,
+    "texturePixels": 573440,
+    "shadowCasters": 0
+   },
+   "size": {
+    "w": 1280,
+    "h": 720
+   },
+   "withFountain": {
+    "drawCalls": 12,
+    "activeMeshes": 13
+   },
+   "withoutFountain": {
+    "drawCalls": 5,
+    "activeMeshes": 6
+   },
+   "fountainDrawCalls": 7,
+   "flicker": {
+    "game_camera": {
+     "maxRatio": 0.00025421626984126986,
+     "meanRatio": 0.00023189484126984132
+    },
+    "q45_camera": {
+     "maxRatio": 0.00017981150793650795,
+     "meanRatio": 0.0001711309523809524
+    },
+    "game_time": {
+     "maxRatio": 0,
+     "meanRatio": 0
+    }
+   },
+   "frameMsSoftware": 0.7999999999592546
+  },
+  {
+   "browser": "webkit",
+   "mode": "hq",
+   "errors": [],
+   "shots": [
+    "webkit_hq_game.png",
+    "webkit_hq_falls.png"
+   ],
+   "loadMs": 2714,
+   "stats": {
+    "meshes": 7,
+    "triangles": 26802,
+    "byMesh": {
+     "stone": 16832,
+     "gold": 7440,
+     "crystal": 96,
+     "water": 704,
+     "falls": 1344,
+     "foam": 384,
+     "halo": 2
+    },
+    "materials": 7,
+    "opaqueMeshes": 4,
+    "transparentMeshes": 3,
+    "textures": 7,
+    "texturePixels": 4390912,
+    "shadowCasters": 3
+   },
+   "size": {
+    "w": 1280,
+    "h": 720
+   },
+   "withFountain": {
+    "drawCalls": 17,
+    "activeMeshes": 13
+   },
+   "withoutFountain": {
+    "drawCalls": 7,
+    "activeMeshes": 6
+   },
+   "fountainDrawCalls": 10
+  },
+  {
+   "browser": "webkit",
+   "mode": "lite-low",
+   "errors": [],
+   "shots": [
+    "webkit_lite-low_game.png"
+   ],
+   "loadMs": 1629,
+   "stats": {
+    "meshes": 7,
+    "triangles": 10802,
+    "byMesh": {
+     "stone": 7360,
+     "gold": 2496,
+     "crystal": 96,
+     "water": 144,
+     "falls": 512,
+     "foam": 192,
+     "halo": 2
+    },
+    "materials": 7,
+    "opaqueMeshes": 4,
+    "transparentMeshes": 3,
+    "textures": 5,
+    "texturePixels": 573440,
+    "shadowCasters": 0
+   },
+   "size": {
+    "w": 1280,
+    "h": 720
+   },
+   "withFountain": {
+    "drawCalls": 12,
+    "activeMeshes": 13
+   },
+   "withoutFountain": {
+    "drawCalls": 5,
+    "activeMeshes": 6
+   },
+   "fountainDrawCalls": 7
+  }
+ ],
+ "finishedAt": "2026-11-23T10:42:36.075Z"
+}

@@ -1,40 +1,153 @@
 {
  "lods": {
   "lite": {
-   "triangles": 10608,
-   "by_material": {
-    "stone": 7680,
-    "gold": 2832,
-    "crystal": 96
+   "triangles": 10800,
+   "within_budget": true,
+   "by_mesh": {
+    "stone": 7360,
+    "gold": 2496,
+    "crystal": 96,
+    "water": 144,
+    "falls": 512,
+    "foam": 192
    },
-   "meshes": 3,
+   "meshes": 6,
+   "ao_baked": 1,
    "bounds": {
     "radius": 7.0,
     "top": 6.5
    },
-   "bytes": 429424
+   "bytes": 741288
   },
   "hq": {
-   "triangles": 24368,
-   "by_material": {
+   "triangles": 26800,
+   "within_budget": true,
+   "by_mesh": {
     "stone": 16832,
     "gold": 7440,
-    "crystal": 96
+    "crystal": 96,
+    "water": 704,
+    "falls": 1344,
+    "foam": 384
    },
-   "meshes": 3,
+   "meshes": 6,
+   "ao_baked": 1,
    "bounds": {
     "radius": 7.0,
     "top": 6.5
    },
-   "bytes": 813176
+   "bytes": 1855864
   }
  },
- "reserve_triangles_preview_only": 1304,
- "seconds": 237.2,
+ "budget": {
+  "hq": 28000,
+  "lite": 11000
+ },
+ "falls": [
+  {
+   "tip": [
+    3.38,
+    0.0,
+    2.14
+   ],
+   "land": [
+    4.03,
+    0.0,
+    0.58
+   ]
+  },
+  {
+   "tip": [
+    2.39,
+    2.39,
+    2.14
+   ],
+   "land": [
+    2.85,
+    2.85,
+    0.58
+   ]
+  },
+  {
+   "tip": [
+    0.0,
+    3.38,
+    2.14
+   ],
+   "land": [
+    0.0,
+    4.03,
+    0.58
+   ]
+  },
+  {
+   "tip": [
+    -2.39,
+    2.39,
+    2.14
+   ],
+   "land": [
+    -2.85,
+    2.85,
+    0.58
+   ]
+  },
+  {
+   "tip": [
+    -3.38,
+    0.0,
+    2.14
+   ],
+   "land": [
+    -4.03,
+    0.0,
+    0.58
+   ]
+  },
+  {
+   "tip": [
+    -2.39,
+    -2.39,
+    2.14
+   ],
+   "land": [
+    -2.85,
+    -2.85,
+    0.58
+   ]
+  },
+  {
+   "tip": [
+    -0.0,
+    -3.38,
+    2.14
+   ],
+   "land": [
+    -0.0,
+    -4.03,
+    0.58
+   ]
+  },
+  {
+   "tip": [
+    2.39,
+    -2.39,
+    2.14
+   ],
+   "land": [
+    2.85,
+    -2.85,
+    0.58
+   ]
+  }
+ ],
+ "log": [],
+ "seconds": 2.7,
  "dims": {
   "outer_diameter": 14.0,
   "basin_inner_diameter": 12.0,
   "rim_top": 0.86,
+  "finial_top": 1.1,
   "bowl_diameter": 6.0,
   "bowl_top": 2.34,
   "crystal": [
@@ -45,8 +158,20 @@
    3.5,
    4.2
   ],
-  "water1_z": 0.62,
-  "water2_z": 2.24,
+  "water1": {
+   "z": 0.62,
+   "r": [
+    0.9,
+    6.03
+   ]
+  },
+  "water2": {
+   "z": 2.24,
+   "r": [
+    0.55,
+    2.79
+   ]
+  },
   "spouts": 8
  }
 }
