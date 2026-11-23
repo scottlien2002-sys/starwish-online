@@ -1,5 +1,5 @@
 {
- "startedAt": "2026-11-23T19:07:45.204Z",
+ "startedAt": "2026-11-23T19:33:20.877Z",
  "checks": {
   "benches 位置＝既有碰撞（誤差 < 1 cm）": {
    "ok": true,
@@ -394,7 +394,7 @@
      "y0": 1.5,
      "y1": 15
     },
-    "triangles": 2956,
+    "triangles": 3050,
     "budget": 9000
    }
   },
@@ -425,7 +425,7 @@
      "y0": 1.5,
      "y1": 15
     },
-    "triangles": 4860,
+    "triangles": 6642,
     "budget": 22000
    }
   },
@@ -595,7 +595,7 @@
    "errors": [],
    "shots": [
     "chromium_hq_player_spawn_cam.png",
-    "chromium_hq_topwide.png",
+    "chromium_hq_village_top.png",
     "chromium_hq_north_plan.png",
     "chromium_hq_north_wide.png",
     "chromium_hq_north_trio.png",
@@ -620,7 +620,7 @@
     "chromium_hq_platform_stair.png",
     "chromium_hq_platform_wall.png"
    ],
-   "loadMs": 9515,
+   "loadMs": 9224,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -696,12 +696,12 @@
     },
     "sword": {
      "meshes": 4,
-     "triangles": 4860,
+     "triangles": 6642,
      "byMesh": {
-      "stone": 2402,
-      "roof": 88,
-      "gold": 1941,
-      "props": 429
+      "stone": 3000,
+      "roof": 232,
+      "gold": 2893,
+      "props": 517
      },
      "materials": 4,
      "shadowCasters": 2,
@@ -847,23 +847,23 @@
    },
    "flicker": {
     "player_spawn_cam": {
-     "maxRatio": 0.0028273809523809523,
-     "meanRatio": 0.0027015128968253975
+     "maxRatio": 0.002839781746031746,
+     "meanRatio": 0.002703993055555556
     },
     "north_wide": {
      "maxRatio": 0.006597222222222222,
-     "meanRatio": 0.006395089285714285
+     "meanRatio": 0.00638640873015873
     },
     "platform_front": {
-     "maxRatio": 0.021701388888888888,
-     "meanRatio": 0.01968625992063492
+     "maxRatio": 0.0024677579365079364,
+     "meanRatio": 0.0023139880952380946
     },
     "sword_q45": {
-     "maxRatio": 0.005394345238095238,
-     "meanRatio": 0.005169890873015873
+     "maxRatio": 0.005400545634920635,
+     "meanRatio": 0.0051810515873015875
     }
    },
-   "frameMsSoftware": 1.6999999999534339
+   "frameMsSoftware": 1.7000000001862645
   },
   {
    "browser": "chromium",
@@ -871,7 +871,7 @@
    "errors": [],
    "shots": [
     "chromium_lite-low_player_spawn_cam.png",
-    "chromium_lite-low_topwide.png",
+    "chromium_lite-low_village_top.png",
     "chromium_lite-low_north_wide.png",
     "chromium_lite-low_mage_front.png",
     "chromium_lite-low_mage_q45.png",
@@ -883,7 +883,7 @@
     "chromium_lite-low_platform_stair.png",
     "chromium_lite-low_platform_wall.png"
    ],
-   "loadMs": 2946,
+   "loadMs": 2944,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -952,11 +952,11 @@
     },
     "sword": {
      "meshes": 3,
-     "triangles": 2956,
+     "triangles": 3050,
      "byMesh": {
-      "stone": 1630,
+      "stone": 1660,
       "roof": 88,
-      "props": 1238
+      "props": 1302
      },
      "materials": 3,
      "shadowCasters": 0,
@@ -1077,18 +1077,18 @@
     },
     "north_wide": {
      "maxRatio": 0.004495287698412698,
-     "meanRatio": 0.00429439484126984
+     "meanRatio": 0.004291914682539682
     },
     "platform_front": {
-     "maxRatio": 0.020213293650793652,
-     "meanRatio": 0.018126240079365082
+     "maxRatio": 0.0019469246031746032,
+     "meanRatio": 0.0018315972222222223
     },
     "sword_q45": {
-     "maxRatio": 0.004396081349206349,
-     "meanRatio": 0.004154265873015873
+     "maxRatio": 0.004464285714285714,
+     "meanRatio": 0.004185267857142857
     }
    },
-   "frameMsSoftware": 1.0666666667287548
+   "frameMsSoftware": 1.1666666666666667
   },
   {
    "browser": "chromium",
@@ -1100,7 +1100,7 @@
     "chromium_hq-portrait_sword_npc.png",
     "chromium_hq-portrait_platform_stair.png"
    ],
-   "loadMs": 5058,
+   "loadMs": 4999,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -1176,12 +1176,12 @@
     },
     "sword": {
      "meshes": 4,
-     "triangles": 4860,
+     "triangles": 6642,
      "byMesh": {
-      "stone": 2402,
-      "roof": 88,
-      "gold": 1941,
-      "props": 429
+      "stone": 3000,
+      "roof": 232,
+      "gold": 2893,
+      "props": 517
      },
      "materials": 4,
      "shadowCasters": 2,
@@ -1334,7 +1334,7 @@
     "chromium_lite-portrait_player_spawn_cam.png",
     "chromium_lite-portrait_sword_npc.png"
    ],
-   "loadMs": 1672,
+   "loadMs": 1475,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -1403,11 +1403,11 @@
     },
     "sword": {
      "meshes": 3,
-     "triangles": 2956,
+     "triangles": 3050,
      "byMesh": {
-      "stone": 1630,
+      "stone": 1660,
       "roof": 88,
-      "props": 1238
+      "props": 1302
      },
      "materials": 3,
      "shadowCasters": 0,
@@ -1531,7 +1531,7 @@
     "webkit_hq_sword_q45.png",
     "webkit_hq_mage_q45.png"
    ],
-   "loadMs": 3884,
+   "loadMs": 3954,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -1607,12 +1607,12 @@
     },
     "sword": {
      "meshes": 4,
-     "triangles": 4860,
+     "triangles": 6642,
      "byMesh": {
-      "stone": 2402,
-      "roof": 88,
-      "gold": 1941,
-      "props": 429
+      "stone": 3000,
+      "roof": 232,
+      "gold": 2893,
+      "props": 517
      },
      "materials": 4,
      "shadowCasters": 2,
@@ -1764,7 +1764,7 @@
    "shots": [
     "webkit_lite-low_north_wide.png"
    ],
-   "loadMs": 2337,
+   "loadMs": 2332,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -1833,11 +1833,11 @@
     },
     "sword": {
      "meshes": 3,
-     "triangles": 2956,
+     "triangles": 3050,
      "byMesh": {
-      "stone": 1630,
+      "stone": 1660,
       "roof": 88,
-      "props": 1238
+      "props": 1302
      },
      "materials": 3,
      "shadowCasters": 0,
@@ -1953,5 +1953,5 @@
    }
   }
  ],
- "finishedAt": "2026-11-23T19:27:12.102Z"
+ "finishedAt": "2026-11-23T19:52:33.934Z"
 }
