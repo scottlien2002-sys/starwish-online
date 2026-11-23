@@ -6,8 +6,6 @@ import {
   Constants,
   FresnelParameters,
   type Material,
-  type Mesh,
-  MeshBuilder,
   type Nullable,
   type Observer,
   type Scene,
@@ -53,7 +51,8 @@ export interface FountainP3Stats {
 
 export interface FountainP3 {
   stats: FountainP3Stats;
-  halo: Mesh;
+  /** P3-2E：每幀會動的網格（星晶）——不可 freezeWorldMatrix、也不投射陰影 */
+  animated: AbstractMesh[];
   /** 固定動畫時間（截圖用）；null＝恢復即時 */
   setTime(t: number | null): void;
   setEnabled(on: boolean): void;
@@ -86,6 +85,9 @@ export function setupFountainP3(scene: Scene, meshes: AbstractMesh[], parent: Tr
   const stone = find(meshes, "stone");
   const gold = find(meshes, "gold");
   const crystal = find(meshes, "crystal");
+  const fxMesh = find(meshes, "fx");
+  // glTF 載入時節點帶有四元數旋轉，改用尤拉角才能每幀設定 rotation.y
+  if (crystal) crystal.rotationQuaternion = null;
   const water = find(meshes, "water");
   const falls = find(meshes, "falls");
   const foam = find(meshes, "foam");
@@ -97,13 +99,16 @@ export function setupFountainP3(scene: Scene, meshes: AbstractMesh[], parent: Tr
   const goldMat = villageGold(scene);
 
   // 星晶：自發光（柔和、不過曝）；HQ 邊緣再亮一點，像光在晶體裡折射
-  const crystalBase = new Color3(0.3, 0.58, 0.92);
+  // P3-2E 漂浮星晶：外殼半透明（頂點 Alpha 0.58）、內核不透明最亮；顏色＝頂點色 ×（漫射＋自發光）
+  // 邊緣菲涅耳讓切面輪廓發亮（HQ／Lite 都有，成本只是幾行著色器）；不投射陰影，所以轉動不增加陰影成本
+  const crystalBase = new Color3(0.36, 0.58, 0.86);
   const crystalMat = own(new StandardMaterial("VP3F_crystal", scene));
-  crystalMat.diffuseColor = new Color3(0.5, 0.76, 1);
+  crystalMat.diffuseColor = new Color3(0.75, 0.85, 1);
   crystalMat.specularColor = new Color3(1, 1, 1);
-  crystalMat.specularPower = 128;
+  crystalMat.specularPower = 160;
   crystalMat.emissiveColor = crystalBase.clone();
-  if (hq) crystalMat.emissiveFresnelParameters = fresnel(new Color3(1.15, 1.15, 1.15), new Color3(0.72, 0.72, 0.72), 0, 1.2);
+  crystalMat.emissiveFresnelParameters = fresnel(new Color3(1.55, 1.55, 1.55), new Color3(0.75, 0.75, 0.75), 0, 1.6);
+  crystalMat.transparencyMode = StandardMaterial.MATERIAL_ALPHABLEND;
 
   // 水面（P3-2D）：仍是不透明（不閃爍），用「看穿清水」的方式畫：
   // 池底馬賽克（靜止）× 頂點色深淺（中央藍、池緣青綠）＋ 水底光紋（自發光、緩慢流動）＋ HQ 柔和水波法線與邊緣天空色
@@ -111,7 +116,7 @@ export function setupFountainP3(scene: Scene, meshes: AbstractMesh[], parent: Tr
   const wTex = ownTex(tex(scene, `${opt.texBase}pool_${q}.png`, hq));
   waterMat.diffuseTexture = wTex;
   waterMat.diffuseColor = new Color3(0.98, 1, 1);
-  const cTex = ownTex(tex(scene, `${opt.texBase}caustic_${q}.png`, hq));
+  const cTex = ownTex(tex(scene, `${opt.texBase}caustic_star_${q}.png`, hq));  // P3-2E：光紋中帶細緻星光
   cTex.uScale = 0.75;
   cTex.vScale = 0.75;
   cTex.level = hq ? 0.55 : 0.45;
@@ -154,25 +159,19 @@ export function setupFountainP3(scene: Scene, meshes: AbstractMesh[], parent: Tr
   foamMat.disableDepthWrite = true;
   foamMat.alpha = 0.6;
 
-  // 星晶光暈：1 張看板，加法混合，柔和
-  const haloMat = own(new StandardMaterial("VP3F_halo", scene));
-  const hTex = ownTex(tex(scene, `${opt.texBase}fx_halo_${q}.png`, hq));
-  haloMat.opacityTexture = hTex;
-  haloMat.disableLighting = true;
-  haloMat.diffuseColor = Color3.Black();
-  haloMat.specularColor = Color3.Black();
-  const haloBase = new Color3(0.36, 0.6, 0.9);
-  haloMat.emissiveColor = haloBase.clone();
-  haloMat.alphaMode = Constants.ALPHA_ADD;
-  haloMat.disableDepthWrite = true;
-  haloMat.backFaceCulling = false;
-  const halo = MeshBuilder.CreatePlane("WishFountain_halo", { size: hq ? 2.9 : 2.5 }, scene);
-  halo.material = haloMat;
-  halo.billboardMode = 7; // BILLBOARDMODE_ALL
-  halo.position.set(0, FOUNTAIN_CRYSTAL_CENTER_Y, 0);
-  if (parent) halo.parent = parent;
-  halo.isPickable = false;
-  halo.alphaIndex = 3;
+  // P3-2E 魔法特效（取代原本的光暈看板）：上層水面發光魔法陣＋落水點小星光，同一網格、加法混合、1 次繪製
+  const fxMat = own(new StandardMaterial("VP3F_magic", scene));
+  const mgTex = ownTex(tex(scene, `${opt.texBase}fx_magic_${q}.png`, hq));
+  fxMat.opacityTexture = mgTex;
+  fxMat.disableLighting = true;
+  fxMat.diffuseColor = Color3.Black();
+  fxMat.specularColor = Color3.Black();
+  const fxBase = new Color3(0.5, 0.74, 1.0);
+  fxMat.emissiveColor = fxBase.clone();
+  fxMat.alphaMode = Constants.ALPHA_ADD;
+  fxMat.disableDepthWrite = true;
+  fxMat.backFaceCulling = false;
+  fxMat.zOffset = -2;
 
   const assign = (m: AbstractMesh | undefined, mat: Material, vertexAlpha: boolean, alphaIndex?: number): void => {
     if (!m) return;
@@ -183,14 +182,15 @@ export function setupFountainP3(scene: Scene, meshes: AbstractMesh[], parent: Tr
   };
   if (stone) stone.hasVertexAlpha = false;
   assign(gold, goldMat, false);
-  assign(crystal, crystalMat, false);
+  assign(crystal, crystalMat, true, 3);
+  assign(fxMesh, fxMat, false, 4);
   assign(water, waterMat, false);
   assign(foam, foamMat, true, 1);
   assign(falls, fallMat, true, 2);
 
   // 陰影：石、金、晶投射；石與水接收（落水、泡沫、光暈不投射，省一次陰影繪製）
   let casters = 0;
-  for (const m of [stone, gold, crystal]) {
+  for (const m of [stone, gold]) {
     if (!m) continue;
     m.receiveShadows = true;
     if (opt.shadows) {
@@ -214,22 +214,26 @@ export function setupFountainP3(scene: Scene, meshes: AbstractMesh[], parent: Tr
     }
     fTex.vOffset = -tt * 1.1;
     mTex.vOffset = -tt * 0.35;
-    const pulse = 0.93 + 0.07 * Math.sin(tt * 1.6);
+    const pulse = 0.92 + 0.08 * Math.sin(tt * 1.6);
     crystalMat.emissiveColor.copyFromFloats(crystalBase.r * pulse, crystalBase.g * pulse, crystalBase.b * pulse);
-    const hp = 0.85 + 0.15 * Math.sin(tt * 1.6 + 0.4);
-    haloMat.emissiveColor.copyFromFloats(haloBase.r * hp, haloBase.g * hp, haloBase.b * hp);
+    // 星晶：繞柱軸慢轉（約 18 秒一圈）＋上下浮動 ±6 cm（只更新這一個網格的世界矩陣）
+    if (crystal) {
+      crystal.rotation.y = tt * 0.35;
+      crystal.position.y = 0.06 * Math.sin(tt * 1.1);
+    }
+    const fp = 0.72 + 0.28 * (0.5 + 0.5 * Math.sin(tt * 2.4));
+    fxMat.emissiveColor.copyFromFloats(fxBase.r * fp, fxBase.g * fp, fxBase.b * fp);
   });
 
   const byMesh: Record<string, number> = {};
   let tris = 0;
-  for (const [k, m] of Object.entries({ stone, gold, crystal, water, falls, foam })) {
+  for (const [k, m] of Object.entries({ stone, gold, crystal, water, falls, foam, fx: fxMesh })) {
     if (!m) continue;
     byMesh[k] = Math.round(m.getTotalIndices() / 3);
     tris += byMesh[k] ?? 0;
   }
-  byMesh.halo = 2;
-  tris += 2;
-  const all = [stone, gold, crystal, water, falls, foam].filter((m): m is AbstractMesh => !!m);
+
+  const all = [stone, gold, crystal, water, falls, foam, fxMesh].filter((m): m is AbstractMesh => !!m);
   // 貼圖尺寸要等載入完成才知道，所以每次讀取時再算
   const computeStats = (): FountainP3Stats => {
     const stoneTex = stone?.material?.getActiveTextures() ?? [];
@@ -239,12 +243,12 @@ export function setupFountainP3(scene: Scene, meshes: AbstractMesh[], parent: Tr
       return s + z.width * z.height;
     }, 0);
     return {
-      meshes: all.length + 1,
+      meshes: all.length,
       triangles: tris,
       byMesh,
       materials: mats.length + (stone?.material ? 1 : 0),
-      opaqueMeshes: [stone, gold, crystal, water].filter(Boolean).length,
-      transparentMeshes: [falls, foam].filter(Boolean).length + 1,
+      opaqueMeshes: [stone, gold, water].filter(Boolean).length,
+      transparentMeshes: [falls, foam, crystal, fxMesh].filter(Boolean).length,
       textures: allTex.length,
       texturePixels,
       shadowCasters: casters,
@@ -255,17 +259,17 @@ export function setupFountainP3(scene: Scene, meshes: AbstractMesh[], parent: Tr
     get stats() {
       return computeStats();
     },
-    halo,
+    animated: crystal ? [crystal] : [],
     setTime(v) {
       fixed = v;
     },
     setEnabled(on) {
       for (const m of all) m.setEnabled(on);
-      halo.setEnabled(on);
+
     },
     dispose() {
       scene.onBeforeRenderObservable.remove(obs);
-      halo.dispose();
+
       for (const m of mats) m.dispose(false, false);
     },
   };

@@ -47,15 +47,18 @@ COL_TOP = 4.32
 CRYSTAL_BOTTOM = 4.3
 CRYSTAL_TOP = 6.5
 CRYSTAL_C = 5.35
+# P3-2E 漂浮星晶：靜止時頂 6.38、底 4.86；上下浮動 ±0.06（最高 6.44 ≤ 6.5）；下方金色八芒星魔法環在 4.62
+FLOAT_TOP, FLOAT_GIRDLE, FLOAT_BOTTOM, BOB = 6.38, 5.58, 4.86, 0.06
+MAGIC_RING_Z = 4.62
 RING_C = 5.2  # 雙環中心（傾角壓低，環頂不超過 Y≈6.5）
 RING_A_R = 1.75  # 直徑 3.5 m
 RING_B_R = 2.1  # 直徑 4.2 m
 RING_T = 0.032
 
 LODS = {
-    "hq": dict(basin=128, bowl=96, column=64, flutes=16, ring=(120, 10), tube=10, band=6, star_relief=16, finial=16,
+    "hq": dict(basin=128, bowl=96, column=64, flutes=16, ring=(96, 6), tube=10, band=6, star_relief=16, finial=16,
                water=(128, 96), fall=(6, 14), foam=24),
-    "lite": dict(basin=48, bowl=40, column=32, flutes=8, ring=(56, 5), tube=4, band=4, star_relief=8, finial=6,
+    "lite": dict(basin=48, bowl=40, column=32, flutes=8, ring=(48, 4), tube=4, band=4, star_relief=8, finial=6,
                  water=(40, 32), fall=(4, 8), foam=12),
 }
 
@@ -212,6 +215,143 @@ def crystal(name, mat):
     return ob
 
 
+def star_crystal(name, mat, lod):
+    """P3-2E 漂浮星晶（中心在柱軸上，旋轉時不偏心）：
+    內核（不透明、最亮）先建立，外殼（半透明、清楚切面）在後——同一網格內先畫內核再疊外殼。
+    外殼：頂點→冠部兩圈→腰帶→底部一圈→底點，相鄰圈錯開 22.5° 形成菱形切面；腰帶 8 道星芒（長短交錯）。
+    每個面獨立頂點（平面著色、逐面明暗），頂點色 RGBA（A＝透明度）。"""
+    hq = lod == "hq"
+    bm = bmesh.new()
+    cols = {}
+
+    def tri(a, b, c, rgba):
+        vs = [bm.verts.new(p) for p in (a, b, c)]
+        f = bm.faces.new(vs)
+        for v in vs:
+            cols[v] = rgba
+        return f
+
+    def ring(z, r, off, n=8):
+        return [Vector((r * math.cos(off + i * math.tau / n), r * math.sin(off + i * math.tau / n), z)) for i in range(n)]
+
+    c0 = Vector((0, 0, FLOAT_GIRDLE + 0.02))
+    # 內核：雙錐，最亮
+    core = ring(c0.z, 0.17, 0.0, 6)
+    top_c, bot_c = c0 + Vector((0, 0, 0.3)), c0 - Vector((0, 0, 0.26))
+    for i in range(6):
+        j = (i + 1) % 6
+        k = 1.0 if i % 2 else 0.9
+        tri(core[i], core[j], top_c, (0.9 * k, 0.97 * k, 1.0, 1.0))
+        tri(core[j], core[i], bot_c, (0.8 * k, 0.92 * k, 1.0, 1.0))
+    # 外殼
+    A = 0.58  # 外殼透明度
+    apex = Vector((0, 0, FLOAT_TOP))
+    bottom = Vector((0, 0, FLOAT_BOTTOM))
+    crown1 = ring(6.02, 0.24, math.pi / 8)
+    crown2 = ring(5.78, 0.42, 0.0) if hq else None
+    girdle = ring(FLOAT_GIRDLE, 0.52, math.pi / 8 if hq else 0.0)
+    pav = ring(5.18, 0.3, 0.0 if hq else math.pi / 8)
+    upper = [(0.82, 0.95, 1.0), (0.72, 0.9, 1.0)]
+    mid = [(0.6, 0.85, 1.0), (0.5, 0.78, 0.98)]
+    low = [(0.46, 0.72, 0.97), (0.38, 0.64, 0.94)]
+    for i in range(8):
+        j = (i + 1) % 8
+        tri(crown1[i], crown1[j], apex, (*upper[i % 2], A))
+    seq = [crown1] + ([crown2] if hq else []) + [girdle, pav]
+    tones = [upper] + ([mid] if hq else []) + [mid, low]
+    for (R1, R2), tone in zip(zip(seq, seq[1:]), tones[1:]):
+        for i in range(8):
+            j = (i + 1) % 8
+            # 錯開的兩圈：每段兩個三角面（菱形切面）
+            tri(R1[i], R2[i], R1[j], (*tone[0], A))
+            tri(R1[j], R2[i], R2[j], (*tone[1], A))
+    for i in range(8):
+        j = (i + 1) % 8
+        tri(pav[j], pav[i], bottom, (*low[i % 2], A))
+    # 腰帶星芒（長短交錯）
+    for i in range(8):
+        a = math.pi / 8 + i * math.tau / 8
+        d = Vector((math.cos(a), math.sin(a), 0))
+        s = Vector((-d.y, d.x, 0))
+        base = d * 0.46 + Vector((0, 0, FLOAT_GIRDLE))
+        tip = base + d * (0.4 if i % 2 == 0 else 0.24)
+        w, h = 0.07, 0.07
+        q = [base + s * w, base + Vector((0, 0, h)), base - s * w, base - Vector((0, 0, h))]
+        for k in range(4):
+            tri(q[k], q[(k + 1) % 4], tip, (0.78, 0.93, 1.0, 0.75) if k % 2 == 0 else (0.62, 0.86, 1.0, 0.75))
+    # 每個三角面都是獨立頂點，自動法線無法判斷內外：一律以星晶中心軸為準朝外
+    for f in bm.faces:
+        f.normal_update()
+        cc = f.calc_center_median()
+        if f.normal.dot(cc - c0) < 0:
+            f.normal_flip()
+    me = bpy.data.meshes.new(name)
+    vidx = {v: i for i, v in enumerate(bm.verts)}
+    colors = [cols[v] for v in bm.verts]
+    bm.to_mesh(me)
+    bm.free()
+    ca = me.color_attributes.new("Col", "FLOAT_COLOR", "POINT")
+    for i, c in enumerate(colors):
+        ca.data[i].color = c
+    me.color_attributes.active_color = ca
+    _ = vidx
+    ob = bpy.data.objects.new(name, me)
+    bpy.context.scene.collection.objects.link(ob)
+    me.materials.append(mat)
+    for p in me.polygons:
+        p.use_smooth = False
+    ob["keep_colors"] = True
+    return ob
+
+
+def magic_ring(name, mat, lod):
+    """P3-2E 纖細金色八芒星魔法環（水平、靜止）：圓環＋{8/3} 星形連線＋環上小金珠（HQ）"""
+    hq = lod == "hq"
+    bm = bmesh.new()
+    z0, z1 = MAGIC_RING_Z - 0.012, MAGIC_RING_Z + 0.012
+    seg = 64 if hq else 32
+    r_in, r_out = 0.93, 1.0
+
+    def quad(a, b, c, d):
+        return bm.faces.new([bm.verts.new(p) for p in (a, b, c, d)])
+
+    P = lambda r, i, z: Vector((r * math.cos(i * math.tau / seg), r * math.sin(i * math.tau / seg), z))  # noqa: E731
+    for i in range(seg):
+        j = i + 1
+        quad(P(r_in, i, z1), P(r_out, i, z1), P(r_out, j, z1), P(r_in, j, z1))  # 頂（逆時針→朝上）
+        quad(P(r_in, j, z0), P(r_out, j, z0), P(r_out, i, z0), P(r_in, i, z0))  # 底（朝下）
+        if hq:
+            quad(P(r_out, i, z0), P(r_out, j, z0), P(r_out, j, z1), P(r_out, i, z1))  # 外側
+            quad(P(r_in, j, z0), P(r_in, i, z0), P(r_in, i, z1), P(r_in, j, z1))  # 內側
+    R = 0.95
+    pts = [Vector((R * math.cos(i * math.pi / 4), R * math.sin(i * math.pi / 4), 0)) for i in range(8)]
+    w = 0.016
+    for i in range(8):
+        a, b = pts[i], pts[(i + 3) % 8]
+        d = (b - a).normalized()
+        s = Vector((-d.y, d.x, 0)) * w
+        quad(a + s + Vector((0, 0, z1)), a - s + Vector((0, 0, z1)), b - s + Vector((0, 0, z1)), b + s + Vector((0, 0, z1)))
+        quad(b + s + Vector((0, 0, z0)), b - s + Vector((0, 0, z0)), a - s + Vector((0, 0, z0)), a + s + Vector((0, 0, z0)))
+    for f in bm.faces:
+        f.normal_update()
+        want_up = f.calc_center_median().z > MAGIC_RING_Z + 0.006
+        want_down = f.calc_center_median().z < MAGIC_RING_Z - 0.006
+        if (want_up and f.normal.z < 0) or (want_down and f.normal.z > 0):
+            f.normal_flip()
+    if hq:
+        for i in range(8):
+            c = Vector((0.965 * math.cos(i * math.pi / 4 + math.pi / 8), 0.965 * math.sin(i * math.pi / 4 + math.pi / 8), MAGIC_RING_Z))
+            ret = bmesh.ops.create_icosphere(bm, subdivisions=1, radius=0.03, matrix=Matrix.Translation(c))
+            _ = ret
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    ob = bpy.data.objects.new(name, me)
+    bpy.context.scene.collection.objects.link(ob)
+    me.materials.append(mat)
+    return ob
+
+
 def ensure_up(ob):
     """開口環形：確認頂面法線朝上（否則整個翻面）"""
     me = ob.data
@@ -222,8 +362,8 @@ def ensure_up(ob):
         me.update()
 
 
-def vc_mat(name, rough=0.8):
-    """頂點色材質（石材：貼圖改由遊戲端共用載入，GLB 不內嵌）"""
+def vc_mat(name, rough=0.8, alpha=False):
+    """頂點色材質（石材：貼圖改由遊戲端共用載入，GLB 不內嵌）；alpha＝輸出 RGBA（星晶透明度）"""
     m = bpy.data.materials.new(name)
     m.use_nodes = True
     nt = m.node_tree
@@ -232,6 +372,10 @@ def vc_mat(name, rough=0.8):
     vc = nt.nodes.new("ShaderNodeVertexColor")
     vc.layer_name = "Col"
     nt.links.new(vc.outputs["Color"], b.inputs["Base Color"])
+    if alpha:
+        # 匯出器只在材質用到頂點色 Alpha 時才輸出 RGBA
+        nt.links.new(vc.outputs["Alpha"], b.inputs["Alpha"])
+        m.blend_method = "BLEND"
     return m
 
 
@@ -317,14 +461,17 @@ def build(lod, M):
         n = Vector((math.cos(a), math.sin(a), 0))
         mat = Matrix.Translation(n * 0.335 + Vector((0, 0, 3.3))) @ Vector((0, 0, 1)).rotation_difference(n).to_matrix().to_4x4()
         parts.append(star_prism(f"colStar{i}", 8, 0.12, 0.05, 0.03, M["gold"], mat))
-    # 托爪：4 支彎曲托臂，從柱頭往上托住星晶
-    for i in range(4):
-        a = i * math.tau / 4
-        d = Vector((math.cos(a), math.sin(a), 0))
-        pts = [d * 0.42 + Vector((0, 0, 4.2)), d * 0.62 + Vector((0, 0, 4.45)), d * 0.66 + Vector((0, 0, 4.75)), d * 0.52 + Vector((0, 0, 5.05)), d * 0.4 + Vector((0, 0, 5.2))]
-        parts.append(tube(f"claw{i}", pts, 0.05, P["tube"], M["gold"], taper=0.45))
-    # 八角星晶
-    parts.append(crystal("crystal", M["crystal"]))
+    # P3-2E：星晶改為漂浮（移除托爪）；柱頭金色細邊；下方纖細金色八芒星魔法環（與出生羅盤同圖騰）
+    parts.append(torus("capLip", 0.56, 0.028, (32, 4) if lod == "hq" else (16, 4), M["gold"], loc=(0, 0, COL_TOP - 0.02)))
+    parts.append(magic_ring("magicRing", M["gold"], lod))
+    parts.append(star_crystal("crystal", M["crystal"], lod))
+    if lod == "hq":
+        # 水盤外緣 8 個石雕五芒星（在出水口之間）
+        for i in range(8):
+            a = math.pi / 8 + i * math.tau / 8
+            n = Vector((math.cos(a), math.sin(a), 0))
+            m = Matrix.Translation(n * (BOWL_R + 0.075) + Vector((0, 0, 2.26))) @ Vector((0, 0, 1)).rotation_difference(n).to_matrix().to_4x4()
+            parts.append(star_prism(f"bowlStar{i}", 5, 0.075, 0.03, 0.02, M["stone"], m))
     # 金色雙環（細、傾斜）＋環上小星
     RA, RB = (38, 0, 20), (-28, 12, -35)
     ringA = torus("ringA", RING_A_R, RING_T, P["ring"], M["gold"], rot=tuple(math.radians(v) for v in RA), loc=(0, 0, RING_C))
@@ -337,12 +484,6 @@ def build(lod, M):
             p = rm @ Vector((R * math.cos(a), R * math.sin(a), 0)) + Vector((0, 0, RING_C))
             m = Matrix.Translation(p) @ Vector((0, 0, 1)).rotation_difference((p - Vector((0, 0, RING_C))).normalized()).to_matrix().to_4x4()
             parts.append(star_prism(f"ringStar{k}", 5, 0.11, 0.045, 0.03, M["gold"], m))
-    # 星晶腰帶的金色小星座（取代原本浮在頂端的小星，避免超出 Y 6.5）
-    for i in range(4):
-        a = i * math.tau / 4
-        n = Vector((math.cos(a), math.sin(a), 0))
-        m = Matrix.Translation(n * 0.36 + Vector((0, 0, 4.62))) @ Vector((0, 0, 1)).rotation_difference(n).to_matrix().to_4x4()
-        parts.append(star_prism(f"crownStar{i}", 5, 0.09, 0.037, 0.025, M["gold"], m))
     return parts
 
 
@@ -504,6 +645,38 @@ def build_water(lod, mats):
 
     set_rgba(fm, mcol)
     out["foam"] = fm
+    # 4) P3-2E 魔法特效（同一網格、加法混合、圖集左＝星光、右＝魔法陣）：
+    #    上層水面發光魔法陣（八角形，高於水面 1.2 cm＋遊戲端 zOffset）＋ 8 個落水點的小星光（十字交叉兩片）
+    bm = bmesh.new()
+    uv = bm.loops.layers.uv.new("UVMap")
+    Rr = 2.8
+    zs = WATER2_Z + 0.012
+    c = bm.verts.new((0, 0, zs))
+    ring = [bm.verts.new((Rr * math.cos(i * math.tau / 8), Rr * math.sin(i * math.tau / 8), zs)) for i in range(8)]
+    for i in range(8):
+        f = bm.faces.new((c, ring[i], ring[(i + 1) % 8]))
+        for lp in f.loops:
+            x, y = lp.vert.co.x, lp.vert.co.y
+            lp[uv].uv = (0.5 + 0.5 * (0.5 + x / (2 * Rr)), 0.5 + y / (2 * Rr))
+    for m in fall_meta:
+        lx, ly = m["land"][0], m["land"][1]
+        d = Vector((lx, ly, 0)).normalized()
+        t = Vector((-d.y, d.x, 0))
+        cz = WATER1_Z + 0.2
+        h = 0.16
+        for axis in (d, t):
+            q = [bm.verts.new(Vector((lx, ly, cz)) + axis * sx * h + Vector((0, 0, sz * h))) for sx, sz in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+            f = bm.faces.new(q)
+            for lp, (u, v) in zip(f.loops, ((0, 0), (0.5, 0), (0.5, 1), (0, 1))):
+                lp[uv].uv = (u, v)
+    me = bpy.data.meshes.new("WishFountain_fx")
+    bm.to_mesh(me)
+    bm.free()
+    fxo = bpy.data.objects.new("WishFountain_fx", me)
+    bpy.context.scene.collection.objects.link(fxo)
+    me.materials.append(mats["fx"])
+    set_rgba(fxo, lambda co: (1.0, 1.0, 1.0, 1.0))
+    out["fx"] = fxo
     return out, fall_meta
 
 
@@ -634,7 +807,8 @@ def main():
         M = {
             "stone": vc_mat("VP3_stone"),
             "gold": simple_mat("VP3_gold", (0.86, 0.68, 0.36), rough=0.35, metal=0.6),
-            "crystal": simple_mat("VP3_crystal", (0.62, 0.84, 0.98), rough=0.15, emit=((0.35, 0.65, 1.0), 0.8)),
+            "crystal": vc_mat("VP3_crystal", rough=0.15, alpha=True),
+            "fx": vc_mat("VP3_fx", rough=0.5),
             "water": simple_mat("VP3_water", (0.6, 0.84, 0.96), rough=0.1),
             "falls": simple_mat("VP3_falls", (0.85, 0.94, 1.0), rough=0.1),
             "foam": simple_mat("VP3_foam", (1, 1, 1), rough=0.6),
@@ -655,7 +829,7 @@ def main():
             else:
                 vp3_kit.box_uv(p, 2.0)
             white(p)
-        for p in groups["gold"] + groups["crystal"]:
+        for p in groups["gold"] + [g for g in groups["crystal"] if not g.get("keep_colors")]:
             white(p)
         merged = {k: vp3_kit_join(v, f"WishFountain_{k}") for k, v in groups.items() if v}
         # 環境光遮蔽烘焙到石材頂點色（金環、星晶一起當遮擋物；水體在烘焙之後才建立）
@@ -692,7 +866,10 @@ def main():
         "finial_top": 1.1,
         "bowl_diameter": BOWL_R * 2,
         "bowl_top": BOWL_TOP,
-        "crystal": [CRYSTAL_BOTTOM, CRYSTAL_TOP],
+        "crystal": [FLOAT_BOTTOM, FLOAT_TOP],
+        "crystal_bob": BOB,
+        "crystal_top_max": round(FLOAT_TOP + BOB, 3),
+        "magic_ring_z": MAGIC_RING_Z,
         "rings_diameter": [RING_A_R * 2, RING_B_R * 2],
         "water1": {"z": WATER1_Z, "r": [WATER1_IN, round(WATER1_OUT, 3)]},
         "water2": {"z": WATER2_Z, "r": [WATER2_IN, WATER2_OUT]},

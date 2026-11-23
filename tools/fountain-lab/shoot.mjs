@@ -96,7 +96,8 @@ let fail = 0;
   {
     const fr = JSON.parse(readFileSync(plazaReport.replace("plaza_report.json", "fountain_report.json"), "utf8"));
     for (const [lod, v] of Object.entries(fr.lods)) {
-      ck(`噴泉 ${lod} 外徑 r ≤ 7.0（＝碰撞半徑 ${L.FOUNTAIN.basinR}）、高 6.5`, v.bounds.radius <= L.FOUNTAIN.basinR + 0.005 && Math.abs(v.bounds.top - 6.5) < 0.01 && v.triangles <= fr.budget[lod], { bounds: v.bounds, triangles: v.triangles, budget: fr.budget[lod] });
+      const topMax = Math.max(v.bounds.top, fr.dims.crystal_top_max ?? 0);
+      ck(`噴泉 ${lod} 外徑 r ≤ 7.0（＝碰撞半徑 ${L.FOUNTAIN.basinR}）、最高（含星晶浮動）≤ 6.5、面數在額度內`, v.bounds.radius <= L.FOUNTAIN.basinR + 0.005 && topMax <= 6.5 + 0.005 && v.triangles <= fr.budget[lod], { bounds: v.bounds, crystalTopMax: fr.dims.crystal_top_max, triangles: v.triangles, budget: fr.budget[lod] });
     }
   }
   console.log(JSON.stringify(report.checks, null, 1));
@@ -106,10 +107,10 @@ let fail = 0;
 const pw = await loadPlaywright();
 const server = await serve(dist);
 const plan = [
-  ["chromium", "hq", "high", "hq", ["player_spawn", "player_south", "pano", "top", "close_bench", "close_lamp", "close_compass", "fountain_close", "fountain_falls", "fountain_q45", "fountain_water", "knight_front", "knight_q45", "knight_q45r", "knight_eye", "knight_player_up", "knight_door", "knight_npc"]],
-  ["chromium", "lite-low", "low", "lite", ["player_spawn", "pano", "fountain_close", "fountain_water", "knight_front", "knight_q45", "knight_eye"]],
-  ["webkit", "hq", "high", "hq", ["player_spawn", "knight_front"]],
-  ["webkit", "lite-low", "low", "lite", ["player_spawn", "knight_front"]],
+  ["chromium", "hq", "high", "hq", ["player_spawn", "fountain_front", "fountain_close", "fountain_q45", "fountain_top", "fountain_falls", "fountain_water", "top", "pano"]],
+  ["chromium", "lite-low", "low", "lite", ["player_spawn", "fountain_front", "fountain_close", "fountain_q45", "fountain_top"]],
+  ["webkit", "hq", "high", "hq", ["player_spawn", "fountain_close"]],
+  ["webkit", "lite-low", "low", "lite", ["player_spawn", "fountain_close"]],
 ];
 
 for (const [bname, mode, quality, lod, views] of plan) {
@@ -159,8 +160,7 @@ for (const [bname, mode, quality, lod, views] of plan) {
       run.flicker = {
         player_spawn: await page.evaluate(() => window.__lab.flickerTest("player_spawn")),
         fountain_q45: await page.evaluate(() => window.__lab.flickerTest("fountain_q45")),
-        knight_front: await page.evaluate(() => window.__lab.flickerTest("knight_front")),
-        knight_player_up: await page.evaluate(() => window.__lab.flickerTest("knight_player_up")),
+        fountain_close: await page.evaluate(() => window.__lab.flickerTest("fountain_close")),
       };
       await page.evaluate(() => window.__lab.setTime(null));
       await page.evaluate(() => window.__lab.setView("player_spawn"));

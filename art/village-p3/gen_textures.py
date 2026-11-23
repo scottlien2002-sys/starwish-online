@@ -352,6 +352,76 @@ def make_p32d(out, info):
     save(make_banner2(256, 512), "banner2_hq")
 
 
+# ---------------- P3-2E 星願之泉魔法化（獨立亂數，放在最後產生） ----------------
+R3 = np.random.default_rng(20261123 + 25)
+
+
+def _sparkle(n):
+    """星光（4 長 4 短光芒＋柔和光心），alpha 通道"""
+    yy, xx = np.mgrid[0:n, 0:n] / n - 0.5 + 0.5 / n
+    r = np.sqrt(xx * xx + yy * yy)
+    th = np.arctan2(yy, xx)
+    core = np.exp(-(r / 0.07) ** 2)
+    glow = 0.35 * np.exp(-(r / 0.2) ** 2)
+    long_ = np.abs(np.cos(th * 2)) ** 60 * np.clip(1 - r / 0.48, 0, 1) ** 1.5
+    short = 0.5 * np.abs(np.cos(th * 2 + np.pi / 2)) ** 60 * np.clip(1 - r / 0.28, 0, 1) ** 1.5
+    return np.clip(core + glow + long_ + short, 0, 1) * np.clip((0.5 - r) / 0.04, 0, 1)
+
+
+def _sigil(n):
+    """魔法陣：三道細環、八芒星連線 {8/3}、外環小圓點、內圈淡光；與出生羅盤同一圖騰"""
+    yy, xx = np.mgrid[0:n, 0:n] / n - 0.5 + 0.5 / n
+    r = np.sqrt(xx * xx + yy * yy)
+    th = np.arctan2(yy, xx)
+    a = np.zeros((n, n))
+    w = 1.6 / n
+    for rr, k in ((0.45, 1.0), (0.41, 0.7), (0.2, 0.8)):
+        a = np.maximum(a, k * np.clip(1 - np.abs(r - rr) / w, 0, 1))
+    R = 0.41
+    pts = [(R * np.cos(i * np.pi / 4), R * np.sin(i * np.pi / 4)) for i in range(8)]
+    for i in range(8):
+        (x0, y0), (x1, y1) = pts[i], pts[(i + 3) % 8]
+        dx, dy = x1 - x0, y1 - y0
+        L2 = dx * dx + dy * dy
+        t = np.clip(((xx - x0) * dx + (yy - y0) * dy) / L2, 0, 1)
+        d = np.sqrt((xx - x0 - t * dx) ** 2 + (yy - y0 - t * dy) ** 2)
+        a = np.maximum(a, 0.8 * np.clip(1 - d / w, 0, 1))
+    for i in range(16):
+        ang = i * np.pi / 8 + np.pi / 16
+        d = np.sqrt((xx - 0.43 * np.cos(ang)) ** 2 + (yy - 0.43 * np.sin(ang)) ** 2)
+        a = np.maximum(a, np.clip(1 - d / (3.2 / n), 0, 1))
+    a = np.maximum(a, 0.18 * np.exp(-(r / 0.18) ** 2))
+    return np.clip(a, 0, 1) * (r < 0.47)
+
+
+def make_p32e(out, info):
+    def save(img, name):
+        p = os.path.join(out, f"{name}.png")
+        img.save(p, optimize=True)
+        info[name] = {"px": list(img.size), "bytes": os.path.getsize(p)}
+
+    # 特效圖集（左＝星光、右＝魔法陣）：白色＋alpha（加法混合，顏色由材質決定）
+    for lod, n in (("hq", 128), ("lite", 64)):
+        atlas = np.zeros((n, n * 2, 4))
+        atlas[..., :3] = 1.0
+        atlas[:, :n, 3] = _sparkle(n)
+        atlas[:, n:, 3] = _sigil(n)
+        save(Image.fromarray((np.clip(atlas, 0, 1) * 255).astype(np.uint8), "RGBA"), f"fx_magic_{lod}")
+    # 水底光紋＋細緻星光（星點稀疏、只比光紋略亮）
+    for lod, n in (("hq", 256), ("lite", 128)):
+        base = np.asarray(Image.open(os.path.join(out, f"caustic_{lod}.png")).convert("RGB"), dtype=float) / 255
+        star = np.zeros((n, n))
+        s = max(5, n // 24)
+        spr = _sparkle(s * 2 + 1)
+        for _ in range(10 if lod == "hq" else 6):
+            cx, cy = R3.integers(0, n, 2)
+            for dy in range(-s, s + 1):
+                for dx in range(-s, s + 1):
+                    star[(cy + dy) % n, (cx + dx) % n] = max(star[(cy + dy) % n, (cx + dx) % n], spr[dy + s, dx + s])
+        v = np.clip(base + star[..., None] * np.array([0.85, 0.95, 1.0]), 0, 1)
+        save(Image.fromarray((v * 255).astype(np.uint8), "RGB"), f"caustic_star_{lod}")
+
+
 def main():
     out = sys.argv[1] if len(sys.argv) > 1 else "out/textures"
     os.makedirs(out, exist_ok=True)
@@ -392,6 +462,7 @@ def main():
         im.save(p, optimize=True)
         info[dst] = {"px": n, "bytes": os.path.getsize(p)}
     make_p32d(out, info)
+    make_p32e(out, info)
     json.dump(info, open(os.path.join(out, "textures.json"), "w"), indent=1)
     print(json.dumps(info, indent=1))
 

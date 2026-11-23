@@ -53,6 +53,9 @@ const VIEWS: Record<string, View> = {
   fountain_close: { target: [0, 5.25, 0], alpha: -H + 0.5, beta: 1.4, radius: 7.5, fov: 0.8 },
   fountain_falls: { target: [0, 1.4, -3.7], alpha: -H + 0.55, beta: 1.28, radius: 6.2, fov: 0.8 },
   fountain_q45: { target: [0, 2.3, 0], alpha: -H + Math.PI / 4, beta: 1.12, radius: 23, fov: 0.8 },
+  // P3-2E：噴泉俯視（正交）、噴泉正面近景（從出生方向）
+  fountain_top: { target: [0, 0, 0], alpha: -H, beta: 0.0001, radius: 60, ortho: 8.5 },
+  fountain_front: { target: [0, 3.6, 0], alpha: -H, beta: 1.42, radius: 13, fov: 0.8 },
   fountain_water: { target: [2.2, 0.6, -3.6], alpha: alphaFrom(165), beta: 0.95, radius: 5.5, fov: 0.8 },
   // P3-2B 騎士軍團（正面中心在方位 332°、r 27；建築中心 r 34；地面 +2 m）
   knight_front: { target: [-15.0, 10.4, 28.2], alpha: alphaFrom(152), beta: 1.5, radius: 31, fov: 0.8 },
@@ -342,7 +345,8 @@ async function load(): Promise<void> {
   knight = setupKnightP3(scene, k.meshes, { lite, texBase: "./models/tex/", shadows: castShadows ? shadows : null });
   // 正式騎士軍團取代灰色量體
   for (const m of context) if (m.name === "bld_knight" || m.name === "roof_knight") m.setEnabled(false);
-  for (const m of [...f.meshes, ...p.meshes, ...k.meshes]) m.freezeWorldMatrix();
+  // 星晶每幀會動：不凍結它的世界矩陣
+  for (const m of [...f.meshes, ...p.meshes, ...k.meshes]) if (!fx.animated.includes(m)) m.freezeWorldMatrix();
   await scene.whenReadyAsync();
   state.loadMs = Math.round(performance.now() - t0);
   state.ready = true;

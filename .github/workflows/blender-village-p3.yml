@@ -135,7 +135,7 @@ jobs:
                   sheet.paste(im, ((i % 2) * W + (W - im.width) // 2, (i // 2) * H + (H - im.height) // 2))
               sheet.save("out/fountain_contact_sheet.png")
           ims = []
-          for v in ("player_spawn", "pano", "fountain_close", "fountain_water", "knight_front", "knight_eye"):
+          for v in ("player_spawn", "fountain_front", "fountain_close", "fountain_q45", "fountain_top", "fountain_water"):
               p = f"out/lab/chromium_hq_{v}.png"
               if os.path.exists(p):
                   ims.append(Image.open(p).convert("RGB"))
@@ -147,7 +147,7 @@ jobs:
               for i, im in enumerate(ims):
                   sheet.paste(im, ((i % cols) * w, (i // cols) * h))
               sheet = sheet.resize((sheet.width // 2, sheet.height // 2))
-              sheet.save("out/p32d_hq_sheet.png")
+              sheet.save("out/p32e_hq_sheet.png")
           PY
 
       - name: Push results to art-village-p3 branch (normal push, no force)
