@@ -59,18 +59,18 @@ export function setupPlazaP3(scene: Scene, meshes: AbstractMesh[], opt: PlazaP3O
   if (pave?.material instanceof PBRMaterial) {
     pave.material.metallic = 0;
     pave.material.roughness = 0.88;
-    pave.material.albedoColor = new Color3(1.06, 1.04, 1.0);
+    pave.material.albedoColor = new Color3(1.12, 1.1, 1.07);
   }
 
-  // 金：與星願之泉相同的設定（暖色高光＋邊緣菲涅耳）
+  // 金：與星願之泉同色系，但自發光較弱（地面嵌條斜看時不會變成螢光黃）
   const gold = new StandardMaterial("VP3P_gold", scene);
-  gold.diffuseColor = new Color3(0.8, 0.6, 0.28);
-  gold.specularColor = new Color3(1, 0.86, 0.55);
-  gold.specularPower = 48;
-  gold.emissiveColor = new Color3(0.32, 0.25, 0.1);
+  gold.diffuseColor = new Color3(0.74, 0.57, 0.28);
+  gold.specularColor = new Color3(0.9, 0.78, 0.5);
+  gold.specularPower = 40;
+  gold.emissiveColor = new Color3(0.2, 0.15, 0.06);
   const gf = new FresnelParameters();
-  gf.leftColor = new Color3(1, 1, 1);
-  gf.rightColor = new Color3(0.14, 0.14, 0.14);
+  gf.leftColor = new Color3(0.7, 0.7, 0.7);
+  gf.rightColor = new Color3(0.12, 0.12, 0.12);
   gf.bias = 0.1;
   gf.power = 1.5;
   gold.emissiveFresnelParameters = gf;
@@ -84,10 +84,11 @@ export function setupPlazaP3(scene: Scene, meshes: AbstractMesh[], opt: PlazaP3O
   props.emissiveColor = new Color3(0.05, 0.045, 0.04);
   mats.push(props);
 
-  // 燈罩與水晶：不受光（顏色＝頂點色），白天看起來像亮著
+  // 燈罩與水晶：不受光（自發光白 × 頂點色＝頂點色），白天看起來像亮著
+  // 注意：StandardMaterial 的 disableLighting 會讓頂點色失效（變黑），所以用「漫射黑＋自發光白」
   const glass = new StandardMaterial("VP3P_glass", scene);
-  glass.disableLighting = true;
-  glass.diffuseColor = new Color3(1, 1, 1);
+  glass.diffuseColor = Color3.Black();
+  glass.emissiveColor = new Color3(1, 1, 1);
   glass.specularColor = Color3.Black();
   mats.push(glass);
 
