@@ -1,5 +1,5 @@
 {
- "startedAt": "2026-11-23T15:10:04.158Z",
+ "startedAt": "2026-11-23T15:25:22.593Z",
  "checks": {
   "benches 位置＝既有碰撞（誤差 < 1 cm）": {
    "ok": true,
@@ -208,9 +208,9 @@
    "detail": {
     "bounds": {
      "radius": 7,
-     "top": 6.38
+     "top": 6.4
     },
-    "crystalTopMax": 6.44,
+    "crystalTopMax": 6.46,
     "triangles": 10460,
     "budget": 11000
    }
@@ -220,9 +220,9 @@
    "detail": {
     "bounds": {
      "radius": 7,
-     "top": 6.38
+     "top": 6.4
     },
-    "crystalTopMax": 6.44,
+    "crystalTopMax": 6.46,
     "triangles": 25644,
     "budget": 28000
    }
@@ -244,7 +244,7 @@
     "chromium_hq_top.png",
     "chromium_hq_pano.png"
    ],
-   "loadMs": 7262,
+   "loadMs": 5123,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -396,18 +396,18 @@
    "flicker": {
     "player_spawn": {
      "maxRatio": 0.001029265873015873,
-     "meanRatio": 0.0009399801587301587
+     "meanRatio": 0.000939360119047619
     },
     "fountain_q45": {
      "maxRatio": 0.0022507440476190474,
-     "meanRatio": 0.0020504712301587296
+     "meanRatio": 0.002044890873015873
     },
     "fountain_close": {
-     "maxRatio": 0.007142857142857143,
-     "meanRatio": 0.006889260912698414
+     "maxRatio": 0.007099454365079365,
+     "meanRatio": 0.0068402777777777785
     }
    },
-   "frameMsSoftware": 1.3999999999068677
+   "frameMsSoftware": 1.8999999999068677
   },
   {
    "browser": "chromium",
@@ -420,7 +420,7 @@
     "chromium_lite-low_fountain_q45.png",
     "chromium_lite-low_fountain_top.png"
    ],
-   "loadMs": 1735,
+   "loadMs": 1388,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -542,19 +542,19 @@
    "knightDrawCalls": 3,
    "flicker": {
     "player_spawn": {
-     "maxRatio": 0.0007874503968253968,
-     "meanRatio": 0.0006628224206349206
+     "maxRatio": 0.0007936507936507937,
+     "meanRatio": 0.0006646825396825396
     },
     "fountain_q45": {
-     "maxRatio": 0.0015438988095238095,
-     "meanRatio": 0.0014056299603174606
+     "maxRatio": 0.0015314980158730159,
+     "meanRatio": 0.0014006696428571432
     },
     "fountain_close": {
-     "maxRatio": 0.005704365079365079,
-     "meanRatio": 0.005308779761904763
+     "maxRatio": 0.005648561507936508,
+     "meanRatio": 0.005265376984126985
     }
    },
-   "frameMsSoftware": 1
+   "frameMsSoftware": 1.1600000000093131
   },
   {
    "browser": "webkit",
@@ -564,7 +564,7 @@
     "webkit_hq_player_spawn.png",
     "webkit_hq_fountain_close.png"
    ],
-   "loadMs": 2726,
+   "loadMs": 2186,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -722,7 +722,7 @@
     "webkit_lite-low_player_spawn.png",
     "webkit_lite-low_fountain_close.png"
    ],
-   "loadMs": 1757,
+   "loadMs": 1350,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -844,5 +844,5 @@
    "knightDrawCalls": 3
   }
  ],
- "finishedAt": "2026-11-23T15:19:44.290Z"
+ "finishedAt": "2026-11-23T15:32:12.253Z"
 }
