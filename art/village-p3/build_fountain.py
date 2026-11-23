@@ -41,13 +41,14 @@ COL_TOP = 4.32
 CRYSTAL_BOTTOM = 4.3
 CRYSTAL_TOP = 6.5
 CRYSTAL_C = 5.35
+RING_C = 5.2  # 雙環中心（傾角壓低，環頂不超過 Y≈6.5）
 RING_A_R = 1.75  # 直徑 3.5 m
 RING_B_R = 2.1  # 直徑 4.2 m
 RING_T = 0.032
 
 LODS = {
-    "hq": dict(basin=128, bowl=96, column=48, ring=(120, 10), tube=10, star_relief=16),
-    "lite": dict(basin=64, bowl=48, column=24, ring=(64, 6), tube=6, star_relief=8),
+    "hq": dict(basin=128, bowl=96, column=64, flutes=16, ring=(120, 10), tube=10, star_relief=16),
+    "lite": dict(basin=64, bowl=48, column=32, flutes=8, ring=(64, 6), tube=6, star_relief=8),
 }
 
 
@@ -85,13 +86,22 @@ def new_obj(name, bm, mat, smooth_angle=38):
     return ob
 
 
-def lathe(name, profile, seg, mat, smooth_angle=38):
-    """profile：[(r, z), ...] 由外到內／由下到上；繞 Z 軸旋轉一圈"""
+def lathe(name, profile, seg, mat, smooth_angle=38, flute=None):
+    """profile：[(r, z), ...] 由外到內／由下到上；繞 Z 軸旋轉一圈
+    flute＝(z0, z1, n, depth)：在 z0～z1 之間刻 n 道直向凹槽（柱身雕刻）"""
     bm = bmesh.new()
     vs = [bm.verts.new((r, 0.0, z)) for r, z in profile]
     edges = [bm.edges.new((vs[i], vs[i + 1])) for i in range(len(vs) - 1)]
     bmesh.ops.spin(bm, geom=vs + edges, cent=(0, 0, 0), axis=(0, 0, 1), angle=math.tau, steps=seg, use_merge=True)
     bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-5)
+    if flute:
+        z0, z1, n, depth = flute
+        for v in bm.verts:
+            if z0 <= v.co.z <= z1:
+                a = math.atan2(v.co.y, v.co.x)
+                k = 1 - depth * max(0.0, math.cos(n * a)) ** 2
+                v.co.x *= k
+                v.co.y *= k
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     return new_obj(name, bm, mat, smooth_angle)
 
@@ -210,8 +220,8 @@ def build(lod, M):
     for i in range(P["star_relief"]):
         a = i * math.tau / P["star_relief"]
         n = Vector((math.cos(a), math.sin(a), 0))
-        mat = Matrix.Translation(n * (WALL_R - 0.015) + Vector((0, 0, 0.45))) @ Vector((0, 0, 1)).rotation_difference(n).to_matrix().to_4x4()
-        parts.append(star_prism(f"relief{i}", 5 if i % 2 else 8, 0.13, 0.055, 0.035, M["stone"], mat))
+        mat = Matrix.Translation(n * (WALL_R - 0.045) + Vector((0, 0, 0.45))) @ Vector((0, 0, 1)).rotation_difference(n).to_matrix().to_4x4()
+        parts.append(star_prism(f"relief{i}", 5 if i % 2 else 8, 0.2, 0.08, 0.06, M["stone"], mat))
     # 8 根矮扶壁（池壁外側，每 45°）
     for i in range(8):
         a = math.pi / 8 + i * math.tau / 8
@@ -226,6 +236,12 @@ def build(lod, M):
         o.name = f"buttress{i}"
         o.data.materials.append(M["stone"])
         parts.append(o)
+        # 扶壁柱頭：小方帽＋寶珠，高出池緣
+        cx, cy = math.cos(a) * (WALL_R + 0.12), math.sin(a) * (WALL_R + 0.12)
+        cap = [(0.0, 0.9), (0.2, 0.9), (0.22, 0.95), (0.16, 1.0), (0.11, 1.02), (0.14, 1.1), (0.15, 1.18), (0.12, 1.26), (0.06, 1.31), (0.0, 1.33)]
+        c = lathe(f"finial{i}", cap, 8 if lod == "lite" else 16, M["stone"], smooth_angle=50)
+        c.location = (cx, cy, 0)
+        parts.append(c)
     # 第二層水盤：腰身台座（多道線腳）＋外翻盤身＋盤緣＋盤內
     bowl = [
         (1.3, FLOOR_Z + 0.02), (1.3, 0.4), (1.1, 0.48), (0.95, 0.62), (0.88, 0.95), (0.95, 1.05), (0.82, 1.15),
@@ -240,13 +256,19 @@ def build(lod, M):
         d = Vector((math.cos(a), math.sin(a), 0))
         p0 = d * (BOWL_R - 0.02) + Vector((0, 0, 2.2))
         pts = [p0, p0 + d * 0.16 + Vector((0, 0, 0.02)), p0 + d * 0.3 - Vector((0, 0, 0.01)), p0 + d * 0.4 - Vector((0, 0, 0.06))]
-        parts.append(tube(f"spout{i}", pts, 0.085, P["tube"], M["stone"], taper=0.55))
+        parts.append(tube(f"spout{i}", pts, 0.12, P["tube"], M["stone"], taper=0.5))
+    # 盤底 8 支渦捲托架（在出水口之間），讓水盤不像單薄的碟子
+    for i in range(8):
+        a = math.pi / 8 + i * math.tau / 8
+        d = Vector((math.cos(a), math.sin(a), 0))
+        pts = [d * 0.8 + Vector((0, 0, 1.2)), d * 1.15 + Vector((0, 0, 1.55)), d * 1.7 + Vector((0, 0, 1.85)), d * 2.3 + Vector((0, 0, 2.0)), d * 2.55 + Vector((0, 0, 1.94)), d * 2.5 + Vector((0, 0, 1.86))]
+        parts.append(tube(f"bracket{i}", pts, 0.09, P["tube"], M["stone"], taper=0.6))
     # 中央石柱：基座、帶收分的柱身、兩道金色環帶、柱頭
     col = [
         (0.6, 2.1), (0.62, 2.22), (0.5, 2.3), (0.52, 2.42), (0.4, 2.52),
         (0.36, 2.7), (0.34, 3.2), (0.33, 3.7), (0.34, 4.0), (0.42, 4.08), (0.5, 4.18), (0.56, 4.26), (0.5, COL_TOP), (0.0, COL_TOP),
     ]
-    parts.append(lathe("column", col, P["column"], M["stone"], smooth_angle=40))
+    parts.append(lathe("column", col, P["column"], M["stone"], smooth_angle=40, flute=(2.85, 3.75, P["flutes"], 0.07)))
     for z in (2.75, 3.85):
         parts.append(torus(f"colBand{z}", 0.355, 0.035, (P["column"], 6), M["gold"], loc=(0, 0, z)))
     # 柱身 4 個星形浮雕
@@ -264,19 +286,23 @@ def build(lod, M):
     # 八角星晶
     parts.append(crystal("crystal", M["crystal"]))
     # 金色雙環（細、傾斜）＋環上小星
-    ringA = torus("ringA", RING_A_R, RING_T, P["ring"], M["gold"], rot=(math.radians(64), 0, math.radians(20)), loc=(0, 0, CRYSTAL_C))
-    ringB = torus("ringB", RING_B_R, RING_T, P["ring"], M["gold"], rot=(math.radians(-58), math.radians(18), math.radians(-35)), loc=(0, 0, CRYSTAL_C))
+    RA, RB = (38, 0, 20), (-28, 12, -35)
+    ringA = torus("ringA", RING_A_R, RING_T, P["ring"], M["gold"], rot=tuple(math.radians(v) for v in RA), loc=(0, 0, RING_C))
+    ringB = torus("ringB", RING_B_R, RING_T, P["ring"], M["gold"], rot=tuple(math.radians(v) for v in RB), loc=(0, 0, RING_C))
     parts += [ringA, ringB]
-    for ring, R, rot in ((ringA, RING_A_R, (64, 0, 20)), (ringB, RING_B_R, (-58, 18, -35))):
+    for ring, R, rot in ((ringA, RING_A_R, RA), (ringB, RING_B_R, RB)):
         rm = Matrix.Rotation(math.radians(rot[2]), 4, "Z") @ Matrix.Rotation(math.radians(rot[1]), 4, "Y") @ Matrix.Rotation(math.radians(rot[0]), 4, "X")
         for k in range(4):
             a = math.pi / 4 + k * math.tau / 4
-            p = rm @ Vector((R * math.cos(a), R * math.sin(a), 0)) + Vector((0, 0, CRYSTAL_C))
-            m = Matrix.Translation(p) @ Vector((0, 0, 1)).rotation_difference((p - Vector((0, 0, CRYSTAL_C))).normalized()).to_matrix().to_4x4()
+            p = rm @ Vector((R * math.cos(a), R * math.sin(a), 0)) + Vector((0, 0, RING_C))
+            m = Matrix.Translation(p) @ Vector((0, 0, 1)).rotation_difference((p - Vector((0, 0, RING_C))).normalized()).to_matrix().to_4x4()
             parts.append(star_prism(f"ringStar{k}", 5, 0.11, 0.045, 0.03, M["gold"], m))
-    # 頂端小金星（星晶上方，與星晶分開、浮在空中）
-    top = Matrix.Translation(Vector((0, 0, CRYSTAL_TOP + 0.32))) @ Matrix.Rotation(math.pi / 2, 4, "X")
-    parts.append(star_prism("topStar", 5, 0.2, 0.08, 0.05, M["gold"], top))
+    # 星晶腰帶的金色小星座（取代原本浮在頂端的小星，避免超出 Y 6.5）
+    for i in range(4):
+        a = i * math.tau / 4
+        n = Vector((math.cos(a), math.sin(a), 0))
+        m = Matrix.Translation(n * 0.36 + Vector((0, 0, 4.62))) @ Vector((0, 0, 1)).rotation_difference(n).to_matrix().to_4x4()
+        parts.append(star_prism(f"crownStar{i}", 5, 0.09, 0.037, 0.025, M["gold"], m))
     return parts
 
 
@@ -328,13 +354,15 @@ def setup_render():
     sc.cycles.device = "CPU"
     sc.cycles.samples = 64
     sc.cycles.use_denoising = True
-    sc.view_settings.view_transform = "Standard"
+    sc.view_settings.view_transform = "AgX"
+    sc.view_settings.look = "AgX - Medium High Contrast"
+    sc.view_settings.exposure = -0.3
     w = bpy.data.worlds.new("w")
     w.use_nodes = True
     w.node_tree.nodes["Background"].inputs["Color"].default_value = (0.86, 0.9, 0.97, 1)
-    w.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.85
+    w.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.45
     sc.world = w
-    for name, rot, e, ang in (("key", (52, 0, -30), 3.2, 6), ("fill", (66, 0, 140), 0.9, 25)):
+    for name, rot, e, ang in (("key", (50, 0, -35), 2.4, 4), ("fill", (70, 0, 145), 0.5, 25)):
         L = bpy.data.lights.new(name, "SUN")
         L.energy = e
         L.angle = math.radians(ang)
@@ -371,10 +399,10 @@ def main():
     for lod in ("lite", "hq"):
         reset()
         M = {
-            "stone": clay("clay_stone", (0.82, 0.8, 0.77)),
+            "stone": clay("clay_stone", (0.74, 0.72, 0.69)),
             "gold": clay("clay_gold", (0.86, 0.72, 0.42), rough=0.4),
             "crystal": clay("clay_crystal", (0.62, 0.82, 0.95), rough=0.25, emit=((0.4, 0.7, 1.0), 0.35)),
-            "water": clay("reserve_water", (0.55, 0.78, 0.98), rough=0.2),
+            "water": clay("reserve_water", (0.35, 0.62, 0.92), rough=0.2),
         }
         parts = build(lod, M)
         groups = {"stone": [], "gold": [], "crystal": []}
@@ -385,7 +413,7 @@ def main():
         merged = [join(v, f"WishFountain_{k}") for k, v in groups.items() if v]
         tris = tri_count(merged)
         export_glb(merged, os.path.join(OUT, f"fountain_{lod}.glb"))
-        bb = [Vector(c) for o in merged for c in (o.matrix_world @ Vector(cc) for cc in o.bound_box)]
+        bb = [o.matrix_world @ v.co for o in merged for v in o.data.vertices]
         report["lods"][lod] = {
             "triangles": tris,
             "by_material": per,
@@ -399,7 +427,7 @@ def main():
             # 預覽地面＋參考：可走範圍邊界（碰撞半徑 7 m＋角色半徑）、噴泉步道 r 11、1.25 m 角色
             bpy.ops.mesh.primitive_cylinder_add(vertices=128, radius=11.0, depth=0.02, location=(0, 0, -0.01))
             g = bpy.context.active_object
-            g.data.materials.append(clay("ground", (0.9, 0.88, 0.84), rough=0.9))
+            g.data.materials.append(clay("ground", (0.5, 0.52, 0.5), rough=0.95))
             cam = setup_render()
             shoot(cam, (0, 0, 2.6), 0, 10, 24, os.path.join(OUT, "fountain_front.png"))
             shoot(cam, (0, 0, 2.4), 45, 24, 24, os.path.join(OUT, "fountain_q45.png"))
