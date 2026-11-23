@@ -1,6 +1,8 @@
-"""P3-1A 星願之泉：正式造型（灰色黏土模型，不含正式材質）＋預覽圖＋尺寸對照。
+"""P3-1A／P3-1B 星願之泉：造型（1A 已驗收）＋水面、落水、泡沫網格與材質（1B）。
 
-blender -b --factory-startup -P build_fountain.py -- --out <輸出資料夾>
+blender -b --factory-startup -P build_fountain.py -- --tex <貼圖資料夾> --out <輸出資料夾> [--previews 0]
+P3-1B：石材＝可重複石紋 × 烘焙環境光遮蔽頂點色（HQ 另有法線貼圖）；金、晶、水、落水、泡沫在遊戲端換成輕量材質
+（見 src/maps/village/FountainP3.ts）。網格依材質分開：stone / gold / crystal / water / falls / foam。
 
 座標：Blender Z 向上（匯出 GLB 時轉成 Y 向上）。單位公尺。中心 (0,0)。
 - 外池：外徑 14 m（含最外圈低矮台階，正好落在遊戲碰撞半徑 7 m 上）、真正中空
@@ -24,6 +26,10 @@ from mathutils import Matrix, Vector
 argv = sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else []
 args = dict(zip(argv[::2], argv[1::2]))
 OUT = os.path.abspath(args.get("--out", "out"))
+TEX = os.path.abspath(args.get("--tex", os.path.join(OUT, "textures")))
+PREVIEWS = args.get("--previews", "1") != "0"
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import vp3_kit  # noqa: E402
 os.makedirs(OUT, exist_ok=True)
 
 # ---------------- 尺寸（公尺） ----------------
@@ -47,8 +53,10 @@ RING_B_R = 2.1  # 直徑 4.2 m
 RING_T = 0.032
 
 LODS = {
-    "hq": dict(basin=128, bowl=96, column=64, flutes=16, ring=(120, 10), tube=10, star_relief=16, finial=16),
-    "lite": dict(basin=48, bowl=40, column=32, flutes=8, ring=(56, 5), tube=6, star_relief=8, finial=6),
+    "hq": dict(basin=128, bowl=96, column=64, flutes=16, ring=(120, 10), tube=10, band=6, star_relief=16, finial=16,
+               water=(128, 96), fall=(6, 14), foam=24),
+    "lite": dict(basin=48, bowl=40, column=32, flutes=8, ring=(56, 5), tube=4, band=4, star_relief=8, finial=6,
+                 water=(40, 32), fall=(4, 8), foam=12),
 }
 
 
@@ -103,7 +111,9 @@ def lathe(name, profile, seg, mat, smooth_angle=38, flute=None):
                 v.co.x *= k
                 v.co.y *= k
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    return new_obj(name, bm, mat, smooth_angle)
+    ob = new_obj(name, bm, mat, smooth_angle)
+    ob["lathe"] = True
+    return ob
 
 
 def star_prism(name, points, r_out, r_in, depth, mat, m=Matrix()):
@@ -238,7 +248,8 @@ def build(lod, M):
         parts.append(o)
         # 扶壁柱頭：小方帽＋寶珠，高出池緣
         cx, cy = math.cos(a) * (WALL_R + 0.12), math.sin(a) * (WALL_R + 0.12)
-        cap = [(0.0, 0.9), (0.2, 0.9), (0.22, 0.95), (0.16, 1.0), (0.11, 1.02), (0.14, 1.1), (0.15, 1.18), (0.12, 1.26), (0.06, 1.31), (0.0, 1.33)]
+        # P3-1B 微調：寶珠降低（頂 1.33 → 1.10），柱帽直接坐在扶壁頂（0.80）
+        cap = [(0.0, 0.8), (0.19, 0.8), (0.2, 0.84), (0.15, 0.88), (0.1, 0.9), (0.12, 0.95), (0.125, 1.0), (0.1, 1.05), (0.05, 1.085), (0.0, 1.1)]
         c = lathe(f"finial{i}", cap, P["finial"], M["stone"], smooth_angle=50)
         c.location = (cx, cy, 0)
         parts.append(c)
@@ -270,7 +281,7 @@ def build(lod, M):
     ]
     parts.append(lathe("column", col, P["column"], M["stone"], smooth_angle=40, flute=(2.85, 3.75, P["flutes"], 0.07)))
     for z in (2.75, 3.85):
-        parts.append(torus(f"colBand{z}", 0.355, 0.035, (P["column"], 6), M["gold"], loc=(0, 0, z)))
+        parts.append(torus(f"colBand{z}", 0.355, 0.035, (P["column"], P["band"]), M["gold"], loc=(0, 0, z)))
     # 柱身 4 個星形浮雕
     for i in range(4):
         a = math.pi / 4 + i * math.tau / 4
@@ -306,24 +317,212 @@ def build(lod, M):
     return parts
 
 
-def reserve_markers(M):
-    """預留位置（只在預覽顯示、不匯出）：外池水面、上層水面、8 道落水"""
-    out = []
-    bpy.ops.mesh.primitive_cylinder_add(vertices=96, radius=INNER_R - 0.05, depth=0.01, location=(0, 0, WATER1_Z))
-    out.append(bpy.context.active_object)
-    bpy.ops.mesh.primitive_cylinder_add(vertices=64, radius=BOWL_R - 0.26, depth=0.01, location=(0, 0, WATER2_Z))
-    out.append(bpy.context.active_object)
+# ---------------- P3-1B 水體網格 ----------------
+FALL_L = 0.7  # 落水水平前進距離（m）
+WATER1_IN, WATER1_OUT = 0.9, INNER_R + 0.03  # 外池水面：內緣藏進水盤底座，外緣插進池壁 3 cm（不留縫、不共面）
+WATER2_IN, WATER2_OUT = 0.55, 2.79  # 上層水面：內緣藏進柱座，外緣插進盤內壁
+
+
+def spout_tip(i):
+    a = i * math.tau / 8
+    d = Vector((math.cos(a), math.sin(a), 0))
+    p0 = d * (BOWL_R - 0.02) + Vector((0, 0, 2.2))
+    return d, p0 + d * 0.4 - Vector((0, 0, 0.06))
+
+
+def set_rgba(ob, fn):
+    """逐頂點 RGBA（線性），fn(co) -> (r,g,b,a)"""
+    me = ob.data
+    ca = me.color_attributes.new("Col", "FLOAT_COLOR", "POINT")
+    for v, d in zip(me.vertices, ca.data):
+        d.color = fn(v.co)
+    me.color_attributes.active_color = ca
+
+
+def annulus(bm, uv, r_list, seg, z, uv_fn, cx=0.0, cy=0.0):
+    rings = [[bm.verts.new((cx + r * math.cos(i * math.tau / seg), cy + r * math.sin(i * math.tau / seg), z)) for i in range(seg)] for r in r_list]
+    for a, b in zip(rings, rings[1:]):
+        for i in range(seg):
+            j = (i + 1) % seg
+            f = bm.faces.new((a[i], a[j], b[j], b[i]))
+            for lp in f.loops:
+                lp[uv].uv = uv_fn(lp.vert.co, lp.vert, f)
+    return rings
+
+
+def foam_u(co, f, cx, cy):
+    """泡沫環的 u（角度，展開時以面中心為基準，避免接縫面整片拉伸）"""
+    c = f.calc_center_median()
+    a0 = math.atan2(c.y - cy, c.x - cx)
+    a = math.atan2(co.y - cy, co.x - cx)
+    while a - a0 > math.pi:
+        a -= math.tau
+    while a - a0 < -math.pi:
+        a += math.tau
+    return a / math.tau * 3
+
+
+def build_water(lod, mats):
+    P = LODS[lod]
+    out = {}
+    # 1) 水面：外池＋上層水盤合成一個網格（同材質＝1 次繪製）；平面 UV 每 2.2 m 重複；頂點色＝邊緣略暗（池壁陰影感）
+    bm = bmesh.new()
+    uv = bm.loops.layers.uv.new("UVMap")
+    pl = lambda co, v, f: (co.x / 2.2, co.y / 2.2)  # noqa: E731
+    annulus(bm, uv, (WATER1_IN, 3.2, WATER1_OUT) if lod == "hq" else (WATER1_IN, WATER1_OUT), P["water"][0], WATER1_Z, pl)
+    annulus(bm, uv, (WATER2_IN, WATER2_OUT), P["water"][1], WATER2_Z, pl)
+    bm.normal_update()
+    for f in bm.faces:
+        if f.normal.z < 0:
+            f.normal_flip()
+    me = bpy.data.meshes.new("WishFountain_water")
+    bm.to_mesh(me)
+    bm.free()
+    w = bpy.data.objects.new("WishFountain_water", me)
+    bpy.context.scene.collection.objects.link(w)
+    me.materials.append(mats["water"])
+
+    def wcol(co):
+        r = math.hypot(co.x, co.y)
+        edge = WATER1_OUT if co.z < 1.5 else WATER2_OUT
+        k = 0.86 + 0.14 * min(1.0, max(0.0, (edge - r) / 0.8))
+        return (k, k, k, 1.0)
+
+    set_rgba(w, wcol)
+    out["water"] = w
+    # 2) 落水：8 道拋物線水柱（開口管，無端蓋）。從出水口內 5 cm 開始，末端插到水面下 4 cm，不碰池壁
+    sides, segs = P["fall"]
+    bm = bmesh.new()
+    uv = bm.loops.layers.uv.new("UVMap")
+    fall_meta = []
     for i in range(8):
-        a = i * math.tau / 8
-        d = Vector((math.cos(a), math.sin(a), 0))
-        p0 = d * (BOWL_R + 0.4) + Vector((0, 0, 2.12))
-        pts = [p0 + d * (0.25 * math.sin(t * math.pi / 2)) - Vector((0, 0, (2.12 - WATER1_Z) * t * t)) for t in (k / 6 for k in range(7))]
-        out.append(tube(f"fall{i}", pts, 0.06, 6, M["water"], taper=1.6))
-    for o in out:
-        o.data.materials.clear()
-        o.data.materials.append(M["water"])
-        o["reserve"] = True
-    return out
+        d, tip = spout_tip(i)
+        z0 = tip.z
+        drop = z0 - (WATER1_Z - 0.04)
+        a_lin = 0.5 * FALL_L
+        b_sq = drop - a_lin
+        start = tip - d * 0.05
+        pts = []
+        for k in range(segs + 1):
+            t = k / segs
+            pts.append(Vector((0, 0, 0)) + start + d * (FALL_L * t) - Vector((0, 0, a_lin * t + b_sq * t * t)) * (1 if k else 0) + (Vector((0, 0, 0))))
+        pts[0] = start
+        rings, vlen, acc = [], [], 0.0
+        for k, p in enumerate(pts):
+            if k:
+                acc += (p - pts[k - 1]).length
+            vlen.append(acc)
+            t = (pts[min(k + 1, segs)] - pts[max(k - 1, 0)]).normalized()
+            side = t.cross(Vector((0, 0, 1))).normalized() if abs(t.z) < 0.999 else Vector((-d.y, d.x, 0))
+            nrm = side.cross(t).normalized()
+            rr = 0.055 + 0.045 * (k / segs)
+            # 稍微扁平（寬：厚＝1.35：1），像一道水簾
+            rings.append([bm.verts.new(p + side * math.cos(q * math.tau / sides) * rr * 1.35 + nrm * math.sin(q * math.tau / sides) * rr) for q in range(sides)])
+        for k in range(segs):
+            for q in range(sides):
+                q2 = q + 1
+                f = bm.faces.new((rings[k][q], rings[k][q2 % sides], rings[k + 1][q2 % sides], rings[k + 1][q]))
+                for lp, (uu, vv) in zip(f.loops, ((q / sides, vlen[k]), (q2 / sides, vlen[k]), (q2 / sides, vlen[k + 1]), (q / sides, vlen[k + 1]))):
+                    lp[uv].uv = (uu, vv / 0.9)
+        fall_meta.append({"tip": [round(tip.x, 3), round(tip.y, 3), round(tip.z, 3)], "land": [round(pts[-1].x, 3), round(pts[-1].y, 3), round(pts[-1].z, 3)]})
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    me = bpy.data.meshes.new("WishFountain_falls")
+    bm.to_mesh(me)
+    bm.free()
+    fo = bpy.data.objects.new("WishFountain_falls", me)
+    bpy.context.scene.collection.objects.link(fo)
+    me.materials.append(mats["falls"])
+    me.shade_smooth()
+
+    def fcol(co):
+        # 透明度：出水口 0.9 → 中段 0.8 → 入水 0.45（與水面柔和銜接）
+        t = min(1.0, max(0.0, (2.14 - co.z) / (2.14 - WATER1_Z)))
+        a = 0.9 - 0.1 * t - 0.35 * max(0.0, (t - 0.7) / 0.3)
+        return (1.0, 1.0, 1.0, a)
+
+    set_rgba(fo, fcol)
+    out["falls"] = fo
+    # 3) 泡沫環：每道落水的入水點一圈（高於水面 1.5 cm；遊戲端再加 zOffset），V＝徑向，外緣透明
+    bm = bmesh.new()
+    uv = bm.loops.layers.uv.new("UVMap")
+    r_in, r_out = 0.07, 0.6
+    for m in fall_meta:
+        cx, cy = m["land"][0], m["land"][1]
+        annulus(
+            bm, uv, (r_in, r_out), P["foam"], WATER1_Z + 0.015,
+            lambda co, v, f, cx=cx, cy=cy: (foam_u(co, f, cx, cy), (math.hypot(co.x - cx, co.y - cy) - r_in) / (r_out - r_in)),
+            cx, cy,
+        )
+    bm.normal_update()
+    for f in bm.faces:
+        if f.normal.z < 0:
+            f.normal_flip()
+    me = bpy.data.meshes.new("WishFountain_foam")
+    bm.to_mesh(me)
+    bm.free()
+    fm = bpy.data.objects.new("WishFountain_foam", me)
+    bpy.context.scene.collection.objects.link(fm)
+    me.materials.append(mats["foam"])
+    landings = [(m["land"][0], m["land"][1]) for m in fall_meta]
+
+    def mcol(co):
+        r = min(math.hypot(co.x - x, co.y - y) for x, y in landings)
+        return (1.0, 1.0, 1.0, 0.85 if r < 0.3 else 0.0)
+
+    set_rgba(fm, mcol)
+    out["foam"] = fm
+    return out, fall_meta
+
+
+def lathe_uv(ob, tile):
+    """旋轉體 UV：側面用圓柱展開（u＝角度×該點半徑，v＝高度），朝上／下的面用平面投影；每 tile 公尺重複"""
+    me = ob.data
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    uv = bm.loops.layers.uv.verify()
+    for f in bm.faces:
+        if abs(f.normal.z) > 0.7:
+            for lp in f.loops:
+                lp[uv].uv = (lp.vert.co.x / tile, lp.vert.co.y / tile)
+            continue
+        fc = f.calc_center_median()
+        a0 = math.atan2(fc.y, fc.x)
+        for lp in f.loops:
+            co = lp.vert.co
+            a = math.atan2(co.y, co.x)
+            while a - a0 > math.pi:
+                a -= math.tau
+            while a - a0 < -math.pi:
+                a += math.tau
+            r = max(math.hypot(co.x, co.y), 0.3)
+            lp[uv].uv = (a * r / tile, co.z / tile)
+    bm.to_mesh(me)
+    bm.free()
+
+
+def simple_mat(name, rgb, rough=0.5, metal=0.0, emit=None):
+    """頂點色 × 顏色的簡單材質（遊戲端會換成 StandardMaterial，這裡只是預設值與 Blender 預覽用）"""
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    b = nt.nodes["Principled BSDF"]
+    b.inputs["Base Color"].default_value = (*rgb, 1)
+    b.inputs["Roughness"].default_value = rough
+    b.inputs["Metallic"].default_value = metal
+    if emit:
+        b.inputs["Emission Color"].default_value = (*emit[0], 1)
+        b.inputs["Emission Strength"].default_value = emit[1]
+    return m
+
+
+def white(ob):
+    me = ob.data
+    if "Col" in me.color_attributes:
+        me.color_attributes.remove(me.color_attributes["Col"])
+    ca = me.color_attributes.new("Col", "FLOAT_COLOR", "POINT")
+    for d in ca.data:
+        d.color = (1, 1, 1, 1)
+    me.color_attributes.active_color = ca
 
 
 def tri_count(objs):
@@ -345,7 +544,7 @@ def export_glb(objs, path):
     bpy.ops.object.select_all(action="DESELECT")
     for o in objs:
         o.select_set(True)
-    bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=True, export_apply=True, export_yup=True)
+    bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=True, export_apply=True, export_yup=True, export_vertex_color="ACTIVE")
 
 
 def setup_render():
@@ -395,70 +594,89 @@ def shoot(cam, target, yaw, elev, dist, path, res=(1200, 800), lens=40, ortho=No
 
 def main():
     t0 = time.time()
-    report = {"lods": {}}
+    report = {"lods": {}, "budget": {"hq": 28000, "lite": 11000}}
+    log = []
     for lod in ("lite", "hq"):
         reset()
+        kit = vp3_kit.make_materials(TEX, lod)
         M = {
-            "stone": clay("clay_stone", (0.74, 0.72, 0.69)),
-            "gold": clay("clay_gold", (0.86, 0.72, 0.42), rough=0.4),
-            "crystal": clay("clay_crystal", (0.62, 0.82, 0.95), rough=0.25, emit=((0.4, 0.7, 1.0), 0.35)),
-            "water": clay("reserve_water", (0.35, 0.62, 0.92), rough=0.2),
+            "stone": kit["stone"],
+            "gold": simple_mat("VP3_gold", (0.86, 0.68, 0.36), rough=0.35, metal=0.6),
+            "crystal": simple_mat("VP3_crystal", (0.62, 0.84, 0.98), rough=0.15, emit=((0.35, 0.65, 1.0), 0.8)),
+            "water": simple_mat("VP3_water", (0.6, 0.84, 0.96), rough=0.1),
+            "falls": simple_mat("VP3_falls", (0.85, 0.94, 1.0), rough=0.1),
+            "foam": simple_mat("VP3_foam", (1, 1, 1), rough=0.6),
         }
+        key_of = {M[k].name: k for k in ("stone", "gold", "crystal")}
         parts = build(lod, M)
         groups = {"stone": [], "gold": [], "crystal": []}
         for p in parts:
-            key = "gold" if p.data.materials[0].name.startswith("clay_gold") else "crystal" if p.data.materials[0].name.startswith("clay_crystal") else "stone"
-            groups[key].append(p)
-        per = {k: tri_count(v) for k, v in groups.items()}
-        merged = [join(v, f"WishFountain_{k}") for k, v in groups.items() if v]
-        tris = tri_count(merged)
-        export_glb(merged, os.path.join(OUT, f"fountain_{lod}.glb"))
-        bb = [o.matrix_world @ v.co for o in merged for v in o.data.vertices]
+            groups[key_of[p.data.materials[0].name]].append(p)
+        # 石材 UV（旋轉體圓柱展開，其他方塊投影）＋白色頂點色（之後乘環境光遮蔽）
+        for p in groups["stone"]:
+            bpy.context.view_layer.objects.active = p
+            bpy.ops.object.select_all(action="DESELECT")
+            p.select_set(True)
+            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+            if p.get("lathe") and abs(p.location.x) < 1e-6 and p.name in ("basin", "bowl", "column"):
+                lathe_uv(p, 2.0)
+            else:
+                vp3_kit.box_uv(p, 2.0)
+            white(p)
+        for p in groups["gold"] + groups["crystal"]:
+            white(p)
+        merged = {k: vp3_kit_join(v, f"WishFountain_{k}") for k, v in groups.items() if v}
+        # 環境光遮蔽烘焙到石材頂點色（金環、星晶一起當遮擋物；水體在烘焙之後才建立）
+        ok = vp3_kit.bake_ao([merged["stone"]], samples=32, strength=0.7, log=log)
+        water, fall_meta = build_water(lod, M)
+        allm = {**merged, **water}
+        per = {k: tri_count([o]) for k, o in allm.items()}
+        tris = sum(per.values())
+        objs = list(allm.values())
+        export_glb(objs, os.path.join(OUT, f"fountain_{lod}.glb"))
+        verts = [o.matrix_world @ v.co for o in merged.values() for v in o.data.vertices]
         report["lods"][lod] = {
             "triangles": tris,
-            "by_material": per,
-            "meshes": len(merged),
-            "bounds": {"radius": round(max(math.hypot(v.x, v.y) for v in bb), 3), "top": round(max(v.z for v in bb), 3)},
+            "within_budget": tris <= report["budget"][lod],
+            "by_mesh": per,
+            "meshes": len(objs),
+            "ao_baked": ok,
+            "bounds": {"radius": round(max(math.hypot(v.x, v.y) for v in verts), 3), "top": round(max(v.z for v in verts), 3)},
             "bytes": os.path.getsize(os.path.join(OUT, f"fountain_{lod}.glb")),
         }
-        if lod == "hq":
-            reserve = reserve_markers(M)
-            report["reserve_triangles_preview_only"] = tri_count(reserve)
-            # 預覽地面＋參考：可走範圍邊界（碰撞半徑 7 m＋角色半徑）、噴泉步道 r 11、1.25 m 角色
+        report["falls"] = fall_meta
+        if lod == "hq" and PREVIEWS:
             bpy.ops.mesh.primitive_cylinder_add(vertices=128, radius=11.0, depth=0.02, location=(0, 0, -0.01))
             g = bpy.context.active_object
-            g.data.materials.append(clay("ground", (0.5, 0.52, 0.5), rough=0.95))
+            g.data.materials.append(simple_mat("ground", (0.5, 0.52, 0.5), rough=0.95))
             cam = setup_render()
-            shoot(cam, (0, 0, 2.6), 0, 10, 24, os.path.join(OUT, "fountain_front.png"))
-            shoot(cam, (0, 0, 2.4), 45, 24, 24, os.path.join(OUT, "fountain_q45.png"))
-            shoot(cam, (0, 0, 0), 0, 89.5, 30, os.path.join(OUT, "fountain_top.png"), res=(1000, 1000))
-            shoot(cam, (0, 0, 5.25), 28, 10, 7.5, os.path.join(OUT, "fountain_close.png"), lens=45)
-            # 尺寸對照：正面正交圖＋俯視正交圖（加上碰撞圈、步道圈、角色）
-            ref = []
-            for R, col in ((7.0, (0.9, 0.2, 0.2)), (10.5, (0.2, 0.45, 0.95))):
-                ref.append(torus(f"ref{R}", R, 0.05, (160, 6), clay(f"ref{R}", col), loc=(0, 0, 0.02)))
-            bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=0.3, depth=1.25, location=(7.6, -0.5, 0.625))
-            hm = bpy.context.active_object
-            hm.data.materials.append(clay("human", (0.95, 0.55, 0.7)))
-            ref.append(hm)
-            shoot(cam, (0, 0, 3.4), 0, 0, 40, os.path.join(OUT, "fountain_elev.png"), res=(1400, 700), ortho=16.5)
-            shoot(cam, (0, 0, 0), 0, 90, 40, os.path.join(OUT, "fountain_plan.png"), res=(1000, 1000), ortho=23.5)
+            shoot(cam, (0, 0, 2.4), 45, 24, 24, os.path.join(OUT, "fountain_blender_q45.png"))
+    report["log"] = log
     report["seconds"] = round(time.time() - t0, 1)
     report["dims"] = {
         "outer_diameter": R_OUT * 2,
         "basin_inner_diameter": INNER_R * 2,
         "rim_top": RIM_TOP,
+        "finial_top": 1.1,
         "bowl_diameter": BOWL_R * 2,
         "bowl_top": BOWL_TOP,
         "crystal": [CRYSTAL_BOTTOM, CRYSTAL_TOP],
         "rings_diameter": [RING_A_R * 2, RING_B_R * 2],
-        "water1_z": WATER1_Z,
-        "water2_z": WATER2_Z,
+        "water1": {"z": WATER1_Z, "r": [WATER1_IN, round(WATER1_OUT, 3)]},
+        "water2": {"z": WATER2_Z, "r": [WATER2_IN, WATER2_OUT]},
         "spouts": 8,
     }
     with open(os.path.join(OUT, "fountain_report.json"), "w") as f:
         json.dump(report, f, ensure_ascii=False, indent=1)
     print(json.dumps(report, ensure_ascii=False, indent=1))
+    if not all(v["within_budget"] for v in report["lods"].values()):
+        raise SystemExit("三角面超出預算")
+
+
+def vp3_kit_join(objs, name):
+    j = join(objs, name)
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    return j
 
 
 main()

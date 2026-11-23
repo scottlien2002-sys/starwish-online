@@ -121,7 +121,35 @@ def make(n):
     rip2 = tile_noise(n, 11, 3)
     w = 0.5 + (rip - 0.5) * 0.6 + (rip2 - 0.5) * 0.4
     tex["water"] = to_img(np.stack([0.55 + w * 0.15, 0.82 + w * 0.1, 0.95 + w * 0.05], -1))
+    # P3-1B：水面法線（HQ；低強度，避免遠處閃爍）
+    nrm["water"] = normal_from_height(rip * 0.7 + rip2 * 0.3, 4.0)
     return tex, nrm
+
+
+def make_fx(n):
+    """P3-1B 噴泉特效貼圖（RGBA，小尺寸）：落水條紋、漣漪泡沫環、星晶光暈"""
+    out = {}
+    yy, xx = np.mgrid[0:n, 0:n] / n
+    # 落水：沿 V（影像列）不變的直向條紋＋少量 2D 破碎；上下左右可無縫重複
+    s1 = tile_noise(n, 10, 3)[n // 3][None, :].repeat(n, 0)
+    s2 = tile_noise(n, 4, 3)
+    a = np.clip(0.42 + (s1 - 0.5) * 0.9 + (s2 - 0.5) * 0.35, 0.08, 1.0)
+    rgb = np.stack([0.8 + a * 0.2, 0.9 + a * 0.1, np.ones_like(a)], -1)
+    out["fall"] = np.concatenate([rgb, a[..., None]], -1)
+    # 泡沫：沿 V 的同心環（V＝徑向，捲動時往外擴散），整數頻率可重複
+    ns = tile_noise(n, 6, 3)
+    ring = np.sin((yy * 3 + (ns - 0.5) * 0.35) * np.pi * 2) * 0.5 + 0.5
+    a = np.clip((ring - 0.45) * 2.2, 0, 1) * (0.55 + 0.45 * tile_noise(n, 12, 2))
+    out["foam"] = np.concatenate([np.ones((n, n, 3)), a[..., None]], -1)
+    # 光暈：柔和高斯＋極淡 8 道星芒，邊緣歸零
+    cx = xx - 0.5 + 0.5 / n
+    cy = yy - 0.5 + 0.5 / n
+    r = np.sqrt(cx * cx + cy * cy)
+    th = np.arctan2(cy, cx)
+    a = 0.75 * np.exp(-(r / 0.16) ** 2) + 0.3 * np.exp(-(r / 0.3) ** 2) * (0.8 + 0.2 * np.cos(4 * th) ** 6)
+    a *= np.clip((0.5 - r) / 0.12, 0, 1)
+    out["halo"] = np.concatenate([np.ones((n, n, 3)), np.clip(a, 0, 1)[..., None]], -1)
+    return {k: Image.fromarray((np.clip(v, 0, 1) * 255).astype(np.uint8), "RGBA") for k, v in out.items()}
 
 
 def main():
@@ -139,6 +167,11 @@ def main():
                 p = os.path.join(out, f"{k}_nrm_hq.png")
                 Image.fromarray(a, "RGB").save(p, optimize=True)
                 info[f"{k}_nrm_hq"] = {"px": n, "bytes": os.path.getsize(p)}
+    for lod, n in (("hq", 256), ("lite", 128)):
+        for k, im in make_fx(n).items():
+            p = os.path.join(out, f"fx_{k}_{lod}.png")
+            im.save(p, optimize=True)
+            info[f"fx_{k}_{lod}"] = {"px": n, "bytes": os.path.getsize(p)}
     json.dump(info, open(os.path.join(out, "textures.json"), "w"), indent=1)
     print(json.dumps(info, indent=1))
 

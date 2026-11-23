@@ -9,6 +9,8 @@ on:
     branches: ["feature/render-village-p3"]
     paths:
       - "art/village-p3/**"
+      - "tools/fountain-lab/**"
+      - "src/maps/village/FountainP3.ts"
       - ".github/workflows/blender-village-p3.yml"
 
 permissions:
@@ -51,10 +53,10 @@ jobs:
           /opt/blender/blender -b --factory-startup -noaudio -P art/village-p3/build_p30.py -- --tex "$PWD/out/textures" --out "$PWD/out" 2>&1 | tee out/blender.log | grep -v "^Fra:" | grep -v "Sample" | tail -40
           for f in p30_sample_hq.glb p30_sample_lite.glb p30_front.png p30_q45.png p30_top.png p30_close.png p30_report.json; do test -f "out/$f"; done
 
-      - name: P3-1A Wish Fountain shape (clay, previews, size comparison)
+      - name: P3-1B Wish Fountain (shape + AO-baked stone + water/falls/foam meshes; budget check)
         run: |
-          /opt/blender/blender -b --factory-startup -noaudio -P art/village-p3/build_fountain.py -- --out "$PWD/out" 2>&1 | tee out/fountain.log | grep -v "^Fra:" | grep -v "Sample" | tail -60
-          for f in fountain_hq.glb fountain_lite.glb fountain_front.png fountain_q45.png fountain_top.png fountain_close.png fountain_elev.png fountain_plan.png fountain_report.json; do test -f "out/$f"; done
+          /opt/blender/blender -b --factory-startup -noaudio -P art/village-p3/build_fountain.py -- --tex "$PWD/out/textures" --out "$PWD/out" --previews 0 2>&1 | tee out/fountain.log | grep -v "^Fra:" | grep -v "Sample" | tail -80
+          for f in fountain_hq.glb fountain_lite.glb fountain_report.json; do test -f "out/$f"; done
 
       - name: Validate GLB (Khronos glTF-Validator)
         run: |
@@ -79,6 +81,21 @@ jobs:
               if (bad) process.exit(1);
             })();'
 
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: P3-1B Babylon preview lab (standalone page, NOT deployed) — typecheck, build, screenshots, cost
+        run: |
+          npm install --no-audit --no-fund
+          npm run typecheck
+          mkdir -p tools/fountain-lab/public/models/fx
+          cp out/fountain_hq.glb out/fountain_lite.glb tools/fountain-lab/public/models/
+          cp out/textures/water_hq.png out/textures/water_lite.png out/textures/water_nrm_hq.png out/textures/fx_*.png tools/fountain-lab/public/models/fx/
+          npx vite build tools/fountain-lab --base ./ --outDir "$PWD/out-lab" --emptyOutDir
+          npx playwright install --with-deps chromium webkit >/dev/null
+          node tools/fountain-lab/shoot.mjs out-lab out/lab | tail -120
+
       - name: Contact sheet
         if: always()
         run: |
@@ -100,8 +117,21 @@ jobs:
                   im = im.copy(); im.thumbnail((W, H))
                   sheet.paste(im, ((i % 2) * W + (W - im.width) // 2, (i // 2) * H + (H - im.height) // 2))
               sheet.save("out/fountain_contact_sheet.png")
+          ims = []
+          for v in ("front", "q45", "top", "close", "falls", "game"):
+              p = f"out/lab/chromium_hq_{v}.png"
+              if os.path.exists(p):
+                  ims.append(Image.open(p).convert("RGB"))
+          if ims:
+              w, h = ims[0].size
+              cols = 2
+              rows = (len(ims) + 1) // 2
+              sheet = Image.new("RGB", (w * cols, h * rows), (235, 236, 242))
+              for i, im in enumerate(ims):
+                  sheet.paste(im, ((i % cols) * w, (i // cols) * h))
+              sheet = sheet.resize((sheet.width // 2, sheet.height // 2))
+              sheet.save("out/fountain_1b_hq_sheet.png")
           PY
-          python3 art/village-p3/fountain_compare.py out || true
 
       - name: Push results to art-village-p3 branch (normal push, no force)
         if: always()
