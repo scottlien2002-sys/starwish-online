@@ -1,167 +1,309 @@
 {
- "startedAt": "2026-11-23T10:46:45.104Z",
+ "startedAt": "2026-11-23T11:57:39.135Z",
+ "checks": {
+  "benches 位置＝既有碰撞（誤差 < 1 cm）": {
+   "ok": true,
+   "detail": {
+    "count": 8,
+    "colliders": 8,
+    "maxErr": 0.0006168623426758979
+   }
+  },
+  "crystal_lamps 位置＝既有碰撞（誤差 < 1 cm）": {
+   "ok": true,
+   "detail": {
+    "count": 4,
+    "colliders": 4,
+    "maxErr": 0.0006867120224530259
+   }
+  },
+  "lamps 位置＝既有碰撞（誤差 < 1 cm）": {
+   "ok": true,
+   "detail": {
+    "count": 9,
+    "colliders": 9,
+    "maxErr": 0.0004953290527801279
+   }
+  },
+  "花圃不擋道路、石階、NPC、出生點、佈告欄、鍛造台；高度 ≤ 0.25 m": {
+   "ok": true,
+   "detail": {
+    "beds": 10,
+    "samples": 270,
+    "issues": []
+   }
+  },
+  "創角出生點站在羅盤徽上（V1.3 出生點不變）": {
+   "ok": true,
+   "detail": {
+    "spawn": {
+     "id": "spawn",
+     "label": "出生點",
+     "x": 0,
+     "z": -12.5,
+     "yaw": -1.2246467991473532e-16
+    },
+    "compass": {
+     "x": 0,
+     "z": -14.55,
+     "r": 2.45
+    }
+   }
+  },
+  "道路寬度與方向＝V1.3（4 條、半寬 3 m）": {
+   "ok": true,
+   "detail": [
+    {
+     "bearing": 0,
+     "from": 23,
+     "to": 40,
+     "half": 3,
+     "h": 2
+    },
+    {
+     "bearing": 90,
+     "from": 17.95,
+     "to": 40,
+     "half": 3,
+     "h": 0
+    },
+    {
+     "bearing": 180,
+     "from": 17.95,
+     "to": 40,
+     "half": 3,
+     "h": 0
+    },
+    {
+     "bearing": 270,
+     "from": 17.95,
+     "to": 40,
+     "half": 3,
+     "h": 0
+    }
+   ]
+  }
+ },
  "runs": [
   {
    "browser": "chromium",
    "mode": "hq",
    "errors": [],
    "shots": [
-    "chromium_hq_front.png",
-    "chromium_hq_q45.png",
     "chromium_hq_top.png",
-    "chromium_hq_close.png",
-    "chromium_hq_falls.png",
-    "chromium_hq_game.png"
+    "chromium_hq_topwide.png",
+    "chromium_hq_player_spawn.png",
+    "chromium_hq_player_south.png",
+    "chromium_hq_pano.png",
+    "chromium_hq_pano_ne.png",
+    "chromium_hq_close_bench.png",
+    "chromium_hq_close_lamp.png",
+    "chromium_hq_close_compass.png",
+    "chromium_hq_close_wall.png"
    ],
-   "loadMs": 7315,
+   "loadMs": 6989,
    "stats": {
-    "meshes": 7,
-    "triangles": 26802,
-    "byMesh": {
-     "stone": 16832,
-     "gold": 7440,
-     "crystal": 96,
-     "water": 704,
-     "falls": 1344,
-     "foam": 384,
-     "halo": 2
+    "fountain": {
+     "meshes": 7,
+     "triangles": 26802,
+     "byMesh": {
+      "stone": 16832,
+      "gold": 7440,
+      "crystal": 96,
+      "water": 704,
+      "falls": 1344,
+      "foam": 384,
+      "halo": 2
+     },
+     "materials": 7,
+     "opaqueMeshes": 4,
+     "transparentMeshes": 3,
+     "textures": 7,
+     "texturePixels": 4390912,
+     "shadowCasters": 3
     },
-    "materials": 7,
-    "opaqueMeshes": 4,
-    "transparentMeshes": 3,
-    "textures": 7,
-    "texturePixels": 4390912,
-    "shadowCasters": 3
-   },
-   "size": {
-    "w": 1280,
-    "h": 720
-   },
-   "withFountain": {
-    "drawCalls": 17,
-    "activeMeshes": 13
-   },
-   "withoutFountain": {
-    "drawCalls": 7,
-    "activeMeshes": 6
-   },
-   "fountainDrawCalls": 10,
-   "flicker": {
-    "game_camera": {
-     "maxRatio": 0.00035342261904761904,
-     "meanRatio": 0.0002976190476190476
-    },
-    "q45_camera": {
-     "maxRatio": 0.0001984126984126984,
-     "meanRatio": 0.0001630704365079365
-    },
-    "game_time": {
-     "maxRatio": 0,
-     "meanRatio": 0
+    "plaza": {
+     "meshes": 5,
+     "triangles": 24138,
+     "byMesh": {
+      "paving": 10508,
+      "gold": 2596,
+      "props": 10628,
+      "glass": 154,
+      "banner": 252
+     },
+     "materials": 5,
+     "transparentMeshes": 0,
+     "textures": 3,
+     "texturePixels": 655360,
+     "shadowCasters": 3
     }
    },
-   "frameMsSoftware": 0.8000000000465661
+   "drawCalls": {
+    "none": {
+     "drawCalls": 127,
+     "activeMeshes": 60
+    },
+    "fountain": {
+     "drawCalls": 137,
+     "activeMeshes": 67
+    },
+    "both": {
+     "drawCalls": 145,
+     "activeMeshes": 72
+    }
+   },
+   "plazaDrawCalls": 8,
+   "fountainDrawCalls": 10,
+   "flicker": {
+    "player_spawn": {
+     "maxRatio": 0.003267609126984127,
+     "meanRatio": 0.003132440476190476
+    },
+    "pano": {
+     "maxRatio": 0.0046875,
+     "meanRatio": 0.004430183531746032
+    }
+   },
+   "frameMsSoftware": 2.099999999976717
   },
   {
    "browser": "chromium",
    "mode": "lite-low",
    "errors": [],
    "shots": [
-    "chromium_lite-low_front.png",
-    "chromium_lite-low_q45.png",
-    "chromium_lite-low_close.png",
-    "chromium_lite-low_falls.png",
-    "chromium_lite-low_game.png"
+    "chromium_lite-low_top.png",
+    "chromium_lite-low_player_spawn.png",
+    "chromium_lite-low_player_south.png",
+    "chromium_lite-low_pano.png",
+    "chromium_lite-low_close_lamp.png"
    ],
-   "loadMs": 1805,
+   "loadMs": 1281,
    "stats": {
-    "meshes": 7,
-    "triangles": 10802,
-    "byMesh": {
-     "stone": 7360,
-     "gold": 2496,
-     "crystal": 96,
-     "water": 144,
-     "falls": 512,
-     "foam": 192,
-     "halo": 2
+    "fountain": {
+     "meshes": 7,
+     "triangles": 10802,
+     "byMesh": {
+      "stone": 7360,
+      "gold": 2496,
+      "crystal": 96,
+      "water": 144,
+      "falls": 512,
+      "foam": 192,
+      "halo": 2
+     },
+     "materials": 7,
+     "opaqueMeshes": 4,
+     "transparentMeshes": 3,
+     "textures": 5,
+     "texturePixels": 573440,
+     "shadowCasters": 0
     },
-    "materials": 7,
-    "opaqueMeshes": 4,
-    "transparentMeshes": 3,
-    "textures": 5,
-    "texturePixels": 573440,
-    "shadowCasters": 0
-   },
-   "size": {
-    "w": 1280,
-    "h": 720
-   },
-   "withFountain": {
-    "drawCalls": 12,
-    "activeMeshes": 13
-   },
-   "withoutFountain": {
-    "drawCalls": 5,
-    "activeMeshes": 6
-   },
-   "fountainDrawCalls": 7,
-   "flicker": {
-    "game_camera": {
-     "maxRatio": 0.00026041666666666666,
-     "meanRatio": 0.00023685515873015875
-    },
-    "q45_camera": {
-     "maxRatio": 0.00018601190476190475,
-     "meanRatio": 0.0001717509920634921
-    },
-    "game_time": {
-     "maxRatio": 0,
-     "meanRatio": 0
+    "plaza": {
+     "meshes": 4,
+     "triangles": 8788,
+     "byMesh": {
+      "paving": 2948,
+      "props": 5390,
+      "glass": 154,
+      "contact": 296
+     },
+     "materials": 5,
+     "transparentMeshes": 1,
+     "textures": 1,
+     "texturePixels": 65536,
+     "shadowCasters": 0
     }
    },
-   "frameMsSoftware": 1.1000000000349246
+   "drawCalls": {
+    "none": {
+     "drawCalls": 58,
+     "activeMeshes": 60
+    },
+    "fountain": {
+     "drawCalls": 65,
+     "activeMeshes": 67
+    },
+    "both": {
+     "drawCalls": 69,
+     "activeMeshes": 71
+    }
+   },
+   "plazaDrawCalls": 4,
+   "fountainDrawCalls": 7,
+   "flicker": {
+    "player_spawn": {
+     "maxRatio": 0.006498015873015873,
+     "meanRatio": 0.0060875496031746025
+    },
+    "pano": {
+     "maxRatio": 0.00521453373015873,
+     "meanRatio": 0.0050018601190476185
+    }
+   },
+   "frameMsSoftware": 1.4333333333488554
   },
   {
    "browser": "webkit",
    "mode": "hq",
    "errors": [],
    "shots": [
-    "webkit_hq_game.png",
-    "webkit_hq_falls.png"
+    "webkit_hq_player_spawn.png",
+    "webkit_hq_pano.png"
    ],
-   "loadMs": 2502,
+   "loadMs": 2644,
    "stats": {
-    "meshes": 7,
-    "triangles": 26802,
-    "byMesh": {
-     "stone": 16832,
-     "gold": 7440,
-     "crystal": 96,
-     "water": 704,
-     "falls": 1344,
-     "foam": 384,
-     "halo": 2
+    "fountain": {
+     "meshes": 7,
+     "triangles": 26802,
+     "byMesh": {
+      "stone": 16832,
+      "gold": 7440,
+      "crystal": 96,
+      "water": 704,
+      "falls": 1344,
+      "foam": 384,
+      "halo": 2
+     },
+     "materials": 7,
+     "opaqueMeshes": 4,
+     "transparentMeshes": 3,
+     "textures": 7,
+     "texturePixels": 4390912,
+     "shadowCasters": 3
     },
-    "materials": 7,
-    "opaqueMeshes": 4,
-    "transparentMeshes": 3,
-    "textures": 7,
-    "texturePixels": 4390912,
-    "shadowCasters": 3
+    "plaza": {
+     "meshes": 5,
+     "triangles": 24138,
+     "byMesh": {
+      "paving": 10508,
+      "gold": 2596,
+      "props": 10628,
+      "glass": 154,
+      "banner": 252
+     },
+     "materials": 5,
+     "transparentMeshes": 0,
+     "textures": 3,
+     "texturePixels": 655360,
+     "shadowCasters": 3
+    }
    },
-   "size": {
-    "w": 1280,
-    "h": 720
+   "drawCalls": {
+    "none": {
+     "drawCalls": 127,
+     "activeMeshes": 60
+    },
+    "fountain": {
+     "drawCalls": 137,
+     "activeMeshes": 67
+    },
+    "both": {
+     "drawCalls": 145,
+     "activeMeshes": 72
+    }
    },
-   "withFountain": {
-    "drawCalls": 17,
-    "activeMeshes": 13
-   },
-   "withoutFountain": {
-    "drawCalls": 7,
-    "activeMeshes": 6
-   },
+   "plazaDrawCalls": 8,
    "fountainDrawCalls": 10
   },
   {
@@ -169,42 +311,62 @@
    "mode": "lite-low",
    "errors": [],
    "shots": [
-    "webkit_lite-low_game.png"
+    "webkit_lite-low_player_spawn.png"
    ],
-   "loadMs": 1368,
+   "loadMs": 880,
    "stats": {
-    "meshes": 7,
-    "triangles": 10802,
-    "byMesh": {
-     "stone": 7360,
-     "gold": 2496,
-     "crystal": 96,
-     "water": 144,
-     "falls": 512,
-     "foam": 192,
-     "halo": 2
+    "fountain": {
+     "meshes": 7,
+     "triangles": 10802,
+     "byMesh": {
+      "stone": 7360,
+      "gold": 2496,
+      "crystal": 96,
+      "water": 144,
+      "falls": 512,
+      "foam": 192,
+      "halo": 2
+     },
+     "materials": 7,
+     "opaqueMeshes": 4,
+     "transparentMeshes": 3,
+     "textures": 5,
+     "texturePixels": 573440,
+     "shadowCasters": 0
     },
-    "materials": 7,
-    "opaqueMeshes": 4,
-    "transparentMeshes": 3,
-    "textures": 5,
-    "texturePixels": 573440,
-    "shadowCasters": 0
+    "plaza": {
+     "meshes": 4,
+     "triangles": 8788,
+     "byMesh": {
+      "paving": 2948,
+      "props": 5390,
+      "glass": 154,
+      "contact": 296
+     },
+     "materials": 5,
+     "transparentMeshes": 1,
+     "textures": 1,
+     "texturePixels": 65536,
+     "shadowCasters": 0
+    }
    },
-   "size": {
-    "w": 1280,
-    "h": 720
+   "drawCalls": {
+    "none": {
+     "drawCalls": 58,
+     "activeMeshes": 60
+    },
+    "fountain": {
+     "drawCalls": 65,
+     "activeMeshes": 67
+    },
+    "both": {
+     "drawCalls": 69,
+     "activeMeshes": 71
+    }
    },
-   "withFountain": {
-    "drawCalls": 12,
-    "activeMeshes": 13
-   },
-   "withoutFountain": {
-    "drawCalls": 5,
-    "activeMeshes": 6
-   },
+   "plazaDrawCalls": 4,
    "fountainDrawCalls": 7
   }
  ],
- "finishedAt": "2026-11-23T10:52:42.909Z"
+ "finishedAt": "2026-11-23T12:04:30.487Z"
 }
