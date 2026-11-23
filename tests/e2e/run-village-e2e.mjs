@@ -189,6 +189,21 @@ for (const name of browsers) {
       const rep = await page.evaluate(() => window.__starwishVillage.report());
       const modeOk = mode === "hq" ? /模式 HQ/.test(rep) : mode === "lite-mid" ? /模式 Lite 中畫質/.test(rep) : /模式 Lite 低畫質/.test(rep);
       check("報告文字（含模式）", /星芽村 V1.3 Grey-box/.test(rep) && /出生／復活點 24/.test(rep) && /傳送門 4（開放 1）/.test(rep) && modeOk, rep.slice(0, 400));
+      // 巡迴 1 圈（只在 WebKit Lite 低跑，控制 CI 時間）：真正卡住 0、報告含必要欄位
+      if (name === "webkit" && mode === "lite-low") {
+        await page.evaluate(() => { window.__starwishVillage.setLabels(true); window.__starwishVillage.startTour(1); });
+        const done = await page
+          .waitForFunction(() => window.__starwishVillage.tourState().result !== null, null, { timeout: 600000, polling: 1000 })
+          .then(() => true)
+          .catch(() => false);
+        const tr = await page.evaluate(() => ({ state: window.__starwishVillage.tourState(), rep: window.__starwishVillage.report() }));
+        run.results.tour = { done, result: tr.state.result };
+        const res = tr.state.result;
+        check("巡迴 1 圈完成、真正卡住 0、腳本誤報 0", done && res && res.stuck === 0 && res.timeouts === 0 && res.loopTimes.length === 1, res ? { loopTimes: res.loopTimes, stuck: res.stuck, timeouts: res.timeouts, blocked: res.blockedFrames, events: res.events } : "未完成");
+        check("巡迴報告含每圈時間、FPS、Draw Calls、Context Lost、卡住與誤報次數、異常事件欄",
+          /每圈時間/.test(tr.rep) && /總時間/.test(tr.rep) && /1% Low/.test(tr.rep) && /Draw Calls 平均/.test(tr.rep) && /Context Lost/.test(tr.rep) && /真正卡住 \d+ 次；腳本誤報/.test(tr.rep) && /異常事件：無|異常 /.test(tr.rep),
+          tr.rep.split("\n").slice(-8).join(" / "));
+      }
       const after = await page.evaluate(() => window.__starwishVillage.info());
       check("沒有 WebGL Context Lost", after.contextLost === 0, after.contextLost);
     } catch (e) {

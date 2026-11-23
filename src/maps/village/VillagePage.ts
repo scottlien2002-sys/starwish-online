@@ -28,6 +28,7 @@ import {
   villageCameraDistance,
 } from "./layout.ts";
 import { buildVillageWorld, type VillageWorld } from "./VillageWorld.ts";
+import { TourRunner, tourPoints, type TourEvent } from "./tour.ts";
 
 /**
  * Stage 6 P2-3 第一階段：星芽村 Grey-box 測試頁（?map=village）。
@@ -47,42 +48,12 @@ export function startVillageMap(canvas: HTMLCanvasElement, hudRoot: HTMLElement)
   return Promise.resolve();
 }
 
-/** 巡迴路線（效能測試用）：傳送陣 → 噴泉 → 依序經過每位 NPC 門前 → 回到傳送陣 */
-function tourPoints(): { x: number; z: number }[] {
-  const pts: { x: number; z: number }[] = [{ x: ARRIVAL_SPOT.x, z: ARRIVAL_SPOT.z }, { x: 0, z: -16 }];
-  // NPC 門前＋北、東、西傳送門前，依方位從南往西繞一圈（順時針）
-  const stops = [
-    ...NPC_SPOTS.map((n) => ({ x: n.x + Math.sin(n.yaw) * 1.8, z: n.z + Math.cos(n.yaw) * 1.8, a: Math.atan2(n.x, n.z) })),
-    ...PORTALS.filter((p) => p.id !== "south").map((p) => {
-      const t = (p.bearing * Math.PI) / 180;
-      return { x: 38 * Math.sin(t), z: 38 * Math.cos(t), a: t };
-    }),
-  ].sort((a, b) => ((((a.a * 180) / Math.PI + 540) % 360) - (((b.a * 180) / Math.PI + 540) % 360)));
-  for (const s of stops) {
-    // 先走到環形廣場上該方位（r 14），再到目的地，再回到環上
-    const ring = { x: 14 * Math.sin(s.a), z: 14 * Math.cos(s.a) };
-    pts.push(ring, { x: s.x, z: s.z }, ring);
-  }
-  pts.push({ x: 0, z: -16 }, { x: ARRIVAL_SPOT.x, z: ARRIVAL_SPOT.z });
-  return pts;
-}
-
-interface TourRun {
-  loops: number;
-  loop: number;
-  idx: number;
-  t: number;
-  loopT: number;
-  warm: number;
-  phase: "warmup" | "running" | "done";
-  pts: { x: number; z: number }[];
+/** 巡迴測試期間的效能取樣（巡迴判定在 tour.ts） */
+interface TourSampling {
+  runner: TourRunner;
   dts: number[];
   draws: number[];
   tris: number[];
-  loopTimes: number[];
-  stuck: number;
-  lastProgressT: number;
-  lastDist: number;
 }
 
 class VillagePage {
@@ -109,8 +80,21 @@ class VillagePage {
   private contextLost = 0;
   private fpsTimer = 0;
   private blockedFrames = 0;
-  private tour: TourRun | null = null;
-  private lastTour: { loopTimes: number[]; avgFps: number; low1Fps: number; minFps: number; avgDraw: number; maxDraw: number; avgTris: number; stuck: number; stutters: number } | null = null;
+  private tour: TourSampling | null = null;
+  private lastTour: {
+    loopTimes: number[];
+    avgFps: number;
+    low1Fps: number;
+    minFps: number;
+    avgDraw: number;
+    maxDraw: number;
+    avgTris: number;
+    stuck: number;
+    timeouts: number;
+    blockedFrames: number;
+    events: TourEvent[];
+    stutters: number;
+  } | null = null;
   private panel!: HTMLDivElement;
   private info!: HTMLDivElement;
   private reportBox!: HTMLTextAreaElement;
@@ -221,20 +205,15 @@ class VillagePage {
     let moveZ = 0;
     let speed01 = 0;
     const tour = this.tour;
-    if (tour && tour.phase === "running") {
-      const target = tour.pts[tour.idx]!;
-      const dx = target.x - this.pos.x;
-      const dz = target.z - this.pos.z;
-      const d = Math.hypot(dx, dz);
-      if (d < 0.6) {
-        tour.idx++;
-        if (tour.idx >= tour.pts.length) this.tourLoopDone(tour);
-      } else {
-        moveX = dx / d;
-        moveZ = dz / d;
+    const touring = tour !== null && tour.runner.phase !== "done";
+    if (tour && tour.runner.phase === "running") {
+      const dir = tour.runner.steer(this.pos.x, this.pos.z);
+      if (dir) {
+        moveX = dir.x;
+        moveZ = dir.z;
         speed01 = 1;
       }
-    } else if (!tour || tour.phase === "done") {
+    } else if (!touring) {
       const m = this.input.getMove();
       const w = inputToWorld(m.x, m.y, this.camera.forwardYaw);
       const l = Math.hypot(w.x, w.z);
@@ -243,10 +222,12 @@ class VillagePage {
       moveZ = w.z * s;
       speed01 = Math.min(1, l);
     }
+    let blockedNow = false;
     if (speed01 > 0 && !this.overview) {
       const step = WALK_SPEED * speed01 * dt;
       const r = moveVillage(this.pos.x, this.pos.z, this.pos.x + moveX * step, this.pos.z + moveZ * step);
       if (r.blocked) this.blockedFrames++;
+      blockedNow = r.blocked;
       this.pos.x = r.x;
       this.pos.z = r.z;
       this.yaw = turnTowards(this.yaw, moveX, moveZ, TUNING.player.turnSharpness, dt);
@@ -257,7 +238,7 @@ class VillagePage {
     this.player.update(dt, this.overview ? 0 : speed01);
     const cam = this.input.consumeCamera();
     if (!this.overview) {
-      if (tour && tour.phase !== "done") {
+      if (touring) {
         const c = this.camera.camera;
         const want = this.alphaBehind(this.yaw);
         let da = want - c.alpha;
@@ -272,7 +253,7 @@ class VillagePage {
     this.world.update(dt, this.overview ? 1e6 : this.pos.x, this.overview ? 1e6 : this.pos.z);
     this.scene.render();
     this.perf.update(dt);
-    if (tour) this.tourFrame(tour, rawDt);
+    if (tour && touring) this.tourFrame(tour, rawDt, blockedNow);
     this.fpsTimer += dt;
     if (this.fpsTimer >= 0.5) {
       this.fpsTimer = 0;
@@ -284,61 +265,43 @@ class VillagePage {
   // ---------------- 巡迴效能測試 ----------------
   startTour(loops: number): void {
     this.teleport(ARRIVAL_SPOT.x, ARRIVAL_SPOT.z, 0);
-    this.tour = { loops, loop: 0, idx: 1, t: 0, loopT: 0, warm: 0, phase: "warmup", pts: tourPoints(), dts: [], draws: [], tris: [], loopTimes: [], stuck: 0, lastProgressT: 0, lastDist: 1e9 };
+    this.tour = { runner: new TourRunner(tourPoints(NPC_SPOTS, PORTALS, ARRIVAL_SPOT), loops), dts: [], draws: [], tris: [] };
     this.hud.toast(`巡迴測試 ${loops} 圈開始（暖身 2 秒）`, 1800);
   }
 
-  private tourFrame(t: TourRun, rawDt: number): void {
-    if (t.phase === "warmup") {
-      t.warm += rawDt;
-      if (t.warm >= 2) t.phase = "running";
-      return;
+  private tourFrame(t: TourSampling, rawDt: number, blocked: boolean): void {
+    const wasRunning = t.runner.phase === "running";
+    t.runner.record(rawDt, this.pos.x, this.pos.y, this.pos.z, blocked);
+    if (wasRunning) {
+      t.dts.push(rawDt);
+      t.draws.push(this.perf.drawCalls);
+      t.tris.push(this.scene.getActiveIndices() / 3);
     }
-    if (t.phase !== "running") return;
-    t.t += rawDt;
-    t.loopT += rawDt;
-    t.dts.push(rawDt);
-    t.draws.push(this.perf.drawCalls);
-    t.tris.push(this.scene.getActiveIndices() / 3);
-    // 卡住偵測：4 秒內離目前目標沒有更近 → 跳下一點並記一次
-    const target = t.pts[Math.min(t.idx, t.pts.length - 1)]!;
-    const d = Math.hypot(target.x - this.pos.x, target.z - this.pos.z);
-    if (d < t.lastDist - 0.2) {
-      t.lastDist = d;
-      t.lastProgressT = t.t;
-    } else if (t.t - t.lastProgressT > 4) {
-      t.stuck++;
-      t.idx++;
-      t.lastDist = 1e9;
-      t.lastProgressT = t.t;
-      if (t.idx >= t.pts.length) this.tourLoopDone(t);
-    }
+    if (t.runner.phase === "done") this.tourDone(t);
   }
 
-  private tourLoopDone(t: TourRun): void {
-    t.loopTimes.push(t.loopT);
-    t.loop++;
-    t.loopT = 0;
-    t.idx = 1;
-    t.lastDist = 1e9;
-    if (t.loop < t.loops) return;
-    t.phase = "done";
+  private tourDone(t: TourSampling): void {
     const s = summarizeFrames(t.dts, t.draws);
+    const r = t.runner;
     this.lastTour = {
-      loopTimes: t.loopTimes,
+      loopTimes: [...r.loopTimes],
       avgFps: s.avgFps,
       low1Fps: s.low1Fps,
       minFps: s.minFps,
       avgDraw: s.avgDrawCalls,
       maxDraw: s.maxDrawCalls,
       avgTris: t.tris.reduce((a, b) => a + b, 0) / Math.max(1, t.tris.length),
-      stuck: t.stuck,
+      stuck: r.stuckCount,
+      timeouts: r.timeoutCount,
+      blockedFrames: r.totalBlockedFrames,
+      events: [...r.events],
       stutters: t.dts.filter((x) => x > 0.05).length,
     };
+    this.tour = null;
     this.reportBox.value = this.report();
     this.reportBox.hidden = false;
     this.panel.classList.add("open");
-    this.hud.toast(`巡迴完成：平均 ${s.avgFps.toFixed(1)} FPS`, 3500);
+    this.hud.toast(`巡迴完成：平均 ${s.avgFps.toFixed(1)} FPS、真正卡住 ${r.stuckCount} 次`, 3500);
   }
 
   // ---------------- 傳送與視角 ----------------
@@ -412,10 +375,17 @@ class VillagePage {
       lines.push("尚未執行巡迴測試");
       return lines.join("\n");
     }
-    lines.push(`---- 巡迴測試 ${r.loopTimes.length} 圈 ----`);
-    lines.push(`每圈時間：${r.loopTimes.map((t) => t.toFixed(1) + " 秒").join("、")}；卡住 ${r.stuck} 次`);
+    lines.push(`---- 巡迴測試 ${r.loopTimes.length} 圈（${this.modeName()}）----`);
+    lines.push(`每圈時間：${r.loopTimes.map((t) => t.toFixed(1) + " 秒").join("、")}；總時間 ${r.loopTimes.reduce((a, b) => a + b, 0).toFixed(1)} 秒`);
+    lines.push(`真正卡住 ${r.stuck} 次；腳本誤報（進度逾時但仍在移動）${r.timeouts} 次；碰撞滑動 ${r.blockedFrames} 幀`);
     lines.push(`FPS 平均 ${r.avgFps.toFixed(1)}／1% Low ${r.low1Fps.toFixed(1)}／最低 ${r.minFps.toFixed(1)}／卡頓(>50ms) ${r.stutters} 幀`);
     lines.push(`Draw Calls 平均 ${r.avgDraw.toFixed(0)}／最高 ${r.maxDraw}；每格三角形平均 ${Math.round(r.avgTris)}`);
+    if (r.events.length === 0) lines.push("異常事件：無");
+    for (const e of r.events) {
+      lines.push(
+        `異常 ${e.kind === "stuck" ? "真正卡住" : "腳本誤報"}｜第 ${e.loop} 圈 路段 ${e.leg} ${e.from}→${e.to}（目標 ${e.target[0]}, ${e.target[1]}）｜位置 X ${e.x} Y ${e.y} Z ${e.z}｜持續 ${e.duration} 秒｜2 秒內移動 ${e.moved2s} m（${e.speed} m/s）｜本段碰撞滑動 ${e.blockedFrames} 幀`,
+      );
+    }
     lines.push(`WebGL Context Lost ${this.contextLost} 次`);
     return lines.join("\n");
   }
@@ -537,12 +507,12 @@ class VillagePage {
   }
 
   private updateInfo(): void {
-    const t = this.tour;
+    const t = this.tour?.runner;
     const st =
       t && t.phase !== "done"
-        ? `巡迴：第 ${t.loop + 1}/${t.loops} 圈 ${t.loopT.toFixed(1)} 秒`
+        ? `巡迴：第 ${t.loop + 1}/${t.loops} 圈 ${t.loopT.toFixed(1)} 秒｜卡住 ${t.stuckCount}、誤報 ${t.timeoutCount}`
         : this.lastTour
-          ? `上次巡迴 平均 ${this.lastTour.avgFps.toFixed(1)} FPS`
+          ? `上次巡迴 平均 ${this.lastTour.avgFps.toFixed(1)} FPS、卡住 ${this.lastTour.stuck}`
           : "尚未測試";
     this.info.textContent = `位置 (${this.pos.x.toFixed(1)}, ${this.pos.z.toFixed(1)}) 高 ${this.pos.y.toFixed(1)}｜${st}`;
   }
@@ -580,7 +550,7 @@ class VillagePage {
       setLabels: (on: boolean) => this.world.setLabels(on),
       setMarkers: (on: boolean) => this.world.setMarkers(on),
       startTour: (loops: number) => this.startTour(loops),
-      tourState: () => ({ phase: this.tour?.phase ?? null, loop: this.tour?.loop ?? 0, result: this.lastTour }),
+      tourState: () => ({ phase: this.tour ? this.tour.runner.phase : this.lastTour ? "done" : null, loop: this.tour?.runner.loop ?? 0, result: this.lastTour }),
       blockedFrames: () => this.blockedFrames,
       report: () => this.report(),
     };
