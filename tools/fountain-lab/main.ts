@@ -107,7 +107,8 @@ const VIEWS: Record<string, View> = {
   sword_npc: { target: [-22.28, 2.85, 11.35], alpha: alphaFrom(129), beta: 1.3, radius: 9, fov: 0.9 },
   sword_eye: { target: [-29.4, 9.5, 14.98], alpha: alphaFrom(117), beta: 1.98, radius: 19.5, fov: 1.0 },
   // P3-6 北側高台擋土牆與石階
-  platform_front: { target: [0, 1.6, 21], alpha: -H, beta: 1.33, radius: 24, fov: 0.85 },
+  platform_front: { target: [0, 1.6, 23], alpha: -H, beta: 1.3, radius: 15, fov: 0.95 },
+  village_top: { target: [0, 0, 0], alpha: -H, beta: 0.0001, radius: 45, ortho: 52 },
   platform_stair: { target: [-9.62, 1.0, 18.1], alpha: alphaFrom(152), beta: 1.25, radius: 9, fov: 0.9 },
   platform_wall: { target: [-5.95, 1.0, 22.2], alpha: alphaFrom(165), beta: 1.42, radius: 7, fov: 0.85 },
 };

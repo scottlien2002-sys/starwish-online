@@ -144,8 +144,8 @@ const pw = await loadPlaywright();
 const server = await serve(dist);
 // [瀏覽器, 模式, 畫質, lod, 截圖視角, 選項{ viewport, anim: [[名稱, 視角, 秒, fps]] }]
 const plan = [
-  ["chromium", "hq", "high", "hq", ["player_spawn_cam", "topwide", "north_plan", "north_wide", "north_trio", "mage_front", "mage_side", "mage_q45", "mage_q45r", "mage_top", "mage_npc", "mage_stairs", "mage_eye", "sword_front", "sword_side", "sword_q45", "sword_q45r", "sword_top", "sword_player_up", "sword_stairs", "sword_npc", "sword_eye", "platform_front", "platform_stair", "platform_wall"]],
-  ["chromium", "lite-low", "low", "lite", ["player_spawn_cam", "topwide", "north_wide", "mage_front", "mage_q45", "mage_top", "sword_front", "sword_q45", "sword_top", "platform_front", "platform_stair", "platform_wall"]],
+  ["chromium", "hq", "high", "hq", ["player_spawn_cam", "village_top", "north_plan", "north_wide", "north_trio", "mage_front", "mage_side", "mage_q45", "mage_q45r", "mage_top", "mage_npc", "mage_stairs", "mage_eye", "sword_front", "sword_side", "sword_q45", "sword_q45r", "sword_top", "sword_player_up", "sword_stairs", "sword_npc", "sword_eye", "platform_front", "platform_stair", "platform_wall"]],
+  ["chromium", "lite-low", "low", "lite", ["player_spawn_cam", "village_top", "north_wide", "mage_front", "mage_q45", "mage_top", "sword_front", "sword_q45", "sword_top", "platform_front", "platform_stair", "platform_wall"]],
   // iPhone 直向（390×844，DPR 2）
   ["chromium", "hq-portrait", "high", "hq", ["player_spawn_cam", "mage_npc", "sword_npc", "platform_stair"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 } }],
   ["chromium", "lite-portrait", "low", "lite", ["player_spawn_cam", "sword_npc"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 } }],
