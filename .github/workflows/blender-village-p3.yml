@@ -133,7 +133,7 @@ jobs:
                   sheet.paste(im, ((i % 2) * W + (W - im.width) // 2, (i // 2) * H + (H - im.height) // 2))
               sheet.save("out/fountain_contact_sheet.png")
           ims = []
-          for v in ("knight_front", "knight_q45", "knight_player_up", "knight_door", "knight_npc", "pano"):
+          for v in ("knight_front", "knight_q45", "knight_eye", "knight_player_up", "knight_door", "pano"):
               p = f"out/lab/chromium_hq_{v}.png"
               if os.path.exists(p):
                   ims.append(Image.open(p).convert("RGB"))

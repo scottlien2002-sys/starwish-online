@@ -57,6 +57,8 @@ const VIEWS: Record<string, View> = {
   knight_player_up: { target: [-7.04, 0.85, 13.24], alpha: alphaFrom(152), beta: 1.38, radius: 9, fov: 0.9 },
   // 玩家站在騎士 NPC 旁（高台上 r 25）看正門
   knight_npc: { target: [-10.8, 2.85, 22.9], alpha: alphaFrom(165), beta: 1.3, radius: 9, fov: 0.9 },
+  // 站在廣場（方位 332°、r 14、眼高 1.7 m）抬頭看騎士軍團全貌（非遊戲鏡頭，展示輪廓用）
+  knight_eye: { target: [-15.02, 9.5, 28.26], alpha: alphaFrom(152), beta: 1.98, radius: 19.5, fov: 1.0 },
   knight_door: { target: [-12.9, 7.6, 24.3], alpha: alphaFrom(152), beta: 1.5, radius: 13.5, fov: 0.8 },
 };
 

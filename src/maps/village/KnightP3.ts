@@ -44,7 +44,8 @@ export function setupKnightP3(scene: Scene, meshes: AbstractMesh[], opt: KnightP
 
   const stone = new PBRMaterial("VP3K_stone", scene);
   stone.albedoTexture = tex(hq ? "stone_hq.png" : "stone_lite.png");
-  stone.albedoColor = new Color3(1.06, 1.04, 1.0);
+  // 暖白石牆：石紋貼圖偏灰，提亮並略帶暖色（只影響建築，星願之泉材質不變）
+  stone.albedoColor = new Color3(1.26, 1.22, 1.14);
   stone.metallic = 0;
   stone.roughness = 0.85;
   if (hq) {

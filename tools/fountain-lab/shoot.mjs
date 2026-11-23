@@ -99,8 +99,8 @@ let fail = 0;
 const pw = await loadPlaywright();
 const server = await serve(dist);
 const plan = [
-  ["chromium", "hq", "high", "hq", ["knight_front", "knight_q45", "knight_q45r", "knight_player", "knight_player_up", "knight_npc", "knight_door", "player_spawn", "pano", "top"]],
-  ["chromium", "lite-low", "low", "lite", ["knight_front", "knight_q45", "knight_player_up", "knight_npc"]],
+  ["chromium", "hq", "high", "hq", ["knight_front", "knight_q45", "knight_q45r", "knight_eye", "knight_player", "knight_player_up", "knight_npc", "knight_door", "player_spawn", "pano", "top"]],
+  ["chromium", "lite-low", "low", "lite", ["knight_front", "knight_q45", "knight_eye", "knight_player_up", "knight_npc"]],
   ["webkit", "hq", "high", "hq", ["knight_front", "knight_player_up"]],
   ["webkit", "lite-low", "low", "lite", ["knight_front"]],
 ];
