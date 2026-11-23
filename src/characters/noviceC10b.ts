@@ -84,8 +84,8 @@ export interface C10bOptions {
   p3: boolean;
   /** C1.0-B2 效能診斷 D2：固定解析度倍率（?res=1|1.25|1.5|2；null = 畫質預設，iPhone 高畫質為 2） */
   res: C10dRes | null;
-  /** 第二輪診斷：?round=2 → 組別標 E0／E1／E2 */
-  round: 1 | 2;
+  /** 第二輪診斷：?round=2 → 組別標 E0／E1／E2；第三輪 ?round=3 → F1／F2／F3 */
+  round: 1 | 2 | 3;
   /** 第二輪 E2：?raf=1 → 不建立 3D，只量 requestAnimationFrame */
   raf: boolean;
 }
@@ -100,6 +100,17 @@ const C10D_RES: readonly C10dRes[] = [1, 1.25, 1.5, 2];
  * 同時改了兩個以上（或其他診斷開關）時標「混合」，報告會提醒不能直接比較。
  */
 export function c10dGroup(o: Pick<C10bOptions, "res" | "shadowFilter" | "shadowMap" | "shadowRefresh" | "diag" | "gpuProbe"> & Partial<Pick<C10bOptions, "round" | "raf">>): string {
+  if (o.round === 3) {
+    // 第三輪：與 E0 只差一個因素 — F1 簡化材質、F2 解析度 1.0x、F3 只有男角色
+    const d = o.diag.join(",");
+    const shadowSame = o.shadowFilter === "default" && o.shadowMap === null && o.shadowRefresh === "every" && !o.gpuProbe;
+    if (o.raf || !shadowSame) return "混合（第三輪）— 不只改一個因素，不能直接比較";
+    if (o.res === null && d === "") return "F0 雙角色 HQ（同 E0）";
+    if (o.res === null && d === "simplemat") return "F1 雙角色 簡化材質";
+    if (o.res === 1 && d === "") return "F2 雙角色 解析度 1.0x";
+    if (o.res === null && d === "nofemale") return "F3 只有男角色";
+    return "混合（第三輪）— 不只改一個因素，不能直接比較";
+  }
   if (o.round === 2) {
     // 第二輪：E0 雙角色（＋新量測）、E1 只隱藏角色、E2 不繪製 3D
     const others = o.res !== null || o.shadowFilter !== "default" || o.shadowMap !== null || o.shadowRefresh !== "every" || o.gpuProbe;
@@ -173,13 +184,15 @@ export function c10pShadowMode(o: Pick<C10bOptions, "diag" | "shadowRefresh" | "
   return parts.join("＋");
 }
 
-export type C10pDiag = "noshadow" | "noglow" | "nopost" | "nomsaa" | "nochars";
+export type C10pDiag = "noshadow" | "noglow" | "nopost" | "nomsaa" | "nochars" | "simplemat" | "nofemale";
 export const C10P_DIAG_LABEL: Readonly<Record<C10pDiag, string>> = Object.freeze({
   noshadow: "不畫陰影",
   noglow: "關發光層",
   nopost: "關 HDR 後製",
   nomsaa: "關 MSAA",
   nochars: "隱藏角色",
+  simplemat: "角色簡化材質（診斷）",
+  nofemale: "隱藏女角色",
 });
 
 /** ?lab=c10b&lod=lite&count=10&bench=30&view=low */
@@ -207,7 +220,7 @@ export function c10bOptionsFromSearch(search: string): C10bOptions {
     fixSize: p.get("fixsize") === "1",
     star: p.get("star") === "2" ? 2 : p.get("star") === "1" ? 1 : 0,
     p3: p.get("p3") === "1",
-    round: p.get("round") === "2" ? 2 : 1,
+    round: p.get("round") === "3" ? 3 : p.get("round") === "2" ? 2 : 1,
     raf: p.get("raf") === "1",
     res: ((r) => (C10D_RES as readonly number[]).includes(r) ? (r as C10dRes) : null)(Number(p.get("res") ?? NaN)),
   };

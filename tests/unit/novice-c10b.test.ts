@@ -237,3 +237,17 @@ test("C1.0-B2 第二輪：間隔分布、時間分段、fence 延遲統計", () 
   assert.equal(l.p95, 40);
   assert.deepEqual(latencyStats([]), { avg: 0, p95: 0, n: 0 });
 });
+
+test("C1.0-B2 第三輪：F1／F2／F3 組別（與 E0 只差一個因素）", () => {
+  const base = "?lab=c10b&quality=high&p1=1&p2=1&star=2&p3=1&rest=30&bench=120&fixsize=1&round=3";
+  const g = (q: string): string => c10dGroup(c10bOptionsFromSearch(base + q));
+  assert.match(g(""), /^F0 /);
+  assert.match(g("&diag=simplemat"), /^F1 /);
+  assert.match(g("&res=1"), /^F2 /);
+  assert.match(g("&diag=nofemale"), /^F3 /);
+  assert.match(g("&res=1.5"), /^混合/);
+  assert.match(g("&diag=simplemat,nofemale"), /^混合/);
+  assert.match(g("&diag=nofemale&res=1"), /^混合/);
+  assert.match(g("&diag=simplemat&shadowfilter=low"), /^混合/);
+  assert.deepEqual(c10bOptionsFromSearch(base + "&diag=simplemat,nofemale").diag, ["simplemat", "nofemale"]);
+});

@@ -15,6 +15,7 @@ import {
   Scene,
   SceneLoader,
   ShadowGenerator,
+  StandardMaterial,
   type TransformNode,
   Vector3,
 } from "@babylonjs/core";
@@ -124,6 +125,8 @@ interface BenchResult extends BenchmarkSummary {
   fence: { all: ReturnType<typeof latencyStats>; overFrame: number; timeouts: number; w30: (ReturnType<typeof latencyStats> | null)[]; w5: (ReturnType<typeof latencyStats> | null)[] } | null;
   /** 第二輪 E1：角色網格是否參與主場景與陰影 */
   charsInScene: { meshes: number; enabled: number; active: number; shadowCasting: number };
+  /** 第三輪：啟用中角色的三角形數、材質數、F1 替換的材質數、各角色啟用網格數 */
+  charsDetail: { trianglesEnabled: number; materialsEnabled: number; simpleMats: number; byGender: { gender: string; enabled: number; meshes: number }[] };
   windows: number[];
   contextLost: number;
 }
@@ -161,6 +164,8 @@ export interface C10bLabApi {
   benchState(): { state: "off" | "warmup" | "running" | "done"; progress: number; result: BenchResult | null; all: BenchResult[] };
   report(): string;
   moveChar(index: number, dx: number): void;
+  /** 第三輪 F3 檢查：鏡頭與角色根節點位置（確認沒有重新置中或放大） */
+  layoutInfo(): { camera: number[]; roots: { gender: string; x: number; y: number; z: number }[] };
   renderInfo(): { p3: boolean; star: C10bStar; pipeline: boolean; canvasAntialias: boolean; glowEnabled: boolean; toneMappingInMaterials: boolean; shadowSkipped: number; files: string[] };
   shadowState(): { renders: number; frozenAt: number | null; refreshRate: number; mapSize: number; contact: boolean; pcf: boolean; filteringQuality: number; casters: number; lastFrameShadowDraws: number; counter: boolean; mode: string };
   /** 效能分析：開關各項目各量一格 Draw Calls（只量測，不改畫面；量完恢復） */
@@ -439,6 +444,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
 
   // ---------- P3 診斷開關（只用來量各項成本；不是優化方案）----------
   const diagLabel = opts.diag.length ? opts.diag.map((d) => C10P_DIAG_LABEL[d]).join("、") : "無";
+  let simpleMatCount = 0; // 第三輪 F1：被替換成簡化材質的原材質數
   const applyDiag = (): void => {
     if (opts.diag.includes("noshadow")) {
       const sm = shadows.getShadowMap();
@@ -448,6 +454,31 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
     if (opts.diag.includes("nopost")) scene.postProcessesEnabled = false;
     if (opts.diag.includes("nomsaa") && render.pipeline) render.pipeline.samples = 1;
     if (opts.diag.includes("nochars")) for (const c of chars) for (const m of c.meshes) m.setEnabled(false);
+    // 第三輪 F3：只停用女角色；男角色位置、鏡頭不變（不重新置中、不放大）
+    if (opts.diag.includes("nofemale")) for (const c of chars) if (c.gender === "female") for (const m of c.meshes) m.setEnabled(false);
+    // 第三輪 F1：角色材質在記憶體中換成簡化材質（只有底色貼圖、不打光）；每個原材質對應一個簡化材質 → 材質數、網格、三角形、Draw 不變；不寫回 GLB
+    if (opts.diag.includes("simplemat")) {
+      const map = new Map<Material, StandardMaterial>();
+      for (const c of chars)
+        for (const m of c.meshes) {
+          const orig = m.material;
+          if (!orig) continue;
+          let sm = map.get(orig);
+          if (!sm) {
+            sm = new StandardMaterial(`diagSimple_${orig.name}`, scene);
+            sm.disableLighting = true;
+            const pbr = orig as PBRMaterial;
+            const tex = pbr.albedoTexture ?? null;
+            if (tex) sm.emissiveTexture = tex;
+            sm.emissiveColor = tex ? Color3.White() : (pbr.albedoColor?.clone() ?? Color3.Gray());
+            sm.backFaceCulling = orig.backFaceCulling;
+            sm.metadata = { diagSimpleOf: orig.name };
+            map.set(orig, sm);
+          }
+          m.material = sm;
+        }
+      simpleMatCount = map.size;
+    }
   };
 
   const clear = (): void => {
@@ -735,6 +766,8 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
       ? "\n  GPU 完成時間：此瀏覽器不支援 WebGL2 fence，未量測"
       : "") +
     `\n  角色網格：共 ${r.charsInScene.meshes}、啟用 ${r.charsInScene.enabled}、主場景實際繪製 ${r.charsInScene.active}、投影到陰影 ${r.charsInScene.shadowCasting}` +
+    `\n  啟用中角色：三角形 ${r.charsDetail.trianglesEnabled}、材質 ${r.charsDetail.materialsEnabled}｜${r.charsDetail.byGender.map((g) => `${g.gender === "male" ? "男" : "女"} ${g.enabled}/${g.meshes} 網格`).join("、")}` +
+    (r.charsDetail.simpleMats ? `｜簡化材質替換 ${r.charsDetail.simpleMats} 個（只在記憶體，不寫回 GLB）` : "") +
     `\n  實際渲染解析度：開始 ${r.renderSize[0]!.join("×")}、結束 ${r.renderSize[1]!.join("×")}` +
     `\n  ${r.label}（${r.lod === "hq" ? "HQ" : "Lite"}、${r.count} 角色）平均 ${r.avgFps.toFixed(1)} FPS　1% Low ${r.low1Fps.toFixed(1)}　最低 ${r.minFps.toFixed(1)}　卡頓(>100ms) ${r.hitches100}　Draw ${r.avgDrawCalls.toFixed(0)}` +
     (r.windows.length > 1 ? `\n  每 30 秒平均：${r.windows.map((w) => w.toFixed(1)).join(" → ")}` : "") +
@@ -863,6 +896,10 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
       const c = chars[index];
       if (c) c.root.position.x += dx;
     },
+    layoutInfo: () => ({
+      camera: [camera.alpha, camera.beta, camera.radius, camera.target.x, camera.target.y, camera.target.z].map((v) => +v.toFixed(4)),
+      roots: chars.map((c) => ({ gender: c.gender, x: +c.root.position.x.toFixed(3), y: +c.root.position.y.toFixed(3), z: +c.root.position.z.toFixed(3) })),
+    }),
     renderInfo: () => ({
       p3: opts.p3,
       star: opts.star,
@@ -1101,6 +1138,15 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
               enabled: cm.filter((m) => m.isEnabled()).length,
               active: cm.filter((m) => active.has(m)).length,
               shadowCasting: cm.filter((m) => casters.includes(m) && m.isEnabled()).length,
+            };
+          })(),
+          charsDetail: (() => {
+            const en = chars.flatMap((c) => c.meshes).filter((m) => m.isEnabled());
+            return {
+              trianglesEnabled: en.reduce((a, m) => a + Math.round((m.getTotalIndices() || 0) / 3), 0),
+              materialsEnabled: new Set(en.map((m) => m.material).filter(Boolean)).size,
+              simpleMats: simpleMatCount,
+              byGender: chars.map((c) => ({ gender: c.gender, enabled: c.meshes.filter((m) => m.isEnabled()).length, meshes: c.meshes.length })),
             };
           })(),
         };

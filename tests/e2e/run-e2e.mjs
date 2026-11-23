@@ -2537,6 +2537,71 @@ for (const name of browsers) {
     for (const e of run.errors) console.log(`   ! ${e}`);
   }
 
+  // ---------- C1.0-B2 效能診斷第三輪（F1 簡化材質／F2 解析度 1.0x／F3 只有男角色）（WebKit）----------
+  if (name === "webkit") {
+    const vp = VIEWPORTS[0];
+    const run = { browser: name, viewport: `${vp.name} / C1.0-B2 效能診斷第三輪 F1／F2／F3`, checks: {}, errors: [], screenshots: [], results: [] };
+    const check = (key, ok, detail) => {
+      run.checks[key] = { ok, detail };
+    };
+    const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+    const page = await ctx.newPage();
+    page.on("pageerror", (e) => run.errors.push(`pageerror: ${e.message}`));
+    page.on("console", (m) => m.type() === "error" && run.errors.push(`console: ${m.text()}`));
+    const base = "/?lab=c10b&quality=high&p1=1&p2=1&star=2&p3=1&fixsize=1&round=3&bench=5&warmup=0";
+    const run3d = async (extra, tag) => {
+      await page.goto(server.url + base + extra, { waitUntil: "load" });
+      await page.waitForFunction(() => window.__starwishC10b?.ready === true, null, { timeout: 120000 });
+      await page.waitForFunction(() => window.__starwishC10b.benchState().state === "done", null, { timeout: 120000 });
+      const st = await page.evaluate(() => window.__starwishC10b.benchState().result);
+      const rep = await page.evaluate(() => window.__starwishC10b.report());
+      const lay = await page.evaluate(() => window.__starwishC10b.layoutInfo());
+      const cam = lay.camera;
+      const pos = lay.roots;
+      await page.evaluate(() => document.querySelectorAll(".v3-top,.lab-panel,.perf-panel,.lab-bench-result").forEach((e) => (e.style.visibility = "hidden")));
+      await page.evaluate(() => window.__starwishC10b.view("front"));
+      await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+      const f = `${outDir}${name}_c10b2_r3_${tag}_front.png`;
+      await page.screenshot({ path: f });
+      run.screenshots.push(f.split("/test-results/")[1]);
+      return { st, rep, cam, pos };
+    };
+    try {
+      const f0 = await run3d("", "F0");
+      const d0 = f0.st.charsDetail;
+      run.results.push({ tag: "F0", group: f0.st.group, draws: f0.st.avgDrawCalls, detail: d0, size: f0.st.renderSize, cam: f0.cam, pos: f0.pos });
+      check("F0：組別 F0（同 E0）、兩名角色全部啟用", /^F0 /.test(f0.st.group) && d0.byGender.every((g) => g.enabled === g.meshes) && d0.simpleMats === 0, d0);
+      const f1 = await run3d("&diag=simplemat", "F1");
+      const d1 = f1.st.charsDetail;
+      run.results.push({ tag: "F1", group: f1.st.group, draws: f1.st.avgDrawCalls, detail: d1, size: f1.st.renderSize });
+      check("F1：角色三角形、啟用網格、材質數與 F0 相同；有替換簡化材質", /^F1 /.test(f1.st.group) && d1.trianglesEnabled === d0.trianglesEnabled && d1.materialsEnabled === d0.materialsEnabled && d1.byGender.map((g) => g.enabled).join() === d0.byGender.map((g) => g.enabled).join() && d1.simpleMats === d0.materialsEnabled, { d0, d1 });
+      check("F1：主場景 Draw Calls 與 F0 相同（±1）、解析度相同", Math.abs(f1.st.avgMainDraws - f0.st.avgMainDraws) <= 1 && f1.st.renderSize[0].join() === f0.st.renderSize[0].join(), { f0: f0.st.avgMainDraws, f1: f1.st.avgMainDraws });
+      check("F1 報告：簡化材質替換數、只在記憶體", f1.rep.includes("簡化材質替換") && f1.rep.includes("不寫回 GLB"), f1.rep.slice(0, 400));
+      const f2 = await run3d("&res=1", "F2");
+      run.results.push({ tag: "F2", group: f2.st.group, draws: f2.st.avgDrawCalls, ratio: f2.st.pixelRatio, size: f2.st.renderSize });
+      const [w0, h0] = f0.st.renderSize[0];
+      const [w2, h2] = f2.st.renderSize[0];
+      check("F2：只改解析度 2x → 1x（每邊 50%），角色、材質、Draw 與 F0 相同", /^F2 /.test(f2.st.group) && f2.st.pixelRatio === 1 && Math.abs(w2 / w0 - 0.5) < 0.02 && Math.abs(h2 / h0 - 0.5) < 0.02 && f2.st.charsDetail.trianglesEnabled === d0.trianglesEnabled && Math.abs(f2.st.avgMainDraws - f0.st.avgMainDraws) <= 1 && f2.st.sizeChanges === 0, { f0: [w0, h0], f2: [w2, h2], r: f2.st.pixelRatio });
+      const f3 = await run3d("&diag=nofemale", "F3");
+      const d3 = f3.st.charsDetail;
+      run.results.push({ tag: "F3", group: f3.st.group, draws: f3.st.avgDrawCalls, detail: d3, cam: f3.cam, pos: f3.pos });
+      const male0 = d0.byGender.find((g) => g.gender === "male");
+      check("F3：女角色 0 網格、男角色全部啟用、三角形約一半", /^F3 /.test(f3.st.group) && d3.byGender.find((g) => g.gender === "female").enabled === 0 && d3.byGender.find((g) => g.gender === "male").enabled === male0.enabled && d3.trianglesEnabled > 195000 && d3.trianglesEnabled < 205000, d3);
+      check("F3：男角色位置與鏡頭和 F0 完全相同（不重新置中、不放大）", f0.cam.length === 6 && f0.pos.length === 2 && JSON.stringify(f3.cam) === JSON.stringify(f0.cam) && JSON.stringify(f3.pos) === JSON.stringify(f0.pos), { f0: [f0.cam, f0.pos], f3: [f3.cam, f3.pos] });
+      check("F0～F3：Context Lost 0", [f0, f1, f2, f3].every((x) => x.st.contextLost === 0), null);
+    } catch (e) {
+      run.errors.push(`exception: ${e.message}`);
+    }
+    await ctx.close();
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 8;
+    if (!run.ok) failures++;
+    report.runs.push(run);
+    console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
+    for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}${v.ok ? "" : "  " + JSON.stringify(v.detail).slice(0, 900)}`);
+    for (const r of run.results) console.log(`   · ${r.tag}: ${JSON.stringify(r)}`.slice(0, 1500));
+    for (const e of run.errors) console.log(`   ! ${e}`);
+  }
+
   await browser.close();
 }
 
