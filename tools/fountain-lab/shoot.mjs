@@ -8,6 +8,7 @@ import * as L from "../../src/maps/village/layout.ts";
 const dist = process.argv[2] ?? "out-lab";
 const out = process.argv[3] ?? "out/lab";
 const plazaReport = process.argv[4] ?? "out/plaza_report.json";
+const knightReport = process.argv[5] ?? "out/knight_report.json";
 mkdirSync(out, { recursive: true });
 const report = { startedAt: new Date().toISOString(), checks: {}, runs: [] };
 let fail = 0;
@@ -73,6 +74,24 @@ let fail = 0;
     const acc = m ? j.accessors[m.primitives[0].attributes.COLOR_0] : null;
     ck("Lite 接地陰影帶頂點透明度（COLOR_0 為 RGBA）", acc?.type === "VEC4", acc ? { type: acc.type } : "missing");
   }
+  // 騎士軍團：完全在原碰撞箱內（±8 × 0～14 × 0～19，地面 +2）、正門朝噴泉、NPC 站位不變
+  {
+    const kr = JSON.parse(readFileSync(knightReport, "utf8"));
+    const b = L.BUILDINGS.find((x) => x.id === "knight");
+    const box = L.BOX_COLLIDERS.find((c) => c.kind === "building:knight");
+    const lay = kr.layout;
+    ck("騎士軍團尺寸、方位與 V1.3 相同", b.bearing === lay.bearing && b.front === lay.front && b.w === lay.w && b.d === lay.d && b.top === lay.top && b.floor === lay.floor, { v13: b, model: lay });
+    for (const [lod, v] of Object.entries(kr.lods)) {
+      const bb = v.bounds_local;
+      const ok = bb.x[0] >= -b.w / 2 - 0.01 && bb.x[1] <= b.w / 2 + 0.01 && bb.y[0] >= -0.01 && bb.y[1] <= b.d + 0.01 && bb.h[0] >= -0.01 && bb.h[1] <= b.top + 0.01;
+      ck(`騎士軍團 ${lod} 模型完全在原碰撞箱內`, ok, { bounds: bb, collider: box });
+    }
+    const npc = L.NPC_SPOTS.find((n) => n.id === "knight");
+    const dDoor = Math.hypot(lay.door[0], lay.door[1]);
+    const dCenter = Math.hypot(box.x, box.z);
+    ck("正門面向噴泉（門比建築中心更靠近噴泉）", dDoor < dCenter, { door: lay.door, doorR: dDoor.toFixed(2), centerR: dCenter.toFixed(2) });
+    ck("騎士轉職 NPC 站位不變（正門前 2 m、在碰撞箱外）", Math.abs(Math.hypot(npc.x, npc.z) - (b.front - 2)) < 0.01 && !L.insideBox(box, npc.x, npc.z), { npc });
+  }
   console.log(JSON.stringify(report.checks, null, 1));
 }
 
@@ -80,10 +99,10 @@ let fail = 0;
 const pw = await loadPlaywright();
 const server = await serve(dist);
 const plan = [
-  ["chromium", "hq", "high", "hq", ["top", "topwide", "player_spawn", "player_south", "pano", "pano_ne", "close_bench", "close_lamp", "close_compass", "close_wall"]],
-  ["chromium", "lite-low", "low", "lite", ["top", "player_spawn", "player_south", "pano", "close_lamp"]],
-  ["webkit", "hq", "high", "hq", ["player_spawn", "pano"]],
-  ["webkit", "lite-low", "low", "lite", ["player_spawn"]],
+  ["chromium", "hq", "high", "hq", ["knight_front", "knight_q45", "knight_q45r", "knight_player", "knight_player_up", "knight_npc", "knight_door", "player_spawn", "pano", "top"]],
+  ["chromium", "lite-low", "low", "lite", ["knight_front", "knight_q45", "knight_player_up", "knight_npc"]],
+  ["webkit", "hq", "high", "hq", ["knight_front", "knight_player_up"]],
+  ["webkit", "lite-low", "low", "lite", ["knight_front"]],
 ];
 
 for (const [bname, mode, quality, lod, views] of plan) {
@@ -111,13 +130,15 @@ for (const [bname, mode, quality, lod, views] of plan) {
     await page.evaluate(() => window.__lab.setView("pano"));
     const dc = {};
     for (const [k, parts] of [
-      ["none", { fountain: false, plaza: false }],
-      ["fountain", { fountain: true, plaza: false }],
-      ["both", { fountain: true, plaza: true }],
+      ["none", { fountain: false, plaza: false, knight: false }],
+      ["fountain", { fountain: true, plaza: false, knight: false }],
+      ["both", { fountain: true, plaza: true, knight: false }],
+      ["all", { fountain: true, plaza: true, knight: true }],
     ]) dc[k] = await page.evaluate((p) => window.__lab.drawCalls(p), parts);
     run.drawCalls = dc;
     run.plazaDrawCalls = dc.both.drawCalls - dc.fountain.drawCalls;
     run.fountainDrawCalls = dc.fountain.drawCalls - dc.none.drawCalls;
+    run.knightDrawCalls = dc.all.drawCalls - dc.both.drawCalls;
     await page.evaluate(() => window.__lab.setTime(3.2));
     for (const v of views) {
       await page.evaluate((name) => window.__lab.setView(name), v);
@@ -128,8 +149,8 @@ for (const [bname, mode, quality, lod, views] of plan) {
     }
     if (bname === "chromium") {
       run.flicker = {
-        player_spawn: await page.evaluate(() => window.__lab.flickerTest("player_spawn")),
-        pano: await page.evaluate(() => window.__lab.flickerTest("pano")),
+        knight_front: await page.evaluate(() => window.__lab.flickerTest("knight_front")),
+        knight_player_up: await page.evaluate(() => window.__lab.flickerTest("knight_player_up")),
       };
       await page.evaluate(() => window.__lab.setTime(null));
       await page.evaluate(() => window.__lab.setView("player_spawn"));

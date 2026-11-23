@@ -220,6 +220,12 @@ def main():
     p = os.path.join(out, "banner_hq.png")
     make_banner(256, 512).save(p, optimize=True)
     info["banner_hq"] = {"px": "256x512", "bytes": os.path.getsize(p)}
+    # P3-2B 建築共用貼圖（遊戲端載入一次、各建築共用）：HQ 石牆法線 512、屋瓦 512＋法線 512；Lite 屋瓦 256
+    for src, dst, n in (("stone_nrm_hq", "stone_nrm_512", 512), ("roof_hq", "roof_512", 512), ("roof_nrm_hq", "roof_nrm_512", 512), ("roof_lite", "roof_256", 256)):
+        im = Image.open(os.path.join(out, f"{src}.png")).resize((n, n), Image.LANCZOS)
+        p = os.path.join(out, f"{dst}.png")
+        im.save(p, optimize=True)
+        info[dst] = {"px": n, "bytes": os.path.getsize(p)}
     json.dump(info, open(os.path.join(out, "textures.json"), "w"), indent=1)
     print(json.dumps(info, indent=1))
 

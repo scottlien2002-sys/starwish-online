@@ -12,6 +12,8 @@ on:
       - "tools/fountain-lab/**"
       - "src/maps/village/FountainP3.ts"
       - "src/maps/village/PlazaP3.ts"
+      - "src/maps/village/KnightP3.ts"
+      - "src/maps/village/villageTextures.ts"
       - ".github/workflows/blender-village-p3.yml"
 
 permissions:
@@ -64,6 +66,11 @@ jobs:
           /opt/blender/blender -b --factory-startup -noaudio -P art/village-p3/build_plaza.py -- --tex "$PWD/out/textures" --out "$PWD/out" 2>&1 | tee out/plaza.log | grep -v "^Fra:" | grep -v "Sample" | tail -40
           for f in plaza_hq.glb plaza_lite.glb plaza_report.json; do test -f "out/$f"; done
 
+      - name: P3-2B Knight Order building (shape + AO; inside V1.3 collider; budget check)
+        run: |
+          /opt/blender/blender -b --factory-startup -noaudio -P art/village-p3/build_knight.py -- --out "$PWD/out" 2>&1 | tee out/knight.log | grep -v "^Fra:" | grep -v "Sample" | tail -40
+          for f in knight_hq.glb knight_lite.glb knight_report.json; do test -f "out/$f"; done
+
       - name: Validate GLB (Khronos glTF-Validator)
         run: |
           mkdir -p /tmp/gv && cd /tmp/gv && npm init -y >/dev/null && npm i --no-save gltf-validator@latest 2>&1 | tail -3
@@ -72,7 +79,7 @@ jobs:
             const v = require("gltf-validator"); const fs = require("fs");
             (async () => {
               let bad = 0; const s = {};
-              for (const q of ["p30_sample_hq", "p30_sample_lite", "fountain_hq", "fountain_lite", "plaza_hq", "plaza_lite"]) {
+              for (const q of ["p30_sample_hq", "p30_sample_lite", "fountain_hq", "fountain_lite", "plaza_hq", "plaza_lite", "knight_hq", "knight_lite"]) {
                 const b = fs.readFileSync(`out/${q}.glb`);
                 const r = await v.validateBytes(new Uint8Array(b));
                 const dv = new DataView(b.buffer, b.byteOffset); const len = dv.getUint32(12, true);
@@ -96,11 +103,13 @@ jobs:
           npm install --no-audit --no-fund
           npm run typecheck
           mkdir -p tools/fountain-lab/public/models/fx
-          cp out/fountain_hq.glb out/fountain_lite.glb out/plaza_hq.glb out/plaza_lite.glb tools/fountain-lab/public/models/
+          mkdir -p tools/fountain-lab/public/models/tex
+          cp out/fountain_hq.glb out/fountain_lite.glb out/plaza_hq.glb out/plaza_lite.glb out/knight_hq.glb out/knight_lite.glb tools/fountain-lab/public/models/
+          cp out/textures/stone_hq.png out/textures/stone_lite.png out/textures/stone_nrm_512.png out/textures/roof_512.png out/textures/roof_nrm_512.png out/textures/roof_256.png tools/fountain-lab/public/models/tex/
           cp out/textures/water_hq.png out/textures/water_lite.png out/textures/water_nrm_hq.png out/textures/fx_*.png tools/fountain-lab/public/models/fx/
           npx vite build tools/fountain-lab --base ./ --outDir "$PWD/out-lab" --emptyOutDir
           npx playwright install --with-deps chromium webkit >/dev/null
-          node tools/fountain-lab/shoot.mjs out-lab out/lab out/plaza_report.json | tail -150
+          node tools/fountain-lab/shoot.mjs out-lab out/lab out/plaza_report.json out/knight_report.json | tail -150
 
       - name: Contact sheet
         if: always()
@@ -124,7 +133,7 @@ jobs:
                   sheet.paste(im, ((i % 2) * W + (W - im.width) // 2, (i // 2) * H + (H - im.height) // 2))
               sheet.save("out/fountain_contact_sheet.png")
           ims = []
-          for v in ("top", "player_spawn", "pano", "player_south", "close_bench", "close_lamp"):
+          for v in ("knight_front", "knight_q45", "knight_player_up", "knight_door", "knight_npc", "pano"):
               p = f"out/lab/chromium_hq_{v}.png"
               if os.path.exists(p):
                   ims.append(Image.open(p).convert("RGB"))
@@ -136,7 +145,7 @@ jobs:
               for i, im in enumerate(ims):
                   sheet.paste(im, ((i % cols) * w, (i // cols) * h))
               sheet = sheet.resize((sheet.width // 2, sheet.height // 2))
-              sheet.save("out/plaza_2a_hq_sheet.png")
+              sheet.save("out/knight_2b_hq_sheet.png")
           PY
 
       - name: Push results to art-village-p3 branch (normal push, no force)

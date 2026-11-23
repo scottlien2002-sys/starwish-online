@@ -22,6 +22,7 @@ import {
 import { createEngine, createShadows, createSkyDome, pickQuality, setupRendering, SKY_COLORS } from "../../src/render/RenderQuality.ts";
 import { type FountainP3, setupFountainP3 } from "../../src/maps/village/FountainP3.ts";
 import { type PlazaP3, setupPlazaP3 } from "../../src/maps/village/PlazaP3.ts";
+import { type KnightP3, setupKnightP3 } from "../../src/maps/village/KnightP3.ts";
 import { BOARD, BUILDINGS, buildingCenter, FORGE, NPC_SPOTS, PLATFORM, PORTALS, portalPillars, SOUTH_GATE, STAIR_FROM, STAIR_WIDTH, STAIRS } from "../../src/maps/village/layout.ts";
 
 type View = { target: [number, number, number]; alpha: number; beta: number; radius: number; fov?: number; ortho?: number };
@@ -47,6 +48,16 @@ const VIEWS: Record<string, View> = {
   close_lamp: { target: [11.96, 1.9, -14.25], alpha: alphaFrom(318), beta: 1.36, radius: 6.2, fov: 0.8 },
   close_compass: { target: [0, 0, -14.4], alpha: -H, beta: 0.62, radius: 7.5, fov: 0.8 },
   close_wall: { target: [-12.6, 1.0, 18.6], alpha: alphaFrom(150), beta: 1.2, radius: 10, fov: 0.8 },
+  // P3-2B 騎士軍團（正面中心在方位 332°、r 27；建築中心 r 34；地面 +2 m）
+  knight_front: { target: [-15.0, 10.4, 28.2], alpha: alphaFrom(152), beta: 1.5, radius: 31, fov: 0.8 },
+  knight_q45: { target: [-15.4, 9.0, 29.0], alpha: alphaFrom(197), beta: 1.3, radius: 33, fov: 0.8 },
+  knight_q45r: { target: [-15.4, 9.0, 29.0], alpha: alphaFrom(107), beta: 1.3, radius: 33, fov: 0.8 },
+  // 玩家視角：站在廣場（方位 332°、r 15）看騎士軍團；遊戲預設俯角＋把鏡頭往上抬
+  knight_player: { target: [-7.04, 0.85, 13.24], alpha: alphaFrom(152), beta: 1.05, radius: 9, fov: 0.9 },
+  knight_player_up: { target: [-7.04, 0.85, 13.24], alpha: alphaFrom(152), beta: 1.38, radius: 9, fov: 0.9 },
+  // 玩家站在騎士 NPC 旁（高台上 r 25）看正門
+  knight_npc: { target: [-10.8, 2.85, 22.9], alpha: alphaFrom(165), beta: 1.3, radius: 9, fov: 0.9 },
+  knight_door: { target: [-12.9, 7.6, 24.3], alpha: alphaFrom(152), beta: 1.5, radius: 13.5, fov: 0.8 },
 };
 
 const params = new URLSearchParams(location.search);
@@ -223,6 +234,7 @@ const inst = new SceneInstrumentation(scene);
 inst.captureFrameTime = true;
 let fx: FountainP3 | null = null;
 let plaza: PlazaP3 | null = null;
+let knight: KnightP3 | null = null;
 const state: { ready: boolean; error: string | null; loadMs: number } = { ready: false, error: null, loadMs: 0 };
 
 function setView(name: string): void {
@@ -291,13 +303,15 @@ async function flickerTest(view: string, steps = 10): Promise<{ maxRatio: number
 }
 
 /** 繪製次數：只開啟指定部分 */
-async function drawCalls(parts: { fountain: boolean; plaza: boolean }): Promise<{ drawCalls: number; activeMeshes: number }> {
+async function drawCalls(parts: { fountain: boolean; plaza: boolean; knight?: boolean }): Promise<{ drawCalls: number; activeMeshes: number }> {
   fx?.setEnabled(parts.fountain);
   plaza?.setEnabled(parts.plaza);
+  knight?.setEnabled(parts.knight ?? true);
   await frames(4);
   const r = { drawCalls: inst.drawCallsCounter.current, activeMeshes: scene.getActiveMeshes().length };
   fx?.setEnabled(true);
   plaza?.setEnabled(true);
+  knight?.setEnabled(true);
   return r;
 }
 
@@ -316,7 +330,11 @@ async function load(): Promise<void> {
   fx = setupFountainP3(scene, f.meshes, f.root, { lite, texBase: "./models/fx/", shadows: castShadows ? shadows : null });
   const p = await loadGlb(`plaza_${q2}.glb`);
   plaza = setupPlazaP3(scene, p.meshes, { lite, shadows: castShadows ? shadows : null });
-  for (const m of [...f.meshes, ...p.meshes]) m.freezeWorldMatrix();
+  const k = await loadGlb(`knight_${q2}.glb`);
+  knight = setupKnightP3(scene, k.meshes, { lite, texBase: "./models/tex/", shadows: castShadows ? shadows : null });
+  // 正式騎士軍團取代灰色量體
+  for (const m of context) if (m.name === "bld_knight" || m.name === "roof_knight") m.setEnabled(false);
+  for (const m of [...f.meshes, ...p.meshes, ...k.meshes]) m.freezeWorldMatrix();
   await scene.whenReadyAsync();
   state.loadMs = Math.round(performance.now() - t0);
   state.ready = true;
@@ -338,7 +356,7 @@ load().catch((e: unknown) => {
   frames,
   flickerTest,
   drawCalls,
-  stats: () => ({ fountain: fx?.stats ?? null, plaza: plaza?.stats ?? null }),
+  stats: () => ({ fountain: fx?.stats ?? null, plaza: plaza?.stats ?? null, knight: knight?.stats ?? null }),
   frameMs: () => inst.frameTimeCounter.lastSecAverage,
   size: () => ({ w: engine.getRenderWidth(), h: engine.getRenderHeight() }),
 };
