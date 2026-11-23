@@ -51,6 +51,11 @@ jobs:
           /opt/blender/blender -b --factory-startup -noaudio -P art/village-p3/build_p30.py -- --tex "$PWD/out/textures" --out "$PWD/out" 2>&1 | tee out/blender.log | grep -v "^Fra:" | grep -v "Sample" | tail -40
           for f in p30_sample_hq.glb p30_sample_lite.glb p30_front.png p30_q45.png p30_top.png p30_close.png p30_report.json; do test -f "out/$f"; done
 
+      - name: P3-1A Wish Fountain shape (clay, previews, size comparison)
+        run: |
+          /opt/blender/blender -b --factory-startup -noaudio -P art/village-p3/build_fountain.py -- --out "$PWD/out" 2>&1 | tee out/fountain.log | grep -v "^Fra:" | grep -v "Sample" | tail -60
+          for f in fountain_hq.glb fountain_lite.glb fountain_front.png fountain_q45.png fountain_top.png fountain_close.png fountain_elev.png fountain_plan.png fountain_report.json; do test -f "out/$f"; done
+
       - name: Validate GLB (Khronos glTF-Validator)
         run: |
           mkdir -p /tmp/gv && cd /tmp/gv && npm init -y >/dev/null && npm i --no-save gltf-validator@latest 2>&1 | tail -3
@@ -59,8 +64,8 @@ jobs:
             const v = require("gltf-validator"); const fs = require("fs");
             (async () => {
               let bad = 0; const s = {};
-              for (const q of ["hq", "lite"]) {
-                const b = fs.readFileSync(`out/p30_sample_${q}.glb`);
+              for (const q of ["p30_sample_hq", "p30_sample_lite", "fountain_hq", "fountain_lite"]) {
+                const b = fs.readFileSync(`out/${q}.glb`);
                 const r = await v.validateBytes(new Uint8Array(b));
                 const dv = new DataView(b.buffer, b.byteOffset); const len = dv.getUint32(12, true);
                 const j = JSON.parse(Buffer.from(b.subarray(20, 20 + len)).toString());
@@ -87,7 +92,16 @@ jobs:
               for i, im in enumerate(ims):
                   sheet.paste(im, ((i % 2) * w, (i // 2) * h))
               sheet.save("out/p30_contact_sheet.png")
+          ims = [Image.open(f"out/fountain_{v}.png").convert("RGB") for v in ("front", "q45", "top", "close") if os.path.exists(f"out/fountain_{v}.png")]
+          if len(ims) == 4:
+              W, H = 1200, 800
+              sheet = Image.new("RGB", (W * 2, H * 2), (235, 236, 242))
+              for i, im in enumerate(ims):
+                  im = im.copy(); im.thumbnail((W, H))
+                  sheet.paste(im, ((i % 2) * W + (W - im.width) // 2, (i // 2) * H + (H - im.height) // 2))
+              sheet.save("out/fountain_contact_sheet.png")
           PY
+          python3 art/village-p3/fountain_compare.py out || true
 
       - name: Push results to art-village-p3 branch (normal push, no force)
         if: always()
