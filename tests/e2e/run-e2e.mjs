@@ -2447,7 +2447,8 @@ for (const name of browsers) {
       return { st, rep, title };
     };
     try {
-      await page.goto(server.url + "/?lab=c10b", { waitUntil: "load" });
+      // 清除冷卻紀錄：用不載入模型的 E2 頁面（避免載入模型途中換頁造成 console 錯誤）
+      await page.goto(server.url + "/?lab=c10b&raf=1&rest=120", { waitUntil: "load" });
       await page.evaluate(() => localStorage.removeItem("starwish.c10bDiag"));
       const d0 = await runOnce("");
       run.results.push({ tag: "D0", group: d0.st.group, size: d0.st.renderSize, ratio: d0.st.pixelRatio, firstLast: d0.st.firstLast, below45: d0.st.firstBelow45, cooldown: d0.st.cooldownSec, run: d0.st.runNo, shadow: d0.st.shadowSampling, draws: d0.st.avgDrawCalls, lost: d0.st.contextLost });
@@ -2507,7 +2508,7 @@ for (const name of browsers) {
       const e0 = await run3d("");
       run.results.push({ tag: "E0", group: e0.st.group, draws: e0.st.avgDrawCalls, raf: e0.st.raf.all, fence: e0.st.fence && e0.st.fence.all, chars: e0.st.charsInScene, size: e0.st.renderSize, lost: e0.st.contextLost });
       check("E0：組別 E0、角色網格都在主場景與陰影中", /^E0 /.test(e0.st.group) && e0.st.charsInScene.meshes > 0 && e0.st.charsInScene.active === e0.st.charsInScene.meshes && e0.st.charsInScene.shadowCasting === e0.st.charsInScene.meshes, e0.st.charsInScene);
-      check("E0：獨立 rAF 時間戳量測有資料（每 30 秒、間隔分布）", e0.st.raf.all.n > 10 && e0.st.raf.all.fps > 0 && e0.st.raf.w30.length >= 1, e0.st.raf);
+      check("E0：獨立 rAF 時間戳量測有資料（每 30 秒、間隔分布；CI 軟體繪圖約 1 FPS）", e0.st.raf.all.n >= 2 && e0.st.raf.all.fps > 0 && e0.st.raf.w30.length >= 1, e0.st.raf);
       check("E0：fence（非阻塞）有量到資料；不支援 WebGL2 時報告註明", e0.st.fence ? e0.st.fence.all.n > 0 : !e0.gl2 && e0.rep.includes("不支援 WebGL2 fence"), { fence: e0.st.fence && e0.st.fence.all, gl2: e0.gl2 });
       check("E0 報告：原始與 rAF FPS、間隔分布、fence 精度說明、開始／結束解析度、角色網格", ["每 30 秒 FPS（原始）", "獨立畫面更新（rAF 時間戳）", "間隔分布", "實際渲染解析度：開始", "角色網格：共"].every((k) => e0.rep.includes(k)) && (!e0.st.fence || e0.rep.includes("精度約 1 格")), e0.rep.slice(0, 900));
       const e1 = await run3d("&diag=nochars");
