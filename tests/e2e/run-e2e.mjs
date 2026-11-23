@@ -2425,6 +2425,110 @@ for (const name of browsers) {
     for (const e of run.errors) console.log(`   ! ${e}`);
   }
 
+  // ---------- Stage 5.5 角色動畫（C1.0-B4 候選：骨架＋五個動作）＋星靈寵物系統（?lab=anim；WebKit）----------
+  if (name === "webkit") {
+    const vp = VIEWPORTS[0];
+    const run = { browser: name, viewport: `${vp.name} / Stage 5.5 角色動畫＋星靈寵物 ?lab=anim`, checks: {}, errors: [], screenshots: [], results: [] };
+    const check = (key, ok, detail) => {
+      run.checks[key] = { ok, detail };
+    };
+    const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+    const page = await ctx.newPage();
+    page.on("pageerror", (e) => run.errors.push(`pageerror: ${e.message}`));
+    page.on("console", (m) => m.type() === "error" && run.errors.push(`console: ${m.text()}`));
+    const frames = (n) => page.evaluate((k) => new Promise((r) => { let i = 0; const f = () => (++i >= k ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); }), n);
+    const shot = async (tag) => {
+      const f = `${outDir}${name}_anim_${tag}.png`;
+      await page.screenshot({ path: f });
+      run.screenshots.push(f.split("/test-results/")[1]);
+    };
+    const waitState = (s, ms = 8000) => page.waitForFunction((x) => window.__starwishAnim.info().state === x, s, { timeout: ms }).then(() => true, () => false);
+    try {
+      for (const [g, lod] of [["male", "hq"], ["female", "hq"], ["female", "lite"], ["male", "lite"]]) {
+        await page.goto(server.url + `/?lab=anim&g=${g}&lod=${lod}&seed=7`, { waitUntil: "load" });
+        await page.waitForFunction(() => window.__starwishAnim?.ready === true, null, { timeout: 120000 });
+        await frames(5);
+        const info = await page.evaluate(() => window.__starwishAnim.info());
+        run.results.push({ tag: `${g}_${lod}`, info });
+        check(`${g} ${lod}：載入 C1.0-B4 GLB、17 根骨頭、蒙皮網格、5 個動作`, info.file === `novice_c10b4_${g}_${lod}.glb` && info.bones === 17 && info.skinnedMeshes > 0 && ["Idle", "Run", "Jump", "Attack", "Hurt"].every((a) => info.animations.includes(a)) && info.contextLost === 0, info);
+        if (lod !== "hq") continue;
+        await shot(`${g}_idle`);
+        await page.evaluate(() => window.__starwishAnim.setInput(0, 1));
+        const runOk = await waitState("Run");
+        await frames(20);
+        await shot(`${g}_run`);
+        await page.evaluate(() => window.__starwishAnim.setInput(0, 0));
+        const idleOk = await waitState("Idle");
+        await page.evaluate(() => window.__starwishAnim.press("jump"));
+        const jumpOk = await waitState("Jump");
+        const jumpY = await page.waitForFunction(() => window.__starwishAnim.info().jumpY > 0.1, null, { timeout: 8000 }).then(() => true, () => false);
+        await shot(`${g}_jump`);
+        await waitState("Idle");
+        await page.evaluate(() => window.__starwishAnim.press("attack"));
+        const atkOk = await waitState("Attack");
+        await frames(8);
+        await shot(`${g}_attack`);
+        await waitState("Idle");
+        await page.evaluate(() => window.__starwishAnim.press("hurt"));
+        const hurtOk = await waitState("Hurt");
+        await frames(4);
+        await shot(`${g}_hurt`);
+        const backIdle = await waitState("Idle");
+        check(`${g}：動作切換 Idle → Run → Idle → Jump（離地）→ Attack → Hurt → Idle`, runOk && idleOk && jumpOk && jumpY && atkOk && hurtOk && backIdle, { runOk, idleOk, jumpOk, jumpY, atkOk, hurtOk, backIdle });
+      }
+      // 寵物流程（男生 HQ）
+      await page.goto(server.url + "/?lab=anim&g=male&lod=hq&seed=7", { waitUntil: "load" });
+      await page.waitForFunction(() => window.__starwishAnim?.ready === true, null, { timeout: 120000 });
+      const flow = await page.evaluate(() => {
+        const p = window.__starwishAnim.pet;
+        p.reset();
+        const drops = p.kill(40);
+        p.give("birdEgg", 1);
+        const pet = p.hatch("birdEgg");
+        const egg = p.state();
+        p.timeWarp(40);
+        const hatched = p.state();
+        p.give("shopFeed", 5);
+        const fed = [p.feed("shopFeed"), p.feed("shopFeed"), p.feed("shopFeed")];
+        p.timeWarp(30);
+        const evo = p.evolve();
+        const appr = p.appraise();
+        const after = p.state();
+        return { drops, petId: pet && pet.id, eggStage: egg.pets[0] && egg.pets[0].stage, hatchedStage: hatched.pets.find((x) => x.id === (pet && pet.id)).stage, fed, evo, appr, after };
+      });
+      run.results.push({ tag: "pet flow", flow: { ...flow, after: { ...flow.after, pets: flow.after.pets.map((x) => ({ id: x.id, stage: x.stage, exp: Math.round(x.exp), affixes: x.affixes })) } } });
+      const kinds = new Set(flow.drops);
+      check("寵物：擊倒怪物會掉落種子／孵化蛋／鳥蛋／材料（測試用暫定機率）", ["seed", "egg", "birdEgg", "monsterMaterial"].every((k) => kinds.has(k)), [...kinds]);
+      const me = flow.after.pets.find((x) => x.id === flow.petId);
+      check("寵物：孵化（時間）→ 餵食 → 進化 → 鑑定（0～4 條、不重複）", flow.eggStage === 0 && flow.hatchedStage === 1 && flow.fed.every(Boolean) && flow.evo && flow.appr && me.stage === 2 && Array.isArray(me.affixes) && me.affixes.length <= 4 && new Set(me.affixes.map((a) => a.stat)).size === me.affixes.length, { me, flow: { eggStage: flow.eggStage, hatchedStage: flow.hatchedStage, fed: flow.fed, evo: flow.evo } });
+      check("寵物：裝備後出現並加成角色（攻速不超過 160）", flow.after.equippedId === flow.petId && flow.after.followerVisible && flow.after.stats.stats.attackSpeed <= 160, flow.after.stats);
+      await page.evaluate(() => window.__starwishAnim.setInput(1, 0.4));
+      await frames(90);
+      await page.evaluate(() => window.__starwishAnim.setInput(0, 0));
+      await frames(90);
+      const fol = await page.evaluate(() => window.__starwishAnim.pet.state());
+      const d = Math.hypot(fol.followerPos[0] - fol.headPos[0], fol.followerPos[1] - fol.headPos[1], fol.followerPos[2] - fol.headPos[2]);
+      run.results.push({ tag: "follower", d, head: fol.headPos, pet: fol.followerPos });
+      check("寵物：角色移動後跟到頭部附近（0.2～0.8 m）、在頭頂高度附近", d > 0.15 && d < 0.8 && Math.abs(fol.followerPos[1] - fol.headPos[1]) < 0.4, { d, head: fol.headPos, pet: fol.followerPos });
+      await shot("pet_follow");
+      await page.evaluate(() => {
+        document.querySelector("[data-pet=toggle]")?.click();
+      });
+      await frames(3);
+      await shot("pet_panel");
+    } catch (e) {
+      run.errors.push(`exception: ${e.message}`);
+    }
+    await ctx.close();
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 10;
+    if (!run.ok) failures++;
+    report.runs.push(run);
+    console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
+    for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}${v.ok ? "" : "  " + JSON.stringify(v.detail).slice(0, 900)}`);
+    for (const r of run.results) console.log(`   · ${r.tag}: ${JSON.stringify(r)}`.slice(0, 1500));
+    for (const e of run.errors) console.log(`   ! ${e}`);
+  }
+
   await browser.close();
 }
 

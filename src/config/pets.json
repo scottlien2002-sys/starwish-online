@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "description": "星靈寵物設定。鑑定數值由企劃確認；機率、孵化時間、成長、進化、掉落、加成倍率尚未定案（null = 未設定，正式遊戲不得自行假設）。preview 區塊只給測試頁使用，不是正式平衡數值。",
+  "status": {
+    "appraisalValues": "confirmed",
+    "affixCountWeights": "pending",
+    "statWeights": "pending",
+    "valueWeights": "pending",
+    "hatch": "pending",
+    "growth": "pending",
+    "evolution": "pending",
+    "feed": "pending",
+    "drops": "pending",
+    "bonusScale": "pending"
+  },
+  "sources": [
+    { "id": "seed", "label": "種子", "species": "sprout" },
+    { "id": "egg", "label": "孵化蛋", "species": "wisp" },
+    { "id": "birdEgg", "label": "鳥蛋", "species": "bird" }
+  ],
+  "species": [
+    { "id": "sprout", "label": "星芽靈（暫定名稱）", "motion": "float", "stages": [
+      { "id": "seed", "label": "種子" }, { "id": "baby", "label": "幼芽" }, { "id": "young", "label": "成長期" }, { "id": "adult", "label": "綻放期" } ] },
+    { "id": "wisp", "label": "星光精靈（暫定名稱）", "motion": "float", "stages": [
+      { "id": "egg", "label": "蛋" }, { "id": "baby", "label": "幼體" }, { "id": "young", "label": "成長期" }, { "id": "adult", "label": "成熟期" } ] },
+    { "id": "bird", "label": "星羽鳥（暫定名稱）", "motion": "fly", "stages": [
+      { "id": "egg", "label": "鳥蛋" }, { "id": "baby", "label": "雛鳥" }, { "id": "young", "label": "幼鳥" }, { "id": "adult", "label": "成鳥" } ] }
+  ],
+  "appraisal": {
+    "maxAffixes": 4,
+    "oneAffixPerStat": true,
+    "allowNegative": true,
+    "stats": [
+      { "stat": "attack", "label": "攻擊力", "unit": "percent", "values": [-10, -5, 10, 15, 20, 25], "valueWeights": null, "statWeight": null },
+      { "stat": "attackSpeed", "label": "攻速", "unit": "flat", "values": [-4, -2, 2, 4, 6, 8, 10], "valueWeights": null, "statWeight": null },
+      { "stat": "defense", "label": "防禦力", "unit": "percent", "values": [-10, -5, 10, 15, 20, 25], "valueWeights": null, "statWeight": null },
+      { "stat": "maxHp", "label": "生命值", "unit": "percent", "values": [-10, -5, 10, 15, 20], "valueWeights": null, "statWeight": null }
+    ],
+    "affixCountWeights": null
+  },
+  "growth": {
+    "hatchSeconds": null,
+    "expPerSecond": null,
+    "stageExp": null,
+    "evolveRequiresFeedCount": null,
+    "bonusScaleByStage": null
+  },
+  "feed": [
+    { "id": "monsterMaterial", "label": "怪物材料", "exp": null },
+    { "id": "shopFeed", "label": "商店飼料", "exp": null }
+  ],
+  "drops": { "default": { "seed": null, "egg": null, "birdEgg": null, "monsterMaterial": null } },
+  "preview": {
+    "note": "只給測試頁（?lab=anim）使用的暫定數值，方便驗證流程；不是正式平衡數值，正式遊戲不得讀取。",
+    "affixCountWeights": [1, 1, 1, 1, 1],
+    "statWeights": { "attack": 1, "attackSpeed": 1, "defense": 1, "maxHp": 1 },
+    "valueWeights": null,
+    "hatchSeconds": 30,
+    "expPerSecond": 2,
+    "stageExp": [0, 60, 200, 500],
+    "evolveRequiresFeedCount": [0, 1, 3, 5],
+    "bonusScaleByStage": [0, 0.3, 0.6, 1.0],
+    "feedExp": { "monsterMaterial": 20, "shopFeed": 50 },
+    "drops": { "seed": 0.25, "egg": 0.15, "birdEgg": 0.1, "monsterMaterial": 0.6 }
+  }
+}
