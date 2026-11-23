@@ -28,7 +28,7 @@ import { villageTextures } from "../../src/maps/village/villageTextures.ts";
 import { VILLAGE_SPAWN_CAMERA } from "../../src/maps/village/spawnCamera.ts";
 import { BOARD, BUILDINGS, buildingCenter, FORGE, NPC_SPOTS, PLATFORM, PORTALS, portalPillars, SOUTH_GATE, STAIR_FROM, STAIR_WIDTH, STAIRS } from "../../src/maps/village/layout.ts";
 
-type View = { target: [number, number, number]; alpha: number; beta: number; radius: number; fov?: number; ortho?: number };
+type View = { target: [number, number, number]; alpha: number; beta: number; radius: number; fov?: number; ortho?: number; hide?: string[] };
 const H = Math.PI / 2;
 /** 鏡頭位於目標的方位（北＝0°，順時針）→ ArcRotateCamera alpha */
 const alphaFrom = (bearing: number): number => {
@@ -79,7 +79,7 @@ const VIEWS: Record<string, View> = {
   knight_door: { target: [-12.9, 7.6, 24.3], alpha: alphaFrom(152), beta: 1.5, radius: 13.5, fov: 0.8 },
   // P3-4 法師軍團「星詠之塔」（正面中心在方位 26°、r 27；建築中心 r 33.5 = (14.69, 30.11)；地面 +2 m）
   mage_front: { target: [14.69, 11.0, 30.11], alpha: alphaFrom(206), beta: 1.5, radius: 34, fov: 0.8 },
-  mage_side: { target: [14.69, 11.0, 30.11], alpha: alphaFrom(116), beta: 1.5, radius: 34, fov: 0.8 },
+  mage_side: { target: [14.69, 11.0, 30.11], alpha: alphaFrom(116), beta: 1.5, radius: 34, fov: 0.8, hide: ["bld_church", "roof_church"] },
   mage_q45: { target: [14.69, 10.5, 30.11], alpha: alphaFrom(241), beta: 1.33, radius: 35, fov: 0.8 },
   mage_q45r: { target: [14.69, 10.5, 30.11], alpha: alphaFrom(161), beta: 1.33, radius: 35, fov: 0.8 },
   mage_top: { target: [14.69, 0, 30.11], alpha: alphaFrom(206), beta: 0.0001, radius: 80, ortho: 9.5 },
@@ -280,6 +280,11 @@ function setView(name: string): void {
   camera.target.set(...v.target);
   camera.alpha = v.alpha;
   camera.beta = v.beta;
+  // 個別視角暫時隱藏擋住鏡頭的灰色量體（例如側面圖前方的教堂量體）
+  for (const m of context) if (m.name.startsWith("bld_") || m.name.startsWith("roof_")) {
+    const id = m.name.slice(m.name.indexOf("_") + 1);
+    if (id !== "knight" && id !== "mage") m.setEnabled(!(v.hide ?? []).includes(m.name));
+  }
   camera.radius = v.radius;
   camera.fov = v.fov ?? 0.8;
   if (v.ortho) {
