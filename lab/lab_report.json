@@ -1,5 +1,5 @@
 {
- "startedAt": "2026-11-23T18:28:13.320Z",
+ "startedAt": "2026-11-23T19:07:45.204Z",
  "checks": {
   "benches 位置＝既有碰撞（誤差 < 1 cm）": {
    "ok": true,
@@ -264,7 +264,7 @@
      "y0": 1.5,
      "y1": 22
     },
-    "triangles": 3874,
+    "triangles": 4630,
     "budget": 10000
    }
   },
@@ -295,7 +295,7 @@
      "y0": 1.5,
      "y1": 22
     },
-    "triangles": 9005,
+    "triangles": 13709,
     "budget": 26000
    }
   },
@@ -310,7 +310,7 @@
     "centerR": "33.50"
    }
   },
-  "正門中心正對 26° 高台石階（側向偏差 < 0.1 m）": {
+  "法師軍團正門中心正對 26° 高台石階（側向偏差 < 0.1 m）": {
    "ok": true,
    "detail": {
     "lateral": "0.000",
@@ -322,7 +322,7 @@
     ]
    }
   },
-  "法師轉職 NPC 站位不變（正門石階前 2 m、在碰撞箱外）": {
+  "法師軍團 NPC 站位不變（正門石階前 2 m、高台上、在碰撞箱外）": {
    "ok": true,
    "detail": {
     "npc": {
@@ -335,6 +335,232 @@
      "floor": 2,
      "interactR": 3
     }
+   }
+  },
+  "劍士軍團尺寸、方位與 V1.3 相同": {
+   "ok": true,
+   "detail": {
+    "v13": {
+     "id": "sword",
+     "name": "劍士軍團",
+     "role": "劍士轉職",
+     "bearing": 297,
+     "w": 12,
+     "d": 12,
+     "eave": 7,
+     "top": 13,
+     "floor": 2,
+     "front": 27,
+     "shape": "hall"
+    },
+    "model": {
+     "bearing": 297,
+     "front": 27,
+     "w": 12,
+     "d": 12,
+     "top": 13,
+     "floor": 2,
+     "door": [
+      -27.069,
+      13.792
+     ]
+    }
+   }
+  },
+  "劍士軍團 lite 模型完全在原碰撞箱內、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "x": [
+      -5.95,
+      5.95
+     ],
+     "y": [
+      0,
+      11.95
+     ],
+     "h": [
+      0,
+      12.99
+     ]
+    },
+    "collider": {
+     "kind": "building:sword",
+     "x": -29.403215298216143,
+     "z": 14.98168649140504,
+     "hw": 6,
+     "hd": 6,
+     "rot": 5.183627878423159,
+     "y0": 1.5,
+     "y1": 15
+    },
+    "triangles": 2956,
+    "budget": 9000
+   }
+  },
+  "劍士軍團 hq 模型完全在原碰撞箱內、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "x": [
+      -5.95,
+      5.95
+     ],
+     "y": [
+      0,
+      11.95
+     ],
+     "h": [
+      0,
+      12.99
+     ]
+    },
+    "collider": {
+     "kind": "building:sword",
+     "x": -29.403215298216143,
+     "z": 14.98168649140504,
+     "hw": 6,
+     "hd": 6,
+     "rot": 5.183627878423159,
+     "y0": 1.5,
+     "y1": 15
+    },
+    "triangles": 4860,
+    "budget": 22000
+   }
+  },
+  "劍士軍團正門面向噴泉（門比建築中心更靠近噴泉）": {
+   "ok": true,
+   "detail": {
+    "door": [
+     -27.069,
+     13.792
+    ],
+    "doorR": "30.38",
+    "centerR": "33.00"
+   }
+  },
+  "劍士軍團正門中心正對 297° 高台石階（側向偏差 < 0.1 m）": {
+   "ok": true,
+   "detail": {
+    "lateral": "-0.000",
+    "stairs": [
+     297,
+     332,
+     0,
+     26
+    ]
+   }
+  },
+  "劍士軍團 NPC 站位不變（正門石階前 2 m、高台上、在碰撞箱外）": {
+   "ok": true,
+   "detail": {
+    "npc": {
+     "id": "sword",
+     "name": "劍士軍團",
+     "role": "劍士轉職",
+     "x": -22.2751631047092,
+     "z": 11.349762493488665,
+     "yaw": 2.0420352248333655,
+     "floor": 2,
+     "interactR": 3
+    }
+   }
+  },
+  "北側高台與石階尺寸＝V1.3（281°→44°、r 23～49、高 2 m；石階 4 道、r 18～23、寬 6 m）": {
+   "ok": true,
+   "detail": {
+    "model": {
+     "from": 281,
+     "to": 44,
+     "r0": 23,
+     "r1": 49,
+     "height": 2,
+     "stairs": [
+      297,
+      332,
+      0,
+      26
+     ],
+     "stair_from": 18,
+     "stair_width": 6
+    }
+   }
+  },
+  "高台 lite：擋土牆正面在 r 23，0.3 m 以下不凸出 r 22.95（牆腳花圃到 22.98）": {
+   "ok": true,
+   "detail": {
+    "wall_min_r_below_0_3m": 22.97,
+    "wall_min_r_any": 22.842,
+    "stairs_side_excess": 0,
+    "stairs_along_excess": 0,
+    "stairs_max_above_ramp": 0.24,
+    "top_max_h": 2.02,
+    "top_in_north_road": 0
+   }
+  },
+  "高台 lite：石階模型完全在石階範圍內、踏面與遊戲斜坡差 ≤ 0.25 m": {
+   "ok": true,
+   "detail": {
+    "wall_min_r_below_0_3m": 22.97,
+    "wall_min_r_any": 22.842,
+    "stairs_side_excess": 0,
+    "stairs_along_excess": 0,
+    "stairs_max_above_ramp": 0.24,
+    "top_max_h": 2.02,
+    "top_in_north_road": 0
+   }
+  },
+  "高台 lite：鋪面高度 ≤ 2.03 m、不蓋住北路、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "wall_min_r_below_0_3m": 22.97,
+    "wall_min_r_any": 22.842,
+    "stairs_side_excess": 0,
+    "stairs_along_excess": 0,
+    "stairs_max_above_ramp": 0.24,
+    "top_max_h": 2.02,
+    "top_in_north_road": 0,
+    "triangles": 3176,
+    "budget": 6000
+   }
+  },
+  "高台 hq：擋土牆正面在 r 23，0.3 m 以下不凸出 r 22.95（牆腳花圃到 22.98）": {
+   "ok": true,
+   "detail": {
+    "wall_min_r_below_0_3m": 22.97,
+    "wall_min_r_any": 22.842,
+    "stairs_side_excess": 0,
+    "stairs_along_excess": 0,
+    "stairs_max_above_ramp": 0.24,
+    "top_max_h": 2.02,
+    "top_in_north_road": 0
+   }
+  },
+  "高台 hq：石階模型完全在石階範圍內、踏面與遊戲斜坡差 ≤ 0.25 m": {
+   "ok": true,
+   "detail": {
+    "wall_min_r_below_0_3m": 22.97,
+    "wall_min_r_any": 22.842,
+    "stairs_side_excess": 0,
+    "stairs_along_excess": 0,
+    "stairs_max_above_ramp": 0.24,
+    "top_max_h": 2.02,
+    "top_in_north_road": 0
+   }
+  },
+  "高台 hq：鋪面高度 ≤ 2.03 m、不蓋住北路、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "wall_min_r_below_0_3m": 22.97,
+    "wall_min_r_any": 22.842,
+    "stairs_side_excess": 0,
+    "stairs_along_excess": 0,
+    "stairs_max_above_ramp": 0.24,
+    "top_max_h": 2.02,
+    "top_in_north_road": 0,
+    "triangles": 4190,
+    "budget": 10000
    }
   },
   "噴泉 lite 外徑 r ≤ 7.0（＝碰撞半徑 7）、最高（含星晶浮動）≤ 6.5、面數在額度內": {
@@ -369,20 +595,32 @@
    "errors": [],
    "shots": [
     "chromium_hq_player_spawn_cam.png",
+    "chromium_hq_topwide.png",
+    "chromium_hq_north_plan.png",
+    "chromium_hq_north_wide.png",
+    "chromium_hq_north_trio.png",
     "chromium_hq_mage_front.png",
     "chromium_hq_mage_side.png",
     "chromium_hq_mage_q45.png",
     "chromium_hq_mage_q45r.png",
     "chromium_hq_mage_top.png",
-    "chromium_hq_mage_player.png",
-    "chromium_hq_mage_player_up.png",
-    "chromium_hq_mage_stairs.png",
     "chromium_hq_mage_npc.png",
+    "chromium_hq_mage_stairs.png",
     "chromium_hq_mage_eye.png",
-    "chromium_hq_north_trio.png",
-    "chromium_hq_north_plan.png"
+    "chromium_hq_sword_front.png",
+    "chromium_hq_sword_side.png",
+    "chromium_hq_sword_q45.png",
+    "chromium_hq_sword_q45r.png",
+    "chromium_hq_sword_top.png",
+    "chromium_hq_sword_player_up.png",
+    "chromium_hq_sword_stairs.png",
+    "chromium_hq_sword_npc.png",
+    "chromium_hq_sword_eye.png",
+    "chromium_hq_platform_front.png",
+    "chromium_hq_platform_stair.png",
+    "chromium_hq_platform_wall.png"
    ],
-   "loadMs": 11003,
+   "loadMs": 9515,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -439,13 +677,13 @@
     },
     "mage": {
      "meshes": 5,
-     "triangles": 9005,
+     "triangles": 13709,
      "byMesh": {
-      "stone": 3660,
-      "roof": 862,
-      "gold": 3592,
+      "stone": 6785,
+      "roof": 880,
+      "gold": 5302,
       "props": 241,
-      "glow": 650
+      "glow": 501
      },
      "materials": 5,
      "shadowCasters": 2,
@@ -454,6 +692,42 @@
       "./models/tex/ashlar_nrm_512.png",
       "./models/tex/slate_hq.png",
       "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "sword": {
+     "meshes": 4,
+     "triangles": 4860,
+     "byMesh": {
+      "stone": 2402,
+      "roof": 88,
+      "gold": 1941,
+      "props": 429
+     },
+     "materials": 4,
+     "shadowCasters": 2,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slate_hq.png",
+      "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "platform": {
+     "meshes": 4,
+     "triangles": 4190,
+     "byMesh": {
+      "stone": 2122,
+      "paving": 1168,
+      "gold": 612,
+      "glow": 288
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slab_hq.png",
+      "./models/tex/slab_nrm_hq.png"
      ]
     }
    },
@@ -529,47 +803,67 @@
      }
     ]
    },
+   "partDrawCalls": {
+    "fountain": 9,
+    "plaza": 8,
+    "knight": 8,
+    "mage": 7,
+    "sword": 6,
+    "platform": 4
+   },
    "drawCalls": {
     "none": {
-     "drawCalls": 119,
-     "activeMeshes": 58
-    },
-    "fountain": {
-     "drawCalls": 128,
-     "activeMeshes": 65
-    },
-    "both": {
-     "drawCalls": 136,
-     "activeMeshes": 70
-    },
-    "noMage": {
-     "drawCalls": 144,
-     "activeMeshes": 74
+     "drawCalls": 73,
+     "activeMeshes": 37
     },
     "all": {
-     "drawCalls": 151,
-     "activeMeshes": 79
+     "drawCalls": 115,
+     "activeMeshes": 66
+    },
+    "no_fountain": {
+     "drawCalls": 106,
+     "activeMeshes": 59
+    },
+    "no_plaza": {
+     "drawCalls": 107,
+     "activeMeshes": 61
+    },
+    "no_knight": {
+     "drawCalls": 107,
+     "activeMeshes": 62
+    },
+    "no_mage": {
+     "drawCalls": 108,
+     "activeMeshes": 61
+    },
+    "no_sword": {
+     "drawCalls": 109,
+     "activeMeshes": 62
+    },
+    "no_platform": {
+     "drawCalls": 111,
+     "activeMeshes": 62
     }
    },
-   "plazaDrawCalls": 8,
-   "fountainDrawCalls": 9,
-   "knightDrawCalls": 8,
-   "mageDrawCalls": 7,
    "flicker": {
     "player_spawn_cam": {
-     "maxRatio": 0.0032180059523809522,
-     "meanRatio": 0.0030803571428571425
+     "maxRatio": 0.0028273809523809523,
+     "meanRatio": 0.0027015128968253975
     },
-    "mage_q45": {
-     "maxRatio": 0.005964781746031746,
-     "meanRatio": 0.005780009920634921
+    "north_wide": {
+     "maxRatio": 0.006597222222222222,
+     "meanRatio": 0.006395089285714285
     },
-    "mage_player": {
-     "maxRatio": 0.0006200396825396825,
-     "meanRatio": 0.000548735119047619
+    "platform_front": {
+     "maxRatio": 0.021701388888888888,
+     "meanRatio": 0.01968625992063492
+    },
+    "sword_q45": {
+     "maxRatio": 0.005394345238095238,
+     "meanRatio": 0.005169890873015873
     }
    },
-   "frameMsSoftware": 1.5999999998603016
+   "frameMsSoftware": 1.6999999999534339
   },
   {
    "browser": "chromium",
@@ -577,14 +871,19 @@
    "errors": [],
    "shots": [
     "chromium_lite-low_player_spawn_cam.png",
+    "chromium_lite-low_topwide.png",
+    "chromium_lite-low_north_wide.png",
     "chromium_lite-low_mage_front.png",
-    "chromium_lite-low_mage_side.png",
     "chromium_lite-low_mage_q45.png",
     "chromium_lite-low_mage_top.png",
-    "chromium_lite-low_mage_player.png",
-    "chromium_lite-low_north_trio.png"
+    "chromium_lite-low_sword_front.png",
+    "chromium_lite-low_sword_q45.png",
+    "chromium_lite-low_sword_top.png",
+    "chromium_lite-low_platform_front.png",
+    "chromium_lite-low_platform_stair.png",
+    "chromium_lite-low_platform_wall.png"
    ],
-   "loadMs": 2957,
+   "loadMs": 2946,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -637,18 +936,48 @@
     },
     "mage": {
      "meshes": 4,
-     "triangles": 3874,
+     "triangles": 4630,
      "byMesh": {
-      "stone": 1889,
+      "stone": 2229,
       "roof": 396,
-      "props": 1171,
-      "glow": 418
+      "props": 1677,
+      "glow": 328
      },
      "materials": 4,
      "shadowCasters": 0,
      "textureUrls": [
       "./models/tex/ashlar_lite.png",
       "./models/tex/slate_lite.png"
+     ]
+    },
+    "sword": {
+     "meshes": 3,
+     "triangles": 2956,
+     "byMesh": {
+      "stone": 1630,
+      "roof": 88,
+      "props": 1238
+     },
+     "materials": 3,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slate_lite.png"
+     ]
+    },
+    "platform": {
+     "meshes": 3,
+     "triangles": 3176,
+     "byMesh": {
+      "stone": 2344,
+      "paving": 544,
+      "glow": 288
+     },
+     "materials": 3,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slab_lite.png"
      ]
     }
    },
@@ -699,47 +1028,67 @@
      }
     ]
    },
+   "partDrawCalls": {
+    "fountain": 7,
+    "plaza": 4,
+    "knight": 3,
+    "mage": 4,
+    "sword": 3,
+    "platform": 3
+   },
    "drawCalls": {
     "none": {
-     "drawCalls": 54,
-     "activeMeshes": 58
-    },
-    "fountain": {
-     "drawCalls": 61,
-     "activeMeshes": 65
-    },
-    "both": {
-     "drawCalls": 65,
-     "activeMeshes": 69
-    },
-    "noMage": {
-     "drawCalls": 68,
-     "activeMeshes": 72
+     "drawCalls": 31,
+     "activeMeshes": 37
     },
     "all": {
-     "drawCalls": 72,
-     "activeMeshes": 76
+     "drawCalls": 55,
+     "activeMeshes": 61
+    },
+    "no_fountain": {
+     "drawCalls": 48,
+     "activeMeshes": 54
+    },
+    "no_plaza": {
+     "drawCalls": 51,
+     "activeMeshes": 57
+    },
+    "no_knight": {
+     "drawCalls": 52,
+     "activeMeshes": 58
+    },
+    "no_mage": {
+     "drawCalls": 51,
+     "activeMeshes": 57
+    },
+    "no_sword": {
+     "drawCalls": 52,
+     "activeMeshes": 58
+    },
+    "no_platform": {
+     "drawCalls": 52,
+     "activeMeshes": 58
     }
    },
-   "plazaDrawCalls": 4,
-   "fountainDrawCalls": 7,
-   "knightDrawCalls": 3,
-   "mageDrawCalls": 4,
    "flicker": {
     "player_spawn_cam": {
-     "maxRatio": 0.0021329365079365077,
-     "meanRatio": 0.0019252232142857144
+     "maxRatio": 0.0018539186507936507,
+     "meanRatio": 0.0016889880952380952
     },
-    "mage_q45": {
-     "maxRatio": 0.004259672619047619,
-     "meanRatio": 0.004114583333333333
+    "north_wide": {
+     "maxRatio": 0.004495287698412698,
+     "meanRatio": 0.00429439484126984
     },
-    "mage_player": {
-     "maxRatio": 0.0006014384920634921,
-     "meanRatio": 0.0005654761904761904
+    "platform_front": {
+     "maxRatio": 0.020213293650793652,
+     "meanRatio": 0.018126240079365082
+    },
+    "sword_q45": {
+     "maxRatio": 0.004396081349206349,
+     "meanRatio": 0.004154265873015873
     }
    },
-   "frameMsSoftware": 1.2666666666821886
+   "frameMsSoftware": 1.0666666667287548
   },
   {
    "browser": "chromium",
@@ -747,10 +1096,11 @@
    "errors": [],
    "shots": [
     "chromium_hq-portrait_player_spawn_cam.png",
-    "chromium_hq-portrait_mage_player.png",
-    "chromium_hq-portrait_mage_npc.png"
+    "chromium_hq-portrait_mage_npc.png",
+    "chromium_hq-portrait_sword_npc.png",
+    "chromium_hq-portrait_platform_stair.png"
    ],
-   "loadMs": 5222,
+   "loadMs": 5058,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -807,13 +1157,13 @@
     },
     "mage": {
      "meshes": 5,
-     "triangles": 9005,
+     "triangles": 13709,
      "byMesh": {
-      "stone": 3660,
-      "roof": 862,
-      "gold": 3592,
+      "stone": 6785,
+      "roof": 880,
+      "gold": 5302,
       "props": 241,
-      "glow": 650
+      "glow": 501
      },
      "materials": 5,
      "shadowCasters": 2,
@@ -822,6 +1172,42 @@
       "./models/tex/ashlar_nrm_512.png",
       "./models/tex/slate_hq.png",
       "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "sword": {
+     "meshes": 4,
+     "triangles": 4860,
+     "byMesh": {
+      "stone": 2402,
+      "roof": 88,
+      "gold": 1941,
+      "props": 429
+     },
+     "materials": 4,
+     "shadowCasters": 2,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slate_hq.png",
+      "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "platform": {
+     "meshes": 4,
+     "triangles": 4190,
+     "byMesh": {
+      "stone": 2122,
+      "paving": 1168,
+      "gold": 612,
+      "glow": 288
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slab_hq.png",
+      "./models/tex/slab_nrm_hq.png"
      ]
     }
    },
@@ -897,32 +1283,48 @@
      }
     ]
    },
+   "partDrawCalls": {
+    "fountain": 9,
+    "plaza": 8,
+    "knight": 4,
+    "mage": 7,
+    "sword": 2,
+    "platform": 4
+   },
    "drawCalls": {
     "none": {
-     "drawCalls": 88,
-     "activeMeshes": 27
-    },
-    "fountain": {
-     "drawCalls": 97,
-     "activeMeshes": 34
-    },
-    "both": {
-     "drawCalls": 105,
-     "activeMeshes": 39
-    },
-    "noMage": {
-     "drawCalls": 109,
-     "activeMeshes": 39
+     "drawCalls": 54,
+     "activeMeshes": 18
     },
     "all": {
-     "drawCalls": 116,
-     "activeMeshes": 44
+     "drawCalls": 88,
+     "activeMeshes": 39
+    },
+    "no_fountain": {
+     "drawCalls": 79,
+     "activeMeshes": 32
+    },
+    "no_plaza": {
+     "drawCalls": 80,
+     "activeMeshes": 34
+    },
+    "no_knight": {
+     "drawCalls": 84,
+     "activeMeshes": 39
+    },
+    "no_mage": {
+     "drawCalls": 81,
+     "activeMeshes": 34
+    },
+    "no_sword": {
+     "drawCalls": 86,
+     "activeMeshes": 39
+    },
+    "no_platform": {
+     "drawCalls": 84,
+     "activeMeshes": 35
     }
-   },
-   "plazaDrawCalls": 8,
-   "fountainDrawCalls": 9,
-   "knightDrawCalls": 4,
-   "mageDrawCalls": 7
+   }
   },
   {
    "browser": "chromium",
@@ -930,9 +1332,9 @@
    "errors": [],
    "shots": [
     "chromium_lite-portrait_player_spawn_cam.png",
-    "chromium_lite-portrait_mage_player.png"
+    "chromium_lite-portrait_sword_npc.png"
    ],
-   "loadMs": 1863,
+   "loadMs": 1672,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -985,18 +1387,48 @@
     },
     "mage": {
      "meshes": 4,
-     "triangles": 3874,
+     "triangles": 4630,
      "byMesh": {
-      "stone": 1889,
+      "stone": 2229,
       "roof": 396,
-      "props": 1171,
-      "glow": 418
+      "props": 1677,
+      "glow": 328
      },
      "materials": 4,
      "shadowCasters": 0,
      "textureUrls": [
       "./models/tex/ashlar_lite.png",
       "./models/tex/slate_lite.png"
+     ]
+    },
+    "sword": {
+     "meshes": 3,
+     "triangles": 2956,
+     "byMesh": {
+      "stone": 1630,
+      "roof": 88,
+      "props": 1238
+     },
+     "materials": 3,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slate_lite.png"
+     ]
+    },
+    "platform": {
+     "meshes": 3,
+     "triangles": 3176,
+     "byMesh": {
+      "stone": 2344,
+      "paving": 544,
+      "glow": 288
+     },
+     "materials": 3,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slab_lite.png"
      ]
     }
    },
@@ -1047,42 +1479,59 @@
      }
     ]
    },
+   "partDrawCalls": {
+    "fountain": 7,
+    "plaza": 4,
+    "knight": 0,
+    "mage": 4,
+    "sword": 0,
+    "platform": 3
+   },
    "drawCalls": {
     "none": {
-     "drawCalls": 23,
-     "activeMeshes": 27
-    },
-    "fountain": {
-     "drawCalls": 30,
-     "activeMeshes": 34
-    },
-    "both": {
-     "drawCalls": 34,
-     "activeMeshes": 38
-    },
-    "noMage": {
-     "drawCalls": 34,
-     "activeMeshes": 38
+     "drawCalls": 12,
+     "activeMeshes": 18
     },
     "all": {
-     "drawCalls": 38,
-     "activeMeshes": 42
+     "drawCalls": 30,
+     "activeMeshes": 36
+    },
+    "no_fountain": {
+     "drawCalls": 23,
+     "activeMeshes": 29
+    },
+    "no_plaza": {
+     "drawCalls": 26,
+     "activeMeshes": 32
+    },
+    "no_knight": {
+     "drawCalls": 30,
+     "activeMeshes": 36
+    },
+    "no_mage": {
+     "drawCalls": 26,
+     "activeMeshes": 32
+    },
+    "no_sword": {
+     "drawCalls": 30,
+     "activeMeshes": 36
+    },
+    "no_platform": {
+     "drawCalls": 27,
+     "activeMeshes": 33
     }
-   },
-   "plazaDrawCalls": 4,
-   "fountainDrawCalls": 7,
-   "knightDrawCalls": 0,
-   "mageDrawCalls": 4
+   }
   },
   {
    "browser": "webkit",
    "mode": "hq",
    "errors": [],
    "shots": [
-    "webkit_hq_mage_q45.png",
-    "webkit_hq_player_spawn_cam.png"
+    "webkit_hq_north_wide.png",
+    "webkit_hq_sword_q45.png",
+    "webkit_hq_mage_q45.png"
    ],
-   "loadMs": 3693,
+   "loadMs": 3884,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -1139,13 +1588,13 @@
     },
     "mage": {
      "meshes": 5,
-     "triangles": 9005,
+     "triangles": 13709,
      "byMesh": {
-      "stone": 3660,
-      "roof": 862,
-      "gold": 3592,
+      "stone": 6785,
+      "roof": 880,
+      "gold": 5302,
       "props": 241,
-      "glow": 650
+      "glow": 501
      },
      "materials": 5,
      "shadowCasters": 2,
@@ -1154,6 +1603,42 @@
       "./models/tex/ashlar_nrm_512.png",
       "./models/tex/slate_hq.png",
       "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "sword": {
+     "meshes": 4,
+     "triangles": 4860,
+     "byMesh": {
+      "stone": 2402,
+      "roof": 88,
+      "gold": 1941,
+      "props": 429
+     },
+     "materials": 4,
+     "shadowCasters": 2,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slate_hq.png",
+      "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "platform": {
+     "meshes": 4,
+     "triangles": 4190,
+     "byMesh": {
+      "stone": 2122,
+      "paving": 1168,
+      "gold": 612,
+      "glow": 288
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slab_hq.png",
+      "./models/tex/slab_nrm_hq.png"
      ]
     }
    },
@@ -1229,41 +1714,57 @@
      }
     ]
    },
+   "partDrawCalls": {
+    "fountain": 9,
+    "plaza": 8,
+    "knight": 8,
+    "mage": 7,
+    "sword": 6,
+    "platform": 4
+   },
    "drawCalls": {
     "none": {
-     "drawCalls": 119,
-     "activeMeshes": 58
-    },
-    "fountain": {
-     "drawCalls": 128,
-     "activeMeshes": 65
-    },
-    "both": {
-     "drawCalls": 136,
-     "activeMeshes": 70
-    },
-    "noMage": {
-     "drawCalls": 144,
-     "activeMeshes": 74
+     "drawCalls": 73,
+     "activeMeshes": 37
     },
     "all": {
-     "drawCalls": 151,
-     "activeMeshes": 79
+     "drawCalls": 115,
+     "activeMeshes": 66
+    },
+    "no_fountain": {
+     "drawCalls": 106,
+     "activeMeshes": 59
+    },
+    "no_plaza": {
+     "drawCalls": 107,
+     "activeMeshes": 61
+    },
+    "no_knight": {
+     "drawCalls": 107,
+     "activeMeshes": 62
+    },
+    "no_mage": {
+     "drawCalls": 108,
+     "activeMeshes": 61
+    },
+    "no_sword": {
+     "drawCalls": 109,
+     "activeMeshes": 62
+    },
+    "no_platform": {
+     "drawCalls": 111,
+     "activeMeshes": 62
     }
-   },
-   "plazaDrawCalls": 8,
-   "fountainDrawCalls": 9,
-   "knightDrawCalls": 8,
-   "mageDrawCalls": 7
+   }
   },
   {
    "browser": "webkit",
    "mode": "lite-low",
    "errors": [],
    "shots": [
-    "webkit_lite-low_mage_q45.png"
+    "webkit_lite-low_north_wide.png"
    ],
-   "loadMs": 2327,
+   "loadMs": 2337,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -1316,18 +1817,48 @@
     },
     "mage": {
      "meshes": 4,
-     "triangles": 3874,
+     "triangles": 4630,
      "byMesh": {
-      "stone": 1889,
+      "stone": 2229,
       "roof": 396,
-      "props": 1171,
-      "glow": 418
+      "props": 1677,
+      "glow": 328
      },
      "materials": 4,
      "shadowCasters": 0,
      "textureUrls": [
       "./models/tex/ashlar_lite.png",
       "./models/tex/slate_lite.png"
+     ]
+    },
+    "sword": {
+     "meshes": 3,
+     "triangles": 2956,
+     "byMesh": {
+      "stone": 1630,
+      "roof": 88,
+      "props": 1238
+     },
+     "materials": 3,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slate_lite.png"
+     ]
+    },
+    "platform": {
+     "meshes": 3,
+     "triangles": 3176,
+     "byMesh": {
+      "stone": 2344,
+      "paving": 544,
+      "glow": 288
+     },
+     "materials": 3,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slab_lite.png"
      ]
     }
    },
@@ -1378,33 +1909,49 @@
      }
     ]
    },
+   "partDrawCalls": {
+    "fountain": 7,
+    "plaza": 4,
+    "knight": 3,
+    "mage": 4,
+    "sword": 3,
+    "platform": 3
+   },
    "drawCalls": {
     "none": {
-     "drawCalls": 54,
-     "activeMeshes": 58
-    },
-    "fountain": {
-     "drawCalls": 61,
-     "activeMeshes": 65
-    },
-    "both": {
-     "drawCalls": 65,
-     "activeMeshes": 69
-    },
-    "noMage": {
-     "drawCalls": 68,
-     "activeMeshes": 72
+     "drawCalls": 31,
+     "activeMeshes": 37
     },
     "all": {
-     "drawCalls": 72,
-     "activeMeshes": 76
+     "drawCalls": 55,
+     "activeMeshes": 61
+    },
+    "no_fountain": {
+     "drawCalls": 48,
+     "activeMeshes": 54
+    },
+    "no_plaza": {
+     "drawCalls": 51,
+     "activeMeshes": 57
+    },
+    "no_knight": {
+     "drawCalls": 52,
+     "activeMeshes": 58
+    },
+    "no_mage": {
+     "drawCalls": 51,
+     "activeMeshes": 57
+    },
+    "no_sword": {
+     "drawCalls": 52,
+     "activeMeshes": 58
+    },
+    "no_platform": {
+     "drawCalls": 52,
+     "activeMeshes": 58
     }
-   },
-   "plazaDrawCalls": 4,
-   "fountainDrawCalls": 7,
-   "knightDrawCalls": 3,
-   "mageDrawCalls": 4
+   }
   }
  ],
- "finishedAt": "2026-11-23T18:41:58.006Z"
+ "finishedAt": "2026-11-23T19:27:12.102Z"
 }
