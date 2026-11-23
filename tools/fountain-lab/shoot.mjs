@@ -10,6 +10,8 @@ const out = process.argv[3] ?? "out/lab";
 const plazaReport = process.argv[4] ?? "out/plaza_report.json";
 const knightReport = process.argv[5] ?? "out/knight_report.json";
 const mageReport = process.argv[6] ?? "out/mage_report.json";
+const swordReport = process.argv[7] ?? "out/sword_report.json";
+const platformReport = process.argv[8] ?? "out/platform_report.json";
 mkdirSync(out, { recursive: true });
 const report = { startedAt: new Date().toISOString(), checks: {}, runs: [] };
 let fail = 0;
@@ -93,26 +95,38 @@ let fail = 0;
     ck("正門面向噴泉（門比建築中心更靠近噴泉）", dDoor < dCenter, { door: lay.door, doorR: dDoor.toFixed(2), centerR: dCenter.toFixed(2) });
     ck("騎士轉職 NPC 站位不變（正門前 2 m、在碰撞箱外）", Math.abs(Math.hypot(npc.x, npc.z) - (b.front - 2)) < 0.01 && !L.insideBox(box, npc.x, npc.z), { npc });
   }
-  // P3-4 法師軍團：完全在原碰撞箱內（±6.5 × 0～13 × 0～20，地面 +2）、正門朝噴泉並正對 26° 石階、NPC 站位不變
-  {
-    const mr = JSON.parse(readFileSync(mageReport, "utf8"));
-    const b = L.BUILDINGS.find((x) => x.id === "mage");
-    const box = L.BOX_COLLIDERS.find((c) => c.kind === "building:mage");
+  // P3-4 法師軍團、P3-5 劍士軍團：完全在原碰撞箱內、面數在額度內、正門朝噴泉並正對高台石階、NPC 站位不變
+  for (const [id, name, file] of [["mage", "法師軍團", mageReport], ["sword", "劍士軍團", swordReport]]) {
+    const mr = JSON.parse(readFileSync(file, "utf8"));
+    const b = L.BUILDINGS.find((x) => x.id === id);
+    const box = L.BOX_COLLIDERS.find((c) => c.kind === `building:${id}`);
     const lay = mr.layout;
-    ck("法師軍團尺寸、方位與 V1.3 相同", b.bearing === lay.bearing && b.front === lay.front && b.w === lay.w && b.d === lay.d && b.top === lay.top && b.floor === lay.floor, { v13: b, model: lay });
+    ck(`${name}尺寸、方位與 V1.3 相同`, b.bearing === lay.bearing && b.front === lay.front && b.w === lay.w && b.d === lay.d && b.top === lay.top && b.floor === lay.floor, { v13: b, model: lay });
     for (const [lod, v] of Object.entries(mr.lods)) {
       const bb = v.bounds_local;
       const ok = bb.x[0] >= -b.w / 2 - 0.01 && bb.x[1] <= b.w / 2 + 0.01 && bb.y[0] >= -0.01 && bb.y[1] <= b.d + 0.01 && bb.h[0] >= -0.01 && bb.h[1] <= b.top + 0.01 && v.within_budget;
-      ck(`法師軍團 ${lod} 模型完全在原碰撞箱內、面數在額度內`, ok, { bounds: bb, collider: box, triangles: v.triangles, budget: mr.budget[lod] });
+      ck(`${name} ${lod} 模型完全在原碰撞箱內、面數在額度內`, ok, { bounds: bb, collider: box, triangles: v.triangles, budget: mr.budget[lod] });
     }
-    const npc = L.NPC_SPOTS.find((n) => n.id === "mage");
+    const npc = L.NPC_SPOTS.find((n) => n.id === id);
     const dDoor = Math.hypot(lay.door[0], lay.door[1]);
     const dCenter = Math.hypot(box.x, box.z);
-    ck("法師軍團正門面向噴泉（門比建築中心更靠近噴泉）", dDoor < dCenter, { door: lay.door, doorR: dDoor.toFixed(2), centerR: dCenter.toFixed(2) });
+    ck(`${name}正門面向噴泉（門比建築中心更靠近噴泉）`, dDoor < dCenter, { door: lay.door, doorR: dDoor.toFixed(2), centerR: dCenter.toFixed(2) });
     const t = (b.bearing * Math.PI) / 180;
     const side = lay.door[0] * Math.cos(t) - lay.door[1] * Math.sin(t);
-    ck("正門中心正對 26° 高台石階（側向偏差 < 0.1 m）", L.STAIRS.includes(b.bearing) && Math.abs(side) < 0.1, { lateral: side.toFixed(3), stairs: L.STAIRS });
-    ck("法師轉職 NPC 站位不變（正門石階前 2 m、在碰撞箱外）", Math.abs(Math.hypot(npc.x, npc.z) - (b.front - 2)) < 0.01 && !L.insideBox(box, npc.x, npc.z), { npc });
+    ck(`${name}正門中心正對 ${b.bearing}° 高台石階（側向偏差 < 0.1 m）`, L.STAIRS.includes(b.bearing) && Math.abs(side) < 0.1, { lateral: side.toFixed(3), stairs: L.STAIRS });
+    ck(`${name} NPC 站位不變（正門石階前 2 m、高台上、在碰撞箱外）`, Math.abs(Math.hypot(npc.x, npc.z) - (b.front - 2)) < 0.01 && !L.insideBox(box, npc.x, npc.z) && L.onPlatform(npc.x, npc.z), { npc });
+  }
+  // P3-6 北側高台：尺寸＝V1.3、擋土牆不擋牆腳花圃、石階在石階範圍內、鋪面不蓋北路
+  {
+    const pr = JSON.parse(readFileSync(platformReport, "utf8"));
+    const lay = pr.layout;
+    ck("北側高台與石階尺寸＝V1.3（281°→44°、r 23～49、高 2 m；石階 4 道、r 18～23、寬 6 m）", lay.from === L.PLATFORM.from && lay.to === L.PLATFORM.to && lay.r0 === L.PLATFORM.r0 && lay.r1 === L.PLATFORM.r1 && lay.height === L.PLATFORM.height && lay.stair_from === L.STAIR_FROM && lay.stair_width === L.STAIR_WIDTH && lay.stairs.length === L.STAIRS.length && lay.stairs.every((x) => L.STAIRS.includes(x)), { model: lay });
+    for (const [lod, v] of Object.entries(pr.lods)) {
+      const c = v.checks;
+      ck(`高台 ${lod}：擋土牆正面在 r 23，0.3 m 以下不凸出 r 22.95（牆腳花圃到 22.98）`, c.wall_min_r_below_0_3m >= 22.95, c);
+      ck(`高台 ${lod}：石階模型完全在石階範圍內、踏面與遊戲斜坡差 ≤ 0.25 m`, c.stairs_side_excess <= 0.001 && c.stairs_along_excess <= 0.001 && c.stairs_max_above_ramp <= 0.25, c);
+      ck(`高台 ${lod}：鋪面高度 ≤ 2.03 m、不蓋住北路、面數在額度內`, c.top_max_h <= 2.03 && c.top_in_north_road === 0 && v.within_budget, { ...c, triangles: v.triangles, budget: pr.budget[lod] });
+    }
   }
   // 噴泉：外徑＝碰撞半徑 7 m、最高 6.5 m（P3-1A 驗收值）
   {
@@ -130,13 +144,13 @@ const pw = await loadPlaywright();
 const server = await serve(dist);
 // [瀏覽器, 模式, 畫質, lod, 截圖視角, 選項{ viewport, anim: [[名稱, 視角, 秒, fps]] }]
 const plan = [
-  ["chromium", "hq", "high", "hq", ["player_spawn_cam", "mage_front", "mage_side", "mage_q45", "mage_q45r", "mage_top", "mage_player", "mage_player_up", "mage_stairs", "mage_npc", "mage_eye", "north_trio", "north_plan"]],
-  ["chromium", "lite-low", "low", "lite", ["player_spawn_cam", "mage_front", "mage_side", "mage_q45", "mage_top", "mage_player", "north_trio"]],
-  // iPhone 直向（390×844，DPR 2）：出生點、廣場看法師軍團、NPC 前
-  ["chromium", "hq-portrait", "high", "hq", ["player_spawn_cam", "mage_player", "mage_npc"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 } }],
-  ["chromium", "lite-portrait", "low", "lite", ["player_spawn_cam", "mage_player"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 } }],
-  ["webkit", "hq", "high", "hq", ["mage_q45", "player_spawn_cam"]],
-  ["webkit", "lite-low", "low", "lite", ["mage_q45"]],
+  ["chromium", "hq", "high", "hq", ["player_spawn_cam", "topwide", "north_plan", "north_wide", "north_trio", "mage_front", "mage_side", "mage_q45", "mage_q45r", "mage_top", "mage_npc", "mage_stairs", "mage_eye", "sword_front", "sword_side", "sword_q45", "sword_q45r", "sword_top", "sword_player_up", "sword_stairs", "sword_npc", "sword_eye", "platform_front", "platform_stair", "platform_wall"]],
+  ["chromium", "lite-low", "low", "lite", ["player_spawn_cam", "topwide", "north_wide", "mage_front", "mage_q45", "mage_top", "sword_front", "sword_q45", "sword_top", "platform_front", "platform_stair", "platform_wall"]],
+  // iPhone 直向（390×844，DPR 2）
+  ["chromium", "hq-portrait", "high", "hq", ["player_spawn_cam", "mage_npc", "sword_npc", "platform_stair"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 } }],
+  ["chromium", "lite-portrait", "low", "lite", ["player_spawn_cam", "sword_npc"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 } }],
+  ["webkit", "hq", "high", "hq", ["north_wide", "sword_q45", "mage_q45"]],
+  ["webkit", "lite-low", "low", "lite", ["north_wide"]],
 ];
 
 for (const [bname, mode, quality, lod, views, opts = {}] of plan) {
@@ -164,19 +178,16 @@ for (const [bname, mode, quality, lod, views, opts = {}] of plan) {
     run.stats = await page.evaluate(() => window.__lab.stats());
     run.textureMemory = await page.evaluate(() => window.__lab.textureMemory());
     await page.evaluate(() => window.__lab.setView("pano"));
-    const dc = {};
-    for (const [k, parts] of [
-      ["none", { fountain: false, plaza: false, knight: false, mage: false }],
-      ["fountain", { fountain: true, plaza: false, knight: false, mage: false }],
-      ["both", { fountain: true, plaza: true, knight: false, mage: false }],
-      ["noMage", { fountain: true, plaza: true, knight: true, mage: false }],
-      ["all", { fountain: true, plaza: true, knight: true, mage: true }],
-    ]) dc[k] = await page.evaluate((p) => window.__lab.drawCalls(p), parts);
+    // 繪製次數：全部開啟 − 拿掉某一部分 ＝ 該部分（含陰影）；none＝只有灰色量體與地面
+    const PARTS = ["fountain", "plaza", "knight", "mage", "sword", "platform"];
+    const allOn = Object.fromEntries(PARTS.map((k) => [k, true]));
+    const dc = { none: await page.evaluate((p) => window.__lab.drawCalls(p), Object.fromEntries(PARTS.map((k) => [k, false]))), all: await page.evaluate((p) => window.__lab.drawCalls(p), allOn) };
+    run.partDrawCalls = {};
+    for (const k of PARTS) {
+      dc[`no_${k}`] = await page.evaluate((p) => window.__lab.drawCalls(p), { ...allOn, [k]: false });
+      run.partDrawCalls[k] = dc.all.drawCalls - dc[`no_${k}`].drawCalls;
+    }
     run.drawCalls = dc;
-    run.plazaDrawCalls = dc.both.drawCalls - dc.fountain.drawCalls;
-    run.fountainDrawCalls = dc.fountain.drawCalls - dc.none.drawCalls;
-    run.knightDrawCalls = dc.noMage.drawCalls - dc.both.drawCalls;
-    run.mageDrawCalls = dc.all.drawCalls - dc.noMage.drawCalls;
     await page.evaluate(() => window.__lab.setTime(3.2));
     for (const v of views) {
       if (v === "fountain_anim") continue;
@@ -199,8 +210,9 @@ for (const [bname, mode, quality, lod, views, opts = {}] of plan) {
     if (bname === "chromium" && !mode.includes("portrait")) {
       run.flicker = {
         player_spawn_cam: await page.evaluate(() => window.__lab.flickerTest("player_spawn_cam")),
-        mage_q45: await page.evaluate(() => window.__lab.flickerTest("mage_q45")),
-        mage_player: await page.evaluate(() => window.__lab.flickerTest("mage_player")),
+        north_wide: await page.evaluate(() => window.__lab.flickerTest("north_wide")),
+        platform_front: await page.evaluate(() => window.__lab.flickerTest("platform_front")),
+        sword_q45: await page.evaluate(() => window.__lab.flickerTest("sword_q45")),
       };
       await page.evaluate(() => window.__lab.setTime(null));
       await page.evaluate(() => window.__lab.setView("player_spawn"));

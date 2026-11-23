@@ -24,6 +24,7 @@ import { type FountainP3, setupFountainP3 } from "../../src/maps/village/Fountai
 import { type PlazaP3, setupPlazaP3 } from "../../src/maps/village/PlazaP3.ts";
 import { type KnightP3, setupKnightP3 } from "../../src/maps/village/KnightP3.ts";
 import { type MageP3, setupMageP3 } from "../../src/maps/village/MageP3.ts";
+import { type BuildingP3, setupBuildingP3 } from "../../src/maps/village/BuildingP3.ts";
 import { villageTextures } from "../../src/maps/village/villageTextures.ts";
 import { VILLAGE_SPAWN_CAMERA } from "../../src/maps/village/spawnCamera.ts";
 import { BOARD, BUILDINGS, buildingCenter, FORGE, NPC_SPOTS, PLATFORM, PORTALS, portalPillars, SOUTH_GATE, STAIR_FROM, STAIR_WIDTH, STAIRS } from "../../src/maps/village/layout.ts";
@@ -94,6 +95,21 @@ const VIEWS: Record<string, View> = {
   // 北側整體：騎士軍團＋法師軍團＋星願之泉；北側高台俯視配置
   north_trio: { target: [0, 8.5, 20], alpha: -H, beta: 1.4, radius: 52, fov: 0.8 },
   north_plan: { target: [0, 0, 24], alpha: -H, beta: 0.0001, radius: 100, ortho: 21 },
+  north_wide: { target: [-3, 7.5, 18], alpha: -H, beta: 1.36, radius: 64, fov: 0.85 },
+  // P3-5 劍士軍團（正面中心在方位 297°、r 27；建築中心 r 33 = (-29.40, 14.98)；地面 +2 m）
+  sword_front: { target: [-29.4, 7.8, 14.98], alpha: alphaFrom(117), beta: 1.5, radius: 30, fov: 0.8 },
+  sword_side: { target: [-29.4, 7.8, 14.98], alpha: alphaFrom(207), beta: 1.5, radius: 30, fov: 0.8, hide: ["bld_smith", "roof_smith", "bld_warehouse", "roof_warehouse"] },
+  sword_q45: { target: [-29.4, 7.2, 14.98], alpha: alphaFrom(162), beta: 1.3, radius: 31, fov: 0.8 },
+  sword_q45r: { target: [-29.4, 7.2, 14.98], alpha: alphaFrom(72), beta: 1.3, radius: 31, fov: 0.8 },
+  sword_top: { target: [-29.4, 0, 14.98], alpha: alphaFrom(117), beta: 0.0001, radius: 80, ortho: 8.5 },
+  sword_player_up: { target: [-13.37, 0.85, 6.81], alpha: alphaFrom(117), beta: 1.38, radius: 9, fov: 0.9 },
+  sword_stairs: { target: [-17.82, 1.6, 9.08], alpha: alphaFrom(117), beta: 1.3, radius: 11, fov: 0.9 },
+  sword_npc: { target: [-22.28, 2.85, 11.35], alpha: alphaFrom(129), beta: 1.3, radius: 9, fov: 0.9 },
+  sword_eye: { target: [-29.4, 9.5, 14.98], alpha: alphaFrom(117), beta: 1.98, radius: 19.5, fov: 1.0 },
+  // P3-6 北側高台擋土牆與石階
+  platform_front: { target: [0, 1.6, 21], alpha: -H, beta: 1.33, radius: 24, fov: 0.85 },
+  platform_stair: { target: [-9.62, 1.0, 18.1], alpha: alphaFrom(152), beta: 1.25, radius: 9, fov: 0.9 },
+  platform_wall: { target: [-5.95, 1.0, 22.2], alpha: alphaFrom(165), beta: 1.42, radius: 7, fov: 0.85 },
 };
 
 const params = new URLSearchParams(location.search);
@@ -272,7 +288,12 @@ let fx: FountainP3 | null = null;
 let plaza: PlazaP3 | null = null;
 let knight: KnightP3 | null = null;
 let mage: MageP3 | null = null;
+let sword: BuildingP3 | null = null;
+let platformArt: BuildingP3 | null = null;
 const state: { ready: boolean; error: string | null; loadMs: number } = { ready: false, error: null, loadMs: 0 };
+
+/** 已由正式模型取代的灰色量體（setView 不會再打開） */
+const REPLACED = new Set<string>(["knight", "mage"]);
 
 function setView(name: string): void {
   const v = VIEWS[name];
@@ -283,7 +304,7 @@ function setView(name: string): void {
   // 個別視角暫時隱藏擋住鏡頭的灰色量體（例如側面圖前方的教堂量體）
   for (const m of context) if (m.name.startsWith("bld_") || m.name.startsWith("roof_")) {
     const id = m.name.slice(m.name.indexOf("_") + 1);
-    if (id !== "knight" && id !== "mage") m.setEnabled(!(v.hide ?? []).includes(m.name));
+    if (!REPLACED.has(id)) m.setEnabled(!(v.hide ?? []).includes(m.name));
   }
   camera.radius = v.radius;
   camera.fov = v.fov ?? 0.8;
@@ -392,17 +413,21 @@ async function captureFrames(view: string, secs: number, fps: number): Promise<s
 }
 
 /** 繪製次數：只開啟指定部分 */
-async function drawCalls(parts: { fountain: boolean; plaza: boolean; knight?: boolean; mage?: boolean }): Promise<{ drawCalls: number; activeMeshes: number }> {
+async function drawCalls(parts: { fountain: boolean; plaza: boolean; knight?: boolean; mage?: boolean; sword?: boolean; platform?: boolean }): Promise<{ drawCalls: number; activeMeshes: number }> {
   fx?.setEnabled(parts.fountain);
   plaza?.setEnabled(parts.plaza);
   knight?.setEnabled(parts.knight ?? true);
   mage?.setEnabled(parts.mage ?? true);
+  sword?.setEnabled(parts.sword ?? true);
+  platformArt?.setEnabled(parts.platform ?? true);
   await frames(4);
   const r = { drawCalls: inst.drawCallsCounter.current, activeMeshes: scene.getActiveMeshes().length };
   fx?.setEnabled(true);
   plaza?.setEnabled(true);
   knight?.setEnabled(true);
   mage?.setEnabled(true);
+  sword?.setEnabled(true);
+  platformArt?.setEnabled(true);
   return r;
 }
 
@@ -429,8 +454,15 @@ async function load(): Promise<void> {
   const mg = await loadGlb(`mage_${q2}.glb`);
   mage = setupMageP3(scene, mg.meshes, { lite, texBase: "./models/tex/", shadows: castShadows ? shadows : null });
   for (const m of context) if (m.name === "bld_mage" || m.name === "roof_mage") m.setEnabled(false);
+  // P3-5 劍士軍團、P3-6 北側高台擋土牆與石階（取代灰色量體、灰色高台與石階）
+  const sw = await loadGlb(`sword_${q2}.glb`);
+  sword = setupBuildingP3(scene, sw.meshes, "Sword", { lite, texBase: "./models/tex/", shadows: castShadows ? shadows : null });
+  const pf = await loadGlb(`platform_${q2}.glb`);
+  platformArt = setupBuildingP3(scene, pf.meshes, "Platform", { lite, texBase: "./models/tex/", shadows: castShadows ? shadows : null, casters: [] });
+  for (const m of context) if (["bld_sword", "roof_sword", "platform", "stair"].includes(m.name)) m.setEnabled(false);
+  REPLACED.add("sword");
   // 星晶每幀會動：不凍結它的世界矩陣
-  for (const m of [...f.meshes, ...p.meshes, ...k.meshes, ...mg.meshes]) if (!fx.animated.includes(m)) m.freezeWorldMatrix();
+  for (const m of [...f.meshes, ...p.meshes, ...k.meshes, ...mg.meshes, ...sw.meshes, ...pf.meshes]) if (!fx.animated.includes(m)) m.freezeWorldMatrix();
   await scene.whenReadyAsync();
   state.loadMs = Math.round(performance.now() - t0);
   state.ready = true;
@@ -454,7 +486,7 @@ load().catch((e: unknown) => {
   flickerTime,
   captureFrames,
   drawCalls,
-  stats: () => ({ fountain: fx?.stats ?? null, plaza: plaza?.stats ?? null, knight: knight?.stats ?? null, mage: mage?.stats ?? null }),
+  stats: () => ({ fountain: fx?.stats ?? null, plaza: plaza?.stats ?? null, knight: knight?.stats ?? null, mage: mage?.stats ?? null, sword: sword?.stats ?? null, platform: platformArt?.stats ?? null }),
   /** 全村共用貼圖快取：張數、像素、估計顯示記憶體（RGBA、含 mipmap ×1.33） */
   textureMemory: () => {
     const list = villageTextures(scene).map((t) => {
