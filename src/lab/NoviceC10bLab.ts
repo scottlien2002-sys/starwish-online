@@ -126,7 +126,19 @@ interface BenchResult extends BenchmarkSummary {
   /** 第二輪 E1：角色網格是否參與主場景與陰影 */
   charsInScene: { meshes: number; enabled: number; active: number; shadowCasting: number };
   /** 第三輪：啟用中角色的三角形數、材質數、F1 替換的材質數、各角色啟用網格數 */
-  charsDetail: { trianglesEnabled: number; materialsEnabled: number; simpleMats: number; byGender: { gender: string; enabled: number; meshes: number }[] };
+  charsDetail: {
+    trianglesEnabled: number;
+    materialsEnabled: number;
+    simpleMats: number;
+    byGender: { gender: string; enabled: number; meshes: number }[];
+    /** 報告格式修正：已載入／實際啟用角色數、已載入／實際繪製三角形、已載入材質數 */
+    charsLoaded: number;
+    charsEnabled: number;
+    trianglesLoaded: number;
+    trianglesDrawn: number;
+    materialsLoaded: number;
+    files: string[];
+  };
   windows: number[];
   contextLost: number;
 }
@@ -508,7 +520,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
     await Promise.all(
       (["male", "female"] as C10bGender[]).map(async (g) => {
         const s = performance.now();
-        const file = c10bFile(g, l, opts.star);
+        const file = c10bFile(g, l, opts.star, opts.geo);
         const c = await SceneLoader.LoadAssetContainerAsync(base, file, scene);
         rec.files.push({ file, ms: Math.round(performance.now() - s), bytes: fileBytes(file) });
         for (const m of c.materials) prepMaterial(m);
@@ -754,6 +766,12 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
     `貼圖 ${quality.shadows.mapSize}×${quality.shadows.mapSize}｜取樣 ${shadowFilterLabel()}｜刷新 ${opts.shadowRefresh === "once" ? `只畫一次（${smFrozenAt !== null ? `第 ${smFrozenAt} 次後停止` : "尚未停止"}）` : opts.p3 ? "有變化才重畫（P3-2）" : "每格"}｜投影者 ${shadowMap.renderList?.length ?? 0}`;
   const fmt = (r: BenchResult): string =>
     `【${r.group}】本瀏覽器第 ${r.runNo} 次測試` +
+    `\n  ── 摘要 ──` +
+    `\n  角色：已載入 ${r.charsDetail.charsLoaded}、實際啟用 ${r.charsDetail.charsEnabled}｜三角形：已載入 ${r.charsDetail.trianglesLoaded.toLocaleString()}、實際繪製 ${r.charsDetail.trianglesDrawn.toLocaleString()}｜材質：已載入 ${r.charsDetail.materialsLoaded}、啟用中 ${r.charsDetail.materialsEnabled}` +
+    `\n  Draw Calls：主場景 ${r.avgMainDraws}、陰影 ${r.avgShadowDraws}｜WebGL Context Lost ${r.contextLost}` +
+    `\n  FPS：平均 ${r.avgFps.toFixed(1)}、1% Low ${r.low1Fps.toFixed(1)}、最後 30 秒 ${r.firstLast.last}` +
+    `\n  模型檔：${r.charsDetail.files.join("、") || "-"}` +
+    `\n  ── 詳細 ──` +
     `\n  前 30 秒 ${r.firstLast.first} FPS → 最後 30 秒 ${r.firstLast.last} FPS（差距 ${r.firstLast.diff} FPS、${r.firstLast.diffPct}%）　首次低於 45 FPS：${r.firstBelow45 === null ? "未發生" : `第 ${r.firstBelow45} 秒`}（5 秒平均）` +
     `\n  實際渲染解析度 ${r.renderSize[0]!.join("×")}（倍率 ${r.pixelRatio}x）｜陰影取樣 ${r.shadowSampling}` +
     `\n  冷卻：距上一次測試結束 ${cooldownText(r.cooldownSec)}｜開始前 ${r.startState}` +
@@ -1105,7 +1123,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
           fixSize: opts.fixSize,
           resizeEvents: resizeLog.filter((e) => e.t >= benchStartT).map((e) => e.text),
           contextLost: contextLost - lostAtStart,
-          group: c10dGroup(opts),
+          group: c10dGroup({ ...opts, lod }),
           firstLast: firstLastFps(dts, 30),
           firstBelow45: firstBelow(frameTimeline(samples, 5), 45),
           cooldownSec: cooldownAtStart,
@@ -1141,8 +1159,18 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
             };
           })(),
           charsDetail: (() => {
-            const en = chars.flatMap((c) => c.meshes).filter((m) => m.isEnabled());
+            const all = chars.flatMap((c) => c.meshes);
+            const en = all.filter((m) => m.isEnabled());
+            const am = scene.getActiveMeshes();
+            const act = new Set(am.data.slice(0, am.length));
+            const tri = (ms: AbstractMesh[]): number => ms.reduce((a, m) => a + Math.round((m.getTotalIndices() || 0) / 3), 0);
             return {
+              charsLoaded: chars.length,
+              charsEnabled: chars.filter((c) => c.meshes.some((m) => m.isEnabled())).length,
+              trianglesLoaded: tri(all),
+              trianglesDrawn: tri(all.filter((m) => act.has(m))),
+              materialsLoaded: new Set(all.map((m) => m.material).filter(Boolean)).size,
+              files: loads[loads.length - 1]?.files.map((f) => f.file) ?? [],
               trianglesEnabled: en.reduce((a, m) => a + Math.round((m.getTotalIndices() || 0) / 3), 0),
               materialsEnabled: new Set(en.map((m) => m.material).filter(Boolean)).size,
               simpleMats: simpleMatCount,

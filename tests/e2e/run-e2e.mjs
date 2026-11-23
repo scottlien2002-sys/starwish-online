@@ -2602,6 +2602,54 @@ for (const name of browsers) {
     for (const e of run.errors) console.log(`   ! ${e}`);
   }
 
+  // ---------- C1.0-B2 效能診斷第三輪補充：F3b 幾何約 20 萬（診斷模型）、L Lite 參考組、報告摘要格式（WebKit）----------
+  if (name === "webkit") {
+    const vp = VIEWPORTS[0];
+    const run = { browser: name, viewport: `${vp.name} / C1.0-B2 效能診斷 F3b／Lite 參考組／報告摘要`, checks: {}, errors: [], screenshots: [], results: [] };
+    const check = (key, ok, detail) => {
+      run.checks[key] = { ok, detail };
+    };
+    const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+    const page = await ctx.newPage();
+    page.on("pageerror", (e) => run.errors.push(`pageerror: ${e.message}`));
+    page.on("console", (m) => m.type() === "error" && run.errors.push(`console: ${m.text()}`));
+    const base = "/?lab=c10b&quality=high&p1=1&p2=1&star=2&p3=1&fixsize=1&round=3&bench=5&warmup=0";
+    const go = async (extra) => {
+      await page.goto(server.url + base + extra, { waitUntil: "load" });
+      await page.waitForFunction(() => window.__starwishC10b?.ready === true, null, { timeout: 120000 });
+      await page.waitForFunction(() => window.__starwishC10b.benchState().state === "done", null, { timeout: 120000 });
+      return { st: await page.evaluate(() => window.__starwishC10b.benchState().result), rep: await page.evaluate(() => window.__starwishC10b.report()) };
+    };
+    try {
+      const f0 = await go("");
+      const d0 = f0.st.charsDetail;
+      const fb = await go("&geo=d100");
+      const db = fb.st.charsDetail;
+      const lt = await go("&lod=lite");
+      const dl = lt.st.charsDetail;
+      const f3 = await go("&diag=nofemale");
+      const d3 = f3.st.charsDetail;
+      for (const [tag, x] of [["F0", f0], ["F3b", fb], ["L", lt], ["F3", f3]]) run.results.push({ tag, group: x.st.group, detail: { ...x.st.charsDetail, byGender: undefined }, main: x.st.avgMainDraws, lost: x.st.contextLost });
+      check("F3b：組別、載入診斷用 d100 模型（男女）", /^F3b /.test(fb.st.group) && db.files.includes("novice_c10b2d100_male_hq.glb") && db.files.includes("novice_c10b2d100_female_hq.glb"), db.files);
+      check("F3b：實際繪製三角形約 20 萬（F0 的 45～55%），GPU 送出的索引真的減少", db.trianglesDrawn > d0.trianglesDrawn * 0.45 && db.trianglesDrawn < d0.trianglesDrawn * 0.55 && db.trianglesDrawn === db.trianglesLoaded, { f0: d0.trianglesDrawn, f3b: db.trianglesDrawn });
+      check("F3b：角色網格 24、材質數、主場景 Draw 與 F0 相同", db.byGender.map((g) => g.enabled).join() === d0.byGender.map((g) => g.enabled).join() && db.materialsLoaded === d0.materialsLoaded && Math.abs(fb.st.avgMainDraws - f0.st.avgMainDraws) <= 1, { f0: [d0.byGender, d0.materialsLoaded, f0.st.avgMainDraws], f3b: [db.byGender, db.materialsLoaded, fb.st.avgMainDraws] });
+      check("L：組別 Lite 參考組、載入現有 Lite 模型、網格與材質數與 F0 相同", /^L /.test(lt.st.group) && dl.files.includes("novice_c10b2_male_lite.glb") && dl.files.includes("novice_c10b_female_lite.glb") && dl.byGender.map((g) => g.enabled).join() === d0.byGender.map((g) => g.enabled).join() && dl.materialsLoaded === d0.materialsLoaded && dl.trianglesDrawn < d0.trianglesDrawn * 0.25, { files: dl.files, tri: dl.trianglesDrawn });
+      check("報告摘要：已載入／啟用角色、已載入／繪製三角形、主場景／陰影 Draw、材質、Context Lost、平均／1% Low／最後 30 秒", ["── 摘要 ──", "角色：已載入 2、實際啟用 2", "三角形：已載入", "實際繪製", "Draw Calls：主場景", "陰影", "材質：已載入", "WebGL Context Lost", "1% Low", "最後 30 秒"].every((k) => f0.rep.includes(k)), f0.rep.slice(0, 700));
+      check("F3 報告摘要：已載入 2、實際啟用 1，實際繪製約一半", f3.rep.includes("角色：已載入 2、實際啟用 1") && d3.trianglesDrawn < d3.trianglesLoaded * 0.55 && d3.trianglesLoaded === d0.trianglesLoaded, { loaded: d3.trianglesLoaded, drawn: d3.trianglesDrawn });
+      check("F0／F3b／L／F3：Context Lost 0", [f0, fb, lt, f3].every((x) => x.st.contextLost === 0), null);
+    } catch (e) {
+      run.errors.push(`exception: ${e.message}`);
+    }
+    await ctx.close();
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 7;
+    if (!run.ok) failures++;
+    report.runs.push(run);
+    console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
+    for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}${v.ok ? "" : "  " + JSON.stringify(v.detail).slice(0, 900)}`);
+    for (const r of run.results) console.log(`   · ${r.tag}: ${JSON.stringify(r)}`.slice(0, 1500));
+    for (const e of run.errors) console.log(`   ! ${e}`);
+  }
+
   await browser.close();
 }
 

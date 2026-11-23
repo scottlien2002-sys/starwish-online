@@ -9,7 +9,9 @@ export type C10bLod = "hq" | "lite";
 /** 男生披風徽記版本：0 = C1.0-B 原版、1 = C1.0-B1（貼合修正）、2 = C1.0-B2（縮小到與女生徽記同尺寸，正式美術基準） */
 export type C10bStar = 0 | 1 | 2;
 
-export function c10bFile(g: C10bGender, lod: C10bLod, star: C10bStar | boolean = 0): string {
+export function c10bFile(g: C10bGender, lod: C10bLod, star: C10bStar | boolean = 0, geo: C10dGeo = "full"): string {
+  // 第三輪 F3b：幾何約減半的「診斷用」模型（每名約 10 萬三角形；與 C1.0-B2 同造型、同材質、同零件）；只有 HQ
+  if (geo === "d100" && lod === "hq") return `novice_c10b2d100_${g}_hq.glb`;
   // 只有男生有徽記修正版（其他零件與 C1.0-B 相同）；女生一律用 C1.0-B
   const v = star === true ? 1 : star === false ? 0 : star;
   if (g !== "male" || v === 0) return `novice_c10b_${g}_${lod}.glb`;
@@ -88,7 +90,12 @@ export interface C10bOptions {
   round: 1 | 2 | 3;
   /** 第二輪 E2：?raf=1 → 不建立 3D，只量 requestAnimationFrame */
   raf: boolean;
+  /** 第三輪 F3b：?geo=d100 → 診斷用約 10 萬三角形／名的模型 */
+  geo: C10dGeo;
 }
+
+/** 第三輪 F3b：full = 正式 HQ 幾何；d100 = 診斷用約 10 萬三角形／名（?geo=d100，只影響 HQ） */
+export type C10dGeo = "full" | "d100";
 
 /** C1.0-B2 效能診斷：可用的解析度倍率 */
 export type C10dRes = 1 | 1.25 | 1.5 | 2;
@@ -99,12 +106,17 @@ const C10D_RES: readonly C10dRes[] = [1, 1.25, 1.5, 2];
  * D0 原始 HQ、D1 只降陰影取樣（shadowfilter=low）、D2 只降解析度（res=1.5）。
  * 同時改了兩個以上（或其他診斷開關）時標「混合」，報告會提醒不能直接比較。
  */
-export function c10dGroup(o: Pick<C10bOptions, "res" | "shadowFilter" | "shadowMap" | "shadowRefresh" | "diag" | "gpuProbe"> & Partial<Pick<C10bOptions, "round" | "raf">>): string {
+export function c10dGroup(o: Pick<C10bOptions, "res" | "shadowFilter" | "shadowMap" | "shadowRefresh" | "diag" | "gpuProbe"> & Partial<Pick<C10bOptions, "round" | "raf" | "lod" | "geo">>): string {
   if (o.round === 3) {
     // 第三輪：與 E0 只差一個因素 — F1 簡化材質、F2 解析度 1.0x、F3 只有男角色
     const d = o.diag.join(",");
     const shadowSame = o.shadowFilter === "default" && o.shadowMap === null && o.shadowRefresh === "every" && !o.gpuProbe;
     if (o.raf || !shadowSame) return "混合（第三輪）— 不只改一個因素，不能直接比較";
+    const geo = o.geo ?? "full";
+    const lod = o.lod ?? "hq";
+    if (lod === "lite" && geo === "full" && o.res === null && d === "") return "L 雙角色 Lite 參考組（現有 Lite 模型；不是純幾何減面）";
+    if (lod === "hq" && geo === "d100" && o.res === null && d === "") return "F3b 雙角色 幾何約 20 萬（診斷用模型）";
+    if (lod !== "hq" || geo !== "full") return "混合（第三輪）— 不只改一個因素，不能直接比較";
     if (o.res === null && d === "") return "F0 雙角色 HQ（同 E0）";
     if (o.res === null && d === "simplemat") return "F1 雙角色 簡化材質";
     if (o.res === 1 && d === "") return "F2 雙角色 解析度 1.0x";
@@ -222,6 +234,7 @@ export function c10bOptionsFromSearch(search: string): C10bOptions {
     p3: p.get("p3") === "1",
     round: p.get("round") === "3" ? 3 : p.get("round") === "2" ? 2 : 1,
     raf: p.get("raf") === "1",
+    geo: p.get("geo") === "d100" ? "d100" : "full",
     res: ((r) => (C10D_RES as readonly number[]).includes(r) ? (r as C10dRes) : null)(Number(p.get("res") ?? NaN)),
   };
 }

@@ -6,7 +6,7 @@ import { C10B_REFERENCE, C10B_VIEWS, c10pAbLabel, c10pShadowMode, c10pMergeGroup
 test("C1.0-B：檔名與網址參數", () => {
   assert.equal(c10bFile("female", "lite"), "novice_c10b_female_lite.glb");
   const d = c10bOptionsFromSearch("?lab=c10b");
-  assert.deepEqual(d, { lod: "hq", count: 2, bench: 0, warmup: 2, view: "front", p1: false, p2: false, diag: [], gpuProbe: false, shadowRefresh: "every", shadowFilter: "default", shadowMap: null, rest: 0, fixSize: false, star: 0, p3: false, res: null, round: 1, raf: false });
+  assert.deepEqual(d, { lod: "hq", count: 2, bench: 0, warmup: 2, view: "front", p1: false, p2: false, diag: [], gpuProbe: false, shadowRefresh: "every", shadowFilter: "default", shadowMap: null, rest: 0, fixSize: false, star: 0, p3: false, res: null, round: 1, raf: false, geo: "full" });
   assert.deepEqual(c10bOptionsFromSearch("?diag=noshadow,bogus,nopost&gpu=1").diag, ["noshadow", "nopost"]);
   assert.equal(c10bOptionsFromSearch("?lab=c10b&p1=1").p1, true);
   const o = c10bOptionsFromSearch("?lab=c10b&lod=lite&count=99&bench=30&view=low");
@@ -251,3 +251,32 @@ test("C1.0-B2 第三輪：F1／F2／F3 組別（與 E0 只差一個因素）", (
   assert.match(g("&diag=simplemat&shadowfilter=low"), /^混合/);
   assert.deepEqual(c10bOptionsFromSearch(base + "&diag=simplemat,nofemale").diag, ["simplemat", "nofemale"]);
 });
+
+test("C1.0-B2 第三輪 F3b／Lite 參考組：組別與檔名", () => {
+  const base = "?lab=c10b&quality=high&p1=1&p2=1&star=2&p3=1&rest=30&bench=120&fixsize=1&round=3";
+  const g = (q: string): string => c10dGroup(c10bOptionsFromSearch(base + q));
+  assert.match(g("&geo=d100"), /^F3b /);
+  assert.match(g("&lod=lite"), /^L /);
+  assert.match(g("&geo=d100&lod=lite"), /^混合/);
+  assert.match(g("&geo=d100&res=1"), /^混合/);
+  assert.match(g("&geo=d100&diag=simplemat"), /^混合/);
+  assert.match(g(""), /^F0 /);
+  assert.equal(c10bFile("male", "hq", 2, "d100"), "novice_c10b2d100_male_hq.glb");
+  assert.equal(c10bFile("female", "hq", 2, "d100"), "novice_c10b2d100_female_hq.glb");
+  assert.equal(c10bFile("male", "lite", 2, "d100"), "novice_c10b2_male_lite.glb");
+  assert.equal(c10bFile("male", "hq", 2), "novice_c10b2_male_hq.glb");
+  assert.equal(c10bOptionsFromSearch(base).geo, "full");
+});
+
+// 第三輪 F3b：診斷用幾何約減半模型（art-novice-c10b2-d100 1c17a974；glTF Validator 0/0）— 不是正式版本
+for (const [g, bytes, tris, meshes] of [["male", 2791984, 99966, 32], ["female", 2759848, 99957, 31]] as const) {
+  const p = `public/models/novice_c10b2d100_${g}_hq.glb`;
+  test(`F3b 診斷 GLB ${g}：約 10 萬三角形、零件 ${meshes}、材質 26（與正式 HQ 相同）`, { skip: !existsSync(p) }, () => {
+    assert.equal(readFileSync(p).length, bytes);
+    const j = glbJson(p) as unknown as { meshes: { primitives: { indices: number }[] }[]; accessors: { count: number }[]; materials: unknown[] };
+    assert.equal(j.meshes.length, meshes);
+    assert.equal(j.materials.length, 26);
+    const t = j.meshes.reduce((a, m) => a + m.primitives.reduce((b2, pr) => b2 + j.accessors[pr.indices]!.count / 3, 0), 0);
+    assert.equal(t, tris);
+  });
+}
