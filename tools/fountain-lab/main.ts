@@ -1,12 +1,15 @@
-// Stage 6 P3-1B 星願之泉預覽頁（獨立頁面，不屬於遊戲、不部署；只在 Blender 美術工作流程裡建置並截圖）
+// Stage 6 P3 星芽村預覽頁（獨立頁面，不屬於遊戲、不部署；只在 Blender 美術工作流程裡建置並截圖）
+// P3-2A：星願之泉（P3-1B 定版，不改）＋中央廣場；周圍建築、高台、石階、傳送門用灰色量體示意（V1.3 座標）
 // 網址參數：?lod=hq|lite&quality=high|medium|low
 import "@babylonjs/loaders/glTF";
 import {
   type AbstractMesh,
   ArcRotateCamera,
+  Camera,
   Color3,
   DirectionalLight,
   HemisphericLight,
+  Mesh,
   MeshBuilder,
   Scene,
   SceneInstrumentation,
@@ -14,19 +17,36 @@ import {
   StandardMaterial,
   TransformNode,
   Vector3,
+  VertexData,
 } from "@babylonjs/core";
 import { createEngine, createShadows, createSkyDome, pickQuality, setupRendering, SKY_COLORS } from "../../src/render/RenderQuality.ts";
 import { type FountainP3, setupFountainP3 } from "../../src/maps/village/FountainP3.ts";
+import { type PlazaP3, setupPlazaP3 } from "../../src/maps/village/PlazaP3.ts";
+import { BOARD, BUILDINGS, buildingCenter, FORGE, NPC_SPOTS, PLATFORM, PORTALS, portalPillars, SOUTH_GATE, STAIR_FROM, STAIR_WIDTH, STAIRS } from "../../src/maps/village/layout.ts";
 
-type View = { target: [number, number, number]; alpha: number; beta: number; radius: number };
+type View = { target: [number, number, number]; alpha: number; beta: number; radius: number; fov?: number; ortho?: number };
 const H = Math.PI / 2;
+/** 鏡頭位於目標的方位（北＝0°，順時針）→ ArcRotateCamera alpha */
+const alphaFrom = (bearing: number): number => {
+  const t = (bearing * Math.PI) / 180;
+  return Math.atan2(Math.cos(t), Math.sin(t));
+};
 const VIEWS: Record<string, View> = {
-  front: { target: [0, 2.6, 0], alpha: -H, beta: 1.4, radius: 24 },
-  q45: { target: [0, 2.3, 0], alpha: -H + Math.PI / 4, beta: 1.12, radius: 23 },
-  top: { target: [0, 0, 0], alpha: -H, beta: 0.02, radius: 30 },
-  close: { target: [0, 5.25, 0], alpha: -H + 0.5, beta: 1.4, radius: 7.5 },
-  falls: { target: [0, 1.4, -3.7], alpha: -H + 0.55, beta: 1.28, radius: 6.2 },
-  game: { target: [0, 2.2, 0], alpha: -H + 0.25, beta: 1.36, radius: 17 },
+  // 俯視（正交）：廣場＋道路入口；全村
+  top: { target: [0, 0, 0], alpha: -H, beta: 0.0001, radius: 80, ortho: 24 },
+  topwide: { target: [0, 0, 0], alpha: -H, beta: 0.0001, radius: 120, ortho: 52 },
+  // 玩家視角（遊戲鏡頭：距離 9、beta 1.05、目標高 0.85、fov 0.9）：創角出生點面向北
+  player_spawn: { target: [0, 0.85, -12.5], alpha: -H, beta: 1.05, radius: 9, fov: 0.9 },
+  // 玩家視角：從南路走進廣場
+  player_south: { target: [0, 0.85, -24], alpha: -H, beta: 1.12, radius: 9, fov: 0.9 },
+  // 斜角全景
+  pano: { target: [0, 1, -1], alpha: alphaFrom(215), beta: 0.98, radius: 50, fov: 0.8 },
+  pano_ne: { target: [0, 1.5, 3], alpha: alphaFrom(55), beta: 1.0, radius: 48, fov: 0.8 },
+  // 近景
+  close_bench: { target: [4.6, 0.7, -7.4], alpha: alphaFrom(170), beta: 1.18, radius: 5.2, fov: 0.8 },
+  close_lamp: { target: [11.96, 1.9, -14.25], alpha: alphaFrom(318), beta: 1.36, radius: 6.2, fov: 0.8 },
+  close_compass: { target: [0, 0, -14.4], alpha: -H, beta: 0.62, radius: 7.5, fov: 0.8 },
+  close_wall: { target: [-12.6, 1.0, 18.6], alpha: alphaFrom(150), beta: 1.2, radius: 10, fov: 0.8 },
 };
 
 const params = new URLSearchParams(location.search);
@@ -61,38 +81,148 @@ const shadows = createShadows(sun, q);
 shadows.darkness = 0.35;
 const castShadows = q.shadows.filter === "contact";
 
-const camera = new ArcRotateCamera("cam", -H, 1.4, 24, new Vector3(0, 2.6, 0), scene);
+const camera = new ArcRotateCamera("cam", -H, 1.05, 9, new Vector3(0, 0.85, -12.5), scene);
 camera.minZ = 0.1;
+camera.maxZ = 600;
 camera.attachControl(canvas, true);
 const render = setupRendering(scene, camera, q);
 if (render.glow) render.glow.isEnabled = false; // 與村莊相同：不開全畫面發光層
 
-// 地面：草地、廣場、噴泉步道（顏色與 Grey-box 相同）
-const flat = (name: string, rgb: [number, number, number]): StandardMaterial => {
+// ---------------- 灰色量體（只為了看比例；正式建築在之後的批次） ----------------
+const flat = (name: string, rgb: [number, number, number], two = false): StandardMaterial => {
   const m = new StandardMaterial(name, scene);
   m.diffuseColor = new Color3(...rgb);
   m.specularColor = Color3.Black();
+  if (two) {
+    m.backFaceCulling = false;
+    m.twoSidedLighting = true;
+  }
   return m;
 };
-const grass = MeshBuilder.CreateDisc("grass", { radius: 60, tessellation: 64 }, scene);
+const context: Mesh[] = [];
+const grass = MeshBuilder.CreateDisc("grass", { radius: 70, tessellation: 72 }, scene);
 grass.rotation.x = H;
 grass.position.y = -0.02;
 grass.material = flat("grassM", [0.56, 0.72, 0.42]);
-const plaza = MeshBuilder.CreateCylinder("plaza", { diameter: 36, height: 0.08, tessellation: 72 }, scene);
-plaza.material = flat("plazaM", [0.83, 0.79, 0.72]);
-const walk = MeshBuilder.CreateCylinder("walk", { diameter: 22, height: 0.1, tessellation: 64 }, scene);
-walk.position.y = 0.02;
-walk.material = flat("walkM", [0.9, 0.87, 0.8]);
-for (const m of [grass, plaza, walk]) m.receiveShadows = true;
-// 1.25 m 角色參考
-const ref = MeshBuilder.CreateCapsule("player", { radius: 0.3, height: 1.25 }, scene);
-ref.position.set(5.6, 0.07 + 0.625, -7.9);
-ref.material = flat("refM", [0.95, 0.6, 0.72]);
-if (castShadows) shadows.addShadowCaster(ref);
+grass.receiveShadows = true;
+const greyM = flat("greyM", [0.8, 0.8, 0.82], true);
+const roofM = flat("roofM", [0.64, 0.68, 0.76], true);
+const platM = flat("platM", [0.78, 0.76, 0.7], true);
+
+// 北側高台（r 23～49、方位 281°→44°、高 2 m）
+{
+  const pos: number[] = [];
+  const idx: number[] = [];
+  const a0 = PLATFORM.from;
+  const a1 = PLATFORM.to + 360;
+  const n = 60;
+  const P = (b: number, r: number, y: number): void => {
+    const t = (b * Math.PI) / 180;
+    pos.push(Math.sin(t) * r, y, Math.cos(t) * r);
+  };
+  for (let i = 0; i <= n; i++) {
+    const b = a0 + ((a1 - a0) * i) / n;
+    P(b, PLATFORM.r0, 0);
+    P(b, PLATFORM.r0, PLATFORM.height);
+    P(b, PLATFORM.r1, PLATFORM.height);
+  }
+  for (let i = 0; i < n; i++) {
+    const k = i * 3;
+    idx.push(k, k + 3, k + 4, k, k + 4, k + 1, k + 1, k + 4, k + 5, k + 1, k + 5, k + 2);
+  }
+  const vd = new VertexData();
+  vd.positions = pos;
+  vd.indices = idx;
+  const nrm: number[] = [];
+  VertexData.ComputeNormals(pos, idx, nrm);
+  vd.normals = nrm;
+  const plat = new Mesh("platform", scene);
+  vd.applyToMesh(plat);
+  plat.material = platM;
+  context.push(plat);
+}
+// 石階（5 階）
+for (const s of STAIRS) {
+  for (let k = 0; k < 5; k++) {
+    const h = ((k + 1) * PLATFORM.height) / 5;
+    const st = MeshBuilder.CreateBox("stair", { width: STAIR_WIDTH, height: h, depth: 1 }, scene);
+    const t = (s * Math.PI) / 180;
+    const r = STAIR_FROM + k + 0.5;
+    st.position.set(Math.sin(t) * r, h / 2, Math.cos(t) * r);
+    st.rotation.y = t;
+    st.material = greyM;
+    context.push(st);
+  }
+}
+// 建築量體：主體＋屋頂（只示意輪廓）
+for (const b of BUILDINGS) {
+  const c = buildingCenter(b);
+  const t = (b.bearing * Math.PI) / 180;
+  const body = MeshBuilder.CreateBox(`bld_${b.id}`, { width: b.w, height: b.eave, depth: b.d }, scene);
+  body.position.set(c.x, b.floor + b.eave / 2, c.z);
+  body.rotation.y = t;
+  body.material = greyM;
+  context.push(body);
+  const rh = b.top - b.eave;
+  const roof = MeshBuilder.CreateCylinder(`roof_${b.id}`, { diameterTop: 0, diameterBottom: Math.max(b.w, b.d) * 1.1, height: rh, tessellation: b.shape === "tent" ? 12 : 4 }, scene);
+  roof.position.set(c.x, b.floor + b.eave + rh / 2, c.z);
+  roof.rotation.y = t + (b.shape === "tent" ? 0 : Math.PI / 4);
+  roof.material = roofM;
+  context.push(roof);
+}
+// 鍛造台、佈告欄、南門柱
+for (const o of [
+  { x: FORGE.x, z: FORGE.z, w: FORGE.w, d: FORGE.d, h: 1.6, r: FORGE.rot },
+  { x: BOARD.x, z: BOARD.z, w: BOARD.w, d: BOARD.d, h: 2.6, r: BOARD.rot },
+]) {
+  const m = MeshBuilder.CreateBox("fixture", { width: o.w, height: o.h, depth: o.d }, scene);
+  m.position.set(o.x, o.h / 2, o.z);
+  m.rotation.y = o.r;
+  m.material = greyM;
+  context.push(m);
+}
+for (const x of [-SOUTH_GATE.halfW, SOUTH_GATE.halfW]) {
+  const m = MeshBuilder.CreateCylinder("gate", { diameter: 1.0, height: 3.4, tessellation: 12 }, scene);
+  m.position.set(x, 1.7, SOUTH_GATE.z);
+  m.material = greyM;
+  context.push(m);
+}
+// 傳送門：圓台＋4 根石柱（南門開放＝淡綠）
+const openM = flat("openM", [0.6, 0.86, 0.7]);
+for (const p of PORTALS) {
+  const pad = MeshBuilder.CreateCylinder("portal", { diameter: p.r * 2, height: 0.12, tessellation: 40 }, scene);
+  pad.position.set(p.x, p.floor + 0.06, p.z);
+  pad.material = p.open ? openM : greyM;
+  context.push(pad);
+  for (const s of portalPillars(p)) {
+    const pl = MeshBuilder.CreateBox("pillar", { width: 0.7, height: 3, depth: 0.7 }, scene);
+    pl.position.set(s.x, p.floor + 1.5, s.z);
+    pl.material = greyM;
+    context.push(pl);
+  }
+}
+// NPC 站位（粉紅色 1.25 m 佔位人形，與 Grey-box 相同）＋創角出生點的玩家參考
+const npcM = flat("npcM", [0.95, 0.6, 0.72]);
+for (const n of NPC_SPOTS) {
+  const m = MeshBuilder.CreateCapsule("npc", { radius: 0.3, height: 1.25 }, scene);
+  m.position.set(n.x, n.floor + 0.625, n.z);
+  m.material = npcM;
+  context.push(m);
+}
+const player = MeshBuilder.CreateCapsule("player", { radius: 0.3, height: 1.25 }, scene);
+player.position.set(0, 0.03 + 0.625, -12.5);
+player.material = flat("playerM", [0.98, 0.45, 0.55]);
+context.push(player);
+for (const m of context) {
+  m.receiveShadows = true;
+  m.isPickable = false;
+  if (castShadows) shadows.addShadowCaster(m, false);
+}
 
 const inst = new SceneInstrumentation(scene);
 inst.captureFrameTime = true;
 let fx: FountainP3 | null = null;
+let plaza: PlazaP3 | null = null;
 const state: { ready: boolean; error: string | null; loadMs: number } = { ready: false, error: null, loadMs: 0 };
 
 function setView(name: string): void {
@@ -102,9 +232,19 @@ function setView(name: string): void {
   camera.alpha = v.alpha;
   camera.beta = v.beta;
   camera.radius = v.radius;
+  camera.fov = v.fov ?? 0.8;
+  if (v.ortho) {
+    const asp = engine.getRenderWidth() / engine.getRenderHeight();
+    camera.mode = Camera.ORTHOGRAPHIC_CAMERA;
+    camera.orthoTop = v.ortho;
+    camera.orthoBottom = -v.ortho;
+    camera.orthoLeft = -v.ortho * asp;
+    camera.orthoRight = v.ortho * asp;
+  } else {
+    camera.mode = Camera.PERSPECTIVE_CAMERA;
+  }
 }
 
-/** 等 n 幀 */
 const frames = (n: number): Promise<void> =>
   new Promise((ok) => {
     let i = 0;
@@ -116,11 +256,8 @@ const frames = (n: number): Promise<void> =>
     });
   });
 
-/**
- * 閃爍檢查：停住渲染迴圈，逐幀微移鏡頭（或推進動畫時間），讀回畫面，統計「相鄰兩幀亮度突變 > 40/255」的像素比例。
- * Z-fighting／透明排序跳動會造成大量突變；正常的小位移只會讓少數邊緣像素改變。
- */
-async function flickerTest(view: string, mode: "camera" | "time", steps = 10): Promise<{ maxRatio: number; meanRatio: number }> {
+/** 閃爍檢查：逐幀微移鏡頭，統計相鄰兩幀亮度突變 > 40/255 的像素比例（readPixels 由下往上，只看畫面下方 70%） */
+async function flickerTest(view: string, steps = 10): Promise<{ maxRatio: number; meanRatio: number }> {
   engine.stopRenderLoop();
   setView(view);
   fx?.setTime(3.2);
@@ -129,15 +266,13 @@ async function flickerTest(view: string, mode: "camera" | "time", steps = 10): P
   let prev: Uint8Array | null = null;
   const ratios: number[] = [];
   for (let k = 0; k <= steps; k++) {
-    if (mode === "camera") camera.alpha += 0.0012;
-    else fx?.setTime(3.2 + k / 60);
+    camera.alpha += 0.0012;
     scene.render();
-    const view8 = await engine.readPixels(0, 0, w, h, true, false);
-    const px = new Uint8Array(view8.buffer, view8.byteOffset, view8.byteLength);
+    const v8 = await engine.readPixels(0, 0, w, h, true, false);
+    const px = new Uint8Array(v8.buffer, v8.byteOffset, v8.byteLength);
     if (prev) {
       let big = 0;
       let n = 0;
-      // 只看畫面下方 70%（readPixels 由下往上，所以是前 70% 列；避開天空）
       for (let y = 0; y < Math.floor(h * 0.7); y += 2) {
         for (let x = 0; x < w; x += 2) {
           const i = (y * w + x) * 4;
@@ -155,24 +290,33 @@ async function flickerTest(view: string, mode: "camera" | "time", steps = 10): P
   return { maxRatio: Math.max(...ratios), meanRatio: ratios.reduce((a, b) => a + b, 0) / ratios.length };
 }
 
-async function drawCalls(withFountain: boolean): Promise<{ drawCalls: number; activeMeshes: number }> {
-  fx?.setEnabled(withFountain);
+/** 繪製次數：只開啟指定部分 */
+async function drawCalls(parts: { fountain: boolean; plaza: boolean }): Promise<{ drawCalls: number; activeMeshes: number }> {
+  fx?.setEnabled(parts.fountain);
+  plaza?.setEnabled(parts.plaza);
   await frames(4);
   const r = { drawCalls: inst.drawCallsCounter.current, activeMeshes: scene.getActiveMeshes().length };
   fx?.setEnabled(true);
+  plaza?.setEnabled(true);
   return r;
+}
+
+async function loadGlb(file: string): Promise<{ meshes: AbstractMesh[]; root: TransformNode }> {
+  const c = await SceneLoader.LoadAssetContainerAsync("./models/", file, scene);
+  c.addAllToScene();
+  const root = new TransformNode(`root_${file}`, scene);
+  for (const n of c.rootNodes) n.parent = root;
+  return { meshes: c.meshes.filter((m): m is AbstractMesh => m.getTotalIndices() > 0), root };
 }
 
 async function load(): Promise<void> {
   const t0 = performance.now();
-  const file = `fountain_${lite ? "lite" : "hq"}.glb`;
-  const c = await SceneLoader.LoadAssetContainerAsync("./models/", file, scene);
-  c.addAllToScene();
-  const root = new TransformNode("fountainRoot", scene);
-  for (const n of c.rootNodes) n.parent = root;
-  const meshes = c.meshes.filter((m): m is AbstractMesh => m.getTotalIndices() > 0);
-  fx = setupFountainP3(scene, meshes, root, { lite, texBase: "./models/fx/", shadows: castShadows ? shadows : null });
-  for (const m of meshes) m.freezeWorldMatrix();
+  const q2 = lite ? "lite" : "hq";
+  const f = await loadGlb(`fountain_${q2}.glb`);
+  fx = setupFountainP3(scene, f.meshes, f.root, { lite, texBase: "./models/fx/", shadows: castShadows ? shadows : null });
+  const p = await loadGlb(`plaza_${q2}.glb`);
+  plaza = setupPlazaP3(scene, p.meshes, { lite, shadows: castShadows ? shadows : null });
+  for (const m of [...f.meshes, ...p.meshes]) m.freezeWorldMatrix();
   await scene.whenReadyAsync();
   state.loadMs = Math.round(performance.now() - t0);
   state.ready = true;
@@ -194,7 +338,7 @@ load().catch((e: unknown) => {
   frames,
   flickerTest,
   drawCalls,
-  stats: () => fx?.stats ?? null,
+  stats: () => ({ fountain: fx?.stats ?? null, plaza: plaza?.stats ?? null }),
   frameMs: () => inst.frameTimeCounter.lastSecAverage,
   size: () => ({ w: engine.getRenderWidth(), h: engine.getRenderHeight() }),
 };

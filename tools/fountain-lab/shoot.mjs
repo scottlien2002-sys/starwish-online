@@ -1,22 +1,80 @@
-// P3-1B 星願之泉預覽頁截圖與量測（只在 Blender 美術工作流程執行；不部署）
-// 用法：node tools/fountain-lab/shoot.mjs <建置資料夾> <輸出資料夾>
+// P3 星芽村預覽頁截圖與量測（只在 Blender 美術工作流程執行；不部署）
+// 用法：node tools/fountain-lab/shoot.mjs <建置資料夾> <輸出資料夾> <plaza_report.json>
 // 注意：CI 是無頭瀏覽器＋軟體繪圖，畫面時間不代表 iPhone，只看相對成本與畫面。
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { loadPlaywright, serve } from "../../tests/e2e/static-server.mjs";
+import * as L from "../../src/maps/village/layout.ts";
 
 const dist = process.argv[2] ?? "out-lab";
 const out = process.argv[3] ?? "out/lab";
+const plazaReport = process.argv[4] ?? "out/plaza_report.json";
 mkdirSync(out, { recursive: true });
-const pw = await loadPlaywright();
-const server = await serve(dist);
-const report = { startedAt: new Date().toISOString(), runs: [] };
+const report = { startedAt: new Date().toISOString(), checks: {}, runs: [] };
 let fail = 0;
 
+// ---------- 1) 配置比對（與 V1.3 layout.ts 完全一致、不擋路） ----------
+{
+  const meta = JSON.parse(readFileSync(plazaReport, "utf8")).layout;
+  const ck = (k, ok, detail) => {
+    report.checks[k] = { ok, detail };
+    if (!ok) fail++;
+  };
+  const near = (list, kind) => {
+    const cols = L.CIRCLE_COLLIDERS.filter((c) => c.kind === kind);
+    const errs = list.map((p) => Math.min(...cols.map((c) => Math.hypot(c.x - p.x, c.z - p.z))));
+    return { count: list.length, colliders: cols.length, maxErr: Math.max(...errs) };
+  };
+  for (const [k, kind] of [["benches", "bench"], ["crystal_lamps", "crystalLamp"], ["lamps", "lamp"]]) {
+    const r = near(meta[k], kind);
+    ck(`${k} 位置＝既有碰撞（誤差 < 1 cm）`, r.count === r.colliders && r.maxErr < 0.01, r);
+  }
+  // 花圃：取樣點不可在道路、石階範圍內，也不可靠近 NPC、出生點、佈告欄、鍛造台
+  const radial = (b, x, z) => {
+    const t = (b * Math.PI) / 180;
+    return { along: x * Math.sin(t) + z * Math.cos(t), side: x * Math.cos(t) - z * Math.sin(t) };
+  };
+  const issues = [];
+  let samples = 0;
+  for (const bed of meta.beds) {
+    for (let i = 0; i <= 8; i++) {
+      for (let j = 0; j <= 2; j++) {
+        const a = bed.a0 + ((bed.a1 - bed.a0) * i) / 8;
+        const r = bed.r0 + ((bed.r1 - bed.r0) * j) / 2;
+        const t = (a * Math.PI) / 180;
+        const x = Math.sin(t) * r;
+        const z = Math.cos(t) * r;
+        samples++;
+        for (const rb of L.ROADS) {
+          const l = radial(rb, x, z);
+          if (l.along > 17 && l.along < 41 && Math.abs(l.side) < L.ROAD_HALF + 0.3) issues.push(`road ${rb}: ${bed.kind} ${a.toFixed(1)}°`);
+        }
+        for (const s of L.STAIRS) {
+          const l = radial(s, x, z);
+          if (l.along > 17.5 && l.along < 23.5 && Math.abs(l.side) < L.STAIR_WIDTH / 2 + 0.3) issues.push(`stair ${s}: ${bed.kind} ${a.toFixed(1)}°`);
+        }
+        for (const n of L.NPC_SPOTS) if (n.floor === 0 && Math.hypot(n.x - x, n.z - z) < 2.0) issues.push(`npc ${n.id}: ${bed.kind} ${a.toFixed(1)}°`);
+        for (const s of L.SPAWN_SLOTS) if (Math.hypot(s.x - x, s.z - z) < 1.0) issues.push(`spawn slot: ${bed.kind} ${a.toFixed(1)}°`);
+        if (Math.hypot(L.BOARD.x - x, L.BOARD.z - z) < 2.0) issues.push(`board: ${bed.kind}`);
+        if (Math.hypot(L.FORGE.x - x, L.FORGE.z - z) < 2.0) issues.push(`forge: ${bed.kind}`);
+        if (bed.h > 0.25) issues.push(`height ${bed.h}`);
+      }
+    }
+  }
+  ck("花圃不擋道路、石階、NPC、出生點、佈告欄、鍛造台；高度 ≤ 0.25 m", issues.length === 0, { beds: meta.beds.length, samples, issues: [...new Set(issues)] });
+  const sp = L.VILLAGE_SPOTS.find((s) => s.id === "spawn");
+  ck("創角出生點站在羅盤徽上（V1.3 出生點不變）", !!sp && Math.hypot(sp.x - meta.compass.x, sp.z - meta.compass.z) <= meta.compass.r, { spawn: sp, compass: meta.compass });
+  ck("道路寬度與方向＝V1.3（4 條、半寬 3 m）", meta.roads.length === 4 && meta.roads.every((r) => L.ROADS.includes(r.bearing) && r.half === L.ROAD_HALF), meta.roads);
+  console.log(JSON.stringify(report.checks, null, 1));
+}
+
+// ---------- 2) 截圖與量測 ----------
+const pw = await loadPlaywright();
+const server = await serve(dist);
 const plan = [
-  ["chromium", "hq", "high", "hq", ["front", "q45", "top", "close", "falls", "game"]],
-  ["chromium", "lite-low", "low", "lite", ["front", "q45", "close", "falls", "game"]],
-  ["webkit", "hq", "high", "hq", ["game", "falls"]],
-  ["webkit", "lite-low", "low", "lite", ["game"]],
+  ["chromium", "hq", "high", "hq", ["top", "topwide", "player_spawn", "player_south", "pano", "pano_ne", "close_bench", "close_lamp", "close_compass", "close_wall"]],
+  ["chromium", "lite-low", "low", "lite", ["top", "player_spawn", "player_south", "pano", "close_lamp"]],
+  ["webkit", "hq", "high", "hq", ["player_spawn", "pano"]],
+  ["webkit", "lite-low", "low", "lite", ["player_spawn"]],
 ];
 
 for (const [bname, mode, quality, lod, views] of plan) {
@@ -35,16 +93,22 @@ for (const [bname, mode, quality, lod, views] of plan) {
   page.on("console", (m) => m.type() === "error" && run.errors.push(`console: ${m.text()}`));
   try {
     await page.goto(`${server.url}/?lod=${lod}&quality=${quality}`, { waitUntil: "load" });
-    await page.waitForFunction(() => window.__lab?.state.ready || window.__lab?.state.error, null, { timeout: 120000 });
+    await page.waitForFunction(() => window.__lab?.state.ready || window.__lab?.state.error, null, { timeout: 180000 });
     const st = await page.evaluate(() => window.__lab.state);
     if (!st.ready) throw new Error(`load: ${st.error}`);
     run.loadMs = st.loadMs;
     await page.evaluate(() => window.__lab.frames(10));
     run.stats = await page.evaluate(() => window.__lab.stats());
-    run.size = await page.evaluate(() => window.__lab.size());
-    run.withFountain = await page.evaluate(() => window.__lab.drawCalls(true));
-    run.withoutFountain = await page.evaluate(() => window.__lab.drawCalls(false));
-    run.fountainDrawCalls = run.withFountain.drawCalls - run.withoutFountain.drawCalls;
+    await page.evaluate(() => window.__lab.setView("pano"));
+    const dc = {};
+    for (const [k, parts] of [
+      ["none", { fountain: false, plaza: false }],
+      ["fountain", { fountain: true, plaza: false }],
+      ["both", { fountain: true, plaza: true }],
+    ]) dc[k] = await page.evaluate((p) => window.__lab.drawCalls(p), parts);
+    run.drawCalls = dc;
+    run.plazaDrawCalls = dc.both.drawCalls - dc.fountain.drawCalls;
+    run.fountainDrawCalls = dc.fountain.drawCalls - dc.none.drawCalls;
     await page.evaluate(() => window.__lab.setTime(3.2));
     for (const v of views) {
       await page.evaluate((name) => window.__lab.setView(name), v);
@@ -55,12 +119,11 @@ for (const [bname, mode, quality, lod, views] of plan) {
     }
     if (bname === "chromium") {
       run.flicker = {
-        game_camera: await page.evaluate(() => window.__lab.flickerTest("game", "camera")),
-        q45_camera: await page.evaluate(() => window.__lab.flickerTest("q45", "camera")),
-        game_time: await page.evaluate(() => window.__lab.flickerTest("game", "time")),
+        player_spawn: await page.evaluate(() => window.__lab.flickerTest("player_spawn")),
+        pano: await page.evaluate(() => window.__lab.flickerTest("pano")),
       };
       await page.evaluate(() => window.__lab.setTime(null));
-      await page.evaluate(() => window.__lab.setView("game"));
+      await page.evaluate(() => window.__lab.setView("player_spawn"));
       await page.evaluate(() => window.__lab.frames(90));
       run.frameMsSoftware = await page.evaluate(() => window.__lab.frameMs());
     }

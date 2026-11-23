@@ -126,6 +126,40 @@ def make(n):
     return tex, nrm
 
 
+def make_slab(n):
+    """暖白石板細紋：低頻色斑＋細顆粒＋少量礦物斑點（接近白，由頂點色決定暖白／米色）"""
+    lo = tile_noise(n, 3, 3)
+    mid = tile_noise(n, 9, 3)
+    fine = tile_noise(n, 48, 2)
+    spk = (tile_noise(n, 64, 1) > 0.86).astype(float)
+    v = 0.9 + (lo - 0.5) * 0.08 + (mid - 0.5) * 0.06 + (fine - 0.5) * 0.06 - spk * 0.025
+    rgb = np.stack([v * 1.0, v * 0.985, v * 0.96], -1)
+    return np.clip(rgb, 0, 1), mid * 0.6 + fine * 0.4
+
+
+def make_banner(w, h):
+    """藍底金邊旗：金色八芒星＋小星點＋燕尾下緣金邊（燕尾形狀由模型決定）"""
+    yy, xx = np.mgrid[0:h, 0:w] / np.array([h, w])[:, None, None]
+    weave = tile_noise(max(w, h), 40, 2)[:h, :w]
+    base = np.stack([0.15 + weave * 0.04, 0.27 + weave * 0.05, 0.58 + weave * 0.08], -1)
+    gold = np.array([0.93, 0.74, 0.32])
+    border = (xx < 0.05) | (xx > 0.95) | (yy < 0.04) | ((yy > 0.83) & (yy < 0.88))
+    inner = ((np.abs(xx - 0.085) < 0.01) | (np.abs(xx - 0.915) < 0.01)) & (yy > 0.04) & (yy < 0.83)
+    cx, cy = xx - 0.5, (yy - 0.36) * (h / w)
+    r = np.sqrt(cx * cx + cy * cy)
+    th = np.arctan2(cy, cx)
+    star_r = 0.17 + 0.13 * np.abs(np.cos(th * 4)) ** 6
+    star = r < star_r * 0.75
+    ring = np.abs(r - 0.3) < 0.012
+    dots = np.zeros_like(xx, bool)
+    for px, py in ((0.25, 0.66), (0.75, 0.66), (0.5, 0.74), (0.3, 0.12), (0.7, 0.12)):
+        dots |= np.hypot(xx - px, (yy - py) * h / w) < 0.025
+    out = base.copy()
+    for m in (border, inner, star, ring, dots):
+        out[m] = gold * (0.92 + 0.08 * weave[m][:, None])
+    return Image.fromarray((np.clip(out, 0, 1) * 255).astype(np.uint8), "RGB")
+
+
 def make_fx(n):
     """P3-1B 噴泉特效貼圖（RGBA，小尺寸）：落水條紋、漣漪泡沫環、星晶光暈"""
     out = {}
@@ -168,6 +202,19 @@ def main():
                 p = os.path.join(out, f"{k}_nrm_hq.png")
                 Image.fromarray(a, "RGB").save(p, optimize=True)
                 info[f"{k}_nrm_hq"] = {"px": n, "bytes": os.path.getsize(p)}
+    # P3-2A 廣場：石板細紋（無接縫線；石板分割由模型負責）HQ 512＋法線、Lite 256；旗幟 256×512
+    for lod, n in (("hq", 512), ("lite", 256)):
+        rgb, h = make_slab(n)
+        p = os.path.join(out, f"slab_{lod}.png")
+        to_img(rgb).save(p, optimize=True)
+        info[f"slab_{lod}"] = {"px": n, "bytes": os.path.getsize(p)}
+        if lod == "hq":
+            p = os.path.join(out, "slab_nrm_hq.png")
+            Image.fromarray(normal_from_height(h, 3.0), "RGB").save(p, optimize=True)
+            info["slab_nrm_hq"] = {"px": n, "bytes": os.path.getsize(p)}
+    p = os.path.join(out, "banner_hq.png")
+    make_banner(256, 512).save(p, optimize=True)
+    info["banner_hq"] = {"px": "256x512", "bytes": os.path.getsize(p)}
     for lod, n in (("hq", 256), ("lite", 128)):
         for k, im in make_fx(n).items():
             p = os.path.join(out, f"fx_{k}_{lod}.png")

@@ -19,6 +19,7 @@ from mathutils import Vector
 MATS = {
     "stone": dict(metal=0.0, rough=0.78, tile=2.0, normal=True, tex="stone"),
     "paving": dict(metal=0.0, rough=0.82, tile=3.0, normal=True, tex="paving"),
+    "slab": dict(metal=0.0, rough=0.85, tile=2.0, normal=True, tex="slab"),
     "roof": dict(metal=0.0, rough=0.6, tile=1.6, normal=True, tex="roof"),
     "wood": dict(metal=0.0, rough=0.7, tile=1.2, normal=False, tex="wood"),
     "metal": dict(metal=0.85, rough=0.32, tile=1.0, normal=False, tex="metal"),
