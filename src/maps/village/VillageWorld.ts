@@ -1,7 +1,7 @@
 import { Color3, DynamicTexture, Mesh, MeshBuilder, type Scene, type ShadowGenerator, StandardMaterial, TransformNode, VertexData } from "@babylonjs/core";
 import { bake, geoOf, joinGeo, type Geo, type Placed } from "../starsprout/StarsproutVegetation.ts";
 import {
-  ARRIVAL_PORTAL,
+  ARRIVAL_SPOT,
   BOARD,
   BUILDINGS,
   CIRCLE_COLLIDERS,
@@ -9,14 +9,16 @@ import {
   FOUNTAIN,
   NPC_SPOTS,
   RESPAWN_SLOTS,
+  PLATFORM,
+  PORTALS,
+  ROADS,
+  ROAD_HALF,
   SOUTH_GATE,
+  STAIRS,
   STAIR_FROM,
   STAIR_WIDTH,
-  TERRACES,
   WALK_RADIUS,
-  WEST_GATE,
   buildingCenter,
-  groundHeight,
   polar,
   type BuildingDef,
 } from "./layout.ts";
@@ -262,13 +264,14 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
   // 廣場：環形廣場、噴泉步道、道路
   add(cyl(scene, FOUNTAIN.plazaR * 2, FOUNTAIN.plazaR * 2, 0.08, lite ? 48 : 72, 0, 0.0, 0, PLAZA));
   add(cyl(scene, FOUNTAIN.walkwayR * 2, FOUNTAIN.walkwayR * 2, 0.1, lite ? 40 : 64, 0, 0.02, 0, WALKWAY));
-  for (const [b, from, to] of [
-    [180, 17.5, 45.5],
-    [270, 17.5, 50],
-  ] as const) {
+  // 四條放射主路（寬 6 m）：北路在高台上（石階另做），東、南、西在地面
+  for (const b of ROADS) {
+    const from = b === 0 ? PLATFORM.r0 : 17.5;
+    const to = 40;
     const len = to - from;
     const c = polar(b, from + len / 2);
-    add(box(scene, 5, 0.08, len, 0, 0, 0, ROAD), c.x, 0, c.z, (b * Math.PI) / 180);
+    const y = b === 0 ? PLATFORM.height : 0;
+    add(box(scene, ROAD_HALF * 2, 0.08, len, 0, y, 0, ROAD), c.x, 0, c.z, (b * Math.PI) / 180);
   }
   // 南側羅盤佔位（八芒星，平面）
   add(cyl(scene, 5, 5, 0.12, 8, 0, 0.03, -14, GOLD));
@@ -277,39 +280,75 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
     const c = polar(b.bearing, (17.5 + b.front) / 2);
     add(box(scene, b.w + 2, 0.06, b.front - 17.5, 0, 0, 0, ROAD), c.x, 0, c.z, (b.bearing * Math.PI) / 180);
   }
-  // 高台與石階
-  for (const t of TERRACES) {
-    const len = t.r1 - t.r0;
-    const c = polar(t.bearing, t.r0 + len / 2);
-    const rot = (t.bearing * Math.PI) / 180;
-    add(box(scene, t.halfW * 2, t.height, len, 0, t.height / 2, 0, STONE), c.x, 0, c.z, rot);
-    // 高台邊緣矮牆（石階開口除外）
-    const edge = (lx: number, lz: number, w: number, d: number): void => {
-      const s = Math.sin(rot);
-      const co = Math.cos(rot);
-      add(box(scene, w, 0.6, d, 0, t.height + 0.3, 0, STONE_DARK), c.x + lx * co + lz * s, 0, c.z - lx * s + lz * co, rot);
+  // 北側上層高台（扇形、+2 m）與 4 座石階
+  {
+    const a0 = PLATFORM.from - 360;
+    const a1 = PLATFORM.to;
+    const segs = lite ? 36 : 54;
+    const h = PLATFORM.height;
+    const pos: number[] = [];
+    const idx: number[] = [];
+    // 兩面都輸出（正反各一組頂點），不必猜三角形繞向；只多幾百個三角形
+    const quad = (p: number[][]): void => {
+      let base = pos.length / 3;
+      for (const v of p) pos.push(v[0]!, v[1]!, v[2]!);
+      idx.push(base, base + 1, base + 2, base, base + 2, base + 3);
+      base = pos.length / 3;
+      for (const v of p) pos.push(v[0]!, v[1]!, v[2]!);
+      idx.push(base, base + 2, base + 1, base, base + 3, base + 2);
     };
-    const side = (t.halfW * 2 - STAIR_WIDTH) / 2;
-    edge(-(STAIR_WIDTH / 2 + side / 2), -len / 2 + 0.2, side, 0.4);
-    edge(STAIR_WIDTH / 2 + side / 2, -len / 2 + 0.2, side, 0.4);
-    // 側邊矮牆：外側若接著另一個同高的高台（北側連成一片）就不放
-    for (const sx of [-1, 1]) {
-      const s = Math.sin(rot);
-      const co = Math.cos(rot);
-      const lx = sx * (t.halfW + 1);
-      const ox = c.x + lx * co;
-      const oz = c.z - lx * s;
-      if (Math.abs(groundHeight(ox, oz) - t.height) < 1e-6) continue;
-      edge(sx * (t.halfW - 0.2), 0, 0.4, len);
+    const at = (deg: number, r: number, y: number): number[] => {
+      const t = (deg * Math.PI) / 180;
+      return [r * Math.sin(t), y, r * Math.cos(t)];
+    };
+    for (let k = 0; k < segs; k++) {
+      const da = a0 + ((a1 - a0) * k) / segs;
+      const db = a0 + ((a1 - a0) * (k + 1)) / segs;
+      quad([at(da, PLATFORM.r0, h), at(da, PLATFORM.r1, h), at(db, PLATFORM.r1, h), at(db, PLATFORM.r0, h)]);
+      quad([at(da, PLATFORM.r0, 0), at(da, PLATFORM.r0, h), at(db, PLATFORM.r0, h), at(db, PLATFORM.r0, 0)]);
+      quad([at(db, PLATFORM.r1, 0), at(db, PLATFORM.r1, h), at(da, PLATFORM.r1, h), at(da, PLATFORM.r1, 0)]);
     }
-    // 石階：一階一階的薄板
-    const run = t.r0 - STAIR_FROM;
-    const steps = Math.round(t.height / 0.25);
+    quad([at(a0, PLATFORM.r1, 0), at(a0, PLATFORM.r1, h), at(a0, PLATFORM.r0, h), at(a0, PLATFORM.r0, 0)]);
+    quad([at(a1, PLATFORM.r0, 0), at(a1, PLATFORM.r0, h), at(a1, PLATFORM.r1, h), at(a1, PLATFORM.r1, 0)]);
+    const mesh = new Mesh("PH_vTmp", scene);
+    const vd = new VertexData();
+    vd.positions = pos;
+    vd.indices = idx;
+    const nrm: number[] = [];
+    VertexData.ComputeNormals(pos, idx, nrm);
+    vd.normals = nrm;
+    vd.applyToMesh(mesh);
+    add(geoOf(mesh, lit(STONE)));
+    // 高台邊緣矮牆：內緣（石階開口除外）、兩端、外緣
+    const stairHalfDeg = ((STAIR_WIDTH / 2 + 0.3) / PLATFORM.r0) * (180 / Math.PI);
+    const wallSeg = (deg: number, r: number, len: number): void => {
+      const p2 = polar(deg, r);
+      add(box(scene, len, 0.6, 0.4, 0, h + 0.3, 0, STONE_DARK), p2.x, 0, p2.z, (deg * Math.PI) / 180);
+    };
+    for (let deg = a0 + 1.5; deg <= a1 - 1.5; deg += 3) {
+      if (STAIRS.some((st) => Math.abs((((deg - st) % 360) + 540) % 360 - 180) < stairHalfDeg + 1.5)) continue;
+      wallSeg(deg, PLATFORM.r0 + 0.2, ((3 * Math.PI) / 180) * PLATFORM.r0 + 0.05);
+    }
+    for (let deg = a0 + 1; deg <= a1 - 1; deg += 2) {
+      // 北路盡頭（北方傳送門後方）也圍起來
+      wallSeg(deg, PLATFORM.r1 - 0.2, ((2 * Math.PI) / 180) * PLATFORM.r1 + 0.05);
+    }
+    for (const deg of [a0 + 0.4, a1 - 0.4]) {
+      for (let r = PLATFORM.r0 + 1; r < PLATFORM.r1; r += 2) {
+        const p2 = polar(deg, r);
+        add(box(scene, 0.4, 0.6, 2.05, 0, h + 0.3, 0, STONE_DARK), p2.x, 0, p2.z, (deg * Math.PI) / 180);
+      }
+    }
+  }
+  for (const st of STAIRS) {
+    const rot = (st * Math.PI) / 180;
+    const run = PLATFORM.r0 - STAIR_FROM;
+    const steps = Math.round(PLATFORM.height / 0.25);
     for (let i = 0; i < steps; i++) {
       const r = STAIR_FROM + (run * (i + 0.5)) / steps;
-      const sc = polar(t.bearing, r + run / steps / 2);
-      const h = (t.height * (i + 1)) / steps;
-      add(box(scene, STAIR_WIDTH, h, run / steps + 0.02, 0, h / 2, 0, i % 2 ? STONE : WALKWAY), sc.x, 0, sc.z, rot);
+      const sc = polar(st, r + run / steps / 2);
+      const hh = (PLATFORM.height * (i + 1)) / steps;
+      add(box(scene, STAIR_WIDTH, hh, run / steps + 0.02, 0, hh / 2, 0, i % 2 ? STONE : WALKWAY), sc.x, 0, sc.z, rot);
     }
   }
   // 建築
@@ -334,12 +373,15 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
     }
     if (cc.kind === "lamp") add(joinGeo([cyl(scene, 0.14, 0.2, 3.2, 8, 0, 1.6, 0, [0.28, 0.28, 0.32]), cyl(scene, 0.5, 0.3, 0.5, 8, 0, 3.4, 0, GOLD)]), cc.x, 0, cc.z);
     if (cc.kind === "gatePost") add(cyl(scene, 1, 1.2, 6.6, 10, cc.x, 3.3, cc.z, STONE));
-    if (cc.kind === "portalStone") add(cyl(scene, 0.7, 0.9, 1.6, 8, cc.x, 0.8, cc.z, STONE_DARK));
+    if (cc.kind.startsWith("portalStone:")) {
+      const p = PORTALS.find((q) => cc.kind.endsWith(q.id))!;
+      add(cyl(scene, 0.7, 0.9, 2.2, 8, cc.x, p.floor + 1.1, cc.z, p.open ? STONE : STONE_DARK));
+    }
   }
   // 拱門橫樑放高（6.6 m），進村時鏡頭不會被擋住
   add(box(scene, SOUTH_GATE.halfW * 2 + 1.2, 0.8, 1, 0, 6.6, SOUTH_GATE.z, STONE));
-  add(box(scene, 1, 0.8, WEST_GATE.halfW * 2 + 1.2, WEST_GATE.x, 6.6, 0, STONE));
-  add(box(scene, 0.4, 3.6, WEST_GATE.halfW * 2 - 0.8, WEST_GATE.x - 0.5, 1.8, 0, DOOR));
+  // 四座傳送門石造圓台（直徑 8 m、高 0.12 m，可以走上去）
+  for (const p of PORTALS) add(cyl(scene, p.r * 2, p.r * 2 + 0.3, 0.12, lite ? 32 : 48, p.x, p.floor + 0.02, p.z, p.open ? WALKWAY : STONE_DARK));
   // 戶外鍛造台（鐵砧、火爐、遮雨棚）
   add(joinGeo([box(scene, 2.4, 0.9, 2, 0, 0.45, 0, STONE_DARK), box(scene, 0.8, 0.6, 0.5, -0.5, 1.2, 0, [0.3, 0.3, 0.34]), box(scene, 2.8, 0.15, 2.4, 0, 2.3, 0, WOOD)]), FORGE.x, 0, FORGE.z, FORGE.rot);
   // 佈告欄
@@ -349,7 +391,6 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
     const n = lite ? 40 : 60;
     for (let i = 0; i < n; i++) {
       const a = (i / n) * 360;
-      if (Math.abs(a - 180) < 5 || Math.abs(a - 270) < 5) continue;
       const p = polar(a, WALK_RADIUS + 1.2);
       add(box(scene, (2 * Math.PI * (WALK_RADIUS + 1.2)) / n + 0.2, 1.3, 1.2, 0, 0.65, 0, HEDGE), p.x, 0, p.z, (a * Math.PI) / 180 + Math.PI / 2 - Math.PI / 2);
     }
@@ -428,13 +469,21 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
     d.position.y = 0.06;
     mark(m(d, [0.35, 0.85, 0.5]), s.x, 0, s.z);
   }
-  // 南側星願傳送陣（抵達入口）
+  // 四座傳送門：南方開放（亮紫）；北、東、西未開放（低亮度、休眠）
+  for (const p of PORTALS) {
+    const r1 = MeshBuilder.CreateTorus("PH_vTmp", { diameter: p.r * 2 - 0.6, thickness: 0.22, tessellation: 48 }, scene);
+    r1.position.y = 0.12;
+    const r2 = MeshBuilder.CreateCylinder("PH_vTmp", { diameter: p.r * 2 - 1.4, height: 0.03, tessellation: 48 }, scene);
+    r2.position.y = 0.1;
+    const ring: RGB = p.open ? [0.78, 0.62, 1] : [0.36, 0.34, 0.42];
+    const fill: RGB = p.open ? [0.5, 0.42, 0.8] : [0.24, 0.23, 0.28];
+    mark(joinGeo([m(r1, ring), m(r2, fill)]), p.x, p.floor, p.z);
+  }
+  // 從原野返回的抵達點（藍色三角）
   {
-    const r1 = MeshBuilder.CreateTorus("PH_vTmp", { diameter: ARRIVAL_PORTAL.r * 2, thickness: 0.25, tessellation: 48 }, scene);
-    r1.position.y = 0.08;
-    const r2 = MeshBuilder.CreateCylinder("PH_vTmp", { diameter: ARRIVAL_PORTAL.r * 2 - 0.4, height: 0.04, tessellation: 48 }, scene);
-    r2.position.y = 0.05;
-    mark(joinGeo([m(r1, [0.75, 0.6, 1]), m(r2, [0.5, 0.42, 0.78])]), ARRIVAL_PORTAL.x, 0, ARRIVAL_PORTAL.z);
+    const tri = MeshBuilder.CreateCylinder("PH_vTmp", { diameter: 1.2, height: 0.04, tessellation: 3 }, scene);
+    tri.position.y = 0.07;
+    mark(m(tri, [0.3, 0.6, 1]), ARRIVAL_SPOT.x, 0, ARRIVAL_SPOT.z, Math.PI);
   }
   const markMesh = bake(scene, "PH_villageMarks", marks, markMat)!;
   markMesh.isPickable = false;
@@ -473,9 +522,8 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
     label(b.name, b.role, c.x, b.floor + b.top + 1.5, c.z, 6);
   }
   for (const n of NPC_SPOTS) label(n.name.replace("（鍛造台旁）", ""), n.id === "board" ? "互動" : "NPC 預留", n.x, n.floor + 2.2, n.z, 2.4);
-  label("星願之泉", "傳送・復活（預留）", 0, 9, 0, 5);
-  label("星願傳送陣", "原野→村莊 抵達入口", ARRIVAL_PORTAL.x, 2.6, ARRIVAL_PORTAL.z, 3.6);
-  label("西門", "預留：下一張地圖", WEST_GATE.x + 1, 6.2, 0, 3.6);
+  label("星願之泉", "出生・復活（座標預留）", 0, 9, 0, 5);
+  for (const p of PORTALS) label(p.name, p.open ? "開放：星芽原野 Lv1–10" : "未開放", p.x, p.floor + 3.4, p.z, 3.8);
 
   let labelsOn = true;
   let markersOn = true;

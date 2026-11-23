@@ -1,4 +1,4 @@
-// Stage 6 P2-3 星芽村 Grey-box（?map=village）端對端測試：載入、配置、移動與碰撞、石階、高台邊緣、鏡頭、三種畫質、截圖。
+// Stage 6 P2-3 星芽村 V1.3 Grey-box（?map=village）端對端測試：載入、配置、移動與碰撞、石階、高台邊緣、鏡頭、三種畫質、截圖。
 // 用法：node tests/e2e/run-village-e2e.mjs dist [chromium,webkit]
 // 注意：CI 是無頭瀏覽器＋軟體繪圖，FPS 不代表 iPhone。
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -56,17 +56,17 @@ for (const name of browsers) {
       const info = await page.evaluate(() => window.__starwishVillage.info());
       run.results.info = info;
       check("村莊網格建立（靜態 1＋水 1＋標記 1＋金環 2）", info.world.meshes === 5 && info.world.triangles > 5000, info.world);
-      check("抵達點在南側傳送陣、面向北", await page.evaluate(() => { const p = window.__starwishVillage.player(); return Math.abs(p.x) < 0.01 && Math.abs(p.z + 42.5) < 0.01; }), await page.evaluate(() => window.__starwishVillage.player()));
+      check("開場在南方傳送門內側抵達點 (0,−39)、面向北", await page.evaluate(() => { const p = window.__starwishVillage.player(); return Math.abs(p.x) < 0.01 && Math.abs(p.z + 39) < 0.01 && Math.abs(p.yaw) < 1e-6; }), await page.evaluate(() => window.__starwishVillage.player()));
       await shot(page, "arrival");
 
       const lay = await page.evaluate(() => window.__starwishVillage.layout());
-      check("NPC 站位 8（6 職業＋倉庫＋佈告欄）、復活點 24", lay.npcs.length === 8 && lay.respawn.length === 24, { npcs: lay.npcs.length, respawn: lay.respawn.length });
+      check("NPC 站位 8（6 職業＋倉庫＋佈告欄）、出生／復活點 24、傳送門 4", lay.npcs.length === 8 && lay.respawn.length === 24 && lay.portals.length === 4, { npcs: lay.npcs.length, respawn: lay.respawn.length, portals: lay.portals.length });
 
       // 走路：從傳送陣往北走 3 秒（5 m/s）
       const walk = await page.evaluate(async () => {
         const api = window.__starwishVillage;
         const frames = (n) => new Promise((r) => { let i = 0; const f = () => (++i >= n ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); });
-        api.teleport(0, -42.5, 0);
+        api.teleport(0, -39, 0);
         await frames(3);
         const p0 = api.player();
         api.setMove({ x: 0, y: 1 });
@@ -78,7 +78,7 @@ for (const name of browsers) {
       });
       check("搖桿往前可以移動", walk.moved > 1.5, walk);
 
-      // 往騎士軍團石階走：上高台（Y 2.5），再往城堡走：停在牆外
+      // 北路：走上 0° 石階到高台（Y 2），一路走到北方傳送門，停在高台外緣牆內
       const climb = await page.evaluate(async () => {
         const api = window.__starwishVillage;
         const frames = (n) => new Promise((r) => { let i = 0; const f = () => (++i >= n ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); });
@@ -87,27 +87,56 @@ for (const name of browsers) {
         api.setMove({ x: 0, y: 1 });
         for (let i = 0; i < 600 && api.player().z < 24.2; i++) await frames(1);
         const top = api.player();
-        await frames(60);
-        const wall = api.player();
+        for (let i = 0; i < 900 && api.player().z < 48.6; i++) { const z0 = api.player().z; await frames(1); if (i > 30 && Math.abs(api.player().z - z0) < 1e-4) break; }
+        await frames(20);
+        const end = api.player();
         api.setMove(null);
-        return { top, wall };
+        return { top, end };
       });
-      check("石階可以走上騎士軍團高台（Y 2）", Math.abs(climb.top.y - 2) < 0.01 && Math.abs(climb.wall.y - 2) < 0.01, climb);
-      check("騎士軍團牆擋住（不能穿牆進入建築）", climb.wall.z < 26 - 0.25 && climb.wall.z > 24, climb.wall);
+      check("北路石階走得上北側高台（Y 2）", Math.abs(climb.top.y - 2) < 0.01, climb.top);
+      check("北路直通北方傳送門、停在高台外緣內（不會掉出地圖）", Math.abs(climb.end.y - 2) < 0.01 && climb.end.z > 47 && climb.end.z < 49.8, climb.end);
 
-      // 高台邊緣：往側面走不會掉下去
+      // 騎士軍團：從 NPC 前方往大門走，停在牆外
+      const wall = await page.evaluate(async () => {
+        const api = window.__starwishVillage;
+        const frames = (n) => new Promise((r) => { let i = 0; const f = () => (++i >= n ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); });
+        const n = api.layout().npcs.find((x) => x.id === "knight");
+        api.teleport(n.x + Math.sin(n.yaw) * 1.5, n.z + Math.cos(n.yaw) * 1.5, (n.yaw * 180) / Math.PI + 180);
+        await frames(3);
+        api.setMove({ x: 0, y: 1 });
+        await frames(90);
+        api.setMove(null);
+        const p = api.player();
+        const t = (332 * Math.PI) / 180;
+        return { ...p, along: p.x * Math.sin(t) + p.z * Math.cos(t) };
+      });
+      check("騎士軍團牆擋住（不能穿牆進入建築）", wall.along < 27 - 0.25 && wall.along > 25.5 && Math.abs(wall.y - 2) < 0.01, wall);
+
+      // 高台內緣（兩座石階之間）：往廣場走不會掉下去
       const edge = await page.evaluate(async () => {
         const api = window.__starwishVillage;
-        // 教堂高台（獨立）南側邊緣
-        api.teleport(30, -8.5, 180);
         const frames = (n) => new Promise((r) => { let i = 0; const f = () => (++i >= n ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); });
+        const t = (345 * Math.PI) / 180;
+        api.teleport(24.5 * Math.sin(t), 24.5 * Math.cos(t), 165);
         await frames(3);
         api.setMove({ x: 0, y: 1 });
         await frames(60);
         api.setMove(null);
-        return api.player();
+        const p = api.player();
+        return { ...p, r: Math.hypot(p.x, p.z) };
       });
-      check("高台邊緣擋住（只能從石階上下）", Math.abs(edge.y - 2) < 0.01 && edge.z > -10.1, edge);
+      check("高台邊緣擋住（只能從石階上下）", Math.abs(edge.y - 2) < 0.01 && edge.r >= 23, edge);
+
+      // 四座傳送門：位置、可站、南方開放、其他未開放
+      const portals = await page.evaluate(() => {
+        const api = window.__starwishVillage;
+        return api.layout().portals.map((p) => ({ id: p.id, x: p.x, z: p.z, open: p.open, dest: p.destination, ok: api.standable(p.x, p.z), h: api.height(p.x, p.z) }));
+      });
+      check("四座傳送門位置正確、可站；只有南方開放（往星芽原野營地）",
+        portals.length === 4 && portals.every((p) => p.ok) &&
+        portals.find((p) => p.id === "south").open && portals.find((p) => p.id === "south").dest.x === -56 &&
+        portals.filter((p) => p.id !== "south").every((p) => !p.open && p.dest === null) &&
+        portals.find((p) => p.id === "north").h === 2, portals);
 
       // 噴泉水池擋住
       const pool = await page.evaluate(async () => {
@@ -136,7 +165,7 @@ for (const name of browsers) {
       check("復活點全部可站、在廣場地面", resp === 0, resp);
 
       // 截圖視角
-      const views = ["gate", "plaza", "west", "east", "north", "smith", "circus", "terrace"];
+      const views = ["gate", "plaza", "west", "east", "north", "northPortal", "smith", "circus", "church", "terrace"];
       const stats = {};
       for (const v of views) {
         await page.evaluate((x) => window.__starwishVillage.view(x), v);
@@ -159,14 +188,14 @@ for (const name of browsers) {
 
       const rep = await page.evaluate(() => window.__starwishVillage.report());
       const modeOk = mode === "hq" ? /模式 HQ/.test(rep) : mode === "lite-mid" ? /模式 Lite 中畫質/.test(rep) : /模式 Lite 低畫質/.test(rep);
-      check("報告文字（含模式）", /星芽村 Grey-box/.test(rep) && /復活點 24/.test(rep) && modeOk, rep.slice(0, 400));
+      check("報告文字（含模式）", /星芽村 V1.3 Grey-box/.test(rep) && /出生／復活點 24/.test(rep) && /傳送門 4（開放 1）/.test(rep) && modeOk, rep.slice(0, 400));
       const after = await page.evaluate(() => window.__starwishVillage.info());
       check("沒有 WebGL Context Lost", after.contextLost === 0, after.contextLost);
     } catch (e) {
       run.errors.push(`exception: ${e.message}`);
     }
     await ctx.close();
-    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 14;
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 16;
     if (!run.ok) failures++;
     report.runs.push(run);
     console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / village ${mode}`);

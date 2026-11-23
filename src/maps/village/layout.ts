@@ -1,4 +1,4 @@
-// Stage 6 P2-3 星芽村 V1.2：村莊配置（純資料與純計算，不依賴 Babylon，可在 node 單元測試）
+// Stage 6 P2-3 星芽村 V1.3：村莊配置（純資料與純計算，不依賴 Babylon，可在 node 單元測試）
 // 座標：X 東、Z 北，單位公尺；方位（bearing）北＝0°，順時針。
 // 第一階段（Grey-box）：廣場、建築佔位、道路、高台、石階、碰撞、NPC／傳送／復活座標預留。
 // 不含 NPC 功能、傳送、死亡復活、UI。
@@ -33,21 +33,22 @@ export interface BuildingDef {
   /** 屋簷高度、最高點 */
   eave: number;
   top: number;
-  /** 所在地面高度（0＝廣場；>0＝高台） */
+  /** 所在地面高度（0＝廣場；2＝北側上層高台） */
   floor: number;
   /** 正門離噴泉中心的距離 */
   front: number;
   shape: "hall" | "castle" | "tower" | "church" | "tent" | "shop" | "storehouse";
 }
 
+/** V1.3：讓出東西南北四條主路；劍士、騎士、法師在北側上層高台，其餘在地面 */
 export const BUILDINGS: readonly BuildingDef[] = [
-  { id: "sword", name: "劍士軍團", role: "劍士轉職", bearing: 310, w: 14, d: 12, eave: 7, top: 13, floor: 2.0, front: 26, shape: "hall" },
-  { id: "knight", name: "騎士軍團", role: "騎士轉職", bearing: 0, w: 20, d: 14, eave: 9, top: 19, floor: 2.0, front: 26, shape: "castle" },
-  { id: "mage", name: "法師軍團", role: "法師轉職", bearing: 45, w: 13, d: 13, eave: 8, top: 20, floor: 2.0, front: 26, shape: "tower" },
-  { id: "church", name: "教堂", role: "祭司轉職", bearing: 90, w: 14, d: 20, eave: 9, top: 18, floor: 2.0, front: 26, shape: "church" },
-  { id: "circus", name: "馬戲團", role: "小丑轉職", bearing: 135, w: 14, d: 14, eave: 4, top: 10, floor: 0, front: 24, shape: "tent" },
-  { id: "warehouse", name: "倉庫", role: "倉庫", bearing: 215, w: 10, d: 8, eave: 4.5, top: 7, floor: 0, front: 24, shape: "storehouse" },
-  { id: "smith", name: "鐵匠鋪", role: "鐵匠轉職＋裝備鑑定", bearing: 245, w: 12, d: 10, eave: 5, top: 11, floor: 0, front: 24, shape: "shop" },
+  { id: "sword", name: "劍士軍團", role: "劍士轉職", bearing: 297, w: 12, d: 12, eave: 7, top: 13, floor: 2.0, front: 27, shape: "hall" },
+  { id: "knight", name: "騎士軍團", role: "騎士轉職", bearing: 332, w: 16, d: 14, eave: 9, top: 19, floor: 2.0, front: 27, shape: "castle" },
+  { id: "mage", name: "法師軍團", role: "法師轉職", bearing: 26, w: 13, d: 13, eave: 8, top: 20, floor: 2.0, front: 27, shape: "tower" },
+  { id: "church", name: "教堂", role: "祭司轉職", bearing: 66, w: 12, d: 18, eave: 9, top: 18, floor: 0, front: 24, shape: "church" },
+  { id: "circus", name: "馬戲團", role: "小丑轉職", bearing: 128, w: 14, d: 14, eave: 4, top: 10, floor: 0, front: 24, shape: "tent" },
+  { id: "warehouse", name: "倉庫", role: "倉庫", bearing: 208, w: 10, d: 8, eave: 4.5, top: 7, floor: 0, front: 24, shape: "storehouse" },
+  { id: "smith", name: "鐵匠鋪", role: "鐵匠轉職＋裝備鑑定", bearing: 240, w: 12, d: 10, eave: 5, top: 11, floor: 0, front: 24, shape: "shop" },
 ];
 
 /** 建築中心（佔地矩形中心） */
@@ -55,53 +56,66 @@ export function buildingCenter(b: BuildingDef): { x: number; z: number } {
   return polar(b.bearing, b.front + b.d / 2);
 }
 
-/** 高台：從 r 23 往外到建築後方 1 m；寬度＝建築寬＋6 m。北側劍士、騎士、法師三個高台同高（+2 m），相接處連成一片上層平台 */
-export const TERRACE_INNER = 23;
-/** 石階：r 18 → r 23（長 5 m）、寬 6 m */
+/** 北側上層高台：方位 281° 經北到 44°、r 23～49、高 +2 m */
+export const PLATFORM = { from: 281, to: 44, r0: 23, r1: 49, height: 2 } as const;
+/** 石階：r 18 → r 23（長 5 m）、寬 6 m；方位 297°（劍士前）、332°（騎士前）、0°（北路）、26°（法師前） */
 export const STAIR_FROM = 18;
 export const STAIR_WIDTH = 6;
+export const STAIRS: readonly number[] = [297, 332, 0, 26];
+/** 四條放射主路（寬 6 m） */
+export const ROADS: readonly number[] = [0, 90, 180, 270];
+export const ROAD_HALF = 3;
 
-export interface Terrace {
-  id: BuildingId;
-  bearing: number;
-  height: number;
-  /** 沿方位方向的範圍（離中心距離） */
-  r0: number;
-  r1: number;
-  halfW: number;
+/** 方位是否在高台的角度範圍內（281°→360°→44°） */
+export function inPlatformArc(bearingDeg: number): boolean {
+  const b = ((bearingDeg % 360) + 360) % 360;
+  return b >= PLATFORM.from || b <= PLATFORM.to;
+}
+export function bearingOf(x: number, z: number): number {
+  return (((Math.atan2(x, z) * 180) / Math.PI) % 360 + 360) % 360;
+}
+export function onPlatform(x: number, z: number): boolean {
+  const r = Math.hypot(x, z);
+  return r >= PLATFORM.r0 && r <= PLATFORM.r1 && inPlatformArc(bearingOf(x, z));
 }
 
-export const TERRACES: readonly Terrace[] = BUILDINGS.filter((b) => b.floor > 0).map((b) => ({
-  id: b.id,
-  bearing: b.bearing,
-  height: b.floor,
-  r0: TERRACE_INNER,
-  r1: b.front + b.d + 1,
-  halfW: (b.w + 6) / 2,
-}));
-
-/** 戶外鍛造台：鐵匠鋪前庭北側 */
+/** 戶外鍛造台：鐵匠鋪前庭 */
 export const FORGE = (() => {
-  const t = (245 * Math.PI) / 180;
+  const t = (240 * Math.PI) / 180;
   const dx = Math.sin(t);
   const dz = Math.cos(t);
-  // 往右側（順時針切線方向的反向）偏移 3.5 m
-  const px = dz;
-  const pz = -dx;
-  return { x: 22.5 * dx + 3.5 * px, z: 22.5 * dz + 3.5 * pz, w: 2.4, d: 2, rot: t };
+  return { x: 22.5 * dx + 3.5 * dz, z: 22.5 * dz - 3.5 * dx, w: 2.4, d: 2, rot: t };
 })();
 
 /** 每日委託佈告欄 */
-export const BOARD = { ...polar(160, 19.5), w: 4, d: 0.8, rot: (160 * Math.PI) / 180 } as const;
+export const BOARD = { ...polar(158, 19.5), w: 4, d: 0.8, rot: (158 * Math.PI) / 180 } as const;
 
-/** 南側星願傳送陣：星芽原野傳送門的抵達入口（本階段只預留座標） */
-export const ARRIVAL_PORTAL = { x: 0, z: -46, r: 4 } as const;
-/** 抵達時的站位與面向（面向北＝朝噴泉） */
-export const ARRIVAL_SPOT = { x: 0, z: -42.5, yaw: 0 } as const;
-/** 南門拱門（裝飾）：兩根門柱 */
-export const SOUTH_GATE = { z: -38, halfW: 4 } as const;
-/** 西門（預留下一張地圖，關閉的裝飾大門） */
-export const WEST_GATE = { x: -50, z: 0, halfW: 4 } as const;
+/** 四座傳送門（V1.3）：只有南方開放（往星芽原野）；北、東、西未開放，不設目的地 */
+export interface PortalDef {
+  id: "south" | "north" | "east" | "west";
+  name: string;
+  bearing: number;
+  x: number;
+  z: number;
+  r: number;
+  floor: number;
+  open: boolean;
+  /** 開放時的目的地（未開放＝null，不可自行指定） */
+  destination: { map: "starsprout"; x: number; z: number; label: string } | null;
+}
+export const PORTAL_R = 4;
+export const PORTALS: readonly PortalDef[] = [
+  { id: "south", name: "南方傳送門", bearing: 180, ...polar(180, 44), r: PORTAL_R, floor: 0, open: true, destination: { map: "starsprout", x: -56, z: -64, label: "星芽原野 Lv1–10（新手營地）" } },
+  { id: "north", name: "北方傳送門", bearing: 0, ...polar(0, 44), r: PORTAL_R, floor: 2, open: false, destination: null },
+  { id: "east", name: "東方傳送門", bearing: 90, ...polar(90, 44), r: PORTAL_R, floor: 0, open: false, destination: null },
+  { id: "west", name: "西方傳送門", bearing: 270, ...polar(270, 44), r: PORTAL_R, floor: 0, open: false, destination: null },
+];
+/** 南方傳送門（往原野）相容舊名稱 */
+export const ARRIVAL_PORTAL = PORTALS[0]!;
+/** 從星芽原野返回的抵達點：南方傳送門內側，面向北（中央廣場） */
+export const ARRIVAL_SPOT = { x: 0, z: -39, yaw: 0 } as const;
+/** 南門拱門（裝飾） */
+export const SOUTH_GATE = { z: -36, halfW: 4.6 } as const;
 
 export interface NpcSpot {
   id: string;
@@ -125,7 +139,7 @@ export const NPC_SPOTS: readonly NpcSpot[] = [
     let p = polar(b.bearing, b.floor > 0 ? b.front - 2 : b.front - 2.5);
     let name = b.name;
     if (b.id === "smith") {
-      const t = (245 * Math.PI) / 180;
+      const t = (b.bearing * Math.PI) / 180;
       p = { x: 21.0 * Math.sin(t) + 1.8 * Math.cos(t), z: 21.0 * Math.cos(t) - 1.8 * Math.sin(t) };
       name = "鐵匠（鍛造台旁）";
     }
@@ -138,13 +152,16 @@ export const NPC_SPOTS: readonly NpcSpot[] = [
   })(),
 ];
 
-/** 復活點（只預留座標）：內圈 r 12.5（方位 15°+每 30°）、外圈 r 15（方位 0°+每 30°）；離 NPC ≥3.5 m、離石階起點 ≥2.5 m */
+/**
+ * 新角色出生＋死亡復活候選點（24 個，只預留座標）：
+ * 內圈 r 12.5（方位 0°＋每 30°）、外圈 r 15（方位 15°＋每 30°）；離 NPC ≥3.5 m、離石階起點 ≥2.5 m
+ */
 export const RESPAWN_SLOTS: readonly { x: number; z: number; yaw: number }[] = (() => {
   const out: { x: number; z: number; yaw: number }[] = [];
-  const stairFoots = TERRACES.map((t) => polar(t.bearing, STAIR_FROM));
+  const stairFoots = STAIRS.map((s) => polar(s, STAIR_FROM));
   for (const [ring, off] of [
-    [12.5, 15],
-    [15, 0],
+    [12.5, 0],
+    [15, 15],
   ] as const) {
     for (let i = 0; i < 12; i++) {
       const p = polar(off + i * 30, ring);
@@ -155,6 +172,8 @@ export const RESPAWN_SLOTS: readonly { x: number; z: number; yaw: number }[] = (
   }
   return out;
 })();
+/** 出生與復活共用同一組安全點 */
+export const SPAWN_SLOTS = RESPAWN_SLOTS;
 
 // ---------------- 地面高度 ----------------
 
@@ -166,30 +185,26 @@ function radialLocal(bearingDeg: number, x: number, z: number): { along: number;
   return { along: x * dx + z * dz, side: x * dz - z * dx };
 }
 
-/** 地面高度：廣場 0；高台 floor；石階線性斜坡；可走範圍外緩緩升高成小丘 */
+/** 地面高度：廣場 0；北側高台 2；石階線性斜坡；可走範圍外緩緩升高成小丘 */
 export function groundHeight(x: number, z: number): number {
-  for (const t of TERRACES) {
-    const l = radialLocal(t.bearing, x, z);
-    if (Math.abs(l.side) <= t.halfW && l.along >= t.r0 && l.along <= t.r1) return t.height;
-    if (Math.abs(l.side) <= STAIR_WIDTH / 2 && l.along >= STAIR_FROM && l.along < t.r0) {
-      return (t.height * (l.along - STAIR_FROM)) / (t.r0 - STAIR_FROM);
+  if (onPlatform(x, z)) return PLATFORM.height;
+  for (const s of STAIRS) {
+    const l = radialLocal(s, x, z);
+    if (Math.abs(l.side) <= STAIR_WIDTH / 2 && l.along >= STAIR_FROM && l.along < PLATFORM.r0) {
+      return (PLATFORM.height * (l.along - STAIR_FROM)) / (PLATFORM.r0 - STAIR_FROM);
     }
   }
   const r = Math.hypot(x, z);
-  if (r > WALK_RADIUS + 1 && !inSouthAvenue(x, z)) return Math.min(6, (r - WALK_RADIUS - 1) * 0.35);
+  if (r > WALK_RADIUS + 1) return Math.min(6, (r - WALK_RADIUS - 1) * 0.35);
   return 0;
-}
-
-/** 南側大道（通往星願傳送陣） */
-function inSouthAvenue(x: number, z: number): boolean {
-  return Math.abs(x) <= 3 && z <= -18 && z >= ARRIVAL_PORTAL.z - ARRIVAL_PORTAL.r - 1;
 }
 
 /** 是否在石階上 */
 export function onStairs(x: number, z: number): boolean {
-  for (const t of TERRACES) {
-    const l = radialLocal(t.bearing, x, z);
-    if (Math.abs(l.side) <= STAIR_WIDTH / 2 && l.along >= STAIR_FROM && l.along < t.r0) return true;
+  if (onPlatform(x, z)) return false;
+  for (const s of STAIRS) {
+    const l = radialLocal(s, x, z);
+    if (Math.abs(l.side) <= STAIR_WIDTH / 2 && l.along >= STAIR_FROM && l.along < PLATFORM.r0) return true;
   }
   return false;
 }
@@ -215,22 +230,27 @@ export interface BoxCollider {
   y1: number;
 }
 
+/** 傳送門石柱：在圓台外圈，方位（相對朝村莊方向）±50°、±130°；朝村莊的入口留 7 m 寬 */
+export function portalPillars(p: PortalDef): { x: number; z: number }[] {
+  const inward = (p.bearing + 180) % 360;
+  return [50, -50, 130, -130].map((d) => {
+    const o = polar(inward + d, p.r + 0.6);
+    return { x: p.x + o.x, z: p.z + o.z };
+  });
+}
+
 export const CIRCLE_COLLIDERS: readonly CircleCollider[] = (() => {
   const c: CircleCollider[] = [{ kind: "fountain", x: 0, z: 0, r: FOUNTAIN.basinR }];
   // 水晶燈座 4 座
   for (const b of [45, 135, 225, 315]) c.push({ kind: "crystalLamp", ...polar(b, 9.5), r: 0.45 });
-  // 長椅 8 張（r 10、靠水池），方位 22.5°+每 45°
+  // 長椅 8 張（靠水池），方位 22.5°＋每 45°
   for (let i = 0; i < 8; i++) c.push({ kind: "bench", ...polar(22.5 + i * 45, 8.4), r: 0.55 });
-  // 路燈：環形廣場外緣 r 18.5（避開道路與石階）
-  for (const b of [25, 70, 112, 155, 200, 230, 290, 335]) c.push({ kind: "lamp", ...polar(b, 18.6), r: 0.3 });
-  // 南門與西門門柱
+  // 路燈：環形廣場外緣 r 18.6（避開主路、石階）
+  for (const b of [45, 75, 112, 140, 205, 225, 255, 285, 315]) c.push({ kind: "lamp", ...polar(b, 18.6), r: 0.3 });
+  // 南門拱門門柱
   c.push({ kind: "gatePost", x: -SOUTH_GATE.halfW, z: SOUTH_GATE.z, r: 0.6 }, { kind: "gatePost", x: SOUTH_GATE.halfW, z: SOUTH_GATE.z, r: 0.6 });
-  c.push({ kind: "gatePost", x: WEST_GATE.x, z: -WEST_GATE.halfW, r: 0.6 }, { kind: "gatePost", x: WEST_GATE.x, z: WEST_GATE.halfW, r: 0.6 });
-  // 傳送陣外圈石柱 4 根（入口北側不放）
-  for (const a of [60, 120, 240, 300]) {
-    const p = polar(a, ARRIVAL_PORTAL.r + 0.6);
-    c.push({ kind: "portalStone", x: ARRIVAL_PORTAL.x + p.x, z: ARRIVAL_PORTAL.z - p.z, r: 0.45 });
-  }
+  // 傳送門石柱
+  for (const p of PORTALS) for (const s of portalPillars(p)) c.push({ kind: `portalStone:${p.id}`, x: s.x, z: s.z, r: 0.45 });
   return c;
 })();
 
@@ -242,8 +262,6 @@ export const BOX_COLLIDERS: readonly BoxCollider[] = (() => {
   }
   out.push({ kind: "forge", x: FORGE.x, z: FORGE.z, hw: FORGE.w / 2, hd: FORGE.d / 2, rot: FORGE.rot, y0: -0.5, y1: 2.2 });
   out.push({ kind: "board", x: BOARD.x, z: BOARD.z, hw: BOARD.w / 2, hd: BOARD.d / 2, rot: BOARD.rot, y0: -0.5, y1: 3.5 });
-  // 西門關閉：門板擋住
-  out.push({ kind: "westGate", x: WEST_GATE.x - 0.5, z: 0, hw: 0.3, hd: WEST_GATE.halfW, rot: 0, y0: -0.5, y1: 3.6 });
   return out;
 })();
 
@@ -320,9 +338,7 @@ export function pushOut(x: number, z: number, radius: number): { x: number; z: n
 
 /** 是否在可行走範圍（不含碰撞物）：可走半徑內或南側大道、傳送陣 */
 export function inBounds(x: number, z: number): boolean {
-  if (Math.hypot(x, z) <= WALK_RADIUS) return true;
-  if (inSouthAvenue(x, z)) return true;
-  return Math.hypot(x - ARRIVAL_PORTAL.x, z - ARRIVAL_PORTAL.z) <= ARRIVAL_PORTAL.r + 1;
+  return Math.hypot(x, z) <= WALK_RADIUS;
 }
 
 /** 點本身能不能站（範圍內、不在碰撞物裡） */
@@ -438,9 +454,14 @@ export function villageCameraDistance(tx: number, ty: number, tz: number, dx: nu
 
 /** 傳送清單（測試面板） */
 export const VILLAGE_SPOTS: readonly { id: string; label: string; x: number; z: number; yaw: number }[] = [
-  { id: "arrival", label: "傳送陣", x: ARRIVAL_SPOT.x, z: ARRIVAL_SPOT.z, yaw: 0 },
-  { id: "fountain", label: "噴泉南", x: 0, z: -12.5, yaw: 0 },
-  ...NPC_SPOTS.map((n) => ({ id: n.id, label: n.name.replace("（鍛造台旁）", ""), x: n.x - Math.sin(n.yaw) * -2, z: n.z - Math.cos(n.yaw) * -2, yaw: n.yaw + Math.PI })),
+  { id: "arrival", label: "南門抵達點", x: ARRIVAL_SPOT.x, z: ARRIVAL_SPOT.z, yaw: 0 },
+  { id: "spawn", label: "出生點", x: RESPAWN_SLOTS[6]!.x, z: RESPAWN_SLOTS[6]!.z, yaw: RESPAWN_SLOTS[6]!.yaw },
+  ...NPC_SPOTS.map((n) => ({ id: n.id, label: n.name.replace("（鍛造台旁）", ""), x: n.x + Math.sin(n.yaw) * 2, z: n.z + Math.cos(n.yaw) * 2, yaw: n.yaw + Math.PI })),
+  // 北、東、西傳送門前 7 m（面向傳送門）
+  ...PORTALS.filter((p) => p.id !== "south").map((p) => {
+    const q = polar(p.bearing, 44 - 7.5);
+    return { id: `portal-${p.id}`, label: p.name.replace("傳送門", "門"), x: q.x, z: q.z, yaw: (p.bearing * Math.PI) / 180 };
+  }),
 ];
 
 /** 格點尋路（測試用）：檢查兩點之間是否有可走路徑（0.5 m 格、8 方向、遵守碰撞與高度差） */

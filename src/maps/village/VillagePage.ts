@@ -18,6 +18,7 @@ import {
   CIRCLE_COLLIDERS,
   FOUNTAIN,
   NPC_SPOTS,
+  PORTALS,
   RESPAWN_SLOTS,
   VILLAGE_SPOTS,
   WALK_SPEED,
@@ -49,20 +50,18 @@ export function startVillageMap(canvas: HTMLCanvasElement, hudRoot: HTMLElement)
 /** 巡迴路線（效能測試用）：傳送陣 → 噴泉 → 依序經過每位 NPC 門前 → 回到傳送陣 */
 function tourPoints(): { x: number; z: number }[] {
   const pts: { x: number; z: number }[] = [{ x: ARRIVAL_SPOT.x, z: ARRIVAL_SPOT.z }, { x: 0, z: -16 }];
-  // 依方位排序：從南往西繞一圈（順時針）
-  const order = [...NPC_SPOTS].sort((a, b) => {
-    const ba = (Math.atan2(a.x, a.z) * 180) / Math.PI;
-    const bb = (Math.atan2(b.x, b.z) * 180) / Math.PI;
-    const na = (ba + 360 + 180) % 360;
-    const nb = (bb + 360 + 180) % 360;
-    return na - nb;
-  });
-  for (const n of order) {
-    const a = Math.atan2(n.x, n.z);
-    // 先走到環形廣場上該方位（r 14），再到 NPC 前 2 m，再回到環上
-    pts.push({ x: 14 * Math.sin(a), z: 14 * Math.cos(a) });
-    pts.push({ x: n.x + Math.sin(n.yaw) * 1.8, z: n.z + Math.cos(n.yaw) * 1.8 });
-    pts.push({ x: 14 * Math.sin(a), z: 14 * Math.cos(a) });
+  // NPC 門前＋北、東、西傳送門前，依方位從南往西繞一圈（順時針）
+  const stops = [
+    ...NPC_SPOTS.map((n) => ({ x: n.x + Math.sin(n.yaw) * 1.8, z: n.z + Math.cos(n.yaw) * 1.8, a: Math.atan2(n.x, n.z) })),
+    ...PORTALS.filter((p) => p.id !== "south").map((p) => {
+      const t = (p.bearing * Math.PI) / 180;
+      return { x: 38 * Math.sin(t), z: 38 * Math.cos(t), a: t };
+    }),
+  ].sort((a, b) => ((((a.a * 180) / Math.PI + 540) % 360) - (((b.a * 180) / Math.PI + 540) % 360)));
+  for (const s of stops) {
+    // 先走到環形廣場上該方位（r 14），再到目的地，再回到環上
+    const ring = { x: 14 * Math.sin(s.a), z: 14 * Math.cos(s.a) };
+    pts.push(ring, { x: s.x, z: s.z }, ring);
   }
   pts.push({ x: 0, z: -16 }, { x: ARRIVAL_SPOT.x, z: ARRIVAL_SPOT.z });
   return pts;
@@ -175,7 +174,7 @@ class VillagePage {
     this.hud.setLevel(10);
     this.hud.setBars({ hp: 100, maxHp: 100, mp: 40, maxMp: 40, exp: 0, expToNext: 100 });
     const build = hudRoot.querySelector<HTMLSpanElement>(".hud-build");
-    if (build) build.textContent = `Stage 6 P2-3 星芽村 Grey-box ${this.modeName()}`;
+    if (build) build.textContent = `Stage 6 P2-3 星芽村 V1.3 Grey-box ${this.modeName()}`;
     this.hud.events.on("skillPressed", () => this.hud.toast("星芽村 Grey-box：這一階段沒有戰鬥與 NPC 功能", 1500));
     const joystick = new VirtualJoystick(this.hud.joystickZone, this.input, TUNING.joystick.radius, TUNING.joystick.deadZone);
     this.camTouch = new CameraTouchControl(canvas, this.input, TUNING.camera.rotateSensitivity, TUNING.camera.pitchSensitivity, TUNING.camera.pinchSensitivity);
@@ -194,7 +193,7 @@ class VillagePage {
 
   start(): void {
     this.engine.runRenderLoop(this.frame);
-    this.hud.toast("星芽村 Grey-box：佔位模型，只測配置、比例、道路與碰撞。右上「村莊」可傳送與測試", 4200);
+    this.hud.toast("星芽村 V1.3 Grey-box：佔位模型，只測配置、比例、道路、傳送門位置與碰撞。上方「村莊」可傳送與測試", 4200);
   }
 
   modeName(): string {
@@ -374,15 +373,17 @@ class VillagePage {
       this.camera.snap(this.pos, this.alphaBehind(this.yaw), beta, radius);
     };
     const V: Record<string, [number, number, number, number, number]> = {
-      arrival: [0, -42.5, 0, 1.25, 12],
+      arrival: [0, -39, 0, 1.25, 12],
       gate: [0, -30, 0, 1.2, 12],
-      plaza: [0, -14, 0, 1.12, 13],
-      west: [-14, -4, 300, 1.15, 12],
-      east: [12, -6, 60, 1.15, 12],
-      north: [0, 16, 0, 1.2, 10],
-      smith: [-17, -4, 245, 1.2, 9],
-      circus: [11, -11, 135, 1.2, 10],
-      terrace: [-6, 24.5, 270, 1.15, 10],
+      plaza: [0, -12.5, 0, 1.12, 13],
+      west: [-30, 0, 270, 1.2, 10],
+      east: [30, 0, 90, 1.2, 10],
+      north: [0, 15, 0, 1.2, 10],
+      northPortal: [0, 30, 0, 1.2, 10],
+      smith: [-15, -6, 240, 1.2, 9],
+      circus: [11, -9, 128, 1.2, 10],
+      church: [13, 5, 66, 1.2, 10],
+      terrace: [-3, 26, 300, 1.15, 10],
     };
     if (name === "overview") {
       this.setOverview(true);
@@ -398,12 +399,12 @@ class VillagePage {
   report(): string {
     const ws = this.world.stats();
     const lines: string[] = [];
-    lines.push("星願物語 Stage 6 P2-3 星芽村 Grey-box 測試報告");
+    lines.push("星願物語 Stage 6 P2-3 星芽村 V1.3 Grey-box 測試報告");
     lines.push(`時間 ${new Date().toLocaleString("zh-TW", { hour12: false })}`);
     lines.push(`網址參數 ${location.search || "(無)"}`);
     lines.push(`裝置 ${navigator.userAgent}`);
     lines.push(`模式 ${this.modeName()}：渲染畫質 ${this.quality.level}（解析度上限 ${this.quality.maxPixelRatio}x、後製 ${this.quality.postProcess ? "開" : "關"}、陰影 ${this.quality.shadows.filter === "contact" ? "柔和 PCSS" : "PCF"} ${this.quality.shadows.mapSize}${this.shadowQ === "medium" ? "、PCSS32" : ""}）／載入 ${Math.round(this.loadMs)} ms`);
-    lines.push(`村莊 佔位網格 ${ws.meshes}、三角形 ${ws.triangles}、文字標籤 ${ws.labels}；建築 7、NPC 站位 ${NPC_SPOTS.length}、復活點 ${RESPAWN_SLOTS.length}`);
+    lines.push(`村莊 V1.3 佔位網格 ${ws.meshes}、三角形 ${ws.triangles}、文字標籤 ${ws.labels}；建築 7、NPC 站位 ${NPC_SPOTS.length}、出生／復活點 ${RESPAWN_SLOTS.length}、傳送門 ${PORTALS.length}（開放 ${PORTALS.filter((p) => p.open).length}）`);
     lines.push(`碰撞 圓形 ${CIRCLE_COLLIDERS.length}、矩形 ${BOX_COLLIDERS.length}；鏡頭避障 ${this.camera.obstructEnabled ? "開" : "關"}`);
     lines.push(`目前畫面 Draw Calls ${this.perf.drawCalls}、三角形 ${Math.round(this.scene.getActiveIndices() / 3)}`);
     const r = this.lastTour;
@@ -435,7 +436,7 @@ class VillagePage {
     panel.addEventListener("pointerdown", stop);
     const title = document.createElement("div");
     title.className = "map-title";
-    title.textContent = "星芽村 Stage 6 P2-3　Grey-box";
+    title.textContent = "星芽村 V1.3　Grey-box";
     this.info = document.createElement("div");
     this.info.className = "map-info";
     panel.append(title, this.info);
@@ -460,7 +461,7 @@ class VillagePage {
       row.appendChild(b);
       return b;
     };
-    const go = section("傳送（NPC 前方 2 m）");
+    const go = section("傳送（測試用：NPC 前方 2 m、傳送門前）");
     for (const s of VILLAGE_SPOTS) {
       btn(go, s.label, () => {
         this.teleport(s.x, s.z, s.yaw);
@@ -571,7 +572,7 @@ class VillagePage {
       },
       standable: (x: number, z: number) => standable(x, z),
       height: (x: number, z: number) => groundHeight(x, z),
-      layout: () => ({ npcs: NPC_SPOTS, respawn: RESPAWN_SLOTS, arrival: ARRIVAL_SPOT, fountain: FOUNTAIN }),
+      layout: () => ({ npcs: NPC_SPOTS, respawn: RESPAWN_SLOTS, arrival: ARRIVAL_SPOT, fountain: FOUNTAIN, portals: PORTALS }),
       view: (name: string) => this.view(name),
       freeze: (on: boolean) => {
         this.frozen = on;
