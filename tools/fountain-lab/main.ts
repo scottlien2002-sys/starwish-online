@@ -23,6 +23,7 @@ import { createEngine, createShadows, createSkyDome, pickQuality, setupRendering
 import { type FountainP3, setupFountainP3 } from "../../src/maps/village/FountainP3.ts";
 import { type PlazaP3, setupPlazaP3 } from "../../src/maps/village/PlazaP3.ts";
 import { type KnightP3, setupKnightP3 } from "../../src/maps/village/KnightP3.ts";
+import { type MageP3, setupMageP3 } from "../../src/maps/village/MageP3.ts";
 import { villageTextures } from "../../src/maps/village/villageTextures.ts";
 import { VILLAGE_SPAWN_CAMERA } from "../../src/maps/village/spawnCamera.ts";
 import { BOARD, BUILDINGS, buildingCenter, FORGE, NPC_SPOTS, PLATFORM, PORTALS, portalPillars, SOUTH_GATE, STAIR_FROM, STAIR_WIDTH, STAIRS } from "../../src/maps/village/layout.ts";
@@ -76,6 +77,23 @@ const VIEWS: Record<string, View> = {
   // 站在廣場（方位 332°、r 14、眼高 1.7 m）抬頭看騎士軍團全貌（非遊戲鏡頭，展示輪廓用）
   knight_eye: { target: [-15.02, 9.5, 28.26], alpha: alphaFrom(152), beta: 1.98, radius: 19.5, fov: 1.0 },
   knight_door: { target: [-12.9, 7.6, 24.3], alpha: alphaFrom(152), beta: 1.5, radius: 13.5, fov: 0.8 },
+  // P3-4 法師軍團「星詠之塔」（正面中心在方位 26°、r 27；建築中心 r 33.5 = (14.69, 30.11)；地面 +2 m）
+  mage_front: { target: [14.69, 11.0, 30.11], alpha: alphaFrom(206), beta: 1.5, radius: 34, fov: 0.8 },
+  mage_side: { target: [14.69, 11.0, 30.11], alpha: alphaFrom(116), beta: 1.5, radius: 34, fov: 0.8 },
+  mage_q45: { target: [14.69, 10.5, 30.11], alpha: alphaFrom(241), beta: 1.33, radius: 35, fov: 0.8 },
+  mage_q45r: { target: [14.69, 10.5, 30.11], alpha: alphaFrom(161), beta: 1.33, radius: 35, fov: 0.8 },
+  mage_top: { target: [14.69, 0, 30.11], alpha: alphaFrom(206), beta: 0.0001, radius: 80, ortho: 9.5 },
+  // 玩家視角：站在廣場（方位 26°、r 15）看法師軍團；遊戲預設俯角＋往上抬
+  mage_player: { target: [6.58, 0.85, 13.48], alpha: alphaFrom(206), beta: 1.05, radius: 9, fov: 0.9 },
+  mage_player_up: { target: [6.58, 0.85, 13.48], alpha: alphaFrom(206), beta: 1.38, radius: 9, fov: 0.9 },
+  // 入口動線：石階下（r 17.5）往上看；法師 NPC 旁（高台 r 25）看正門
+  mage_stairs: { target: [8.33, 1.6, 17.08], alpha: alphaFrom(206), beta: 1.3, radius: 11, fov: 0.9 },
+  mage_npc: { target: [10.96, 2.85, 22.47], alpha: alphaFrom(218), beta: 1.3, radius: 9, fov: 0.9 },
+  // 站在廣場（方位 26°、r 14、眼高 1.7 m）抬頭看全貌（非遊戲鏡頭）
+  mage_eye: { target: [14.69, 9.5, 30.11], alpha: alphaFrom(206), beta: 1.98, radius: 19.5, fov: 1.0 },
+  // 北側整體：騎士軍團＋法師軍團＋星願之泉；北側高台俯視配置
+  north_trio: { target: [0, 8.5, 20], alpha: -H, beta: 1.4, radius: 52, fov: 0.8 },
+  north_plan: { target: [0, 0, 24], alpha: -H, beta: 0.0001, radius: 100, ortho: 21 },
 };
 
 const params = new URLSearchParams(location.search);
@@ -253,6 +271,7 @@ inst.captureFrameTime = true;
 let fx: FountainP3 | null = null;
 let plaza: PlazaP3 | null = null;
 let knight: KnightP3 | null = null;
+let mage: MageP3 | null = null;
 const state: { ready: boolean; error: string | null; loadMs: number } = { ready: false, error: null, loadMs: 0 };
 
 function setView(name: string): void {
@@ -368,15 +387,17 @@ async function captureFrames(view: string, secs: number, fps: number): Promise<s
 }
 
 /** 繪製次數：只開啟指定部分 */
-async function drawCalls(parts: { fountain: boolean; plaza: boolean; knight?: boolean }): Promise<{ drawCalls: number; activeMeshes: number }> {
+async function drawCalls(parts: { fountain: boolean; plaza: boolean; knight?: boolean; mage?: boolean }): Promise<{ drawCalls: number; activeMeshes: number }> {
   fx?.setEnabled(parts.fountain);
   plaza?.setEnabled(parts.plaza);
   knight?.setEnabled(parts.knight ?? true);
+  mage?.setEnabled(parts.mage ?? true);
   await frames(4);
   const r = { drawCalls: inst.drawCallsCounter.current, activeMeshes: scene.getActiveMeshes().length };
   fx?.setEnabled(true);
   plaza?.setEnabled(true);
   knight?.setEnabled(true);
+  mage?.setEnabled(true);
   return r;
 }
 
@@ -399,8 +420,12 @@ async function load(): Promise<void> {
   knight = setupKnightP3(scene, k.meshes, { lite, texBase: "./models/tex/", shadows: castShadows ? shadows : null });
   // 正式騎士軍團取代灰色量體
   for (const m of context) if (m.name === "bld_knight" || m.name === "roof_knight") m.setEnabled(false);
+  // P3-4：法師軍團造型提案取代灰色量體
+  const mg = await loadGlb(`mage_${q2}.glb`);
+  mage = setupMageP3(scene, mg.meshes, { lite, texBase: "./models/tex/", shadows: castShadows ? shadows : null });
+  for (const m of context) if (m.name === "bld_mage" || m.name === "roof_mage") m.setEnabled(false);
   // 星晶每幀會動：不凍結它的世界矩陣
-  for (const m of [...f.meshes, ...p.meshes, ...k.meshes]) if (!fx.animated.includes(m)) m.freezeWorldMatrix();
+  for (const m of [...f.meshes, ...p.meshes, ...k.meshes, ...mg.meshes]) if (!fx.animated.includes(m)) m.freezeWorldMatrix();
   await scene.whenReadyAsync();
   state.loadMs = Math.round(performance.now() - t0);
   state.ready = true;
@@ -424,7 +449,7 @@ load().catch((e: unknown) => {
   flickerTime,
   captureFrames,
   drawCalls,
-  stats: () => ({ fountain: fx?.stats ?? null, plaza: plaza?.stats ?? null, knight: knight?.stats ?? null }),
+  stats: () => ({ fountain: fx?.stats ?? null, plaza: plaza?.stats ?? null, knight: knight?.stats ?? null, mage: mage?.stats ?? null }),
   /** 全村共用貼圖快取：張數、像素、估計顯示記憶體（RGBA、含 mipmap ×1.33） */
   textureMemory: () => {
     const list = villageTextures(scene).map((t) => {

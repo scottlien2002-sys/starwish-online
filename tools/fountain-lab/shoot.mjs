@@ -9,6 +9,7 @@ const dist = process.argv[2] ?? "out-lab";
 const out = process.argv[3] ?? "out/lab";
 const plazaReport = process.argv[4] ?? "out/plaza_report.json";
 const knightReport = process.argv[5] ?? "out/knight_report.json";
+const mageReport = process.argv[6] ?? "out/mage_report.json";
 mkdirSync(out, { recursive: true });
 const report = { startedAt: new Date().toISOString(), checks: {}, runs: [] };
 let fail = 0;
@@ -92,6 +93,27 @@ let fail = 0;
     ck("正門面向噴泉（門比建築中心更靠近噴泉）", dDoor < dCenter, { door: lay.door, doorR: dDoor.toFixed(2), centerR: dCenter.toFixed(2) });
     ck("騎士轉職 NPC 站位不變（正門前 2 m、在碰撞箱外）", Math.abs(Math.hypot(npc.x, npc.z) - (b.front - 2)) < 0.01 && !L.insideBox(box, npc.x, npc.z), { npc });
   }
+  // P3-4 法師軍團：完全在原碰撞箱內（±6.5 × 0～13 × 0～20，地面 +2）、正門朝噴泉並正對 26° 石階、NPC 站位不變
+  {
+    const mr = JSON.parse(readFileSync(mageReport, "utf8"));
+    const b = L.BUILDINGS.find((x) => x.id === "mage");
+    const box = L.BOX_COLLIDERS.find((c) => c.kind === "building:mage");
+    const lay = mr.layout;
+    ck("法師軍團尺寸、方位與 V1.3 相同", b.bearing === lay.bearing && b.front === lay.front && b.w === lay.w && b.d === lay.d && b.top === lay.top && b.floor === lay.floor, { v13: b, model: lay });
+    for (const [lod, v] of Object.entries(mr.lods)) {
+      const bb = v.bounds_local;
+      const ok = bb.x[0] >= -b.w / 2 - 0.01 && bb.x[1] <= b.w / 2 + 0.01 && bb.y[0] >= -0.01 && bb.y[1] <= b.d + 0.01 && bb.h[0] >= -0.01 && bb.h[1] <= b.top + 0.01 && v.within_budget;
+      ck(`法師軍團 ${lod} 模型完全在原碰撞箱內、面數在額度內`, ok, { bounds: bb, collider: box, triangles: v.triangles, budget: mr.budget[lod] });
+    }
+    const npc = L.NPC_SPOTS.find((n) => n.id === "mage");
+    const dDoor = Math.hypot(lay.door[0], lay.door[1]);
+    const dCenter = Math.hypot(box.x, box.z);
+    ck("法師軍團正門面向噴泉（門比建築中心更靠近噴泉）", dDoor < dCenter, { door: lay.door, doorR: dDoor.toFixed(2), centerR: dCenter.toFixed(2) });
+    const t = (b.bearing * Math.PI) / 180;
+    const side = lay.door[0] * Math.cos(t) - lay.door[1] * Math.sin(t);
+    ck("正門中心正對 26° 高台石階（側向偏差 < 0.1 m）", L.STAIRS.includes(b.bearing) && Math.abs(side) < 0.1, { lateral: side.toFixed(3), stairs: L.STAIRS });
+    ck("法師轉職 NPC 站位不變（正門石階前 2 m、在碰撞箱外）", Math.abs(Math.hypot(npc.x, npc.z) - (b.front - 2)) < 0.01 && !L.insideBox(box, npc.x, npc.z), { npc });
+  }
   // 噴泉：外徑＝碰撞半徑 7 m、最高 6.5 m（P3-1A 驗收值）
   {
     const fr = JSON.parse(readFileSync(plazaReport.replace("plaza_report.json", "fountain_report.json"), "utf8"));
@@ -108,14 +130,13 @@ const pw = await loadPlaywright();
 const server = await serve(dist);
 // [瀏覽器, 模式, 畫質, lod, 截圖視角, 選項{ viewport, anim: [[名稱, 視角, 秒, fps]] }]
 const plan = [
-  ["chromium", "hq", "high", "hq", ["player_spawn", "player_spawn_cam", "fountain_front", "fountain_close", "fountain_q45", "fountain_top", "top", "fountain_anim"], { anim: [["crystal", "fountain_anim", 8, 15]] }],
-  ["chromium", "lite-low", "low", "lite", ["player_spawn", "player_spawn_cam", "fountain_close", "fountain_q45", "fountain_anim"], { anim: [["crystal", "fountain_anim", 4, 15]] }],
-  // iPhone 直向（390×844，DPR 2）：出生點構圖檢查＋動畫
-  ["chromium", "hq-portrait", "high", "hq", ["player_spawn", "player_spawn_cam"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 }, anim: [["spawn", "player_spawn_cam", 5, 15]] }],
-  ["chromium", "lite-portrait", "low", "lite", ["player_spawn", "player_spawn_cam"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 } }],
-  ["webkit", "hq", "high", "hq", ["player_spawn_cam", "fountain_close"]],
-  ["webkit", "lite-low", "low", "lite", ["player_spawn_cam", "fountain_close"]],
-  ["webkit", "hq-portrait", "high", "hq", ["player_spawn_cam"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 } }],
+  ["chromium", "hq", "high", "hq", ["player_spawn_cam", "mage_front", "mage_side", "mage_q45", "mage_q45r", "mage_top", "mage_player", "mage_player_up", "mage_stairs", "mage_npc", "mage_eye", "north_trio", "north_plan"]],
+  ["chromium", "lite-low", "low", "lite", ["player_spawn_cam", "mage_front", "mage_side", "mage_q45", "mage_top", "mage_player", "north_trio"]],
+  // iPhone 直向（390×844，DPR 2）：出生點、廣場看法師軍團、NPC 前
+  ["chromium", "hq-portrait", "high", "hq", ["player_spawn_cam", "mage_player", "mage_npc"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 } }],
+  ["chromium", "lite-portrait", "low", "lite", ["player_spawn_cam", "mage_player"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 } }],
+  ["webkit", "hq", "high", "hq", ["mage_q45", "player_spawn_cam"]],
+  ["webkit", "lite-low", "low", "lite", ["mage_q45"]],
 ];
 
 for (const [bname, mode, quality, lod, views, opts = {}] of plan) {
@@ -145,15 +166,17 @@ for (const [bname, mode, quality, lod, views, opts = {}] of plan) {
     await page.evaluate(() => window.__lab.setView("pano"));
     const dc = {};
     for (const [k, parts] of [
-      ["none", { fountain: false, plaza: false, knight: false }],
-      ["fountain", { fountain: true, plaza: false, knight: false }],
-      ["both", { fountain: true, plaza: true, knight: false }],
-      ["all", { fountain: true, plaza: true, knight: true }],
+      ["none", { fountain: false, plaza: false, knight: false, mage: false }],
+      ["fountain", { fountain: true, plaza: false, knight: false, mage: false }],
+      ["both", { fountain: true, plaza: true, knight: false, mage: false }],
+      ["noMage", { fountain: true, plaza: true, knight: true, mage: false }],
+      ["all", { fountain: true, plaza: true, knight: true, mage: true }],
     ]) dc[k] = await page.evaluate((p) => window.__lab.drawCalls(p), parts);
     run.drawCalls = dc;
     run.plazaDrawCalls = dc.both.drawCalls - dc.fountain.drawCalls;
     run.fountainDrawCalls = dc.fountain.drawCalls - dc.none.drawCalls;
-    run.knightDrawCalls = dc.all.drawCalls - dc.both.drawCalls;
+    run.knightDrawCalls = dc.noMage.drawCalls - dc.both.drawCalls;
+    run.mageDrawCalls = dc.all.drawCalls - dc.noMage.drawCalls;
     await page.evaluate(() => window.__lab.setTime(3.2));
     for (const v of views) {
       if (v === "fountain_anim") continue;
@@ -174,14 +197,10 @@ for (const [bname, mode, quality, lod, views, opts = {}] of plan) {
       await page.evaluate(() => window.__lab.setTime(3.2));
     }
     if (bname === "chromium" && !mode.includes("portrait")) {
-      run.flickerAnim = {
-        fountain_anim: await page.evaluate(() => window.__lab.flickerTime("fountain_anim")),
-        player_spawn_cam: await page.evaluate(() => window.__lab.flickerTime("player_spawn_cam")),
-      };
       run.flicker = {
         player_spawn_cam: await page.evaluate(() => window.__lab.flickerTest("player_spawn_cam")),
-        fountain_q45: await page.evaluate(() => window.__lab.flickerTest("fountain_q45")),
-        fountain_close: await page.evaluate(() => window.__lab.flickerTest("fountain_close")),
+        mage_q45: await page.evaluate(() => window.__lab.flickerTest("mage_q45")),
+        mage_player: await page.evaluate(() => window.__lab.flickerTest("mage_player")),
       };
       await page.evaluate(() => window.__lab.setTime(null));
       await page.evaluate(() => window.__lab.setView("player_spawn"));

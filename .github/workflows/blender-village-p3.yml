@@ -13,6 +13,7 @@ on:
       - "src/maps/village/FountainP3.ts"
       - "src/maps/village/PlazaP3.ts"
       - "src/maps/village/KnightP3.ts"
+      - "src/maps/village/MageP3.ts"
       - "src/maps/village/villageTextures.ts"
       - "src/maps/village/villageMaterials.ts"
       - "src/maps/village/spawnCamera.ts"
@@ -75,6 +76,11 @@ jobs:
           /opt/blender/blender -b --factory-startup -noaudio -P art/village-p3/build_knight.py -- --out "$PWD/out" 2>&1 | tee out/knight.log | grep -v "^Fra:" | grep -v "Sample" | tail -40
           for f in knight_hq.glb knight_lite.glb knight_report.json; do test -f "out/$f"; done
 
+      - name: P3-4 Mage Order tower — shape proposal (inside V1.3 collider; budget check)
+        run: |
+          /opt/blender/blender -b --factory-startup -noaudio -P art/village-p3/build_mage.py -- --out "$PWD/out" 2>&1 | tee out/mage.log | grep -v "^Fra:" | grep -v "Sample" | tail -40
+          for f in mage_hq.glb mage_lite.glb mage_report.json; do test -f "out/$f"; done
+
       - name: Validate GLB (Khronos glTF-Validator)
         run: |
           mkdir -p /tmp/gv && cd /tmp/gv && npm init -y >/dev/null && npm i --no-save gltf-validator@latest 2>&1 | tail -3
@@ -83,7 +89,7 @@ jobs:
             const v = require("gltf-validator"); const fs = require("fs");
             (async () => {
               let bad = 0; const s = {};
-              for (const q of ["p30_sample_hq", "p30_sample_lite", "fountain_hq", "fountain_lite", "plaza_hq", "plaza_lite", "knight_hq", "knight_lite"]) {
+              for (const q of ["p30_sample_hq", "p30_sample_lite", "fountain_hq", "fountain_lite", "plaza_hq", "plaza_lite", "knight_hq", "knight_lite", "mage_hq", "mage_lite"]) {
                 const b = fs.readFileSync(`out/${q}.glb`);
                 const r = await v.validateBytes(new Uint8Array(b));
                 const dv = new DataView(b.buffer, b.byteOffset); const len = dv.getUint32(12, true);
@@ -109,12 +115,12 @@ jobs:
           npm test 2>&1 | tail -8
           mkdir -p tools/fountain-lab/public/models/fx
           mkdir -p tools/fountain-lab/public/models/tex
-          cp out/fountain_hq.glb out/fountain_lite.glb out/plaza_hq.glb out/plaza_lite.glb out/knight_hq.glb out/knight_lite.glb tools/fountain-lab/public/models/
+          cp out/fountain_hq.glb out/fountain_lite.glb out/plaza_hq.glb out/plaza_lite.glb out/knight_hq.glb out/knight_lite.glb out/mage_hq.glb out/mage_lite.glb tools/fountain-lab/public/models/
           cp out/textures/*.png tools/fountain-lab/public/models/tex/
           cp out/textures/water_hq.png out/textures/water_lite.png out/textures/water_nrm_hq.png out/textures/fx_*.png tools/fountain-lab/public/models/fx/
           npx vite build tools/fountain-lab --base ./ --outDir "$PWD/out-lab" --emptyOutDir
           npx playwright install --with-deps chromium webkit >/dev/null
-          node tools/fountain-lab/shoot.mjs out-lab out/lab out/plaza_report.json out/knight_report.json | tail -150
+          node tools/fountain-lab/shoot.mjs out-lab out/lab out/plaza_report.json out/knight_report.json out/mage_report.json | tail -150
 
       - name: P3-2E animation clips (MP4 + GIF via ffmpeg)
         if: always()
@@ -156,7 +162,7 @@ jobs:
               p = f"out/lab/chromium_hq_{v}.png"
               if os.path.exists(p):
                   ims.append(Image.open(p).convert("RGB"))
-          if ims:
+          if len(ims) >= 4:
               w, h = ims[0].size
               cols = 2
               rows = (len(ims) + 1) // 2
@@ -165,6 +171,13 @@ jobs:
                   sheet.paste(im, ((i % cols) * w, (i // cols) * h))
               sheet = sheet.resize((sheet.width // 2, sheet.height // 2))
               sheet.save("out/p32e_hq_sheet.png")
+          ims = [Image.open(f"out/lab/chromium_hq_{v}.png").convert("RGB") for v in ("mage_front", "mage_side", "mage_q45", "mage_top") if os.path.exists(f"out/lab/chromium_hq_{v}.png")]
+          if len(ims) == 4:
+              w, h = ims[0].size
+              sheet = Image.new("RGB", (w * 2, h * 2), (235, 236, 242))
+              for i, im in enumerate(ims):
+                  sheet.paste(im, ((i % 2) * w, (i // 2) * h))
+              sheet.resize((w, h)).save("out/p34_mage_sheet.png")
           PY
 
       - name: Push results to art-village-p3 branch (normal push, no force)
