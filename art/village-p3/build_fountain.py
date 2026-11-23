@@ -47,8 +47,8 @@ RING_B_R = 2.1  # 直徑 4.2 m
 RING_T = 0.032
 
 LODS = {
-    "hq": dict(basin=128, bowl=96, column=64, flutes=16, ring=(120, 10), tube=10, star_relief=16),
-    "lite": dict(basin=64, bowl=48, column=32, flutes=8, ring=(64, 6), tube=6, star_relief=8),
+    "hq": dict(basin=128, bowl=96, column=64, flutes=16, ring=(120, 10), tube=10, star_relief=16, finial=16),
+    "lite": dict(basin=48, bowl=40, column=32, flutes=8, ring=(56, 5), tube=6, star_relief=8, finial=6),
 }
 
 
@@ -239,7 +239,7 @@ def build(lod, M):
         # 扶壁柱頭：小方帽＋寶珠，高出池緣
         cx, cy = math.cos(a) * (WALL_R + 0.12), math.sin(a) * (WALL_R + 0.12)
         cap = [(0.0, 0.9), (0.2, 0.9), (0.22, 0.95), (0.16, 1.0), (0.11, 1.02), (0.14, 1.1), (0.15, 1.18), (0.12, 1.26), (0.06, 1.31), (0.0, 1.33)]
-        c = lathe(f"finial{i}", cap, 8 if lod == "lite" else 16, M["stone"], smooth_angle=50)
+        c = lathe(f"finial{i}", cap, P["finial"], M["stone"], smooth_angle=50)
         c.location = (cx, cy, 0)
         parts.append(c)
     # 第二層水盤：腰身台座（多道線腳）＋外翻盤身＋盤緣＋盤內
