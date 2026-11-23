@@ -106,14 +106,19 @@ let fail = 0;
 // ---------- 2) 截圖與量測 ----------
 const pw = await loadPlaywright();
 const server = await serve(dist);
+// [瀏覽器, 模式, 畫質, lod, 截圖視角, 選項{ viewport, anim: [[名稱, 視角, 秒, fps]] }]
 const plan = [
-  ["chromium", "hq", "high", "hq", ["player_spawn", "player_spawn_up", "fountain_front", "fountain_close", "fountain_q45", "fountain_top", "fountain_falls", "fountain_water", "top", "pano"]],
-  ["chromium", "lite-low", "low", "lite", ["player_spawn", "player_spawn_up", "fountain_front", "fountain_close", "fountain_q45", "fountain_top"]],
-  ["webkit", "hq", "high", "hq", ["player_spawn", "fountain_close"]],
-  ["webkit", "lite-low", "low", "lite", ["player_spawn", "fountain_close"]],
+  ["chromium", "hq", "high", "hq", ["player_spawn", "player_spawn_cam", "fountain_front", "fountain_close", "fountain_q45", "fountain_top", "top", "fountain_anim"], { anim: [["crystal", "fountain_anim", 8, 15]] }],
+  ["chromium", "lite-low", "low", "lite", ["player_spawn", "player_spawn_cam", "fountain_close", "fountain_q45", "fountain_anim"], { anim: [["crystal", "fountain_anim", 4, 15]] }],
+  // iPhone 直向（390×844，DPR 2）：出生點構圖檢查＋動畫
+  ["chromium", "hq-portrait", "high", "hq", ["player_spawn", "player_spawn_cam"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 }, anim: [["spawn", "player_spawn_cam", 5, 15]] }],
+  ["chromium", "lite-portrait", "low", "lite", ["player_spawn", "player_spawn_cam"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 } }],
+  ["webkit", "hq", "high", "hq", ["player_spawn_cam", "fountain_close"]],
+  ["webkit", "lite-low", "low", "lite", ["player_spawn_cam", "fountain_close"]],
+  ["webkit", "hq-portrait", "high", "hq", ["player_spawn_cam"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 } }],
 ];
 
-for (const [bname, mode, quality, lod, views] of plan) {
+for (const [bname, mode, quality, lod, views, opts = {}] of plan) {
   const run = { browser: bname, mode, errors: [], shots: [] };
   report.runs.push(run);
   let browser;
@@ -124,7 +129,8 @@ for (const [bname, mode, quality, lod, views] of plan) {
     fail++;
     continue;
   }
-  const page = await browser.newPage({ viewport: { width: 1280, height: 720 }, deviceScaleFactor: 1 });
+  const vp = opts.viewport ?? { width: 1280, height: 720, deviceScaleFactor: 1 };
+  const page = await browser.newPage({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: vp.deviceScaleFactor ?? 1 });
   page.on("pageerror", (e) => run.errors.push(`pageerror: ${e.message}`));
   page.on("console", (m) => m.type() === "error" && run.errors.push(`console: ${m.text()}`));
   try {
@@ -150,15 +156,34 @@ for (const [bname, mode, quality, lod, views] of plan) {
     run.knightDrawCalls = dc.all.drawCalls - dc.both.drawCalls;
     await page.evaluate(() => window.__lab.setTime(3.2));
     for (const v of views) {
+      if (v === "fountain_anim") continue;
       await page.evaluate((name) => window.__lab.setView(name), v);
       await page.evaluate(() => window.__lab.frames(6));
       const f = `${out}/${bname}_${mode}_${v}.png`;
       await page.screenshot({ path: f, timeout: 120000 });
       run.shots.push(f.split("/").pop());
     }
-    if (bname === "chromium") {
+    // 動畫：固定時間步進逐幀截圖（之後由 ffmpeg 合成 MP4／GIF）
+    for (const [name, view, secs, fps] of opts.anim ?? []) {
+      const dir = `${out}/anim_${mode}_${name}`;
+      mkdirSync(dir, { recursive: true });
+      await page.evaluate((v) => window.__lab.setView(v), view);
+      const n = Math.round(secs * fps);
+      for (let k = 0; k < n; k++) {
+        await page.evaluate((t) => window.__lab.setTime(t), k / fps);
+        await page.evaluate(() => window.__lab.frames(2));
+        await page.screenshot({ path: `${dir}/f${String(k).padStart(3, "0")}.png`, timeout: 120000 });
+      }
+      (run.anims ??= []).push({ name, view, secs, fps, frames: n, dir: dir.split("/").pop() });
+      await page.evaluate(() => window.__lab.setTime(3.2));
+    }
+    if (bname === "chromium" && !mode.includes("portrait")) {
+      run.flickerAnim = {
+        fountain_anim: await page.evaluate(() => window.__lab.flickerTime("fountain_anim")),
+        player_spawn_cam: await page.evaluate(() => window.__lab.flickerTime("player_spawn_cam")),
+      };
       run.flicker = {
-        player_spawn: await page.evaluate(() => window.__lab.flickerTest("player_spawn")),
+        player_spawn_cam: await page.evaluate(() => window.__lab.flickerTest("player_spawn_cam")),
         fountain_q45: await page.evaluate(() => window.__lab.flickerTest("fountain_q45")),
         fountain_close: await page.evaluate(() => window.__lab.flickerTest("fountain_close")),
       };

@@ -24,6 +24,7 @@ import { type FountainP3, setupFountainP3 } from "../../src/maps/village/Fountai
 import { type PlazaP3, setupPlazaP3 } from "../../src/maps/village/PlazaP3.ts";
 import { type KnightP3, setupKnightP3 } from "../../src/maps/village/KnightP3.ts";
 import { villageTextures } from "../../src/maps/village/villageTextures.ts";
+import { VILLAGE_SPAWN_CAMERA } from "../../src/maps/village/spawnCamera.ts";
 import { BOARD, BUILDINGS, buildingCenter, FORGE, NPC_SPOTS, PLATFORM, PORTALS, portalPillars, SOUTH_GATE, STAIR_FROM, STAIR_WIDTH, STAIRS } from "../../src/maps/village/layout.ts";
 
 type View = { target: [number, number, number]; alpha: number; beta: number; radius: number; fov?: number; ortho?: number };
@@ -41,6 +42,10 @@ const VIEWS: Record<string, View> = {
   player_spawn: { target: [0, 0.85, -12.5], alpha: -H, beta: 1.05, radius: 9, fov: 0.9 },
   // 創角出生點、把遊戲鏡頭往上抬（看得到漂浮星晶）
   player_spawn_up: { target: [0, 0.85, -12.5], alpha: -H, beta: 1.32, radius: 9, fov: 0.9 },
+  // P3-2E 正式出生點鏡頭（spawnCamera.ts 的實際設定：俯角 1.32、距離 9）
+  player_spawn_cam: { target: [0, 0.85, -12.5], alpha: -H, beta: VILLAGE_SPAWN_CAMERA.beta, radius: VILLAGE_SPAWN_CAMERA.distance, fov: 0.9 },
+  // 星晶動畫近景
+  fountain_anim: { target: [0, 5.45, 0], alpha: -H + 0.35, beta: 1.42, radius: 6.8, fov: 0.8 },
   // 玩家視角：從南路走進廣場
   player_south: { target: [0, 0.85, -24], alpha: -H, beta: 1.12, radius: 9, fov: 0.9 },
   // 斜角全景
@@ -315,6 +320,36 @@ async function flickerTest(view: string, steps = 10): Promise<{ maxRatio: number
   return { maxRatio: Math.max(...ratios), meanRatio: ratios.reduce((a, b) => a + b, 0) / ratios.length };
 }
 
+/** 動畫閃爍檢查：鏡頭固定、每步推進 1/30 秒，統計相鄰兩幀亮度突變 > 40/255 的像素比例 */
+async function flickerTime(view: string, steps = 30): Promise<{ maxRatio: number; meanRatio: number }> {
+  engine.stopRenderLoop();
+  setView(view);
+  const w = engine.getRenderWidth();
+  const h = engine.getRenderHeight();
+  let prev: Uint8Array | null = null;
+  const ratios: number[] = [];
+  for (let k = 0; k <= steps; k++) {
+    fx?.setTime(3.2 + k / 30);
+    scene.render();
+    const v8 = await engine.readPixels(0, 0, w, h, true, false);
+    const px = new Uint8Array(v8.buffer, v8.byteOffset, v8.byteLength);
+    if (prev) {
+      let big = 0;
+      let n = 0;
+      for (let i = 0; i < px.length; i += 8) {
+        const l1 = (px[i] ?? 0) * 0.3 + (px[i + 1] ?? 0) * 0.59 + (px[i + 2] ?? 0) * 0.11;
+        const l0 = (prev[i] ?? 0) * 0.3 + (prev[i + 1] ?? 0) * 0.59 + (prev[i + 2] ?? 0) * 0.11;
+        if (Math.abs(l1 - l0) > 40) big++;
+        n++;
+      }
+      ratios.push(big / n);
+    }
+    prev = px;
+  }
+  engine.runRenderLoop(() => scene.render());
+  return { maxRatio: Math.max(...ratios), meanRatio: ratios.reduce((a, b) => a + b, 0) / ratios.length };
+}
+
 /** 繪製次數：只開啟指定部分 */
 async function drawCalls(parts: { fountain: boolean; plaza: boolean; knight?: boolean }): Promise<{ drawCalls: number; activeMeshes: number }> {
   fx?.setEnabled(parts.fountain);
@@ -369,6 +404,7 @@ load().catch((e: unknown) => {
   setTime: (t: number | null) => fx?.setTime(t),
   frames,
   flickerTest,
+  flickerTime,
   drawCalls,
   stats: () => ({ fountain: fx?.stats ?? null, plaza: plaza?.stats ?? null, knight: knight?.stats ?? null }),
   /** 全村共用貼圖快取：張數、像素、估計顯示記憶體（RGBA、含 mipmap ×1.33） */

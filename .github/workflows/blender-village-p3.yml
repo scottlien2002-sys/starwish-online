@@ -15,6 +15,9 @@ on:
       - "src/maps/village/KnightP3.ts"
       - "src/maps/village/villageTextures.ts"
       - "src/maps/village/villageMaterials.ts"
+      - "src/maps/village/spawnCamera.ts"
+      - "src/maps/village/VillagePage.ts"
+      - "tests/unit/village-spawn-camera.test.ts"
       - ".github/workflows/blender-village-p3.yml"
 
 permissions:
@@ -112,6 +115,20 @@ jobs:
           npx vite build tools/fountain-lab --base ./ --outDir "$PWD/out-lab" --emptyOutDir
           npx playwright install --with-deps chromium webkit >/dev/null
           node tools/fountain-lab/shoot.mjs out-lab out/lab out/plaza_report.json out/knight_report.json | tail -150
+
+      - name: P3-2E animation clips (MP4 + GIF via ffmpeg)
+        if: always()
+        run: |
+          which ffmpeg >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null)
+          mkdir -p out/anim
+          for d in out/lab/anim_*; do
+            [ -d "$d" ] || continue
+            n=$(basename "$d")
+            ffmpeg -y -loglevel error -framerate 15 -i "$d/f%03d.png" -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -c:v libx264 -preset veryfast -crf 23 -pix_fmt yuv420p -movflags +faststart "out/anim/$n.mp4"
+            ffmpeg -y -loglevel error -framerate 15 -i "$d/f%03d.png" -vf "scale='min(480,iw)':-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=160[p];[b][p]paletteuse=dither=bayer:bayer_scale=4" "out/anim/$n.gif"
+            rm -rf "$d"
+          done
+          ls -la out/anim
 
       - name: Contact sheet
         if: always()
