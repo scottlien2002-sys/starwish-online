@@ -379,6 +379,7 @@ def skin(objs, rig):
 
 
 # ---------------- 動作（在「父骨的座標方向」指定旋轉：軸用世界軸，Blender 座標 x＝角色左、y＝背後、z＝上）
+# 正負號：繞 x 軸正轉時，往下的骨頭（腿、手臂）往後擺、往上的骨頭（脊椎、頭）往前傾
 def axis_q(ax, deg):
     return Quaternion(Vector(ax), math.radians(deg))
 
@@ -420,7 +421,7 @@ def pose_run(t):
     c = math.cos(2 * math.pi * t)
     knee = lambda ph: 10 + 55 * max(0.0, math.sin(2 * math.pi * t + ph))  # noqa: E731
     return ({
-        "hips": axis_q(Z, 6 * s), "spine": axis_q(X, -10) @ axis_q(Z, -5 * s), "chest": axis_q(Z, -4 * s), "head": axis_q(X, 6),
+        "hips": axis_q(Z, 6 * s), "spine": axis_q(X, 10) @ axis_q(Z, -5 * s), "chest": axis_q(Z, -4 * s), "head": axis_q(X, 6),
         "thigh.L": axis_q(X, -35 * s), "thigh.R": axis_q(X, 35 * s),
         "shin.L": axis_q(X, knee(math.pi / 2)), "shin.R": axis_q(X, knee(-math.pi / 2)),
         "foot.L": axis_q(X, -10 * c), "foot.R": axis_q(X, 10 * c),
@@ -441,7 +442,7 @@ def pose_jump(t):
             cr, up = lerp(c0, c1, u), lerp(a0, a1, u)
             break
     return ({
-        "spine": axis_q(X, -15 * max(cr, 0)), "head": axis_q(X, 8 * max(cr, 0) - 6 * up),
+        "spine": axis_q(X, 15 * max(cr, 0)), "head": axis_q(X, -4 * max(cr, 0) - 6 * up),
         "thigh.L": axis_q(X, -50 * max(cr, 0) + 10 * min(cr, 0)), "thigh.R": axis_q(X, -50 * max(cr, 0) + 10 * min(cr, 0)),
         "shin.L": axis_q(X, 85 * max(cr, 0)), "shin.R": axis_q(X, 85 * max(cr, 0)),
         "foot.L": axis_q(X, -35 * max(cr, 0) + 20 * max(-cr, 0)), "foot.R": axis_q(X, -35 * max(cr, 0) + 20 * max(-cr, 0)),
@@ -458,7 +459,7 @@ def pose_attack(t):
     swing = env(0.3, 0.45, t) * (1 - env(0.7, 1.0, t))
     tw = 20 * wind - 25 * swing
     return ({
-        "hips": axis_q(Z, -0.4 * tw), "spine": axis_q(Z, -0.6 * tw) @ axis_q(X, -8 * swing), "chest": axis_q(Z, -0.4 * tw),
+        "hips": axis_q(Z, -0.4 * tw), "spine": axis_q(Z, -0.6 * tw) @ axis_q(X, 8 * swing), "chest": axis_q(Z, -0.4 * tw),
         "upper_arm.R": axis_q(X, -150 * wind - 60 * swing) @ axis_q(Y, -25 * wind),
         "forearm.R": axis_q(X, -70 * wind - 10 * swing),
         "upper_arm.L": axis_q(X, 25 * wind - 20 * swing) @ axis_q(Y, 10),
@@ -472,7 +473,7 @@ def pose_hurt(t):
     k = max(k, (1 - (t - 0.35) / 0.65) * 0.0)
     k = math.exp(-((t - 0.15) / 0.12) ** 2) if t < 0.15 else math.exp(-((t - 0.15) / 0.22) ** 2)
     return ({
-        "spine": axis_q(X, 14 * k), "chest": axis_q(X, 8 * k), "head": axis_q(X, 18 * k),
+        "spine": axis_q(X, -14 * k), "chest": axis_q(X, -8 * k), "head": axis_q(X, -18 * k),
         "upper_arm.L": axis_q(Y, 30 * k) @ axis_q(X, -15 * k), "upper_arm.R": axis_q(Y, -30 * k) @ axis_q(X, -15 * k),
         "forearm.L": axis_q(X, -30 * k), "forearm.R": axis_q(X, -30 * k),
         "thigh.L": axis_q(X, 8 * k), "thigh.R": axis_q(X, -6 * k),
