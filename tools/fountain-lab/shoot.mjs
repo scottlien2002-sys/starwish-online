@@ -92,6 +92,13 @@ let fail = 0;
     ck("正門面向噴泉（門比建築中心更靠近噴泉）", dDoor < dCenter, { door: lay.door, doorR: dDoor.toFixed(2), centerR: dCenter.toFixed(2) });
     ck("騎士轉職 NPC 站位不變（正門前 2 m、在碰撞箱外）", Math.abs(Math.hypot(npc.x, npc.z) - (b.front - 2)) < 0.01 && !L.insideBox(box, npc.x, npc.z), { npc });
   }
+  // 噴泉：外徑＝碰撞半徑 7 m、最高 6.5 m（P3-1A 驗收值）
+  {
+    const fr = JSON.parse(readFileSync(plazaReport.replace("plaza_report.json", "fountain_report.json"), "utf8"));
+    for (const [lod, v] of Object.entries(fr.lods)) {
+      ck(`噴泉 ${lod} 外徑 r ≤ 7.0（＝碰撞半徑 ${L.FOUNTAIN.basinR}）、高 6.5`, v.bounds.radius <= L.FOUNTAIN.basinR + 0.005 && Math.abs(v.bounds.top - 6.5) < 0.01 && v.triangles <= fr.budget[lod], { bounds: v.bounds, triangles: v.triangles, budget: fr.budget[lod] });
+    }
+  }
   console.log(JSON.stringify(report.checks, null, 1));
 }
 
@@ -99,10 +106,10 @@ let fail = 0;
 const pw = await loadPlaywright();
 const server = await serve(dist);
 const plan = [
-  ["chromium", "hq", "high", "hq", ["knight_front", "knight_q45", "knight_q45r", "knight_eye", "knight_player", "knight_player_up", "knight_npc", "knight_door", "player_spawn", "pano", "top"]],
-  ["chromium", "lite-low", "low", "lite", ["knight_front", "knight_q45", "knight_eye", "knight_player_up", "knight_npc"]],
-  ["webkit", "hq", "high", "hq", ["knight_front", "knight_player_up"]],
-  ["webkit", "lite-low", "low", "lite", ["knight_front"]],
+  ["chromium", "hq", "high", "hq", ["player_spawn", "player_south", "pano", "top", "close_bench", "close_lamp", "close_compass", "fountain_close", "fountain_falls", "fountain_q45", "fountain_water", "knight_front", "knight_q45", "knight_q45r", "knight_eye", "knight_player_up", "knight_door", "knight_npc"]],
+  ["chromium", "lite-low", "low", "lite", ["player_spawn", "pano", "fountain_close", "fountain_water", "knight_front", "knight_q45", "knight_eye"]],
+  ["webkit", "hq", "high", "hq", ["player_spawn", "knight_front"]],
+  ["webkit", "lite-low", "low", "lite", ["player_spawn", "knight_front"]],
 ];
 
 for (const [bname, mode, quality, lod, views] of plan) {
@@ -127,6 +134,7 @@ for (const [bname, mode, quality, lod, views] of plan) {
     run.loadMs = st.loadMs;
     await page.evaluate(() => window.__lab.frames(10));
     run.stats = await page.evaluate(() => window.__lab.stats());
+    run.textureMemory = await page.evaluate(() => window.__lab.textureMemory());
     await page.evaluate(() => window.__lab.setView("pano"));
     const dc = {};
     for (const [k, parts] of [
@@ -149,6 +157,8 @@ for (const [bname, mode, quality, lod, views] of plan) {
     }
     if (bname === "chromium") {
       run.flicker = {
+        player_spawn: await page.evaluate(() => window.__lab.flickerTest("player_spawn")),
+        fountain_q45: await page.evaluate(() => window.__lab.flickerTest("fountain_q45")),
         knight_front: await page.evaluate(() => window.__lab.flickerTest("knight_front")),
         knight_player_up: await page.evaluate(() => window.__lab.flickerTest("knight_player_up")),
       };

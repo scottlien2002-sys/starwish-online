@@ -187,6 +187,170 @@ def make_fx(n):
     return {k: Image.fromarray((np.clip(v, 0, 1) * 255).astype(np.uint8), "RGBA") for k, v in out.items()}
 
 
+# ---------------- P3-2D 精修貼圖（獨立亂數，不影響既有貼圖） ----------------
+R2 = np.random.default_rng(20261123 + 24)
+
+
+def noise2(n, scale, octaves=3):
+    """與 tile_noise 相同的可重複雜訊，但用獨立亂數"""
+    out = np.zeros((n, n))
+    amp, total = 1.0, 0.0
+    for o in range(octaves):
+        g = max(2, int(scale * (2 ** o)))
+        grid = R2.random((g, g))
+        xs = np.linspace(0, g, n, endpoint=False)
+        i0 = np.floor(xs).astype(int)
+        f = xs - i0
+        f = f * f * (3 - 2 * f)
+        i1 = (i0 + 1) % g
+        a, b, c, d = grid[np.ix_(i0, i0)], grid[np.ix_(i0, i1)], grid[np.ix_(i1, i0)], grid[np.ix_(i1, i1)]
+        fx, fy = f[None, :], f[:, None]
+        out += amp * ((a * (1 - fx) + b * fx) * (1 - fy) + (c * (1 - fx) + d * fx) * fy)
+        total += amp
+        amp *= 0.5
+    return out / total
+
+
+def make_pool(n):
+    """池底馬賽克（可重複）：小方磚＋淺灰縫，淡水色、偶有較深的青綠磚；顏色再由頂點色調成淺藍→青綠深淺"""
+    tiles = 16
+    yy, xx = np.mgrid[0:n, 0:n] / n
+    gx, gy = (xx * tiles) % 1.0, (yy * tiles) % 1.0
+    ix, iy = np.floor(xx * tiles).astype(int), np.floor(yy * tiles).astype(int)
+    rnd = R2.random((tiles, tiles))[iy, ix]
+    edge = np.minimum(np.minimum(gx, 1 - gx), np.minimum(gy, 1 - gy))
+    grout = np.clip((0.07 - edge) / 0.03, 0, 1)
+    fine = noise2(n, 24, 2)
+    base = 0.9 + (rnd - 0.5) * 0.1 + (fine - 0.5) * 0.05
+    deep = (rnd > 0.88).astype(float)
+    r = base * (1 - deep * 0.22)
+    g = base * (1 - deep * 0.08)
+    b = base
+    rgb = np.stack([r, g, b], -1) * (1 - grout[..., None] * 0.18)
+    return np.clip(rgb, 0, 1)
+
+
+def make_caustic(n):
+    """水底光紋（可重複）：兩層雜訊差值形成細亮網紋"""
+    a = noise2(n, 4, 3)
+    b = noise2(n, 4, 3)
+    c = np.clip(1 - np.abs(a - b) * 9, 0, 1) ** 3
+    a2 = noise2(n, 7, 2)
+    b2 = noise2(n, 7, 2)
+    c2 = np.clip(1 - np.abs(a2 - b2) * 9, 0, 1) ** 3
+    v = np.clip(c * 0.8 + c2 * 0.5, 0, 1)
+    return np.stack([v * 0.9, v, v], -1)
+
+
+def make_ashlar(n, rows=4):
+    """城牆砌石（可重複）：大小不一的錯縫石塊、倒角邊、每塊暖白／奶油色差、淺色灰縫、細微風化"""
+    h = np.zeros((n, n))
+    tone = np.zeros((n, n))
+    rh = n // rows
+    mortar = max(2, n // 256)
+    bevel = max(3, n // 90)
+    yy, xx = np.mgrid[0:n, 0:n]
+    for r in range(rows):
+        lens, x = [], 0.0
+        while x < 1.0 - 1e-6:
+            L = min(1.0 - x, R2.uniform(0.24, 0.46))
+            if 1.0 - x - L < 0.16:
+                L = 1.0 - x
+            lens.append(L)
+            x += L
+        off = R2.random()
+        x = 0.0
+        for L in lens:
+            x0 = int(((x + off) % 1.0) * n)
+            w = int(L * n)
+            cols = (np.arange(x0, x0 + w) % n)
+            t = R2.uniform(-0.5, 0.5)
+            for k, c in enumerate(cols):
+                dx = min(k, w - 1 - k)
+                for yv in range(rh):
+                    dy = min(yv, rh - 1 - yv)
+                    d = min(dx, dy) - mortar
+                    if d < 0:
+                        continue
+                    hv = min(1.0, (d + 1) / bevel)
+                    h[r * rh + yv, c] = hv
+                    tone[r * rh + yv, c] = t
+            x += L
+    fine = noise2(n, 32, 3)
+    chips = (noise2(n, 48, 1) > 0.8).astype(float)
+    hh = h * (0.92 + (fine - 0.5) * 0.12) - chips * 0.06 * h
+    v = np.where(h > 0, 0.9 + tone * 0.08 + (fine - 0.5) * 0.06, 0.8)
+    v = v * (0.9 + 0.1 * np.clip(h * 3, 0, 1))
+    rgb = np.stack([v * 1.0, v * 0.975, v * 0.935], -1)
+    return np.clip(rgb, 0, 1), hh
+
+
+def make_slate(n, rows=10):
+    """魚鱗瓦（可重複）：錯排圓弧瓦片，上方瓦片在下方投下淡影；灰階，由頂點色染深藍"""
+    yy, xx = np.mgrid[0:n, 0:n] / n
+    r = np.floor(yy * rows)
+    cols = 8
+    off = np.where(r % 2 == 1, 0.5, 0.0) / cols
+    cx = ((xx + off) * cols) % 1.0 - 0.5
+    cy = (yy * rows) % 1.0
+    d = np.sqrt((cx * 1.25) ** 2 + (cy - 0.05) ** 2)
+    scale = np.clip(1 - d / 0.62, 0, 1)
+    edge = np.clip((0.62 - d) / 0.06, 0, 1)
+    height = scale ** 0.6 * 0.8 + cy * 0.2
+    fine = noise2(n, 20, 2)
+    v = (0.62 + 0.3 * scale ** 0.5 + (fine - 0.5) * 0.06) * (0.75 + 0.25 * edge)
+    v = v * (0.88 + 0.12 * (1 - cy))
+    return np.clip(np.stack([v, v, v], -1), 0, 1), height
+
+
+def make_banner2(w, h):
+    """騎士旗／廣場旗精修：粗織紋、直向布褶明暗、刺繡金邊（針腳點）、金色徽章有描邊"""
+    yy, xx = np.mgrid[0:h, 0:w] / np.array([h, w])[:, None, None]
+    weave = noise2(max(w, h), 64, 1)[:h, :w] * 0.5 + noise2(max(w, h), 16, 2)[:h, :w] * 0.5
+    fold = 0.9 + 0.1 * np.sin(xx * np.pi * 6 + 0.6)
+    base = np.stack([0.14 + weave * 0.05, 0.25 + weave * 0.06, 0.56 + weave * 0.08], -1) * fold[..., None]
+    gold = np.array([0.95, 0.76, 0.34])
+    gold_d = np.array([0.72, 0.52, 0.18])
+    border = (xx < 0.05) | (xx > 0.95) | (yy < 0.04) | ((yy > 0.83) & (yy < 0.88))
+    stitch = (((xx > 0.07) & (xx < 0.095)) | ((xx > 0.905) & (xx < 0.93))) & ((yy * h).astype(int) % 10 < 5) & (yy > 0.05) & (yy < 0.82)
+    cx, cy = xx - 0.5, (yy - 0.36) * (h / w)
+    r = np.sqrt(cx * cx + cy * cy)
+    th = np.arctan2(cy, cx)
+    star_r = (0.17 + 0.13 * np.abs(np.cos(th * 4)) ** 6) * 0.75
+    star = r < star_r
+    star_edge = (r < star_r + 0.02) & ~star
+    ring = np.abs(r - 0.3) < 0.013
+    ring_edge = (np.abs(r - 0.3) < 0.022) & ~ring
+    out = base.copy()
+    for m in (border, stitch, star, ring):
+        out[m] = gold * (0.9 + 0.1 * weave[m][:, None])
+    for m in (star_edge, ring_edge):
+        out[m] = gold_d
+    return Image.fromarray((np.clip(out, 0, 1) * 255).astype(np.uint8), "RGB")
+
+
+def make_p32d(out, info):
+    def save(img, name):
+        p = os.path.join(out, f"{name}.png")
+        img.save(p, optimize=True)
+        info[name] = {"px": list(img.size), "bytes": os.path.getsize(p)}
+
+    for lod, n in (("hq", 512), ("lite", 256)):
+        save(to_img(make_pool(n)), f"pool_{lod}")
+    for lod, n in (("hq", 256), ("lite", 128)):
+        save(to_img(make_caustic(n)), f"caustic_{lod}")
+    save(Image.open(os.path.join(out, "water_nrm_hq.png")).resize((512, 512), Image.LANCZOS), "water_nrm_512")
+    rgb, hgt = make_ashlar(1024)
+    save(to_img(rgb), "ashlar_hq")
+    save(Image.fromarray(normal_from_height(hgt, 5.0), "RGB").resize((512, 512), Image.LANCZOS), "ashlar_nrm_512")
+    save(to_img(rgb).resize((512, 512), Image.LANCZOS), "ashlar_lite")
+    rgb, hgt = make_slate(512)
+    save(to_img(rgb), "slate_hq")
+    save(Image.fromarray(normal_from_height(hgt, 4.0), "RGB"), "slate_nrm_512")
+    save(to_img(rgb).resize((256, 256), Image.LANCZOS), "slate_lite")
+    save(make_banner2(256, 512), "banner2_hq")
+
+
 def main():
     out = sys.argv[1] if len(sys.argv) > 1 else "out/textures"
     os.makedirs(out, exist_ok=True)
@@ -226,6 +390,7 @@ def main():
         p = os.path.join(out, f"{dst}.png")
         im.save(p, optimize=True)
         info[dst] = {"px": n, "bytes": os.path.getsize(p)}
+    make_p32d(out, info)
     json.dump(info, open(os.path.join(out, "textures.json"), "w"), indent=1)
     print(json.dumps(info, indent=1))
 

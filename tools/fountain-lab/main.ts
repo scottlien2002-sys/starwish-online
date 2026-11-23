@@ -23,6 +23,7 @@ import { createEngine, createShadows, createSkyDome, pickQuality, setupRendering
 import { type FountainP3, setupFountainP3 } from "../../src/maps/village/FountainP3.ts";
 import { type PlazaP3, setupPlazaP3 } from "../../src/maps/village/PlazaP3.ts";
 import { type KnightP3, setupKnightP3 } from "../../src/maps/village/KnightP3.ts";
+import { villageTextures } from "../../src/maps/village/villageTextures.ts";
 import { BOARD, BUILDINGS, buildingCenter, FORGE, NPC_SPOTS, PLATFORM, PORTALS, portalPillars, SOUTH_GATE, STAIR_FROM, STAIR_WIDTH, STAIRS } from "../../src/maps/village/layout.ts";
 
 type View = { target: [number, number, number]; alpha: number; beta: number; radius: number; fov?: number; ortho?: number };
@@ -48,6 +49,11 @@ const VIEWS: Record<string, View> = {
   close_lamp: { target: [11.96, 1.9, -14.25], alpha: alphaFrom(318), beta: 1.36, radius: 6.2, fov: 0.8 },
   close_compass: { target: [0, 0, -14.4], alpha: -H, beta: 0.62, radius: 7.5, fov: 0.8 },
   close_wall: { target: [-12.6, 1.0, 18.6], alpha: alphaFrom(150), beta: 1.2, radius: 10, fov: 0.8 },
+  // 噴泉近景（與 P3-1B 預覽相同鏡頭，供前後對照）
+  fountain_close: { target: [0, 5.25, 0], alpha: -H + 0.5, beta: 1.4, radius: 7.5, fov: 0.8 },
+  fountain_falls: { target: [0, 1.4, -3.7], alpha: -H + 0.55, beta: 1.28, radius: 6.2, fov: 0.8 },
+  fountain_q45: { target: [0, 2.3, 0], alpha: -H + Math.PI / 4, beta: 1.12, radius: 23, fov: 0.8 },
+  fountain_water: { target: [2.2, 0.6, -3.6], alpha: alphaFrom(165), beta: 0.95, radius: 5.5, fov: 0.8 },
   // P3-2B 騎士軍團（正面中心在方位 332°、r 27；建築中心 r 34；地面 +2 m）
   knight_front: { target: [-15.0, 10.4, 28.2], alpha: alphaFrom(152), beta: 1.5, radius: 31, fov: 0.8 },
   knight_q45: { target: [-15.4, 9.0, 29.0], alpha: alphaFrom(197), beta: 1.3, radius: 33, fov: 0.8 },
@@ -329,9 +335,9 @@ async function load(): Promise<void> {
   const t0 = performance.now();
   const q2 = lite ? "lite" : "hq";
   const f = await loadGlb(`fountain_${q2}.glb`);
-  fx = setupFountainP3(scene, f.meshes, f.root, { lite, texBase: "./models/fx/", shadows: castShadows ? shadows : null });
+  fx = setupFountainP3(scene, f.meshes, f.root, { lite, texBase: "./models/tex/", shadows: castShadows ? shadows : null });
   const p = await loadGlb(`plaza_${q2}.glb`);
-  plaza = setupPlazaP3(scene, p.meshes, { lite, shadows: castShadows ? shadows : null });
+  plaza = setupPlazaP3(scene, p.meshes, { lite, texBase: "./models/tex/", shadows: castShadows ? shadows : null });
   const k = await loadGlb(`knight_${q2}.glb`);
   knight = setupKnightP3(scene, k.meshes, { lite, texBase: "./models/tex/", shadows: castShadows ? shadows : null });
   // 正式騎士軍團取代灰色量體
@@ -359,6 +365,15 @@ load().catch((e: unknown) => {
   flickerTest,
   drawCalls,
   stats: () => ({ fountain: fx?.stats ?? null, plaza: plaza?.stats ?? null, knight: knight?.stats ?? null }),
+  /** 全村共用貼圖快取：張數、像素、估計顯示記憶體（RGBA、含 mipmap ×1.33） */
+  textureMemory: () => {
+    const list = villageTextures(scene).map((t) => {
+      const z = t.getSize();
+      return { name: t.name.split("/").pop(), w: z.width, h: z.height };
+    });
+    const px = list.reduce((a, t) => a + t.w * t.h, 0);
+    return { count: list.length, pixels: px, mb: +((px * 4 * 1.33) / 1048576).toFixed(2), list };
+  },
   frameMs: () => inst.frameTimeCounter.lastSecAverage,
   size: () => ({ w: engine.getRenderWidth(), h: engine.getRenderHeight() }),
 };

@@ -362,6 +362,20 @@ def build_paving(P, rng, pave, gold, meta):
     for k in range(sg):
         gm.face([A[k], A[(k + 1) % sg], B[(k + 1) % sg], B[k]], UP)
     meta["compass"] = {"x": cx, "z": cz, "r": R + 0.25}
+    # P3-2D：放射金線兩端的小金星（HQ）、米色帶上的淡藍菱形嵌石（避開羅盤）
+    if not lite:
+        for k in range(16):
+            for r in (11.32, 17.68):
+                x, z = pol(k * 22.5, r)
+                flat_star(gm, x, z, PAVE_TOP + 0.004, 4, [0.16, 0.16], 0.06, gcol, gcol_d, rot=k * 22.5)
+    for k in range(16):
+        b = 11.25 + k * 22.5
+        x, z = pol(b, 14.92)
+        if math.hypot(x - cx, z - cz) < 3.3:
+            continue
+        Fd = frame(x, z, b)
+        q = [pave.vert(Fd(dx, dy, PAVE_TOP + 0.004), PAL["blue"]) for dx, dy in ((0, -0.36), (0.22, 0), (0, 0.36), (-0.22, 0))]
+        pave.face(q, UP)
     # 四向道路（寬 6 m；E/S/W 在地面，N 在高台上）：路緣石＋錯縫石板；比廣場低 4 mm，入口處由路緣環蓋住
     meta["roads"] = []
     for b in ROADS:
@@ -384,6 +398,14 @@ def build_paving(P, rng, pave, gold, meta):
                 # 路面石板只做上表面（縫隙露出底層），省面數；路緣石保留斜邊
                 slab_quad(pave, [Fb(xa, ya, 0)[:2], Fb(xb, ya, 0)[:2], Fb(xb, yb, 0)[:2], Fb(xa, yb, 0)[:2]], h0 + top, h0 + BASE_Z, 0.022, col, False)
         meta["roads"].append({"bearing": b, "from": y0, "to": ROAD_END, "half": ROAD_HALF, "h": h0})
+
+
+def mottle(mb):
+    """P3-2D：石板頂點色細微斑駁（位置雜湊，不增加面數）"""
+    for i, (x, z, h) in enumerate(mb.v):
+        k = 1.0 + 0.035 * math.sin(x * 3.1 + z * 1.7) * math.cos(z * 2.3 - x * 0.9) + 0.015 * math.sin(x * 11.0 + z * 7.0)
+        r, g, b, a = mb.c[i]
+        mb.c[i] = (min(1.0, r * k), min(1.0, g * k), min(1.0, b * k), a)
 
 
 # ---------------- 物件 ----------------
@@ -415,6 +437,13 @@ def bench(P, props, gold, F, lite):
         box(props, F, -0.8, 0.8, y0, y1, 0.41, 0.46, C["wood"] if i % 2 == 0 else C["wood_d"])
     for i, (h0, h1) in enumerate(((0.58, 0.70), (0.76, 0.88)) if not lite else ((0.6, 0.86),)):
         box(props, F, -0.8, 0.8, -0.27, -0.22, h0, h1, C["wood_d"] if i % 2 == 0 else C["wood"])
+    # P3-2D：扶手（HQ 鐵製渦捲、Lite 簡化方塊）
+    for sx in (-0.8, 0.8):
+        if lite:
+            box(props, F, sx - 0.03, sx + 0.03, -0.2, 0.18, 0.46, 0.64, C["iron"])
+        else:
+            tube(props, [F(sx, 0.2, 0.46), F(sx, 0.2, 0.58), F(sx, 0.12, 0.66), F(sx, -0.05, 0.67), F(sx, -0.2, 0.64)], 0.022, 5, C["iron"])
+            blob(gm, F(sx, 0.2, 0.47), 0.03, 0.03, 0.03, gcol)
     # 椅背中央金色小星（朝前）
     cx, cz, h = F(0, -0.215, 0.95)
     t = math.atan2(F(0, 1, 0)[0] - F(0, 0, 0)[0], F(0, 1, 0)[1] - F(0, 0, 0)[1])
@@ -486,6 +515,10 @@ def lamp(P, props, gold, glass, banner, b, lite, rng, meta):
         for sx, sy in ((-0.13, -0.13), (0.13, -0.13), (0.13, 0.13), (-0.13, 0.13)):
             box(props, F, sx - 0.018, sx + 0.018, sy - 0.018, sy + 0.018, 3.02, 3.46, C["iron"])
     box(glass, F, -0.12, 0.12, -0.12, 0.12, 3.02, 3.46, C["glass"])
+    if not lite:
+        # P3-2D：燈籠下方兩支渦捲托架
+        for sx in (-1, 1):
+            tube(props, [F(sx * 0.06, 0, 2.62), F(sx * 0.16, 0, 2.72), F(sx * 0.2, 0, 2.86), F(sx * 0.15, 0, 2.95)], 0.016, 4, C["iron"])
     lathe(props, cx, cz, 3.46, [(0.25, 0.0), (0.25, 0.04), (0.19, 0.1), (0.0, 0.24)], 4, C["iron"], phase=math.pi / 4, smooth=False)
     lathe(gm, cx, cz, 3.68, [(0.03, 0.0), (0.05, 0.05), (0.0, 0.13)], s, gcol)
     # 旗臂（朝外）＋旗幟
@@ -606,6 +639,7 @@ def build(lod):
     banner = MB("Plaza_banner", False) if P["banner_tex"] else None
     cont = MB("Plaza_contact", False) if lite else None
     build_paving(P, rng, pave, gold, meta)
+    mottle(pave)
     for b in BENCH_B:
         x, z = pol(b, BENCH_R)
         F = frame(x, z, b + 180)
@@ -686,13 +720,12 @@ def main():
     log = []
     for lod in ("lite", "hq"):
         vp3_kit.reset()
-        kit = vp3_kit.make_materials(TEX, lod)
         mats = {
-            "paving": kit["slab"],
+            "paving": simple_mat("VP3_plaza_paving", (1, 1, 1)),
             "gold": simple_mat("VP3_plaza_gold", (1, 1, 1)),
             "props": simple_mat("VP3_plaza_props", (1, 1, 1)),
             "glass": simple_mat("VP3_plaza_glass", (1, 1, 1)),
-            "banner": simple_mat("VP3_plaza_banner", (1, 1, 1), os.path.join(TEX, "banner_hq.png")),
+            "banner": simple_mat("VP3_plaza_banner", (1, 1, 1)),
             "contact": simple_mat("VP3_plaza_contact", (0, 0, 0), alpha=True),
         }
         mbs, meta = build(lod)

@@ -212,6 +212,29 @@ def crystal(name, mat):
     return ob
 
 
+def ensure_up(ob):
+    """開口環形：確認頂面法線朝上（否則整個翻面）"""
+    me = ob.data
+    ups = [p.normal.z for p in me.polygons if abs(p.normal.z) > 0.9]
+    if ups and sum(ups) < 0:
+        for p in me.polygons:
+            p.flip()
+        me.update()
+
+
+def vc_mat(name, rough=0.8):
+    """頂點色材質（石材：貼圖改由遊戲端共用載入，GLB 不內嵌）"""
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    b = nt.nodes["Principled BSDF"]
+    b.inputs["Roughness"].default_value = rough
+    vc = nt.nodes.new("ShaderNodeVertexColor")
+    vc.layer_name = "Col"
+    nt.links.new(vc.outputs["Color"], b.inputs["Base Color"])
+    return m
+
+
 def build(lod, M):
     P = LODS[lod]
     parts = []
@@ -231,7 +254,13 @@ def build(lod, M):
         a = i * math.tau / P["star_relief"]
         n = Vector((math.cos(a), math.sin(a), 0))
         mat = Matrix.Translation(n * (WALL_R - 0.045) + Vector((0, 0, 0.45))) @ Vector((0, 0, 1)).rotation_difference(n).to_matrix().to_4x4()
-        parts.append(star_prism(f"relief{i}", 5 if i % 2 else 8, 0.2, 0.08, 0.06, M["stone"], mat))
+        # P3-2D：八芒星浮雕改成金色（少量金飾），五芒星維持石雕
+        parts.append(star_prism(f"relief{i}", 5 if i % 2 else 8, 0.2, 0.08, 0.06, M["stone"] if i % 2 else M["gold"], mat))
+    # P3-2D：池緣頂面金色細環（HQ；Lite 面數已用滿）
+    if lod == "hq":
+        ring = lathe("rimGold", [(6.23, RIM_TOP - 0.004), (6.23, RIM_TOP + 0.007), (6.42, RIM_TOP + 0.007), (6.42, RIM_TOP - 0.004)], 96, M["gold"], smooth_angle=20)
+        ensure_up(ring)
+        parts.append(ring)
     # 8 根矮扶壁（池壁外側，每 45°）
     for i in range(8):
         a = math.pi / 8 + i * math.tau / 8
@@ -267,7 +296,7 @@ def build(lod, M):
         d = Vector((math.cos(a), math.sin(a), 0))
         p0 = d * (BOWL_R - 0.02) + Vector((0, 0, 2.2))
         pts = [p0, p0 + d * 0.16 + Vector((0, 0, 0.02)), p0 + d * 0.3 - Vector((0, 0, 0.01)), p0 + d * 0.4 - Vector((0, 0, 0.06))]
-        parts.append(tube(f"spout{i}", pts, 0.12, P["tube"], M["stone"], taper=0.5))
+        parts.append(tube(f"spout{i}", pts, 0.12, P["tube"], M["gold"], taper=0.5))  # P3-2D：金色出水口
     # 盤底 8 支渦捲托架（在出水口之間），讓水盤不像單薄的碟子
     for i in range(8):
         a = math.pi / 8 + i * math.tau / 8
@@ -383,10 +412,14 @@ def build_water(lod, mats):
     me.materials.append(mats["water"])
 
     def wcol(co):
+        # P3-2D：深淺層次（遊戲端 StandardMaterial，頂點色為 sRGB）：中央較深的藍、池緣淺的青綠
         r = math.hypot(co.x, co.y)
-        edge = WATER1_OUT if co.z < 1.5 else WATER2_OUT
-        k = 0.86 + 0.14 * min(1.0, max(0.0, (edge - r) / 0.8))
-        return (k, k, k, 1.0)
+        upper = co.z > 1.5
+        r0, r1 = (WATER2_IN, WATER2_OUT) if upper else (WATER1_IN, WATER1_OUT)
+        t = min(1.0, max(0.0, (r - r0) / (r1 - r0))) ** 1.4
+        deep = (0.56, 0.84, 0.92) if upper else (0.44, 0.75, 0.88)
+        shallow = (0.82, 0.98, 0.95) if upper else (0.76, 0.96, 0.92)
+        return tuple(deep[i] + (shallow[i] - deep[i]) * t for i in range(3)) + (1.0,)
 
     set_rgba(w, wcol)
     out["water"] = w
@@ -598,9 +631,8 @@ def main():
     log = []
     for lod in ("lite", "hq"):
         reset()
-        kit = vp3_kit.make_materials(TEX, lod)
         M = {
-            "stone": kit["stone"],
+            "stone": vc_mat("VP3_stone"),
             "gold": simple_mat("VP3_gold", (0.86, 0.68, 0.36), rough=0.35, metal=0.6),
             "crystal": simple_mat("VP3_crystal", (0.62, 0.84, 0.98), rough=0.15, emit=((0.35, 0.65, 1.0), 0.8)),
             "water": simple_mat("VP3_water", (0.6, 0.84, 0.96), rough=0.1),

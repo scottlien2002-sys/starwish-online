@@ -1,10 +1,9 @@
+import { villageBanner, villageGlass, villageGold, villageLimestone, villageProps } from "./villageMaterials.ts";
 import {
   type AbstractMesh,
   type BaseTexture,
   Color3,
-  FresnelParameters,
   type Material,
-  PBRMaterial,
   type Scene,
   type ShadowGenerator,
   StandardMaterial,
@@ -24,6 +23,8 @@ import {
 
 export interface PlazaP3Options {
   lite: boolean;
+  /** 共用貼圖資料夾（結尾含 /） */
+  texBase: string;
   shadows?: ShadowGenerator | null;
 }
 
@@ -54,56 +55,16 @@ export function setupPlazaP3(scene: Scene, meshes: AbstractMesh[], opt: PlazaP3O
   }
   const mats: Material[] = [];
 
-  // 石板：沿用 GLB 的 PBR；暖白、霧面
+  // P3-2D：全村共用材質（石灰岩、金、物件、燈罩、旗幟），與噴泉、騎士軍團一致
   const pave = by.paving;
-  if (pave?.material instanceof PBRMaterial) {
-    pave.material.metallic = 0;
-    pave.material.roughness = 0.88;
-    pave.material.albedoColor = new Color3(1.12, 1.1, 1.07);
-  }
-
-  // 金：與星願之泉同色系，但自發光較弱（地面嵌條斜看時不會變成螢光黃）
-  const gold = new StandardMaterial("VP3P_gold", scene);
-  gold.diffuseColor = new Color3(0.74, 0.57, 0.28);
-  gold.specularColor = new Color3(0.9, 0.78, 0.5);
-  gold.specularPower = 40;
-  gold.emissiveColor = new Color3(0.2, 0.15, 0.06);
-  const gf = new FresnelParameters();
-  gf.leftColor = new Color3(0.7, 0.7, 0.7);
-  gf.rightColor = new Color3(0.12, 0.12, 0.12);
-  gf.bias = 0.1;
-  gf.power = 1.5;
-  gold.emissiveFresnelParameters = gf;
-  mats.push(gold);
-
-  // 物件：頂點色（含烘焙環境光遮蔽），低高光
-  const props = new StandardMaterial("VP3P_props", scene);
-  props.diffuseColor = new Color3(1, 1, 1);
-  props.specularColor = new Color3(0.1, 0.1, 0.1);
-  props.specularPower = 24;
-  props.emissiveColor = new Color3(0.05, 0.045, 0.04);
-  mats.push(props);
-
-  // 燈罩與水晶：不受光（自發光白 × 頂點色＝頂點色），白天看起來像亮著
-  // 注意：StandardMaterial 的 disableLighting 會讓頂點色失效（變黑），所以用「漫射黑＋自發光白」
-  const glass = new StandardMaterial("VP3P_glass", scene);
-  glass.diffuseColor = Color3.Black();
-  glass.emissiveColor = new Color3(1, 1, 1);
-  glass.specularColor = Color3.Black();
-  mats.push(glass);
-
-  // 旗幟（HQ）：沿用 GLB 內的旗幟貼圖，雙面
+  if (pave) pave.material = villageLimestone(scene, opt.texBase, !opt.lite);
+  const gold = villageGold(scene);
+  const props = villageProps(scene);
+  const glass = villageGlass(scene);
   let bannerTex: BaseTexture | null = null;
   if (by.banner) {
-    const src = by.banner.material;
-    bannerTex = src instanceof PBRMaterial ? src.albedoTexture : null;
-    const banner = new StandardMaterial("VP3P_banner", scene);
-    if (bannerTex) banner.diffuseTexture = bannerTex;
-    banner.backFaceCulling = false;
-    banner.twoSidedLighting = true;
-    banner.specularColor = new Color3(0.08, 0.08, 0.1);
-    banner.emissiveColor = new Color3(0.08, 0.08, 0.1);
-    mats.push(banner);
+    const banner = villageBanner(scene, opt.texBase);
+    bannerTex = banner.diffuseTexture;
     by.banner.material = banner;
   }
 

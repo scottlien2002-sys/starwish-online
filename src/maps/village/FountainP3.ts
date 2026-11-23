@@ -1,3 +1,5 @@
+import { villageGold, villageLimestone } from "./villageMaterials.ts";
+import { villageTexture } from "./villageTextures.ts";
 import {
   type AbstractMesh,
   Color3,
@@ -8,7 +10,6 @@ import {
   MeshBuilder,
   type Nullable,
   type Observer,
-  PBRMaterial,
   type Scene,
   type ShadowGenerator,
   StandardMaterial,
@@ -62,11 +63,8 @@ export interface FountainP3 {
 /** 星晶中心（噴泉本地座標，Y 向上） */
 export const FOUNTAIN_CRYSTAL_CENTER_Y = 5.4;
 
-const tex = (scene: Scene, url: string, hq: boolean): Texture => {
-  const t = new Texture(url, scene, false, true, Texture.TRILINEAR_SAMPLINGMODE);
-  t.anisotropicFilteringLevel = hq ? 4 : 1;
-  return t;
-};
+// P3-2D：貼圖一律走全村共用快取（同一張只載一次）
+const tex = (scene: Scene, url: string, hq: boolean): Texture => villageTexture(scene, url, hq);
 
 const find = (meshes: AbstractMesh[], key: string): AbstractMesh | undefined =>
   meshes.find((m) => m.name.startsWith(`WishFountain_${key}`) && m.getTotalIndices() > 0);
@@ -92,21 +90,11 @@ export function setupFountainP3(scene: Scene, meshes: AbstractMesh[], parent: Tr
   const falls = find(meshes, "falls");
   const foam = find(meshes, "foam");
 
-  // 石材：沿用 GLB 的 PBR（石紋 × 烘焙環境光遮蔽頂點色；HQ 有法線貼圖）。場景沒有環境貼圖，金屬度歸零。
-  if (stone?.material instanceof PBRMaterial) {
-    stone.material.metallic = 0;
-    stone.material.roughness = Math.max(stone.material.roughness ?? 0.8, 0.75);
-    // 白石：略提亮（貼圖 × 環境光遮蔽後偏灰）
-    stone.material.albedoColor = new Color3(1.12, 1.1, 1.06);
-  }
+  // 石材（P3-2D）：與廣場石板相同的暖白石灰岩（共用材質、共用貼圖）× 烘焙環境光遮蔽頂點色
+  if (stone) stone.material = villageLimestone(scene, opt.texBase, hq);
 
-  // 金：StandardMaterial（不靠環境貼圖也有金屬感）＝暖色高光＋邊緣菲涅耳自發光（假反射）
-  const goldMat = own(new StandardMaterial("VP3F_gold", scene));
-  goldMat.diffuseColor = new Color3(0.8, 0.6, 0.28);
-  goldMat.specularColor = new Color3(1, 0.86, 0.55);
-  goldMat.specularPower = 48;
-  goldMat.emissiveColor = new Color3(0.32, 0.25, 0.1);
-  goldMat.emissiveFresnelParameters = fresnel(new Color3(1, 1, 1), new Color3(0.14, 0.14, 0.14), 0.1, 1.5);
+  // 金：全村共用金色材質
+  const goldMat = villageGold(scene);
 
   // 星晶：自發光（柔和、不過曝）；HQ 邊緣再亮一點，像光在晶體裡折射
   const crystalBase = new Color3(0.3, 0.58, 0.92);
@@ -117,24 +105,29 @@ export function setupFountainP3(scene: Scene, meshes: AbstractMesh[], parent: Tr
   crystalMat.emissiveColor = crystalBase.clone();
   if (hq) crystalMat.emissiveFresnelParameters = fresnel(new Color3(1.15, 1.15, 1.15), new Color3(0.72, 0.72, 0.72), 0, 1.2);
 
-  // 水面：不透明。HQ＝1024 貼圖＋低強度法線（兩個方向捲動）＋邊緣天空色；Lite＝512 貼圖捲動＋高光
+  // 水面（P3-2D）：仍是不透明（不閃爍），用「看穿清水」的方式畫：
+  // 池底馬賽克（靜止）× 頂點色深淺（中央藍、池緣青綠）＋ 水底光紋（自發光、緩慢流動）＋ HQ 柔和水波法線與邊緣天空色
   const waterMat = own(new StandardMaterial("VP3F_water", scene));
-  const wTex = ownTex(tex(scene, `${opt.texBase}water_${q}.png`, hq));
+  const wTex = ownTex(tex(scene, `${opt.texBase}pool_${q}.png`, hq));
   waterMat.diffuseTexture = wTex;
-  waterMat.diffuseColor = new Color3(0.92, 0.97, 1);
-  waterMat.specularColor = hq ? new Color3(0.55, 0.6, 0.65) : new Color3(0.42, 0.46, 0.5);
-  waterMat.specularPower = hq ? 90 : 64;
+  waterMat.diffuseColor = new Color3(0.98, 1, 1);
+  const cTex = ownTex(tex(scene, `${opt.texBase}caustic_${q}.png`, hq));
+  cTex.uScale = 0.75;
+  cTex.vScale = 0.75;
+  cTex.level = hq ? 0.32 : 0.26;
+  waterMat.emissiveTexture = cTex;
+  waterMat.emissiveColor = new Color3(0.07, 0.1, 0.12);
+  waterMat.specularColor = hq ? new Color3(0.6, 0.65, 0.7) : new Color3(0.42, 0.46, 0.5);
+  waterMat.specularPower = hq ? 96 : 64;
   let wBump: Texture | null = null;
   if (hq) {
-    wBump = ownTex(tex(scene, `${opt.texBase}water_nrm_hq.png`, true));
-    wBump.level = 0.35;
+    wBump = ownTex(tex(scene, `${opt.texBase}water_nrm_512.png`, true));
+    wBump.level = 0.3;
     wBump.uScale = 1.6;
     wBump.vScale = 1.6;
     waterMat.bumpTexture = wBump;
-    waterMat.emissiveColor = new Color3(1, 1, 1);
-    waterMat.emissiveFresnelParameters = fresnel(new Color3(0.3, 0.4, 0.48), new Color3(0.06, 0.09, 0.12), 0, 2);
-  } else {
-    waterMat.emissiveColor = new Color3(0.08, 0.11, 0.14);
+    // 斜看時（水面邊緣）較亮，像反射天空；正看保持清澈
+    waterMat.emissiveFresnelParameters = fresnel(new Color3(2.4, 2.4, 2.4), new Color3(1, 1, 1), 0, 2);
   }
 
   // 落水：半透明條紋捲動（往下流）；頂點透明度讓入水處淡出
@@ -213,8 +206,8 @@ export function setupFountainP3(scene: Scene, meshes: AbstractMesh[], parent: Tr
   const obs: Nullable<Observer<Scene>> = scene.onBeforeRenderObservable.add(() => {
     if (fixed === null) t += Math.min(scene.getEngine().getDeltaTime() / 1000, 0.1);
     const tt = fixed ?? t;
-    wTex.uOffset = tt * 0.012;
-    wTex.vOffset = tt * 0.008;
+    cTex.uOffset = tt * 0.018 + Math.sin(tt * 0.5) * 0.02;
+    cTex.vOffset = tt * 0.012 + Math.cos(tt * 0.43) * 0.02;
     if (wBump) {
       wBump.uOffset = -tt * 0.01;
       wBump.vOffset = tt * 0.016;
@@ -273,7 +266,7 @@ export function setupFountainP3(scene: Scene, meshes: AbstractMesh[], parent: Tr
     dispose() {
       scene.onBeforeRenderObservable.remove(obs);
       halo.dispose();
-      for (const m of mats) m.dispose(true, true);
+      for (const m of mats) m.dispose(false, false);
     },
   };
 }
