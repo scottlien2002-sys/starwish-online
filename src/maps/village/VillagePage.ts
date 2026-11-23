@@ -1,3 +1,4 @@
+import { villageInitialCamera } from "./spawnCamera.ts";
 import { Color3, DirectionalLight, type Engine, HemisphericLight, Scene, ShadowGenerator, Vector3 } from "@babylonjs/core";
 import { TUNING } from "../../config/tuning.ts";
 import { InputState } from "../../input/InputState.ts";
@@ -318,7 +319,9 @@ class VillagePage {
     this.pos.set(x, groundHeight(x, z), z);
     if (faceYaw !== undefined) this.yaw = faceYaw;
     this.player.root.position.copyFrom(this.pos);
-    this.camera.snap(this.pos, this.alphaBehind(this.yaw), TUNING.camera.defaultBeta, TUNING.camera.distance);
+    // P3-2E：出生／復活點（噴泉周圍）用微抬的初始俯角，讓第一眼看到漂浮星晶；其他位置維持預設
+    const cam0 = villageInitialCamera(x, z);
+    this.camera.snap(this.pos, this.alphaBehind(this.yaw), cam0.beta, cam0.distance);
   }
 
   setOverview(on: boolean): void {
