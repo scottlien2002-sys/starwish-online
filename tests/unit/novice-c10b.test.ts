@@ -1,12 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
-import { C10B_REFERENCE, C10B_VIEWS, c10pAbLabel, c10pShadowMode, c10pMergeGroups, c10pSlot, frameHistogram, frameTimeline, windowHistograms, isLowView, wantsGlow, c10bFile, c10bLayout, c10bOptionsFromSearch, countHitches, windowAverages } from "../../src/characters/noviceC10b.ts";
+import { C10B_REFERENCE, C10B_VIEWS, c10pAbLabel, c10pShadowMode, c10pMergeGroups, c10pSlot, frameHistogram, frameTimeline, windowHistograms, isLowView, wantsGlow, c10bFile, c10bLayout, c10bOptionsFromSearch, countHitches, windowAverages, c10dGroup, firstLastFps, firstBelow, cooldownText } from "../../src/characters/noviceC10b.ts";
 
 test("C1.0-B：檔名與網址參數", () => {
   assert.equal(c10bFile("female", "lite"), "novice_c10b_female_lite.glb");
   const d = c10bOptionsFromSearch("?lab=c10b");
-  assert.deepEqual(d, { lod: "hq", count: 2, bench: 0, warmup: 2, view: "front", p1: false, p2: false, diag: [], gpuProbe: false, shadowRefresh: "every", shadowFilter: "default", shadowMap: null, rest: 0, fixSize: false, star: 0, p3: false });
+  assert.deepEqual(d, { lod: "hq", count: 2, bench: 0, warmup: 2, view: "front", p1: false, p2: false, diag: [], gpuProbe: false, shadowRefresh: "every", shadowFilter: "default", shadowMap: null, rest: 0, fixSize: false, star: 0, p3: false, res: null });
   assert.deepEqual(c10bOptionsFromSearch("?diag=noshadow,bogus,nopost&gpu=1").diag, ["noshadow", "nopost"]);
   assert.equal(c10bOptionsFromSearch("?lab=c10b&p1=1").p1, true);
   const o = c10bOptionsFromSearch("?lab=c10b&lod=lite&count=99&bench=30&view=low");
@@ -181,3 +181,29 @@ for (const [l, bytes, tris] of [["hq", 5241688, 199965], ["lite", 1335724, 40395
     assert.ok(!j.skins?.length && !j.animations?.length);
   });
 }
+
+test("C1.0-B2 效能診斷：組別（每組只改一個因素）與 ?res", () => {
+  const g = (q: string): string => c10dGroup(c10bOptionsFromSearch(q));
+  const base = "?lab=c10b&quality=high&p1=1&p2=1&star=2&p3=1&rest=30&bench=120&fixsize=1";
+  assert.equal(g(base), "D0 原始 HQ");
+  assert.match(g(base + "&shadowfilter=low"), /^D1 /);
+  assert.match(g(base + "&res=1.5"), /^D2 /);
+  assert.match(g(base + "&res=1.5&shadowfilter=low"), /^混合/);
+  assert.equal(c10bOptionsFromSearch(base + "&res=1.5").res, 1.5);
+  assert.equal(c10bOptionsFromSearch(base + "&res=0.3").res, null);
+  assert.equal(c10bOptionsFromSearch(base + "&res=1.25").res, 1.25);
+  assert.equal(c10bOptionsFromSearch(base).res, null);
+});
+
+test("C1.0-B2 效能診斷：前 30 秒／最後 30 秒 FPS、首次低於 45、冷卻文字", () => {
+  // 前 30 秒 60 FPS、之後 90 秒 30 FPS
+  const dts = [...Array<number>(1800).fill(1 / 60), ...Array<number>(2700).fill(1 / 30)];
+  const r = firstLastFps(dts, 30);
+  assert.ok(Math.abs(r.first - 60) < 0.2 && Math.abs(r.last - 30) < 0.2, JSON.stringify(r));
+  assert.ok(Math.abs(r.diff - 30) < 0.3 && Math.abs(r.diffPct - 50) < 0.5);
+  assert.equal(firstBelow([{ t0: 0, fps: 60 }, { t0: 5, fps: 59 }, { t0: 15, fps: 44.9 }, { t0: 20, fps: 34 }], 45), 15);
+  assert.equal(firstBelow([{ t0: 0, fps: 60 }], 45), null);
+  assert.match(cooldownText(null), /沒有上一次/);
+  assert.match(cooldownText(300), /冷卻不足/);
+  assert.match(cooldownText(600), /已滿 10 分鐘/);
+});

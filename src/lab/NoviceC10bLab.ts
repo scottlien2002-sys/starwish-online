@@ -29,6 +29,11 @@ import {
   C10B_VIEWS,
   c10bFile,
   c10bStarLabel,
+  c10dGroup,
+  cooldownText,
+  C10D_COOLDOWN_SEC,
+  firstBelow,
+  firstLastFps,
   type C10bStar,
   c10bLayout,
   c10bOptionsFromSearch,
@@ -98,6 +103,15 @@ interface BenchResult extends BenchmarkSummary {
   lod: C10bLod;
   count: number;
   hitches100: number;
+  /** C1.0-B2 效能診斷（D0／D1／D2） */
+  group: string;
+  firstLast: { first: number; last: number; diff: number; diffPct: number };
+  firstBelow45: number | null;
+  cooldownSec: number | null;
+  startState: string;
+  runNo: number;
+  pixelRatio: number;
+  shadowSampling: string;
   windows: number[];
   contextLost: number;
 }
@@ -314,7 +328,8 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
     });
   }
   const perf = new PerfOverlay(engine, scene, quality, hudRoot);
-  perf.lockResolution(Math.min(window.devicePixelRatio || 1, quality.maxPixelRatio));
+  // C1.0-B2 診斷 D2：?res= 只改解析度倍率，其他渲染設定與 D0 相同
+  perf.lockResolution(opts.res ?? Math.min(window.devicePixelRatio || 1, quality.maxPixelRatio));
 
   // ---------- 載入 ----------
   const base = `${import.meta.env.BASE_URL}models/`;
@@ -487,7 +502,7 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
   const title = document.createElement("div");
   title.className = "lab-title";
   title.innerHTML =
-    `<div class="lab-name">男女初心者 C1.0-B <small>實機整合測試　${c10pAbLabel(opts)}${opts.diag.length ? `　診斷：${diagLabel}` : ""}${opts.gpuProbe ? "　GPU 探測" : ""}　${c10pShadowMode(opts)}${opts.p3 ? "　P3-2 優化" : ""}${opts.star ? `　男 ${c10bStarLabel(opts.star)}` : ""}</small></div>` +
+    `<div class="lab-name">男女初心者 C1.0-B <small>實機整合測試　${c10pAbLabel(opts)}${opts.diag.length ? `　診斷：${diagLabel}` : ""}${opts.gpuProbe ? "　GPU 探測" : ""}　${c10pShadowMode(opts)}${opts.p3 ? "　P3-2 優化" : ""}${opts.star ? `　男 ${c10bStarLabel(opts.star)}` : ""}　【${c10dGroup(opts)}】</small></div>` +
     `<div class="lab-state" data-c10b-state></div>` +
     `<div class="lab-msg">靜態模型（尚未綁骨架、沒有動畫）；燈光、陰影、HDR 與遊戲相同</div>`;
   top.append(title);
@@ -554,6 +569,38 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
       api.bench(60, "停 30 秒後 1 分");
     }, 30000);
   });
+  // C1.0-B2 診斷：開始前狀態（使用者自己填，只當參考；點一下換下一個選項）
+  const startState = { charge: "？", feel: "？", battery: "？" };
+  const cycle = (key: keyof typeof startState, title: string, values: string[]): void => {
+    const b = addBtn(panel, `${title}：？`, "lab-btn", () => {
+      const i = values.indexOf(startState[key]);
+      startState[key] = values[(i + 1) % values.length]!;
+      b.textContent = `${title}：${startState[key]}`;
+    });
+    b.dataset.startState = key;
+  };
+  cycle("charge", "充電", ["否", "是"]);
+  cycle("feel", "手感", ["冷", "溫", "熱"]);
+  cycle("battery", "電量", ["80%以上", "50～79%", "20～49%", "20%以下"]);
+  const startStateText = (): string => `充電 ${startState.charge}｜手感 ${startState.feel}（主觀）｜電量 ${startState.battery}`;
+  // 冷卻：上一次測試結束的時間存在這個瀏覽器（localStorage；讀寫失敗就當沒有紀錄）
+  const DIAG_KEY = "starwish.c10bDiag";
+  const readDiag = (): { lastEnd: number | null; runs: number } => {
+    try {
+      const v = JSON.parse(localStorage.getItem(DIAG_KEY) ?? "null") as { lastEnd?: number; runs?: number } | null;
+      return { lastEnd: typeof v?.lastEnd === "number" ? v.lastEnd : null, runs: typeof v?.runs === "number" ? v.runs : 0 };
+    } catch {
+      return { lastEnd: null, runs: 0 };
+    }
+  };
+  const writeDiag = (v: { lastEnd: number; runs: number }): void => {
+    try {
+      localStorage.setItem(DIAG_KEY, JSON.stringify(v));
+    } catch {
+      /* 無法儲存時略過（報告會顯示沒有紀錄） */
+    }
+  };
+  let cooldownAtStart: number | null = null;
   const copyBtn = addBtn(panel, "複製報告", "lab-btn lab-demo", () => {
     const text = api.report();
     const done = (): void => {
@@ -643,7 +690,11 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
   const shadowConfigText = (): string =>
     `貼圖 ${quality.shadows.mapSize}×${quality.shadows.mapSize}｜取樣 ${shadowFilterLabel()}｜刷新 ${opts.shadowRefresh === "once" ? `只畫一次（${smFrozenAt !== null ? `第 ${smFrozenAt} 次後停止` : "尚未停止"}）` : opts.p3 ? "有變化才重畫（P3-2）" : "每格"}｜投影者 ${shadowMap.renderList?.length ?? 0}`;
   const fmt = (r: BenchResult): string =>
-    `${r.label}（${r.lod === "hq" ? "HQ" : "Lite"}、${r.count} 角色）平均 ${r.avgFps.toFixed(1)} FPS　1% Low ${r.low1Fps.toFixed(1)}　最低 ${r.minFps.toFixed(1)}　卡頓(>100ms) ${r.hitches100}　Draw ${r.avgDrawCalls.toFixed(0)}` +
+    `【${r.group}】本瀏覽器第 ${r.runNo} 次測試` +
+    `\n  前 30 秒 ${r.firstLast.first} FPS → 最後 30 秒 ${r.firstLast.last} FPS（差距 ${r.firstLast.diff} FPS、${r.firstLast.diffPct}%）　首次低於 45 FPS：${r.firstBelow45 === null ? "未發生" : `第 ${r.firstBelow45} 秒`}（5 秒平均）` +
+    `\n  實際渲染解析度 ${r.renderSize[0]!.join("×")}（倍率 ${r.pixelRatio}x）｜陰影取樣 ${r.shadowSampling}` +
+    `\n  冷卻：距上一次測試結束 ${cooldownText(r.cooldownSec)}｜開始前 ${r.startState}` +
+    `\n  ${r.label}（${r.lod === "hq" ? "HQ" : "Lite"}、${r.count} 角色）平均 ${r.avgFps.toFixed(1)} FPS　1% Low ${r.low1Fps.toFixed(1)}　最低 ${r.minFps.toFixed(1)}　卡頓(>100ms) ${r.hitches100}　Draw ${r.avgDrawCalls.toFixed(0)}` +
     (r.windows.length > 1 ? `\n  每 30 秒平均：${r.windows.map((w) => w.toFixed(1)).join(" → ")}` : "") +
     (r.windows5.length > 1 ? `\n  每 5 秒平均：${r.windows5.map((w) => w.toFixed(0)).join(" ")}` : "") +
     (r.hist30.length ? `\n  每 30 秒影格分布（≤20ms／≤37ms／≤54ms／>54ms）：${r.hist30.map((h) => `${h.le20}/${h.le37}/${h.le54}/${h.gt54}`).join(" → ")}` : "") +
@@ -755,6 +806,10 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
       benchStartT = performance.now() / 1000;
       benchStartLoad = Math.round((performance.now() - lastLoadDone) / 1000);
       benchState = "warmup";
+      {
+        const d = readDiag();
+        cooldownAtStart = d.lastEnd === null ? null : Math.max(0, Math.round((Date.now() - d.lastEnd) / 1000));
+      }
       api.view("free");
     },
     benchState: () => ({ state: benchState, progress: recProgress(), result: benchResult, all: allResults }),
@@ -853,7 +908,8 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
       const i = api.info();
       const ua = navigator.userAgent;
       const lines = [
-        `星願物語 C1.0-B 實機測試報告　${c10pAbLabel(opts)}　${new Date().toLocaleString()}`,
+        `星願物語 C1.0-B2 效能診斷報告　${c10dGroup(opts)}　${c10pAbLabel(opts)}　${new Date().toLocaleString()}`,
+        `組別：${c10dGroup(opts)}　方向 ${engine.getRenderWidth() < engine.getRenderHeight() ? "直向" : "橫向"}　實際渲染解析度 ${engine.getRenderWidth()}×${engine.getRenderHeight()}（倍率 ${+(1 / engine.getHardwareScalingLevel()).toFixed(2)}x${opts.res !== null ? "，?res 固定" : ""}）　陰影取樣 ${shadowFilterLabel()}　冷卻基準 ${C10D_COOLDOWN_SEC / 60} 分鐘`,
         `裝置：${ua}`,
         `螢幕：${screen.width}×${screen.height} @${window.devicePixelRatio}x　畫布 ${engine.getRenderWidth()}×${engine.getRenderHeight()}　解析度倍率 ${i.pixelRatio}　畫質 ${i.quality}　HDR ${i.hdr}　MSAA ${i.msaa}　陰影品質 ${i.shadowQuality}`,
         `診斷開關：${diagLabel}　GPU 探測 ${opts.gpuProbe ? "開" : "關"}　畫布鎖定 ${opts.fixSize ? "開" : "關"}　載入後休息 ${opts.rest} 秒`,
@@ -940,7 +996,16 @@ export async function startNoviceC10bLab(canvas: HTMLCanvasElement, hudRoot: HTM
           fixSize: opts.fixSize,
           resizeEvents: resizeLog.filter((e) => e.t >= benchStartT).map((e) => e.text),
           contextLost: contextLost - lostAtStart,
+          group: c10dGroup(opts),
+          firstLast: firstLastFps(dts, 30),
+          firstBelow45: firstBelow(frameTimeline(samples, 5), 45),
+          cooldownSec: cooldownAtStart,
+          startState: startStateText(),
+          runNo: readDiag().runs + 1,
+          pixelRatio: +(1 / engine.getHardwareScalingLevel()).toFixed(2),
+          shadowSampling: shadowFilterLabel(),
         };
+        writeDiag({ lastEnd: Date.now(), runs: benchResult.runNo });
         allResults.push(benchResult);
         result.hidden = false;
         result.textContent = `效能測試結果\n${allResults.map(fmt).join("\n")}\n解析度 ${perf.pixelRatio}x　畫質 ${quality.level}`;

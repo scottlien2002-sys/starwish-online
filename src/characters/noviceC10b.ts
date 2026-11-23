@@ -82,6 +82,62 @@ export interface C10bOptions {
   star: C10bStar;
   /** P3-2 優化組合（?p3=1）：陰影只在投影者或太陽改變時重畫、色調映射改在材質內＋畫布 MSAA 4x、沒有發光物件時暫停發光層 */
   p3: boolean;
+  /** C1.0-B2 效能診斷 D2：固定解析度倍率（?res=1|1.25|1.5|2；null = 畫質預設，iPhone 高畫質為 2） */
+  res: C10dRes | null;
+}
+
+/** C1.0-B2 效能診斷：可用的解析度倍率 */
+export type C10dRes = 1 | 1.25 | 1.5 | 2;
+const C10D_RES: readonly C10dRes[] = [1, 1.25, 1.5, 2];
+
+/**
+ * C1.0-B2 效能診斷組別（每組只改一個因素）：
+ * D0 原始 HQ、D1 只降陰影取樣（shadowfilter=low）、D2 只降解析度（res=1.5）。
+ * 同時改了兩個以上（或其他診斷開關）時標「混合」，報告會提醒不能直接比較。
+ */
+export function c10dGroup(o: Pick<C10bOptions, "res" | "shadowFilter" | "shadowMap" | "shadowRefresh" | "diag" | "gpuProbe">): string {
+  const changes: string[] = [];
+  if (o.shadowFilter !== "default") changes.push(o.shadowFilter === "low" ? "D1 陰影取樣降低（PCSS 低）" : `陰影取樣 ${o.shadowFilter}`);
+  if (o.res !== null) changes.push(o.res === 1.5 ? "D2 解析度降低（1.5x）" : `解析度 ${o.res}x`);
+  if (o.shadowMap !== null) changes.push(`陰影貼圖 ${o.shadowMap}`);
+  if (o.shadowRefresh !== "every") changes.push("陰影只畫一次");
+  if (o.diag.length) changes.push(`診斷 ${o.diag.join(",")}`);
+  if (o.gpuProbe) changes.push("GPU 探測");
+  if (!changes.length) return "D0 原始 HQ";
+  return changes.length === 1 ? changes[0]! : `混合（${changes.join("＋")}）— 不只改一個因素，不能直接與 D0 比較`;
+}
+
+/** 前 sec 秒與最後 sec 秒的 FPS（影格數 ÷ 實際秒數）與差距 */
+export function firstLastFps(dts: readonly number[], sec = 30): { first: number; last: number; diff: number; diffPct: number } {
+  const take = (arr: readonly number[]): number => {
+    let t = 0;
+    let n = 0;
+    for (const dt of arr) {
+      if (t >= sec) break;
+      t += dt;
+      n++;
+    }
+    return t > 0 ? n / t : 0;
+  };
+  const first = take(dts);
+  const last = take([...dts].reverse());
+  const diff = first - last;
+  return { first: +first.toFixed(1), last: +last.toFixed(1), diff: +diff.toFixed(1), diffPct: first > 0 ? +((diff / first) * 100).toFixed(1) : 0 };
+}
+
+/** 第一次「5 秒平均」低於 limit FPS 的時間（秒，從量測開始算；從未低於 → null） */
+export function firstBelow(timeline: readonly { t0: number; fps: number }[], limit = 45): number | null {
+  const w = timeline.find((x) => x.fps < limit);
+  return w ? w.t0 : null;
+}
+
+/** 冷卻時間判定（方案：每組之間 10 分鐘） */
+export const C10D_COOLDOWN_SEC = 600;
+export function cooldownText(sec: number | null): string {
+  if (sec === null) return "沒有上一次測試紀錄（本瀏覽器第一次測試）";
+  const m = Math.floor(sec / 60);
+  const t = `${m} 分 ${Math.round(sec - m * 60)} 秒`;
+  return sec < C10D_COOLDOWN_SEC ? `${t}　⚠ 冷卻不足（未滿 10 分鐘）` : `${t}（已滿 10 分鐘）`;
 }
 
 /** P3-2 優化內容（報告用） */
@@ -138,6 +194,7 @@ export function c10bOptionsFromSearch(search: string): C10bOptions {
     fixSize: p.get("fixsize") === "1",
     star: p.get("star") === "2" ? 2 : p.get("star") === "1" ? 1 : 0,
     p3: p.get("p3") === "1",
+    res: ((r) => (C10D_RES as readonly number[]).includes(r) ? (r as C10dRes) : null)(Number(p.get("res") ?? NaN)),
   };
 }
 

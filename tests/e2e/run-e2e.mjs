@@ -2425,6 +2425,62 @@ for (const name of browsers) {
     for (const e of run.errors) console.log(`   ! ${e}`);
   }
 
+  // ---------- C1.0-B2 效能診斷（D0／D1／D2）測試頁：組別、解析度、陰影取樣、前後 30 秒欄位、冷卻紀錄（WebKit）----------
+  if (name === "webkit") {
+    const vp = VIEWPORTS[0];
+    const run = { browser: name, viewport: `${vp.name} / C1.0-B2 效能診斷 D0／D1／D2`, checks: {}, errors: [], screenshots: [], results: [] };
+    const check = (key, ok, detail) => {
+      run.checks[key] = { ok, detail };
+    };
+    const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+    const page = await ctx.newPage();
+    page.on("pageerror", (e) => run.errors.push(`pageerror: ${e.message}`));
+    page.on("console", (m) => m.type() === "error" && run.errors.push(`console: ${m.text()}`));
+    const base = "/?lab=c10b&quality=high&p1=1&p2=1&star=2&p3=1&fixsize=1&bench=4&warmup=0";
+    const runOnce = async (extra) => {
+      await page.goto(server.url + base + extra, { waitUntil: "load" });
+      await page.waitForFunction(() => window.__starwishC10b?.ready === true, null, { timeout: 120000 });
+      await page.waitForFunction(() => window.__starwishC10b.benchState().state === "done", null, { timeout: 120000 });
+      const st = await page.evaluate(() => window.__starwishC10b.benchState().result);
+      const rep = await page.evaluate(() => window.__starwishC10b.report());
+      const title = await page.evaluate(() => document.querySelector(".lab-name")?.textContent ?? "");
+      return { st, rep, title };
+    };
+    try {
+      await page.goto(server.url + "/?lab=c10b", { waitUntil: "load" });
+      await page.evaluate(() => localStorage.removeItem("starwish.c10bDiag"));
+      const d0 = await runOnce("");
+      run.results.push({ tag: "D0", group: d0.st.group, size: d0.st.renderSize, ratio: d0.st.pixelRatio, firstLast: d0.st.firstLast, below45: d0.st.firstBelow45, cooldown: d0.st.cooldownSec, run: d0.st.runNo, shadow: d0.st.shadowSampling, draws: d0.st.avgDrawCalls, lost: d0.st.contextLost });
+      check("D0：組別「D0 原始 HQ」、第 1 次測試、沒有上一次紀錄", d0.st.group === "D0 原始 HQ" && d0.st.runNo === 1 && d0.st.cooldownSec === null && d0.title.includes("D0 原始 HQ"), { g: d0.st.group, n: d0.st.runNo, c: d0.st.cooldownSec });
+      check("D0：前／後 30 秒 FPS、差距、首次低於 45、Draw、Context Lost 欄位齊全", d0.st.firstLast.first > 0 && d0.st.firstLast.last > 0 && "diff" in d0.st.firstLast && "firstBelow45" in d0.st && d0.st.avgDrawCalls > 0 && d0.st.contextLost === 0, d0.st.firstLast);
+      check(
+        "D0 報告：組別、實際渲染解析度、陰影取樣、冷卻、開始前狀態、前後 30 秒",
+        ["組別：D0 原始 HQ", "實際渲染解析度", "陰影取樣", "冷卻：", "開始前 充電", "前 30 秒", "最後 30 秒", "首次低於 45 FPS"].every((k) => d0.rep.includes(k)),
+        d0.rep.slice(0, 600)
+      );
+      const d1 = await runOnce("&shadowfilter=low");
+      run.results.push({ tag: "D1", group: d1.st.group, size: d1.st.renderSize, ratio: d1.st.pixelRatio, shadow: d1.st.shadowSampling, cooldown: d1.st.cooldownSec, run: d1.st.runNo });
+      check("D1：只改陰影取樣（解析度與 D0 相同）", /^D1 /.test(d1.st.group) && d1.st.shadowSampling !== d0.st.shadowSampling && d1.st.renderSize[0].join() === d0.st.renderSize[0].join() && d1.st.pixelRatio === d0.st.pixelRatio, { d0: [d0.st.shadowSampling, d0.st.renderSize[0]], d1: [d1.st.shadowSampling, d1.st.renderSize[0]] });
+      check("D1：第 2 次測試、記錄冷卻秒數並標示冷卻不足", d1.st.runNo === 2 && typeof d1.st.cooldownSec === "number" && d1.rep.includes("冷卻不足"), { n: d1.st.runNo, c: d1.st.cooldownSec });
+      const d2 = await runOnce("&res=1.5");
+      run.results.push({ tag: "D2", group: d2.st.group, size: d2.st.renderSize, ratio: d2.st.pixelRatio, shadow: d2.st.shadowSampling });
+      const [w0, h0] = d0.st.renderSize[0];
+      const [w2, h2] = d2.st.renderSize[0];
+      check("D2：只改解析度倍率 2 → 1.5（畫布每邊約 75%），陰影取樣與 D0 相同", /^D2 /.test(d2.st.group) && d2.st.pixelRatio === 1.5 && d0.st.pixelRatio === 2 && Math.abs(w2 / w0 - 0.75) < 0.02 && Math.abs(h2 / h0 - 0.75) < 0.02 && d2.st.shadowSampling === d0.st.shadowSampling, { d0: [w0, h0, d0.st.pixelRatio], d2: [w2, h2, d2.st.pixelRatio] });
+      check("D2：測試期間解析度沒有被自動調整", d2.st.sizeChanges === 0 && d2.st.renderSize[1].join() === d2.st.renderSize[0].join(), d2.st.renderSize);
+    } catch (e) {
+      run.errors.push(`exception: ${e.message}`);
+    }
+    await ctx.close();
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 7;
+    if (!run.ok) failures++;
+    report.runs.push(run);
+    console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
+    for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}${v.ok ? "" : "  " + JSON.stringify(v.detail).slice(0, 900)}`);
+    for (const r of run.results) console.log(`   · ${r.tag}: ${JSON.stringify(r)}`.slice(0, 1500));
+    for (const e of run.errors) console.log(`   ! ${e}`);
+  }
+
   await browser.close();
 }
 
