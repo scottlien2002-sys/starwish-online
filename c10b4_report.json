@@ -1,0 +1,1060 @@
+{
+ "male": {
+  "hq": {
+   "triangles": 199968,
+   "parts": 32,
+   "materials": [
+    "face_male",
+    "male_belt",
+    "male_belt_edge",
+    "male_belt_loop",
+    "male_boot",
+    "male_boot_buckle",
+    "male_boot_gem",
+    "male_boot_sole",
+    "male_boot_strap",
+    "male_buckle",
+    "male_glove",
+    "male_glove_band",
+    "male_hair",
+    "male_lace",
+    "male_pouch",
+    "male_rivet",
+    "male_scarf",
+    "male_shirt",
+    "male_shorts",
+    "male_skin",
+    "male_sleeve_trim",
+    "male_tabard",
+    "male_tabard_star",
+    "male_tabard_trim",
+    "male_vest",
+    "male_vest_trim"
+   ],
+   "bones": [
+    "hips",
+    "spine",
+    "chest",
+    "neck",
+    "head",
+    "upper_arm.L",
+    "forearm.L",
+    "hand.L",
+    "upper_arm.R",
+    "forearm.R",
+    "hand.R",
+    "thigh.L",
+    "shin.L",
+    "foot.L",
+    "thigh.R",
+    "shin.R",
+    "foot.R"
+   ],
+   "actions": [
+    {
+     "name": "Idle",
+     "frames": 60,
+     "fps": 30
+    },
+    {
+     "name": "Run",
+     "frames": 18,
+     "fps": 30
+    },
+    {
+     "name": "Jump",
+     "frames": 30,
+     "fps": 30
+    },
+    {
+     "name": "Attack",
+     "frames": 18,
+     "fps": 30
+    },
+    {
+     "name": "Hurt",
+     "frames": 15,
+     "fps": 30
+    }
+   ],
+   "vertex_groups_per_part": {
+    "head": [
+     "head",
+     "neck"
+    ],
+    "body": [
+     "hips",
+     "spine",
+     "chest",
+     "neck",
+     "head",
+     "upper_arm.L",
+     "forearm.L",
+     "hand.L",
+     "upper_arm.R",
+     "forearm.R",
+     "hand.R",
+     "thigh.L",
+     "shin.L",
+     "foot.L",
+     "thigh.R",
+     "shin.R",
+     "foot.R"
+    ],
+    "hand_l": [
+     "hand.L"
+    ],
+    "hand_r": [
+     "hand.R"
+    ],
+    "glove_l": [
+     "hand.L",
+     "forearm.L"
+    ],
+    "rivet_l": [
+     "hand.L"
+    ],
+    "glove_r": [
+     "hand.R",
+     "forearm.R"
+    ],
+    "rivet_r": [
+     "hand.R"
+    ],
+    "boot_l": [
+     "foot.L",
+     "shin.L"
+    ],
+    "boot_gem_l": [
+     "foot.L",
+     "shin.L"
+    ],
+    "boot_r": [
+     "foot.R",
+     "shin.R"
+    ],
+    "boot_gem_r": [
+     "foot.R",
+     "shin.R"
+    ],
+    "hair": [
+     "head"
+    ],
+    "shirt": [
+     "hips",
+     "spine",
+     "chest",
+     "neck",
+     "head",
+     "upper_arm.L",
+     "forearm.L",
+     "hand.L",
+     "upper_arm.R",
+     "forearm.R",
+     "hand.R",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "sleeve_trim": [
+     "spine",
+     "chest",
+     "upper_arm.L",
+     "forearm.L",
+     "hand.L",
+     "upper_arm.R",
+     "forearm.R",
+     "hand.R"
+    ],
+    "vest": [
+     "hips",
+     "spine",
+     "chest",
+     "neck",
+     "head",
+     "upper_arm.L",
+     "forearm.L",
+     "hand.L",
+     "upper_arm.R",
+     "forearm.R",
+     "hand.R"
+    ],
+    "vest_trim": [
+     "hips",
+     "spine",
+     "chest",
+     "neck",
+     "head",
+     "upper_arm.L",
+     "forearm.L",
+     "hand.L",
+     "upper_arm.R",
+     "forearm.R",
+     "hand.R"
+    ],
+    "lace": [
+     "chest",
+     "spine"
+    ],
+    "scarf": [
+     "neck",
+     "chest",
+     "spine",
+     "hips"
+    ],
+    "belt": [
+     "hips",
+     "spine",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "buckle": [
+     "hips",
+     "spine",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "pouch": [
+     "hips",
+     "spine",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "shorts": [
+     "hips",
+     "spine",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "tabard": [
+     "hips",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "tabard_trim": [
+     "hips",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "tabard_star": [
+     "hips",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "belt_edge": [
+     "hips",
+     "spine",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "belt_loop": [
+     "hips",
+     "spine",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "glove_band": [
+     "forearm.L",
+     "hand.L",
+     "forearm.R",
+     "hand.R"
+    ],
+    "boot_sole": [
+     "foot.L",
+     "shin.L",
+     "foot.R",
+     "shin.R"
+    ],
+    "boot_strap": [
+     "foot.L",
+     "shin.L",
+     "foot.R",
+     "shin.R"
+    ],
+    "boot_buckle": [
+     "foot.L",
+     "shin.L",
+     "foot.R",
+     "shin.R"
+    ]
+   }
+  },
+  "lite": {
+   "triangles": 40386,
+   "parts": 32,
+   "materials": [
+    "face_male",
+    "male_belt",
+    "male_belt_edge",
+    "male_belt_loop",
+    "male_boot",
+    "male_boot_buckle",
+    "male_boot_gem",
+    "male_boot_sole",
+    "male_boot_strap",
+    "male_buckle",
+    "male_glove",
+    "male_glove_band",
+    "male_hair",
+    "male_lace",
+    "male_pouch",
+    "male_rivet",
+    "male_scarf",
+    "male_shirt",
+    "male_shorts",
+    "male_skin",
+    "male_sleeve_trim",
+    "male_tabard",
+    "male_tabard_star",
+    "male_tabard_trim",
+    "male_vest",
+    "male_vest_trim"
+   ],
+   "bones": [
+    "hips",
+    "spine",
+    "chest",
+    "neck",
+    "head",
+    "upper_arm.L",
+    "forearm.L",
+    "hand.L",
+    "upper_arm.R",
+    "forearm.R",
+    "hand.R",
+    "thigh.L",
+    "shin.L",
+    "foot.L",
+    "thigh.R",
+    "shin.R",
+    "foot.R"
+   ],
+   "actions": [
+    {
+     "name": "Idle",
+     "frames": 60,
+     "fps": 30
+    },
+    {
+     "name": "Run",
+     "frames": 18,
+     "fps": 30
+    },
+    {
+     "name": "Jump",
+     "frames": 30,
+     "fps": 30
+    },
+    {
+     "name": "Attack",
+     "frames": 18,
+     "fps": 30
+    },
+    {
+     "name": "Hurt",
+     "frames": 15,
+     "fps": 30
+    }
+   ],
+   "vertex_groups_per_part": {
+    "head": [
+     "head",
+     "neck"
+    ],
+    "body": [
+     "hips",
+     "spine",
+     "chest",
+     "neck",
+     "head",
+     "upper_arm.L",
+     "forearm.L",
+     "hand.L",
+     "upper_arm.R",
+     "forearm.R",
+     "hand.R",
+     "thigh.L",
+     "shin.L",
+     "foot.L",
+     "thigh.R",
+     "shin.R",
+     "foot.R"
+    ],
+    "hand_l": [
+     "hand.L"
+    ],
+    "hand_r": [
+     "hand.R"
+    ],
+    "glove_l": [
+     "hand.L",
+     "forearm.L"
+    ],
+    "rivet_l": [
+     "hand.L"
+    ],
+    "glove_r": [
+     "hand.R",
+     "forearm.R"
+    ],
+    "rivet_r": [
+     "hand.R"
+    ],
+    "boot_l": [
+     "foot.L",
+     "shin.L"
+    ],
+    "boot_gem_l": [
+     "foot.L",
+     "shin.L"
+    ],
+    "boot_r": [
+     "foot.R",
+     "shin.R"
+    ],
+    "boot_gem_r": [
+     "foot.R",
+     "shin.R"
+    ],
+    "hair": [
+     "head"
+    ],
+    "shirt": [
+     "hips",
+     "spine",
+     "chest",
+     "neck",
+     "head",
+     "upper_arm.L",
+     "forearm.L",
+     "hand.L",
+     "upper_arm.R",
+     "forearm.R",
+     "hand.R",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "sleeve_trim": [
+     "spine",
+     "chest",
+     "upper_arm.L",
+     "forearm.L",
+     "hand.L",
+     "upper_arm.R",
+     "forearm.R",
+     "hand.R"
+    ],
+    "vest": [
+     "hips",
+     "spine",
+     "chest",
+     "neck",
+     "head",
+     "upper_arm.L",
+     "forearm.L",
+     "hand.L",
+     "upper_arm.R",
+     "forearm.R",
+     "hand.R"
+    ],
+    "vest_trim": [
+     "hips",
+     "spine",
+     "chest",
+     "neck",
+     "head",
+     "upper_arm.L",
+     "forearm.L",
+     "hand.L",
+     "upper_arm.R",
+     "forearm.R",
+     "hand.R"
+    ],
+    "lace": [
+     "chest",
+     "spine"
+    ],
+    "scarf": [
+     "neck",
+     "chest",
+     "spine",
+     "hips"
+    ],
+    "belt": [
+     "hips",
+     "spine",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "buckle": [
+     "hips",
+     "spine",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "pouch": [
+     "hips",
+     "spine",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "shorts": [
+     "hips",
+     "spine",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "tabard": [
+     "hips",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "tabard_trim": [
+     "hips",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "tabard_star": [
+     "hips",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "belt_edge": [
+     "hips",
+     "spine",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "belt_loop": [
+     "hips",
+     "spine",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "glove_band": [
+     "forearm.L",
+     "hand.L",
+     "forearm.R",
+     "hand.R"
+    ],
+    "boot_sole": [
+     "foot.L",
+     "shin.L",
+     "foot.R",
+     "shin.R"
+    ],
+    "boot_strap": [
+     "foot.L",
+     "shin.L",
+     "foot.R",
+     "shin.R"
+    ],
+    "boot_buckle": [
+     "foot.L",
+     "shin.L",
+     "foot.R",
+     "shin.R"
+    ]
+   }
+  }
+ },
+ "female": {
+  "hq": {
+   "triangles": 199972,
+   "parts": 31,
+   "materials": [
+    "face_female",
+    "female_armband",
+    "female_belt",
+    "female_blouse",
+    "female_boot",
+    "female_boot_strap",
+    "female_bow",
+    "female_bow_star",
+    "female_buckle",
+    "female_chest_trim",
+    "female_choker",
+    "female_corset",
+    "female_front_panel",
+    "female_gems",
+    "female_glove",
+    "female_hair",
+    "female_overskirt",
+    "female_overskirt_emblem",
+    "female_overskirt_trim",
+    "female_petticoat",
+    "female_ponytail",
+    "female_safety_shorts",
+    "female_skin",
+    "female_skirt_pink",
+    "female_skirt_trim",
+    "female_underskirt"
+   ],
+   "bones": [
+    "hips",
+    "spine",
+    "chest",
+    "neck",
+    "head",
+    "upper_arm.L",
+    "forearm.L",
+    "hand.L",
+    "upper_arm.R",
+    "forearm.R",
+    "hand.R",
+    "thigh.L",
+    "shin.L",
+    "foot.L",
+    "thigh.R",
+    "shin.R",
+    "foot.R"
+   ],
+   "actions": [
+    {
+     "name": "Idle",
+     "frames": 60,
+     "fps": 30
+    },
+    {
+     "name": "Run",
+     "frames": 18,
+     "fps": 30
+    },
+    {
+     "name": "Jump",
+     "frames": 30,
+     "fps": 30
+    },
+    {
+     "name": "Attack",
+     "frames": 18,
+     "fps": 30
+    },
+    {
+     "name": "Hurt",
+     "frames": 15,
+     "fps": 30
+    }
+   ],
+   "vertex_groups_per_part": {
+    "head": [
+     "head",
+     "neck"
+    ],
+    "body": [
+     "hips",
+     "spine",
+     "chest",
+     "neck",
+     "head",
+     "upper_arm.L",
+     "forearm.L",
+     "hand.L",
+     "upper_arm.R",
+     "forearm.R",
+     "hand.R",
+     "thigh.L",
+     "shin.L",
+     "foot.L",
+     "thigh.R",
+     "shin.R",
+     "foot.R"
+    ],
+    "hand_l": [
+     "hand.L"
+    ],
+    "hand_r": [
+     "hand.R"
+    ],
+    "glove_l": [
+     "hand.L",
+     "forearm.L"
+    ],
+    "glove_r": [
+     "hand.R",
+     "forearm.R"
+    ],
+    "boot_l": [
+     "foot.L",
+     "shin.L"
+    ],
+    "boot_strap_l": [
+     "foot.L",
+     "shin.L"
+    ],
+    "boot_r": [
+     "foot.R",
+     "shin.R"
+    ],
+    "boot_strap_r": [
+     "foot.R",
+     "shin.R"
+    ],
+    "hair": [
+     "head"
+    ],
+    "ponytail": [
+     "head"
+    ],
+    "bow": [
+     "head"
+    ],
+    "bow_star": [
+     "head"
+    ],
+    "blouse": [
+     "hips",
+     "spine",
+     "chest",
+     "neck",
+     "head",
+     "upper_arm.L",
+     "forearm.L",
+     "hand.L",
+     "upper_arm.R",
+     "forearm.R",
+     "hand.R"
+    ],
+    "armband": [
+     "spine",
+     "chest",
+     "upper_arm.L",
+     "forearm.L",
+     "hand.L",
+     "upper_arm.R",
+     "forearm.R",
+     "hand.R"
+    ],
+    "choker": [
+     "neck",
+     "chest"
+    ],
+    "gems": [
+     "chest",
+     "spine"
+    ],
+    "corset": [
+     "hips",
+     "spine",
+     "chest",
+     "neck",
+     "upper_arm.L",
+     "forearm.L",
+     "hand.L",
+     "upper_arm.R",
+     "forearm.R",
+     "hand.R"
+    ],
+    "belt": [
+     "hips",
+     "spine",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "buckle": [
+     "hips",
+     "spine",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "front_panel": [
+     "chest",
+     "spine"
+    ],
+    "chest_trim": [
+     "chest",
+     "spine"
+    ],
+    "underskirt": [
+     "hips",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "petticoat": [
+     "hips",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "skirt_pink": [
+     "hips",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "skirt_trim": [
+     "hips",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "safety_shorts": [
+     "hips",
+     "spine",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "overskirt": [
+     "hips",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "overskirt_trim": [
+     "hips",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "overskirt_emblem": [
+     "hips",
+     "thigh.L",
+     "thigh.R"
+    ]
+   }
+  },
+  "lite": {
+   "triangles": 39972,
+   "parts": 31,
+   "materials": [
+    "face_female",
+    "female_armband",
+    "female_belt",
+    "female_blouse",
+    "female_boot",
+    "female_boot_strap",
+    "female_bow",
+    "female_bow_star",
+    "female_buckle",
+    "female_chest_trim",
+    "female_choker",
+    "female_corset",
+    "female_front_panel",
+    "female_gems",
+    "female_glove",
+    "female_hair",
+    "female_overskirt",
+    "female_overskirt_emblem",
+    "female_overskirt_trim",
+    "female_petticoat",
+    "female_ponytail",
+    "female_safety_shorts",
+    "female_skin",
+    "female_skirt_pink",
+    "female_skirt_trim",
+    "female_underskirt"
+   ],
+   "bones": [
+    "hips",
+    "spine",
+    "chest",
+    "neck",
+    "head",
+    "upper_arm.L",
+    "forearm.L",
+    "hand.L",
+    "upper_arm.R",
+    "forearm.R",
+    "hand.R",
+    "thigh.L",
+    "shin.L",
+    "foot.L",
+    "thigh.R",
+    "shin.R",
+    "foot.R"
+   ],
+   "actions": [
+    {
+     "name": "Idle",
+     "frames": 60,
+     "fps": 30
+    },
+    {
+     "name": "Run",
+     "frames": 18,
+     "fps": 30
+    },
+    {
+     "name": "Jump",
+     "frames": 30,
+     "fps": 30
+    },
+    {
+     "name": "Attack",
+     "frames": 18,
+     "fps": 30
+    },
+    {
+     "name": "Hurt",
+     "frames": 15,
+     "fps": 30
+    }
+   ],
+   "vertex_groups_per_part": {
+    "head": [
+     "head",
+     "neck"
+    ],
+    "body": [
+     "hips",
+     "spine",
+     "chest",
+     "neck",
+     "head",
+     "upper_arm.L",
+     "forearm.L",
+     "hand.L",
+     "upper_arm.R",
+     "forearm.R",
+     "hand.R",
+     "thigh.L",
+     "shin.L",
+     "foot.L",
+     "thigh.R",
+     "shin.R",
+     "foot.R"
+    ],
+    "hand_l": [
+     "hand.L"
+    ],
+    "hand_r": [
+     "hand.R"
+    ],
+    "glove_l": [
+     "hand.L",
+     "forearm.L"
+    ],
+    "glove_r": [
+     "hand.R",
+     "forearm.R"
+    ],
+    "boot_l": [
+     "foot.L",
+     "shin.L"
+    ],
+    "boot_strap_l": [
+     "foot.L",
+     "shin.L"
+    ],
+    "boot_r": [
+     "foot.R",
+     "shin.R"
+    ],
+    "boot_strap_r": [
+     "foot.R",
+     "shin.R"
+    ],
+    "hair": [
+     "head"
+    ],
+    "ponytail": [
+     "head"
+    ],
+    "bow": [
+     "head"
+    ],
+    "bow_star": [
+     "head"
+    ],
+    "blouse": [
+     "hips",
+     "spine",
+     "chest",
+     "neck",
+     "head",
+     "upper_arm.L",
+     "forearm.L",
+     "hand.L",
+     "upper_arm.R",
+     "forearm.R",
+     "hand.R"
+    ],
+    "armband": [
+     "spine",
+     "chest",
+     "upper_arm.L",
+     "forearm.L",
+     "hand.L",
+     "upper_arm.R",
+     "forearm.R",
+     "hand.R"
+    ],
+    "choker": [
+     "neck",
+     "chest"
+    ],
+    "gems": [
+     "chest",
+     "spine"
+    ],
+    "corset": [
+     "hips",
+     "spine",
+     "chest",
+     "neck",
+     "upper_arm.L",
+     "forearm.L",
+     "hand.L",
+     "upper_arm.R",
+     "forearm.R",
+     "hand.R"
+    ],
+    "belt": [
+     "hips",
+     "spine",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "buckle": [
+     "hips",
+     "spine",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "front_panel": [
+     "chest",
+     "spine"
+    ],
+    "chest_trim": [
+     "chest",
+     "spine"
+    ],
+    "underskirt": [
+     "hips",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "petticoat": [
+     "hips",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "skirt_pink": [
+     "hips",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "skirt_trim": [
+     "hips",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "safety_shorts": [
+     "hips",
+     "spine",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "overskirt": [
+     "hips",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "overskirt_trim": [
+     "hips",
+     "thigh.L",
+     "thigh.R"
+    ],
+    "overskirt_emblem": [
+     "hips",
+     "thigh.L",
+     "thigh.R"
+    ]
+   }
+  }
+ }
+}
