@@ -1,5 +1,5 @@
 {
- "startedAt": "2026-11-23T17:23:11.170Z",
+ "startedAt": "2026-11-23T18:11:27.572Z",
  "checks": {
   "benches 位置＝既有碰撞（誤差 < 1 cm）": {
    "ok": true,
@@ -203,6 +203,140 @@
     }
    }
   },
+  "法師軍團尺寸、方位與 V1.3 相同": {
+   "ok": true,
+   "detail": {
+    "v13": {
+     "id": "mage",
+     "name": "法師軍團",
+     "role": "法師轉職",
+     "bearing": 26,
+     "w": 13,
+     "d": 13,
+     "eave": 8,
+     "top": 20,
+     "floor": 2,
+     "front": 27,
+     "shape": "tower"
+    },
+    "model": {
+     "bearing": 26,
+     "front": 27,
+     "w": 13,
+     "d": 13,
+     "top": 20,
+     "floor": 2,
+     "door": [
+      12.612,
+      25.858
+     ],
+     "stair_top": [
+      10.083,
+      20.672
+     ]
+    }
+   }
+  },
+  "法師軍團 lite 模型完全在原碰撞箱內、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "x": [
+      -5.955,
+      6.016
+     ],
+     "y": [
+      0,
+      12.906
+     ],
+     "h": [
+      0,
+      19.98
+     ]
+    },
+    "collider": {
+     "kind": "building:mage",
+     "x": 14.685433417434092,
+     "z": 30.109600551022094,
+     "hw": 6.5,
+     "hd": 6.5,
+     "rot": 0.4537856055185257,
+     "y0": 1.5,
+     "y1": 22
+    },
+    "triangles": 3874,
+    "budget": 10000
+   }
+  },
+  "法師軍團 hq 模型完全在原碰撞箱內、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "x": [
+      -6.047,
+      6.097
+     ],
+     "y": [
+      0,
+      12.906
+     ],
+     "h": [
+      0,
+      19.98
+     ]
+    },
+    "collider": {
+     "kind": "building:mage",
+     "x": 14.685433417434092,
+     "z": 30.109600551022094,
+     "hw": 6.5,
+     "hd": 6.5,
+     "rot": 0.4537856055185257,
+     "y0": 1.5,
+     "y1": 22
+    },
+    "triangles": 9005,
+    "budget": 26000
+   }
+  },
+  "法師軍團正門面向噴泉（門比建築中心更靠近噴泉）": {
+   "ok": true,
+   "detail": {
+    "door": [
+     12.612,
+     25.858
+    ],
+    "doorR": "28.77",
+    "centerR": "33.50"
+   }
+  },
+  "正門中心正對 26° 高台石階（側向偏差 < 0.1 m）": {
+   "ok": true,
+   "detail": {
+    "lateral": "0.000",
+    "stairs": [
+     297,
+     332,
+     0,
+     26
+    ]
+   }
+  },
+  "法師轉職 NPC 站位不變（正門石階前 2 m、在碰撞箱外）": {
+   "ok": true,
+   "detail": {
+    "npc": {
+     "id": "mage",
+     "name": "法師軍團",
+     "role": "法師轉職",
+     "x": 10.959278669726935,
+     "z": 22.469851157479177,
+     "yaw": -2.6878070480712677,
+     "floor": 2,
+     "interactR": 3
+    }
+   }
+  },
   "噴泉 lite 外徑 r ≤ 7.0（＝碰撞半徑 7）、最高（含星晶浮動）≤ 6.5、面數在額度內": {
    "ok": true,
    "detail": {
@@ -234,15 +368,21 @@
    "mode": "hq",
    "errors": [],
    "shots": [
-    "chromium_hq_player_spawn.png",
     "chromium_hq_player_spawn_cam.png",
-    "chromium_hq_fountain_front.png",
-    "chromium_hq_fountain_close.png",
-    "chromium_hq_fountain_q45.png",
-    "chromium_hq_fountain_top.png",
-    "chromium_hq_top.png"
+    "chromium_hq_mage_front.png",
+    "chromium_hq_mage_side.png",
+    "chromium_hq_mage_q45.png",
+    "chromium_hq_mage_q45r.png",
+    "chromium_hq_mage_top.png",
+    "chromium_hq_mage_player.png",
+    "chromium_hq_mage_player_up.png",
+    "chromium_hq_mage_stairs.png",
+    "chromium_hq_mage_npc.png",
+    "chromium_hq_mage_eye.png",
+    "chromium_hq_north_trio.png",
+    "chromium_hq_north_plan.png"
    ],
-   "loadMs": 13094,
+   "loadMs": 9684,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -290,6 +430,25 @@
      },
      "materials": 4,
      "shadowCasters": 4,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slate_hq.png",
+      "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "mage": {
+     "meshes": 5,
+     "triangles": 9005,
+     "byMesh": {
+      "stone": 3660,
+      "roof": 862,
+      "gold": 3592,
+      "props": 241,
+      "glow": 650
+     },
+     "materials": 5,
+     "shadowCasters": 2,
      "textureUrls": [
       "./models/tex/ashlar_hq.png",
       "./models/tex/ashlar_nrm_512.png",
@@ -372,72 +531,60 @@
    },
    "drawCalls": {
     "none": {
-     "drawCalls": 123,
-     "activeMeshes": 59
+     "drawCalls": 119,
+     "activeMeshes": 58
     },
     "fountain": {
-     "drawCalls": 132,
-     "activeMeshes": 66
+     "drawCalls": 128,
+     "activeMeshes": 65
     },
     "both": {
-     "drawCalls": 140,
-     "activeMeshes": 71
+     "drawCalls": 136,
+     "activeMeshes": 70
+    },
+    "noMage": {
+     "drawCalls": 144,
+     "activeMeshes": 74
     },
     "all": {
-     "drawCalls": 148,
-     "activeMeshes": 75
+     "drawCalls": 151,
+     "activeMeshes": 79
     }
    },
    "plazaDrawCalls": 8,
    "fountainDrawCalls": 9,
    "knightDrawCalls": 8,
-   "anims": [
-    {
-     "name": "crystal",
-     "view": "fountain_anim",
-     "secs": 8,
-     "fps": 15,
-     "frames": 120,
-     "dir": "anim_hq_crystal"
-    }
-   ],
-   "flickerAnim": {
-    "fountain_anim": {
-     "maxRatio": 0.000030381944444444444,
-     "meanRatio": 0.000010199652777777774
-    },
-    "player_spawn_cam": {
-     "maxRatio": 0,
-     "meanRatio": 0
-    }
-   },
+   "mageDrawCalls": 7,
    "flicker": {
     "player_spawn_cam": {
-     "maxRatio": 0.0032118055555555554,
-     "meanRatio": 0.0030803571428571425
+     "maxRatio": 0.0032180059523809522,
+     "meanRatio": 0.0030859374999999993
     },
-    "fountain_q45": {
-     "maxRatio": 0.0022507440476190474,
-     "meanRatio": 0.0020455109126984125
+    "mage_q45": {
+     "maxRatio": 0.005977182539682539,
+     "meanRatio": 0.005806051587301587
     },
-    "fountain_close": {
-     "maxRatio": 0.007099454365079365,
-     "meanRatio": 0.006840897817460318
+    "mage_player": {
+     "maxRatio": 0.0006200396825396825,
+     "meanRatio": 0.000548735119047619
     }
    },
-   "frameMsSoftware": 1.6999999999534339
+   "frameMsSoftware": 2.099999999976717
   },
   {
    "browser": "chromium",
    "mode": "lite-low",
    "errors": [],
    "shots": [
-    "chromium_lite-low_player_spawn.png",
     "chromium_lite-low_player_spawn_cam.png",
-    "chromium_lite-low_fountain_close.png",
-    "chromium_lite-low_fountain_q45.png"
+    "chromium_lite-low_mage_front.png",
+    "chromium_lite-low_mage_side.png",
+    "chromium_lite-low_mage_q45.png",
+    "chromium_lite-low_mage_top.png",
+    "chromium_lite-low_mage_player.png",
+    "chromium_lite-low_north_trio.png"
    ],
-   "loadMs": 2378,
+   "loadMs": 2522,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -480,6 +627,22 @@
       "stone": 2599,
       "roof": 246,
       "props": 1781
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slate_lite.png"
+     ]
+    },
+    "mage": {
+     "meshes": 4,
+     "triangles": 3874,
+     "byMesh": {
+      "stone": 1889,
+      "roof": 396,
+      "props": 1171,
+      "glow": 418
      },
      "materials": 4,
      "shadowCasters": 0,
@@ -538,70 +701,56 @@
    },
    "drawCalls": {
     "none": {
-     "drawCalls": 56,
-     "activeMeshes": 59
+     "drawCalls": 54,
+     "activeMeshes": 58
     },
     "fountain": {
-     "drawCalls": 63,
-     "activeMeshes": 66
+     "drawCalls": 61,
+     "activeMeshes": 65
     },
     "both": {
-     "drawCalls": 67,
-     "activeMeshes": 70
+     "drawCalls": 65,
+     "activeMeshes": 69
+    },
+    "noMage": {
+     "drawCalls": 68,
+     "activeMeshes": 72
     },
     "all": {
-     "drawCalls": 70,
-     "activeMeshes": 73
+     "drawCalls": 72,
+     "activeMeshes": 76
     }
    },
    "plazaDrawCalls": 4,
    "fountainDrawCalls": 7,
    "knightDrawCalls": 3,
-   "anims": [
-    {
-     "name": "crystal",
-     "view": "fountain_anim",
-     "secs": 4,
-     "fps": 15,
-     "frames": 60,
-     "dir": "anim_lite-low_crystal"
-    }
-   ],
-   "flickerAnim": {
-    "fountain_anim": {
-     "maxRatio": 0.000015190972222222222,
-     "meanRatio": 0.000006004050925925922
-    },
-    "player_spawn_cam": {
-     "maxRatio": 0,
-     "meanRatio": 0
-    }
-   },
+   "mageDrawCalls": 4,
    "flicker": {
     "player_spawn_cam": {
      "maxRatio": 0.0021329365079365077,
-     "meanRatio": 0.001925843253968254
+     "meanRatio": 0.0019295634920634922
     },
-    "fountain_q45": {
-     "maxRatio": 0.0015314980158730159,
-     "meanRatio": 0.0013994295634920638
+    "mage_q45": {
+     "maxRatio": 0.004309275793650794,
+     "meanRatio": 0.004168526785714286
     },
-    "fountain_close": {
-     "maxRatio": 0.005648561507936508,
-     "meanRatio": 0.005265376984126985
+    "mage_player": {
+     "maxRatio": 0.0006014384920634921,
+     "meanRatio": 0.0005654761904761904
     }
    },
-   "frameMsSoftware": 1.2666666666821886
+   "frameMsSoftware": 1.0666666666511446
   },
   {
    "browser": "chromium",
    "mode": "hq-portrait",
    "errors": [],
    "shots": [
-    "chromium_hq-portrait_player_spawn.png",
-    "chromium_hq-portrait_player_spawn_cam.png"
+    "chromium_hq-portrait_player_spawn_cam.png",
+    "chromium_hq-portrait_mage_player.png",
+    "chromium_hq-portrait_mage_npc.png"
    ],
-   "loadMs": 6572,
+   "loadMs": 5766,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -649,6 +798,25 @@
      },
      "materials": 4,
      "shadowCasters": 4,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slate_hq.png",
+      "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "mage": {
+     "meshes": 5,
+     "triangles": 9005,
+     "byMesh": {
+      "stone": 3660,
+      "roof": 862,
+      "gold": 3592,
+      "props": 241,
+      "glow": 650
+     },
+     "materials": 5,
+     "shadowCasters": 2,
      "textureUrls": [
       "./models/tex/ashlar_hq.png",
       "./models/tex/ashlar_nrm_512.png",
@@ -731,45 +899,40 @@
    },
    "drawCalls": {
     "none": {
-     "drawCalls": 92,
-     "activeMeshes": 28
+     "drawCalls": 88,
+     "activeMeshes": 27
     },
     "fountain": {
-     "drawCalls": 101,
-     "activeMeshes": 35
+     "drawCalls": 97,
+     "activeMeshes": 34
     },
     "both": {
+     "drawCalls": 105,
+     "activeMeshes": 39
+    },
+    "noMage": {
      "drawCalls": 109,
-     "activeMeshes": 40
+     "activeMeshes": 39
     },
     "all": {
-     "drawCalls": 113,
-     "activeMeshes": 40
+     "drawCalls": 116,
+     "activeMeshes": 44
     }
    },
    "plazaDrawCalls": 8,
    "fountainDrawCalls": 9,
    "knightDrawCalls": 4,
-   "anims": [
-    {
-     "name": "spawn",
-     "view": "player_spawn_cam",
-     "secs": 5,
-     "fps": 15,
-     "frames": 75,
-     "dir": "anim_hq-portrait_spawn"
-    }
-   ]
+   "mageDrawCalls": 7
   },
   {
    "browser": "chromium",
    "mode": "lite-portrait",
    "errors": [],
    "shots": [
-    "chromium_lite-portrait_player_spawn.png",
-    "chromium_lite-portrait_player_spawn_cam.png"
+    "chromium_lite-portrait_player_spawn_cam.png",
+    "chromium_lite-portrait_mage_player.png"
    ],
-   "loadMs": 1509,
+   "loadMs": 1742,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -812,6 +975,22 @@
       "stone": 2599,
       "roof": 246,
       "props": 1781
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slate_lite.png"
+     ]
+    },
+    "mage": {
+     "meshes": 4,
+     "triangles": 3874,
+     "byMesh": {
+      "stone": 1889,
+      "roof": 396,
+      "props": 1171,
+      "glow": 418
      },
      "materials": 4,
      "shadowCasters": 0,
@@ -870,35 +1049,40 @@
    },
    "drawCalls": {
     "none": {
-     "drawCalls": 25,
-     "activeMeshes": 28
+     "drawCalls": 23,
+     "activeMeshes": 27
     },
     "fountain": {
-     "drawCalls": 32,
-     "activeMeshes": 35
+     "drawCalls": 30,
+     "activeMeshes": 34
     },
     "both": {
-     "drawCalls": 36,
-     "activeMeshes": 39
+     "drawCalls": 34,
+     "activeMeshes": 38
+    },
+    "noMage": {
+     "drawCalls": 34,
+     "activeMeshes": 38
     },
     "all": {
-     "drawCalls": 36,
-     "activeMeshes": 39
+     "drawCalls": 38,
+     "activeMeshes": 42
     }
    },
    "plazaDrawCalls": 4,
    "fountainDrawCalls": 7,
-   "knightDrawCalls": 0
+   "knightDrawCalls": 0,
+   "mageDrawCalls": 4
   },
   {
    "browser": "webkit",
    "mode": "hq",
    "errors": [],
    "shots": [
-    "webkit_hq_player_spawn_cam.png",
-    "webkit_hq_fountain_close.png"
+    "webkit_hq_mage_q45.png",
+    "webkit_hq_player_spawn_cam.png"
    ],
-   "loadMs": 3506,
+   "loadMs": 4871,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -946,6 +1130,25 @@
      },
      "materials": 4,
      "shadowCasters": 4,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slate_hq.png",
+      "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "mage": {
+     "meshes": 5,
+     "triangles": 9005,
+     "byMesh": {
+      "stone": 3660,
+      "roof": 862,
+      "gold": 3592,
+      "props": 241,
+      "glow": 650
+     },
+     "materials": 5,
+     "shadowCasters": 2,
      "textureUrls": [
       "./models/tex/ashlar_hq.png",
       "./models/tex/ashlar_nrm_512.png",
@@ -1028,35 +1231,39 @@
    },
    "drawCalls": {
     "none": {
-     "drawCalls": 123,
-     "activeMeshes": 59
+     "drawCalls": 119,
+     "activeMeshes": 58
     },
     "fountain": {
-     "drawCalls": 132,
-     "activeMeshes": 66
+     "drawCalls": 128,
+     "activeMeshes": 65
     },
     "both": {
-     "drawCalls": 140,
-     "activeMeshes": 71
+     "drawCalls": 136,
+     "activeMeshes": 70
+    },
+    "noMage": {
+     "drawCalls": 144,
+     "activeMeshes": 74
     },
     "all": {
-     "drawCalls": 148,
-     "activeMeshes": 75
+     "drawCalls": 151,
+     "activeMeshes": 79
     }
    },
    "plazaDrawCalls": 8,
    "fountainDrawCalls": 9,
-   "knightDrawCalls": 8
+   "knightDrawCalls": 8,
+   "mageDrawCalls": 7
   },
   {
    "browser": "webkit",
    "mode": "lite-low",
    "errors": [],
    "shots": [
-    "webkit_lite-low_player_spawn_cam.png",
-    "webkit_lite-low_fountain_close.png"
+    "webkit_lite-low_mage_q45.png"
    ],
-   "loadMs": 2313,
+   "loadMs": 2060,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -1099,6 +1306,22 @@
       "stone": 2599,
       "roof": 246,
       "props": 1781
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slate_lite.png"
+     ]
+    },
+    "mage": {
+     "meshes": 4,
+     "triangles": 3874,
+     "byMesh": {
+      "stone": 1889,
+      "roof": 396,
+      "props": 1171,
+      "glow": 418
      },
      "materials": 4,
      "shadowCasters": 0,
@@ -1157,183 +1380,31 @@
    },
    "drawCalls": {
     "none": {
-     "drawCalls": 56,
-     "activeMeshes": 59
+     "drawCalls": 54,
+     "activeMeshes": 58
     },
     "fountain": {
-     "drawCalls": 63,
-     "activeMeshes": 66
+     "drawCalls": 61,
+     "activeMeshes": 65
     },
     "both": {
-     "drawCalls": 67,
-     "activeMeshes": 70
+     "drawCalls": 65,
+     "activeMeshes": 69
+    },
+    "noMage": {
+     "drawCalls": 68,
+     "activeMeshes": 72
     },
     "all": {
-     "drawCalls": 70,
-     "activeMeshes": 73
+     "drawCalls": 72,
+     "activeMeshes": 76
     }
    },
    "plazaDrawCalls": 4,
    "fountainDrawCalls": 7,
-   "knightDrawCalls": 3
-  },
-  {
-   "browser": "webkit",
-   "mode": "hq-portrait",
-   "errors": [],
-   "shots": [
-    "webkit_hq-portrait_player_spawn_cam.png"
-   ],
-   "loadMs": 1205,
-   "stats": {
-    "fountain": {
-     "meshes": 7,
-     "triangles": 25644,
-     "byMesh": {
-      "stone": 16000,
-      "gold": 7064,
-      "crystal": 108,
-      "water": 704,
-      "falls": 1344,
-      "foam": 384,
-      "fx": 40
-     },
-     "materials": 6,
-     "opaqueMeshes": 3,
-     "transparentMeshes": 4,
-     "textures": 8,
-     "texturePixels": 1277952,
-     "shadowCasters": 2
-    },
-    "plaza": {
-     "meshes": 5,
-     "triangles": 26438,
-     "byMesh": {
-      "paving": 10792,
-      "gold": 3236,
-      "props": 12004,
-      "glass": 154,
-      "banner": 252
-     },
-     "materials": 1,
-     "transparentMeshes": 0,
-     "textures": 3,
-     "texturePixels": 655360,
-     "shadowCasters": 3
-    },
-    "knight": {
-     "meshes": 4,
-     "triangles": 12532,
-     "byMesh": {
-      "stone": 6343,
-      "roof": 664,
-      "gold": 3513,
-      "props": 2012
-     },
-     "materials": 4,
-     "shadowCasters": 4,
-     "textureUrls": [
-      "./models/tex/ashlar_hq.png",
-      "./models/tex/ashlar_nrm_512.png",
-      "./models/tex/slate_hq.png",
-      "./models/tex/slate_nrm_512.png"
-     ]
-    }
-   },
-   "textureMemory": {
-    "count": 13,
-    "pixels": 3244032,
-    "mb": 16.46,
-    "list": [
-     {
-      "name": "slab_hq.png",
-      "w": 512,
-      "h": 512
-     },
-     {
-      "name": "slab_nrm_hq.png",
-      "w": 512,
-      "h": 512
-     },
-     {
-      "name": "pool_hq.png",
-      "w": 512,
-      "h": 512
-     },
-     {
-      "name": "caustic_star_hq.png",
-      "w": 256,
-      "h": 256
-     },
-     {
-      "name": "water_nrm_512.png",
-      "w": 512,
-      "h": 512
-     },
-     {
-      "name": "fx_fall_hq.png",
-      "w": 256,
-      "h": 256
-     },
-     {
-      "name": "fx_foam_hq.png",
-      "w": 256,
-      "h": 256
-     },
-     {
-      "name": "fx_magic_hq.png",
-      "w": 256,
-      "h": 128
-     },
-     {
-      "name": "banner2_hq.png",
-      "w": 256,
-      "h": 512
-     },
-     {
-      "name": "ashlar_hq.png",
-      "w": 1024,
-      "h": 1024
-     },
-     {
-      "name": "ashlar_nrm_512.png",
-      "w": 512,
-      "h": 512
-     },
-     {
-      "name": "slate_hq.png",
-      "w": 512,
-      "h": 512
-     },
-     {
-      "name": "slate_nrm_512.png",
-      "w": 512,
-      "h": 512
-     }
-    ]
-   },
-   "drawCalls": {
-    "none": {
-     "drawCalls": 92,
-     "activeMeshes": 28
-    },
-    "fountain": {
-     "drawCalls": 101,
-     "activeMeshes": 35
-    },
-    "both": {
-     "drawCalls": 109,
-     "activeMeshes": 40
-    },
-    "all": {
-     "drawCalls": 113,
-     "activeMeshes": 40
-    }
-   },
-   "plazaDrawCalls": 8,
-   "fountainDrawCalls": 9,
-   "knightDrawCalls": 4
+   "knightDrawCalls": 3,
+   "mageDrawCalls": 4
   }
  ],
- "finishedAt": "2026-11-23T17:46:48.528Z"
+ "finishedAt": "2026-11-23T18:23:24.131Z"
 }
