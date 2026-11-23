@@ -64,6 +64,15 @@ let fail = 0;
   const sp = L.VILLAGE_SPOTS.find((s) => s.id === "spawn");
   ck("創角出生點站在羅盤徽上（V1.3 出生點不變）", !!sp && Math.hypot(sp.x - meta.compass.x, sp.z - meta.compass.z) <= meta.compass.r, { spawn: sp, compass: meta.compass });
   ck("道路寬度與方向＝V1.3（4 條、半寬 3 m）", meta.roads.length === 4 && meta.roads.every((r) => L.ROADS.includes(r.bearing) && r.half === L.ROAD_HALF), meta.roads);
+  // Lite 接地陰影要有頂點 Alpha（VEC4），否則會畫成黑色方塊
+  {
+    const b = readFileSync(plazaReport.replace("plaza_report.json", "plaza_lite.glb"));
+    const len = b.readUInt32LE(12);
+    const j = JSON.parse(b.subarray(20, 20 + len).toString());
+    const m = j.meshes.find((x) => x.name.startsWith("Plaza_contact"));
+    const acc = m ? j.accessors[m.primitives[0].attributes.COLOR_0] : null;
+    ck("Lite 接地陰影帶頂點透明度（COLOR_0 為 RGBA）", acc?.type === "VEC4", acc ? { type: acc.type } : "missing");
+  }
   console.log(JSON.stringify(report.checks, null, 1));
 }
 

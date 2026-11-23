@@ -659,7 +659,7 @@ def to_object(mb, mat):
     return ob
 
 
-def simple_mat(name, rgb, tex=None):
+def simple_mat(name, rgb, tex=None, alpha=False):
     m = bpy.data.materials.new(name)
     m.use_nodes = True
     nt = m.node_tree
@@ -673,6 +673,10 @@ def simple_mat(name, rgb, tex=None):
         vc = nt.nodes.new("ShaderNodeVertexColor")
         vc.layer_name = "Col"
         nt.links.new(vc.outputs["Color"], b.inputs["Base Color"])
+        if alpha:
+            # 匯出器只在材質有用到頂點色 Alpha 時才輸出 RGBA（否則只輸出 RGB，接地陰影會變成全黑方塊）
+            nt.links.new(vc.outputs["Alpha"], b.inputs["Alpha"])
+            m.blend_method = "BLEND"
     return m
 
 
@@ -689,7 +693,7 @@ def main():
             "props": simple_mat("VP3_plaza_props", (1, 1, 1)),
             "glass": simple_mat("VP3_plaza_glass", (1, 1, 1)),
             "banner": simple_mat("VP3_plaza_banner", (1, 1, 1), os.path.join(TEX, "banner_hq.png")),
-            "contact": simple_mat("VP3_plaza_contact", (0, 0, 0)),
+            "contact": simple_mat("VP3_plaza_contact", (0, 0, 0), alpha=True),
         }
         mbs, meta = build(lod)
         objs = {k: to_object(mb, mats[k]) for k, mb in mbs.items()}
