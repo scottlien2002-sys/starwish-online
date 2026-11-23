@@ -202,7 +202,12 @@ def main():
                 p = os.path.join(out, f"{k}_nrm_hq.png")
                 Image.fromarray(a, "RGB").save(p, optimize=True)
                 info[f"{k}_nrm_hq"] = {"px": n, "bytes": os.path.getsize(p)}
-    # P3-2A 廣場：石板細紋（無接縫線；石板分割由模型負責）HQ 512＋法線、Lite 256；旗幟 256×512
+    for lod, n in (("hq", 256), ("lite", 128)):
+        for k, im in make_fx(n).items():
+            p = os.path.join(out, f"fx_{k}_{lod}.png")
+            im.save(p, optimize=True)
+            info[f"fx_{k}_{lod}"] = {"px": n, "bytes": os.path.getsize(p)}
+    # P3-2A 廣場（放在噴泉特效之後產生，確保 P3-1B 貼圖逐位元不變）：石板細紋（無接縫線；石板分割由模型負責）HQ 512＋法線、Lite 256；旗幟 256×512
     for lod, n in (("hq", 512), ("lite", 256)):
         rgb, h = make_slab(n)
         p = os.path.join(out, f"slab_{lod}.png")
@@ -215,11 +220,6 @@ def main():
     p = os.path.join(out, "banner_hq.png")
     make_banner(256, 512).save(p, optimize=True)
     info["banner_hq"] = {"px": "256x512", "bytes": os.path.getsize(p)}
-    for lod, n in (("hq", 256), ("lite", 128)):
-        for k, im in make_fx(n).items():
-            p = os.path.join(out, f"fx_{k}_{lod}.png")
-            im.save(p, optimize=True)
-            info[f"fx_{k}_{lod}"] = {"px": n, "bytes": os.path.getsize(p)}
     json.dump(info, open(os.path.join(out, "textures.json"), "w"), indent=1)
     print(json.dumps(info, indent=1))
 
