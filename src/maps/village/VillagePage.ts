@@ -29,6 +29,7 @@ import {
 } from "./layout.ts";
 import { buildVillageWorld, type VillageWorld } from "./VillageWorld.ts";
 import { TourRunner, tourPoints, type TourEvent } from "./tour.ts";
+import type { VillageArtState } from "./VillageArtP3.ts";
 
 /**
  * Stage 6 P2-3 第一階段：星芽村 Grey-box 測試頁（?map=village）。
@@ -99,6 +100,9 @@ class VillagePage {
   private info!: HTMLDivElement;
   private reportBox!: HTMLTextAreaElement;
   private shadowQ: "default" | "medium" = "default";
+  /** 正式美術開關（&art=p3）；預設關閉＝Grey-box */
+  private readonly artP3: boolean;
+  private artState: VillageArtState | null = null;
 
   constructor(canvas: HTMLCanvasElement, hudRoot: HTMLElement) {
     const t0 = performance.now();
@@ -152,13 +156,17 @@ class VillagePage {
     if (this.render.glow) this.render.glow.isEnabled = false;
     this.world = buildVillageWorld(scene, this.quality.shadows.filter === "contact" ? this.shadows : null, this.lite);
     if (params.get("labels") === "0") this.world.setLabels(false);
+    this.artP3 = params.get("art") === "p3";
+    if (this.artP3) {
+      void import("./VillageArtP3.ts").then((m) => m.loadVillageArtP3(scene, this.lite, this.shadows, (st) => (this.artState = st)));
+    }
     if (params.get("marks") === "0") this.world.setMarkers(false);
 
     this.hud = new Hud(hudRoot);
     this.hud.setLevel(10);
     this.hud.setBars({ hp: 100, maxHp: 100, mp: 40, maxMp: 40, exp: 0, expToNext: 100 });
     const build = hudRoot.querySelector<HTMLSpanElement>(".hud-build");
-    if (build) build.textContent = `Stage 6 P2-3 星芽村 V1.3 Grey-box ${this.modeName()}`;
+    if (build) build.textContent = `星芽村 V1.3 ${params.get("art") === "p3" ? "P3-0 美術流程測試" : "Grey-box"} ${this.modeName()}`;
     this.hud.events.on("skillPressed", () => this.hud.toast("星芽村 Grey-box：這一階段沒有戰鬥與 NPC 功能", 1500));
     const joystick = new VirtualJoystick(this.hud.joystickZone, this.input, TUNING.joystick.radius, TUNING.joystick.deadZone);
     this.camTouch = new CameraTouchControl(canvas, this.input, TUNING.camera.rotateSensitivity, TUNING.camera.pitchSensitivity, TUNING.camera.pinchSensitivity);
@@ -347,6 +355,7 @@ class VillagePage {
       circus: [11, -9, 128, 1.2, 10],
       church: [13, 5, 66, 1.2, 10],
       terrace: [-3, 26, 300, 1.15, 10],
+      p3sample: [4.5, -34.5, 45, 1.2, 8],
     };
     if (name === "overview") {
       this.setOverview(true);
@@ -370,6 +379,14 @@ class VillagePage {
     lines.push(`村莊 V1.3 佔位網格 ${ws.meshes}、三角形 ${ws.triangles}、文字標籤 ${ws.labels}；建築 7、NPC 站位 ${NPC_SPOTS.length}、出生／復活點 ${RESPAWN_SLOTS.length}、傳送門 ${PORTALS.length}（開放 ${PORTALS.filter((p) => p.open).length}）`);
     lines.push(`碰撞 圓形 ${CIRCLE_COLLIDERS.length}、矩形 ${BOX_COLLIDERS.length}；鏡頭避障 ${this.camera.obstructEnabled ? "開" : "關"}`);
     lines.push(`目前畫面 Draw Calls ${this.perf.drawCalls}、三角形 ${Math.round(this.scene.getActiveIndices() / 3)}`);
+    if (this.artP3) {
+      const a = this.artState;
+      lines.push(
+        a
+          ? `正式美術 art=p3（${a.stage}）：${a.status === "loaded" ? "已載入" : a.status === "error" ? `載入失敗 ${a.error}` : "載入中"} ${a.file}，${a.ms} ms，網格 ${a.meshes}、材質 ${a.materials}、貼圖 ${a.textures}、三角形 ${a.triangles}`
+          : "正式美術 art=p3：尚未開始載入",
+      );
+    } else lines.push("正式美術：關閉（Grey-box）");
     const r = this.lastTour;
     if (!r) {
       lines.push("尚未執行巡迴測試");
@@ -552,6 +569,7 @@ class VillagePage {
       startTour: (loops: number) => this.startTour(loops),
       tourState: () => ({ phase: this.tour ? this.tour.runner.phase : this.lastTour ? "done" : null, loop: this.tour?.runner.loop ?? 0, result: this.lastTour }),
       blockedFrames: () => this.blockedFrames,
+      artState: () => this.artState,
       report: () => this.report(),
     };
     window.__starwishVillage = api;

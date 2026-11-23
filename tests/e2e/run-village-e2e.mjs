@@ -204,12 +204,51 @@ for (const name of browsers) {
           /每圈時間/.test(tr.rep) && /總時間/.test(tr.rep) && /1% Low/.test(tr.rep) && /Draw Calls 平均/.test(tr.rep) && /Context Lost/.test(tr.rep) && /真正卡住 \d+ 次；腳本誤報/.test(tr.rep) && /異常事件：無|異常 /.test(tr.rep),
           tr.rep.split("\n").slice(-8).join(" / "));
       }
+      // 環境基準（P3 預算用）：關掉測試標籤與地面標記，量全景與廣場的實際繪製三角形
+      {
+        const base = {};
+        await page.evaluate(() => { window.__starwishVillage.setLabels(false); window.__starwishVillage.setMarkers(false); });
+        for (const v of ["overview", "plaza", "gate"]) {
+          await page.evaluate((x) => window.__starwishVillage.view(x), v);
+          await settle(page, 5);
+          base[v] = await page.evaluate(() => { const i = window.__starwishVillage.info(); return { draw: i.drawCalls, tris: i.triangles }; });
+        }
+        await page.evaluate(() => { window.__starwishVillage.setLabels(true); window.__starwishVillage.setMarkers(true); });
+        run.results.envBaseline = base;
+      }
       const after = await page.evaluate(() => window.__starwishVillage.info());
       check("沒有 WebGL Context Lost", after.contextLost === 0, after.contextLost);
     } catch (e) {
       run.errors.push(`exception: ${e.message}`);
     }
     await ctx.close();
+    // P3-0：art=p3 開關（HQ 與 Lite 低）載入流程樣品 GLB
+    if (mode === "hq" || mode === "lite-low") {
+      const ctx2 = await browser.newContext({ viewport: { width: 852, height: 393 }, deviceScaleFactor: 2, hasTouch: true });
+      const p2 = await ctx2.newPage();
+      const errs = [];
+      p2.on("pageerror", (e) => errs.push(`pageerror: ${e.message}`));
+      p2.on("console", (m) => m.type() === "error" && errs.push(`console: ${m.text()}`));
+      try {
+        await p2.goto(server.url + `/?map=village&quality=${q}&lod=${lod}&art=p3`, { waitUntil: "load" });
+        await p2.waitForFunction(() => window.__starwishVillage?.ready === true, null, { timeout: 90000 });
+        await p2.waitForFunction(() => { const a = window.__starwishVillage.artState(); return a && a.status !== "loading"; }, null, { timeout: 90000 });
+        const art = await p2.evaluate(() => window.__starwishVillage.artState());
+        run.results.artP3 = art;
+        check("art=p3：流程樣品 GLB 載入成功（HQ／Lite 對應檔案）", art.status === "loaded" && art.file === `p30_sample_${lod === "lite" ? "lite" : "hq"}.glb` && art.meshes > 0 && art.triangles > 0, art);
+        await p2.evaluate(() => window.__starwishVillage.view("p3sample"));
+        await settle(p2, 6);
+        const f = `${outDir}${name}_${mode}_p3sample.png`;
+        await p2.screenshot({ path: f, timeout: 90000 });
+        run.screenshots.push(f.split("/test-results/")[1]);
+        const rep = await p2.evaluate(() => window.__starwishVillage.report());
+        check("art=p3：報告列出正式美術載入狀態；不影響 NPC／傳送門／出生點資料", /正式美術 art=p3（P3-0）：已載入/.test(rep) && /出生／復活點 24、傳送門 4（開放 1）/.test(rep), rep.split("\n").filter((l) => /正式美術|出生/.test(l)).join(" / "));
+        check("art=p3：沒有錯誤訊息", errs.length === 0, errs.slice(0, 3));
+      } catch (e) {
+        run.errors.push(`art=p3 exception: ${e.message}`);
+      }
+      await ctx2.close();
+    }
     run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 16;
     if (!run.ok) failures++;
     report.runs.push(run);
@@ -217,6 +256,7 @@ for (const name of browsers) {
     for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}${v.ok ? "" : "  " + JSON.stringify(v.detail).slice(0, 600)}`);
     console.log(`   · info ${JSON.stringify(run.results.info)}`);
     console.log(`   · views ${JSON.stringify(run.results.viewStats)}`);
+    console.log(`   · envBaseline ${JSON.stringify(run.results.envBaseline)} art ${JSON.stringify(run.results.artP3 ?? null)}`);
     for (const e of run.errors) console.log(`   ! ${e}`);
   }
   await browser.close();
