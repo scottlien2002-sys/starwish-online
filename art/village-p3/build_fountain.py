@@ -467,7 +467,7 @@ def build_water(lod, mats):
 
     def mcol(co):
         r = min(math.hypot(co.x - x, co.y - y) for x, y in landings)
-        return (1.0, 1.0, 1.0, 0.85 if r < 0.3 else 0.0)
+        return (1.0, 1.0, 1.0, 0.7 if r < 0.3 else 0.0)
 
     set_rgba(fm, mcol)
     out["foam"] = fm

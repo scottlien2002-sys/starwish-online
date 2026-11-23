@@ -138,8 +138,9 @@ def make_fx(n):
     out["fall"] = np.concatenate([rgb, a[..., None]], -1)
     # 泡沫：沿 V 的同心環（V＝徑向，捲動時往外擴散），整數頻率可重複
     ns = tile_noise(n, 6, 3)
-    ring = np.sin((yy * 3 + (ns - 0.5) * 0.35) * np.pi * 2) * 0.5 + 0.5
-    a = np.clip((ring - 0.45) * 2.2, 0, 1) * (0.55 + 0.45 * tile_noise(n, 12, 2))
+    ring = np.sin((yy * 2 + (ns - 0.5) * 0.5) * np.pi * 2) * 0.5 + 0.5
+    froth = tile_noise(n, 14, 3)
+    a = np.clip((ring - 0.5) * 1.5, 0, 1) ** 1.3 * np.clip(0.25 + 0.95 * froth, 0, 1) * 0.8
     out["foam"] = np.concatenate([np.ones((n, n, 3)), a[..., None]], -1)
     # 光暈：柔和高斯＋極淡 8 道星芒，邊緣歸零
     cx = xx - 0.5 + 0.5 / n

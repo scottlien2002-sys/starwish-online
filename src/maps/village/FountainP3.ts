@@ -96,6 +96,8 @@ export function setupFountainP3(scene: Scene, meshes: AbstractMesh[], parent: Tr
   if (stone?.material instanceof PBRMaterial) {
     stone.material.metallic = 0;
     stone.material.roughness = Math.max(stone.material.roughness ?? 0.8, 0.75);
+    // 白石：略提亮（貼圖 × 環境光遮蔽後偏灰）
+    stone.material.albedoColor = new Color3(1.12, 1.1, 1.06);
   }
 
   // 金：StandardMaterial（不靠環境貼圖也有金屬感）＝暖色高光＋邊緣菲涅耳自發光（假反射）
@@ -157,7 +159,7 @@ export function setupFountainP3(scene: Scene, meshes: AbstractMesh[], parent: Tr
   foamMat.specularColor = Color3.Black();
   foamMat.zOffset = -2;
   foamMat.disableDepthWrite = true;
-  foamMat.alpha = 0.85;
+  foamMat.alpha = 0.6;
 
   // 星晶光暈：1 張看板，加法混合，柔和
   const haloMat = own(new StandardMaterial("VP3F_halo", scene));
