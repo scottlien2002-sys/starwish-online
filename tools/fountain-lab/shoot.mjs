@@ -167,13 +167,9 @@ for (const [bname, mode, quality, lod, views, opts = {}] of plan) {
     for (const [name, view, secs, fps] of opts.anim ?? []) {
       const dir = `${out}/anim_${mode}_${name}`;
       mkdirSync(dir, { recursive: true });
-      await page.evaluate((v) => window.__lab.setView(v), view);
-      const n = Math.round(secs * fps);
-      for (let k = 0; k < n; k++) {
-        await page.evaluate((t) => window.__lab.setTime(t), k / fps);
-        await page.evaluate(() => window.__lab.frames(2));
-        await page.screenshot({ path: `${dir}/f${String(k).padStart(3, "0")}.png`, timeout: 120000 });
-      }
+      const urls = await page.evaluate(([v, sc, f]) => window.__lab.captureFrames(v, sc, f), [view, secs, fps]);
+      urls.forEach((u, k) => writeFileSync(`${dir}/f${String(k).padStart(3, "0")}.jpg`, Buffer.from(u.split(",")[1], "base64")));
+      const n = urls.length;
       (run.anims ??= []).push({ name, view, secs, fps, frames: n, dir: dir.split("/").pop() });
       await page.evaluate(() => window.__lab.setTime(3.2));
     }

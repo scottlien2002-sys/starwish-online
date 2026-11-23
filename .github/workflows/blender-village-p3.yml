@@ -34,7 +34,7 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@v5
 
@@ -124,8 +124,8 @@ jobs:
           for d in out/lab/anim_*; do
             [ -d "$d" ] || continue
             n=$(basename "$d")
-            ffmpeg -y -loglevel error -framerate 15 -i "$d/f%03d.png" -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -c:v libx264 -preset veryfast -crf 23 -pix_fmt yuv420p -movflags +faststart "out/anim/$n.mp4"
-            ffmpeg -y -loglevel error -framerate 15 -i "$d/f%03d.png" -vf "scale='min(480,iw)':-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=160[p];[b][p]paletteuse=dither=bayer:bayer_scale=4" "out/anim/$n.gif"
+            ffmpeg -y -loglevel error -framerate 15 -i "$d/f%03d.jpg" -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -c:v libx264 -preset veryfast -crf 23 -pix_fmt yuv420p -movflags +faststart "out/anim/$n.mp4"
+            ffmpeg -y -loglevel error -framerate 15 -i "$d/f%03d.jpg" -vf "scale='min(480,iw)':-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=160[p];[b][p]paletteuse=dither=bayer:bayer_scale=4" "out/anim/$n.gif"
             rm -rf "$d"
           done
           ls -la out/anim

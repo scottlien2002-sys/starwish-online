@@ -350,6 +350,23 @@ async function flickerTime(view: string, steps = 30): Promise<{ maxRatio: number
   return { maxRatio: Math.max(...ratios), meanRatio: ratios.reduce((a, b) => a + b, 0) / ratios.length };
 }
 
+/** 動畫短片：固定時間步進、直接在頁面內繪製並讀出畫布（比整頁截圖快很多），回傳 JPEG data URL 陣列 */
+async function captureFrames(view: string, secs: number, fps: number): Promise<string[]> {
+  engine.stopRenderLoop();
+  setView(view);
+  const out: string[] = [];
+  const n = Math.round(secs * fps);
+  for (let k = 0; k < n; k++) {
+    fx?.setTime(k / fps);
+    scene.render();
+    out.push(canvas.toDataURL("image/jpeg", 0.9));
+    if (k % 10 === 9) await new Promise((r) => setTimeout(r, 0));
+  }
+  fx?.setTime(3.2);
+  engine.runRenderLoop(() => scene.render());
+  return out;
+}
+
 /** 繪製次數：只開啟指定部分 */
 async function drawCalls(parts: { fountain: boolean; plaza: boolean; knight?: boolean }): Promise<{ drawCalls: number; activeMeshes: number }> {
   fx?.setEnabled(parts.fountain);
@@ -405,6 +422,7 @@ load().catch((e: unknown) => {
   frames,
   flickerTest,
   flickerTime,
+  captureFrames,
   drawCalls,
   stats: () => ({ fountain: fx?.stats ?? null, plaza: plaza?.stats ?? null, knight: knight?.stats ?? null }),
   /** 全村共用貼圖快取：張數、像素、估計顯示記憶體（RGBA、含 mipmap ×1.33） */
