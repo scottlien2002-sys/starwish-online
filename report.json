@@ -1,5 +1,5 @@
 {
- "startedAt": "2026-11-24T07:32:18.396Z",
+ "startedAt": "2026-11-24T08:04:27.750Z",
  "note": "CI 軟體繪圖：FPS 不代表 iPhone 實機",
  "runs": [
   {
@@ -29,7 +29,7 @@
       "errors": []
      }
     },
-    "繪製次數 ≤ 140（全村整合，任何位置）": {
+    "繪製次數 ≤ 160（全村整合、HQ、任何位置）": {
      "ok": true,
      "detail": {
       "arrival": {
@@ -51,12 +51,12 @@
      }
     },
     "移動規則：一般行走走上石階到高台（不跳躍）": {
-     "ok": false,
+     "ok": true,
      "detail": {
-      "x": -9.184850993605148e-17,
-      "y": 0,
-      "z": 16.500000000000004,
-      "yaw": -6.031412569963934e-17
+      "x": -5.510910596163096e-16,
+      "y": 2,
+      "z": 24.00000000000011,
+      "yaw": -6.123233995667142e-17
      }
     },
     "NPC 互動：8 位 NPC 都能靠近後點擊對話（名稱、職責）": {
@@ -154,26 +154,19 @@
       }
      ]
     },
-    "洛恩：靠近 2.5 m 內出現互動": {
-     "ok": false,
-     "detail": {
-      "target": null,
-      "talking": false,
-      "dialog": "",
-      "panelOpen": false,
-      "appraisalOpen": false,
-      "merchantPaused": false
-     }
+    "洛恩：靠近 2.5 m 內可以對話": {
+     "ok": true,
+     "detail": "merchant"
     },
     "洛恩：對話時停止巡走（暫停中）並開啟商人選單": {
-     "ok": false,
+     "ok": true,
      "detail": {
-      "target": null,
-      "talking": false,
+      "target": "merchant",
+      "talking": true,
       "dialog": "",
-      "panelOpen": false,
+      "panelOpen": true,
       "appraisalOpen": false,
-      "merchantPaused": false
+      "merchantPaused": true
      }
     },
     "寵物鑑定：放入後可鑑定；連點只鑑定一次；結果逐條顯示；物品留在背包並變成已鑑定": {
@@ -192,19 +185,19 @@
      }
     },
     "洛恩：關閉後恢復巡走": {
-     "ok": true,
+     "ok": false,
      "detail": {
-      "target": null,
-      "talking": false,
+      "target": "merchant",
+      "talking": true,
       "dialog": "",
-      "panelOpen": false,
+      "panelOpen": true,
       "appraisalOpen": false,
-      "merchantPaused": false
+      "merchantPaused": true
      }
     }
    },
    "errors": [
-    "appraise button: page.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('[data-act=\"choose:appraise\"]')\n",
+    "appraise button: page.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('[data-act=\"choose:appraise\"]')\n    - locator resolved to <button type=\"button\" data-act=\"choose:appraise\">…</button>\n  - attempting click action\n    - waiting for element to be visible, enabled and stable\n",
     "tile: page.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.pa-win [data-id=\"s1\"]')\n",
     "start: page.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.pa-win [data-act=\"start\"]')\n"
    ],
@@ -227,7 +220,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 141695,
+     "loadMs": 147661,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -383,7 +376,7 @@
       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
      }
     ],
-    "fpsSoftware": 118
+    "fpsSoftware": 119
    },
    "ok": false
   },
@@ -414,12 +407,12 @@
       "errors": []
      }
     },
-    "繪製次數 ≤ 140（全村整合，任何位置）": {
+    "繪製次數 ≤ 100（全村整合、Lite、任何位置）": {
      "ok": true,
      "detail": {
       "arrival": {
-       "drawCalls": 91,
-       "triangles": 114821
+       "drawCalls": 90,
+       "triangles": 114046
       },
       "spawn": {
        "drawCalls": 86,
@@ -438,10 +431,10 @@
     "移動規則：一般行走走上石階到高台（不跳躍）": {
      "ok": true,
      "detail": {
-      "x": -4.898587196589419e-16,
+      "x": -6.123233995736774e-16,
       "y": 2,
-      "z": 23.000000000000096,
-      "yaw": -6.123233994591822e-17
+      "z": 25.000000000000124,
+      "yaw": -6.123233995732532e-17
      }
     },
     "NPC 互動：8 位 NPC 都能靠近後點擊對話（名稱、職責）": {
@@ -539,16 +532,9 @@
       }
      ]
     },
-    "洛恩：靠近 2.5 m 內出現互動": {
+    "洛恩：靠近 2.5 m 內可以對話": {
      "ok": true,
-     "detail": {
-      "target": "merchant",
-      "talking": false,
-      "dialog": "",
-      "panelOpen": false,
-      "appraisalOpen": false,
-      "merchantPaused": false
-     }
+     "detail": "merchant"
     },
     "洛恩：對話時停止巡走（暫停中）並開啟商人選單": {
      "ok": true,
@@ -614,7 +600,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 18900,
+     "loadMs": 18793,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -678,8 +664,8 @@
     },
     "perf": {
      "arrival": {
-      "drawCalls": 91,
-      "triangles": 114821
+      "drawCalls": 90,
+      "triangles": 114046
      },
      "spawn": {
       "drawCalls": 86,
@@ -801,8 +787,8 @@
       "errors": []
      }
     },
-    "繪製次數 ≤ 140（全村整合，任何位置）": {
-     "ok": false,
+    "繪製次數 ≤ 160（全村整合、HQ、任何位置）": {
+     "ok": true,
      "detail": {
       "arrival": {
        "drawCalls": 152,
@@ -823,12 +809,12 @@
      }
     },
     "移動規則：一般行走走上石階到高台（不跳躍）": {
-     "ok": false,
+     "ok": true,
      "detail": {
-      "x": -6.123233995736766e-17,
-      "y": 0,
-      "z": 15.999999999999996,
-      "yaw": -5.750879752987149e-17
+      "x": -5.510910596163096e-16,
+      "y": 2,
+      "z": 24.00000000000011,
+      "yaw": -6.123233995667142e-17
      }
     },
     "NPC 互動：8 位 NPC 都能靠近後點擊對話（名稱、職責）": {
@@ -926,26 +912,19 @@
       }
      ]
     },
-    "洛恩：靠近 2.5 m 內出現互動": {
-     "ok": false,
-     "detail": {
-      "target": null,
-      "talking": false,
-      "dialog": "",
-      "panelOpen": false,
-      "appraisalOpen": false,
-      "merchantPaused": false
-     }
+    "洛恩：靠近 2.5 m 內可以對話": {
+     "ok": true,
+     "detail": "merchant"
     },
     "洛恩：對話時停止巡走（暫停中）並開啟商人選單": {
-     "ok": false,
+     "ok": true,
      "detail": {
-      "target": null,
-      "talking": false,
+      "target": "merchant",
+      "talking": true,
       "dialog": "",
-      "panelOpen": false,
+      "panelOpen": true,
       "appraisalOpen": false,
-      "merchantPaused": false
+      "merchantPaused": true
      }
     },
     "寵物鑑定：放入後可鑑定；連點只鑑定一次；結果逐條顯示；物品留在背包並變成已鑑定": {
@@ -957,19 +936,19 @@
      }
     },
     "洛恩：關閉後恢復巡走": {
-     "ok": true,
+     "ok": false,
      "detail": {
       "target": "merchant",
-      "talking": false,
+      "talking": true,
       "dialog": "",
-      "panelOpen": false,
+      "panelOpen": true,
       "appraisalOpen": false,
-      "merchantPaused": false
+      "merchantPaused": true
      }
     }
    },
    "errors": [
-    "appraise button: page.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('[data-act=\"choose:appraise\"]')\n",
+    "appraise button: page.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('[data-act=\"choose:appraise\"]')\n    - locator resolved to <button type=\"button\" data-act=\"choose:appraise\">…</button>\n  - attempting click action\n    - waiting for element to be visible, enabled and stable\n",
     "tile: page.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.pa-win [data-id=\"s1\"]')\n",
     "start: page.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.pa-win [data-act=\"start\"]')\n"
    ],
@@ -987,7 +966,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 113165,
+     "loadMs": 122782,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -1143,7 +1122,7 @@
       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
      }
     ],
-    "fpsSoftware": 140
+    "fpsSoftware": 137
    },
    "ok": false
   },
@@ -1174,7 +1153,7 @@
       "errors": []
      }
     },
-    "繪製次數 ≤ 140（全村整合，任何位置）": {
+    "繪製次數 ≤ 160（全村整合、HQ、任何位置）": {
      "ok": true,
      "detail": {
       "arrival": {
@@ -1196,12 +1175,12 @@
      }
     },
     "移動規則：一般行走走上石階到高台（不跳躍）": {
-     "ok": false,
+     "ok": true,
      "detail": {
-      "x": -3.367778697655225e-16,
-      "y": 1.0000000000000242,
-      "z": 20.50000000000006,
-      "yaw": -6.123232740152588e-17
+      "x": -5.204748896376258e-16,
+      "y": 2,
+      "z": 23.500000000000103,
+      "yaw": -6.123233995454427e-17
      }
     },
     "NPC 互動：8 位 NPC 都能靠近後點擊對話（名稱、職責）": {
@@ -1299,16 +1278,9 @@
       }
      ]
     },
-    "洛恩：靠近 2.5 m 內出現互動": {
+    "洛恩：靠近 2.5 m 內可以對話": {
      "ok": true,
-     "detail": {
-      "target": "merchant",
-      "talking": false,
-      "dialog": "",
-      "panelOpen": false,
-      "appraisalOpen": false,
-      "merchantPaused": false
-     }
+     "detail": "merchant"
     },
     "洛恩：對話時停止巡走（暫停中）並開啟商人選單": {
      "ok": true,
@@ -1379,7 +1351,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 726,
+     "loadMs": 737,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -1535,9 +1507,9 @@
       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
      }
     ],
-    "fpsSoftware": 118
+    "fpsSoftware": 120
    },
-   "ok": false
+   "ok": true
   },
   {
    "browser": "webkit",
@@ -1566,12 +1538,12 @@
       "errors": []
      }
     },
-    "繪製次數 ≤ 140（全村整合，任何位置）": {
+    "繪製次數 ≤ 100（全村整合、Lite、任何位置）": {
      "ok": true,
      "detail": {
       "arrival": {
-       "drawCalls": 91,
-       "triangles": 114821
+       "drawCalls": 90,
+       "triangles": 114046
       },
       "spawn": {
        "drawCalls": 86,
@@ -1590,10 +1562,10 @@
     "移動規則：一般行走走上石階到高台（不跳躍）": {
      "ok": true,
      "detail": {
-      "x": -8.097976959361875e-16,
+      "x": -5.866058167915823e-16,
       "y": 2,
-      "z": 28.224999999999973,
-      "yaw": -6.123233995736766e-17
+      "z": 24.580000000000002,
+      "yaw": -6.123233995723042e-17
      }
     },
     "NPC 互動：8 位 NPC 都能靠近後點擊對話（名稱、職責）": {
@@ -1691,16 +1663,9 @@
       }
      ]
     },
-    "洛恩：靠近 2.5 m 內出現互動": {
+    "洛恩：靠近 2.5 m 內可以對話": {
      "ok": true,
-     "detail": {
-      "target": "merchant",
-      "talking": false,
-      "dialog": "",
-      "panelOpen": false,
-      "appraisalOpen": false,
-      "merchantPaused": false
-     }
+     "detail": "merchant"
     },
     "洛恩：對話時停止巡走（暫停中）並開啟商人選單": {
      "ok": true,
@@ -1766,7 +1731,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 2465,
+     "loadMs": 2294,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -1830,8 +1795,8 @@
     },
     "perf": {
      "arrival": {
-      "drawCalls": 91,
-      "triangles": 114821
+      "drawCalls": 90,
+      "triangles": 114046
      },
      "spawn": {
       "drawCalls": 86,
@@ -1927,5 +1892,5 @@
    "ok": true
   }
  ],
- "finishedAt": "2026-11-24T08:01:13.668Z"
+ "finishedAt": "2026-11-24T08:33:54.145Z"
 }
