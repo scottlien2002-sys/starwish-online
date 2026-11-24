@@ -641,6 +641,7 @@ class VillagePage {
       },
       interactClose: () => this.interact?.closeAll(),
       appraisal: () => this.interact?.appraisalWindow.current ?? null,
+      guild: (cmd: string) => this.interact?.guildCmd(cmd) ?? Promise.resolve(null),
       report: () => this.report(),
     };
     window.__starwishVillage = api;

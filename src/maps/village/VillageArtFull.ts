@@ -101,6 +101,7 @@ export async function loadVillageArtFull(scene: Scene, lite: boolean, shadows: S
     ["board", "Board", "委託佈告欄", ["stone", "roof", "props"]],
     ["church", "Church", "祭司教堂", undefined],
     ["circus", "Circus", "小丑馬戲團", ["stone", "props"]],
+    ["guild", "Guild", "星願商會", undefined],
   ] as const) {
     await step(file, async () => {
       const r = await load(`${file}_${q}.glb`);

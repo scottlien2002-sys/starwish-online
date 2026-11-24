@@ -3,6 +3,8 @@ import { PointerEventTypes } from "@babylonjs/core";
 import { NPC_SPOTS, type NpcSpot, PORTALS, type PortalDef } from "./layout.ts";
 import { canTalkToPetMerchant, PET_MERCHANT } from "./petMerchant.ts";
 import { connectPetAppraisalService, createDemoAppraisalService } from "./petAppraisal.ts";
+import { connectGuildMarketService, createDemoGuildService, guildMarketService, simulateDemoSale } from "./guildMarket.ts";
+import { GuildWindow } from "./GuildWindow.ts";
 import { PetAppraisalWindow } from "./PetAppraisalWindow.ts";
 import { PetMerchantPanel } from "./PetMerchantPanel.ts";
 import type { PetMerchantV2 } from "./PetMerchantV2.ts";
@@ -33,6 +35,7 @@ export class VillageInteract {
   private readonly dlg: HTMLDivElement;
   private readonly panel = new PetMerchantPanel();
   private readonly appraisal: PetAppraisalWindow;
+  private readonly guild: GuildWindow;
   private target: Target | null = null;
   private talking = false;
   private px = 0;
@@ -66,6 +69,9 @@ export class VillageInteract {
     connectPetAppraisalService(createDemoAppraisalService({ delayMs: 600 }));
     this.appraisal = new PetAppraisalWindow({ avatarUrl: opts.avatarUrl, onBack: () => void this.panel.open(), onClose: () => this.endTalk() });
     this.panel.onAppraise = () => void this.appraisal.open();
+    // 預覽版：星願商會使用明確標示的本機示範資料（不是真正的多人交易；正式交易由共用伺服器處理）
+    connectGuildMarketService(createDemoGuildService({ delayMs: 400 }));
+    this.guild = new GuildWindow();
     this.panel.onClose = () => {
       if (!this.appraisal.isOpen) this.endTalk();
     };
@@ -82,7 +88,7 @@ export class VillageInteract {
   }
 
   get busy(): boolean {
-    return this.talking || !this.dlg.hidden || this.panel.isOpen || this.appraisal.isOpen;
+    return this.talking || !this.dlg.hidden || this.panel.isOpen || this.appraisal.isOpen || this.guild.isOpen;
   }
 
   /** 每幀：玩家位置、洛恩時間（秒） */
@@ -130,6 +136,11 @@ export class VillageInteract {
     if (t.kind === "merchant") {
       this.talkMerchant();
       return "merchant";
+    }
+    if (t.kind === "npc" && t.npc.id === "guild") {
+      void this.guild.open();
+      this.log.push({ t: this.now, what: "npc:guild" });
+      return "npc:guild";
     }
     if (t.kind === "npc") {
       const n = t.npc;
@@ -185,6 +196,7 @@ export class VillageInteract {
 
   closeAll(): void {
     this.dlg.hidden = true;
+    this.guild.close();
     this.panel.close();
     this.appraisal.close();
     this.endTalk();
@@ -199,6 +211,50 @@ export class VillageInteract {
       panelOpen: this.panel.isOpen,
       appraisalOpen: this.appraisal.isOpen,
       merchantPaused: this.merchant ? this.merchant.clock.paused(this.now) : false,
+    };
+  }
+
+  /** 測試／自動化：星願商會操作（open／go:<選單>／cat:<分類>／detail／buy／startListing／choose／price:<n>／cancel／sale／claim／close），回傳狀態摘要 */
+  async guildCmd(cmd: string): Promise<Record<string, unknown>> {
+    const g = this.guild;
+    const st = g.state;
+    if (cmd === "open") await g.open();
+    else if (cmd.startsWith("go:")) await g.go(cmd.slice(3));
+    else if (cmd.startsWith("cat:")) {
+      g.setCategory(cmd.slice(4) as never);
+      await new Promise((r) => setTimeout(r, 50));
+    } else if (cmd === "detail") {
+      const l = st.listings[0];
+      if (l) await g.openDetail(l.listingId);
+    } else if (cmd === "buy" && st.detail) await g.buyListing(st.detail.listingId);
+    else if (cmd === "startListing") await g.startListing();
+    else if (cmd === "choose") {
+      const it = st.inv.find((x) => !x.locked);
+      if (it) g.choose(it.uid);
+    } else if (cmd.startsWith("price:")) await g.confirmListing(cmd.slice(6));
+    else if (cmd === "cancel") {
+      const l = st.mine.find((x) => x.status === "active");
+      if (l) await g.cancelListing(l.listingId);
+    } else if (cmd === "sale") {
+      const l = st.mine.find((x) => x.status === "active");
+      if (l) simulateDemoSale(guildMarketService(), l.listingId);
+    } else if (cmd === "claim") await g.claim();
+    else if (cmd === "close") g.close();
+    const s = g.state;
+    return {
+      open: g.isOpen,
+      screen: s.screen,
+      cat: s.cat,
+      gold: s.gold,
+      listings: s.listings.map((l) => ({ id: l.listingId, cat: l.item.category, price: l.price, eq: l.item.equipment ? { level: l.item.equipment.level, enhance: l.item.equipment.enhance, affixes: l.item.equipment.affixes.length } : null, pet: l.item.pet ? { stage: l.item.pet.stage, breed: l.item.pet.breedLevel, appraised: l.item.pet.appraised, affixes: l.item.pet.affixes.map((a) => a.polarity) } : null })),
+      inv: s.inv.map((i) => ({ uid: i.uid, locked: i.locked, frozen: i.pet?.frozen ?? null })),
+      mine: s.mine.map((l) => ({ id: l.listingId, status: l.status, uid: l.item.uid })),
+      earn: s.earn,
+      msg: s.msg,
+      last: g.lastResult,
+      test: guildMarketService().testData,
+      serverBacked: guildMarketService().serverBacked,
+      hScroll: document.documentElement.scrollWidth - window.innerWidth,
     };
   }
 

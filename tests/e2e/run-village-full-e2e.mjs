@@ -57,7 +57,7 @@ for (const name of browsers) {
       await page.waitForFunction(() => { const a = window.__starwishVillage.artFull(); return a.status === "loaded" || a.status.startsWith("部分") || a.status.startsWith("error"); }, null, { timeout: 240000 });
       const art = await V(() => window.__starwishVillage.artFull());
       run.results.art = art;
-      check("全村正式美術載入完成（14 組模型、沒有錯誤）", art.status === "loaded" && Object.keys(art.parts).length === 14 && art.merchant, { status: art.status, parts: Object.keys(art.parts), errors: art.errors });
+      check("全村正式美術載入完成（15 組模型、沒有錯誤）", art.status === "loaded" && Object.keys(art.parts).length === 15 && art.merchant, { status: art.status, parts: Object.keys(art.parts), errors: art.errors });
       await page.waitForTimeout(800);
       // 效能（CI 軟體繪圖，只看相對數字）
       const perf = {};
@@ -93,13 +93,66 @@ for (const name of browsers) {
         const what = await V(() => window.__starwishVillage.interactNow());
         await settle(page, 2);
         const after = await V(() => window.__starwishVillage.interact());
-        npcRes.push({ id: n.id, target: st?.target, what, dialog: after?.dialog?.slice(0, 40) });
-        if (["smith", "church", "circus"].includes(n.id) && mode === "hq-portrait") await shot(page, `npc_${n.id}`);
+        const g = n.id === "guild" ? await V(() => window.__starwishVillage.guild("noop")) : null;
+        npcRes.push({ id: n.id, target: st?.target, what, dialog: g ? (g.open ? "星願商會選單" : "") : after?.dialog?.slice(0, 40) });
+        if (["smith", "church", "circus", "guild"].includes(n.id) && mode === "hq-portrait") await shot(page, `npc_${n.id}`);
         await V(() => window.__starwishVillage.interactClose());
       }
       run.results.npcs = npcRes;
       check(`NPC 互動：${npcs.length} 位 NPC 都能靠近後點擊對話（名稱、職責）`, npcRes.every((r) => r.target === `npc:${r.id}` && r.what === `npc:${r.id}` && r.dialog.length > 0), npcRes);
       check("鐵匠只有一位（轉職＋裝備鑑定）", npcs.filter((n) => n.id === "smith").length === 1 && /轉職/.test(npcs.find((n) => n.id === "smith").role) && /鑑定/.test(npcs.find((n) => n.id === "smith").role), npcs.find((n) => n.id === "smith"));
+      // 星願商會：選單 → 交易所三分類（裝備／寵物詳細資料）→ 購買 → 掛賣（鎖定）→ 取消（解鎖）→ 再掛賣 → 他人買走（示範）→ 領取收益
+      {
+        const gnpc = npcs.find((n) => n.id === "guild");
+        await V(([a, b, c]) => window.__starwishVillage.teleport(a, b, c), [gnpc.x + Math.sin(gnpc.yaw) * 1.6, gnpc.z + Math.cos(gnpc.yaw) * 1.6, ((gnpc.yaw + Math.PI) * 180) / Math.PI]);
+        await settle(page, 3);
+        await V(() => window.__starwishVillage.interactNow());
+        await page.waitForTimeout(700);
+        const G = (c) => V((x) => window.__starwishVillage.guild(x), c);
+        const g0 = await G("noop");
+        if (mode.includes("portrait")) await shot(page, "guild_1_menu");
+        const gm = await G("go:market");
+        const ge = await G("cat:equipment");
+        await page.waitForTimeout(300);
+        const ge2 = await G("noop");
+        if (mode === "hq-portrait") await shot(page, "guild_2_market_equipment");
+        await G("cat:pet");
+        await page.waitForTimeout(300);
+        const gp = await G("noop");
+        await G("detail");
+        if (mode.includes("portrait")) await shot(page, "guild_3_pet_detail");
+        const gb = await G("buy");
+        await G("go:mine");
+        await G("startListing");
+        await G("cat:pet");
+        await page.waitForTimeout(300);
+        await G("choose");
+        if (mode === "hq-portrait") await shot(page, "guild_4_listing_price");
+        const gl = await G("price:800");
+        const locked = await G("startListing");
+        await G("cat:pet");
+        await page.waitForTimeout(300);
+        const lockedInv = await G("noop");
+        await G("go:mine");
+        const gc = await G("cancel");
+        await G("startListing");
+        await G("cat:item");
+        await page.waitForTimeout(300);
+        await G("choose");
+        await G("price:300");
+        await G("sale");
+        await G("go:earnings");
+        const ge3 = await G("noop");
+        const gcl = await G("claim");
+        if (mode.includes("portrait")) await shot(page, "guild_5_earnings");
+        await G("close");
+        run.results.guild = { menu: g0.screen, market: gm.listings.length, eq: ge2.listings.slice(0, 2), pet: gp.listings.slice(0, 2), buy: gb.last, list: gl.last, lockedInv: lockedInv.inv, cancel: gc.last, earn: ge3.earn, claim: gcl.last, msg: gcl.msg };
+        check("星願商會：掌櫃選單、標示測試資料與本機示範（不是多人交易）", g0.open && g0.screen === "menu" && g0.test === true && g0.serverBacked === false, g0);
+        check("星願商會：交易所道具／裝備／寵物三分類；裝備顯示等級、強化、詞條；寵物顯示成長階段、培育等級、鑑定狀態、正負詞條", gm.listings.length > 0 && gm.listings.every((l) => l.cat === "item") && ge2.listings.length > 0 && ge2.listings.every((l) => l.cat === "equipment" && l.eq && typeof l.eq.level === "number" && typeof l.eq.enhance === "number") && gp.listings.length > 0 && gp.listings.every((l) => l.cat === "pet" && l.pet && l.pet.stage && typeof l.pet.breed === "number") && gp.listings.some((l) => l.pet.affixes.includes("positive") && l.pet.affixes.includes("negative")), { item: gm.listings.length, eq: ge2.listings, pet: gp.listings });
+        check("星願商會：購買成功；掛賣後物品鎖定（寵物暫停成長）、不能再掛賣；取消後解鎖", gb.last?.ok && gl.last?.ok && lockedInv.inv.some((i) => i.locked && i.frozen === true) && gc.last?.ok, { buy: gb.last, list: gl.last, inv: lockedInv.inv, cancel: gc.last });
+        check("星願商會：售出後收益扣手續費、領取一次", ge3.earn && ge3.earn.pending === 300 - Math.floor(300 * 0.05) && gcl.last?.ok, { earn: ge3.earn, claim: gcl.last });
+        if (mode.includes("portrait")) check("星願商會：iPhone 直向沒有橫向捲動", gcl.hScroll <= 0, { hScroll: gcl.hScroll });
+      }
       // 傳送門：南門開放（確認視窗）、北東西休眠
       const portals = await V(() => window.__starwishVillage.layout().portals);
       const pRes = [];
