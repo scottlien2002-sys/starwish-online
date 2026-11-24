@@ -13,6 +13,7 @@ import {
   runAppraisal,
   selected,
   withItems,
+  chargedText,
 } from "./petAppraisal.ts";
 import type { PetItemKind } from "./petMerchant.ts";
 
@@ -57,6 +58,8 @@ const CSS = `
 .pa-slot .pa-icon{position:relative;width:52%;height:52%;filter:drop-shadow(0 4px 10px rgba(0,0,0,.4))}
 .pa-hint{position:relative;font-size:13px;opacity:.75;text-align:center;padding:0 16px}
 .pa-itemname{margin-top:6px;font-weight:700;min-height:22px}
+.pa-state{display:inline-block;margin-left:6px;padding:0 8px;border-radius:9px;font-size:12px;font-weight:600;line-height:20px;background:rgba(255,255,255,.12);color:#d9dcef;vertical-align:1px}
+.pa-state.done{background:rgba(232,196,110,.22);color:#f3d68b}
 .pa-fx{position:absolute;inset:0;pointer-events:none;display:none}
 .pa-fx.on{display:block}
 .pa-fx .pa-ring{position:absolute;inset:4%;animation:pa-spin 1s linear,pa-flash 1s ease-out}
@@ -209,8 +212,8 @@ export class PetAppraisalWindow {
           ${it ? ICONS[it.kind].replace('class="pa-icon"', 'class="pa-icon"') : `<div class="pa-hint">點選下方背包的物品<br>放入鑑定框</div>`}
           <div class="pa-fx${fxOn ? " on" : ""}"><div class="pa-glow"></div><div class="pa-ring">${CIRCLE}</div>${sparks}</div>
         </div>
-        <div class="pa-itemname">${it ? `${it.name}<span style="opacity:.7;font-weight:400">（${KIND_LABEL[it.kind]}）</span>` : "&nbsp;"}</div></div>
-      <div class="pa-row"><span class="pa-fee">鑑定費用：<b>${it && !it.appraised ? feeText(s.quote) : "—"}</b></span>${it && s.phase !== "appraising" ? `<button type="button" class="pa-x" style="width:auto;padding:0 12px;font-size:13px" data-act="clear">取出</button>` : ""}</div>
+        <div class="pa-itemname">${it ? `${it.name}<span style="opacity:.7;font-weight:400">（${KIND_LABEL[it.kind]}）</span><span class="pa-state ${it.appraised ? "done" : ""}">${it.appraised ? "已鑑定" : "未鑑定"}</span>` : "&nbsp;"}</div></div>
+      <div class="pa-row"><span class="pa-fee">${s.phase === "result" ? `鑑定費用：<b>${chargedText(s.charged, s.testData)}</b>` : `鑑定費用：<b>${it && !it.appraised ? feeText(s.quote) : "—"}</b>`}</span>${it && s.phase !== "appraising" ? `<button type="button" class="pa-x" style="width:auto;padding:0 12px;font-size:13px" data-act="clear">取出</button>` : ""}</div>
       <button type="button" class="pa-go" data-act="start" ${canAppraise(s) ? "" : "disabled"}>${btnText}</button>
       <div class="pa-res"><h4>鑑定結果</h4>${resInner}</div>
       <div class="pa-bag"><h4>背包（種子・孵化蛋・鳥蛋）</h4><div class="pa-grid">${

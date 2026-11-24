@@ -226,3 +226,53 @@ test("鑑定：服務錯誤時解除鎖定、可以再試", async () => {
   assert.equal(e.pending, null);
   assert.equal(e.phase, "error");
 });
+
+// ---------------- V2.1：正式鑑定規格（只檢查與顯示，不抽取）
+import { OFFICIAL_AFFIX_VALUES, validateAffixes, linesFromCore, itemLines, createDemoAppraisalService as demoSvc, initialAppraisal as init0, withItems as withI, place as placeI, runAppraisal as runA } from "../../src/maps/village/petAppraisal.ts";
+
+test("正式規格：屬性數值清單與企劃確認值完全相同", () => {
+  assert.deepEqual(OFFICIAL_AFFIX_VALUES.attack, [-10, -5, 10, 15, 20, 25]);
+  assert.deepEqual(OFFICIAL_AFFIX_VALUES.attackSpeed, [-4, -2, 2, 4, 6, 8, 10]);
+  assert.deepEqual(OFFICIAL_AFFIX_VALUES.defense, [-10, -5, 10, 15, 20, 25]);
+  assert.deepEqual(OFFICIAL_AFFIX_VALUES.maxHp, [-10, -5, 10, 15, 20]);
+});
+
+test("正式規格：0～4 條、同種類最多 1 條、數值必須在清單內；可全無／全正／全負／混合", () => {
+  assert.equal(validateAffixes([]).ok, true);
+  assert.equal(validateAffixes([{ stat: "attack", value: 25 }, { stat: "attackSpeed", value: 10 }, { stat: "defense", value: 25 }, { stat: "maxHp", value: 20 }]).ok, true);
+  assert.equal(validateAffixes([{ stat: "attack", value: -10 }, { stat: "maxHp", value: -5 }]).ok, true);
+  assert.equal(validateAffixes([{ stat: "attack", value: 10 }, { stat: "attack", value: 15 }]).ok, false, "重複");
+  assert.equal(validateAffixes([{ stat: "attack", value: 12 }]).ok, false, "不在清單");
+  assert.equal(validateAffixes([{ stat: "maxHp", value: 25 }]).ok, false, "生命值沒有 +25");
+  assert.equal(validateAffixes([{ stat: "crit", value: 5 }]).ok, false, "未知屬性");
+  assert.equal(validateAffixes([{ stat: "attack", value: 10 }, { stat: "attackSpeed", value: 2 }, { stat: "defense", value: 10 }, { stat: "maxHp", value: 10 }, { stat: "attack", value: 10 }]).ok, false, "超過 4 條");
+});
+
+test("顯示：無屬性→「無附加屬性」灰色；攻擊速度為固定值、其他為百分比；依固定順序", () => {
+  assert.deepEqual(linesFromCore([]), [{ label: "無附加屬性", text: "—", polarity: "none" }]);
+  const l = linesFromCore([{ stat: "maxHp", value: -5 }, { stat: "attackSpeed", value: 6 }]);
+  assert.deepEqual(l.map((x) => [x.label, x.text, x.polarity]), [["生命值", "-5%", "negative"], ["攻擊速度", "+6", "positive"]]);
+  const v = validateAffixes([{ stat: "maxHp", value: -5 }, { stat: "attack", value: 15 }]);
+  assert.ok(v.ok && v.affixes[0]!.stat === "attack");
+  assert.equal(itemLines({ id: "x", kind: "seed", name: "x", appraised: true, affixes: [{ stat: "attack", value: 99 } as never] }).ok, false);
+});
+
+test("每顆物品獨立識別：同名的兩顆種子各自鑑定、結果不共用；鑑定後物品數不變", async () => {
+  const svc = demoSvc({ delayMs: 0 });
+  const inv = await svc.inventory();
+  assert.ok(inv.ok);
+  const ids = inv.data.map((i) => i.id);
+  assert.equal(new Set(ids).size, ids.length, "每個物品 id 唯一");
+  let s = withI(init0(), inv.data, true);
+  s = placeI(s, "s1");
+  s = await runA(s, svc, () => {}, "r-s1");
+  s = placeI(s, "s2");
+  s = await runA(s, svc, () => {}, "r-s2");
+  const s1 = s.items.find((i) => i.id === "s1")!;
+  const s2 = s.items.find((i) => i.id === "s2")!;
+  assert.ok(s1.appraised && s2.appraised);
+  assert.notDeepEqual(s1.affixes, s2.affixes);
+  assert.equal(s.items.length, inv.data.length);
+  assert.equal(s.lines[0]!.label, "無附加屬性");
+  assert.equal(svc.charges(), 2);
+});

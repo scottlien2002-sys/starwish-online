@@ -12,7 +12,8 @@
  *
  * 與 Claude A 寵物核心的對應（src/pets/petSystem.ts，唯讀核對）：
  * - AppraisableItem ↔ A 的 Pet（stage 0、source ∈ seed/egg/birdEgg）；appraised ↔ `affixes !== null`
- * - 結果每一條 ↔ A 的 PetAffix（stat、value）；文字用 A 的 affixText()；正負號決定顏色；0 條 → 一行「無屬性」（灰色）
+ * - 結果每一條 ↔ A 的 PetAffix（stat、value）；正負號決定顏色；0 條 → 一行「無附加屬性」（灰色）
+ * - 核心回傳的詞條先經 validateAffixes() 檢查正式規格；不符合就顯示錯誤（介面不自行修正、不重抽）
  * - 費用：A 的設定檔目前沒有鑑定費用欄位 → 服務回傳 fee: null（畫面顯示「未定案」）
  */
 import { PET_ITEM_KINDS, PET_ITEM_LABEL, type PetItemKind } from "./petMerchant.ts";
@@ -23,12 +24,60 @@ export interface AppraisalLine {
   text: string;
   polarity: Polarity;
 }
+/** 寵物核心的詞條（與 Claude A 的 PetAffix 相同：stat＋原始數值；百分比屬性的 value 以「百分點」表示，例：+15 ＝ +15%） */
+export type PetStat = "attack" | "attackSpeed" | "defense" | "maxHp";
+export interface CoreAffix {
+  stat: PetStat;
+  value: number;
+}
+
+/**
+ * 已確認的正式鑑定規格（企劃 2026-11-24 確認；B 只用來「檢查與顯示」，不抽取）：
+ * - 每個寵物 0～4 種屬性、同種類最多 1 條；可全無、全正、全負、正負混合
+ * - 方案 A：第一次鑑定後永久固定詞條與原始數值（孵化、培育、進化、存讀檔都不改變）
+ */
+export const OFFICIAL_AFFIX_VALUES: Readonly<Record<PetStat, readonly number[]>> = Object.freeze({
+  attack: [-10, -5, 10, 15, 20, 25],
+  attackSpeed: [-4, -2, 2, 4, 6, 8, 10],
+  defense: [-10, -5, 10, 15, 20, 25],
+  maxHp: [-10, -5, 10, 15, 20],
+});
+export const AFFIX_META: Readonly<Record<PetStat, { label: string; unit: "percent" | "flat" }>> = Object.freeze({
+  attack: { label: "攻擊力", unit: "percent" },
+  attackSpeed: { label: "攻擊速度", unit: "flat" },
+  defense: { label: "防禦力", unit: "percent" },
+  maxHp: { label: "生命值", unit: "percent" },
+});
+const STAT_ORDER: readonly PetStat[] = ["attack", "attackSpeed", "defense", "maxHp"];
+
+/** 檢查核心回傳的詞條是否符合正式規格（數量 0～4、不重複、數值在允許清單內）；不符合 → 畫面顯示錯誤、不顯示結果 */
+export function validateAffixes(a: unknown): { ok: true; affixes: CoreAffix[] } | { ok: false; why: string } {
+  if (!Array.isArray(a)) return { ok: false, why: "詞條不是陣列" };
+  if (a.length > 4) return { ok: false, why: `詞條數 ${a.length} > 4` };
+  const seen = new Set<string>();
+  for (const x of a as { stat?: unknown; value?: unknown }[]) {
+    if (!x || typeof x.stat !== "string" || !(x.stat in OFFICIAL_AFFIX_VALUES)) return { ok: false, why: `未知屬性 ${String(x?.stat)}` };
+    if (seen.has(x.stat)) return { ok: false, why: `屬性重複 ${x.stat}` };
+    seen.add(x.stat);
+    if (typeof x.value !== "number" || !OFFICIAL_AFFIX_VALUES[x.stat as PetStat].includes(x.value)) return { ok: false, why: `${x.stat} 數值 ${String(x.value)} 不在正式清單內` };
+  }
+  return { ok: true, affixes: (a as CoreAffix[]).slice().sort((p, q) => STAT_ORDER.indexOf(p.stat) - STAT_ORDER.indexOf(q.stat)) };
+}
+
+/** 核心詞條 → 畫面行（依固定順序；正綠、負紅；0 條 →「無附加屬性」灰色） */
+export function linesFromCore(affixes: readonly CoreAffix[]): AppraisalLine[] {
+  return linesFromAffixes(affixes.map((a) => ({ label: AFFIX_META[a.stat].label, value: a.value, unit: AFFIX_META[a.stat].unit })));
+}
+
 export interface AppraisableItem {
+  /** 物品個體唯一識別碼（每顆種子／蛋各自一個；背包堆疊不可共用鑑定結果） */
   id: string;
   kind: PetItemKind;
   name: string;
   appraised: boolean;
-  /** 已鑑定時的結果 */
+  /** 已鑑定時，寵物核心回傳的原始詞條（永久固定）；畫面由這裡產生結果行 */
+  affixes?: readonly CoreAffix[] | null;
+  /** 已鑑定時的結果行（由 affixes 產生；舊介面相容） */
   lines?: readonly AppraisalLine[];
 }
 export interface AppraisalQuote {
@@ -55,7 +104,7 @@ export const isPetSource = (k: string): k is PetItemKind => (PET_ITEM_KINDS as r
 
 /** 由寵物核心的詞條轉成畫面行（label＋數值文字、正負決定顏色）；沒有詞條 → 「無屬性」 */
 export function linesFromAffixes(affixes: readonly { label: string; value: number; unit: "flat" | "percent" }[]): AppraisalLine[] {
-  if (!affixes.length) return [{ label: "無屬性", text: "沒有鑑定出任何屬性", polarity: "none" }];
+  if (!affixes.length) return [{ label: "無附加屬性", text: "—", polarity: "none" }];
   return affixes.map((a) => ({
     label: a.label,
     text: `${a.value > 0 ? "+" : ""}${a.value}${a.unit === "percent" ? "%" : ""}`,
@@ -77,6 +126,8 @@ export interface AppraisalState {
   /** 進行中的 requestId（防重複送出） */
   pending: string | null;
   testData: boolean;
+  /** 最近一次鑑定實際扣款（服務回傳；null＝未扣款或費用未定案） */
+  charged: number | null;
 }
 
 export const MERCHANT_LINES = {
@@ -89,7 +140,16 @@ export const MERCHANT_LINES = {
 } as const;
 
 export function initialAppraisal(): AppraisalState {
-  return { phase: "loading", items: [], selectedId: null, quote: null, lines: [], message: MERCHANT_LINES.empty, pending: null, testData: false };
+  return { phase: "loading", items: [], selectedId: null, quote: null, lines: [], message: MERCHANT_LINES.empty, pending: null, testData: false, charged: null };
+}
+
+/** 物品的結果行：優先用核心詞條（並檢查正式規格），沒有時用舊的 lines */
+export function itemLines(it: AppraisableItem): { ok: true; lines: AppraisalLine[] } | { ok: false; why: string } {
+  if (it.affixes !== undefined && it.affixes !== null) {
+    const v = validateAffixes(it.affixes);
+    return v.ok ? { ok: true, lines: linesFromCore(v.affixes) } : v;
+  }
+  return { ok: true, lines: [...(it.lines ?? [])] };
 }
 
 export function selected(s: AppraisalState): AppraisableItem | null {
@@ -113,13 +173,16 @@ export function place(s: AppraisalState, itemId: string): AppraisalState {
   if (s.pending) return s;
   const it = s.items.find((i) => i.id === itemId);
   if (!it || !isPetSource(it.kind)) return s;
-  if (it.appraised) return { ...s, selectedId: it.id, phase: "appraised", lines: it.lines ?? [], message: MERCHANT_LINES.appraised, quote: null };
-  return { ...s, selectedId: it.id, phase: "ready", lines: [], message: MERCHANT_LINES.ready, quote: null };
+  if (it.appraised) {
+    const l = itemLines(it);
+    return l.ok ? { ...s, selectedId: it.id, phase: "appraised", lines: l.lines, message: MERCHANT_LINES.appraised, quote: null, charged: null } : { ...s, selectedId: it.id, phase: "error", lines: [], message: `鑑定資料異常（${l.why}）`, quote: null, charged: null };
+  }
+  return { ...s, selectedId: it.id, phase: "ready", lines: [], message: MERCHANT_LINES.ready, quote: null, charged: null };
 }
 
 export function clearSlot(s: AppraisalState): AppraisalState {
   if (s.pending) return s;
-  return { ...s, selectedId: null, phase: "empty", lines: [], message: MERCHANT_LINES.empty, quote: null };
+  return { ...s, selectedId: null, phase: "empty", lines: [], message: MERCHANT_LINES.empty, quote: null, charged: null };
 }
 
 let seq = 0;
@@ -140,8 +203,11 @@ export function finish(s: AppraisalState, requestId: string, r: Result<{ item: A
   if (!r.ok) {
     return { ...s, pending: null, phase: r.reason === "alreadyAppraised" ? "appraised" : "error", message: r.message };
   }
+  // 同一個物品（同 id）原地更新；不新增、不刪除
   const items = s.items.map((i) => (i.id === r.data.item.id ? { ...r.data.item, appraised: true } : i));
-  return { ...s, items, pending: null, phase: "result", lines: r.data.item.lines ?? [], message: MERCHANT_LINES.result };
+  const l = itemLines(r.data.item);
+  if (!l.ok) return { ...s, items, pending: null, phase: "error", lines: [], message: `鑑定結果不符合正式規格（${l.why}），請回報。`, charged: r.data.charged };
+  return { ...s, items, pending: null, phase: "result", lines: l.lines, message: MERCHANT_LINES.result, charged: r.data.charged };
 }
 
 /** 整個鑑定流程（畫面與測試共用）：鎖定 → 呼叫服務 → 更新 */
@@ -164,6 +230,10 @@ export function feeText(q: AppraisalQuote | null): string {
   if (!q) return "—";
   if (q.fee === null) return "未定案";
   return `${q.fee} 金幣${q.test ? "（測試）" : ""}`;
+}
+
+export function chargedText(charged: number | null, test: boolean): string {
+  return charged === null ? "未扣款" : `已支付 ${charged} 金幣${test ? "（測試）" : ""}`;
 }
 
 export function itemLabel(it: AppraisableItem): string {
@@ -192,18 +262,21 @@ export function createDemoAppraisalService(opts: { delayMs?: number } = {}): Pet
   const DEMO_FEE = 100;
   let gold = 1000;
   let charges = 0;
-  const demo: Record<string, AppraisalLine[]> = {
-    s1: linesFromAffixes([{ label: "攻擊力", value: 15, unit: "percent" }, { label: "生命值", value: -5, unit: "percent" }]),
-    s2: linesFromAffixes([]),
-    e1: linesFromAffixes([{ label: "攻速", value: 4, unit: "flat" }, { label: "防禦力", value: 20, unit: "percent" }, { label: "生命值", value: 10, unit: "percent" }]),
-    b1: linesFromAffixes([{ label: "攻擊力", value: -10, unit: "percent" }, { label: "攻速", value: 6, unit: "flat" }, { label: "防禦力", value: -5, unit: "percent" }, { label: "生命值", value: 15, unit: "percent" }]),
+  // 示範結果固定（不是機率抽取）；數值都取自正式允許清單，涵蓋：正負混合、無附加屬性、全正、全負
+  const demo: Record<string, CoreAffix[]> = {
+    s1: [{ stat: "attack", value: 15 }, { stat: "maxHp", value: -5 }],
+    s2: [],
+    e1: [{ stat: "attackSpeed", value: 4 }, { stat: "defense", value: 20 }, { stat: "maxHp", value: 10 }],
+    b1: [{ stat: "attack", value: -10 }, { stat: "attackSpeed", value: 6 }, { stat: "defense", value: -5 }, { stat: "maxHp", value: 15 }],
+    b2: [{ stat: "attack", value: -5 }, { stat: "defense", value: -10 }],
   };
   const items: AppraisableItem[] = [
-    { id: "s1", kind: "seed", name: "星芽種子", appraised: false },
-    { id: "s2", kind: "seed", name: "星芽種子", appraised: false },
-    { id: "e1", kind: "egg", name: "孵化蛋", appraised: false },
-    { id: "e0", kind: "egg", name: "孵化蛋", appraised: true, lines: linesFromAffixes([{ label: "防禦力", value: 10, unit: "percent" }]) },
-    { id: "b1", kind: "birdEgg", name: "鳥蛋", appraised: false },
+    { id: "s1", kind: "seed", name: "星芽種子", appraised: false, affixes: null },
+    { id: "s2", kind: "seed", name: "星芽種子", appraised: false, affixes: null },
+    { id: "e1", kind: "egg", name: "孵化蛋", appraised: false, affixes: null },
+    { id: "e0", kind: "egg", name: "孵化蛋", appraised: true, affixes: [{ stat: "defense", value: 10 }] },
+    { id: "b1", kind: "birdEgg", name: "鳥蛋", appraised: false, affixes: null },
+    { id: "b2", kind: "birdEgg", name: "鳥蛋", appraised: false, affixes: null },
   ];
   const done = new Map<string, { item: AppraisableItem; charged: number }>();
   const wait = () => new Promise((r) => setTimeout(r, delay));
@@ -231,7 +304,7 @@ export function createDemoAppraisalService(opts: { delayMs?: number } = {}): Pet
       gold -= DEMO_FEE;
       charges += 1;
       it.appraised = true;
-      it.lines = demo[it.id] ?? linesFromAffixes([]);
+      it.affixes = demo[it.id] ?? [];
       const out = { item: { ...it }, charged: DEMO_FEE };
       done.set(requestId, out);
       return { ok: true, data: out };
