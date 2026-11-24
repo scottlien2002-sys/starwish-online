@@ -71,13 +71,15 @@ def dais(stone, paving, gm, gcol, glow, props, p, hq):
         lit.face(q, G.UP)
 
 
-def pillar(stone, gm, gcol, glow, props, x, z, h0, open_, hq):
+def pillar(stone, gm, gcol, glow, props, x, z, h0, open_, hq, crystal=True):
     seg = 8 if hq else 6
     # 2.2 m 以下半徑 ≤ 0.4（碰撞圓 0.45）
     G.lathe(stone, x, z, h0, [(0.4, 0.0), (0.4, 0.22), (0.34, 0.3), (0.3, 0.36), (0.27, 2.55), (0.33, 2.7), (0.36, 2.86), (0.0, 2.86)], seg, A.WALL, smooth=False)
     if hq:
         for h in (0.42, 1.5, 2.5):
             G.lathe(gm, x, z, h0, [(0.285, h), (0.3, h + 0.03), (0.285, h + 0.06)], seg, gcol)
+    if not crystal:  # 後方兩柱：上方是拱腳，不放水晶
+        return
     A.bipyramid(glow if open_ else props, (x, z, h0 + 3.18), 0.2, 0.42, 0.3, 6 if hq else 4,
                 (C["crystal_tip"], C["crystal"], C["rune2"]) if open_ else (C["dim"], C["dim"], C["dim_d"]))
     G.lathe(gm, x, z, h0, [(0.24, 2.86), (0.26, 2.92), (0.16, 2.98), (0.0, 2.98)], seg, gcol)
@@ -91,24 +93,30 @@ def back_arch(stone, gm, gcol, glow, props, p, hq):
     half = math.hypot(a[0] - b[0], a[1] - b[1]) / 2
     Fa = G.frame(mx, mz, p["bearing"], p["floor"])  # x 沿拱、y 往外（離村）、−y 面向村莊
     seg = 14 if hq else 7
-    rise = 1.85
+    rise = 2.05
     outer, inner = [], []
     for k in range(seg + 1):
         t = math.pi * k / seg
-        outer.append((-math.cos(t) * (half + 0.22), 2.78 + math.sin(t) * (rise + 0.3)))
-        inner.append((-math.cos(t) * (half - 0.22), 2.78 + math.sin(t) * (rise - 0.12)))
+        outer.append((-math.cos(t) * (half + 0.36), 2.7 + math.sin(t) * (rise + 0.55)))
+        inner.append((-math.cos(t) * (half - 0.34), 2.7 + math.sin(t) * (rise - 0.2)))
     for k in range(seg):
         quad = [outer[k], outer[k + 1], inner[k + 1], inner[k]]
-        A.vextrude(stone, Fa, quad, -0.22, 0.44, A.WALL)
+        A.vextrude(stone, Fa, quad, -0.34, 0.68, A.WALL)
     mid = [((o[0] + i[0]) / 2, (o[1] + i[1]) / 2) for o, i in zip(outer, inner)]
-    G.tube(gm, [Fa(x, -0.25, h) for x, h in mid], 0.04, 5 if hq else 3, gcol)
-    G.tube(gm, [Fa(x, 0.25, h) for x, h in mid], 0.04, 5 if hq else 3, gcol)
-    top = 2.78 + rise + 0.1
-    A.vextrude(stone, Fa, [(-0.32, top - 0.3), (0.32, top - 0.3), (0.38, top + 0.25), (0.0, top + 0.5), (-0.38, top + 0.25)], -0.26, 0.52, A.TRIM)
+    G.tube(gm, [Fa(x, -0.37, h) for x, h in mid], 0.05, 5 if hq else 3, gcol)
+    G.tube(gm, [Fa(x, 0.37, h) for x, h in mid], 0.05, 5 if hq else 3, gcol)
+    if hq:  # 拱石分割線（金）
+        for k in range(1, seg, 2):
+            G.tube(gm, [Fa(inner[k][0], -0.36, inner[k][1]), Fa(outer[k][0], -0.36, outer[k][1])], 0.02, 3, gcol)
+    # 拱腳石墩（柱頂上方 2.7～3.1 m，加寬拱腳的厚重感）
+    for sx in (-1, 1):
+        G.box(stone, Fa, sx * half - 0.42, sx * half + 0.42, -0.38, 0.38, 2.62, 3.05, A.TRIM)
+    top = 2.7 + rise + 0.45
+    A.vextrude(stone, Fa, [(-0.32, top - 0.3), (0.32, top - 0.3), (0.38, top + 0.25), (0.0, top + 0.5), (-0.38, top + 0.25)], -0.38, 0.76, A.TRIM)
     star = A.star_outline(0, top + 0.1, 4 if not p["open"] else 8, 0.3, 0.12)
     mb = glow if p["open"] else gm
-    A.vpoly(mb, Fa, star, -0.28, C["crystal_tip"] if p["open"] else gcol, -1)
-    A.vpoly(mb, Fa, star, 0.28, C["crystal_tip"] if p["open"] else gcol, 1)
+    A.vpoly(mb, Fa, star, -0.39, C["crystal_tip"] if p["open"] else gcol, -1)
+    A.vpoly(mb, Fa, star, 0.39, C["crystal_tip"] if p["open"] else gcol, 1)
     if not p["open"]:  # 未開放：拱下橫掛金色封印環（高 3.4 m 以上，不擋人）
         A.vpoly(props, Fa, A.circle(0, 3.9, 0.5, 16 if hq else 10), -0.02, C["dim_d"], -1)
         A.vpoly(gm, Fa, A.circle(0, 3.9, 0.36, 16 if hq else 10), -0.03, gcol, -1)
@@ -203,8 +211,8 @@ def build(lod):
     gm, gcol = (gold, (1, 1, 1)) if hq else (props, A.GOLD_VC)
     for p in PORTALS:
         dais(stone, paving, gm, gcol, glow, props, p, hq)
-        for x, z in pillars(p):
-            pillar(stone, gm, gcol, glow, props, x, z, p["floor"], p["open"], hq)
+        for i, (x, z) in enumerate(pillars(p)):
+            pillar(stone, gm, gcol, glow, props, x, z, p["floor"], p["open"], hq, crystal=i < 2)
         back_arch(stone, gm, gcol, glow, props, p, hq)
     south_gate(stone, gm, gcol, glow, hq)
     road_inlays(gm, gcol, paving, hq)
