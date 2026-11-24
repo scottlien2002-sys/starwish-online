@@ -12,6 +12,10 @@ const knightReport = process.argv[5] ?? "out/knight_report.json";
 const mageReport = process.argv[6] ?? "out/mage_report.json";
 const swordReport = process.argv[7] ?? "out/sword_report.json";
 const platformReport = process.argv[8] ?? "out/platform_report.json";
+const boardReport = process.argv[9] ?? "out/board_report.json";
+const smithReport = process.argv[10] ?? "out/smith_report.json";
+const warehouseReport = process.argv[11] ?? "out/warehouse_report.json";
+const portalsReport = process.argv[12] ?? "out/portals_report.json";
 mkdirSync(out, { recursive: true });
 const report = { startedAt: new Date().toISOString(), checks: {}, runs: [] };
 let fail = 0;
@@ -128,6 +132,60 @@ let fail = 0;
       ck(`高台 ${lod}：鋪面高度 ≤ 2.03 m、不蓋住北路、面數在額度內`, c.top_max_h <= 2.03 && c.top_in_north_road === 0 && v.within_budget, { ...c, triangles: v.triangles, budget: pr.budget[lod] });
     }
   }
+  // ---------- 批次二：佈告欄、鐵匠鋪、倉庫、四座傳送門＋南門＋道路嵌飾 ----------
+  {
+    const inBox = (bb, w, d, top) => bb.x[0] >= -w / 2 - 0.01 && bb.x[1] <= w / 2 + 0.01 && bb.y[0] >= -0.01 && bb.y[1] <= d + 0.01 && bb.h[0] >= -0.01 && bb.h[1] <= top + 0.01;
+    // 佈告欄：碰撞箱以佈告欄中心為原點（±w/2 × ±d/2 × 0～3.5）
+    const br = JSON.parse(readFileSync(boardReport, "utf8"));
+    const bx = L.BOX_COLLIDERS.find((c) => c.kind === "board");
+    ck("佈告欄位置、尺寸＝V1.3（方位 158°、r 19.5、4 × 0.8 m）", br.layout.bearing === 158 && br.layout.r === 19.5 && br.layout.w === L.BOARD.w && br.layout.d === L.BOARD.d, br.layout);
+    for (const [lod, v] of Object.entries(br.lods)) {
+      const bb = v.bounds_local;
+      const ok = bb.x[0] >= -bx.hw - 0.01 && bb.x[1] <= bx.hw + 0.01 && bb.y[0] >= -bx.hd - 0.01 && bb.y[1] <= bx.hd + 0.01 && bb.h[1] <= bx.y1 + 0.01 && v.within_budget;
+      ck(`佈告欄 ${lod} 完全在原碰撞箱內、面數在額度內`, ok, { bounds: bb, collider: bx, triangles: v.triangles, budget: br.budget[lod] });
+    }
+    const bn = L.NPC_SPOTS.find((n) => n.id === "board");
+    const fn = br.layout.front_normal;
+    ck("佈告欄告示面朝廣場（正面法線指向噴泉）、委託 NPC 站在正面側", fn[0] * -L.BOARD.x + fn[1] * -L.BOARD.z > 0 && (bn.x - L.BOARD.x) * fn[0] + (bn.z - L.BOARD.z) * fn[1] > 0, { front_normal: fn, npc: bn });
+    // 鐵匠鋪與倉庫
+    for (const [id, name, file] of [["smith", "鐵匠鋪", smithReport], ["warehouse", "倉庫", warehouseReport]]) {
+      const r = JSON.parse(readFileSync(file, "utf8"));
+      const b = L.BUILDINGS.find((x) => x.id === id);
+      const box = L.BOX_COLLIDERS.find((c) => c.kind === `building:${id}`);
+      const lay = r.layout;
+      ck(`${name}尺寸、方位與 V1.3 相同`, b.bearing === lay.bearing && b.front === lay.front && b.w === lay.w && b.d === lay.d && b.top === lay.top && b.floor === lay.floor, { v13: b, model: lay });
+      for (const [lod, v] of Object.entries(r.lods)) {
+        const ok = (id === "smith" ? v.outside_colliders === 0 : inBox(v.bounds_local, b.w, b.d, b.top)) && v.outside_colliders === 0 && v.within_budget;
+        ck(`${name} ${lod} 全部頂點在原碰撞箱內${id === "smith" ? "（建築箱或鍛造台箱）" : ""}、面數在額度內`, ok, { bounds: v.bounds_local, outside: v.outside_colliders, triangles: v.triangles, budget: r.budget[lod] });
+      }
+      const dDoor = Math.hypot(lay.door[0], lay.door[1]);
+      const dCenter = Math.hypot(box.x, box.z);
+      ck(`${name}正門面向噴泉（門比建築中心更靠近噴泉）`, dDoor < dCenter, { door: lay.door, doorR: dDoor.toFixed(2), centerR: dCenter.toFixed(2) });
+    }
+    {
+      const r = JSON.parse(readFileSync(smithReport, "utf8"));
+      const f = r.layout.forge;
+      ck("戶外鍛造台位置＝V1.3（FORGE）", Math.hypot(f.x - L.FORGE.x, f.z - L.FORGE.z) < 0.01 && f.w === L.FORGE.w && f.d === L.FORGE.d, { model: f, v13: L.FORGE });
+      const smiths = L.NPC_SPOTS.filter((n) => n.id === "smith");
+      const npc = smiths[0];
+      const fb = L.BOX_COLLIDERS.find((c) => c.kind === "forge");
+      const sb = L.BOX_COLLIDERS.find((c) => c.kind === "building:smith");
+      ck("只有一位鐵匠 NPC（鐵匠轉職＋裝備詞條鑑定），站位不變、不在建築或鍛造台碰撞箱內", smiths.length === 1 && Math.abs(npc.x - (21 * Math.sin((240 * Math.PI) / 180) + 1.8 * Math.cos((240 * Math.PI) / 180))) < 0.01 && !L.insideBox(sb, npc.x, npc.z) && !L.insideBox(fb, npc.x, npc.z), { npc, role: npc?.role });
+    }
+    // 傳送門
+    const pr = JSON.parse(readFileSync(portalsReport, "utf8"));
+    for (const [lod, v] of Object.entries(pr.lods)) {
+      const ps = v.portals;
+      const same = ps.length === L.PORTALS.length && L.PORTALS.every((p) => {
+        const m = ps.find((q) => q.id === p.id);
+        const pil = L.portalPillars(p);
+        return !!m && m.bearing === p.bearing && Math.hypot(m.x - p.x, m.z - p.z) < 0.01 && m.floor === p.floor && m.open === p.open && (m.destination ?? null) === (p.destination?.map ?? null) && pil.every((s) => m.pillars.some((q) => Math.hypot(q[0] - s.x, q[1] - s.z) < 0.01));
+      });
+      ck(`傳送門 ${lod}：數量 4、位置、樓層、開放狀態、目的地與石柱位置＝V1.3（只有南門開放、不新增出口）`, same && L.PORTALS.filter((p) => p.open).length === 1, { model: ps.map((p) => [p.id, p.open, p.destination]) });
+      ck(`傳送門 ${lod}：石柱 2.2 m 以下半徑 ≤ 0.45（碰撞圓）、南門柱 ≤ 0.6、圓台頂面 ≤ 0.12 m 且台面上無擋路物、面數在額度內`, v.pillar_max_r_below_2_2 <= 0.45 && v.gate_post_max_r_below_2_2 <= 0.6 && Object.values(v.dais_top).every((h) => h <= 0.12) && v.dais_blockers === 0 && v.within_budget, { pillar: v.pillar_max_r_below_2_2, post: v.gate_post_max_r_below_2_2, dais: v.dais_top, blockers: v.dais_blockers, triangles: v.triangles, budget: pr.budget[lod] });
+      ck(`道路嵌飾 ${lod} 貼平（金色嵌飾最低 ≥ 0.026 m 路面）`, v.gold_min_h === null || v.gold_min_h >= 0.025, { gold_min_h: v.gold_min_h });
+    }
+  }
   // 噴泉：外徑＝碰撞半徑 7 m、最高 6.5 m（P3-1A 驗收值）
   {
     const fr = JSON.parse(readFileSync(plazaReport.replace("plaza_report.json", "fountain_report.json"), "utf8"));
@@ -144,12 +202,12 @@ const pw = await loadPlaywright();
 const server = await serve(dist);
 // [瀏覽器, 模式, 畫質, lod, 截圖視角, 選項{ viewport, anim: [[名稱, 視角, 秒, fps]] }]
 const plan = [
-  ["chromium", "hq", "high", "hq", ["player_spawn_cam", "village_top", "north_plan", "north_wide", "north_trio", "mage_front", "mage_side", "mage_q45", "mage_q45r", "mage_top", "mage_npc", "mage_stairs", "mage_eye", "sword_front", "sword_side", "sword_q45", "sword_q45r", "sword_top", "sword_player_up", "sword_stairs", "sword_npc", "sword_eye", "platform_front", "platform_stair", "platform_wall"]],
-  ["chromium", "lite-low", "low", "lite", ["player_spawn_cam", "village_top", "north_wide", "mage_front", "mage_q45", "mage_top", "sword_front", "sword_q45", "sword_top", "platform_front", "platform_stair", "platform_wall"]],
+  ["chromium", "hq", "high", "hq", ["player_spawn_cam", "village_top", "south_plan", "south_wide", "board_front", "board_q45", "smith_front", "smith_q45", "smith_q45r", "smith_back", "smith_top", "smith_forge", "smith_counter", "smith_npc", "warehouse_front", "warehouse_q45", "warehouse_q45r", "warehouse_back", "warehouse_top", "portal_south", "portal_south_out", "portal_north", "portal_east", "portal_west", "portal_top", "gate_south", "player_arrival", "road_east", "north_plan", "north_wide", "north_trio", "mage_front", "mage_side", "mage_q45", "mage_q45r", "mage_top", "mage_npc", "mage_stairs", "mage_eye", "sword_front", "sword_side", "sword_q45", "sword_q45r", "sword_top", "sword_player_up", "sword_stairs", "sword_npc", "sword_eye", "platform_front", "platform_stair", "platform_wall"], { anim: [["portal_south", "portal_south", 3, 10]] }],
+  ["chromium", "lite-low", "low", "lite", ["player_spawn_cam", "village_top", "south_wide", "board_front", "smith_front", "smith_q45", "smith_forge", "warehouse_front", "warehouse_q45", "portal_south", "portal_east", "gate_south", "player_arrival", "north_wide", "mage_front", "mage_q45", "mage_top", "sword_front", "sword_q45", "sword_top", "platform_front", "platform_stair", "platform_wall"]],
   // iPhone 直向（390×844，DPR 2）
-  ["chromium", "hq-portrait", "high", "hq", ["player_spawn_cam", "mage_npc", "sword_npc", "platform_stair"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 } }],
-  ["chromium", "lite-portrait", "low", "lite", ["player_spawn_cam", "sword_npc"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 } }],
-  ["webkit", "hq", "high", "hq", ["north_wide", "sword_q45", "mage_q45"]],
+  ["chromium", "hq-portrait", "high", "hq", ["player_arrival", "smith_npc", "board_front", "player_spawn_cam", "mage_npc", "sword_npc", "platform_stair"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 } }],
+  ["chromium", "lite-portrait", "low", "lite", ["player_arrival", "smith_npc", "player_spawn_cam", "sword_npc"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 } }],
+  ["webkit", "hq", "high", "hq", ["south_wide", "portal_south", "north_wide", "sword_q45", "mage_q45"]],
   ["webkit", "lite-low", "low", "lite", ["north_wide"]],
 ];
 
@@ -179,7 +237,7 @@ for (const [bname, mode, quality, lod, views, opts = {}] of plan) {
     run.textureMemory = await page.evaluate(() => window.__lab.textureMemory());
     await page.evaluate(() => window.__lab.setView("pano"));
     // 繪製次數：全部開啟 − 拿掉某一部分 ＝ 該部分（含陰影）；none＝只有灰色量體與地面
-    const PARTS = ["fountain", "plaza", "knight", "mage", "sword", "platform"];
+    const PARTS = ["fountain", "plaza", "knight", "mage", "sword", "platform", "board", "smith", "warehouse", "portals"];
     const allOn = Object.fromEntries(PARTS.map((k) => [k, true]));
     const dc = { none: await page.evaluate((p) => window.__lab.drawCalls(p), Object.fromEntries(PARTS.map((k) => [k, false]))), all: await page.evaluate((p) => window.__lab.drawCalls(p), allOn) };
     run.partDrawCalls = {};
@@ -213,6 +271,8 @@ for (const [bname, mode, quality, lod, views, opts = {}] of plan) {
         north_wide: await page.evaluate(() => window.__lab.flickerTest("north_wide")),
         platform_front: await page.evaluate(() => window.__lab.flickerTest("platform_front")),
         sword_q45: await page.evaluate(() => window.__lab.flickerTest("sword_q45")),
+        south_wide: await page.evaluate(() => window.__lab.flickerTest("south_wide")),
+        portal_south: await page.evaluate(() => window.__lab.flickerTest("portal_south")),
       };
       await page.evaluate(() => window.__lab.setTime(null));
       await page.evaluate(() => window.__lab.setView("player_spawn"));

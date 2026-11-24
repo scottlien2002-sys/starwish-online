@@ -25,6 +25,7 @@ import { type PlazaP3, setupPlazaP3 } from "../../src/maps/village/PlazaP3.ts";
 import { type KnightP3, setupKnightP3 } from "../../src/maps/village/KnightP3.ts";
 import { type MageP3, setupMageP3 } from "../../src/maps/village/MageP3.ts";
 import { type BuildingP3, setupBuildingP3 } from "../../src/maps/village/BuildingP3.ts";
+import { type PortalP3, setupPortalsP3 } from "../../src/maps/village/PortalP3.ts";
 import { villageTextures } from "../../src/maps/village/villageTextures.ts";
 import { VILLAGE_SPAWN_CAMERA } from "../../src/maps/village/spawnCamera.ts";
 import { BOARD, BUILDINGS, buildingCenter, FORGE, NPC_SPOTS, PLATFORM, PORTALS, portalPillars, SOUTH_GATE, STAIR_FROM, STAIR_WIDTH, STAIRS } from "../../src/maps/village/layout.ts";
@@ -111,6 +112,33 @@ const VIEWS: Record<string, View> = {
   village_top: { target: [0, 0, 0], alpha: -H, beta: 0.0001, radius: 45, ortho: 52 },
   platform_stair: { target: [-9.62, 1.0, 18.1], alpha: alphaFrom(152), beta: 1.25, radius: 9, fov: 0.9 },
   platform_wall: { target: [-5.95, 1.0, 22.2], alpha: alphaFrom(165), beta: 1.42, radius: 7, fov: 0.85 },
+  // 批次二：委託佈告欄（方位 158°、r 19.5）、鐵匠鋪（240°、正面 r 24；中心 r 29）、倉庫（208°、中心 r 28）、四座傳送門（r 44）、南門（z −36）
+  board_front: { target: [7.3, 1.9, -18.08], alpha: alphaFrom(338), beta: 1.42, radius: 8.5, fov: 0.85 },
+  board_q45: { target: [7.3, 1.8, -18.08], alpha: alphaFrom(20), beta: 1.3, radius: 9, fov: 0.85 },
+  smith_front: { target: [-25.11, 4.6, -14.5], alpha: alphaFrom(60), beta: 1.45, radius: 27, fov: 0.8 },
+  smith_q45: { target: [-25.11, 4.2, -14.5], alpha: alphaFrom(105), beta: 1.3, radius: 28, fov: 0.8 },
+  smith_q45r: { target: [-25.11, 4.2, -14.5], alpha: alphaFrom(15), beta: 1.3, radius: 28, fov: 0.8 },
+  smith_back: { target: [-25.11, 4.2, -14.5], alpha: alphaFrom(240), beta: 1.35, radius: 28, fov: 0.8 },
+  smith_top: { target: [-25.11, 0, -14.5], alpha: alphaFrom(60), beta: 0.0001, radius: 80, ortho: 9 },
+  smith_forge: { target: [-21.24, 1.1, -8.22], alpha: alphaFrom(40), beta: 1.2, radius: 7, fov: 0.85 },
+  smith_counter: { target: [-20.67, 1.4, -14.99], alpha: alphaFrom(60), beta: 1.4, radius: 6.5, fov: 0.85 },
+  smith_npc: { target: [-19.09, 0.85, -8.94], alpha: alphaFrom(60), beta: 1.25, radius: 9, fov: 0.9 },
+  warehouse_front: { target: [-13.15, 3.4, -24.72], alpha: alphaFrom(28), beta: 1.45, radius: 22, fov: 0.8 },
+  warehouse_q45: { target: [-13.15, 3.0, -24.72], alpha: alphaFrom(73), beta: 1.3, radius: 23, fov: 0.8 },
+  warehouse_q45r: { target: [-13.15, 3.0, -24.72], alpha: alphaFrom(343), beta: 1.3, radius: 23, fov: 0.8 },
+  warehouse_back: { target: [-13.15, 3.0, -24.72], alpha: alphaFrom(208), beta: 1.35, radius: 23, fov: 0.8 },
+  warehouse_top: { target: [-13.15, 0, -24.72], alpha: alphaFrom(28), beta: 0.0001, radius: 80, ortho: 7.5 },
+  portal_south: { target: [0, 2.0, -44], alpha: alphaFrom(0), beta: 1.3, radius: 16, fov: 0.85 },
+  portal_south_out: { target: [0, 2.6, -40], alpha: alphaFrom(180), beta: 1.35, radius: 18, fov: 0.85 },
+  portal_north: { target: [0, 3.6, 44], alpha: alphaFrom(180), beta: 1.3, radius: 16, fov: 0.85 },
+  portal_east: { target: [44, 1.6, 0], alpha: alphaFrom(270), beta: 1.3, radius: 16, fov: 0.85 },
+  portal_west: { target: [-44, 1.6, 0], alpha: alphaFrom(90), beta: 1.3, radius: 16, fov: 0.85 },
+  portal_top: { target: [0, 0, -42], alpha: -H, beta: 0.0001, radius: 80, ortho: 9 },
+  gate_south: { target: [0, 4.2, -36], alpha: alphaFrom(0), beta: 1.45, radius: 17, fov: 0.85 },
+  player_arrival: { target: [0, 0.85, -39], alpha: -H, beta: 1.25, radius: 9, fov: 0.9 },
+  road_east: { target: [30, 0.5, 0], alpha: alphaFrom(270), beta: 1.15, radius: 16, fov: 0.85 },
+  south_wide: { target: [-8, 3, -24], alpha: alphaFrom(20), beta: 1.22, radius: 50, fov: 0.85 },
+  south_plan: { target: [-6, 0, -26], alpha: -H, beta: 0.0001, radius: 100, ortho: 24 },
 };
 
 const params = new URLSearchParams(location.search);
@@ -291,6 +319,10 @@ let knight: KnightP3 | null = null;
 let mage: MageP3 | null = null;
 let sword: BuildingP3 | null = null;
 let platformArt: BuildingP3 | null = null;
+let board: BuildingP3 | null = null;
+let smith: BuildingP3 | null = null;
+let warehouse: BuildingP3 | null = null;
+let portals: PortalP3 | null = null;
 const state: { ready: boolean; error: string | null; loadMs: number } = { ready: false, error: null, loadMs: 0 };
 
 /** 已由正式模型取代的灰色量體（setView 不會再打開） */
@@ -404,23 +436,29 @@ async function captureFrames(view: string, secs: number, fps: number): Promise<s
   const n = Math.round(secs * fps);
   for (let k = 0; k < n; k++) {
     fx?.setTime(k / fps);
+    portals?.freeze(k / fps);
     scene.render();
     out.push(canvas.toDataURL("image/jpeg", 0.9));
     if (k % 10 === 9) await new Promise((r) => setTimeout(r, 0));
   }
   fx?.setTime(3.2);
+  portals?.freeze(3.2);
   engine.runRenderLoop(() => scene.render());
   return out;
 }
 
 /** 繪製次數：只開啟指定部分 */
-async function drawCalls(parts: { fountain: boolean; plaza: boolean; knight?: boolean; mage?: boolean; sword?: boolean; platform?: boolean }): Promise<{ drawCalls: number; activeMeshes: number }> {
+async function drawCalls(parts: { fountain: boolean; plaza: boolean; knight?: boolean; mage?: boolean; sword?: boolean; platform?: boolean; board?: boolean; smith?: boolean; warehouse?: boolean; portals?: boolean }): Promise<{ drawCalls: number; activeMeshes: number }> {
   fx?.setEnabled(parts.fountain);
   plaza?.setEnabled(parts.plaza);
   knight?.setEnabled(parts.knight ?? true);
   mage?.setEnabled(parts.mage ?? true);
   sword?.setEnabled(parts.sword ?? true);
   platformArt?.setEnabled(parts.platform ?? true);
+  board?.setEnabled(parts.board ?? true);
+  smith?.setEnabled(parts.smith ?? true);
+  warehouse?.setEnabled(parts.warehouse ?? true);
+  portals?.setEnabled(parts.portals ?? true);
   await frames(4);
   const r = { drawCalls: inst.drawCallsCounter.current, activeMeshes: scene.getActiveMeshes().length };
   fx?.setEnabled(true);
@@ -429,6 +467,7 @@ async function drawCalls(parts: { fountain: boolean; plaza: boolean; knight?: bo
   mage?.setEnabled(true);
   sword?.setEnabled(true);
   platformArt?.setEnabled(true);
+  for (const b of [board, smith, warehouse, portals]) b?.setEnabled(true);
   return r;
 }
 
@@ -462,8 +501,21 @@ async function load(): Promise<void> {
   platformArt = setupBuildingP3(scene, pf.meshes, "Platform", { lite, texBase: "./models/tex/", shadows: castShadows ? shadows : null, casters: [] });
   for (const m of context) if (["bld_sword", "roof_sword", "platform", "stair"].includes(m.name)) m.setEnabled(false);
   REPLACED.add("sword");
+  // 批次二：佈告欄、鐵匠鋪（含戶外鍛造台）、倉庫、四座傳送門＋南門＋道路嵌飾（取代灰色量體）
+  const sh = castShadows ? shadows : null;
+  const bd = await loadGlb(`board_${q2}.glb`);
+  board = setupBuildingP3(scene, bd.meshes, "Board", { lite, texBase: "./models/tex/", shadows: sh, casters: ["stone", "roof", "props"] });
+  const sm = await loadGlb(`smith_${q2}.glb`);
+  smith = setupBuildingP3(scene, sm.meshes, "Smith", { lite, texBase: "./models/tex/", shadows: sh });
+  const wh = await loadGlb(`warehouse_${q2}.glb`);
+  warehouse = setupBuildingP3(scene, wh.meshes, "Ware", { lite, texBase: "./models/tex/", shadows: sh, casters: ["stone", "roof", "props"] });
+  const pt = await loadGlb(`portals_${q2}.glb`);
+  portals = setupPortalsP3(scene, pt.meshes, { lite, texBase: "./models/tex/", shadows: sh });
+  for (const m of context) if (["bld_smith", "roof_smith", "bld_warehouse", "roof_warehouse", "fixture", "gate", "portal", "pillar"].includes(m.name)) m.setEnabled(false);
+  REPLACED.add("smith");
+  REPLACED.add("warehouse");
   // 星晶每幀會動：不凍結它的世界矩陣
-  for (const m of [...f.meshes, ...p.meshes, ...k.meshes, ...mg.meshes, ...sw.meshes, ...pf.meshes]) if (!fx.animated.includes(m)) m.freezeWorldMatrix();
+  for (const m of [...f.meshes, ...p.meshes, ...k.meshes, ...mg.meshes, ...sw.meshes, ...pf.meshes, ...bd.meshes, ...sm.meshes, ...wh.meshes, ...pt.meshes]) if (!fx.animated.includes(m) && !m.name.startsWith("Portal_fx") && !m.name.startsWith("Portal_rune")) m.freezeWorldMatrix();
   await scene.whenReadyAsync();
   state.loadMs = Math.round(performance.now() - t0);
   state.ready = true;
@@ -481,13 +533,16 @@ load().catch((e: unknown) => {
   quality: q.level,
   views: Object.keys(VIEWS),
   setView,
-  setTime: (t: number | null) => fx?.setTime(t),
+  setTime: (t: number | null) => {
+    fx?.setTime(t);
+    portals?.freeze(t);
+  },
   frames,
   flickerTest,
   flickerTime,
   captureFrames,
   drawCalls,
-  stats: () => ({ fountain: fx?.stats ?? null, plaza: plaza?.stats ?? null, knight: knight?.stats ?? null, mage: mage?.stats ?? null, sword: sword?.stats ?? null, platform: platformArt?.stats ?? null }),
+  stats: () => ({ fountain: fx?.stats ?? null, plaza: plaza?.stats ?? null, knight: knight?.stats ?? null, mage: mage?.stats ?? null, sword: sword?.stats ?? null, platform: platformArt?.stats ?? null, board: board?.stats ?? null, smith: smith?.stats ?? null, warehouse: warehouse?.stats ?? null, portals: portals?.stats ?? null, portalFx: portals?.fxStats ?? null }),
   /** 全村共用貼圖快取：張數、像素、估計顯示記憶體（RGBA、含 mipmap ×1.33） */
   textureMemory: () => {
     const list = villageTextures(scene).map((t) => {
