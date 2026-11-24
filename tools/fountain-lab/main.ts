@@ -340,7 +340,7 @@ let merchantT: number | null = null;
 let merchantPath: AbstractMesh | null = null;
 const petPanel = new PetMerchantPanel();
 // 預覽頁：鑑定使用「測試資料」服務（畫面標示「測試資料・非正式數值」）
-connectPetAppraisalService(createDemoAppraisalService());
+connectPetAppraisalService(createDemoAppraisalService({ delayMs: 1600 }));
 const appraisal = new PetAppraisalWindow({ avatarUrl: "./models/pm2_avatar.png", onBack: () => void petPanel.open(), onClose: () => setTalking(false) });
 petPanel.onAppraise = () => void appraisal.open();
 petPanel.onClose = () => {

@@ -149,6 +149,7 @@ let fail = 0;
       const names = v.actions.map((a) => a.name);
       ck(`洛恩（寵物商人 V2）${lod}：17 根骨頭、動作 Idle／Walk／Talk／Turn、面數在額度內`, v.bones.length === 17 && ["Idle", "Walk", "Talk", "Turn"].every((n) => names.includes(n)) && v.within_budget, { bones: v.bones.length, actions: names, triangles: v.triangles, budget: r2.budget[lod] });
     }
+    for (const [lod, v] of Object.entries(r2.lods)) ck(`洛恩 V2.1 ${lod}：同材質網格已合併（網格數 ≤ 12，目標約 11 次繪製）`, (v.meshes ?? 99) <= 12, { meshes: v.meshes, parts: v.parts, names: v.mesh_names });
   }
   // 噴泉：外徑＝碰撞半徑 7 m、最高 6.5 m（P3-1A 驗收值）
   {
@@ -247,7 +248,7 @@ for (const [bname, mode, quality, lod, views, opts = {}] of plan) {
       await page.waitForTimeout(300);
       await shot("appraise_2_ready");
       log.push({ step: "startTwice", ...(await A("startTwice")) });
-      await page.waitForTimeout(420);
+      await page.waitForTimeout(250);
       await shot("appraise_3_effect");
       await page.waitForTimeout(2600);
       log.push({ step: "result", ...(await A("state")) });
@@ -260,7 +261,16 @@ for (const [bname, mode, quality, lod, views, opts = {}] of plan) {
       await page.waitForTimeout(3400);
       log.push({ step: "result_b1", ...(await A("state")) });
       await shot("appraise_6_bird");
+      log.push({ step: "place:s2", ...(await A("place:s2")) });
+      await A("start");
+      await page.waitForTimeout(3000);
+      log.push({ step: "result_s2", ...(await A("state")) });
+      await shot("appraise_7_none");
       log.push({ step: "close", ...(await A("close")) });
+      // 關閉後重新開啟：已鑑定物品仍在背包、結果保留（不遺失、不複製）
+      log.push({ step: "reopen", ...(await A("open")) });
+      await page.waitForTimeout(400);
+      log.push({ step: "close2", ...(await A("close")) });
       run.appraisal = log;
     }
     // 桌面：把背包物品拖進鑑定框
@@ -340,6 +350,9 @@ await server.close();
     ck2(`星靈鑑定 ${tag}：放入後顯示費用、按鈕可按；連點只鑑定一次；物品留在背包並變成已鑑定（數量不變）`, L["place:s1"]?.startDisabled === false && /金幣|未定案/.test(L["place:s1"].fee) && L.result?.phase === "result" && L.result.items.length === L.open.items.length && L.result.items.filter((i) => i.id === "s1").length === 1 && L.result.items.find((i) => i.id === "s1")?.appraised === true && L.result.shownLines === L.result.lines.length && L.result.lines.length > 0, { ready: L["place:s1"], result: L.result });
     ck2(`星靈鑑定 ${tag}：已鑑定物品不能再鑑定（按鈕停用、顯示原結果）`, L["place:e0"]?.phase === "appraised" && L["place:e0"].startDisabled === true && L["place:e0"].lines.length > 0, L["place:e0"]);
     ck2(`星靈鑑定 ${tag}：正屬性綠、負屬性紅（鳥蛋 4 條含正負）`, L.result_b1?.lines.some((l) => l.polarity === "positive") && L.result_b1.lines.some((l) => l.polarity === "negative"), L.result_b1?.lines);
+    ck2(`星靈鑑定 ${tag}：鑑定特效期間顯示「鑑定中」（約 1 秒特效後才出結果）`, L.startTwice?.phase === "appraising", L.startTwice);
+    ck2(`星靈鑑定 ${tag}：沒有屬性時顯示「無附加屬性」`, L.result_s2?.lines.length === 1 && L.result_s2.lines[0].label === "無附加屬性" && L.result_s2.lines[0].polarity === "none", L.result_s2?.lines);
+    ck2(`星靈鑑定 ${tag}：關閉後重新開啟，物品數量不變、已鑑定狀態保留`, L.reopen?.items.length === L.open.items.length && ["s1", "b1", "s2", "e0"].every((id) => L.reopen.items.find((i) => i.id === id)?.appraised === true), L.reopen);
     if (r.mode.includes("portrait")) ck2(`星靈鑑定 ${tag}：iPhone 直向沒有橫向捲動、開始鑑定按鈕在畫面內`, L.open.hScroll <= 0 && L["place:s1"].startBottom <= L["place:s1"].viewportH, { hScroll: L.open.hScroll, startBottom: L["place:s1"].startBottom, viewportH: L["place:s1"].viewportH });
   }
   const dr = report.runs.find((r) => r.drag);
