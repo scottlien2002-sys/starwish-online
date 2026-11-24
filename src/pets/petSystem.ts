@@ -330,6 +330,22 @@ export function appraise(cfg: PetConfig, t: PetTuning, rng: Rng, mode: "official
   return out;
 }
 
+export type AppraiseResult = { ok: true; affixes: PetAffix[] } | { ok: false; reason: "egg" | "already-appraised" | "not-found" };
+
+/**
+ * 方案 A：首次鑑定一次定案。詞條種類與原始數值永久保存在 pet.affixes，
+ * 之後再次鑑定一律拒絕（不重抽），進化／存讀檔也不會改動；進化只改變 bonusScale（發揮比例）。
+ * 正負詞條使用同一個發揮比例。
+ */
+export function appraisePet(save: PetSave, cfg: PetConfig, t: PetTuning, rng: Rng, petId: number, mode: "official" | "preview" = "official"): AppraiseResult {
+  const pet = save.pets.find((p) => p.id === petId);
+  if (!pet) return { ok: false, reason: "not-found" };
+  if (pet.stage === 0) return { ok: false, reason: "egg" };
+  if (pet.affixes !== null) return { ok: false, reason: "already-appraised" };
+  pet.affixes = appraise(cfg, t, rng, mode);
+  return { ok: true, affixes: pet.affixes };
+}
+
 // ---------------------------------------------------------------- 套用到角色
 
 export interface CharacterStats {

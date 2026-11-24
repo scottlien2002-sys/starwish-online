@@ -2425,7 +2425,7 @@ for (const name of browsers) {
     for (const e of run.errors) console.log(`   ! ${e}`);
   }
 
-  // ---------- Stage 5.5 角色動畫（C1.0-B4 候選：骨架＋五個動作）＋星靈寵物系統（?lab=anim；WebKit）----------
+  // ---------- Stage 5.5 角色動畫（C1.0-B5 候選：骨架＋五個動作＋第二批渲染／陰影／攻速）＋星靈寵物系統（?lab=anim；WebKit）----------
   if (name === "webkit") {
     const vp = VIEWPORTS[0];
     const run = { browser: name, viewport: `${vp.name} / Stage 5.5 角色動畫＋星靈寵物 ?lab=anim`, checks: {}, errors: [], screenshots: [], results: [] };
@@ -2450,13 +2450,20 @@ for (const name of browsers) {
         await frames(5);
         const info = await page.evaluate(() => window.__starwishAnim.info());
         run.results.push({ tag: `${g}_${lod}`, info });
-        check(`${g} ${lod}：載入 C1.0-B4 GLB、17 根骨頭、蒙皮網格、5 個動作`, info.file === `novice_c10b4_${g}_${lod}.glb` && info.bones === 17 && info.skinnedMeshes > 0 && ["Idle", "Run", "Jump", "Attack", "Hurt"].every((a) => info.animations.includes(a)) && info.contextLost === 0, info);
+        check(`${g} ${lod}：載入 C1.0-B5 GLB、17 根骨頭、依材質合併後 ≤ 26 個網格、5 個動作`, info.file === `novice_c10b5_${g}_${lod}.glb` && info.bones === 17 && info.skinnedMeshes > 0 && info.meshes <= 26 && ["Idle", "Run", "Jump", "Attack", "Hurt"].every((a) => info.animations.includes(a)) && info.contextLost === 0, info);
+        await frames(30);
+        const r2 = await page.evaluate(() => window.__starwishAnim.info());
+        check(`${g} ${lod}：P3-2 渲染（無 HDR 管線、畫布 MSAA、無發光物件時發光層暫停）＋腳下陰影（環境陰影只畫一次）`, r2.render.p3 && !r2.render.pipeline && r2.render.canvasAntialias && !r2.render.glowEnabled && r2.render.charShadow === "blob" && r2.render.shadowRenders <= 2, { render: r2.render, drawCalls: r2.drawCalls });
+        run.results.push({ tag: `${g}_${lod} draw`, drawCalls: r2.drawCalls, render: r2.render });
         if (lod !== "hq") continue;
         await shot(`${g}_idle`);
         await page.evaluate(() => window.__starwishAnim.setInput(0, 1));
         const runOk = await waitState("Run");
         await frames(20);
         await shot(`${g}_run`);
+        const mv = (await page.evaluate(() => window.__starwishAnim.info())).move;
+        run.results.push({ tag: `${g} run`, move: mv });
+        check(`${g}：跑步速度與正式遊戲相同（5 m/s），跑步動畫依速度加快（減少滑步）`, Math.abs(mv.speed - 5) < 0.01 && mv.runRate > 1.5, mv);
         await page.evaluate(() => window.__starwishAnim.setInput(0, 0));
         const idleOk = await waitState("Idle");
         await page.evaluate(() => window.__starwishAnim.press("jump"));
@@ -2469,6 +2476,9 @@ for (const name of browsers) {
         await frames(8);
         await shot(`${g}_attack`);
         await waitState("Idle");
+        const atk = (await page.evaluate(() => window.__starwishAnim.info())).attack;
+        run.results.push({ tag: `${g} attack`, atk });
+        check(`${g}：攻擊 0.5 秒、命中事件 1 次、約在 0.2 秒`, Math.abs(atk.seconds - 0.5) < 1e-6 && atk.hits === 1 && atk.lastHitAt > 0.15 && atk.lastHitAt < 0.3, atk);
         await page.evaluate(() => window.__starwishAnim.press("hurt"));
         const hurtOk = await waitState("Hurt");
         await frames(4);
@@ -2494,7 +2504,14 @@ for (const name of browsers) {
         const evo = p.evolve();
         const appr = p.appraise();
         const after = p.state();
-        return { drops, petId: pet && pet.id, eggStage: egg.pets[0] && egg.pets[0].stage, hatchedStage: hatched.pets.find((x) => x.id === (pet && pet.id)).stage, fed, evo, appr, after };
+        const first = JSON.stringify(after.pets.find((x) => x.id === (pet && pet.id)).affixes);
+        const again = [p.appraise(), p.appraise(), p.appraise()];
+        const second = JSON.stringify(p.state().pets.find((x) => x.id === (pet && pet.id)).affixes);
+        const avatarAs = window.__starwishAnim.info().attack.attackSpeed;
+        p.equip(null);
+        const unequipped = { stats: p.state().stats.stats, avatarAs: window.__starwishAnim.info().attack.attackSpeed };
+        p.equip(pet && pet.id);
+        return { drops, petId: pet && pet.id, eggStage: egg.pets[0] && egg.pets[0].stage, hatchedStage: hatched.pets.find((x) => x.id === (pet && pet.id)).stage, fed, evo, appr, after, noReroll: { first, second, again }, avatarAs, unequipped };
       });
       run.results.push({ tag: "pet flow", flow: { ...flow, after: { ...flow.after, pets: flow.after.pets.map((x) => ({ id: x.id, stage: x.stage, exp: Math.round(x.exp), affixes: x.affixes })) } } });
       const kinds = new Set(flow.drops);
@@ -2502,6 +2519,12 @@ for (const name of browsers) {
       const me = flow.after.pets.find((x) => x.id === flow.petId);
       check("寵物：孵化（時間）→ 餵食 → 進化 → 鑑定（0～4 條、不重複）", flow.eggStage === 0 && flow.hatchedStage === 1 && flow.fed.every(Boolean) && flow.evo && flow.appr && me.stage === 2 && Array.isArray(me.affixes) && me.affixes.length <= 4 && new Set(me.affixes.map((a) => a.stat)).size === me.affixes.length, { me, flow: { eggStage: flow.eggStage, hatchedStage: flow.hatchedStage, fed: flow.fed, evo: flow.evo } });
       check("寵物：裝備後出現並加成角色（攻速不超過 160）", flow.after.equippedId === flow.petId && flow.after.followerVisible && flow.after.stats.stats.attackSpeed <= 160, flow.after.stats);
+      check("寵物方案 A：再次鑑定一律拒絕、詞條不變；攻速加成同步到角色攻擊動作；卸下後恢復基礎", flow.noReroll.again.every((x) => x === false) && flow.noReroll.first === flow.noReroll.second && flow.avatarAs === flow.after.stats.stats.attackSpeed && flow.unequipped.avatarAs === 100 && flow.unequipped.stats.attack === 100, { noReroll: flow.noReroll, avatarAs: flow.avatarAs, unequipped: flow.unequipped });
+      // 重新載入：詞條從存檔讀回，不改變
+      await page.goto(server.url + "/?lab=anim&g=male&lod=hq&seed=99", { waitUntil: "load" });
+      await page.waitForFunction(() => window.__starwishAnim?.ready === true, null, { timeout: 120000 });
+      const reload = await page.evaluate((id) => JSON.stringify(window.__starwishAnim.pet.state().pets.find((x) => x.id === id).affixes), flow.petId);
+      check("寵物方案 A：重新載入（讀檔）後詞條完全相同", reload === flow.noReroll.first, { reload, first: flow.noReroll.first });
       await page.evaluate(() => window.__starwishAnim.setInput(1, 0.4));
       await frames(90);
       await page.evaluate(() => window.__starwishAnim.setInput(0, 0));
@@ -2516,11 +2539,21 @@ for (const name of browsers) {
       });
       await frames(3);
       await shot("pet_panel");
+      // 對照：角色即時陰影（?charshadow=realtime）與舊渲染（?p3=0）
+      for (const q of ["charshadow=realtime", "p3=0"]) {
+        await page.goto(server.url + `/?lab=anim&g=female&lod=hq&seed=7&${q}`, { waitUntil: "load" });
+        await page.waitForFunction(() => window.__starwishAnim?.ready === true, null, { timeout: 120000 });
+        await frames(40);
+        const i = await page.evaluate(() => window.__starwishAnim.info());
+        run.results.push({ tag: `compare ${q}`, drawCalls: i.drawCalls, render: i.render });
+        if (q === "charshadow=realtime") check("對照：?charshadow=realtime 角色即時陰影（陰影每格重畫）", i.render.charShadow === "realtime" && i.render.shadowRenders > 10, i.render);
+        else check("對照：?p3=0 回到舊渲染設定（HDR 後製管線）", !i.render.p3, i.render);
+      }
     } catch (e) {
       run.errors.push(`exception: ${e.message}`);
     }
     await ctx.close();
-    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 10;
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 20;
     if (!run.ok) failures++;
     report.runs.push(run);
     console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);

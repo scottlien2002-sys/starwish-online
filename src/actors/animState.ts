@@ -21,7 +21,12 @@ export class AnimStateMachine {
   private readonly durations: Record<AnimName, number>;
 
   constructor(durations: Partial<Record<AnimName, number>> = {}) {
-    this.durations = { Idle: 2, Run: 0.6, Jump: 1, Attack: 0.6, Hurt: 0.5, ...durations };
+    this.durations = { Idle: 2.4, Run: 0.6, Jump: 1, Attack: 0.5, Hurt: 0.5, ...durations };
+  }
+
+  /** 攻速改變時調整攻擊動作長度 */
+  setDuration(name: AnimName, seconds: number): void {
+    this.durations[name] = seconds;
   }
 
   duration(name: AnimName): number {

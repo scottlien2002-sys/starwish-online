@@ -1,14 +1,12 @@
 import "@babylonjs/loaders/glTF";
 import {
-  type AbstractMesh,
-  type AnimationGroup,
   ArcRotateCamera,
   Color3,
   DirectionalLight,
   HemisphericLight,
+  ReflectionProbe,
+  RenderTargetTexture,
   Scene,
-  SceneLoader,
-  TransformNode,
   Vector3,
 } from "@babylonjs/core";
 import { createEngine, createShadows, createSkyDome, pickQuality, setupRendering, SKY_COLORS } from "../render/RenderQuality.ts";
@@ -18,14 +16,17 @@ import { heightAt } from "../world/terrain.ts";
 import { InputState } from "../input/InputState.ts";
 import { VirtualJoystick } from "../input/VirtualJoystick.ts";
 import { KeyboardInput } from "../input/KeyboardInput.ts";
-import { AnimStateMachine, ANIM_NAMES, ONE_SHOT, type AnimName } from "../actors/animState.ts";
+import type { AnimName } from "../actors/animState.ts";
+import { runRate } from "../actors/animTiming.ts";
+import { NoviceAvatar, type CharShadowMode, type AvatarEvent } from "../characters/NoviceAvatar.ts";
+import { TUNING } from "../config/tuning.ts";
 import { createRng } from "../core/rng.ts";
 import { CORE_RULES } from "../core/rules.ts";
 import petCfgJson from "../config/pets.json";
 import {
   addItems,
   affixText,
-  appraise,
+  appraisePet,
   applyPetBonus,
   bonusScale,
   canEvolve,
@@ -65,7 +66,22 @@ export interface AnimLabApi {
   ready: boolean;
   gender: "male" | "female";
   lod: "hq" | "lite";
-  info(): { file: string; bones: number; skinnedMeshes: number; triangles: number; animations: string[]; state: AnimName; jumpY: number; contextLost: number; drawCalls: number };
+  info(): {
+    file: string;
+    bones: number;
+    skinnedMeshes: number;
+    meshes: number;
+    triangles: number;
+    animations: string[];
+    state: AnimName;
+    jumpY: number;
+    contextLost: number;
+    drawCalls: number;
+    render: { p3: boolean; pipeline: boolean; canvasAntialias: boolean; glowEnabled: boolean; charShadow: CharShadowMode; shadowRenders: number };
+    move: { speed: number; runRate: number; slide: number };
+    attack: { rate: number; seconds: number; hitAt: number; attackSpeed: number; hits: number; lastHitAt: number };
+    events: string[];
+  };
   setInput(x: number, y: number): void;
   press(a: "jump" | "attack" | "hurt"): void;
   pet: {
@@ -97,7 +113,14 @@ export async function startAnimPetLab(canvas: HTMLCanvasElement, hudRoot: HTMLEl
   const cfgErrors = validatePetConfig(cfg);
   const T = resolveTuning(cfg, "preview");
 
-  const quality = pickQuality();
+  // P3-2 渲染優化（預設開啟；?p3=0 回到舊設定對照）：不建立半浮點 HDR 後製管線、改用畫布原生 MSAA、沒有發光物件時暫停發光層
+  const p3 = qs.get("p3") !== "0";
+  // 角色陰影：預設 blob（腳下柔邊陰影＋環境陰影只畫一次）；?charshadow=realtime = 角色即時陰影（每格重畫）
+  const charShadow: CharShadowMode = qs.get("charshadow") === "realtime" ? "realtime" : "blob";
+  const version = qs.get("ver") === "c10b4" ? "c10b4" : "c10b5";
+  const moveSpeed = Number(qs.get("speed") ?? TUNING.player.moveSpeed);
+  const baseQuality = pickQuality();
+  const quality = p3 && baseQuality.postProcess ? { ...baseQuality, postProcess: false, canvasAntialias: true } : baseQuality;
   const engine = createEngine(canvas, quality);
   const scene = new Scene(engine);
   createSkyDome(scene);
@@ -116,49 +139,56 @@ export async function startAnimPetLab(canvas: HTMLCanvasElement, hudRoot: HTMLEl
   const sun = new DirectionalLight("sun", new Vector3(-0.45, -1, 0.35).normalize(), scene);
   sun.intensity = 0.75;
   sun.diffuse = new Color3(1, 0.95, 0.86);
+  sun.position = new Vector3(12, 25, -9);
+  sun.autoUpdateExtends = false;
+  sun.shadowMinZ = 1;
+  sun.shadowMaxZ = 90;
   const shadows = createShadows(sun, quality);
   shadows.darkness = 0.35;
   buildMeadow(scene, shadows);
+  const shadowMap = shadows.getShadowMap()!;
+  let shadowRenders = 0;
+  shadowMap.onAfterRenderObservable.add(() => shadowRenders++);
+  // 環境（草地、樹）是靜態的：角色不進陰影貼圖時，陰影只需要畫一次
+  if (charShadow === "blob") shadowMap.refreshRate = RenderTargetTexture.REFRESHRATE_RENDER_ONCE;
 
   const camera = new ArcRotateCamera("animCam", -Math.PI / 2, 1.2, 3.2, new Vector3(0, 0.7, 0), scene);
   camera.lowerRadiusLimit = 1.2;
   camera.upperRadiusLimit = 9;
   camera.attachControl(canvas, true);
-  setupRendering(scene, camera, quality);
+  const render = setupRendering(scene, camera, quality);
+  if (p3 && render.glow) render.glow.isEnabled = scene.meshes.some((m) => (m.metadata as { glow?: boolean } | null)?.glow === true);
 
-  // ---------- 角色（C1.0-B4 候選：骨架＋五個動作）----------
-  const file = `novice_c10b4_${gender}_${lod}.glb`;
-  const res = await SceneLoader.ImportMeshAsync("", `${import.meta.env.BASE_URL}models/`, file, scene);
-  // 玩家節點：移動、轉向都在這一層（glTF 的 __root__ 保留左右手座標轉換，不要改它）
-  const charRoot = new TransformNode("player", scene);
-  (res.meshes[0] as AbstractMesh).parent = charRoot;
-  const skinned = res.meshes.filter((m) => !!m.skeleton);
-  for (const m of res.meshes) {
-    m.isPickable = false;
-    if (m.getTotalVertices() > 0) shadows.addShadowCaster(m, false);
-    m.receiveShadows = false;
+  // ---------- 角色（C1.0-B5 候選：骨架＋五個動作；?ver=c10b4 = 上一版）----------
+  const avatar = await NoviceAvatar.load(scene, { gender, lod, baseUrl: `${import.meta.env.BASE_URL}models/`, version });
+  const file = avatar.file;
+  const charRoot = avatar.root;
+  avatar.setupShadow(charShadow, scene, shadows);
+  // 金色金屬（徽章、金邊）：只拍天空一次的反射圖
+  const sky = scene.getMeshByName("skyDome") ?? scene.meshes.find((m) => /sky/i.test(m.name));
+  if (sky) {
+    const probe = new ReflectionProbe("animEnv", 128, scene, true, true);
+    probe.position = new Vector3(0, 0.8, 0);
+    probe.renderList!.push(sky);
+    probe.refreshRate = RenderTargetTexture.REFRESHRATE_RENDER_ONCE;
+    avatar.setMetalReflection(probe.cubeTexture);
   }
-  const groups = new Map<AnimName, AnimationGroup>();
-  for (const ag of res.animationGroups) {
-    const a = ANIM_NAMES.find((n) => ag.name === n || ag.name.endsWith(n));
-    if (a) groups.set(a, ag);
-    ag.stop();
-  }
-  const triangles = res.meshes.reduce((a, m) => a + Math.round((m.getTotalIndices() || 0) / 3), 0);
-  const headBone = res.skeletons[0]?.bones.find((b) => b.name === "head") ?? null;
-
-  // 動作切換：交叉淡入（0.15 秒），one-shot 播一次
-  const sm = new AnimStateMachine(Object.fromEntries([...groups].map(([n, g]) => [n, (g.to - g.from) / 60])) as Partial<Record<AnimName, number>>);
-  const weights = new Map<AnimName, number>(ANIM_NAMES.map((n) => [n, n === "Idle" ? 1 : 0]));
-  const startGroup = (n: AnimName): void => {
-    const g = groups.get(n);
-    if (!g) return;
-    g.stop();
-    g.start(!ONE_SHOT[n], 1, g.from, g.to, false);
-    g.setWeightForAllAnimatables(weights.get(n) ?? 0);
-  };
-  for (const n of ANIM_NAMES) startGroup(n);
-  for (const n of ANIM_NAMES) if (n !== "Idle") groups.get(n)?.stop();
+  const triangles = avatar.triangles;
+  const events: string[] = [];
+  let curSpeed = 0;
+  let perfRef: PerfOverlay | null = null;
+  let hits = 0;
+  let lastHitAt = -1;
+  let attackStartedAt = 0;
+  let labTime = 0;
+  avatar.on((e: AvatarEvent) => {
+    if (e.type === "hit") {
+      hits++;
+      lastHitAt = Math.round((labTime - attackStartedAt) * 1000) / 1000;
+    }
+    events.push(e.type);
+    if (events.length > 20) events.shift();
+  });
 
   // ---------- 輸入 ----------
   const input = new InputState();
@@ -198,7 +228,7 @@ export async function startAnimPetLab(canvas: HTMLCanvasElement, hudRoot: HTMLEl
   // ---------- 畫面 ----------
   const top = document.createElement("div");
   top.className = "v3-top";
-  top.innerHTML = `<div class="lab-name">Stage 5.5 角色動畫＋星靈寵物 <small>C1.0-B4 候選｜${gender === "male" ? "男" : "女"}｜${lod === "hq" ? "HQ" : "Lite"}｜寵物數值＝測試用暫定值（非正式平衡）</small></div><div class="lab-state" data-anim-state></div>`;
+  top.innerHTML = `<div class="lab-name">Stage 5.5 角色動畫＋星靈寵物 <small>${version === "c10b5" ? "C1.0-B5" : "C1.0-B4"} 候選｜${p3 ? "P3-2 優化" : "舊渲染"}｜陰影 ${charShadow === "blob" ? "腳下" : "即時"}｜${gender === "male" ? "男" : "女"}｜${lod === "hq" ? "HQ" : "Lite"}｜寵物數值＝測試用暫定值（非正式平衡）</small></div><div class="lab-state" data-anim-state></div>`;
   hudRoot.append(top);
   const stateEl = top.querySelector("[data-anim-state]") as HTMLElement;
   const panel = document.createElement("div");
@@ -238,14 +268,19 @@ export async function startAnimPetLab(canvas: HTMLCanvasElement, hudRoot: HTMLEl
     lod,
     info: () => ({
       file,
-      bones: res.skeletons[0]?.bones.length ?? 0,
-      skinnedMeshes: skinned.length,
+      bones: avatar.bones,
+      skinnedMeshes: avatar.skinnedMeshes,
+      meshes: avatar.meshes.filter((m) => m.getTotalVertices() > 0).length,
       triangles,
-      animations: [...groups.keys()],
-      state: sm.state,
-      jumpY: sm.jumpHeight(),
+      animations: [...avatar.groups.keys()],
+      state: avatar.state,
+      jumpY: avatar.jumpHeight(),
       contextLost,
-      drawCalls: (engine as unknown as { _drawCalls?: { current: number } })._drawCalls?.current ?? 0,
+      drawCalls: perfRef?.drawCalls ?? 0,
+      render: { p3, pipeline: quality.postProcess, canvasAntialias: quality.canvasAntialias, glowEnabled: !!render.glow?.isEnabled, charShadow, shadowRenders },
+      move: { speed: curSpeed, ...runRate(curSpeed), runRate: avatar.runRate },
+      attack: { ...avatar.getAttackTiming(), hits, lastHitAt },
+      events: [...events],
     }),
     setInput: (x, y) => (override = x === 0 && y === 0 ? null : { x, y }),
     press: (a) => (pending[a] = true),
@@ -280,10 +315,14 @@ export async function startAnimPetLab(canvas: HTMLCanvasElement, hudRoot: HTMLEl
       },
       appraise: () => {
         const p = equippedPet(save);
-        if (!p || p.affixes) return false;
-        p.affixes = appraise(cfg, T, rng, "preview");
+        if (!p) return false;
+        const r = appraisePet(save, cfg, T, rng, p.id, "preview");
+        if (!r.ok) {
+          renderPet(r.reason === "already-appraised" ? "已鑑定過，詞條永久保留（不會重抽）" : "還不能鑑定（蛋還沒孵化）");
+          return false;
+        }
         persist();
-        renderPet(`鑑定結果：${p.affixes.length ? p.affixes.map((a) => affixText(cfg, a)).join("、") : "無屬性"}`);
+        renderPet(`鑑定結果：${r.affixes.length ? r.affixes.map((a) => affixText(cfg, a)).join("、") : "無屬性"}`);
         return true;
       },
       evolve: () => {
@@ -339,6 +378,7 @@ export async function startAnimPetLab(canvas: HTMLCanvasElement, hudRoot: HTMLEl
   function renderPet(msg = ""): void {
     const p = equippedPet(save);
     const bonus = applyPetBonus({ ...BASE_STATS }, cfg, p, T);
+    avatar.setAttackSpeed(bonus.stats.attackSpeed); // 裝備／卸下寵物後攻速改變 → 攻擊動作播放速度跟著變
     const sp = (x: Pet): string => {
       const s = cfg.species.find((y) => y.id === x.species);
       return `${s?.label ?? x.species}・${s?.stages[x.stage]?.label ?? x.stage}`;
@@ -395,51 +435,35 @@ export async function startAnimPetLab(canvas: HTMLCanvasElement, hudRoot: HTMLEl
 
   // ---------- 迴圈 ----------
   const perf = new PerfOverlay(engine, scene, quality, hudRoot);
+  perfRef = perf;
   perf.lockResolution(Math.min(window.devicePixelRatio || 1, quality.maxPixelRatio));
   const pos = new Vector3(0, heightAt(0, 0), 0);
   let yaw = 0;
   const headTmp = new Vector3();
-  const headWorld = (): Vector3 => {
-    // 頭骨的起點在脖子上方（約 0.67 m）；頭頂約 1.25 m → 往上 0.55 m 是頭頂
-    const sk = skinned[0];
-    if (headBone && sk) {
-      headBone.getAbsolutePositionToRef(sk, headTmp);
-      return headTmp.add(new Vector3(0, 0.55, 0));
-    }
-    return charRoot.position.add(new Vector3(0, 1.25, 0));
-  };
+  const headWorld = (): Vector3 => avatar.headAnchor(headTmp);
   let petTick = 0;
   engine.runRenderLoop(() => {
     const dt = Math.min(0.05, engine.getDeltaTime() / 1000);
+    labTime += dt;
     const mv = override ?? input.getMove();
     const len = Math.hypot(mv.x, mv.y);
     const moving = len > 0.15;
-    if (moving && sm.state !== "Attack" && sm.state !== "Hurt") {
-      // 搖桿方向相對於鏡頭
+    curSpeed = 0;
+    if (moving && avatar.state !== "Attack" && avatar.state !== "Hurt") {
+      // 搖桿方向相對於鏡頭；速度與正式遊戲相同（TUNING.player.moveSpeed = 5 m/s），推一半就走一半速度
       const camYaw = -camera.alpha - Math.PI / 2;
       const dx = mv.x * Math.cos(camYaw) - mv.y * Math.sin(camYaw);
       const dz = mv.x * Math.sin(camYaw) + mv.y * Math.cos(camYaw);
-      const sp = 2.4 * Math.min(1, len);
-      pos.x += (dx / Math.max(len, 1e-6)) * sp * dt;
-      pos.z += (dz / Math.max(len, 1e-6)) * sp * dt;
+      curSpeed = moveSpeed * Math.min(1, len);
+      pos.x += (dx / Math.max(len, 1e-6)) * curSpeed * dt;
+      pos.z += (dz / Math.max(len, 1e-6)) * curSpeed * dt;
       yaw = Math.atan2(dx, dz);
     }
-    const before = sm.state;
-    sm.update(dt, { moving, ...pending });
+    if (pending.attack && avatar.state !== "Attack" && avatar.state !== "Hurt") attackStartedAt = labTime;
+    const groundY = heightAt(pos.x, pos.z);
+    const h = avatar.update(dt, { speed: curSpeed, ...pending }, groundY);
     pending = {};
-    if (sm.state !== before || (ONE_SHOT[sm.state] && sm.time === 0)) startGroup(sm.state);
-    for (const n of ANIM_NAMES) {
-      const w = weights.get(n)!;
-      const target = n === sm.state ? 1 : 0;
-      const nw = w + (target - w) * Math.min(1, dt / 0.15);
-      weights.set(n, nw);
-      const g = groups.get(n);
-      if (!g) continue;
-      if (nw < 0.01 && n !== sm.state) {
-        if (g.isPlaying) g.stop();
-      } else g.setWeightForAllAnimatables(nw);
-    }
-    charRoot.position.set(pos.x, heightAt(pos.x, pos.z) + sm.jumpHeight(), pos.z);
+    charRoot.position.set(pos.x, groundY + h, pos.z);
     charRoot.rotation.y = yaw; // 模型正面朝 +z（yaw 0）
     camera.target.copyFrom(Vector3.Lerp(camera.target, new Vector3(pos.x, charRoot.position.y + 0.7, pos.z), Math.min(1, dt * 6)));
     follower.update(dt, headWorld(), yaw);
@@ -450,7 +474,7 @@ export async function startAnimPetLab(canvas: HTMLCanvasElement, hudRoot: HTMLEl
       tickAll();
       if (!petPanel.hidden) renderPet();
     }
-    stateEl.textContent = `動作 ${sm.state}　骨頭 ${api.info().bones}　三角形 ${triangles.toLocaleString()}`;
+    stateEl.textContent = `動作 ${avatar.state}　骨頭 ${avatar.bones}　三角形 ${triangles.toLocaleString()}　速度 ${curSpeed.toFixed(1)} m/s　跑步倍率 ${avatar.runRate.toFixed(2)}　攻速 ${avatar.getAttackTiming().attackSpeed}`;
     scene.render();
     perf.update(dt);
   });
