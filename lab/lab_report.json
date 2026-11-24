@@ -1,5 +1,5 @@
 {
- "startedAt": "2026-11-23T19:33:20.877Z",
+ "startedAt": "2026-11-24T02:36:29.252Z",
  "checks": {
   "benches 位置＝既有碰撞（誤差 < 1 cm）": {
    "ok": true,
@@ -563,6 +563,416 @@
     "budget": 10000
    }
   },
+  "佈告欄位置、尺寸＝V1.3（方位 158°、r 19.5、4 × 0.8 m）": {
+   "ok": true,
+   "detail": {
+    "bearing": 158,
+    "r": 19.5,
+    "w": 4,
+    "d": 0.8,
+    "top": 3.5,
+    "front_normal": [
+     -0.3746,
+     0.9272
+    ]
+   }
+  },
+  "佈告欄 lite 完全在原碰撞箱內、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "x": [
+      -2,
+      2
+     ],
+     "y": [
+      -0.39,
+      0.39
+     ],
+     "h": [
+      0,
+      3.48
+     ]
+    },
+    "collider": {
+     "kind": "board",
+     "x": 7.3048285716102885,
+     "z": -18.080085164052353,
+     "hw": 2,
+     "hd": 0.4,
+     "rot": 2.7576202181510405,
+     "y0": -0.5,
+     "y1": 3.5
+    },
+    "triangles": 487,
+    "budget": 1200
+   }
+  },
+  "佈告欄 hq 完全在原碰撞箱內、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "x": [
+      -2,
+      2
+     ],
+     "y": [
+      -0.39,
+      0.39
+     ],
+     "h": [
+      0,
+      3.48
+     ]
+    },
+    "collider": {
+     "kind": "board",
+     "x": 7.3048285716102885,
+     "z": -18.080085164052353,
+     "hw": 2,
+     "hd": 0.4,
+     "rot": 2.7576202181510405,
+     "y0": -0.5,
+     "y1": 3.5
+    },
+    "triangles": 811,
+    "budget": 2600
+   }
+  },
+  "佈告欄告示面朝廣場（正面法線指向噴泉）、委託 NPC 站在正面側": {
+   "ok": true,
+   "detail": {
+    "front_normal": [
+     -0.3746,
+     0.9272
+    ],
+    "npc": {
+     "id": "board",
+     "name": "每日委託佈告欄",
+     "role": "每日委託",
+     "x": 7.004828571610289,
+     "z": -16.280085164052352,
+     "yaw": 0.3839724354387526,
+     "floor": 0,
+     "interactR": 3
+    }
+   }
+  },
+  "鐵匠鋪尺寸、方位與 V1.3 相同": {
+   "ok": true,
+   "detail": {
+    "v13": {
+     "id": "smith",
+     "name": "鐵匠鋪",
+     "role": "鐵匠轉職＋裝備鑑定",
+     "bearing": 240,
+     "w": 12,
+     "d": 10,
+     "eave": 5,
+     "top": 11,
+     "floor": 0,
+     "front": 24,
+     "shape": "shop"
+    },
+    "model": {
+     "bearing": 240,
+     "front": 24,
+     "w": 12,
+     "d": 10,
+     "top": 11,
+     "floor": 0,
+     "door": [
+      -23.47,
+      -10.548
+     ],
+     "counter": [
+      -20.672,
+      -14.995
+     ],
+     "forge": {
+      "x": -21.235571585149863,
+      "z": -8.218911086754476,
+      "w": 2.4,
+      "d": 2,
+      "h": 2.2
+     }
+    }
+   }
+  },
+  "鐵匠鋪 lite 全部頂點在原碰撞箱內（建築箱或鍛造台箱）、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "x": [
+      -6,
+      6
+     ],
+     "y": [
+      -2.34,
+      9.95
+     ],
+     "h": [
+      0,
+      10.9
+     ]
+    },
+    "outside": 0,
+    "triangles": 1738,
+    "budget": 8000
+   }
+  },
+  "鐵匠鋪 hq 全部頂點在原碰撞箱內（建築箱或鍛造台箱）、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "x": [
+      -6,
+      6
+     ],
+     "y": [
+      -2.34,
+      9.95
+     ],
+     "h": [
+      0,
+      10.9
+     ]
+    },
+    "outside": 0,
+    "triangles": 2742,
+    "budget": 18000
+   }
+  },
+  "鐵匠鋪正門面向噴泉（門比建築中心更靠近噴泉）": {
+   "ok": true,
+   "detail": {
+    "door": [
+     -23.47,
+     -10.548
+    ],
+    "doorR": "25.73",
+    "centerR": "29.00"
+   }
+  },
+  "倉庫尺寸、方位與 V1.3 相同": {
+   "ok": true,
+   "detail": {
+    "v13": {
+     "id": "warehouse",
+     "name": "倉庫",
+     "role": "倉庫",
+     "bearing": 208,
+     "w": 10,
+     "d": 8,
+     "eave": 4.5,
+     "top": 7,
+     "floor": 0,
+     "front": 24,
+     "shape": "storehouse"
+    },
+    "model": {
+     "bearing": 208,
+     "front": 24,
+     "w": 10,
+     "d": 8,
+     "eave": 4.5,
+     "top": 7,
+     "floor": 0,
+     "door": [
+      -11.807,
+      -22.206
+     ]
+    }
+   }
+  },
+  "倉庫 lite 全部頂點在原碰撞箱內、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "x": [
+      -4.99,
+      4.99
+     ],
+     "y": [
+      0.195,
+      7.96
+     ],
+     "h": [
+      0,
+      6.97
+     ]
+    },
+    "outside": 0,
+    "triangles": 1011,
+    "budget": 5000
+   }
+  },
+  "倉庫 hq 全部頂點在原碰撞箱內、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "x": [
+      -4.99,
+      4.99
+     ],
+     "y": [
+      0.158,
+      7.96
+     ],
+     "h": [
+      0,
+      6.97
+     ]
+    },
+    "outside": 0,
+    "triangles": 1619,
+    "budget": 12000
+   }
+  },
+  "倉庫正門面向噴泉（門比建築中心更靠近噴泉）": {
+   "ok": true,
+   "detail": {
+    "door": [
+     -11.807,
+     -22.206
+    ],
+    "doorR": "25.15",
+    "centerR": "28.00"
+   }
+  },
+  "戶外鍛造台位置＝V1.3（FORGE）": {
+   "ok": true,
+   "detail": {
+    "model": {
+     "x": -21.235571585149863,
+     "z": -8.218911086754476,
+     "w": 2.4,
+     "d": 2,
+     "h": 2.2
+    },
+    "v13": {
+     "x": -21.235571585149867,
+     "z": -8.218911086754476,
+     "w": 2.4,
+     "d": 2,
+     "rot": 4.1887902047863905
+    }
+   }
+  },
+  "只有一位鐵匠 NPC（鐵匠轉職＋裝備詞條鑑定），站位不變、不在建築或鍛造台碰撞箱內": {
+   "ok": true,
+   "detail": {
+    "npc": {
+     "id": "smith",
+     "name": "鐵匠（鍛造台旁）",
+     "role": "鐵匠轉職＋裝備鑑定",
+     "x": -19.08653347947321,
+     "z": -8.941154273188019,
+     "yaw": 1.132702844874802,
+     "floor": 0,
+     "interactR": 3
+    },
+    "role": "鐵匠轉職＋裝備鑑定"
+   }
+  },
+  "傳送門 lite：數量 4、位置、樓層、開放狀態、目的地與石柱位置＝V1.3（只有南門開放、不新增出口）": {
+   "ok": true,
+   "detail": {
+    "model": [
+     [
+      "south",
+      true,
+      "starsprout"
+     ],
+     [
+      "north",
+      false,
+      null
+     ],
+     [
+      "east",
+      false,
+      null
+     ],
+     [
+      "west",
+      false,
+      null
+     ]
+    ]
+   }
+  },
+  "傳送門 lite：石柱 2.2 m 以下半徑 ≤ 0.45（碰撞圓）、南門柱 ≤ 0.6、圓台頂面 ≤ 0.12 m 且台面上無擋路物、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "pillar": 0.4,
+    "post": 0.56,
+    "dais": {
+     "south": 0.08,
+     "north": 0.08,
+     "east": 0.08,
+     "west": 0.08
+    },
+    "blockers": 0,
+    "triangles": 5155,
+    "budget": 9000
+   }
+  },
+  "道路嵌飾 lite 貼平（金色嵌飾最低 ≥ 0.026 m 路面）": {
+   "ok": true,
+   "detail": {
+    "gold_min_h": null
+   }
+  },
+  "傳送門 hq：數量 4、位置、樓層、開放狀態、目的地與石柱位置＝V1.3（只有南門開放、不新增出口）": {
+   "ok": true,
+   "detail": {
+    "model": [
+     [
+      "south",
+      true,
+      "starsprout"
+     ],
+     [
+      "north",
+      false,
+      null
+     ],
+     [
+      "east",
+      false,
+      null
+     ],
+     [
+      "west",
+      false,
+      null
+     ]
+    ]
+   }
+  },
+  "傳送門 hq：石柱 2.2 m 以下半徑 ≤ 0.45（碰撞圓）、南門柱 ≤ 0.6、圓台頂面 ≤ 0.12 m 且台面上無擋路物、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "pillar": 0.4,
+    "post": 0.56,
+    "dais": {
+     "south": 0.08,
+     "north": 0.08,
+     "east": 0.08,
+     "west": 0.08
+    },
+    "blockers": 0,
+    "triangles": 10667,
+    "budget": 22000
+   }
+  },
+  "道路嵌飾 hq 貼平（金色嵌飾最低 ≥ 0.026 m 路面）": {
+   "ok": true,
+   "detail": {
+    "gold_min_h": 0.03
+   }
+  },
   "噴泉 lite 外徑 r ≤ 7.0（＝碰撞半徑 7）、最高（含星晶浮動）≤ 6.5、面數在額度內": {
    "ok": true,
    "detail": {
@@ -596,6 +1006,32 @@
    "shots": [
     "chromium_hq_player_spawn_cam.png",
     "chromium_hq_village_top.png",
+    "chromium_hq_south_plan.png",
+    "chromium_hq_south_wide.png",
+    "chromium_hq_board_front.png",
+    "chromium_hq_board_q45.png",
+    "chromium_hq_smith_front.png",
+    "chromium_hq_smith_q45.png",
+    "chromium_hq_smith_q45r.png",
+    "chromium_hq_smith_back.png",
+    "chromium_hq_smith_top.png",
+    "chromium_hq_smith_forge.png",
+    "chromium_hq_smith_counter.png",
+    "chromium_hq_smith_npc.png",
+    "chromium_hq_warehouse_front.png",
+    "chromium_hq_warehouse_q45.png",
+    "chromium_hq_warehouse_q45r.png",
+    "chromium_hq_warehouse_back.png",
+    "chromium_hq_warehouse_top.png",
+    "chromium_hq_portal_south.png",
+    "chromium_hq_portal_south_out.png",
+    "chromium_hq_portal_north.png",
+    "chromium_hq_portal_east.png",
+    "chromium_hq_portal_west.png",
+    "chromium_hq_portal_top.png",
+    "chromium_hq_gate_south.png",
+    "chromium_hq_player_arrival.png",
+    "chromium_hq_road_east.png",
     "chromium_hq_north_plan.png",
     "chromium_hq_north_wide.png",
     "chromium_hq_north_trio.png",
@@ -620,7 +1056,7 @@
     "chromium_hq_platform_stair.png",
     "chromium_hq_platform_wall.png"
    ],
-   "loadMs": 9224,
+   "loadMs": 20013,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -729,6 +1165,89 @@
       "./models/tex/slab_hq.png",
       "./models/tex/slab_nrm_hq.png"
      ]
+    },
+    "board": {
+     "meshes": 5,
+     "triangles": 811,
+     "byMesh": {
+      "stone": 30,
+      "roof": 20,
+      "gold": 232,
+      "props": 465,
+      "glow": 64
+     },
+     "materials": 5,
+     "shadowCasters": 3,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slate_hq.png",
+      "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "smith": {
+     "meshes": 5,
+     "triangles": 2742,
+     "byMesh": {
+      "stone": 748,
+      "roof": 40,
+      "gold": 630,
+      "props": 1220,
+      "glow": 104
+     },
+     "materials": 5,
+     "shadowCasters": 2,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slate_hq.png",
+      "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "warehouse": {
+     "meshes": 5,
+     "triangles": 1619,
+     "byMesh": {
+      "stone": 162,
+      "roof": 20,
+      "gold": 196,
+      "props": 1177,
+      "glow": 64
+     },
+     "materials": 5,
+     "shadowCasters": 3,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slate_hq.png",
+      "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "portals": {
+     "meshes": 7,
+     "triangles": 10667,
+     "byMesh": {
+      "stone": 3687,
+      "paving": 904,
+      "gold": 4812,
+      "props": 672,
+      "glow": 308,
+      "fx": 56,
+      "rune": 228
+     },
+     "materials": 7,
+     "shadowCasters": 1,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slab_hq.png",
+      "./models/tex/slab_nrm_hq.png"
+     ]
+    },
+    "portalFx": {
+     "fxTris": 56,
+     "runeTris": 228,
+     "animated": 2
     }
    },
    "textureMemory": {
@@ -809,61 +1328,99 @@
     "knight": 8,
     "mage": 7,
     "sword": 6,
-    "platform": 4
+    "platform": 4,
+    "board": 8,
+    "smith": 7,
+    "warehouse": 8,
+    "portals": 6
    },
    "drawCalls": {
     "none": {
-     "drawCalls": 73,
-     "activeMeshes": 37
+     "drawCalls": 29,
+     "activeMeshes": 25
     },
     "all": {
-     "drawCalls": 115,
-     "activeMeshes": 66
+     "drawCalls": 100,
+     "activeMeshes": 74
     },
     "no_fountain": {
-     "drawCalls": 106,
-     "activeMeshes": 59
+     "drawCalls": 91,
+     "activeMeshes": 67
     },
     "no_plaza": {
-     "drawCalls": 107,
-     "activeMeshes": 61
+     "drawCalls": 92,
+     "activeMeshes": 69
     },
     "no_knight": {
-     "drawCalls": 107,
-     "activeMeshes": 62
+     "drawCalls": 92,
+     "activeMeshes": 70
     },
     "no_mage": {
-     "drawCalls": 108,
-     "activeMeshes": 61
+     "drawCalls": 93,
+     "activeMeshes": 69
     },
     "no_sword": {
-     "drawCalls": 109,
-     "activeMeshes": 62
+     "drawCalls": 94,
+     "activeMeshes": 70
     },
     "no_platform": {
-     "drawCalls": 111,
-     "activeMeshes": 62
+     "drawCalls": 96,
+     "activeMeshes": 70
+    },
+    "no_board": {
+     "drawCalls": 92,
+     "activeMeshes": 69
+    },
+    "no_smith": {
+     "drawCalls": 93,
+     "activeMeshes": 69
+    },
+    "no_warehouse": {
+     "drawCalls": 92,
+     "activeMeshes": 69
+    },
+    "no_portals": {
+     "drawCalls": 94,
+     "activeMeshes": 69
     }
    },
+   "anims": [
+    {
+     "name": "portal_south",
+     "view": "portal_south",
+     "secs": 3,
+     "fps": 10,
+     "frames": 30,
+     "dir": "anim_hq_portal_south"
+    }
+   ],
    "flicker": {
     "player_spawn_cam": {
      "maxRatio": 0.002839781746031746,
-     "meanRatio": 0.002703993055555556
+     "meanRatio": 0.0027052331349206355
     },
     "north_wide": {
-     "maxRatio": 0.006597222222222222,
-     "meanRatio": 0.00638640873015873
+     "maxRatio": 0.01042906746031746,
+     "meanRatio": 0.010231274801587302
     },
     "platform_front": {
-     "maxRatio": 0.0024677579365079364,
-     "meanRatio": 0.0023139880952380946
+     "maxRatio": 0.0024615575396825396,
+     "meanRatio": 0.0023356894841269835
     },
     "sword_q45": {
-     "maxRatio": 0.005400545634920635,
-     "meanRatio": 0.0051810515873015875
+     "maxRatio": 0.006094990079365079,
+     "meanRatio": 0.005593998015873017
+    },
+    "south_wide": {
+     "maxRatio": 0.008110119047619048,
+     "meanRatio": 0.007919766865079364
+    },
+    "portal_south": {
+     "maxRatio": 0.002033730158730159,
+     "meanRatio": 0.0018737599206349205
     }
    },
-   "frameMsSoftware": 1.7000000001862645
+   "frameMsSoftware": 1.3999999999068677
   },
   {
    "browser": "chromium",
@@ -872,6 +1429,17 @@
    "shots": [
     "chromium_lite-low_player_spawn_cam.png",
     "chromium_lite-low_village_top.png",
+    "chromium_lite-low_south_wide.png",
+    "chromium_lite-low_board_front.png",
+    "chromium_lite-low_smith_front.png",
+    "chromium_lite-low_smith_q45.png",
+    "chromium_lite-low_smith_forge.png",
+    "chromium_lite-low_warehouse_front.png",
+    "chromium_lite-low_warehouse_q45.png",
+    "chromium_lite-low_portal_south.png",
+    "chromium_lite-low_portal_east.png",
+    "chromium_lite-low_gate_south.png",
+    "chromium_lite-low_player_arrival.png",
     "chromium_lite-low_north_wide.png",
     "chromium_lite-low_mage_front.png",
     "chromium_lite-low_mage_q45.png",
@@ -883,7 +1451,7 @@
     "chromium_lite-low_platform_stair.png",
     "chromium_lite-low_platform_wall.png"
    ],
-   "loadMs": 2944,
+   "loadMs": 2966,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -979,6 +1547,77 @@
       "./models/tex/ashlar_lite.png",
       "./models/tex/slab_lite.png"
      ]
+    },
+    "board": {
+     "meshes": 4,
+     "triangles": 487,
+     "byMesh": {
+      "stone": 30,
+      "roof": 20,
+      "props": 389,
+      "glow": 48
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slate_lite.png"
+     ]
+    },
+    "smith": {
+     "meshes": 4,
+     "triangles": 1738,
+     "byMesh": {
+      "stone": 570,
+      "roof": 40,
+      "props": 1032,
+      "glow": 96
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slate_lite.png"
+     ]
+    },
+    "warehouse": {
+     "meshes": 4,
+     "triangles": 1011,
+     "byMesh": {
+      "stone": 162,
+      "roof": 20,
+      "props": 781,
+      "glow": 48
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slate_lite.png"
+     ]
+    },
+    "portals": {
+     "meshes": 6,
+     "triangles": 5155,
+     "byMesh": {
+      "stone": 2431,
+      "paving": 264,
+      "props": 2086,
+      "glow": 228,
+      "fx": 32,
+      "rune": 114
+     },
+     "materials": 6,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slab_lite.png"
+     ]
+    },
+    "portalFx": {
+     "fxTris": 32,
+     "runeTris": 114,
+     "animated": 2
     }
    },
    "textureMemory": {
@@ -1034,73 +1673,104 @@
     "knight": 3,
     "mage": 4,
     "sword": 3,
-    "platform": 3
+    "platform": 3,
+    "board": 4,
+    "smith": 4,
+    "warehouse": 4,
+    "portals": 4
    },
    "drawCalls": {
     "none": {
-     "drawCalls": 31,
-     "activeMeshes": 37
+     "drawCalls": 15,
+     "activeMeshes": 25
     },
     "all": {
      "drawCalls": 55,
-     "activeMeshes": 61
+     "activeMeshes": 65
     },
     "no_fountain": {
      "drawCalls": 48,
-     "activeMeshes": 54
+     "activeMeshes": 58
     },
     "no_plaza": {
      "drawCalls": 51,
-     "activeMeshes": 57
+     "activeMeshes": 61
     },
     "no_knight": {
      "drawCalls": 52,
-     "activeMeshes": 58
+     "activeMeshes": 62
     },
     "no_mage": {
      "drawCalls": 51,
-     "activeMeshes": 57
+     "activeMeshes": 61
     },
     "no_sword": {
      "drawCalls": 52,
-     "activeMeshes": 58
+     "activeMeshes": 62
     },
     "no_platform": {
      "drawCalls": 52,
-     "activeMeshes": 58
+     "activeMeshes": 62
+    },
+    "no_board": {
+     "drawCalls": 51,
+     "activeMeshes": 61
+    },
+    "no_smith": {
+     "drawCalls": 51,
+     "activeMeshes": 61
+    },
+    "no_warehouse": {
+     "drawCalls": 51,
+     "activeMeshes": 61
+    },
+    "no_portals": {
+     "drawCalls": 51,
+     "activeMeshes": 61
     }
    },
    "flicker": {
     "player_spawn_cam": {
-     "maxRatio": 0.0018539186507936507,
-     "meanRatio": 0.0016889880952380952
+     "maxRatio": 0.0018353174603174603,
+     "meanRatio": 0.0016908482142857142
     },
     "north_wide": {
-     "maxRatio": 0.004495287698412698,
-     "meanRatio": 0.004291914682539682
+     "maxRatio": 0.007335069444444444,
+     "meanRatio": 0.007046130952380952
     },
     "platform_front": {
-     "maxRatio": 0.0019469246031746032,
-     "meanRatio": 0.0018315972222222223
+     "maxRatio": 0.0019035218253968254,
+     "meanRatio": 0.0018074156746031747
     },
     "sword_q45": {
-     "maxRatio": 0.004464285714285714,
-     "meanRatio": 0.004185267857142857
+     "maxRatio": 0.005245535714285714,
+     "meanRatio": 0.004563492063492063
+    },
+    "south_wide": {
+     "maxRatio": 0.007217261904761905,
+     "meanRatio": 0.0068080357142857135
+    },
+    "portal_south": {
+     "maxRatio": 0.0017237103174603174,
+     "meanRatio": 0.0015947420634920633
     }
    },
-   "frameMsSoftware": 1.1666666666666667
+   "frameMsSoftware": 1.5500000000465661
   },
   {
    "browser": "chromium",
    "mode": "hq-portrait",
    "errors": [],
    "shots": [
+    "chromium_hq-portrait_player_arrival.png",
+    "chromium_hq-portrait_smith_npc.png",
+    "chromium_hq-portrait_board_front.png",
     "chromium_hq-portrait_player_spawn_cam.png",
     "chromium_hq-portrait_mage_npc.png",
     "chromium_hq-portrait_sword_npc.png",
     "chromium_hq-portrait_platform_stair.png"
    ],
-   "loadMs": 4999,
+   "loadMs": 9024,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -1209,6 +1879,89 @@
       "./models/tex/slab_hq.png",
       "./models/tex/slab_nrm_hq.png"
      ]
+    },
+    "board": {
+     "meshes": 5,
+     "triangles": 811,
+     "byMesh": {
+      "stone": 30,
+      "roof": 20,
+      "gold": 232,
+      "props": 465,
+      "glow": 64
+     },
+     "materials": 5,
+     "shadowCasters": 3,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slate_hq.png",
+      "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "smith": {
+     "meshes": 5,
+     "triangles": 2742,
+     "byMesh": {
+      "stone": 748,
+      "roof": 40,
+      "gold": 630,
+      "props": 1220,
+      "glow": 104
+     },
+     "materials": 5,
+     "shadowCasters": 2,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slate_hq.png",
+      "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "warehouse": {
+     "meshes": 5,
+     "triangles": 1619,
+     "byMesh": {
+      "stone": 162,
+      "roof": 20,
+      "gold": 196,
+      "props": 1177,
+      "glow": 64
+     },
+     "materials": 5,
+     "shadowCasters": 3,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slate_hq.png",
+      "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "portals": {
+     "meshes": 7,
+     "triangles": 10667,
+     "byMesh": {
+      "stone": 3687,
+      "paving": 904,
+      "gold": 4812,
+      "props": 672,
+      "glow": 308,
+      "fx": 56,
+      "rune": 228
+     },
+     "materials": 7,
+     "shadowCasters": 1,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slab_hq.png",
+      "./models/tex/slab_nrm_hq.png"
+     ]
+    },
+    "portalFx": {
+     "fxTris": 56,
+     "runeTris": 228,
+     "animated": 2
     }
    },
    "textureMemory": {
@@ -1289,40 +2042,60 @@
     "knight": 4,
     "mage": 7,
     "sword": 2,
-    "platform": 4
+    "platform": 4,
+    "board": 3,
+    "smith": 6,
+    "warehouse": 8,
+    "portals": 5
    },
    "drawCalls": {
     "none": {
-     "drawCalls": 54,
+     "drawCalls": 22,
      "activeMeshes": 18
     },
     "all": {
-     "drawCalls": 88,
-     "activeMeshes": 39
+     "drawCalls": 78,
+     "activeMeshes": 52
     },
     "no_fountain": {
-     "drawCalls": 79,
-     "activeMeshes": 32
+     "drawCalls": 69,
+     "activeMeshes": 45
     },
     "no_plaza": {
-     "drawCalls": 80,
-     "activeMeshes": 34
+     "drawCalls": 70,
+     "activeMeshes": 47
     },
     "no_knight": {
-     "drawCalls": 84,
-     "activeMeshes": 39
+     "drawCalls": 74,
+     "activeMeshes": 52
     },
     "no_mage": {
-     "drawCalls": 81,
-     "activeMeshes": 34
+     "drawCalls": 71,
+     "activeMeshes": 47
     },
     "no_sword": {
-     "drawCalls": 86,
-     "activeMeshes": 39
+     "drawCalls": 76,
+     "activeMeshes": 52
     },
     "no_platform": {
-     "drawCalls": 84,
-     "activeMeshes": 35
+     "drawCalls": 74,
+     "activeMeshes": 48
+    },
+    "no_board": {
+     "drawCalls": 75,
+     "activeMeshes": 52
+    },
+    "no_smith": {
+     "drawCalls": 72,
+     "activeMeshes": 48
+    },
+    "no_warehouse": {
+     "drawCalls": 70,
+     "activeMeshes": 47
+    },
+    "no_portals": {
+     "drawCalls": 73,
+     "activeMeshes": 48
     }
    }
   },
@@ -1331,10 +2104,12 @@
    "mode": "lite-portrait",
    "errors": [],
    "shots": [
+    "chromium_lite-portrait_player_arrival.png",
+    "chromium_lite-portrait_smith_npc.png",
     "chromium_lite-portrait_player_spawn_cam.png",
     "chromium_lite-portrait_sword_npc.png"
    ],
-   "loadMs": 1475,
+   "loadMs": 1890,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -1430,6 +2205,77 @@
       "./models/tex/ashlar_lite.png",
       "./models/tex/slab_lite.png"
      ]
+    },
+    "board": {
+     "meshes": 4,
+     "triangles": 487,
+     "byMesh": {
+      "stone": 30,
+      "roof": 20,
+      "props": 389,
+      "glow": 48
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slate_lite.png"
+     ]
+    },
+    "smith": {
+     "meshes": 4,
+     "triangles": 1738,
+     "byMesh": {
+      "stone": 570,
+      "roof": 40,
+      "props": 1032,
+      "glow": 96
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slate_lite.png"
+     ]
+    },
+    "warehouse": {
+     "meshes": 4,
+     "triangles": 1011,
+     "byMesh": {
+      "stone": 162,
+      "roof": 20,
+      "props": 781,
+      "glow": 48
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slate_lite.png"
+     ]
+    },
+    "portals": {
+     "meshes": 6,
+     "triangles": 5155,
+     "byMesh": {
+      "stone": 2431,
+      "paving": 264,
+      "props": 2086,
+      "glow": 228,
+      "fx": 32,
+      "rune": 114
+     },
+     "materials": 6,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slab_lite.png"
+     ]
+    },
+    "portalFx": {
+     "fxTris": 32,
+     "runeTris": 114,
+     "animated": 2
     }
    },
    "textureMemory": {
@@ -1485,40 +2331,60 @@
     "knight": 0,
     "mage": 4,
     "sword": 0,
-    "platform": 3
+    "platform": 3,
+    "board": 0,
+    "smith": 3,
+    "warehouse": 4,
+    "portals": 3
    },
    "drawCalls": {
     "none": {
-     "drawCalls": 12,
+     "drawCalls": 8,
      "activeMeshes": 18
     },
     "all": {
-     "drawCalls": 30,
-     "activeMeshes": 36
+     "drawCalls": 36,
+     "activeMeshes": 46
     },
     "no_fountain": {
-     "drawCalls": 23,
-     "activeMeshes": 29
+     "drawCalls": 29,
+     "activeMeshes": 39
     },
     "no_plaza": {
-     "drawCalls": 26,
-     "activeMeshes": 32
+     "drawCalls": 32,
+     "activeMeshes": 42
     },
     "no_knight": {
-     "drawCalls": 30,
-     "activeMeshes": 36
+     "drawCalls": 36,
+     "activeMeshes": 46
     },
     "no_mage": {
-     "drawCalls": 26,
-     "activeMeshes": 32
+     "drawCalls": 32,
+     "activeMeshes": 42
     },
     "no_sword": {
-     "drawCalls": 30,
-     "activeMeshes": 36
+     "drawCalls": 36,
+     "activeMeshes": 46
     },
     "no_platform": {
-     "drawCalls": 27,
-     "activeMeshes": 33
+     "drawCalls": 33,
+     "activeMeshes": 43
+    },
+    "no_board": {
+     "drawCalls": 36,
+     "activeMeshes": 46
+    },
+    "no_smith": {
+     "drawCalls": 33,
+     "activeMeshes": 43
+    },
+    "no_warehouse": {
+     "drawCalls": 32,
+     "activeMeshes": 42
+    },
+    "no_portals": {
+     "drawCalls": 33,
+     "activeMeshes": 43
     }
    }
   },
@@ -1527,11 +2393,13 @@
    "mode": "hq",
    "errors": [],
    "shots": [
+    "webkit_hq_south_wide.png",
+    "webkit_hq_portal_south.png",
     "webkit_hq_north_wide.png",
     "webkit_hq_sword_q45.png",
     "webkit_hq_mage_q45.png"
    ],
-   "loadMs": 3954,
+   "loadMs": 6293,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -1640,6 +2508,89 @@
       "./models/tex/slab_hq.png",
       "./models/tex/slab_nrm_hq.png"
      ]
+    },
+    "board": {
+     "meshes": 5,
+     "triangles": 811,
+     "byMesh": {
+      "stone": 30,
+      "roof": 20,
+      "gold": 232,
+      "props": 465,
+      "glow": 64
+     },
+     "materials": 5,
+     "shadowCasters": 3,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slate_hq.png",
+      "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "smith": {
+     "meshes": 5,
+     "triangles": 2742,
+     "byMesh": {
+      "stone": 748,
+      "roof": 40,
+      "gold": 630,
+      "props": 1220,
+      "glow": 104
+     },
+     "materials": 5,
+     "shadowCasters": 2,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slate_hq.png",
+      "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "warehouse": {
+     "meshes": 5,
+     "triangles": 1619,
+     "byMesh": {
+      "stone": 162,
+      "roof": 20,
+      "gold": 196,
+      "props": 1177,
+      "glow": 64
+     },
+     "materials": 5,
+     "shadowCasters": 3,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slate_hq.png",
+      "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "portals": {
+     "meshes": 7,
+     "triangles": 10667,
+     "byMesh": {
+      "stone": 3687,
+      "paving": 904,
+      "gold": 4812,
+      "props": 672,
+      "glow": 308,
+      "fx": 56,
+      "rune": 228
+     },
+     "materials": 7,
+     "shadowCasters": 1,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slab_hq.png",
+      "./models/tex/slab_nrm_hq.png"
+     ]
+    },
+    "portalFx": {
+     "fxTris": 56,
+     "runeTris": 228,
+     "animated": 2
     }
    },
    "textureMemory": {
@@ -1720,40 +2671,60 @@
     "knight": 8,
     "mage": 7,
     "sword": 6,
-    "platform": 4
+    "platform": 4,
+    "board": 8,
+    "smith": 7,
+    "warehouse": 8,
+    "portals": 6
    },
    "drawCalls": {
     "none": {
-     "drawCalls": 73,
-     "activeMeshes": 37
+     "drawCalls": 29,
+     "activeMeshes": 25
     },
     "all": {
-     "drawCalls": 115,
-     "activeMeshes": 66
+     "drawCalls": 100,
+     "activeMeshes": 74
     },
     "no_fountain": {
-     "drawCalls": 106,
-     "activeMeshes": 59
+     "drawCalls": 91,
+     "activeMeshes": 67
     },
     "no_plaza": {
-     "drawCalls": 107,
-     "activeMeshes": 61
+     "drawCalls": 92,
+     "activeMeshes": 69
     },
     "no_knight": {
-     "drawCalls": 107,
-     "activeMeshes": 62
+     "drawCalls": 92,
+     "activeMeshes": 70
     },
     "no_mage": {
-     "drawCalls": 108,
-     "activeMeshes": 61
+     "drawCalls": 93,
+     "activeMeshes": 69
     },
     "no_sword": {
-     "drawCalls": 109,
-     "activeMeshes": 62
+     "drawCalls": 94,
+     "activeMeshes": 70
     },
     "no_platform": {
-     "drawCalls": 111,
-     "activeMeshes": 62
+     "drawCalls": 96,
+     "activeMeshes": 70
+    },
+    "no_board": {
+     "drawCalls": 92,
+     "activeMeshes": 69
+    },
+    "no_smith": {
+     "drawCalls": 93,
+     "activeMeshes": 69
+    },
+    "no_warehouse": {
+     "drawCalls": 92,
+     "activeMeshes": 69
+    },
+    "no_portals": {
+     "drawCalls": 94,
+     "activeMeshes": 69
     }
    }
   },
@@ -1764,7 +2735,7 @@
    "shots": [
     "webkit_lite-low_north_wide.png"
    ],
-   "loadMs": 2332,
+   "loadMs": 2828,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -1860,6 +2831,77 @@
       "./models/tex/ashlar_lite.png",
       "./models/tex/slab_lite.png"
      ]
+    },
+    "board": {
+     "meshes": 4,
+     "triangles": 487,
+     "byMesh": {
+      "stone": 30,
+      "roof": 20,
+      "props": 389,
+      "glow": 48
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slate_lite.png"
+     ]
+    },
+    "smith": {
+     "meshes": 4,
+     "triangles": 1738,
+     "byMesh": {
+      "stone": 570,
+      "roof": 40,
+      "props": 1032,
+      "glow": 96
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slate_lite.png"
+     ]
+    },
+    "warehouse": {
+     "meshes": 4,
+     "triangles": 1011,
+     "byMesh": {
+      "stone": 162,
+      "roof": 20,
+      "props": 781,
+      "glow": 48
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slate_lite.png"
+     ]
+    },
+    "portals": {
+     "meshes": 6,
+     "triangles": 5155,
+     "byMesh": {
+      "stone": 2431,
+      "paving": 264,
+      "props": 2086,
+      "glow": 228,
+      "fx": 32,
+      "rune": 114
+     },
+     "materials": 6,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slab_lite.png"
+     ]
+    },
+    "portalFx": {
+     "fxTris": 32,
+     "runeTris": 114,
+     "animated": 2
     }
    },
    "textureMemory": {
@@ -1915,43 +2957,63 @@
     "knight": 3,
     "mage": 4,
     "sword": 3,
-    "platform": 3
+    "platform": 3,
+    "board": 4,
+    "smith": 4,
+    "warehouse": 4,
+    "portals": 4
    },
    "drawCalls": {
     "none": {
-     "drawCalls": 31,
-     "activeMeshes": 37
+     "drawCalls": 15,
+     "activeMeshes": 25
     },
     "all": {
      "drawCalls": 55,
-     "activeMeshes": 61
+     "activeMeshes": 65
     },
     "no_fountain": {
      "drawCalls": 48,
-     "activeMeshes": 54
+     "activeMeshes": 58
     },
     "no_plaza": {
      "drawCalls": 51,
-     "activeMeshes": 57
+     "activeMeshes": 61
     },
     "no_knight": {
      "drawCalls": 52,
-     "activeMeshes": 58
+     "activeMeshes": 62
     },
     "no_mage": {
      "drawCalls": 51,
-     "activeMeshes": 57
+     "activeMeshes": 61
     },
     "no_sword": {
      "drawCalls": 52,
-     "activeMeshes": 58
+     "activeMeshes": 62
     },
     "no_platform": {
      "drawCalls": 52,
-     "activeMeshes": 58
+     "activeMeshes": 62
+    },
+    "no_board": {
+     "drawCalls": 51,
+     "activeMeshes": 61
+    },
+    "no_smith": {
+     "drawCalls": 51,
+     "activeMeshes": 61
+    },
+    "no_warehouse": {
+     "drawCalls": 51,
+     "activeMeshes": 61
+    },
+    "no_portals": {
+     "drawCalls": 51,
+     "activeMeshes": 61
     }
    }
   }
  ],
- "finishedAt": "2026-11-23T19:52:33.934Z"
+ "finishedAt": "2026-11-24T03:05:27.229Z"
 }
