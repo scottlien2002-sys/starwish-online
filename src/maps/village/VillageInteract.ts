@@ -41,11 +41,12 @@ export class VillageInteract {
   /** 測試／自動化用：最近一次互動紀錄 */
   readonly log: { t: number; what: string }[] = [];
 
-  constructor(
-    scene: Scene,
-    private readonly merchant: PetMerchantV2 | null,
-    private readonly opts: { avatarUrl: string; goToMap: (map: "starsprout") => void },
-  ) {
+  private readonly merchant: PetMerchantV2 | null;
+  private readonly opts: { avatarUrl: string; goToMap: (map: "starsprout") => void };
+
+  constructor(scene: Scene, merchant: PetMerchantV2 | null, opts: { avatarUrl: string; goToMap: (map: "starsprout") => void }) {
+    this.merchant = merchant;
+    this.opts = opts;
     const st = document.createElement("style");
     st.textContent = CSS;
     document.head.appendChild(st);
