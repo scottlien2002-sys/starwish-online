@@ -49,6 +49,7 @@ import { affixText, bonusScale, canEvolve, ITEM_IDS, stageCount, type CharacterS
 import { PetManager } from "../pets/PetManager.ts";
 import { PetFollower } from "../pets/PetFollower.ts";
 import { createPetMerchantService, type PetMerchantService } from "../pets/petMerchantAdapter.ts";
+import { createPetAppraisalService, type PetAppraisalService } from "../pets/petAppraisalService.ts";
 
 /**
  * Stage 5.6 正式遊戲整合（?play=starsprout）：男女初心者在星芽原野實際遊玩。
@@ -106,6 +107,9 @@ export interface PlayApi {
     equip(id: number | null): boolean;
     reset(): void;
     list(): { id: number; stage: number; affixes: unknown }[];
+    bag(): { id: string; kind: string; affixes: unknown }[];
+    appraiseItem(itemId: string): Promise<{ ok: boolean; affixes: unknown }>;
+    hatchItem(itemId: string): number | null;
   };
   bench(seconds: number): Promise<BenchReport>;
 }
@@ -174,6 +178,9 @@ class StarsproutGame {
   private readonly rng = createRng(Number(this.params.get("seed") ?? Date.now()) >>> 0);
   private readonly pets: PetManager;
   private readonly merchant: PetMerchantService;
+  /** 星靈鑑定服務（Claude B 鑑定視窗規格 V2.1）；整合頁暫時在背包直接呼叫 */
+  private readonly appraisal: PetAppraisalService;
+  private reqSeq = 0;
   private readonly follower: PetFollower;
   private readonly loot = new FieldLoot(FIELD_TEST.pickupRadius, FIELD_TEST.lootLifetime);
   private readonly lootMeshes = new Map<number, Mesh>();
@@ -264,6 +271,7 @@ class StarsproutGame {
     }
     this.pets = new PetManager(petCfgJson as unknown as PetConfig, this.rng, mode, saved);
     this.merchant = createPetMerchantService(this.pets);
+    this.appraisal = createPetAppraisalService(this.pets);
     this.pets.on(() => this.persist());
     this.follower = new PetFollower(scene);
 
@@ -669,9 +677,21 @@ class StarsproutGame {
     if (this.panelTab === "bag") {
       line(p.enabled ? (p.mode === "preview" ? "<small>寵物與掉落：<b>測試設定</b>（不是正式平衡數值）</small>" : "<small>寵物：正式設定</small>") : `<span style="color:#ffb0b0">${p.disabledReason}</span>`);
       line(ITEM_IDS.map((k) => `<span style="color:${ITEM_COLOR[k]}">●</span> ${ITEM_LABEL[k]} <b>${p.save.items[k]}</b>`).join("　"));
-      const r = row();
-      for (const s of ["seed", "egg", "birdEgg"] as const)
-        btn(r, `孵化${ITEM_LABEL[s]}`, () => this.afterPetChange(p.hatch(s, this.petClock) ? `開始孵化${ITEM_LABEL[s]}` : `背包沒有${ITEM_LABEL[s]}`), p.enabled && p.save.items[s] > 0);
+      // 每一顆種子／蛋都是獨立個體：可以先到寵物商人鑑定（詞條跟著這一顆），再孵化
+      if (p.enabled) {
+        const bag = p.bag();
+        if (!bag.length) line("<small>背包沒有種子或蛋：打倒怪物會掉落。</small>");
+        for (const it of bag) {
+          const d = line(
+            `<span style="color:${ITEM_COLOR[it.kind]}">●</span> ${ITEM_LABEL[it.kind]} <small>${it.id.replace("item:", "#")}</small>　詞條：${it.affixes ? (it.affixes.length ? it.affixes.map((a) => affixText(p.cfg, a)).join("、") : "沒有屬性") : "未鑑定"}`,
+          );
+          const r = document.createElement("div");
+          r.className = "map-row";
+          d.appendChild(r);
+          btn(r, "鑑定（寵物商人・測試）", () => void this.appraiseItemVia(it.id), it.affixes === null);
+          btn(r, "孵化", () => this.afterPetChange(p.hatch(it.kind, this.petClock, it.id) ? `開始孵化${ITEM_LABEL[it.kind]}${it.affixes ? "（詞條跟著寵物）" : ""}` : "不能孵化"));
+        }
+      }
       line(`角色屬性（基礎 → 含寵物）：攻擊 ${b.attack} → <b>${st.attack}</b>｜攻速 ${b.attackSpeed} → <b>${st.attackSpeed}</b>（上限 ${CORE_RULES.maxAttackSpeed}）｜防禦 ${b.defense} → <b>${st.defense}</b>｜生命 ${b.maxHp} → <b>${st.maxHp}</b>`);
       const t = this.combat.tuning;
       line(`<small>戰鬥（測試設定）：每下 ${t.attackDamage} 傷害、${t.attackInterval.toFixed(3)} 秒一下、受到傷害 ×${t.damageTakenMul.toFixed(2)}｜擊倒 ${this.kills}、掉落 ${this.dropCount}、撿到 ${this.picked}</small>`);
@@ -745,6 +765,12 @@ class StarsproutGame {
       ta.value = JSON.stringify(r);
       body.appendChild(ta);
     }
+  }
+
+  private async appraiseItemVia(itemId: string): Promise<{ ok: boolean; affixes: unknown }> {
+    const r = await this.appraisal.appraise(itemId, `play-${Date.now()}-${++this.reqSeq}`);
+    this.afterPetChange(r.ok ? `鑑定結果：${r.data.item.affixes?.length ? r.data.item.affixes.map((a) => affixText(this.pets.cfg, a)).join("、") : "沒有屬性"}（永久固定，孵化後跟著寵物）` : r.message);
+    return { ok: r.ok, affixes: r.ok ? r.data.item.affixes : null };
   }
 
   private async appraiseVia(petId: number): Promise<void> {
@@ -942,6 +968,14 @@ class StarsproutGame {
           self.afterPetChange("");
         },
         list: () => p.save.pets.map((x) => ({ id: x.id, stage: x.stage, affixes: x.affixes })),
+        bag: () => p.bag().map((b) => ({ id: b.id, kind: b.kind, affixes: b.affixes })),
+        appraiseItem: (itemId) => self.appraiseItemVia(itemId),
+        hatchItem: (itemId) => {
+          const it = p.bag().find((b) => b.id === itemId);
+          const pet = it ? p.hatch(it.kind, self.petClock, itemId) : null;
+          self.afterPetChange("");
+          return pet?.id ?? null;
+        },
       },
       bench: (s) => self.bench(s),
     };

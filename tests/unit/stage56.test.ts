@@ -77,9 +77,9 @@ test("寵物商人服務（B 線介面）：列出可鑑定寵物、鑑定一次
   const svc = createPetMerchantService(m);
   assert.equal(svc.available, true);
   m.save.items.birdEgg = 1;
-  const p = m.hatch("birdEgg", 0)!;
   let list = await svc.appraisableItems("birdEgg");
-  assert.ok(list.ok && list.data.length === 0); // 還沒孵化
+  assert.ok(list.ok && list.data.length === 1 && list.data[0]!.itemId.startsWith("item:")); // 孵化前的鳥蛋個體
+  const p = m.hatch("birdEgg", 0)!;
   m.tick(m.tuning.hatchSeconds! * 1000);
   list = await svc.appraisableItems("birdEgg");
   assert.ok(list.ok && list.data.length === 1 && list.data[0]!.itemId === `pet:${p.id}`);
@@ -97,4 +97,57 @@ test("寵物商人服務（B 線介面）：列出可鑑定寵物、鑑定一次
   assert.equal(off.available, false);
   const r = await off.appraisableItems("seed");
   assert.ok(!r.ok && r.reason === "unavailable");
+});
+
+test("寵物鑑定服務（B 線規格 V2.1）：個體物品、孵化前鑑定、冪等、不可重鑑、物品不變、孵化後詞條跟著寵物", async () => {
+  const { createPetAppraisalService } = await import("../../src/pets/petAppraisalService.ts");
+  const { validateAffixes, parseSave } = await import("../../src/pets/petSystem.ts");
+  const m = new PetManager(cfg, createRng(11), "preview");
+  const svc = createPetAppraisalService(m);
+  assert.equal(svc.available, true);
+  assert.equal(svc.testData, true);
+  m.giveItem("seed", 2);
+  m.giveItem("birdEgg", 1);
+  const inv = await svc.inventory();
+  assert.ok(inv.ok && inv.data.length === 3 && inv.data.every((x) => !x.appraised && x.affixes === null));
+  const ids = inv.ok ? inv.data.map((x) => x.id) : [];
+  assert.equal(new Set(ids).size, 3); // 同名的兩顆種子是不同個體
+  const q = await svc.quote(ids[0]!);
+  assert.ok(q.ok && q.data.fee === 0 && q.data.test);
+  const a1 = await svc.appraise(ids[0]!, "req-1");
+  assert.ok(a1.ok && a1.data.item.appraised && validateAffixes(cfg, a1.data.item.affixes as never).length === 0);
+  // 重送同一個 requestId → 同一個結果
+  const a1b = await svc.appraise(ids[0]!, "req-1");
+  assert.deepEqual(a1b, a1);
+  // 新請求但已鑑定 → alreadyAppraised
+  const a1c = await svc.appraise(ids[0]!, "req-2");
+  assert.ok(!a1c.ok && a1c.reason === "alreadyAppraised");
+  // 另一顆種子各自鑑定、數量不變
+  assert.equal(m.save.items.seed, 2);
+  const inv2 = await svc.inventory();
+  assert.ok(inv2.ok && inv2.data.length === 3 && inv2.data.filter((x) => x.appraised).length === 1);
+  // 找不到
+  const nf = await svc.appraise("item:999", "req-3");
+  assert.ok(!nf.ok && nf.reason === "notAppraisable");
+  // 存讀檔保留
+  const back = parseSave(m.serialize());
+  assert.deepEqual(back.bag!.find((b) => b.id === ids[0])!.affixes, a1.ok ? a1.data.item.affixes : null);
+  // 孵化指定的那一顆：詞條跟著寵物，之後也不能再鑑定
+  const pet = m.hatch("seed", 0, ids[0])!;
+  assert.deepEqual(pet.affixes, a1.ok ? a1.data.item.affixes : null);
+  assert.equal(m.appraise(pet.id).ok, false);
+  assert.equal(m.save.items.seed, 1);
+  // 正式設定：費用未定案 → 不開放
+  const off = createPetAppraisalService(new PetManager(cfg, createRng(1), "official"));
+  assert.equal(off.available, false);
+  assert.ok(!(await off.inventory()).ok);
+});
+
+test("詞條檢查：超過 4 條、重複、數值不在清單、未知屬性都擋下", async () => {
+  const { validateAffixes } = await import("../../src/pets/petSystem.ts");
+  assert.deepEqual(validateAffixes(cfg, []), []);
+  assert.ok(validateAffixes(cfg, [{ stat: "attack", value: 12 }]).length);
+  assert.ok(validateAffixes(cfg, [{ stat: "attack", value: 10 }, { stat: "attack", value: 15 }]).length);
+  assert.ok(validateAffixes(cfg, [{ stat: "luck" as never, value: 1 }]).length);
+  assert.ok(validateAffixes(cfg, [{ stat: "attack", value: 10 }, { stat: "attackSpeed", value: 2 }, { stat: "defense", value: 10 }, { stat: "maxHp", value: 10 }, { stat: "maxHp", value: 15 }]).length);
 });

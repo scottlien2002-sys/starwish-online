@@ -214,18 +214,50 @@ export interface Pet {
   obtainedAt: number; // 毫秒
   lastTickAt: number;
   affixes: PetAffix[] | null; // null = 尚未鑑定
+  appraisedAt?: number;
+}
+
+/**
+ * 背包裡的一顆種子／孵化蛋／鳥蛋（每一顆都是獨立個體，不能只有數量）。
+ * 可以在孵化前到寵物商人鑑定；詞條跟著個體走，孵化後成為寵物的詞條（方案 A：一次固定）。
+ */
+export interface PetItem {
+  id: string; // "item:<流水號>"，存檔後不變、不重複使用
+  kind: PetSourceId;
+  obtainedAt: number;
+  affixes: PetAffix[] | null;
+  appraisedAt?: number;
 }
 
 export interface PetSave {
   version: 1;
   nextId: number;
-  items: Record<ItemId, number>;
+  items: Record<ItemId, number>; // 種子／蛋／鳥蛋的數量＝bag 裡同種個體的數量（顯示用）
   pets: Pet[];
   equippedId: number | null;
+  /** 種子／孵化蛋／鳥蛋個體（舊存檔沒有 → 讀檔時依數量補上） */
+  bag?: PetItem[];
+  nextItemId?: number;
+  /** 寵物商人鑑定紀錄（requestId 冪等：同一個請求只處理一次） */
+  appraisalLog?: { requestId: string; itemId: string; charged: number | null }[];
+}
+
+const SOURCE_KINDS: readonly PetSourceId[] = ["seed", "egg", "birdEgg"];
+
+/** 讓 bag 與數量一致：數量比個體多 → 補未鑑定個體；比個體少 → 數量改成個體數 */
+export function syncBag(save: PetSave, now = 0): PetItem[] {
+  if (!save.bag) save.bag = [];
+  if (!save.nextItemId) save.nextItemId = 1;
+  for (const k of SOURCE_KINDS) {
+    const have = save.bag.filter((b) => b.kind === k).length;
+    for (let i = have; i < save.items[k]; i++) save.bag.push({ id: `item:${save.nextItemId++}`, kind: k, obtainedAt: now, affixes: null });
+    save.items[k] = save.bag.filter((b) => b.kind === k).length;
+  }
+  return save.bag;
 }
 
 export function newSave(): PetSave {
-  return { version: 1, nextId: 1, items: { seed: 0, egg: 0, birdEgg: 0, monsterMaterial: 0, shopFeed: 0 }, pets: [], equippedId: null };
+  return { version: 1, nextId: 1, items: { seed: 0, egg: 0, birdEgg: 0, monsterMaterial: 0, shopFeed: 0 }, pets: [], equippedId: null, bag: [], nextItemId: 1, appraisalLog: [] };
 }
 
 export function parseSave(json: string | null): PetSave {
@@ -237,7 +269,12 @@ export function parseSave(json: string | null): PetSave {
     for (const k of ITEM_IDS) items[k] = Math.max(0, Math.floor(Number(v.items[k]) || 0));
     const pets = v.pets.filter((p): p is Pet => !!p && typeof p.id === "number" && typeof p.species === "string");
     const equippedId = pets.some((p) => p.id === v.equippedId) ? (v.equippedId as number) : null;
-    return { version: 1, nextId: v.nextId, items, pets, equippedId };
+    const bag = Array.isArray(v.bag) ? v.bag.filter((b): b is PetItem => !!b && typeof b.id === "string" && SOURCE_KINDS.includes(b.kind)) : [];
+    const nextItemId = Math.max(Number(v.nextItemId) || 1, ...bag.map((b) => Number(b.id.replace(/^item:/, "")) + 1 || 1));
+    const appraisalLog = Array.isArray(v.appraisalLog) ? v.appraisalLog.slice(-100) : [];
+    const save: PetSave = { version: 1, nextId: v.nextId, items, pets, equippedId, bag, nextItemId, appraisalLog };
+    syncBag(save);
+    return save;
   } catch {
     return newSave();
   }
@@ -251,17 +288,26 @@ export function rollDrops(rng: Rng, t: PetTuning): ItemId[] {
   return ITEM_IDS.filter((k) => rng.next() < (rates[k] ?? 0));
 }
 
-export function addItems(save: PetSave, items: readonly ItemId[]): void {
-  for (const k of items) save.items[k] += 1;
+export function addItems(save: PetSave, items: readonly ItemId[], now = 0): void {
+  syncBag(save, now);
+  for (const k of items) {
+    save.items[k] += 1;
+    if ((SOURCE_KINDS as readonly string[]).includes(k)) save.bag!.push({ id: `item:${save.nextItemId!++}`, kind: k as PetSourceId, obtainedAt: now, affixes: null });
+  }
 }
 
 /** 用背包裡的種子／蛋／鳥蛋開始孵化（成為階段 0 的寵物） */
-export function startHatch(save: PetSave, cfg: PetConfig, source: PetSourceId, now: number): Pet | null {
-  if (save.items[source] <= 0) return null;
+export function startHatch(save: PetSave, cfg: PetConfig, source: PetSourceId, now: number, itemId?: string): Pet | null {
+  const bag = syncBag(save, now);
+  const idx = itemId ? bag.findIndex((b) => b.id === itemId && b.kind === source) : bag.findIndex((b) => b.kind === source);
+  if (idx < 0) return null;
   const src = cfg.sources.find((s) => s.id === source);
   if (!src) return null;
+  const [item] = bag.splice(idx, 1);
   save.items[source] -= 1;
-  const pet: Pet = { id: save.nextId++, source, species: src.species, stage: 0, exp: 0, feedCount: 0, obtainedAt: now, lastTickAt: now, affixes: null };
+  // 孵化前鑑定過的詞條跟著個體進入寵物（方案 A：不重抽、不改變）
+  const pet: Pet = { id: save.nextId++, source, species: src.species, stage: 0, exp: 0, feedCount: 0, obtainedAt: now, lastTickAt: now, affixes: item!.affixes };
+  if (item!.appraisedAt !== undefined) pet.appraisedAt = item!.appraisedAt;
   save.pets.push(pet);
   return pet;
 }
@@ -376,10 +422,33 @@ export type AppraiseResult = { ok: true; affixes: PetAffix[] } | { ok: false; re
 export function appraisePet(save: PetSave, cfg: PetConfig, t: PetTuning, rng: Rng, petId: number, mode: "official" | "preview" = "official"): AppraiseResult {
   const pet = save.pets.find((p) => p.id === petId);
   if (!pet) return { ok: false, reason: "not-found" };
-  if (pet.stage === 0) return { ok: false, reason: "egg" };
+  // 孵化中（階段 0）也可以鑑定：與「在寵物商人鑑定種子／蛋本身」同一套規則
   if (pet.affixes !== null) return { ok: false, reason: "already-appraised" };
   pet.affixes = appraise(cfg, t, rng, mode);
   return { ok: true, affixes: pet.affixes };
+}
+
+/** 鑑定背包裡的種子／孵化蛋／鳥蛋個體（方案 A：一次固定；不新增、不刪除、不改數量） */
+export function appraiseItem(save: PetSave, cfg: PetConfig, t: PetTuning, rng: Rng, itemId: string, mode: "official" | "preview" = "official", now = 0): AppraiseResult {
+  const item = syncBag(save).find((b) => b.id === itemId);
+  if (!item) return { ok: false, reason: "not-found" };
+  if (item.affixes !== null) return { ok: false, reason: "already-appraised" };
+  item.affixes = appraise(cfg, t, rng, mode);
+  item.appraisedAt = now;
+  return { ok: true, affixes: item.affixes };
+}
+
+/** 詞條是否符合正式規格（0～4 條、同種最多一條、數值在確認清單內）；空陣列＝符合 */
+export function validateAffixes(cfg: PetConfig, affixes: readonly PetAffix[]): string[] {
+  const e: string[] = [];
+  if (affixes.length > cfg.appraisal.maxAffixes) e.push("超過 4 條");
+  if (new Set(affixes.map((a) => a.stat)).size !== affixes.length) e.push("同一種屬性重複");
+  for (const a of affixes) {
+    const entry = cfg.appraisal.stats.find((s) => s.stat === a.stat);
+    if (!entry) e.push(`未知屬性 ${a.stat}`);
+    else if (!entry.values.includes(a.value)) e.push(`${a.stat} 數值 ${a.value} 不在確認清單內`);
+  }
+  return e;
 }
 
 // ---------------------------------------------------------------- 套用到角色

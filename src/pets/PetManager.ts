@@ -8,8 +8,10 @@ import type { Rng } from "../core/rng.ts";
 import {
   addItems,
   applyPetBonus,
+  appraiseItem,
   appraisePet,
   missingTuning,
+  syncBag,
   equip,
   equippedPet,
   evolve,
@@ -26,6 +28,7 @@ import {
   type ItemId,
   type Pet,
   type PetConfig,
+  type PetItem,
   type PetSave,
   type PetSourceId,
   type PetTuning,
@@ -78,15 +81,16 @@ export class PetManager {
     if (!this.enabled) return [];
     const items = rollDrops(this.rng, this.tuning);
     if (items.length) {
-      addItems(this.save, items);
+      addItems(this.save, items, Date.now());
       this.emit({ type: "drops", items });
     }
     return items;
   }
 
-  hatch(source: PetSourceId, now: number): Pet | null {
+  /** itemId：指定要孵化的那一顆（孵化前鑑定過的詞條會跟著進入寵物）；省略 = 同種最早取得的一顆 */
+  hatch(source: PetSourceId, now: number, itemId?: string): Pet | null {
     if (!this.enabled) return null;
-    const p = startHatch(this.save, this.cfg, source, now);
+    const p = startHatch(this.save, this.cfg, source, now, itemId);
     if (p) this.emit({ type: "changed" });
     return p;
   }
@@ -103,6 +107,19 @@ export class PetManager {
     const ok = !!p && feedPet(this.save, p, food, this.tuning);
     if (ok) this.emit({ type: "changed" });
     return ok;
+  }
+
+  /** 背包裡的種子／孵化蛋／鳥蛋個體 */
+  bag(): PetItem[] {
+    return syncBag(this.save);
+  }
+
+  /** 鑑定背包裡的一顆種子／蛋（方案 A：一次固定） */
+  appraiseItem(itemId: string): AppraiseResult {
+    if (!this.enabled) return { ok: false, reason: "not-found" };
+    const r = appraiseItem(this.save, this.cfg, this.tuning, this.rng, itemId, this.mode, Date.now());
+    if (r.ok) this.emit({ type: "changed" });
+    return r;
   }
 
   /** 方案 A：只能鑑定一次，之後永久保留 */
@@ -144,7 +161,7 @@ export class PetManager {
   /** 測試設定專用：給物品（商店購買、測試按鈕）。正式模式沒有金幣系統，不提供 */
   giveItem(item: ItemId, n = 1): void {
     if (!this.enabled) return;
-    this.save.items[item] += n;
+    addItems(this.save, Array.from({ length: Math.max(0, Math.floor(n)) }, () => item), Date.now());
     this.emit({ type: "changed" });
   }
 

@@ -156,6 +156,22 @@ for (const name of browsers) {
       check("寵物加成反映到角色屬性；攻速 ≤ 160 且同步到攻擊動作", pf.stats.attackSpeed <= 160 && pf.attack.attackSpeed === pf.stats.attackSpeed, { stats: pf.stats, attack: pf.attack });
       await shot("pet");
 
+      // 寵物商人鑑定（B 線規格 V2.1）：孵化前鑑定種子個體 → 孵化指定的那一顆 → 詞條跟著寵物；再鑑定被拒
+      const item = await page.evaluate(async () => {
+        const p = window.__starwishPlay.pet;
+        p.give("seed", 2);
+        const bag = p.bag().filter((b) => b.kind === "seed" && b.affixes === null);
+        const target = bag[0].id;
+        const r1 = await p.appraiseItem(target);
+        const r2 = await p.appraiseItem(target);
+        const other = p.bag().find((b) => b.id === bag[1].id)?.affixes ?? "missing";
+        const petId = p.hatchItem(target);
+        const pet = p.list().find((x) => x.id === petId);
+        return { target, r1, r2, other, petAffixes: JSON.stringify(pet?.affixes), itemAffixes: JSON.stringify(r1.affixes) };
+      });
+      run.results.itemAppraisal = item;
+      check("寵物商人鑑定：孵化前鑑定個體、不能重鑑、另一顆不受影響、孵化後詞條相同", item.r1.ok && !item.r2.ok && item.other === null && item.petAffixes === item.itemAffixes && item.itemAffixes !== "null", item);
+
       // 存讀檔：重新載入後寵物與詞條相同
       const ok2 = await open();
       await frames(4);

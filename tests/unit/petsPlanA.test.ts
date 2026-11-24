@@ -93,7 +93,7 @@ test("正負混合：正負詞條使用同一個發揮比例（各階段皆同�
   }
 });
 
-test("重新鑑定不會重抽：第二次一律拒絕，詞條逐字不變；蛋不能鑑定", () => {
+test("重新鑑定不會重抽：第二次一律拒絕，詞條逐字不變；孵化中可鑑定一次", () => {
   const { s, id } = hatched(1);
   const first = appraisePet(s, cfg, T, createRng(42), id, "preview");
   assert.ok(first.ok);
@@ -106,7 +106,9 @@ test("重新鑑定不會重抽：第二次一律拒絕，詞條逐字不變；�
   const e = newSave();
   e.items.egg = 1;
   const egg = startHatch(e, cfg, "egg", 0)!;
-  assert.deepEqual(appraisePet(e, cfg, T, createRng(1), egg.id, "preview"), { ok: false, reason: "egg" });
+  // 孵化中（階段 0）也可以鑑定一次（與寵物商人鑑定種子／蛋本身相同規則）
+  assert.ok(appraisePet(e, cfg, T, createRng(1), egg.id, "preview").ok);
+  assert.equal(appraisePet(e, cfg, T, createRng(2), egg.id, "preview").ok, false);
   assert.deepEqual(appraisePet(e, cfg, T, createRng(1), 999, "preview"), { ok: false, reason: "not-found" });
 });
 
