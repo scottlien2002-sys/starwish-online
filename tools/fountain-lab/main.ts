@@ -304,7 +304,8 @@ function petMerchantViews(): Record<string, View> {
   const w = petMerchantPose(16);
   const b0 = PET_MERCHANT.stations[0]!;
   const me = (p: { x: number; z: number }, h: number): [number, number, number] => [p.x, h, p.z];
-  const player = { x: Math.sin((b0 * Math.PI) / 180) * 13.6, z: Math.cos((b0 * Math.PI) / 180) * 13.6 };
+  // 玩家站在商人外側 2.8 m（避開 r 18.6 的路燈，鏡頭略偏 10°）
+  const player = { x: Math.sin(((b0 - 4) * Math.PI) / 180) * 13.6, z: Math.cos(((b0 - 4) * Math.PI) / 180) * 13.6 };
   return {
     pm_front: { target: me(s0, 0.78), alpha: alphaFrom(b0), beta: 1.47, radius: 3.0, fov: 0.8, mt: 4 },
     pm_q45: { target: me(s0, 0.75), alpha: alphaFrom(b0 + 42), beta: 1.38, radius: 3.2, fov: 0.8, mt: 4 },
@@ -312,7 +313,7 @@ function petMerchantViews(): Record<string, View> {
     pm_plaza: { target: me(s0, 1.2), alpha: alphaFrom(b0 + 22), beta: 1.32, radius: 10, fov: 0.85, mt: 4 },
     pm_walk: { target: me(w, 0.75), alpha: alphaFrom(w.bearing + 70), beta: 1.38, radius: 4.2, fov: 0.8, mt: 16 },
     pm_spawn: { target: [0, 0.85, -12.5], alpha: -H, beta: VILLAGE_SPAWN_CAMERA.beta, radius: 9, fov: 0.9, mt: 4 },
-    pm_iphone: { target: [player.x, 0.85, player.z], alpha: alphaFrom(b0), beta: 1.32, radius: 9, fov: 0.9, mt: 4 },
+    pm_iphone: { target: [player.x, 0.85, player.z], alpha: alphaFrom(b0 - 14), beta: 1.32, radius: 9, fov: 0.9, mt: 4 },
     pm_path: { target: [0, 0, 0], alpha: -H, beta: 0.0001, radius: 45, ortho: 14.5, mt: 4 },
     pm_anim: { target: [-5.6, 1.0, -9.2], alpha: alphaFrom(200), beta: 1.3, radius: 11, fov: 0.85 },
   };
@@ -547,8 +548,10 @@ load().catch((e: unknown) => {
   /** 寵物商人對話面板：open／choose:<id>／kind:<kind>／back／close；回傳目前畫面文字 */
   petPanel: async (a: string) => {
     if (a === "open") await petPanel.open();
-    else if (a === "close") petPanel.close();
-    else {
+    else if (a === "close") {
+      petPanel.close();
+      await new Promise((r) => setTimeout(r, 50));
+    } else {
       const el = document.querySelector<HTMLButtonElement>(`.pet-merchant-panel button[data-act="${a}"]`);
       el?.click();
       await new Promise((r) => setTimeout(r, 50));
