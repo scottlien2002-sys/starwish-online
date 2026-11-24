@@ -53,9 +53,10 @@ function roadDist(p: { x: number; z: number }, bearing: number): number {
   return Math.hypot(p.x - s * dx, p.z - s * dz);
 }
 
-test("星芽村 V1.3：120×120 m、六大職業據點＋倉庫、沒有刺客、鐵匠鋪只有 1 位 NPC", () => {
+test("星芽村 V1.3：120×120 m、六大職業據點＋倉庫＋星願商會、沒有刺客、鐵匠鋪只有 1 位 NPC", () => {
   assert.equal(VILLAGE_HALF * 2, 120);
-  assert.deepEqual(BUILDINGS.map((b) => b.name), ["劍士軍團", "騎士軍團", "法師軍團", "教堂", "馬戲團", "倉庫", "鐵匠鋪"]);
+  assert.deepEqual(BUILDINGS.map((b) => b.name), ["劍士軍團", "騎士軍團", "法師軍團", "教堂", "馬戲團", "倉庫", "鐵匠鋪", "星願商會"]);
+  assert.equal(NPC_SPOTS.filter((n) => n.id === "guild").length, 1);
   assert.ok(!BUILDINGS.some((b) => /刺客/.test(b.name + b.role)));
   const roles = BUILDINGS.map((b) => b.role).join("、");
   for (const r of ["劍士", "騎士", "鐵匠", "法師", "祭司", "小丑"]) assert.ok(roles.includes(r), r);

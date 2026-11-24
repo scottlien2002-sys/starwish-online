@@ -15,6 +15,7 @@ import type { QualitySettings } from "../../render/quality.ts";
 import { summarizeFrames } from "../../render/benchmark.ts";
 import {
   ARRIVAL_SPOT,
+  BUILDINGS,
   BOX_COLLIDERS,
   CIRCLE_COLLIDERS,
   FOUNTAIN,
@@ -414,7 +415,7 @@ class VillagePage {
     lines.push(`網址參數 ${location.search || "(無)"}`);
     lines.push(`裝置 ${navigator.userAgent}`);
     lines.push(`模式 ${this.modeName()}：渲染畫質 ${this.quality.level}（解析度上限 ${this.quality.maxPixelRatio}x、後製 ${this.quality.postProcess ? "開" : "關"}、陰影 ${this.quality.shadows.filter === "contact" ? "柔和 PCSS" : "PCF"} ${this.quality.shadows.mapSize}${this.shadowQ === "medium" ? "、PCSS32" : ""}）／載入 ${Math.round(this.loadMs)} ms`);
-    lines.push(`村莊 V1.3 佔位網格 ${ws.meshes}、三角形 ${ws.triangles}、文字標籤 ${ws.labels}；建築 7、NPC 站位 ${NPC_SPOTS.length}、出生／復活點 ${RESPAWN_SLOTS.length}、傳送門 ${PORTALS.length}（開放 ${PORTALS.filter((p) => p.open).length}）`);
+    lines.push(`村莊 V1.3 佔位網格 ${ws.meshes}、三角形 ${ws.triangles}、文字標籤 ${ws.labels}；建築 ${BUILDINGS.length}、NPC 站位 ${NPC_SPOTS.length}、出生／復活點 ${RESPAWN_SLOTS.length}、傳送門 ${PORTALS.length}（開放 ${PORTALS.filter((p) => p.open).length}）`);
     lines.push(`碰撞 圓形 ${CIRCLE_COLLIDERS.length}、矩形 ${BOX_COLLIDERS.length}；鏡頭避障 ${this.camera.obstructEnabled ? "開" : "關"}`);
     lines.push(`目前畫面 Draw Calls ${this.perf.drawCalls}、三角形 ${Math.round(this.scene.getActiveIndices() / 3)}`);
     if (this.artP3) {
