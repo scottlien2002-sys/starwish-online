@@ -304,6 +304,7 @@ function petMerchantViews(): Record<string, View> {
   const w = petMerchantPose(16);
   const b0 = PET_MERCHANT.stations[0]!;
   const me = (p: { x: number; z: number }, h: number): [number, number, number] => [p.x, h, p.z];
+  const polarDeg = (b: number, r: number): { x: number; z: number } => ({ x: Math.sin((b * Math.PI) / 180) * r, z: Math.cos((b * Math.PI) / 180) * r });
   // 玩家站在商人外側 2.8 m（避開 r 18.6 的路燈，鏡頭略偏 10°）
   const player = { x: Math.sin(((b0 - 4) * Math.PI) / 180) * 13.6, z: Math.cos(((b0 - 4) * Math.PI) / 180) * 13.6 };
   return {
@@ -315,7 +316,8 @@ function petMerchantViews(): Record<string, View> {
     pm_spawn: { target: [0, 0.85, -12.5], alpha: -H, beta: VILLAGE_SPAWN_CAMERA.beta, radius: 9, fov: 0.9, mt: 4 },
     pm_iphone: { target: [player.x, 0.85, player.z], alpha: alphaFrom(b0 - 14), beta: 1.32, radius: 9, fov: 0.9, mt: 4 },
     pm_path: { target: [0, 0, 0], alpha: -H, beta: 0.0001, radius: 45, ortho: 14.5, mt: 4 },
-    pm_anim: { target: [-5.6, 1.0, -9.2], alpha: alphaFrom(200), beta: 1.3, radius: 11, fov: 0.85 },
+    // 巡走動畫：從第 1 個停留點（202.5°）往 247.5° 走；鏡頭在廣場外側（路燈 r 18.6 之內），看向 212° 一帶
+    pm_anim: { target: me(polarDeg(214, PET_MERCHANT.patrolR), 0.85), alpha: alphaFrom(214), beta: 1.33, radius: 6.2, fov: 0.85 },
   };
 }
 

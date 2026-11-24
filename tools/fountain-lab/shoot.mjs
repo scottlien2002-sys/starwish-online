@@ -157,7 +157,7 @@ const pw = await loadPlaywright();
 const server = await serve(dist);
 // [瀏覽器, 模式, 畫質, lod, 截圖視角, 選項{ viewport, anim: [[名稱, 視角, 秒, fps]] }]
 const plan = [
-  ["chromium", "hq", "high", "hq", ["pm_spawn", "pm_front", "pm_q45", "pm_back", "pm_plaza", "pm_walk", "pm_path", "village_top"], { anim: [["pet_merchant", "pm_anim", 10, 15, 3]] }],
+  ["chromium", "hq", "high", "hq", ["pm_spawn", "pm_front", "pm_q45", "pm_back", "pm_plaza", "pm_walk", "pm_path", "village_top"], { anim: [["pet_merchant", "pm_anim", 10, 15, 5]] }],
   ["chromium", "lite-low", "low", "lite", ["pm_spawn", "pm_front", "pm_q45", "pm_back", "pm_plaza", "pm_walk"]],
   // iPhone 直向（390×844，DPR 2）：出生點、站在商人前、對話面板（占位功能）
   ["chromium", "hq-portrait", "high", "hq", ["pm_spawn", "pm_iphone"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 }, panel: true }],
