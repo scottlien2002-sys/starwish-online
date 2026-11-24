@@ -19,6 +19,7 @@ const portalsReport = process.argv[12] ?? "out/portals_report.json";
 const churchReport = process.argv[13] ?? "out/church_report.json";
 const circusReport = process.argv[14] ?? "out/circus_report.json";
 const envReport = process.argv[15] ?? "out/env_report.json";
+const guildReport = process.argv[16] ?? "out/guild_report.json";
 mkdirSync(out, { recursive: true });
 const report = { startedAt: new Date().toISOString(), checks: {}, runs: [] };
 let fail = 0;
@@ -151,7 +152,7 @@ let fail = 0;
     const fn = br.layout.front_normal;
     ck("佈告欄告示面朝廣場（正面法線指向噴泉）、委託 NPC 站在正面側", fn[0] * -L.BOARD.x + fn[1] * -L.BOARD.z > 0 && (bn.x - L.BOARD.x) * fn[0] + (bn.z - L.BOARD.z) * fn[1] > 0, { front_normal: fn, npc: bn });
     // 鐵匠鋪與倉庫
-    for (const [id, name, file] of [["smith", "鐵匠鋪", smithReport], ["warehouse", "倉庫", warehouseReport], ["church", "祭司教堂", churchReport], ["circus", "小丑馬戲團", circusReport]]) {
+    for (const [id, name, file] of [["smith", "鐵匠鋪", smithReport], ["warehouse", "倉庫", warehouseReport], ["church", "祭司教堂", churchReport], ["circus", "小丑馬戲團", circusReport], ["guild", "星願商會", guildReport]]) {
       const r = JSON.parse(readFileSync(file, "utf8"));
       const b = L.BUILDINGS.find((x) => x.id === id);
       const box = L.BOX_COLLIDERS.find((c) => c.kind === `building:${id}`);
@@ -181,6 +182,14 @@ let fail = 0;
       const npc = L.NPC_SPOTS.find((n) => n.id === id);
       const box = L.BOX_COLLIDERS.find((c) => c.kind === `building:${id}`);
       ck(`${name}轉職 NPC 站位不變（正門前 2.5 m、在碰撞箱外）`, Math.abs(Math.hypot(npc.x, npc.z) - (b.front - 2.5)) < 0.01 && !L.insideBox(box, npc.x, npc.z), { npc });
+    }
+    // 星願商會：唯一一位商會 NPC、在碰撞箱外、站位可走、正門在 NPC 旁（門與 NPC 距離 ≤ 3 m）
+    {
+      const g = L.NPC_SPOTS.filter((n) => n.id === "guild");
+      const box = L.BOX_COLLIDERS.find((c) => c.kind === "building:guild");
+      const gr = JSON.parse(readFileSync(guildReport, "utf8"));
+      const dd = g[0] ? Math.hypot(g[0].x - gr.layout.door[0], g[0].z - gr.layout.door[1]) : 99;
+      ck("星願商會：只有一位商會 NPC、站在碰撞箱外的可走位置、正門就在旁邊（≤ 3 m）", g.length === 1 && !L.insideBox(box, g[0].x, g[0].z) && L.standable(g[0].x, g[0].z) && dd <= 3, { npc: g[0], door: gr.layout.door, doorDist: +dd.toFixed(2) });
     }
     // 環境美術：可走範圍內沒有高於 0.12 m 的頂點、面數在額度內
     {
@@ -228,12 +237,12 @@ const pw = await loadPlaywright();
 const server = await serve(dist);
 // [瀏覽器, 模式, 畫質, lod, 截圖視角, 選項{ viewport, anim: [[名稱, 視角, 秒, fps]] }]
 const plan = [
-  ["chromium", "hq", "high", "hq", ["village_top_full", "village_full", "village_full_ne", "church_front", "church_q45", "church_q45r", "church_back", "church_top", "church_npc", "church_eye", "circus_front", "circus_q45", "circus_q45r", "circus_back", "circus_top", "circus_npc", "env_edge", "env_east", "player_spawn_cam", "village_top", "south_plan", "south_wide", "board_front", "board_q45", "smith_front", "smith_q45", "smith_q45r", "smith_back", "smith_top", "smith_forge", "smith_counter", "smith_npc", "warehouse_front", "warehouse_q45", "warehouse_q45r", "warehouse_back", "warehouse_top", "portal_south", "portal_south_out", "portal_north", "portal_east", "portal_west", "portal_top", "gate_south", "player_arrival", "road_east", "north_plan", "north_wide", "north_trio", "mage_front", "mage_side", "mage_q45", "mage_q45r", "mage_top", "mage_npc", "mage_stairs", "mage_eye", "sword_front", "sword_side", "sword_q45", "sword_q45r", "sword_top", "sword_player_up", "sword_stairs", "sword_npc", "sword_eye", "platform_front", "platform_stair", "platform_wall"], { anim: [["portal_south", "portal_south", 3, 10]] }],
-  ["chromium", "lite-low", "low", "lite", ["village_top_full", "village_full", "church_front", "church_q45", "circus_front", "circus_q45", "env_edge", "player_spawn_cam", "village_top", "south_wide", "board_front", "smith_front", "smith_q45", "smith_forge", "warehouse_front", "warehouse_q45", "portal_south", "portal_east", "gate_south", "player_arrival", "north_wide", "mage_front", "mage_q45", "mage_top", "sword_front", "sword_q45", "sword_top", "platform_front", "platform_stair", "platform_wall"]],
+  ["chromium", "hq", "high", "hq", ["guild_front", "guild_q45", "guild_q45r", "guild_back", "guild_top", "guild_npc", "guild_window", "village_top_full", "village_full", "village_full_ne", "church_front", "church_q45", "church_q45r", "church_back", "church_top", "church_npc", "church_eye", "circus_front", "circus_q45", "circus_q45r", "circus_back", "circus_top", "circus_npc", "env_edge", "env_east", "player_spawn_cam", "village_top", "south_plan", "south_wide", "board_front", "board_q45", "smith_front", "smith_q45", "smith_q45r", "smith_back", "smith_top", "smith_forge", "smith_counter", "smith_npc", "warehouse_front", "warehouse_q45", "warehouse_q45r", "warehouse_back", "warehouse_top", "portal_south", "portal_south_out", "portal_north", "portal_east", "portal_west", "portal_top", "gate_south", "player_arrival", "road_east", "north_plan", "north_wide", "north_trio", "mage_front", "mage_side", "mage_q45", "mage_q45r", "mage_top", "mage_npc", "mage_stairs", "mage_eye", "sword_front", "sword_side", "sword_q45", "sword_q45r", "sword_top", "sword_player_up", "sword_stairs", "sword_npc", "sword_eye", "platform_front", "platform_stair", "platform_wall"], { anim: [["portal_south", "portal_south", 3, 10]] }],
+  ["chromium", "lite-low", "low", "lite", ["guild_front", "guild_q45", "village_top_full", "village_full", "church_front", "church_q45", "circus_front", "circus_q45", "env_edge", "player_spawn_cam", "village_top", "south_wide", "board_front", "smith_front", "smith_q45", "smith_forge", "warehouse_front", "warehouse_q45", "portal_south", "portal_east", "gate_south", "player_arrival", "north_wide", "mage_front", "mage_q45", "mage_top", "sword_front", "sword_q45", "sword_top", "platform_front", "platform_stair", "platform_wall"]],
   // iPhone 直向（390×844，DPR 2）
-  ["chromium", "hq-portrait", "high", "hq", ["church_npc", "circus_npc", "player_arrival", "smith_npc", "board_front", "player_spawn_cam", "mage_npc", "sword_npc", "platform_stair"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 } }],
+  ["chromium", "hq-portrait", "high", "hq", ["guild_npc", "church_npc", "circus_npc", "player_arrival", "smith_npc", "board_front", "player_spawn_cam", "mage_npc", "sword_npc", "platform_stair"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 } }],
   ["chromium", "lite-portrait", "low", "lite", ["player_arrival", "smith_npc", "player_spawn_cam", "sword_npc"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 } }],
-  ["webkit", "hq", "high", "hq", ["village_full", "church_q45", "circus_q45", "south_wide", "portal_south", "north_wide", "sword_q45", "mage_q45"]],
+  ["webkit", "hq", "high", "hq", ["guild_q45", "village_full", "church_q45", "circus_q45", "south_wide", "portal_south", "north_wide", "sword_q45", "mage_q45"]],
   ["webkit", "lite-low", "low", "lite", ["north_wide"]],
 ];
 
@@ -263,7 +272,7 @@ for (const [bname, mode, quality, lod, views, opts = {}] of plan) {
     run.textureMemory = await page.evaluate(() => window.__lab.textureMemory());
     await page.evaluate(() => window.__lab.setView("pano"));
     // 繪製次數：全部開啟 − 拿掉某一部分 ＝ 該部分（含陰影）；none＝只有灰色量體與地面
-    const PARTS = ["fountain", "plaza", "knight", "mage", "sword", "platform", "board", "smith", "warehouse", "portals", "church", "circus", "env"];
+    const PARTS = ["fountain", "plaza", "knight", "mage", "sword", "platform", "board", "smith", "warehouse", "portals", "church", "circus", "env", "guild"];
     const allOn = Object.fromEntries(PARTS.map((k) => [k, true]));
     const dc = { none: await page.evaluate((p) => window.__lab.drawCalls(p), Object.fromEntries(PARTS.map((k) => [k, false]))), all: await page.evaluate((p) => window.__lab.drawCalls(p), allOn) };
     run.partDrawCalls = {};

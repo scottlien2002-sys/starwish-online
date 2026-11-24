@@ -140,6 +140,14 @@ const VIEWS: Record<string, View> = {
   road_east: { target: [30, 0.5, 0], alpha: alphaFrom(270), beta: 1.15, radius: 16, fov: 0.85 },
   south_wide: { target: [-8, 3, -24], alpha: alphaFrom(20), beta: 1.22, radius: 50, fov: 0.85 },
   south_plan: { target: [-6, 0, -26], alpha: -H, beta: 0.0001, radius: 100, ortho: 24 },
+  // 星願商會（160°、中心 r 31）
+  guild_front: { target: [10.60, 4.4, -29.13], alpha: alphaFrom(340), beta: 1.45, radius: 22, fov: 0.8 },
+  guild_q45: { target: [10.60, 4.0, -29.13], alpha: alphaFrom(25), beta: 1.3, radius: 22, fov: 0.8 },
+  guild_q45r: { target: [10.60, 4.0, -29.13], alpha: alphaFrom(295), beta: 1.3, radius: 22, fov: 0.8 },
+  guild_back: { target: [10.60, 4.0, -29.13], alpha: alphaFrom(160), beta: 1.35, radius: 22, fov: 0.8 },
+  guild_top: { target: [10.60, 0, -29.13], alpha: alphaFrom(340), beta: 0.0001, radius: 80, ortho: 8 },
+  guild_npc: { target: [5.26, 0.85, -24.69], alpha: alphaFrom(355), beta: 1.25, radius: 9, fov: 0.9 },
+  guild_window: { target: [9.60, 1.8, -26.13], alpha: alphaFrom(345), beta: 1.45, radius: 6.5, fov: 0.85 },
   // 第三批：祭司教堂（66°、中心 r 33）、小丑馬戲團（128°、中心 r 31）、環境美術
   church_front: { target: [30.15, 7.5, 13.42], alpha: alphaFrom(246), beta: 1.47, radius: 34, fov: 0.8 },
   church_q45: { target: [30.15, 7.0, 13.42], alpha: alphaFrom(291), beta: 1.32, radius: 35, fov: 0.8 },
@@ -346,6 +354,7 @@ let portals: PortalP3 | null = null;
 let church: BuildingP3 | null = null;
 let circus: BuildingP3 | null = null;
 let env: EnvP3 | null = null;
+let guild: BuildingP3 | null = null;
 const state: { ready: boolean; error: string | null; loadMs: number } = { ready: false, error: null, loadMs: 0 };
 
 /** 已由正式模型取代的灰色量體（setView 不會再打開） */
@@ -471,7 +480,7 @@ async function captureFrames(view: string, secs: number, fps: number): Promise<s
 }
 
 /** 繪製次數：只開啟指定部分 */
-async function drawCalls(parts: { fountain: boolean; plaza: boolean; knight?: boolean; mage?: boolean; sword?: boolean; platform?: boolean; board?: boolean; smith?: boolean; warehouse?: boolean; portals?: boolean; church?: boolean; circus?: boolean; env?: boolean }): Promise<{ drawCalls: number; activeMeshes: number }> {
+async function drawCalls(parts: { fountain: boolean; plaza: boolean; knight?: boolean; mage?: boolean; sword?: boolean; platform?: boolean; board?: boolean; smith?: boolean; warehouse?: boolean; portals?: boolean; church?: boolean; circus?: boolean; env?: boolean; guild?: boolean }): Promise<{ drawCalls: number; activeMeshes: number }> {
   fx?.setEnabled(parts.fountain);
   plaza?.setEnabled(parts.plaza);
   knight?.setEnabled(parts.knight ?? true);
@@ -485,6 +494,7 @@ async function drawCalls(parts: { fountain: boolean; plaza: boolean; knight?: bo
   church?.setEnabled(parts.church ?? true);
   circus?.setEnabled(parts.circus ?? true);
   env?.setEnabled(parts.env ?? true);
+  guild?.setEnabled(parts.guild ?? true);
   await frames(4);
   const r = { drawCalls: inst.drawCallsCounter.current, activeMeshes: scene.getActiveMeshes().length };
   fx?.setEnabled(true);
@@ -493,7 +503,7 @@ async function drawCalls(parts: { fountain: boolean; plaza: boolean; knight?: bo
   mage?.setEnabled(true);
   sword?.setEnabled(true);
   platformArt?.setEnabled(true);
-  for (const b of [board, smith, warehouse, portals, church, circus, env]) b?.setEnabled(true);
+  for (const b of [board, smith, warehouse, portals, church, circus, env, guild]) b?.setEnabled(true);
   return r;
 }
 
@@ -550,8 +560,13 @@ async function load(): Promise<void> {
   for (const m of context) if (["bld_church", "roof_church", "bld_circus", "roof_circus"].includes(m.name)) m.setEnabled(false);
   REPLACED.add("church");
   REPLACED.add("circus");
+  // 第三批追加：星願商會
+  const gd = await loadGlb(`guild_${q2}.glb`);
+  guild = setupBuildingP3(scene, gd.meshes, "Guild", { lite, texBase: "./models/tex/", shadows: sh });
+  for (const m of context) if (["bld_guild", "roof_guild"].includes(m.name)) m.setEnabled(false);
+  REPLACED.add("guild");
   // 星晶每幀會動：不凍結它的世界矩陣
-  for (const m of [...f.meshes, ...p.meshes, ...k.meshes, ...mg.meshes, ...sw.meshes, ...pf.meshes, ...bd.meshes, ...sm.meshes, ...wh.meshes, ...pt.meshes, ...ch.meshes, ...cc.meshes, ...ev.meshes]) if (!fx.animated.includes(m) && !m.name.startsWith("Portal_fx") && !m.name.startsWith("Portal_rune")) m.freezeWorldMatrix();
+  for (const m of [...f.meshes, ...p.meshes, ...k.meshes, ...mg.meshes, ...sw.meshes, ...pf.meshes, ...bd.meshes, ...sm.meshes, ...wh.meshes, ...pt.meshes, ...ch.meshes, ...cc.meshes, ...ev.meshes, ...gd.meshes]) if (!fx.animated.includes(m) && !m.name.startsWith("Portal_fx") && !m.name.startsWith("Portal_rune")) m.freezeWorldMatrix();
   await scene.whenReadyAsync();
   state.loadMs = Math.round(performance.now() - t0);
   state.ready = true;
@@ -578,7 +593,7 @@ load().catch((e: unknown) => {
   flickerTime,
   captureFrames,
   drawCalls,
-  stats: () => ({ fountain: fx?.stats ?? null, plaza: plaza?.stats ?? null, knight: knight?.stats ?? null, mage: mage?.stats ?? null, sword: sword?.stats ?? null, platform: platformArt?.stats ?? null, board: board?.stats ?? null, smith: smith?.stats ?? null, warehouse: warehouse?.stats ?? null, portals: portals?.stats ?? null, portalFx: portals?.fxStats ?? null, church: church?.stats ?? null, circus: circus?.stats ?? null, env: env?.stats ?? null }),
+  stats: () => ({ fountain: fx?.stats ?? null, plaza: plaza?.stats ?? null, knight: knight?.stats ?? null, mage: mage?.stats ?? null, sword: sword?.stats ?? null, platform: platformArt?.stats ?? null, board: board?.stats ?? null, smith: smith?.stats ?? null, warehouse: warehouse?.stats ?? null, portals: portals?.stats ?? null, portalFx: portals?.fxStats ?? null, church: church?.stats ?? null, circus: circus?.stats ?? null, env: env?.stats ?? null, guild: guild?.stats ?? null }),
   /** 全村共用貼圖快取：張數、像素、估計顯示記憶體（RGBA、含 mipmap ×1.33） */
   textureMemory: () => {
     const list = villageTextures(scene).map((t) => {
