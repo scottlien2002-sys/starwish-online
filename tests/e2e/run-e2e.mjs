@@ -2470,12 +2470,13 @@ for (const name of browsers) {
         const jumpOk = await waitState("Jump");
         const jumpY = await page.waitForFunction(() => window.__starwishAnim.info().jumpY > 0.1, null, { timeout: 8000 }).then(() => true, () => false);
         await shot(`${g}_jump`);
-        await waitState("Idle");
+        // 跳躍 1 秒（遊戲時間）：CI 軟體繪圖很慢時要等比較久；跳躍中按攻擊會被忽略（規則：彼此不打斷）
+        await waitState("Idle", 40000);
         await page.evaluate(() => window.__starwishAnim.press("attack"));
-        const atkOk = await waitState("Attack");
+        const atkOk = await waitState("Attack", 20000);
         await frames(8);
         await shot(`${g}_attack`);
-        await waitState("Idle");
+        await waitState("Idle", 40000);
         const atk = (await page.evaluate(() => window.__starwishAnim.info())).attack;
         run.results.push({ tag: `${g} attack`, atk });
         check(`${g}：攻擊 0.5 秒、命中事件 1 次、約在 0.2 秒`, Math.abs(atk.seconds - 0.5) < 1e-6 && atk.hits === 1 && atk.lastHitAt > 0.15 && atk.lastHitAt < 0.3, atk);
