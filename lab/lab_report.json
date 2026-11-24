@@ -1,0 +1,742 @@
+{
+ "startedAt": "2026-11-24T03:49:19.310Z",
+ "checks": {
+  "benches 位置＝既有碰撞（誤差 < 1 cm）": {
+   "ok": true,
+   "detail": {
+    "count": 8,
+    "colliders": 8,
+    "maxErr": 0.0006168623426758979
+   }
+  },
+  "crystal_lamps 位置＝既有碰撞（誤差 < 1 cm）": {
+   "ok": true,
+   "detail": {
+    "count": 4,
+    "colliders": 4,
+    "maxErr": 0.0006867120224530259
+   }
+  },
+  "lamps 位置＝既有碰撞（誤差 < 1 cm）": {
+   "ok": true,
+   "detail": {
+    "count": 9,
+    "colliders": 9,
+    "maxErr": 0.0004953290527801279
+   }
+  },
+  "花圃不擋道路、石階、NPC、出生點、佈告欄、鍛造台；高度 ≤ 0.25 m": {
+   "ok": true,
+   "detail": {
+    "beds": 10,
+    "samples": 270,
+    "issues": []
+   }
+  },
+  "創角出生點站在羅盤徽上（V1.3 出生點不變）": {
+   "ok": true,
+   "detail": {
+    "spawn": {
+     "id": "spawn",
+     "label": "出生點",
+     "x": 0,
+     "z": -12.5,
+     "yaw": -1.2246467991473532e-16
+    },
+    "compass": {
+     "x": 0,
+     "z": -14.55,
+     "r": 2.45
+    }
+   }
+  },
+  "道路寬度與方向＝V1.3（4 條、半寬 3 m）": {
+   "ok": true,
+   "detail": [
+    {
+     "bearing": 0,
+     "from": 23,
+     "to": 40,
+     "half": 3,
+     "h": 2
+    },
+    {
+     "bearing": 90,
+     "from": 17.95,
+     "to": 40,
+     "half": 3,
+     "h": 0
+    },
+    {
+     "bearing": 180,
+     "from": 17.95,
+     "to": 40,
+     "half": 3,
+     "h": 0
+    },
+    {
+     "bearing": 270,
+     "from": 17.95,
+     "to": 40,
+     "half": 3,
+     "h": 0
+    }
+   ]
+  },
+  "Lite 接地陰影帶頂點透明度（COLOR_0 為 RGBA）": {
+   "ok": true,
+   "detail": {
+    "type": "VEC4"
+   }
+  },
+  "騎士軍團尺寸、方位與 V1.3 相同": {
+   "ok": true,
+   "detail": {
+    "v13": {
+     "id": "knight",
+     "name": "騎士軍團",
+     "role": "騎士轉職",
+     "bearing": 332,
+     "w": 16,
+     "d": 14,
+     "eave": 9,
+     "top": 19,
+     "floor": 2,
+     "front": 27,
+     "shape": "castle"
+    },
+    "model": {
+     "bearing": 332,
+     "front": 27,
+     "w": 16,
+     "d": 14,
+     "top": 19,
+     "floor": 2,
+     "door": [
+      -14.07,
+      26.462
+     ]
+    }
+   }
+  },
+  "騎士軍團 lite 模型完全在原碰撞箱內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "x": [
+      -7.999,
+      7.999
+     ],
+     "y": [
+      0,
+      13.995
+     ],
+     "h": [
+      0,
+      19
+     ]
+    },
+    "collider": {
+     "kind": "building:knight",
+     "x": -15.962033134720288,
+     "z": 30.020218157203516,
+     "hw": 8,
+     "hd": 7,
+     "rot": 5.794493116621174,
+     "y0": 1.5,
+     "y1": 21
+    }
+   }
+  },
+  "騎士軍團 hq 模型完全在原碰撞箱內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "x": [
+      -7.989,
+      7.989
+     ],
+     "y": [
+      0,
+      13.995
+     ],
+     "h": [
+      0,
+      19
+     ]
+    },
+    "collider": {
+     "kind": "building:knight",
+     "x": -15.962033134720288,
+     "z": 30.020218157203516,
+     "hw": 8,
+     "hd": 7,
+     "rot": 5.794493116621174,
+     "y0": 1.5,
+     "y1": 21
+    }
+   }
+  },
+  "正門面向噴泉（門比建築中心更靠近噴泉）": {
+   "ok": true,
+   "detail": {
+    "door": [
+     -14.07,
+     26.462
+    ],
+    "doorR": "29.97",
+    "centerR": "34.00"
+   }
+  },
+  "騎士轉職 NPC 站位不變（正門前 2 m、在碰撞箱外）": {
+   "ok": true,
+   "detail": {
+    "npc": {
+     "id": "knight",
+     "name": "騎士軍團",
+     "role": "騎士轉職",
+     "x": -11.736789069647271,
+     "z": 22.073689821473174,
+     "yaw": 2.652900463031381,
+     "floor": 2,
+     "interactR": 3
+    }
+   }
+  },
+  "法師軍團尺寸、方位與 V1.3 相同": {
+   "ok": true,
+   "detail": {
+    "v13": {
+     "id": "mage",
+     "name": "法師軍團",
+     "role": "法師轉職",
+     "bearing": 26,
+     "w": 13,
+     "d": 13,
+     "eave": 8,
+     "top": 20,
+     "floor": 2,
+     "front": 27,
+     "shape": "tower"
+    },
+    "model": {
+     "bearing": 26,
+     "front": 27,
+     "w": 13,
+     "d": 13,
+     "top": 20,
+     "floor": 2,
+     "door": [
+      12.612,
+      25.858
+     ],
+     "stair_top": [
+      10.083,
+      20.672
+     ]
+    }
+   }
+  },
+  "法師軍團 lite 模型完全在原碰撞箱內、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "x": [
+      -5.955,
+      6.016
+     ],
+     "y": [
+      0,
+      12.906
+     ],
+     "h": [
+      0,
+      19.98
+     ]
+    },
+    "collider": {
+     "kind": "building:mage",
+     "x": 14.685433417434092,
+     "z": 30.109600551022094,
+     "hw": 6.5,
+     "hd": 6.5,
+     "rot": 0.4537856055185257,
+     "y0": 1.5,
+     "y1": 22
+    },
+    "triangles": 4630,
+    "budget": 10000
+   }
+  },
+  "法師軍團 hq 模型完全在原碰撞箱內、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "x": [
+      -6.047,
+      6.097
+     ],
+     "y": [
+      0,
+      12.906
+     ],
+     "h": [
+      0,
+      19.98
+     ]
+    },
+    "collider": {
+     "kind": "building:mage",
+     "x": 14.685433417434092,
+     "z": 30.109600551022094,
+     "hw": 6.5,
+     "hd": 6.5,
+     "rot": 0.4537856055185257,
+     "y0": 1.5,
+     "y1": 22
+    },
+    "triangles": 13709,
+    "budget": 26000
+   }
+  },
+  "法師軍團正門面向噴泉（門比建築中心更靠近噴泉）": {
+   "ok": true,
+   "detail": {
+    "door": [
+     12.612,
+     25.858
+    ],
+    "doorR": "28.77",
+    "centerR": "33.50"
+   }
+  },
+  "法師軍團正門中心正對 26° 高台石階（側向偏差 < 0.1 m）": {
+   "ok": true,
+   "detail": {
+    "lateral": "0.000",
+    "stairs": [
+     297,
+     332,
+     0,
+     26
+    ]
+   }
+  },
+  "法師軍團 NPC 站位不變（正門石階前 2 m、高台上、在碰撞箱外）": {
+   "ok": true,
+   "detail": {
+    "npc": {
+     "id": "mage",
+     "name": "法師軍團",
+     "role": "法師轉職",
+     "x": 10.959278669726935,
+     "z": 22.469851157479177,
+     "yaw": -2.6878070480712677,
+     "floor": 2,
+     "interactR": 3
+    }
+   }
+  },
+  "劍士軍團尺寸、方位與 V1.3 相同": {
+   "ok": true,
+   "detail": {
+    "v13": {
+     "id": "sword",
+     "name": "劍士軍團",
+     "role": "劍士轉職",
+     "bearing": 297,
+     "w": 12,
+     "d": 12,
+     "eave": 7,
+     "top": 13,
+     "floor": 2,
+     "front": 27,
+     "shape": "hall"
+    },
+    "model": {
+     "bearing": 297,
+     "front": 27,
+     "w": 12,
+     "d": 12,
+     "top": 13,
+     "floor": 2,
+     "door": [
+      -27.069,
+      13.792
+     ]
+    }
+   }
+  },
+  "劍士軍團 lite 模型完全在原碰撞箱內、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "x": [
+      -5.95,
+      5.95
+     ],
+     "y": [
+      0,
+      11.95
+     ],
+     "h": [
+      0,
+      12.99
+     ]
+    },
+    "collider": {
+     "kind": "building:sword",
+     "x": -29.403215298216143,
+     "z": 14.98168649140504,
+     "hw": 6,
+     "hd": 6,
+     "rot": 5.183627878423159,
+     "y0": 1.5,
+     "y1": 15
+    },
+    "triangles": 3050,
+    "budget": 9000
+   }
+  },
+  "劍士軍團 hq 模型完全在原碰撞箱內、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "x": [
+      -5.95,
+      5.95
+     ],
+     "y": [
+      0,
+      11.95
+     ],
+     "h": [
+      0,
+      12.99
+     ]
+    },
+    "collider": {
+     "kind": "building:sword",
+     "x": -29.403215298216143,
+     "z": 14.98168649140504,
+     "hw": 6,
+     "hd": 6,
+     "rot": 5.183627878423159,
+     "y0": 1.5,
+     "y1": 15
+    },
+    "triangles": 6642,
+    "budget": 22000
+   }
+  },
+  "劍士軍團正門面向噴泉（門比建築中心更靠近噴泉）": {
+   "ok": true,
+   "detail": {
+    "door": [
+     -27.069,
+     13.792
+    ],
+    "doorR": "30.38",
+    "centerR": "33.00"
+   }
+  },
+  "劍士軍團正門中心正對 297° 高台石階（側向偏差 < 0.1 m）": {
+   "ok": true,
+   "detail": {
+    "lateral": "-0.000",
+    "stairs": [
+     297,
+     332,
+     0,
+     26
+    ]
+   }
+  },
+  "劍士軍團 NPC 站位不變（正門石階前 2 m、高台上、在碰撞箱外）": {
+   "ok": true,
+   "detail": {
+    "npc": {
+     "id": "sword",
+     "name": "劍士軍團",
+     "role": "劍士轉職",
+     "x": -22.2751631047092,
+     "z": 11.349762493488665,
+     "yaw": 2.0420352248333655,
+     "floor": 2,
+     "interactR": 3
+    }
+   }
+  },
+  "北側高台與石階尺寸＝V1.3（281°→44°、r 23～49、高 2 m；石階 4 道、r 18～23、寬 6 m）": {
+   "ok": true,
+   "detail": {
+    "model": {
+     "from": 281,
+     "to": 44,
+     "r0": 23,
+     "r1": 49,
+     "height": 2,
+     "stairs": [
+      297,
+      332,
+      0,
+      26
+     ],
+     "stair_from": 18,
+     "stair_width": 6
+    }
+   }
+  },
+  "高台 lite：擋土牆正面在 r 23，0.3 m 以下不凸出 r 22.95（牆腳花圃到 22.98）": {
+   "ok": true,
+   "detail": {
+    "wall_min_r_below_0_3m": 22.97,
+    "wall_min_r_any": 22.842,
+    "stairs_side_excess": 0,
+    "stairs_along_excess": 0,
+    "stairs_max_above_ramp": 0.24,
+    "top_max_h": 2.02,
+    "top_in_north_road": 0
+   }
+  },
+  "高台 lite：石階模型完全在石階範圍內、踏面與遊戲斜坡差 ≤ 0.25 m": {
+   "ok": true,
+   "detail": {
+    "wall_min_r_below_0_3m": 22.97,
+    "wall_min_r_any": 22.842,
+    "stairs_side_excess": 0,
+    "stairs_along_excess": 0,
+    "stairs_max_above_ramp": 0.24,
+    "top_max_h": 2.02,
+    "top_in_north_road": 0
+   }
+  },
+  "高台 lite：鋪面高度 ≤ 2.03 m、不蓋住北路、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "wall_min_r_below_0_3m": 22.97,
+    "wall_min_r_any": 22.842,
+    "stairs_side_excess": 0,
+    "stairs_along_excess": 0,
+    "stairs_max_above_ramp": 0.24,
+    "top_max_h": 2.02,
+    "top_in_north_road": 0,
+    "triangles": 3176,
+    "budget": 6000
+   }
+  },
+  "高台 hq：擋土牆正面在 r 23，0.3 m 以下不凸出 r 22.95（牆腳花圃到 22.98）": {
+   "ok": true,
+   "detail": {
+    "wall_min_r_below_0_3m": 22.97,
+    "wall_min_r_any": 22.842,
+    "stairs_side_excess": 0,
+    "stairs_along_excess": 0,
+    "stairs_max_above_ramp": 0.24,
+    "top_max_h": 2.02,
+    "top_in_north_road": 0
+   }
+  },
+  "高台 hq：石階模型完全在石階範圍內、踏面與遊戲斜坡差 ≤ 0.25 m": {
+   "ok": true,
+   "detail": {
+    "wall_min_r_below_0_3m": 22.97,
+    "wall_min_r_any": 22.842,
+    "stairs_side_excess": 0,
+    "stairs_along_excess": 0,
+    "stairs_max_above_ramp": 0.24,
+    "top_max_h": 2.02,
+    "top_in_north_road": 0
+   }
+  },
+  "高台 hq：鋪面高度 ≤ 2.03 m、不蓋住北路、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "wall_min_r_below_0_3m": 22.97,
+    "wall_min_r_any": 22.842,
+    "stairs_side_excess": 0,
+    "stairs_along_excess": 0,
+    "stairs_max_above_ramp": 0.24,
+    "top_max_h": 2.02,
+    "top_in_north_road": 0,
+    "triangles": 4190,
+    "budget": 10000
+   }
+  },
+  "寵物商人巡走路線：與噴泉水池、長椅、水晶燈座、路燈等碰撞物淨距 ≥ 0.4 m、不進入任何建築碰撞箱、全程可站立": {
+   "ok": true,
+   "detail": {
+    "minCircleGap": 0.5000527965275464,
+    "nearestCircle": "crystalLamp",
+    "insideBox": false,
+    "minSpawnDist": 1.6531278949223491,
+    "minNpcDist": 6.923313802942551,
+    "allStandable": true,
+    "stationAxisGapDeg": 22.5
+   }
+  },
+  "寵物商人巡走路線：離 24 個出生點 ≥ 1.5 m、離所有 NPC ≥ 3 m": {
+   "ok": true,
+   "detail": {
+    "minCircleGap": 0.5000527965275464,
+    "nearestCircle": "crystalLamp",
+    "insideBox": false,
+    "minSpawnDist": 1.6531278949223491,
+    "minNpcDist": 6.923313802942551,
+    "allStandable": true,
+    "stationAxisGapDeg": 22.5
+   }
+  },
+  "寵物商人停留點避開主路與石階軸線（≥ 12°）；商人不是碰撞物（不擋主要通道）": {
+   "ok": true,
+   "detail": {
+    "stationAxisGapDeg": 22.5,
+    "stations": [
+     202.5,
+     247.5,
+     67.5,
+     157.5
+    ],
+    "patrolR": 10.8
+   }
+  },
+  "寵物商人 lite 模型：高 ≤ 1.6 m、半徑 ≤ 路線檢查用的 0.44999999999999996 m、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "height": 1.505,
+    "radius": 0.448,
+    "triangles": 2849,
+    "budget": 3000
+   }
+  },
+  "寵物商人 hq 模型：高 ≤ 1.6 m、半徑 ≤ 路線檢查用的 0.44999999999999996 m、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "height": 1.505,
+    "radius": 0.448,
+    "triangles": 6890,
+    "budget": 8000
+   }
+  },
+  "洛恩（寵物商人 V2）hq：17 根骨頭、動作 Idle／Walk／Talk／Turn、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "bones": 17,
+    "actions": [
+     "Idle",
+     "Walk",
+     "Talk",
+     "Turn"
+    ],
+    "triangles": 59566,
+    "budget": 60000
+   }
+  },
+  "洛恩（寵物商人 V2）lite：17 根骨頭、動作 Idle／Walk／Talk／Turn、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "bones": 17,
+    "actions": [
+     "Idle",
+     "Walk",
+     "Talk",
+     "Turn"
+    ],
+    "triangles": 14592,
+    "budget": 15000
+   }
+  },
+  "噴泉 lite 外徑 r ≤ 7.0（＝碰撞半徑 7）、最高（含星晶浮動）≤ 6.5、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "radius": 7,
+     "top": 6.4
+    },
+    "crystalTopMax": 6.46,
+    "triangles": 10460,
+    "budget": 11000
+   }
+  },
+  "噴泉 hq 外徑 r ≤ 7.0（＝碰撞半徑 7）、最高（含星晶浮動）≤ 6.5、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "radius": 7,
+     "top": 6.4
+    },
+    "crystalTopMax": 6.46,
+    "triangles": 25644,
+    "budget": 28000
+   }
+  },
+  "商人對話面板：飼料、培育與進化在寵物系統接入前顯示「準備中」（不顯示機率或價格）；關閉後面板消失": {
+   "ok": false,
+   "detail": "no panel run"
+  },
+  "星靈鑑定：桌面版可把背包物品拖進鑑定框": {
+   "ok": false,
+   "detail": "no drag run"
+  },
+  "洛恩：開啟介面時停止巡走、轉身面向玩家並播放 Talk；關閉後恢復巡走": {
+   "ok": false
+  }
+ },
+ "runs": [
+  {
+   "browser": "chromium",
+   "mode": "hq",
+   "errors": [
+    "pageerror: Cannot read properties of undefined (reading 'x')",
+    "page.waitForFunction: Timeout 180000ms exceeded."
+   ],
+   "shots": []
+  },
+  {
+   "browser": "chromium",
+   "mode": "lite-low",
+   "errors": [
+    "pageerror: Cannot read properties of undefined (reading 'x')",
+    "page.waitForFunction: Timeout 180000ms exceeded."
+   ],
+   "shots": []
+  },
+  {
+   "browser": "chromium",
+   "mode": "hq-portrait",
+   "errors": [
+    "pageerror: Cannot read properties of undefined (reading 'x')",
+    "page.waitForFunction: Timeout 180000ms exceeded."
+   ],
+   "shots": []
+  },
+  {
+   "browser": "chromium",
+   "mode": "lite-portrait",
+   "errors": [
+    "pageerror: Cannot read properties of undefined (reading 'x')",
+    "page.waitForFunction: Timeout 180000ms exceeded."
+   ],
+   "shots": []
+  },
+  {
+   "browser": "webkit",
+   "mode": "hq",
+   "errors": [
+    "pageerror: undefined is not an object (evaluating 'a.x')",
+    "page.waitForFunction: Timeout 180000ms exceeded."
+   ],
+   "shots": []
+  },
+  {
+   "browser": "webkit",
+   "mode": "lite-low",
+   "errors": [
+    "pageerror: undefined is not an object (evaluating 'a.x')",
+    "page.waitForFunction: Timeout 180000ms exceeded."
+   ],
+   "shots": []
+  }
+ ],
+ "finishedAt": "2026-11-24T04:07:30.654Z"
+}
