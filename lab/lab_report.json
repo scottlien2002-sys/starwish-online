@@ -1,5 +1,5 @@
 {
- "startedAt": "2026-11-24T04:11:09.199Z",
+ "startedAt": "2026-11-24T07:05:40.705Z",
  "checks": {
   "benches 位置＝既有碰撞（誤差 < 1 cm）": {
    "ok": true,
@@ -840,6 +840,178 @@
     "centerR": "28.00"
    }
   },
+  "祭司教堂尺寸、方位與 V1.3 相同": {
+   "ok": true,
+   "detail": {
+    "v13": {
+     "id": "church",
+     "name": "教堂",
+     "role": "祭司轉職",
+     "bearing": 66,
+     "w": 12,
+     "d": 18,
+     "eave": 9,
+     "top": 18,
+     "floor": 0,
+     "front": 24,
+     "shape": "church"
+    },
+    "model": {
+     "bearing": 66,
+     "front": 24,
+     "w": 12,
+     "d": 18,
+     "eave": 9,
+     "top": 18,
+     "floor": 0,
+     "door": [
+      22.291,
+      9.924
+     ]
+    }
+   }
+  },
+  "祭司教堂 lite 全部頂點在原碰撞箱內、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "x": [
+      -5.88,
+      5.88
+     ],
+     "y": [
+      0.02,
+      17.806
+     ],
+     "h": [
+      0,
+      17.98
+     ]
+    },
+    "outside": 0,
+    "triangles": 2218,
+    "budget": 11000
+   }
+  },
+  "祭司教堂 hq 全部頂點在原碰撞箱內、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "x": [
+      -5.88,
+      5.88
+     ],
+     "y": [
+      0.02,
+      17.773
+     ],
+     "h": [
+      0,
+      17.98
+     ]
+    },
+    "outside": 0,
+    "triangles": 3683,
+    "budget": 26000
+   }
+  },
+  "祭司教堂正門面向噴泉（門比建築中心更靠近噴泉）": {
+   "ok": true,
+   "detail": {
+    "door": [
+     22.291,
+     9.924
+    ],
+    "doorR": "24.40",
+    "centerR": "33.00"
+   }
+  },
+  "小丑馬戲團尺寸、方位與 V1.3 相同": {
+   "ok": true,
+   "detail": {
+    "v13": {
+     "id": "circus",
+     "name": "馬戲團",
+     "role": "小丑轉職",
+     "bearing": 128,
+     "w": 14,
+     "d": 14,
+     "eave": 4,
+     "top": 10,
+     "floor": 0,
+     "front": 24,
+     "shape": "tent"
+    },
+    "model": {
+     "bearing": 128,
+     "front": 24,
+     "w": 14,
+     "d": 14,
+     "eave": 4,
+     "top": 10,
+     "floor": 0,
+     "door": [
+      19.227,
+      -15.022
+     ]
+    }
+   }
+  },
+  "小丑馬戲團 lite 全部頂點在原碰撞箱內、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "x": [
+      -6.83,
+      6.83
+     ],
+     "y": [
+      0.187,
+      13.77
+     ],
+     "h": [
+      0,
+      9.96
+     ]
+    },
+    "outside": 0,
+    "triangles": 1137,
+    "budget": 7000
+   }
+  },
+  "小丑馬戲團 hq 全部頂點在原碰撞箱內、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "x": [
+      -6.797,
+      6.797
+     ],
+     "y": [
+      0.187,
+      13.797
+     ],
+     "h": [
+      0,
+      9.96
+     ]
+    },
+    "outside": 0,
+    "triangles": 2635,
+    "budget": 16000
+   }
+  },
+  "小丑馬戲團正門面向噴泉（門比建築中心更靠近噴泉）": {
+   "ok": true,
+   "detail": {
+    "door": [
+     19.227,
+     -15.022
+    ],
+    "doorR": "24.40",
+    "centerR": "31.00"
+   }
+  },
   "戶外鍛造台位置＝V1.3（FORGE）": {
    "ok": true,
    "detail": {
@@ -873,6 +1045,75 @@
      "interactR": 3
     },
     "role": "鐵匠轉職＋裝備鑑定"
+   }
+  },
+  "祭司轉職 NPC 站位不變（正門前 2.5 m、在碰撞箱外）": {
+   "ok": true,
+   "detail": {
+    "npc": {
+     "id": "church",
+     "name": "教堂",
+     "role": "祭司轉職",
+     "x": 19.64122733931592,
+     "z": 8.744837826129704,
+     "yaw": -1.9896753472735358,
+     "floor": 0,
+     "interactR": 3
+    }
+   }
+  },
+  "小丑轉職 NPC 站位不變（正門前 2.5 m、在碰撞箱外）": {
+   "ok": true,
+   "detail": {
+    "npc": {
+     "id": "circus",
+     "name": "馬戲團",
+     "role": "小丑轉職",
+     "x": 16.942231202544523,
+     "z": -13.236721719501654,
+     "yaw": -0.9075712110370514,
+     "floor": 0,
+     "interactR": 3
+    }
+   }
+  },
+  "環境美術 lite：可走範圍（r ≤ 50.55）內沒有高於 0.12 m 的物件（不擋路、不需碰撞）、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "inside": 0,
+    "triangles": 4480,
+    "budget": 12000
+   }
+  },
+  "環境美術 hq：可走範圍（r ≤ 50.55）內沒有高於 0.12 m 的物件（不擋路、不需碰撞）、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "inside": 0,
+    "triangles": 14530,
+    "budget": 30000
+   }
+  },
+  "移動規則：出生點不跳躍即可走到 37 個目標（全部 NPC、4 座傳送門、24 復活點、抵達點）": {
+   "ok": true,
+   "detail": {
+    "targets": 37,
+    "unreachable": []
+   }
+  },
+  "移動規則：傳送門圓台台階 ≤ MAX_STEP（0.35 m），不需要跳躍": {
+   "ok": true,
+   "detail": {
+    "dais": [
+     0.08,
+     0.08,
+     0.08,
+     0.08,
+     0.08,
+     0.08,
+     0.08,
+     0.08
+    ],
+    "maxStep": 0.35
    }
   },
   "傳送門 lite：數量 4、位置、樓層、開放狀態、目的地與石柱位置＝V1.3（只有南門開放、不新增出口）": {
@@ -914,7 +1155,7 @@
      "west": 0.08
     },
     "blockers": 0,
-    "triangles": 5171,
+    "triangles": 4819,
     "budget": 9000
    }
   },
@@ -963,7 +1204,7 @@
      "west": 0.08
     },
     "blockers": 0,
-    "triangles": 10699,
+    "triangles": 10507,
     "budget": 22000
    }
   },
@@ -1004,6 +1245,24 @@
    "mode": "hq",
    "errors": [],
    "shots": [
+    "chromium_hq_village_top_full.png",
+    "chromium_hq_village_full.png",
+    "chromium_hq_village_full_ne.png",
+    "chromium_hq_church_front.png",
+    "chromium_hq_church_q45.png",
+    "chromium_hq_church_q45r.png",
+    "chromium_hq_church_back.png",
+    "chromium_hq_church_top.png",
+    "chromium_hq_church_npc.png",
+    "chromium_hq_church_eye.png",
+    "chromium_hq_circus_front.png",
+    "chromium_hq_circus_q45.png",
+    "chromium_hq_circus_q45r.png",
+    "chromium_hq_circus_back.png",
+    "chromium_hq_circus_top.png",
+    "chromium_hq_circus_npc.png",
+    "chromium_hq_env_edge.png",
+    "chromium_hq_env_east.png",
     "chromium_hq_player_spawn_cam.png",
     "chromium_hq_village_top.png",
     "chromium_hq_south_plan.png",
@@ -1056,7 +1315,7 @@
     "chromium_hq_platform_stair.png",
     "chromium_hq_platform_wall.png"
    ],
-   "loadMs": 10997,
+   "loadMs": 15066,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -1225,13 +1484,13 @@
     },
     "portals": {
      "meshes": 7,
-     "triangles": 10699,
+     "triangles": 10507,
      "byMesh": {
-      "stone": 3687,
+      "stone": 3767,
       "paving": 904,
-      "gold": 4812,
-      "props": 672,
-      "glow": 308,
+      "gold": 4828,
+      "props": 456,
+      "glow": 236,
       "fx": 88,
       "rune": 228
      },
@@ -1248,6 +1507,51 @@
      "fxTris": 88,
      "runeTris": 228,
      "animated": 2
+    },
+    "church": {
+     "meshes": 5,
+     "triangles": 3683,
+     "byMesh": {
+      "stone": 2172,
+      "roof": 108,
+      "gold": 844,
+      "props": 77,
+      "glow": 482
+     },
+     "materials": 5,
+     "shadowCasters": 2,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slate_hq.png",
+      "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "circus": {
+     "meshes": 4,
+     "triangles": 2635,
+     "byMesh": {
+      "stone": 84,
+      "gold": 1350,
+      "props": 1113,
+      "glow": 88
+     },
+     "materials": 4,
+     "shadowCasters": 2,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png"
+     ]
+    },
+    "env": {
+     "meshes": 3,
+     "triangles": 14530,
+     "byMesh": {
+      "props": 12422,
+      "far": 1100,
+      "terrain": 1008
+     },
+     "materials": 1
     }
    },
    "textureMemory": {
@@ -1332,56 +1636,71 @@
     "board": 8,
     "smith": 7,
     "warehouse": 8,
-    "portals": 6
+    "portals": 6,
+    "church": 7,
+    "circus": 6,
+    "env": 3
    },
    "drawCalls": {
     "none": {
-     "drawCalls": 29,
-     "activeMeshes": 25
+     "drawCalls": 21,
+     "activeMeshes": 24
     },
     "all": {
-     "drawCalls": 100,
-     "activeMeshes": 74
+     "drawCalls": 108,
+     "activeMeshes": 85
     },
     "no_fountain": {
-     "drawCalls": 91,
-     "activeMeshes": 67
+     "drawCalls": 99,
+     "activeMeshes": 78
     },
     "no_plaza": {
-     "drawCalls": 92,
-     "activeMeshes": 69
+     "drawCalls": 100,
+     "activeMeshes": 80
     },
     "no_knight": {
-     "drawCalls": 92,
-     "activeMeshes": 70
+     "drawCalls": 100,
+     "activeMeshes": 81
     },
     "no_mage": {
-     "drawCalls": 93,
-     "activeMeshes": 69
+     "drawCalls": 101,
+     "activeMeshes": 80
     },
     "no_sword": {
-     "drawCalls": 94,
-     "activeMeshes": 70
+     "drawCalls": 102,
+     "activeMeshes": 81
     },
     "no_platform": {
-     "drawCalls": 96,
-     "activeMeshes": 70
+     "drawCalls": 104,
+     "activeMeshes": 81
     },
     "no_board": {
-     "drawCalls": 92,
-     "activeMeshes": 69
+     "drawCalls": 100,
+     "activeMeshes": 80
     },
     "no_smith": {
-     "drawCalls": 93,
-     "activeMeshes": 69
+     "drawCalls": 101,
+     "activeMeshes": 80
     },
     "no_warehouse": {
-     "drawCalls": 92,
-     "activeMeshes": 69
+     "drawCalls": 100,
+     "activeMeshes": 80
     },
     "no_portals": {
-     "drawCalls": 94,
-     "activeMeshes": 69
+     "drawCalls": 102,
+     "activeMeshes": 80
+    },
+    "no_church": {
+     "drawCalls": 101,
+     "activeMeshes": 80
+    },
+    "no_circus": {
+     "drawCalls": 102,
+     "activeMeshes": 81
+    },
+    "no_env": {
+     "drawCalls": 105,
+     "activeMeshes": 82
     }
    },
    "anims": [
@@ -1396,37 +1715,48 @@
    ],
    "flicker": {
     "player_spawn_cam": {
-     "maxRatio": 0.002833581349206349,
-     "meanRatio": 0.002704613095238096
+     "maxRatio": 0.002945188492063492,
+     "meanRatio": 0.0028218005952380955
     },
     "north_wide": {
-     "maxRatio": 0.010422867063492063,
-     "meanRatio": 0.010214533730158732
+     "maxRatio": 0.012394593253968253,
+     "meanRatio": 0.012160218253968255
     },
     "platform_front": {
-     "maxRatio": 0.002449156746031746,
-     "meanRatio": 0.002331349206349206
+     "maxRatio": 0.002560763888888889,
+     "meanRatio": 0.0024671378968253973
     },
     "sword_q45": {
-     "maxRatio": 0.006125992063492063,
-     "meanRatio": 0.0055927579365079375
+     "maxRatio": 0.007663690476190476,
+     "meanRatio": 0.00718687996031746
     },
     "south_wide": {
-     "maxRatio": 0.007725694444444445,
-     "meanRatio": 0.007571304563492062
+     "maxRatio": 0.011848958333333333,
+     "meanRatio": 0.011405629960317461
     },
     "portal_south": {
-     "maxRatio": 0.0011284722222222221,
-     "meanRatio": 0.0010305059523809522
+     "maxRatio": 0.008928571428571428,
+     "meanRatio": 0.005862475198412698
+    },
+    "village_full": {
+     "maxRatio": 0.00818452380952381,
+     "meanRatio": 0.0069326636904761905
     }
    },
-   "frameMsSoftware": 1.3999999999068677
+   "frameMsSoftware": 1.7000000001862645
   },
   {
    "browser": "chromium",
    "mode": "lite-low",
    "errors": [],
    "shots": [
+    "chromium_lite-low_village_top_full.png",
+    "chromium_lite-low_village_full.png",
+    "chromium_lite-low_church_front.png",
+    "chromium_lite-low_church_q45.png",
+    "chromium_lite-low_circus_front.png",
+    "chromium_lite-low_circus_q45.png",
+    "chromium_lite-low_env_edge.png",
     "chromium_lite-low_player_spawn_cam.png",
     "chromium_lite-low_village_top.png",
     "chromium_lite-low_south_wide.png",
@@ -1451,7 +1781,7 @@
     "chromium_lite-low_platform_stair.png",
     "chromium_lite-low_platform_wall.png"
    ],
-   "loadMs": 1639,
+   "loadMs": 2675,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -1598,12 +1928,12 @@
     },
     "portals": {
      "meshes": 6,
-     "triangles": 5171,
+     "triangles": 4819,
      "byMesh": {
-      "stone": 2431,
+      "stone": 2511,
       "paving": 264,
-      "props": 2086,
-      "glow": 228,
+      "props": 1702,
+      "glow": 180,
       "fx": 48,
       "rune": 114
      },
@@ -1618,6 +1948,46 @@
      "fxTris": 48,
      "runeTris": 114,
      "animated": 2
+    },
+    "church": {
+     "meshes": 4,
+     "triangles": 2218,
+     "byMesh": {
+      "stone": 1463,
+      "roof": 100,
+      "props": 420,
+      "glow": 235
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slate_lite.png"
+     ]
+    },
+    "circus": {
+     "meshes": 3,
+     "triangles": 1137,
+     "byMesh": {
+      "stone": 42,
+      "props": 1055,
+      "glow": 40
+     },
+     "materials": 3,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png"
+     ]
+    },
+    "env": {
+     "meshes": 3,
+     "triangles": 4480,
+     "byMesh": {
+      "props": 3670,
+      "far": 490,
+      "terrain": 320
+     },
+     "materials": 1
     }
    },
    "textureMemory": {
@@ -1677,91 +2047,112 @@
     "board": 4,
     "smith": 4,
     "warehouse": 4,
-    "portals": 4
+    "portals": 4,
+    "church": 4,
+    "circus": 3,
+    "env": 3
    },
    "drawCalls": {
     "none": {
-     "drawCalls": 15,
-     "activeMeshes": 25
+     "drawCalls": 11,
+     "activeMeshes": 24
     },
     "all": {
-     "drawCalls": 55,
-     "activeMeshes": 65
+     "drawCalls": 61,
+     "activeMeshes": 74
     },
     "no_fountain": {
-     "drawCalls": 48,
-     "activeMeshes": 58
+     "drawCalls": 54,
+     "activeMeshes": 67
     },
     "no_plaza": {
-     "drawCalls": 51,
-     "activeMeshes": 61
+     "drawCalls": 57,
+     "activeMeshes": 70
     },
     "no_knight": {
-     "drawCalls": 52,
-     "activeMeshes": 62
+     "drawCalls": 58,
+     "activeMeshes": 71
     },
     "no_mage": {
-     "drawCalls": 51,
-     "activeMeshes": 61
+     "drawCalls": 57,
+     "activeMeshes": 70
     },
     "no_sword": {
-     "drawCalls": 52,
-     "activeMeshes": 62
+     "drawCalls": 58,
+     "activeMeshes": 71
     },
     "no_platform": {
-     "drawCalls": 52,
-     "activeMeshes": 62
+     "drawCalls": 58,
+     "activeMeshes": 71
     },
     "no_board": {
-     "drawCalls": 51,
-     "activeMeshes": 61
+     "drawCalls": 57,
+     "activeMeshes": 70
     },
     "no_smith": {
-     "drawCalls": 51,
-     "activeMeshes": 61
+     "drawCalls": 57,
+     "activeMeshes": 70
     },
     "no_warehouse": {
-     "drawCalls": 51,
-     "activeMeshes": 61
+     "drawCalls": 57,
+     "activeMeshes": 70
     },
     "no_portals": {
-     "drawCalls": 51,
-     "activeMeshes": 61
+     "drawCalls": 57,
+     "activeMeshes": 70
+    },
+    "no_church": {
+     "drawCalls": 57,
+     "activeMeshes": 70
+    },
+    "no_circus": {
+     "drawCalls": 58,
+     "activeMeshes": 71
+    },
+    "no_env": {
+     "drawCalls": 58,
+     "activeMeshes": 71
     }
    },
    "flicker": {
     "player_spawn_cam": {
-     "maxRatio": 0.0018353174603174603,
-     "meanRatio": 0.0016877480158730158
+     "maxRatio": 0.0018787202380952381,
+     "meanRatio": 0.0017274305555555556
     },
     "north_wide": {
-     "maxRatio": 0.007316468253968254,
-     "meanRatio": 0.00703125
+     "maxRatio": 0.008289930555555556,
+     "meanRatio": 0.008098338293650791
     },
     "platform_front": {
-     "maxRatio": 0.0019035218253968254,
-     "meanRatio": 0.0018074156746031747
+     "maxRatio": 0.0018973214285714286,
+     "meanRatio": 0.0018061755952380955
     },
     "sword_q45": {
-     "maxRatio": 0.0052517361111111115,
-     "meanRatio": 0.0045690724206349205
+     "maxRatio": 0.00648561507936508,
+     "meanRatio": 0.005754588293650794
     },
     "south_wide": {
-     "maxRatio": 0.0067398313492063495,
-     "meanRatio": 0.006395709325396825
+     "maxRatio": 0.008265128968253968,
+     "meanRatio": 0.008035094246031747
     },
     "portal_south": {
-     "maxRatio": 0.00017361111111111112,
-     "meanRatio": 0.0001413690476190476
+     "maxRatio": 0.008612351190476191,
+     "meanRatio": 0.00492311507936508
+    },
+    "village_full": {
+     "maxRatio": 0.003962053571428571,
+     "meanRatio": 0.0032421874999999994
     }
    },
-   "frameMsSoftware": 1.74000000001397
+   "frameMsSoftware": 1.2250000000349246
   },
   {
    "browser": "chromium",
    "mode": "hq-portrait",
    "errors": [],
    "shots": [
+    "chromium_hq-portrait_church_npc.png",
+    "chromium_hq-portrait_circus_npc.png",
     "chromium_hq-portrait_player_arrival.png",
     "chromium_hq-portrait_smith_npc.png",
     "chromium_hq-portrait_board_front.png",
@@ -1770,7 +2161,7 @@
     "chromium_hq-portrait_sword_npc.png",
     "chromium_hq-portrait_platform_stair.png"
    ],
-   "loadMs": 5394,
+   "loadMs": 7141,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -1939,13 +2330,13 @@
     },
     "portals": {
      "meshes": 7,
-     "triangles": 10699,
+     "triangles": 10507,
      "byMesh": {
-      "stone": 3687,
+      "stone": 3767,
       "paving": 904,
-      "gold": 4812,
-      "props": 672,
-      "glow": 308,
+      "gold": 4828,
+      "props": 456,
+      "glow": 236,
       "fx": 88,
       "rune": 228
      },
@@ -1962,6 +2353,51 @@
      "fxTris": 88,
      "runeTris": 228,
      "animated": 2
+    },
+    "church": {
+     "meshes": 5,
+     "triangles": 3683,
+     "byMesh": {
+      "stone": 2172,
+      "roof": 108,
+      "gold": 844,
+      "props": 77,
+      "glow": 482
+     },
+     "materials": 5,
+     "shadowCasters": 2,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slate_hq.png",
+      "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "circus": {
+     "meshes": 4,
+     "triangles": 2635,
+     "byMesh": {
+      "stone": 84,
+      "gold": 1350,
+      "props": 1113,
+      "glow": 88
+     },
+     "materials": 4,
+     "shadowCasters": 2,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png"
+     ]
+    },
+    "env": {
+     "meshes": 3,
+     "triangles": 14530,
+     "byMesh": {
+      "props": 12422,
+      "far": 1100,
+      "terrain": 1008
+     },
+     "materials": 1
     }
    },
    "textureMemory": {
@@ -2046,56 +2482,71 @@
     "board": 3,
     "smith": 6,
     "warehouse": 8,
-    "portals": 5
+    "portals": 5,
+    "church": 7,
+    "circus": 2,
+    "env": 3
    },
    "drawCalls": {
     "none": {
-     "drawCalls": 22,
-     "activeMeshes": 18
+     "drawCalls": 16,
+     "activeMeshes": 19
     },
     "all": {
-     "drawCalls": 78,
-     "activeMeshes": 52
+     "drawCalls": 84,
+     "activeMeshes": 61
     },
     "no_fountain": {
-     "drawCalls": 69,
-     "activeMeshes": 45
+     "drawCalls": 75,
+     "activeMeshes": 54
     },
     "no_plaza": {
-     "drawCalls": 70,
-     "activeMeshes": 47
+     "drawCalls": 76,
+     "activeMeshes": 56
     },
     "no_knight": {
-     "drawCalls": 74,
-     "activeMeshes": 52
+     "drawCalls": 80,
+     "activeMeshes": 61
     },
     "no_mage": {
-     "drawCalls": 71,
-     "activeMeshes": 47
+     "drawCalls": 77,
+     "activeMeshes": 56
     },
     "no_sword": {
-     "drawCalls": 76,
-     "activeMeshes": 52
+     "drawCalls": 82,
+     "activeMeshes": 61
     },
     "no_platform": {
-     "drawCalls": 74,
-     "activeMeshes": 48
+     "drawCalls": 80,
+     "activeMeshes": 57
     },
     "no_board": {
-     "drawCalls": 75,
-     "activeMeshes": 52
+     "drawCalls": 81,
+     "activeMeshes": 61
     },
     "no_smith": {
-     "drawCalls": 72,
-     "activeMeshes": 48
+     "drawCalls": 78,
+     "activeMeshes": 57
     },
     "no_warehouse": {
-     "drawCalls": 70,
-     "activeMeshes": 47
+     "drawCalls": 76,
+     "activeMeshes": 56
     },
     "no_portals": {
-     "drawCalls": 73,
-     "activeMeshes": 48
+     "drawCalls": 79,
+     "activeMeshes": 57
+    },
+    "no_church": {
+     "drawCalls": 77,
+     "activeMeshes": 56
+    },
+    "no_circus": {
+     "drawCalls": 82,
+     "activeMeshes": 61
+    },
+    "no_env": {
+     "drawCalls": 81,
+     "activeMeshes": 58
     }
    }
   },
@@ -2109,7 +2560,7 @@
     "chromium_lite-portrait_player_spawn_cam.png",
     "chromium_lite-portrait_sword_npc.png"
    ],
-   "loadMs": 1096,
+   "loadMs": 1520,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -2256,12 +2707,12 @@
     },
     "portals": {
      "meshes": 6,
-     "triangles": 5171,
+     "triangles": 4819,
      "byMesh": {
-      "stone": 2431,
+      "stone": 2511,
       "paving": 264,
-      "props": 2086,
-      "glow": 228,
+      "props": 1702,
+      "glow": 180,
       "fx": 48,
       "rune": 114
      },
@@ -2276,6 +2727,46 @@
      "fxTris": 48,
      "runeTris": 114,
      "animated": 2
+    },
+    "church": {
+     "meshes": 4,
+     "triangles": 2218,
+     "byMesh": {
+      "stone": 1463,
+      "roof": 100,
+      "props": 420,
+      "glow": 235
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slate_lite.png"
+     ]
+    },
+    "circus": {
+     "meshes": 3,
+     "triangles": 1137,
+     "byMesh": {
+      "stone": 42,
+      "props": 1055,
+      "glow": 40
+     },
+     "materials": 3,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png"
+     ]
+    },
+    "env": {
+     "meshes": 3,
+     "triangles": 4480,
+     "byMesh": {
+      "props": 3670,
+      "far": 490,
+      "terrain": 320
+     },
+     "materials": 1
     }
    },
    "textureMemory": {
@@ -2335,56 +2826,71 @@
     "board": 0,
     "smith": 3,
     "warehouse": 4,
-    "portals": 3
+    "portals": 3,
+    "church": 4,
+    "circus": 0,
+    "env": 3
    },
    "drawCalls": {
     "none": {
-     "drawCalls": 8,
-     "activeMeshes": 18
+     "drawCalls": 6,
+     "activeMeshes": 19
     },
     "all": {
-     "drawCalls": 36,
-     "activeMeshes": 46
+     "drawCalls": 41,
+     "activeMeshes": 54
     },
     "no_fountain": {
-     "drawCalls": 29,
-     "activeMeshes": 39
+     "drawCalls": 34,
+     "activeMeshes": 47
     },
     "no_plaza": {
-     "drawCalls": 32,
-     "activeMeshes": 42
+     "drawCalls": 37,
+     "activeMeshes": 50
     },
     "no_knight": {
-     "drawCalls": 36,
-     "activeMeshes": 46
+     "drawCalls": 41,
+     "activeMeshes": 54
     },
     "no_mage": {
-     "drawCalls": 32,
-     "activeMeshes": 42
+     "drawCalls": 37,
+     "activeMeshes": 50
     },
     "no_sword": {
-     "drawCalls": 36,
-     "activeMeshes": 46
+     "drawCalls": 41,
+     "activeMeshes": 54
     },
     "no_platform": {
-     "drawCalls": 33,
-     "activeMeshes": 43
+     "drawCalls": 38,
+     "activeMeshes": 51
     },
     "no_board": {
-     "drawCalls": 36,
-     "activeMeshes": 46
+     "drawCalls": 41,
+     "activeMeshes": 54
     },
     "no_smith": {
-     "drawCalls": 33,
-     "activeMeshes": 43
+     "drawCalls": 38,
+     "activeMeshes": 51
     },
     "no_warehouse": {
-     "drawCalls": 32,
-     "activeMeshes": 42
+     "drawCalls": 37,
+     "activeMeshes": 50
     },
     "no_portals": {
-     "drawCalls": 33,
-     "activeMeshes": 43
+     "drawCalls": 38,
+     "activeMeshes": 51
+    },
+    "no_church": {
+     "drawCalls": 37,
+     "activeMeshes": 50
+    },
+    "no_circus": {
+     "drawCalls": 41,
+     "activeMeshes": 54
+    },
+    "no_env": {
+     "drawCalls": 38,
+     "activeMeshes": 51
     }
    }
   },
@@ -2393,13 +2899,16 @@
    "mode": "hq",
    "errors": [],
    "shots": [
+    "webkit_hq_village_full.png",
+    "webkit_hq_church_q45.png",
+    "webkit_hq_circus_q45.png",
     "webkit_hq_south_wide.png",
     "webkit_hq_portal_south.png",
     "webkit_hq_north_wide.png",
     "webkit_hq_sword_q45.png",
     "webkit_hq_mage_q45.png"
    ],
-   "loadMs": 4720,
+   "loadMs": 5799,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -2568,13 +3077,13 @@
     },
     "portals": {
      "meshes": 7,
-     "triangles": 10699,
+     "triangles": 10507,
      "byMesh": {
-      "stone": 3687,
+      "stone": 3767,
       "paving": 904,
-      "gold": 4812,
-      "props": 672,
-      "glow": 308,
+      "gold": 4828,
+      "props": 456,
+      "glow": 236,
       "fx": 88,
       "rune": 228
      },
@@ -2591,6 +3100,51 @@
      "fxTris": 88,
      "runeTris": 228,
      "animated": 2
+    },
+    "church": {
+     "meshes": 5,
+     "triangles": 3683,
+     "byMesh": {
+      "stone": 2172,
+      "roof": 108,
+      "gold": 844,
+      "props": 77,
+      "glow": 482
+     },
+     "materials": 5,
+     "shadowCasters": 2,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slate_hq.png",
+      "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "circus": {
+     "meshes": 4,
+     "triangles": 2635,
+     "byMesh": {
+      "stone": 84,
+      "gold": 1350,
+      "props": 1113,
+      "glow": 88
+     },
+     "materials": 4,
+     "shadowCasters": 2,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png"
+     ]
+    },
+    "env": {
+     "meshes": 3,
+     "triangles": 14530,
+     "byMesh": {
+      "props": 12422,
+      "far": 1100,
+      "terrain": 1008
+     },
+     "materials": 1
     }
    },
    "textureMemory": {
@@ -2675,56 +3229,71 @@
     "board": 8,
     "smith": 7,
     "warehouse": 8,
-    "portals": 6
+    "portals": 6,
+    "church": 7,
+    "circus": 6,
+    "env": 3
    },
    "drawCalls": {
     "none": {
-     "drawCalls": 29,
-     "activeMeshes": 25
+     "drawCalls": 21,
+     "activeMeshes": 24
     },
     "all": {
-     "drawCalls": 100,
-     "activeMeshes": 74
+     "drawCalls": 108,
+     "activeMeshes": 85
     },
     "no_fountain": {
-     "drawCalls": 91,
-     "activeMeshes": 67
+     "drawCalls": 99,
+     "activeMeshes": 78
     },
     "no_plaza": {
-     "drawCalls": 92,
-     "activeMeshes": 69
+     "drawCalls": 100,
+     "activeMeshes": 80
     },
     "no_knight": {
-     "drawCalls": 92,
-     "activeMeshes": 70
+     "drawCalls": 100,
+     "activeMeshes": 81
     },
     "no_mage": {
-     "drawCalls": 93,
-     "activeMeshes": 69
+     "drawCalls": 101,
+     "activeMeshes": 80
     },
     "no_sword": {
-     "drawCalls": 94,
-     "activeMeshes": 70
+     "drawCalls": 102,
+     "activeMeshes": 81
     },
     "no_platform": {
-     "drawCalls": 96,
-     "activeMeshes": 70
+     "drawCalls": 104,
+     "activeMeshes": 81
     },
     "no_board": {
-     "drawCalls": 92,
-     "activeMeshes": 69
+     "drawCalls": 100,
+     "activeMeshes": 80
     },
     "no_smith": {
-     "drawCalls": 93,
-     "activeMeshes": 69
+     "drawCalls": 101,
+     "activeMeshes": 80
     },
     "no_warehouse": {
-     "drawCalls": 92,
-     "activeMeshes": 69
+     "drawCalls": 100,
+     "activeMeshes": 80
     },
     "no_portals": {
-     "drawCalls": 94,
-     "activeMeshes": 69
+     "drawCalls": 102,
+     "activeMeshes": 80
+    },
+    "no_church": {
+     "drawCalls": 101,
+     "activeMeshes": 80
+    },
+    "no_circus": {
+     "drawCalls": 102,
+     "activeMeshes": 81
+    },
+    "no_env": {
+     "drawCalls": 105,
+     "activeMeshes": 82
     }
    }
   },
@@ -2735,7 +3304,7 @@
    "shots": [
     "webkit_lite-low_north_wide.png"
    ],
-   "loadMs": 1483,
+   "loadMs": 1522,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -2882,12 +3451,12 @@
     },
     "portals": {
      "meshes": 6,
-     "triangles": 5171,
+     "triangles": 4819,
      "byMesh": {
-      "stone": 2431,
+      "stone": 2511,
       "paving": 264,
-      "props": 2086,
-      "glow": 228,
+      "props": 1702,
+      "glow": 180,
       "fx": 48,
       "rune": 114
      },
@@ -2902,6 +3471,46 @@
      "fxTris": 48,
      "runeTris": 114,
      "animated": 2
+    },
+    "church": {
+     "meshes": 4,
+     "triangles": 2218,
+     "byMesh": {
+      "stone": 1463,
+      "roof": 100,
+      "props": 420,
+      "glow": 235
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slate_lite.png"
+     ]
+    },
+    "circus": {
+     "meshes": 3,
+     "triangles": 1137,
+     "byMesh": {
+      "stone": 42,
+      "props": 1055,
+      "glow": 40
+     },
+     "materials": 3,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png"
+     ]
+    },
+    "env": {
+     "meshes": 3,
+     "triangles": 4480,
+     "byMesh": {
+      "props": 3670,
+      "far": 490,
+      "terrain": 320
+     },
+     "materials": 1
     }
    },
    "textureMemory": {
@@ -2961,59 +3570,74 @@
     "board": 4,
     "smith": 4,
     "warehouse": 4,
-    "portals": 4
+    "portals": 4,
+    "church": 4,
+    "circus": 3,
+    "env": 3
    },
    "drawCalls": {
     "none": {
-     "drawCalls": 15,
-     "activeMeshes": 25
+     "drawCalls": 11,
+     "activeMeshes": 24
     },
     "all": {
-     "drawCalls": 55,
-     "activeMeshes": 65
+     "drawCalls": 61,
+     "activeMeshes": 74
     },
     "no_fountain": {
-     "drawCalls": 48,
-     "activeMeshes": 58
+     "drawCalls": 54,
+     "activeMeshes": 67
     },
     "no_plaza": {
-     "drawCalls": 51,
-     "activeMeshes": 61
+     "drawCalls": 57,
+     "activeMeshes": 70
     },
     "no_knight": {
-     "drawCalls": 52,
-     "activeMeshes": 62
+     "drawCalls": 58,
+     "activeMeshes": 71
     },
     "no_mage": {
-     "drawCalls": 51,
-     "activeMeshes": 61
+     "drawCalls": 57,
+     "activeMeshes": 70
     },
     "no_sword": {
-     "drawCalls": 52,
-     "activeMeshes": 62
+     "drawCalls": 58,
+     "activeMeshes": 71
     },
     "no_platform": {
-     "drawCalls": 52,
-     "activeMeshes": 62
+     "drawCalls": 58,
+     "activeMeshes": 71
     },
     "no_board": {
-     "drawCalls": 51,
-     "activeMeshes": 61
+     "drawCalls": 57,
+     "activeMeshes": 70
     },
     "no_smith": {
-     "drawCalls": 51,
-     "activeMeshes": 61
+     "drawCalls": 57,
+     "activeMeshes": 70
     },
     "no_warehouse": {
-     "drawCalls": 51,
-     "activeMeshes": 61
+     "drawCalls": 57,
+     "activeMeshes": 70
     },
     "no_portals": {
-     "drawCalls": 51,
-     "activeMeshes": 61
+     "drawCalls": 57,
+     "activeMeshes": 70
+    },
+    "no_church": {
+     "drawCalls": 57,
+     "activeMeshes": 70
+    },
+    "no_circus": {
+     "drawCalls": 58,
+     "activeMeshes": 71
+    },
+    "no_env": {
+     "drawCalls": 58,
+     "activeMeshes": 71
     }
    }
   }
  ],
- "finishedAt": "2026-11-24T04:26:12.084Z"
+ "finishedAt": "2026-11-24T07:25:36.703Z"
 }
