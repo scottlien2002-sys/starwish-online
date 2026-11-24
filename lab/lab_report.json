@@ -1,5 +1,5 @@
 {
- "startedAt": "2026-11-24T00:21:13.484Z",
+ "startedAt": "2026-11-24T00:47:13.655Z",
  "checks": {
   "benches 位置＝既有碰撞（誤差 < 1 cm）": {
    "ok": true,
@@ -643,7 +643,7 @@
    }
   },
   "寵物商人對話面板：鑑定（種子／孵化蛋／鳥蛋）、飼料、培育與進化都可點選，未接入寵物系統時顯示「準備中」，不顯示任何機率或價格": {
-   "ok": false,
+   "ok": true,
    "detail": [
     {
      "act": "open",
@@ -679,7 +679,7 @@
     },
     {
      "act": "close",
-     "text": "✦ 寵物商人功能準備中培育與進化寵物系統尚未開放，敬請期待。返回離開"
+     "text": ""
     }
    ]
   }
@@ -699,7 +699,7 @@
     "chromium_hq_pm_path.png",
     "chromium_hq_village_top.png"
    ],
-   "loadMs": 14259,
+   "loadMs": 12392,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -952,19 +952,19 @@
    ],
    "flicker": {
     "pm_spawn": {
-     "maxRatio": 0.003168402777777778,
-     "meanRatio": 0.0030183531746031745
+     "maxRatio": 0.003162202380952381,
+     "meanRatio": 0.0030164930555555552
     },
     "pm_plaza": {
-     "maxRatio": 0.006312003968253968,
-     "meanRatio": 0.005912078373015873
+     "maxRatio": 0.006299603174603175,
+     "meanRatio": 0.005910218253968254
     },
     "pm_front": {
      "maxRatio": 0.005543154761904762,
-     "meanRatio": 0.005062624007936508
+     "meanRatio": 0.005055803571428571
     }
    },
-   "frameMsSoftware": 1.8000000000465661
+   "frameMsSoftware": 1.7000000001862645
   },
   {
    "browser": "chromium",
@@ -978,7 +978,7 @@
     "chromium_lite-low_pm_plaza.png",
     "chromium_lite-low_pm_walk.png"
    ],
-   "loadMs": 2323,
+   "loadMs": 1794,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -1182,19 +1182,19 @@
    },
    "flicker": {
     "pm_spawn": {
-     "maxRatio": 0.0021019345238095237,
-     "meanRatio": 0.0019518849206349206
+     "maxRatio": 0.0021081349206349205,
+     "meanRatio": 0.0019506448412698412
     },
     "pm_plaza": {
-     "maxRatio": 0.0023251488095238095,
-     "meanRatio": 0.002075272817460317
+     "maxRatio": 0.0023313492063492063,
+     "meanRatio": 0.0020833333333333333
     },
     "pm_front": {
-     "maxRatio": 0.0034970238095238097,
-     "meanRatio": 0.0033017113095238095
+     "maxRatio": 0.0035032242063492065,
+     "meanRatio": 0.0033072916666666667
     }
    },
-   "frameMsSoftware": 1.299999999968956
+   "frameMsSoftware": 1.2333333333178114
   },
   {
    "browser": "chromium",
@@ -1210,7 +1210,7 @@
     "chromium_hq-portrait_panel_guide.png",
     "chromium_hq-portrait_panel_closed.png"
    ],
-   "loadMs": 5955,
+   "loadMs": 5943,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -1410,7 +1410,7 @@
     "knight": 4,
     "mage": 7,
     "sword": 2,
-    "platform": 8,
+    "platform": 4,
     "merchant": 5
    },
    "drawCalls": {
@@ -1443,8 +1443,8 @@
      "activeMeshes": 44
     },
     "no_platform": {
-     "drawCalls": 85,
-     "activeMeshes": 36
+     "drawCalls": 89,
+     "activeMeshes": 40
     },
     "no_merchant": {
      "drawCalls": 88,
@@ -1486,7 +1486,7 @@
     },
     {
      "act": "close",
-     "text": "✦ 寵物商人功能準備中培育與進化寵物系統尚未開放，敬請期待。返回離開"
+     "text": ""
     }
    ]
   },
@@ -1498,7 +1498,7 @@
     "chromium_lite-portrait_pm_spawn.png",
     "chromium_lite-portrait_pm_iphone.png"
    ],
-   "loadMs": 1923,
+   "loadMs": 1478,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -1709,7 +1709,7 @@
     "webkit_hq_pm_q45.png",
     "webkit_hq_pm_plaza.png"
    ],
-   "loadMs": 4844,
+   "loadMs": 4128,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -1958,7 +1958,7 @@
    "shots": [
     "webkit_lite-low_pm_front.png"
    ],
-   "loadMs": 2560,
+   "loadMs": 1886,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -2162,5 +2162,5 @@
    }
   }
  ],
- "finishedAt": "2026-11-24T00:42:22.345Z"
+ "finishedAt": "2026-11-24T01:04:16.466Z"
 }
