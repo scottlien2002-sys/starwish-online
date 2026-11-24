@@ -54,7 +54,8 @@ for (const name of browsers) {
         .catch(() => false);
     };
     try {
-      await page.goto(server.url + "/?play=starsprout&clear=1", { waitUntil: "load" });
+      // 清除存檔：先開一個不會載入遊戲的同源網址（避免遊戲載入到一半就換頁，產生「載入中斷」的錯誤訊息）
+      await page.goto(server.url + "/__clear__", { waitUntil: "load" }).catch(() => {});
       await page.evaluate(() => localStorage.clear());
       const ready = await open();
       const bootError = await page.evaluate(() => document.querySelector(".boot-status.error")?.textContent ?? null);
@@ -165,6 +166,7 @@ for (const name of browsers) {
 
       if (g === "male") {
         // 正式設定缺值：寵物停用、提示、遊戲照常進入與打怪
+        await page.goto(server.url + "/__clear__", { waitUntil: "load" }).catch(() => {});
         await page.evaluate(() => localStorage.clear());
         const ok3 = await open("&pets=official");
         await frames(4);
