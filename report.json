@@ -1,12 +1,12 @@
 {
- "startedAt": "2026-11-24T09:06:37.749Z",
+ "startedAt": "2026-11-24T10:56:33.808Z",
  "note": "CI 軟體繪圖：FPS 不代表 iPhone 實機",
  "runs": [
   {
    "browser": "chromium",
    "mode": "hq-portrait",
    "checks": {
-    "全村正式美術載入完成（14 組模型、沒有錯誤）": {
+    "全村正式美術載入完成（15 組模型、沒有錯誤）": {
      "ok": true,
      "detail": {
       "status": "loaded",
@@ -23,6 +23,7 @@
        "委託佈告欄",
        "祭司教堂",
        "小丑馬戲團",
+       "星願商會",
        "傳送門與南門",
        "寵物商人洛恩"
       ],
@@ -33,20 +34,20 @@
      "ok": true,
      "detail": {
       "arrival": {
-       "drawCalls": 105,
-       "triangles": 353213
+       "drawCalls": 112,
+       "triangles": 361078
       },
       "spawn": {
-       "drawCalls": 101,
-       "triangles": 353743
+       "drawCalls": 103,
+       "triangles": 359765
       },
       "plaza_north": {
-       "drawCalls": 104,
-       "triangles": 330314
+       "drawCalls": 113,
+       "triangles": 339770
       },
       "east": {
-       "drawCalls": 103,
-       "triangles": 340276
+       "drawCalls": 105,
+       "triangles": 346298
       }
      }
     },
@@ -59,7 +60,7 @@
       "yaw": -6.123233995667142e-17
      }
     },
-    "NPC 互動：8 位 NPC 都能靠近後點擊對話（名稱、職責）": {
+    "NPC 互動：9 位 NPC 都能靠近後點擊對話（名稱、職責）": {
      "ok": true,
      "detail": [
       {
@@ -105,6 +106,12 @@
        "dialog": "鐵匠鐵匠轉職＋裝備鑑定鐵匠轉職、裝備詞條鑑定都找我（同一位鐵匠）。功能正在整合中"
       },
       {
+       "id": "guild",
+       "target": "npc:guild",
+       "what": "npc:guild",
+       "dialog": "星願商會選單"
+      },
+      {
        "id": "board",
        "target": "npc:board",
        "what": "npc:board",
@@ -123,6 +130,136 @@
       "yaw": 1.132702844874802,
       "floor": 0,
       "interactR": 3
+     }
+    },
+    "星願商會：掌櫃選單、標示測試資料與本機示範（不是多人交易）": {
+     "ok": true,
+     "detail": {
+      "open": true,
+      "screen": "menu",
+      "cat": "item",
+      "gold": 5000,
+      "listings": [],
+      "inv": [],
+      "mine": [],
+      "earn": null,
+      "msg": "",
+      "last": null,
+      "test": true,
+      "serverBacked": false,
+      "hScroll": 0
+     }
+    },
+    "星願商會：交易所道具／裝備／寵物三分類；裝備顯示等級、強化、詞條；寵物顯示成長階段、培育等級、鑑定狀態、正負詞條": {
+     "ok": true,
+     "detail": {
+      "item": 2,
+      "eq": [
+       {
+        "id": "L103",
+        "cat": "equipment",
+        "price": 1500,
+        "eq": {
+         "level": 7,
+         "enhance": 1,
+         "affixes": 1
+        },
+        "pet": null
+       },
+       {
+        "id": "L102",
+        "cat": "equipment",
+        "price": 2400,
+        "eq": {
+         "level": 10,
+         "enhance": 5,
+         "affixes": 3
+        },
+        "pet": null
+       }
+      ],
+      "pet": [
+       {
+        "id": "L105",
+        "cat": "pet",
+        "price": 700,
+        "eq": null,
+        "pet": {
+         "stage": "幼年期",
+         "breed": 1,
+         "appraised": false,
+         "affixes": []
+        }
+       },
+       {
+        "id": "L104",
+        "cat": "pet",
+        "price": 3200,
+        "eq": null,
+        "pet": {
+         "stage": "成熟期",
+         "breed": 9,
+         "appraised": true,
+         "affixes": [
+          "positive",
+          "negative"
+         ]
+        }
+       }
+      ]
+     }
+    },
+    "星願商會：購買成功；掛賣後物品鎖定（寵物暫停成長）、不能再掛賣；取消後解鎖": {
+     "ok": true,
+     "detail": {
+      "buy": {
+       "action": "buyListing",
+       "ok": true
+      },
+      "list": {
+       "action": "createListing",
+       "ok": true
+      },
+      "inv": [
+       {
+        "uid": "demo:105",
+        "locked": true,
+        "frozen": true
+       },
+       {
+        "uid": "demo:106",
+        "locked": false,
+        "frozen": false
+       },
+       {
+        "uid": "demo:107",
+        "locked": false,
+        "frozen": false
+       }
+      ],
+      "cancel": {
+       "action": "cancelListing",
+       "ok": true
+      }
+     }
+    },
+    "星願商會：售出後收益扣手續費、領取一次": {
+     "ok": true,
+     "detail": {
+      "earn": {
+       "pending": 285,
+       "sales": 1
+      },
+      "claim": {
+       "action": "claim",
+       "ok": true
+      }
+     }
+    },
+    "星願商會：iPhone 直向沒有橫向捲動": {
+     "ok": true,
+     "detail": {
+      "hScroll": 0
      }
     },
     "傳送門狀態：南門開放（可前往星芽原野、需確認）、北東西休眠（未開放）；共 4 座、沒有新增出口": {
@@ -216,6 +353,12 @@
     "chromium_hq-portrait_npc_church.png",
     "chromium_hq-portrait_npc_circus.png",
     "chromium_hq-portrait_npc_smith.png",
+    "chromium_hq-portrait_npc_guild.png",
+    "chromium_hq-portrait_guild_1_menu.png",
+    "chromium_hq-portrait_guild_2_market_equipment.png",
+    "chromium_hq-portrait_guild_3_pet_detail.png",
+    "chromium_hq-portrait_guild_4_listing_price.png",
+    "chromium_hq-portrait_guild_5_earnings.png",
     "chromium_hq-portrait_portal_south.png",
     "chromium_hq-portrait_portal_east.png",
     "chromium_hq-portrait_merchant_talk.png",
@@ -227,7 +370,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 122551,
+     "loadMs": 134830,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -277,6 +420,10 @@
        "meshes": 4,
        "triangles": 2635
       },
+      "星願商會": {
+       "meshes": 5,
+       "triangles": 3324
+      },
       "傳送門與南門": {
        "meshes": 7,
        "triangles": 10507
@@ -291,20 +438,20 @@
     },
     "perf": {
      "arrival": {
-      "drawCalls": 105,
-      "triangles": 353213
+      "drawCalls": 112,
+      "triangles": 361078
      },
      "spawn": {
-      "drawCalls": 101,
-      "triangles": 353743
+      "drawCalls": 103,
+      "triangles": 359765
      },
      "plaza_north": {
-      "drawCalls": 104,
-      "triangles": 330314
+      "drawCalls": 113,
+      "triangles": 339770
      },
      "east": {
-      "drawCalls": 103,
-      "triangles": 340276
+      "drawCalls": 105,
+      "triangles": 346298
      }
     },
     "npcs": [
@@ -351,12 +498,113 @@
       "dialog": "鐵匠鐵匠轉職＋裝備鑑定鐵匠轉職、裝備詞條鑑定都找我（同一位鐵匠）。功能正在整合中"
      },
      {
+      "id": "guild",
+      "target": "npc:guild",
+      "what": "npc:guild",
+      "dialog": "星願商會選單"
+     },
+     {
       "id": "board",
       "target": "npc:board",
       "what": "npc:board",
       "dialog": "每日委託佈告欄每日委託每日委託會貼在這裡。功能正在整合中。\n      關閉"
      }
     ],
+    "guild": {
+     "menu": "menu",
+     "market": 2,
+     "eq": [
+      {
+       "id": "L103",
+       "cat": "equipment",
+       "price": 1500,
+       "eq": {
+        "level": 7,
+        "enhance": 1,
+        "affixes": 1
+       },
+       "pet": null
+      },
+      {
+       "id": "L102",
+       "cat": "equipment",
+       "price": 2400,
+       "eq": {
+        "level": 10,
+        "enhance": 5,
+        "affixes": 3
+       },
+       "pet": null
+      }
+     ],
+     "pet": [
+      {
+       "id": "L105",
+       "cat": "pet",
+       "price": 700,
+       "eq": null,
+       "pet": {
+        "stage": "幼年期",
+        "breed": 1,
+        "appraised": false,
+        "affixes": []
+       }
+      },
+      {
+       "id": "L104",
+       "cat": "pet",
+       "price": 3200,
+       "eq": null,
+       "pet": {
+        "stage": "成熟期",
+        "breed": 9,
+        "appraised": true,
+        "affixes": [
+         "positive",
+         "negative"
+        ]
+       }
+      }
+     ],
+     "buy": {
+      "action": "buyListing",
+      "ok": true
+     },
+     "list": {
+      "action": "createListing",
+      "ok": true
+     },
+     "lockedInv": [
+      {
+       "uid": "demo:105",
+       "locked": true,
+       "frozen": true
+      },
+      {
+       "uid": "demo:106",
+       "locked": false,
+       "frozen": false
+      },
+      {
+       "uid": "demo:107",
+       "locked": false,
+       "frozen": false
+      }
+     ],
+     "cancel": {
+      "action": "cancelListing",
+      "ok": true
+     },
+     "earn": {
+      "pending": 285,
+      "sales": 1
+     },
+     "claim": {
+      "action": "claim",
+      "ok": true
+     },
+     "msg": "已領取 285 金幣"
+    },
     "portals": [
      {
       "id": "south",
@@ -383,7 +631,7 @@
       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
      }
     ],
-    "fpsSoftware": 99
+    "fpsSoftware": 103
    },
    "ok": true
   },
@@ -391,7 +639,7 @@
    "browser": "chromium",
    "mode": "lite-portrait",
    "checks": {
-    "全村正式美術載入完成（14 組模型、沒有錯誤）": {
+    "全村正式美術載入完成（15 組模型、沒有錯誤）": {
      "ok": true,
      "detail": {
       "status": "loaded",
@@ -408,6 +656,7 @@
        "委託佈告欄",
        "祭司教堂",
        "小丑馬戲團",
+       "星願商會",
        "傳送門與南門",
        "寵物商人洛恩"
       ],
@@ -418,20 +667,20 @@
      "ok": true,
      "detail": {
       "arrival": {
-       "drawCalls": 67,
-       "triangles": 114050
+       "drawCalls": 71,
+       "triangles": 120165
       },
       "spawn": {
        "drawCalls": 63,
-       "triangles": 113955
+       "triangles": 118985
       },
       "plaza_north": {
-       "drawCalls": 66,
-       "triangles": 106401
+       "drawCalls": 72,
+       "triangles": 113207
       },
       "east": {
        "drawCalls": 65,
-       "triangles": 111513
+       "triangles": 116543
       }
      }
     },
@@ -444,7 +693,7 @@
       "yaw": -6.123233995732532e-17
      }
     },
-    "NPC 互動：8 位 NPC 都能靠近後點擊對話（名稱、職責）": {
+    "NPC 互動：9 位 NPC 都能靠近後點擊對話（名稱、職責）": {
      "ok": true,
      "detail": [
       {
@@ -490,6 +739,12 @@
        "dialog": "鐵匠鐵匠轉職＋裝備鑑定鐵匠轉職、裝備詞條鑑定都找我（同一位鐵匠）。功能正在整合中"
       },
       {
+       "id": "guild",
+       "target": "npc:guild",
+       "what": "npc:guild",
+       "dialog": "星願商會選單"
+      },
+      {
        "id": "board",
        "target": "npc:board",
        "what": "npc:board",
@@ -508,6 +763,136 @@
       "yaw": 1.132702844874802,
       "floor": 0,
       "interactR": 3
+     }
+    },
+    "星願商會：掌櫃選單、標示測試資料與本機示範（不是多人交易）": {
+     "ok": true,
+     "detail": {
+      "open": true,
+      "screen": "menu",
+      "cat": "item",
+      "gold": 5000,
+      "listings": [],
+      "inv": [],
+      "mine": [],
+      "earn": null,
+      "msg": "",
+      "last": null,
+      "test": true,
+      "serverBacked": false,
+      "hScroll": 0
+     }
+    },
+    "星願商會：交易所道具／裝備／寵物三分類；裝備顯示等級、強化、詞條；寵物顯示成長階段、培育等級、鑑定狀態、正負詞條": {
+     "ok": true,
+     "detail": {
+      "item": 2,
+      "eq": [
+       {
+        "id": "L103",
+        "cat": "equipment",
+        "price": 1500,
+        "eq": {
+         "level": 7,
+         "enhance": 1,
+         "affixes": 1
+        },
+        "pet": null
+       },
+       {
+        "id": "L102",
+        "cat": "equipment",
+        "price": 2400,
+        "eq": {
+         "level": 10,
+         "enhance": 5,
+         "affixes": 3
+        },
+        "pet": null
+       }
+      ],
+      "pet": [
+       {
+        "id": "L105",
+        "cat": "pet",
+        "price": 700,
+        "eq": null,
+        "pet": {
+         "stage": "幼年期",
+         "breed": 1,
+         "appraised": false,
+         "affixes": []
+        }
+       },
+       {
+        "id": "L104",
+        "cat": "pet",
+        "price": 3200,
+        "eq": null,
+        "pet": {
+         "stage": "成熟期",
+         "breed": 9,
+         "appraised": true,
+         "affixes": [
+          "positive",
+          "negative"
+         ]
+        }
+       }
+      ]
+     }
+    },
+    "星願商會：購買成功；掛賣後物品鎖定（寵物暫停成長）、不能再掛賣；取消後解鎖": {
+     "ok": true,
+     "detail": {
+      "buy": {
+       "action": "buyListing",
+       "ok": true
+      },
+      "list": {
+       "action": "createListing",
+       "ok": true
+      },
+      "inv": [
+       {
+        "uid": "demo:105",
+        "locked": true,
+        "frozen": true
+       },
+       {
+        "uid": "demo:106",
+        "locked": false,
+        "frozen": false
+       },
+       {
+        "uid": "demo:107",
+        "locked": false,
+        "frozen": false
+       }
+      ],
+      "cancel": {
+       "action": "cancelListing",
+       "ok": true
+      }
+     }
+    },
+    "星願商會：售出後收益扣手續費、領取一次": {
+     "ok": true,
+     "detail": {
+      "earn": {
+       "pending": 285,
+       "sales": 1
+      },
+      "claim": {
+       "action": "claim",
+       "ok": true
+      }
+     }
+    },
+    "星願商會：iPhone 直向沒有橫向捲動": {
+     "ok": true,
+     "detail": {
+      "hScroll": 0
      }
     },
     "傳送門狀態：南門開放（可前往星芽原野、需確認）、北東西休眠（未開放）；共 4 座、沒有新增出口": {
@@ -598,6 +983,9 @@
     "chromium_lite-portrait_view_spawn.png",
     "chromium_lite-portrait_view_plaza_north.png",
     "chromium_lite-portrait_view_east.png",
+    "chromium_lite-portrait_guild_1_menu.png",
+    "chromium_lite-portrait_guild_3_pet_detail.png",
+    "chromium_lite-portrait_guild_5_earnings.png",
     "chromium_lite-portrait_merchant_talk.png",
     "chromium_lite-portrait_appraise_1_open.png",
     "chromium_lite-portrait_appraise_2_placed.png",
@@ -607,7 +995,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 15813,
+     "loadMs": 18092,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -657,6 +1045,10 @@
        "meshes": 3,
        "triangles": 1137
       },
+      "星願商會": {
+       "meshes": 4,
+       "triangles": 1682
+      },
       "傳送門與南門": {
        "meshes": 6,
        "triangles": 4819
@@ -671,20 +1063,20 @@
     },
     "perf": {
      "arrival": {
-      "drawCalls": 67,
-      "triangles": 114050
+      "drawCalls": 71,
+      "triangles": 120165
      },
      "spawn": {
       "drawCalls": 63,
-      "triangles": 113955
+      "triangles": 118985
      },
      "plaza_north": {
-      "drawCalls": 66,
-      "triangles": 106401
+      "drawCalls": 72,
+      "triangles": 113207
      },
      "east": {
       "drawCalls": 65,
-      "triangles": 111513
+      "triangles": 116543
      }
     },
     "npcs": [
@@ -731,12 +1123,113 @@
       "dialog": "鐵匠鐵匠轉職＋裝備鑑定鐵匠轉職、裝備詞條鑑定都找我（同一位鐵匠）。功能正在整合中"
      },
      {
+      "id": "guild",
+      "target": "npc:guild",
+      "what": "npc:guild",
+      "dialog": "星願商會選單"
+     },
+     {
       "id": "board",
       "target": "npc:board",
       "what": "npc:board",
       "dialog": "每日委託佈告欄每日委託每日委託會貼在這裡。功能正在整合中。\n      關閉"
      }
     ],
+    "guild": {
+     "menu": "menu",
+     "market": 2,
+     "eq": [
+      {
+       "id": "L103",
+       "cat": "equipment",
+       "price": 1500,
+       "eq": {
+        "level": 7,
+        "enhance": 1,
+        "affixes": 1
+       },
+       "pet": null
+      },
+      {
+       "id": "L102",
+       "cat": "equipment",
+       "price": 2400,
+       "eq": {
+        "level": 10,
+        "enhance": 5,
+        "affixes": 3
+       },
+       "pet": null
+      }
+     ],
+     "pet": [
+      {
+       "id": "L105",
+       "cat": "pet",
+       "price": 700,
+       "eq": null,
+       "pet": {
+        "stage": "幼年期",
+        "breed": 1,
+        "appraised": false,
+        "affixes": []
+       }
+      },
+      {
+       "id": "L104",
+       "cat": "pet",
+       "price": 3200,
+       "eq": null,
+       "pet": {
+        "stage": "成熟期",
+        "breed": 9,
+        "appraised": true,
+        "affixes": [
+         "positive",
+         "negative"
+        ]
+       }
+      }
+     ],
+     "buy": {
+      "action": "buyListing",
+      "ok": true
+     },
+     "list": {
+      "action": "createListing",
+      "ok": true
+     },
+     "lockedInv": [
+      {
+       "uid": "demo:105",
+       "locked": true,
+       "frozen": true
+      },
+      {
+       "uid": "demo:106",
+       "locked": false,
+       "frozen": false
+      },
+      {
+       "uid": "demo:107",
+       "locked": false,
+       "frozen": false
+      }
+     ],
+     "cancel": {
+      "action": "cancelListing",
+      "ok": true
+     },
+     "earn": {
+      "pending": 285,
+      "sales": 1
+     },
+     "claim": {
+      "action": "claim",
+      "ok": true
+     },
+     "msg": "已領取 285 金幣"
+    },
     "portals": [
      {
       "id": "south",
@@ -763,7 +1256,7 @@
       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
      }
     ],
-    "fpsSoftware": 68
+    "fpsSoftware": 63
    },
    "ok": true
   },
@@ -771,7 +1264,7 @@
    "browser": "chromium",
    "mode": "hq-landscape",
    "checks": {
-    "全村正式美術載入完成（14 組模型、沒有錯誤）": {
+    "全村正式美術載入完成（15 組模型、沒有錯誤）": {
      "ok": true,
      "detail": {
       "status": "loaded",
@@ -788,6 +1281,7 @@
        "委託佈告欄",
        "祭司教堂",
        "小丑馬戲團",
+       "星願商會",
        "傳送門與南門",
        "寵物商人洛恩"
       ],
@@ -798,20 +1292,20 @@
      "ok": true,
      "detail": {
       "arrival": {
-       "drawCalls": 134,
-       "triangles": 370546
+       "drawCalls": 142,
+       "triangles": 379894
       },
       "spawn": {
-       "drawCalls": 115,
-       "triangles": 364078
+       "drawCalls": 117,
+       "triangles": 370100
       },
       "plaza_north": {
-       "drawCalls": 116,
-       "triangles": 335759
+       "drawCalls": 125,
+       "triangles": 345215
       },
       "east": {
-       "drawCalls": 134,
-       "triangles": 370785
+       "drawCalls": 142,
+       "triangles": 380133
       }
      }
     },
@@ -824,7 +1318,7 @@
       "yaw": -6.123233995667142e-17
      }
     },
-    "NPC 互動：8 位 NPC 都能靠近後點擊對話（名稱、職責）": {
+    "NPC 互動：9 位 NPC 都能靠近後點擊對話（名稱、職責）": {
      "ok": true,
      "detail": [
       {
@@ -870,6 +1364,12 @@
        "dialog": "鐵匠鐵匠轉職＋裝備鑑定鐵匠轉職、裝備詞條鑑定都找我（同一位鐵匠）。功能正在整合中"
       },
       {
+       "id": "guild",
+       "target": "npc:guild",
+       "what": "npc:guild",
+       "dialog": "星願商會選單"
+      },
+      {
        "id": "board",
        "target": "npc:board",
        "what": "npc:board",
@@ -888,6 +1388,130 @@
       "yaw": 1.132702844874802,
       "floor": 0,
       "interactR": 3
+     }
+    },
+    "星願商會：掌櫃選單、標示測試資料與本機示範（不是多人交易）": {
+     "ok": true,
+     "detail": {
+      "open": true,
+      "screen": "menu",
+      "cat": "item",
+      "gold": 5000,
+      "listings": [],
+      "inv": [],
+      "mine": [],
+      "earn": null,
+      "msg": "",
+      "last": null,
+      "test": true,
+      "serverBacked": false,
+      "hScroll": 0
+     }
+    },
+    "星願商會：交易所道具／裝備／寵物三分類；裝備顯示等級、強化、詞條；寵物顯示成長階段、培育等級、鑑定狀態、正負詞條": {
+     "ok": true,
+     "detail": {
+      "item": 2,
+      "eq": [
+       {
+        "id": "L103",
+        "cat": "equipment",
+        "price": 1500,
+        "eq": {
+         "level": 7,
+         "enhance": 1,
+         "affixes": 1
+        },
+        "pet": null
+       },
+       {
+        "id": "L102",
+        "cat": "equipment",
+        "price": 2400,
+        "eq": {
+         "level": 10,
+         "enhance": 5,
+         "affixes": 3
+        },
+        "pet": null
+       }
+      ],
+      "pet": [
+       {
+        "id": "L105",
+        "cat": "pet",
+        "price": 700,
+        "eq": null,
+        "pet": {
+         "stage": "幼年期",
+         "breed": 1,
+         "appraised": false,
+         "affixes": []
+        }
+       },
+       {
+        "id": "L104",
+        "cat": "pet",
+        "price": 3200,
+        "eq": null,
+        "pet": {
+         "stage": "成熟期",
+         "breed": 9,
+         "appraised": true,
+         "affixes": [
+          "positive",
+          "negative"
+         ]
+        }
+       }
+      ]
+     }
+    },
+    "星願商會：購買成功；掛賣後物品鎖定（寵物暫停成長）、不能再掛賣；取消後解鎖": {
+     "ok": true,
+     "detail": {
+      "buy": {
+       "action": "buyListing",
+       "ok": true
+      },
+      "list": {
+       "action": "createListing",
+       "ok": true
+      },
+      "inv": [
+       {
+        "uid": "demo:105",
+        "locked": true,
+        "frozen": true
+       },
+       {
+        "uid": "demo:106",
+        "locked": false,
+        "frozen": false
+       },
+       {
+        "uid": "demo:107",
+        "locked": false,
+        "frozen": false
+       }
+      ],
+      "cancel": {
+       "action": "cancelListing",
+       "ok": true
+      }
+     }
+    },
+    "星願商會：售出後收益扣手續費、領取一次": {
+     "ok": true,
+     "detail": {
+      "earn": {
+       "pending": 285,
+       "sales": 1
+      },
+      "claim": {
+       "action": "claim",
+       "ok": true
+      }
      }
     },
     "傳送門狀態：南門開放（可前往星芽原野、需確認）、北東西休眠（未開放）；共 4 座、沒有新增出口": {
@@ -980,7 +1604,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 104753,
+     "loadMs": 114629,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -1030,6 +1654,10 @@
        "meshes": 4,
        "triangles": 2635
       },
+      "星願商會": {
+       "meshes": 5,
+       "triangles": 3324
+      },
       "傳送門與南門": {
        "meshes": 7,
        "triangles": 10507
@@ -1044,20 +1672,20 @@
     },
     "perf": {
      "arrival": {
-      "drawCalls": 134,
-      "triangles": 370546
+      "drawCalls": 142,
+      "triangles": 379894
      },
      "spawn": {
-      "drawCalls": 115,
-      "triangles": 364078
+      "drawCalls": 117,
+      "triangles": 370100
      },
      "plaza_north": {
-      "drawCalls": 116,
-      "triangles": 335759
+      "drawCalls": 125,
+      "triangles": 345215
      },
      "east": {
-      "drawCalls": 134,
-      "triangles": 370785
+      "drawCalls": 142,
+      "triangles": 380133
      }
     },
     "npcs": [
@@ -1104,12 +1732,113 @@
       "dialog": "鐵匠鐵匠轉職＋裝備鑑定鐵匠轉職、裝備詞條鑑定都找我（同一位鐵匠）。功能正在整合中"
      },
      {
+      "id": "guild",
+      "target": "npc:guild",
+      "what": "npc:guild",
+      "dialog": "星願商會選單"
+     },
+     {
       "id": "board",
       "target": "npc:board",
       "what": "npc:board",
       "dialog": "每日委託佈告欄每日委託每日委託會貼在這裡。功能正在整合中。\n      關閉"
      }
     ],
+    "guild": {
+     "menu": "menu",
+     "market": 2,
+     "eq": [
+      {
+       "id": "L103",
+       "cat": "equipment",
+       "price": 1500,
+       "eq": {
+        "level": 7,
+        "enhance": 1,
+        "affixes": 1
+       },
+       "pet": null
+      },
+      {
+       "id": "L102",
+       "cat": "equipment",
+       "price": 2400,
+       "eq": {
+        "level": 10,
+        "enhance": 5,
+        "affixes": 3
+       },
+       "pet": null
+      }
+     ],
+     "pet": [
+      {
+       "id": "L105",
+       "cat": "pet",
+       "price": 700,
+       "eq": null,
+       "pet": {
+        "stage": "幼年期",
+        "breed": 1,
+        "appraised": false,
+        "affixes": []
+       }
+      },
+      {
+       "id": "L104",
+       "cat": "pet",
+       "price": 3200,
+       "eq": null,
+       "pet": {
+        "stage": "成熟期",
+        "breed": 9,
+        "appraised": true,
+        "affixes": [
+         "positive",
+         "negative"
+        ]
+       }
+      }
+     ],
+     "buy": {
+      "action": "buyListing",
+      "ok": true
+     },
+     "list": {
+      "action": "createListing",
+      "ok": true
+     },
+     "lockedInv": [
+      {
+       "uid": "demo:105",
+       "locked": true,
+       "frozen": true
+      },
+      {
+       "uid": "demo:106",
+       "locked": false,
+       "frozen": false
+      },
+      {
+       "uid": "demo:107",
+       "locked": false,
+       "frozen": false
+      }
+     ],
+     "cancel": {
+      "action": "cancelListing",
+      "ok": true
+     },
+     "earn": {
+      "pending": 285,
+      "sales": 1
+     },
+     "claim": {
+      "action": "claim",
+      "ok": true
+     },
+     "msg": "已領取 285 金幣"
+    },
     "portals": [
      {
       "id": "south",
@@ -1136,7 +1865,7 @@
       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
      }
     ],
-    "fpsSoftware": 118
+    "fpsSoftware": 131
    },
    "ok": true
   },
@@ -1144,7 +1873,7 @@
    "browser": "webkit",
    "mode": "hq-portrait",
    "checks": {
-    "全村正式美術載入完成（14 組模型、沒有錯誤）": {
+    "全村正式美術載入完成（15 組模型、沒有錯誤）": {
      "ok": true,
      "detail": {
       "status": "loaded",
@@ -1161,6 +1890,7 @@
        "委託佈告欄",
        "祭司教堂",
        "小丑馬戲團",
+       "星願商會",
        "傳送門與南門",
        "寵物商人洛恩"
       ],
@@ -1171,20 +1901,20 @@
      "ok": true,
      "detail": {
       "arrival": {
-       "drawCalls": 105,
-       "triangles": 353213
+       "drawCalls": 112,
+       "triangles": 361078
       },
       "spawn": {
-       "drawCalls": 101,
-       "triangles": 353743
+       "drawCalls": 103,
+       "triangles": 359765
       },
       "plaza_north": {
-       "drawCalls": 105,
-       "triangles": 330422
+       "drawCalls": 113,
+       "triangles": 339770
       },
       "east": {
-       "drawCalls": 103,
-       "triangles": 340276
+       "drawCalls": 105,
+       "triangles": 346298
       }
      }
     },
@@ -1197,7 +1927,7 @@
       "yaw": -6.123233995667142e-17
      }
     },
-    "NPC 互動：8 位 NPC 都能靠近後點擊對話（名稱、職責）": {
+    "NPC 互動：9 位 NPC 都能靠近後點擊對話（名稱、職責）": {
      "ok": true,
      "detail": [
       {
@@ -1243,6 +1973,12 @@
        "dialog": "鐵匠鐵匠轉職＋裝備鑑定鐵匠轉職、裝備詞條鑑定都找我（同一位鐵匠）。功能正在整合中"
       },
       {
+       "id": "guild",
+       "target": "npc:guild",
+       "what": "npc:guild",
+       "dialog": "星願商會選單"
+      },
+      {
        "id": "board",
        "target": "npc:board",
        "what": "npc:board",
@@ -1261,6 +1997,136 @@
       "yaw": 1.132702844874802,
       "floor": 0,
       "interactR": 3
+     }
+    },
+    "星願商會：掌櫃選單、標示測試資料與本機示範（不是多人交易）": {
+     "ok": true,
+     "detail": {
+      "open": true,
+      "screen": "menu",
+      "cat": "item",
+      "gold": 5000,
+      "listings": [],
+      "inv": [],
+      "mine": [],
+      "earn": null,
+      "msg": "",
+      "last": null,
+      "test": true,
+      "serverBacked": false,
+      "hScroll": 0
+     }
+    },
+    "星願商會：交易所道具／裝備／寵物三分類；裝備顯示等級、強化、詞條；寵物顯示成長階段、培育等級、鑑定狀態、正負詞條": {
+     "ok": true,
+     "detail": {
+      "item": 2,
+      "eq": [
+       {
+        "id": "L103",
+        "cat": "equipment",
+        "price": 1500,
+        "eq": {
+         "level": 7,
+         "enhance": 1,
+         "affixes": 1
+        },
+        "pet": null
+       },
+       {
+        "id": "L102",
+        "cat": "equipment",
+        "price": 2400,
+        "eq": {
+         "level": 10,
+         "enhance": 5,
+         "affixes": 3
+        },
+        "pet": null
+       }
+      ],
+      "pet": [
+       {
+        "id": "L105",
+        "cat": "pet",
+        "price": 700,
+        "eq": null,
+        "pet": {
+         "stage": "幼年期",
+         "breed": 1,
+         "appraised": false,
+         "affixes": []
+        }
+       },
+       {
+        "id": "L104",
+        "cat": "pet",
+        "price": 3200,
+        "eq": null,
+        "pet": {
+         "stage": "成熟期",
+         "breed": 9,
+         "appraised": true,
+         "affixes": [
+          "positive",
+          "negative"
+         ]
+        }
+       }
+      ]
+     }
+    },
+    "星願商會：購買成功；掛賣後物品鎖定（寵物暫停成長）、不能再掛賣；取消後解鎖": {
+     "ok": true,
+     "detail": {
+      "buy": {
+       "action": "buyListing",
+       "ok": true
+      },
+      "list": {
+       "action": "createListing",
+       "ok": true
+      },
+      "inv": [
+       {
+        "uid": "demo:105",
+        "locked": true,
+        "frozen": true
+       },
+       {
+        "uid": "demo:106",
+        "locked": false,
+        "frozen": false
+       },
+       {
+        "uid": "demo:107",
+        "locked": false,
+        "frozen": false
+       }
+      ],
+      "cancel": {
+       "action": "cancelListing",
+       "ok": true
+      }
+     }
+    },
+    "星願商會：售出後收益扣手續費、領取一次": {
+     "ok": true,
+     "detail": {
+      "earn": {
+       "pending": 285,
+       "sales": 1
+      },
+      "claim": {
+       "action": "claim",
+       "ok": true
+      }
+     }
+    },
+    "星願商會：iPhone 直向沒有橫向捲動": {
+     "ok": true,
+     "detail": {
+      "hScroll": 0
      }
     },
     "傳送門狀態：南門開放（可前往星芽原野、需確認）、北東西休眠（未開放）；共 4 座、沒有新增出口": {
@@ -1354,6 +2220,12 @@
     "webkit_hq-portrait_npc_church.png",
     "webkit_hq-portrait_npc_circus.png",
     "webkit_hq-portrait_npc_smith.png",
+    "webkit_hq-portrait_npc_guild.png",
+    "webkit_hq-portrait_guild_1_menu.png",
+    "webkit_hq-portrait_guild_2_market_equipment.png",
+    "webkit_hq-portrait_guild_3_pet_detail.png",
+    "webkit_hq-portrait_guild_4_listing_price.png",
+    "webkit_hq-portrait_guild_5_earnings.png",
     "webkit_hq-portrait_portal_south.png",
     "webkit_hq-portrait_portal_east.png",
     "webkit_hq-portrait_merchant_talk.png",
@@ -1365,7 +2237,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 716,
+     "loadMs": 717,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -1415,6 +2287,10 @@
        "meshes": 4,
        "triangles": 2635
       },
+      "星願商會": {
+       "meshes": 5,
+       "triangles": 3324
+      },
       "傳送門與南門": {
        "meshes": 7,
        "triangles": 10507
@@ -1429,20 +2305,20 @@
     },
     "perf": {
      "arrival": {
-      "drawCalls": 105,
-      "triangles": 353213
+      "drawCalls": 112,
+      "triangles": 361078
      },
      "spawn": {
-      "drawCalls": 101,
-      "triangles": 353743
+      "drawCalls": 103,
+      "triangles": 359765
      },
      "plaza_north": {
-      "drawCalls": 105,
-      "triangles": 330422
+      "drawCalls": 113,
+      "triangles": 339770
      },
      "east": {
-      "drawCalls": 103,
-      "triangles": 340276
+      "drawCalls": 105,
+      "triangles": 346298
      }
     },
     "npcs": [
@@ -1489,12 +2365,113 @@
       "dialog": "鐵匠鐵匠轉職＋裝備鑑定鐵匠轉職、裝備詞條鑑定都找我（同一位鐵匠）。功能正在整合中"
      },
      {
+      "id": "guild",
+      "target": "npc:guild",
+      "what": "npc:guild",
+      "dialog": "星願商會選單"
+     },
+     {
       "id": "board",
       "target": "npc:board",
       "what": "npc:board",
       "dialog": "每日委託佈告欄每日委託每日委託會貼在這裡。功能正在整合中。\n      關閉"
      }
     ],
+    "guild": {
+     "menu": "menu",
+     "market": 2,
+     "eq": [
+      {
+       "id": "L103",
+       "cat": "equipment",
+       "price": 1500,
+       "eq": {
+        "level": 7,
+        "enhance": 1,
+        "affixes": 1
+       },
+       "pet": null
+      },
+      {
+       "id": "L102",
+       "cat": "equipment",
+       "price": 2400,
+       "eq": {
+        "level": 10,
+        "enhance": 5,
+        "affixes": 3
+       },
+       "pet": null
+      }
+     ],
+     "pet": [
+      {
+       "id": "L105",
+       "cat": "pet",
+       "price": 700,
+       "eq": null,
+       "pet": {
+        "stage": "幼年期",
+        "breed": 1,
+        "appraised": false,
+        "affixes": []
+       }
+      },
+      {
+       "id": "L104",
+       "cat": "pet",
+       "price": 3200,
+       "eq": null,
+       "pet": {
+        "stage": "成熟期",
+        "breed": 9,
+        "appraised": true,
+        "affixes": [
+         "positive",
+         "negative"
+        ]
+       }
+      }
+     ],
+     "buy": {
+      "action": "buyListing",
+      "ok": true
+     },
+     "list": {
+      "action": "createListing",
+      "ok": true
+     },
+     "lockedInv": [
+      {
+       "uid": "demo:105",
+       "locked": true,
+       "frozen": true
+      },
+      {
+       "uid": "demo:106",
+       "locked": false,
+       "frozen": false
+      },
+      {
+       "uid": "demo:107",
+       "locked": false,
+       "frozen": false
+      }
+     ],
+     "cancel": {
+      "action": "cancelListing",
+      "ok": true
+     },
+     "earn": {
+      "pending": 285,
+      "sales": 1
+     },
+     "claim": {
+      "action": "claim",
+      "ok": true
+     },
+     "msg": "已領取 285 金幣"
+    },
     "portals": [
      {
       "id": "south",
@@ -1521,7 +2498,7 @@
       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
      }
     ],
-    "fpsSoftware": 101
+    "fpsSoftware": 104
    },
    "ok": true
   },
@@ -1529,7 +2506,7 @@
    "browser": "webkit",
    "mode": "lite-portrait",
    "checks": {
-    "全村正式美術載入完成（14 組模型、沒有錯誤）": {
+    "全村正式美術載入完成（15 組模型、沒有錯誤）": {
      "ok": true,
      "detail": {
       "status": "loaded",
@@ -1546,6 +2523,7 @@
        "委託佈告欄",
        "祭司教堂",
        "小丑馬戲團",
+       "星願商會",
        "傳送門與南門",
        "寵物商人洛恩"
       ],
@@ -1556,33 +2534,33 @@
      "ok": true,
      "detail": {
       "arrival": {
-       "drawCalls": 67,
-       "triangles": 114050
+       "drawCalls": 71,
+       "triangles": 120165
       },
       "spawn": {
        "drawCalls": 63,
-       "triangles": 113955
+       "triangles": 118985
       },
       "plaza_north": {
-       "drawCalls": 67,
-       "triangles": 106493
+       "drawCalls": 72,
+       "triangles": 113207
       },
       "east": {
        "drawCalls": 65,
-       "triangles": 111513
+       "triangles": 116543
       }
      }
     },
     "移動規則：一般行走走上石階到高台（不跳躍）": {
      "ok": true,
      "detail": {
-      "x": -5.452739873203591e-16,
+      "x": -5.265981236333624e-16,
       "y": 2,
-      "z": 23.905000000000015,
-      "yaw": -6.123233995645925e-17
+      "z": 23.599999999999994,
+      "yaw": -6.123233995523378e-17
      }
     },
-    "NPC 互動：8 位 NPC 都能靠近後點擊對話（名稱、職責）": {
+    "NPC 互動：9 位 NPC 都能靠近後點擊對話（名稱、職責）": {
      "ok": true,
      "detail": [
       {
@@ -1628,6 +2606,12 @@
        "dialog": "鐵匠鐵匠轉職＋裝備鑑定鐵匠轉職、裝備詞條鑑定都找我（同一位鐵匠）。功能正在整合中"
       },
       {
+       "id": "guild",
+       "target": "npc:guild",
+       "what": "npc:guild",
+       "dialog": "星願商會選單"
+      },
+      {
        "id": "board",
        "target": "npc:board",
        "what": "npc:board",
@@ -1646,6 +2630,136 @@
       "yaw": 1.132702844874802,
       "floor": 0,
       "interactR": 3
+     }
+    },
+    "星願商會：掌櫃選單、標示測試資料與本機示範（不是多人交易）": {
+     "ok": true,
+     "detail": {
+      "open": true,
+      "screen": "menu",
+      "cat": "item",
+      "gold": 5000,
+      "listings": [],
+      "inv": [],
+      "mine": [],
+      "earn": null,
+      "msg": "",
+      "last": null,
+      "test": true,
+      "serverBacked": false,
+      "hScroll": 0
+     }
+    },
+    "星願商會：交易所道具／裝備／寵物三分類；裝備顯示等級、強化、詞條；寵物顯示成長階段、培育等級、鑑定狀態、正負詞條": {
+     "ok": true,
+     "detail": {
+      "item": 2,
+      "eq": [
+       {
+        "id": "L103",
+        "cat": "equipment",
+        "price": 1500,
+        "eq": {
+         "level": 7,
+         "enhance": 1,
+         "affixes": 1
+        },
+        "pet": null
+       },
+       {
+        "id": "L102",
+        "cat": "equipment",
+        "price": 2400,
+        "eq": {
+         "level": 10,
+         "enhance": 5,
+         "affixes": 3
+        },
+        "pet": null
+       }
+      ],
+      "pet": [
+       {
+        "id": "L105",
+        "cat": "pet",
+        "price": 700,
+        "eq": null,
+        "pet": {
+         "stage": "幼年期",
+         "breed": 1,
+         "appraised": false,
+         "affixes": []
+        }
+       },
+       {
+        "id": "L104",
+        "cat": "pet",
+        "price": 3200,
+        "eq": null,
+        "pet": {
+         "stage": "成熟期",
+         "breed": 9,
+         "appraised": true,
+         "affixes": [
+          "positive",
+          "negative"
+         ]
+        }
+       }
+      ]
+     }
+    },
+    "星願商會：購買成功；掛賣後物品鎖定（寵物暫停成長）、不能再掛賣；取消後解鎖": {
+     "ok": true,
+     "detail": {
+      "buy": {
+       "action": "buyListing",
+       "ok": true
+      },
+      "list": {
+       "action": "createListing",
+       "ok": true
+      },
+      "inv": [
+       {
+        "uid": "demo:105",
+        "locked": true,
+        "frozen": true
+       },
+       {
+        "uid": "demo:106",
+        "locked": false,
+        "frozen": false
+       },
+       {
+        "uid": "demo:107",
+        "locked": false,
+        "frozen": false
+       }
+      ],
+      "cancel": {
+       "action": "cancelListing",
+       "ok": true
+      }
+     }
+    },
+    "星願商會：售出後收益扣手續費、領取一次": {
+     "ok": true,
+     "detail": {
+      "earn": {
+       "pending": 285,
+       "sales": 1
+      },
+      "claim": {
+       "action": "claim",
+       "ok": true
+      }
+     }
+    },
+    "星願商會：iPhone 直向沒有橫向捲動": {
+     "ok": true,
+     "detail": {
+      "hScroll": 0
      }
     },
     "傳送門狀態：南門開放（可前往星芽原野、需確認）、北東西休眠（未開放）；共 4 座、沒有新增出口": {
@@ -1736,6 +2850,9 @@
     "webkit_lite-portrait_view_spawn.png",
     "webkit_lite-portrait_view_plaza_north.png",
     "webkit_lite-portrait_view_east.png",
+    "webkit_lite-portrait_guild_1_menu.png",
+    "webkit_lite-portrait_guild_3_pet_detail.png",
+    "webkit_lite-portrait_guild_5_earnings.png",
     "webkit_lite-portrait_merchant_talk.png",
     "webkit_lite-portrait_appraise_1_open.png",
     "webkit_lite-portrait_appraise_2_placed.png",
@@ -1745,7 +2862,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 2285,
+     "loadMs": 2486,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -1795,6 +2912,10 @@
        "meshes": 3,
        "triangles": 1137
       },
+      "星願商會": {
+       "meshes": 4,
+       "triangles": 1682
+      },
       "傳送門與南門": {
        "meshes": 6,
        "triangles": 4819
@@ -1809,20 +2930,20 @@
     },
     "perf": {
      "arrival": {
-      "drawCalls": 67,
-      "triangles": 114050
+      "drawCalls": 71,
+      "triangles": 120165
      },
      "spawn": {
       "drawCalls": 63,
-      "triangles": 113955
+      "triangles": 118985
      },
      "plaza_north": {
-      "drawCalls": 67,
-      "triangles": 106493
+      "drawCalls": 72,
+      "triangles": 113207
      },
      "east": {
       "drawCalls": 65,
-      "triangles": 111513
+      "triangles": 116543
      }
     },
     "npcs": [
@@ -1869,12 +2990,113 @@
       "dialog": "鐵匠鐵匠轉職＋裝備鑑定鐵匠轉職、裝備詞條鑑定都找我（同一位鐵匠）。功能正在整合中"
      },
      {
+      "id": "guild",
+      "target": "npc:guild",
+      "what": "npc:guild",
+      "dialog": "星願商會選單"
+     },
+     {
       "id": "board",
       "target": "npc:board",
       "what": "npc:board",
       "dialog": "每日委託佈告欄每日委託每日委託會貼在這裡。功能正在整合中。\n      關閉"
      }
     ],
+    "guild": {
+     "menu": "menu",
+     "market": 2,
+     "eq": [
+      {
+       "id": "L103",
+       "cat": "equipment",
+       "price": 1500,
+       "eq": {
+        "level": 7,
+        "enhance": 1,
+        "affixes": 1
+       },
+       "pet": null
+      },
+      {
+       "id": "L102",
+       "cat": "equipment",
+       "price": 2400,
+       "eq": {
+        "level": 10,
+        "enhance": 5,
+        "affixes": 3
+       },
+       "pet": null
+      }
+     ],
+     "pet": [
+      {
+       "id": "L105",
+       "cat": "pet",
+       "price": 700,
+       "eq": null,
+       "pet": {
+        "stage": "幼年期",
+        "breed": 1,
+        "appraised": false,
+        "affixes": []
+       }
+      },
+      {
+       "id": "L104",
+       "cat": "pet",
+       "price": 3200,
+       "eq": null,
+       "pet": {
+        "stage": "成熟期",
+        "breed": 9,
+        "appraised": true,
+        "affixes": [
+         "positive",
+         "negative"
+        ]
+       }
+      }
+     ],
+     "buy": {
+      "action": "buyListing",
+      "ok": true
+     },
+     "list": {
+      "action": "createListing",
+      "ok": true
+     },
+     "lockedInv": [
+      {
+       "uid": "demo:105",
+       "locked": true,
+       "frozen": true
+      },
+      {
+       "uid": "demo:106",
+       "locked": false,
+       "frozen": false
+      },
+      {
+       "uid": "demo:107",
+       "locked": false,
+       "frozen": false
+      }
+     ],
+     "cancel": {
+      "action": "cancelListing",
+      "ok": true
+     },
+     "earn": {
+      "pending": 285,
+      "sales": 1
+     },
+     "claim": {
+      "action": "claim",
+      "ok": true
+     },
+     "msg": "已領取 285 金幣"
+    },
     "portals": [
      {
       "id": "south",
@@ -1906,5 +3128,5 @@
    "ok": true
   }
  ],
- "finishedAt": "2026-11-24T09:30:07.220Z"
+ "finishedAt": "2026-11-24T11:24:35.490Z"
 }
