@@ -407,6 +407,9 @@ def key_all(rig, frame):
 
 
 X, Y, Z = (1, 0, 0), (0, 1, 0), (0, 0, 1)
+# 手臂外張（往下的手臂）：左手（+x）繞 Y 軸「負」轉才是往外、右手繞 Y 軸「正」轉才是往外
+# （B5 第一版正負號相反 → 手往內收，跑步、待機、受傷時手穿進裙子／腰包；穿插報告量到後修正）
+ABD = 4.0   # 所有動作共同的基本外張角度（度），讓手離開裙擺、腰包
 
 
 def pose_idle(t):
@@ -417,7 +420,7 @@ def pose_idle(t):
     return ({
         "spine": axis_q(X, -1.2 * b), "chest": axis_q(X, -1.6 * b),
         "neck": axis_q(X, 1.0 * b), "head": axis_q(X, 1.4 * b) @ axis_q(Z, 1.5 * sway),
-        "upper_arm.L": axis_q(Y, 2.5 + 2.0 * b2) @ axis_q(X, 1.5 * b), "upper_arm.R": axis_q(Y, -2.5 - 2.0 * b2) @ axis_q(X, 1.5 * b),
+        "upper_arm.L": axis_q(Y, -ABD - 2.0 * b2) @ axis_q(X, 1.5 * b), "upper_arm.R": axis_q(Y, ABD + 2.0 * b2) @ axis_q(X, 1.5 * b),
         "forearm.L": axis_q(X, -4 - 1.5 * b2), "forearm.R": axis_q(X, -4 - 1.5 * b2),
         "hips": axis_q(Y, 1.0 * sway),
         "thigh.L": axis_q(Y, -1.0 * sway), "thigh.R": axis_q(Y, -1.0 * sway),
@@ -438,7 +441,7 @@ def pose_run(t):
         "thigh.L": axis_q(X, -40 * s), "thigh.R": axis_q(X, 40 * s),
         "shin.L": axis_q(X, knee(math.pi / 2)), "shin.R": axis_q(X, knee(-math.pi / 2)),
         "foot.L": axis_q(X, -12 * c), "foot.R": axis_q(X, 12 * c),
-        "upper_arm.L": axis_q(X, 45 * s) @ axis_q(Y, 10), "upper_arm.R": axis_q(X, -45 * s) @ axis_q(Y, -10),
+        "upper_arm.L": axis_q(X, 45 * s) @ axis_q(Y, -ABD - 8), "upper_arm.R": axis_q(X, -45 * s) @ axis_q(Y, ABD + 8),
         "forearm.L": axis_q(X, -55 - 15 * s), "forearm.R": axis_q(X, -55 + 15 * s),
     }, {"hips": (0, 0, 0.022 * abs(c) - 0.012)})
 
@@ -491,7 +494,7 @@ def pose_attack(t):
         "head": axis_q(Z, 0.5 * tw),
         "upper_arm.R": axis_q(X, -155 * wind - 55 * swing) @ axis_q(Y, -25 * wind - 5 * swing),
         "forearm.R": axis_q(X, -75 * wind - 15 * swing), "hand.R": axis_q(X, 20 * wind - 25 * swing),
-        "upper_arm.L": axis_q(X, 30 * wind - 25 * swing) @ axis_q(Y, 12), "forearm.L": axis_q(X, -30 * (wind + swing)),
+        "upper_arm.L": axis_q(X, 30 * wind - 25 * swing) @ axis_q(Y, -ABD - 14 * (wind + swing)), "forearm.L": axis_q(X, -30 * (wind + swing)),
         "thigh.L": axis_q(X, -28 * swing), "shin.L": axis_q(X, 25 * swing), "foot.L": axis_q(X, -8 * swing),
         "thigh.R": axis_q(X, 18 * swing), "shin.R": axis_q(X, 12 * swing),
     }, {"hips": (0, -0.035 * swing, -0.018 * swing)})
@@ -505,7 +508,7 @@ def pose_hurt(t):
     rb = 0.25 * math.sin(math.pi * max(0.0, min(1.0, (s - 0.2) / 0.2)))   # 回彈：往前一點點
     return ({
         "spine": axis_q(X, -15 * k + 4 * rb), "chest": axis_q(X, -9 * k + 3 * rb), "neck": axis_q(X, -6 * k), "head": axis_q(X, -14 * k) @ axis_q(Z, 6 * k),
-        "upper_arm.L": axis_q(Y, 28 * k) @ axis_q(X, -12 * k), "upper_arm.R": axis_q(Y, -28 * k) @ axis_q(X, -12 * k),
+        "upper_arm.L": axis_q(Y, -ABD - 28 * k) @ axis_q(X, -12 * k), "upper_arm.R": axis_q(Y, ABD + 28 * k) @ axis_q(X, -12 * k),
         "forearm.L": axis_q(X, -30 * k), "forearm.R": axis_q(X, -30 * k),
         "thigh.L": axis_q(X, -10 * k), "thigh.R": axis_q(X, -6 * k), "shin.L": axis_q(X, 18 * k), "shin.R": axis_q(X, 12 * k),
     }, {"hips": (0, 0.045 * k, -0.02 * k)})
@@ -603,13 +606,13 @@ def clip_report(objs, rig):
 
 
 def attach_rig(objs, rig):
-    """骨架修改器＋以骨架為父物件（與 C1.0-B4 相同、已確認 Babylon 正常播放）。glTF 警告的實際代碼由 CI 驗證步驟印出。"""
+    """只加骨架修改器（蒙皮網格放在根層級）"""
     for o in objs:
         if not any(m.type == "ARMATURE" for m in o.modifiers):
             mod = o.modifiers.new("rig", "ARMATURE")
             mod.object = rig
-        o.parent = rig
-        o.matrix_parent_inverse = rig.matrix_world.inverted()
+        # 不再以骨架為父物件：glTF 驗證器的 26 個警告全是 NODE_SKINNED_MESH_NON_ROOT（蒙皮網格節點掛在骨架節點底下）。
+        # 蒙皮網格只靠骨架修改器變形即可，放在根層級符合 glTF 規範建議。
 
 
 def slot_of(name):
