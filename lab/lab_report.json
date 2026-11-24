@@ -1,5 +1,5 @@
 {
- "startedAt": "2026-11-24T04:42:49.480Z",
+ "startedAt": "2026-11-24T05:50:39.177Z",
  "checks": {
   "benches 位置＝既有碰撞（誤差 < 1 cm）": {
    "ok": true,
@@ -1363,9 +1363,46 @@
    ]
   },
   "星靈鑑定：桌面版可把背包物品拖進鑑定框": {
-   "ok": false,
+   "ok": true,
    "detail": {
-    "error": "page.dragAndDrop: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.pa-win [data-id=\"e1\"]')\n    - locator resolved to <button data-id=\"e1\" type=\"button\" class=\"pa-tile\" data-act=\"item\" draggable=\"true\">…</button>\n  - attempting move and down action\n    - waiting for element to be visible and stable\n"
+    "open": true,
+    "phase": "ready",
+    "selected": "e1",
+    "items": [
+     {
+      "id": "s1",
+      "kind": "seed",
+      "appraised": false
+     },
+     {
+      "id": "s2",
+      "kind": "seed",
+      "appraised": false
+     },
+     {
+      "id": "e1",
+      "kind": "egg",
+      "appraised": false
+     },
+     {
+      "id": "e0",
+      "kind": "egg",
+      "appraised": true
+     },
+     {
+      "id": "b1",
+      "kind": "birdEgg",
+      "appraised": false
+     }
+    ],
+    "lines": [],
+    "fee": "100 金幣（測試）",
+    "startDisabled": false,
+    "startBottom": 526,
+    "viewportH": 720,
+    "hScroll": 0,
+    "test": true,
+    "shownLines": 0
    }
   },
   "洛恩：開啟介面時停止巡走、轉身面向玩家並播放 Talk；關閉後恢復巡走": {
@@ -1395,9 +1432,10 @@
     "chromium_hq_pm_plaza.png",
     "chromium_hq_pm_walk.png",
     "chromium_hq_pm_path.png",
-    "chromium_hq_village_top.png"
+    "chromium_hq_village_top.png",
+    "chromium_hq_appraise_drag.png"
    ],
-   "loadMs": 40485,
+   "loadMs": 24244,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -1517,7 +1555,7 @@
       "Turn",
       "Walk"
      ],
-     "shadowCasters": 30
+     "shadowCasters": 7
     }
    },
    "textureMemory": {
@@ -1599,7 +1637,7 @@
     "mage": 7,
     "sword": 6,
     "platform": 4,
-    "merchant": 64
+    "merchant": 41
    },
    "drawCalls": {
     "none": {
@@ -1607,31 +1645,31 @@
      "activeMeshes": 37
     },
     "all": {
-     "drawCalls": 179,
+     "drawCalls": 156,
      "activeMeshes": 101
     },
     "no_fountain": {
-     "drawCalls": 170,
+     "drawCalls": 147,
      "activeMeshes": 94
     },
     "no_plaza": {
-     "drawCalls": 171,
+     "drawCalls": 148,
      "activeMeshes": 96
     },
     "no_knight": {
-     "drawCalls": 171,
+     "drawCalls": 148,
      "activeMeshes": 97
     },
     "no_mage": {
-     "drawCalls": 172,
+     "drawCalls": 149,
      "activeMeshes": 96
     },
     "no_sword": {
-     "drawCalls": 173,
+     "drawCalls": 150,
      "activeMeshes": 97
     },
     "no_platform": {
-     "drawCalls": 175,
+     "drawCalls": 152,
      "activeMeshes": 97
     },
     "no_merchant": {
@@ -1658,27 +1696,64 @@
     "animAfter": "Walk"
    },
    "drag": {
-    "error": "page.dragAndDrop: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.pa-win [data-id=\"e1\"]')\n    - locator resolved to <button data-id=\"e1\" type=\"button\" class=\"pa-tile\" data-act=\"item\" draggable=\"true\">…</button>\n  - attempting move and down action\n    - waiting for element to be visible and stable\n"
+    "open": true,
+    "phase": "ready",
+    "selected": "e1",
+    "items": [
+     {
+      "id": "s1",
+      "kind": "seed",
+      "appraised": false
+     },
+     {
+      "id": "s2",
+      "kind": "seed",
+      "appraised": false
+     },
+     {
+      "id": "e1",
+      "kind": "egg",
+      "appraised": false
+     },
+     {
+      "id": "e0",
+      "kind": "egg",
+      "appraised": true
+     },
+     {
+      "id": "b1",
+      "kind": "birdEgg",
+      "appraised": false
+     }
+    ],
+    "lines": [],
+    "fee": "100 金幣（測試）",
+    "startDisabled": false,
+    "startBottom": 526,
+    "viewportH": 720,
+    "hScroll": 0,
+    "test": true,
+    "shownLines": 0
    },
    "flicker": {
     "pm_spawn": {
-     "maxRatio": 0.0032118055555555554,
-     "meanRatio": 0.0030784970238095237
+     "maxRatio": 0.003329613095238095,
+     "meanRatio": 0.0031206597222222217
     },
     "pm_plaza": {
-     "maxRatio": 0.006653025793650793,
-     "meanRatio": 0.006357266865079364
+     "maxRatio": 0.006876240079365079,
+     "meanRatio": 0.006490575396825396
     },
     "pm_front": {
-     "maxRatio": 0.011489335317460318,
-     "meanRatio": 0.010746527777777777
+     "maxRatio": 0.01236359126984127,
+     "meanRatio": 0.011767733134920636
     },
     "pm_talk": {
-     "maxRatio": 0.005270337301587302,
-     "meanRatio": 0.0044295634920634925
+     "maxRatio": 0.005425347222222222,
+     "meanRatio": 0.00451202876984127
     }
    },
-   "frameMsSoftware": 3
+   "frameMsSoftware": 1.5
   },
   {
    "browser": "chromium",
@@ -1692,7 +1767,7 @@
     "chromium_lite-low_pm_q45.png",
     "chromium_lite-low_pm_talk.png"
    ],
-   "loadMs": 5840,
+   "loadMs": 3752,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -1906,23 +1981,23 @@
    },
    "flicker": {
     "pm_spawn": {
-     "maxRatio": 0.0022197420634920634,
-     "meanRatio": 0.0021081349206349205
+     "maxRatio": 0.0022569444444444442,
+     "meanRatio": 0.002090773809523809
     },
     "pm_plaza": {
-     "maxRatio": 0.0025793650793650793,
-     "meanRatio": 0.0023257688492063495
+     "maxRatio": 0.0025049603174603177,
+     "meanRatio": 0.0021999007936507934
     },
     "pm_front": {
-     "maxRatio": 0.00837673611111111,
-     "meanRatio": 0.006713789682539682
+     "maxRatio": 0.006312003968253968,
+     "meanRatio": 0.005318080357142857
     },
     "pm_talk": {
-     "maxRatio": 0.0037016369047619046,
-     "meanRatio": 0.002907366071428572
+     "maxRatio": 0.003763640873015873,
+     "meanRatio": 0.002917906746031746
     }
    },
-   "frameMsSoftware": 1.6000000000931323
+   "frameMsSoftware": 1.4500000001862645
   },
   {
    "browser": "chromium",
@@ -1943,7 +2018,7 @@
     "chromium_hq-portrait_panel_guide.png",
     "chromium_hq-portrait_panel_closed.png"
    ],
-   "loadMs": 18480,
+   "loadMs": 10913,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -2063,7 +2138,7 @@
       "Turn",
       "Walk"
      ],
-     "shadowCasters": 30
+     "shadowCasters": 7
     }
    },
    "textureMemory": {
@@ -2145,7 +2220,7 @@
     "mage": 7,
     "sword": 2,
     "platform": 4,
-    "merchant": 64
+    "merchant": 41
    },
    "drawCalls": {
     "none": {
@@ -2153,31 +2228,31 @@
      "activeMeshes": 18
     },
     "all": {
-     "drawCalls": 152,
+     "drawCalls": 129,
      "activeMeshes": 74
     },
     "no_fountain": {
-     "drawCalls": 143,
-     "activeMeshes": 66
+     "drawCalls": 120,
+     "activeMeshes": 67
     },
     "no_plaza": {
-     "drawCalls": 144,
-     "activeMeshes": 68
+     "drawCalls": 121,
+     "activeMeshes": 69
     },
     "no_knight": {
-     "drawCalls": 148,
-     "activeMeshes": 73
+     "drawCalls": 125,
+     "activeMeshes": 74
     },
     "no_mage": {
-     "drawCalls": 145,
-     "activeMeshes": 68
+     "drawCalls": 122,
+     "activeMeshes": 69
     },
     "no_sword": {
-     "drawCalls": 150,
-     "activeMeshes": 73
+     "drawCalls": 127,
+     "activeMeshes": 74
     },
     "no_platform": {
-     "drawCalls": 148,
+     "drawCalls": 125,
      "activeMeshes": 70
     },
     "no_merchant": {
@@ -2619,7 +2694,7 @@
     "chromium_lite-portrait_appraise_5_already.png",
     "chromium_lite-portrait_appraise_6_bird.png"
    ],
-   "loadMs": 3362,
+   "loadMs": 2231,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -3235,7 +3310,7 @@
     "webkit_hq_appraise_5_already.png",
     "webkit_hq_appraise_6_bird.png"
    ],
-   "loadMs": 5505,
+   "loadMs": 5281,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -3355,7 +3430,7 @@
       "Turn",
       "Walk"
      ],
-     "shadowCasters": 30
+     "shadowCasters": 7
     }
    },
    "textureMemory": {
@@ -3437,7 +3512,7 @@
     "mage": 7,
     "sword": 6,
     "platform": 4,
-    "merchant": 64
+    "merchant": 41
    },
    "drawCalls": {
     "none": {
@@ -3445,31 +3520,31 @@
      "activeMeshes": 37
     },
     "all": {
-     "drawCalls": 179,
+     "drawCalls": 156,
      "activeMeshes": 101
     },
     "no_fountain": {
-     "drawCalls": 170,
+     "drawCalls": 147,
      "activeMeshes": 94
     },
     "no_plaza": {
-     "drawCalls": 171,
+     "drawCalls": 148,
      "activeMeshes": 96
     },
     "no_knight": {
-     "drawCalls": 171,
+     "drawCalls": 148,
      "activeMeshes": 97
     },
     "no_mage": {
-     "drawCalls": 172,
+     "drawCalls": 149,
      "activeMeshes": 96
     },
     "no_sword": {
-     "drawCalls": 173,
+     "drawCalls": 150,
      "activeMeshes": 97
     },
     "no_platform": {
-     "drawCalls": 175,
+     "drawCalls": 152,
      "activeMeshes": 97
     },
     "no_merchant": {
@@ -3882,7 +3957,7 @@
    "shots": [
     "webkit_lite-low_pm_front.png"
    ],
-   "loadMs": 2822,
+   "loadMs": 1835,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -4096,5 +4171,5 @@
    }
   }
  ],
- "finishedAt": "2026-11-24T05:08:01.485Z"
+ "finishedAt": "2026-11-24T06:06:28.551Z"
 }
