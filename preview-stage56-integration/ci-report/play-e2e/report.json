@@ -1,0 +1,47 @@
+{
+  "startedAt": "2026-11-24T05:03:50.049Z",
+  "runs": [
+    {
+      "browser": "webkit",
+      "label": "male hq",
+      "checks": {
+        "啟動（地圖＋角色＋怪物）": {
+          "ok": false,
+          "detail": "星芽原野整合測試載入失敗：Unable to load from ./models/novice_c10b5a_male_hq.glb: Not Found"
+        }
+      },
+      "errors": [
+        "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "console: RuntimeError: Unable to load from ./models/novice_c10b5a_male_hq.glb: Not Found",
+        "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "console: RuntimeError: Unable to load from ./models/novice_c10b5a_male_hq.glb: Not Found",
+        "exception: 未啟動"
+      ],
+      "screenshots": [],
+      "results": {},
+      "ok": false
+    },
+    {
+      "browser": "webkit",
+      "label": "female lite",
+      "checks": {
+        "啟動（地圖＋角色＋怪物）": {
+          "ok": false,
+          "detail": "星芽原野整合測試載入失敗：Unable to load from ./models/novice_c10b5a_female_lite.glb: Not Found"
+        }
+      },
+      "errors": [
+        "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "console: RuntimeError: Unable to load from ./models/novice_c10b5a_male_hq.glb: Not Found",
+        "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "console: RuntimeError: Unable to load from ./models/novice_c10b5a_female_lite.glb: Not Found",
+        "exception: 未啟動"
+      ],
+      "screenshots": [],
+      "results": {},
+      "ok": false
+    }
+  ],
+  "finishedAt": "2026-11-24T05:03:56.640Z",
+  "failures": 2
+}
