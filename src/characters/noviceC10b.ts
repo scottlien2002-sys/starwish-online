@@ -6,8 +6,18 @@
 export type C10bGender = "male" | "female";
 export type C10bLod = "hq" | "lite";
 
-export function c10bFile(g: C10bGender, lod: C10bLod): string {
-  return `novice_c10b_${g}_${lod}.glb`;
+/** 男生披風徽記版本：0 = C1.0-B 原版、1 = C1.0-B1（貼合修正）、2 = C1.0-B2（縮小到與女生徽記同尺寸，正式美術基準） */
+export type C10bStar = 0 | 1 | 2;
+
+export function c10bFile(g: C10bGender, lod: C10bLod, star: C10bStar | boolean = 0): string {
+  // 只有男生有徽記修正版（其他零件與 C1.0-B 相同）；女生一律用 C1.0-B
+  const v = star === true ? 1 : star === false ? 0 : star;
+  if (g !== "male" || v === 0) return `novice_c10b_${g}_${lod}.glb`;
+  return v === 2 ? `novice_c10b2_${g}_${lod}.glb` : `novice_c10b1_${g}_${lod}.glb`;
+}
+
+export function c10bStarLabel(star: C10bStar): string {
+  return star === 2 ? "C1.0-B2（徽記縮小・正式基準）" : star === 1 ? "C1.0-B1（徽記修正）" : "C1.0-B";
 }
 
 /** 建置時的參考值（art-novice-c10b 320df1fb 的 c10b_report.json／glTF Validator） */
@@ -17,10 +27,10 @@ export const C10B_REFERENCE = Object.freeze({
   materials: 26,
 });
 
-export type C10bView = "front" | "left45" | "side" | "back" | "low" | "lowBack" | "head" | "skirt" | "free";
+export type C10bView = "front" | "left45" | "side" | "back" | "low" | "lowBack" | "head" | "skirt" | "emblem" | "emblemL45" | "emblemR45" | "femEmblem" | "femEmblemL45" | "femEmblemR45" | "free";
 
 /** 鏡頭（ArcRotateCamera）：alpha、beta、radius、注視高度 y（從腳底起算）。從正面看（+Z）= alpha π/2 */
-export const C10B_VIEWS: Readonly<Record<Exclude<C10bView, "free">, { alpha: number; beta: number; radius: number; y: number; label: string }>> = Object.freeze({
+export const C10B_VIEWS: Readonly<Record<Exclude<C10bView, "free">, { alpha: number; beta: number; radius: number; y: number; label: string; x?: number; z?: number }>> = Object.freeze({
   front: { alpha: Math.PI / 2, beta: 1.42, radius: 3.0, y: 0.6, label: "正面" },
   left45: { alpha: Math.PI / 4, beta: 1.42, radius: 3.0, y: 0.6, label: "45 度" },
   side: { alpha: 0, beta: 1.42, radius: 3.0, y: 0.6, label: "側面" },
@@ -30,6 +40,15 @@ export const C10B_VIEWS: Readonly<Record<Exclude<C10bView, "free">, { alpha: num
   lowBack: { alpha: -Math.PI / 2, beta: 1.85, radius: 1.55, y: 0.36, label: "低角度背面" },
   head: { alpha: Math.PI / 2, beta: 1.5, radius: 1.35, y: 0.9, label: "頭部" },
   skirt: { alpha: Math.PI / 3, beta: 1.5, radius: 1.45, y: 0.32, label: "裙裝" },
+  // 男生背後披風徽記特寫（男生站在 x = 0.45）
+  // C1.0-B2：鏡頭對準徽記本身（背面在 -Z，男生披風徽記約 z = -0.2、女生外裙徽記約 z = -0.22），男女同距離 0.9 m → 畫面上大小可直接比較
+  emblem: { alpha: -Math.PI / 2, beta: 1.45, radius: 0.9, y: 0.33, x: 0.45, z: -0.2, label: "披風徽記" },
+  // 徽記左後、右後 45 度（角色左手邊在 -X）與女生外裙徽記（女生站在 x = -0.45）
+  emblemL45: { alpha: (-3 * Math.PI) / 4, beta: 1.45, radius: 0.9, y: 0.33, x: 0.45, z: -0.2, label: "徽記左後45°" },
+  emblemR45: { alpha: -Math.PI / 4, beta: 1.45, radius: 0.9, y: 0.33, x: 0.45, z: -0.2, label: "徽記右後45°" },
+  femEmblem: { alpha: -Math.PI / 2, beta: 1.45, radius: 0.9, y: 0.33, x: -0.45, z: -0.22, label: "女徽記" },
+  femEmblemL45: { alpha: (-3 * Math.PI) / 4, beta: 1.45, radius: 0.9, y: 0.33, x: -0.45, z: -0.22, label: "女徽記左後45°" },
+  femEmblemR45: { alpha: -Math.PI / 4, beta: 1.45, radius: 0.9, y: 0.33, x: -0.45, z: -0.22, label: "女徽記右後45°" },
 });
 
 export interface C10bOptions {
@@ -47,8 +66,42 @@ export interface C10bOptions {
   p2: boolean;
   /** P3 診斷開關（只用來量成本，不是優化方案）：?diag=noshadow,noglow,nopost,nomsaa,nochars */
   diag: C10pDiag[];
-  /** P3 診斷：每 30 格用 gl.finish() 量一次「CPU 提交＋GPU 完成」時間（?gpu=1） */
+  /** P3 診斷：每 0.5 秒用 gl.finish() 量一次「CPU 提交＋GPU 完成」時間（?gpu=1） */
   gpuProbe: boolean;
+  /** P3-1 陰影診斷（只量成本，不是正式設定）：once = 陰影貼圖載入後只畫一次（?shadowrefresh=once） */
+  shadowRefresh: "every" | "once";
+  /** P3-1：陰影取樣對照（?shadowfilter=low|high|pcf；default = 正式 PCSS32 中品質） */
+  shadowFilter: "default" | "low" | "high" | "pcf";
+  /** P3-1：陰影貼圖解析度對照（?shadowmap=1024；null = 畫質預設 2048） */
+  shadowMap: 1024 | 2048 | null;
+  /** P3-1：載入後先停止繪製幾秒再開始（?rest=30，0～120） */
+  rest: number;
+  /** P3-1：測試期間鎖定畫布尺寸（?fixsize=1），Safari 工具列收放不改變渲染解析度 */
+  fixSize: boolean;
+  /** 男生披風徽記版本（?star=1 → C1.0-B1、?star=2 → C1.0-B2） */
+  star: C10bStar;
+  /** P3-2 優化組合（?p3=1）：陰影只在投影者或太陽改變時重畫、色調映射改在材質內＋畫布 MSAA 4x、沒有發光物件時暫停發光層 */
+  p3: boolean;
+}
+
+/** P3-2 優化內容（報告用） */
+export const C10P_P3_ITEMS = Object.freeze([
+  "陰影貼圖只在投影者移動／顯示改變、或太陽改變時重畫（支援之後角色與怪物移動；有骨架動畫的網格每格重畫）",
+  "不使用半浮點 HDR 後製管線：色調映射、曝光、對比改在材質內計算（同一組 KHR PBR Neutral 設定），MSAA 4x 改由畫布原生提供",
+  "沒有任何發光物件時暫停發光層（之後有星星、光環等發光物加入時自動開啟）",
+]);
+
+/** P3-1 陰影診斷代號（報告與畫面標題用） */
+export function c10pShadowMode(o: Pick<C10bOptions, "diag" | "shadowRefresh" | "shadowFilter" | "shadowMap" | "gpuProbe">): string {
+  const parts: string[] = [];
+  if (o.diag.includes("noshadow")) parts.push("S1 關陰影");
+  if (o.shadowRefresh === "once") parts.push("S2 陰影貼圖只畫一次");
+  if (o.shadowFilter === "low") parts.push("S3a PCSS 低取樣");
+  if (o.shadowFilter === "high") parts.push("S3b PCSS 高取樣");
+  if (o.shadowFilter === "pcf") parts.push("S3c 一般 PCF");
+  if (o.shadowMap === 1024) parts.push("S4 陰影貼圖 1024");
+  if (!parts.length) parts.push(o.gpuProbe ? "S0 原始 HQ 陰影" : "S0n 原始 HQ 陰影（無 GPU 探測）");
+  return parts.join("＋");
 }
 
 export type C10pDiag = "noshadow" | "noglow" | "nopost" | "nomsaa" | "nochars";
@@ -78,6 +131,13 @@ export function c10bOptionsFromSearch(search: string): C10bOptions {
     p2: p.get("p2") === "1",
     diag: (p.get("diag") ?? "").split(",").filter((d): d is C10pDiag => d in C10P_DIAG_LABEL),
     gpuProbe: p.get("gpu") === "1",
+    shadowRefresh: p.get("shadowrefresh") === "once" ? "once" : "every",
+    shadowFilter: ((f) => (f === "low" || f === "high" || f === "pcf" ? f : "default"))(p.get("shadowfilter")),
+    shadowMap: p.get("shadowmap") === "1024" ? 1024 : p.get("shadowmap") === "2048" ? 2048 : null,
+    rest: Math.round(num("rest", 0, 0, 120)),
+    fixSize: p.get("fixsize") === "1",
+    star: p.get("star") === "2" ? 2 : p.get("star") === "1" ? 1 : 0,
+    p3: p.get("p3") === "1",
   };
 }
 

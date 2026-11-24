@@ -108,6 +108,18 @@ function main(): void {
         });
       return;
     }
+    // ?lab=anim：Stage 5.5 角色動畫（C1.0-B4 候選：骨架＋五個動作）＋星靈寵物系統測試頁
+    if (lab === "anim") {
+      document.body.classList.add("lab-mode");
+      void import("./lab/AnimPetLab.ts")
+        .then((m) => m.startAnimPetLab(canvas, hudRoot))
+        .then(() => hideBoot())
+        .catch((err: unknown) => {
+          console.error(err);
+          fail(`動畫／寵物測試頁載入失敗：${err instanceof Error ? err.message : String(err)}`);
+        });
+      return;
+    }
     const LAB_MONSTER: Record<string, string> = { bobo: "star_dew_bobo", dummy: "test_dummy" };
     if (lab && (lab in LAB_MONSTER || lab === "field")) {
       const start =

@@ -2084,7 +2084,7 @@ for (const name of browsers) {
         const br = await pg.evaluate(() => window.__starwishC10b.benchState().result);
         const rep = await pg.evaluate(() => window.__starwishC10b.report());
         run.results.push({ tag: "c10p P3 diag", breakdown: bd, bench: br });
-        check("P3 診斷：關陰影＋關發光時陰影與發光層不再畫角色", bd.share.shadowMap === 0 && bd.draws.all < bds.A2.hq.draws.all, [bd.draws, bd.share]);
+        check("P3 診斷：關陰影＋關發光時陰影與發光層都是 0 個繪製", bd.share.shadowMap === 0 && bd.share.glowLayer === 0 && bd.draws.all < bds.A2.hq.draws.all, [bd.draws, bd.share]);
         check("P3 診斷：時間軸含 CPU 時間、GPU 探測、解析度紀錄", !!br && br.timeline.length >= 1 && br.timeline.some((w) => w.gpuN > 0) && br.sizeChanges === 0 && /時間軸/.test(rep) && /診斷開關/.test(rep), br && { tl: br.timeline, sz: br.renderSize });
         await pg.close();
       }
@@ -2099,6 +2099,466 @@ for (const name of browsers) {
     console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
     for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}${v.ok ? "" : "  " + JSON.stringify(v.detail).slice(0, 900)}`);
     for (const r of run.results) console.log(`   · ${r.tag}: ${JSON.stringify(r)}`);
+    for (const e of run.errors) console.log(`   ! ${e}`);
+  }
+
+  // ---------- C1.0-P P3-1：陰影診斷模式（WebKit；只檢查模式與量測正確，CI 沒有 GPU，FPS 不代表 iPhone）----------
+  if (name === "webkit") {
+    const vp = VIEWPORTS[0];
+    const run = { browser: name, viewport: `${vp.name} / C1.0-P P3-1 陰影診斷 S0～S4`, checks: {}, errors: [], screenshots: [], results: [] };
+    const check = (key, ok, detail) => {
+      run.checks[key] = { ok, detail };
+    };
+    const frames = (page, n) => page.evaluate((k) => new Promise((r) => { let i = 0; const f = () => (++i >= k ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); }), n);
+    const BASE = "/?lab=c10b&quality=high&p1=1&p2=1";
+    const VIEWS = ["front", "left45", "back", "low"];
+    const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+    const open = async (q) => {
+      const page = await ctx.newPage();
+      page.on("pageerror", (e) => run.errors.push(`${q} pageerror: ${e.message}`));
+      await page.goto(server.url + BASE + q, { waitUntil: "load" });
+      await page.waitForFunction(() => window.__starwishC10b?.ready === true, null, { timeout: 120000 });
+      return page;
+    };
+    const shots = {};
+    const take = async (page, tag) => {
+      shots[tag] = {};
+      await page.evaluate(() => document.querySelectorAll(".v3-top,.lab-panel,.perf-panel,.lab-bench-result").forEach((e) => (e.style.visibility = "hidden")));
+      for (const v of VIEWS) {
+        await page.evaluate((x) => window.__starwishC10b.view(x), v);
+        await frames(page, 3);
+        const f = `${outDir}${name}_c10p_p31_${tag}_${v}.png`;
+        shots[tag][v] = await page.screenshot({ path: f });
+        run.screenshots.push(f.split("/test-results/")[1]);
+      }
+    };
+    try {
+      // S0：每格重畫陰影貼圖
+      const p0 = await open("&gpu=1");
+      await frames(p0, 3);
+      const s0a = await p0.evaluate(() => window.__starwishC10b.shadowState());
+      await frames(p0, 4);
+      const s0b = await p0.evaluate(() => window.__starwishC10b.shadowState());
+      run.results.push({ tag: "S0", a: s0a, b: s0b });
+      check("S0：陰影貼圖每格重畫（4 格內更新 ≥4 次）、PCSS32 中品質、2048", s0b.renders - s0a.renders >= 4 && s0b.contact && s0b.filteringQuality === 1 && s0b.mapSize === 2048, [s0a, s0b]);
+      check("S0：陰影貼圖每次約 28 個 Draw（角色 24＋草原 4）", s0b.lastFrameShadowDraws >= 20 && s0b.lastFrameShadowDraws <= 40, s0b);
+      await take(p0, "S0");
+      await p0.close();
+
+      // S2：陰影貼圖只畫一次
+      const p2 = await open("&gpu=1&shadowrefresh=once");
+      await p2.waitForFunction(() => window.__starwishC10b.shadowState().frozenAt !== null, null, { timeout: 120000 });
+      await frames(p2, 3);
+      const s2a = await p2.evaluate(() => window.__starwishC10b.shadowState());
+      await frames(p2, 6);
+      const s2b = await p2.evaluate(() => window.__starwishC10b.shadowState());
+      run.results.push({ tag: "S2", a: s2a, b: s2b });
+      check("S2：凍結後 6 格陰影貼圖更新 0 次、陰影 Draw 0", s2b.renders === s2a.renders && s2b.lastFrameShadowDraws === 0 && s2b.refreshRate === 0, [s2a, s2b]);
+      await take(p2, "S2");
+      // 切換 Lite 後會重新畫、再凍結
+      await p2.evaluate(() => window.__starwishC10b.setLod("lite"));
+      await p2.waitForFunction(() => window.__starwishC10b.lod === "lite" && !window.__starwishC10b.loading, null, { timeout: 120000 });
+      await p2.waitForFunction(() => window.__starwishC10b.shadowState().frozenAt !== null, null, { timeout: 120000 });
+      const s2c = await p2.evaluate(() => window.__starwishC10b.shadowState());
+      check("S2：切換 Lite 後陰影貼圖重新畫並再次凍結", s2c.renders > s2b.renders && s2c.frozenAt !== null, s2c);
+      await p2.close();
+
+      // 逐像素比較 S0 vs S2
+      const dp = await ctx.newPage();
+      const diff = (a, b) =>
+        dp.evaluate(async ([x, y]) => {
+          const load = (b64) => new Promise((r) => { const i = new Image(); i.onload = () => r(i); i.src = "data:image/png;base64," + b64; });
+          const [ia, ib] = await Promise.all([load(x), load(y)]);
+          const c = document.createElement("canvas");
+          c.width = ia.width;
+          c.height = ia.height;
+          const g = c.getContext("2d");
+          g.drawImage(ia, 0, 0);
+          const da = g.getImageData(0, 0, c.width, c.height).data;
+          g.drawImage(ib, 0, 0);
+          const db = g.getImageData(0, 0, c.width, c.height).data;
+          let changed = 0, max = 0;
+          for (let k = 0; k < da.length; k += 4) {
+            const d = Math.max(Math.abs(da[k] - db[k]), Math.abs(da[k + 1] - db[k + 1]), Math.abs(da[k + 2] - db[k + 2]));
+            if (d > max) max = d;
+            if (d > 8) changed++;
+          }
+          return { changedPct: +((changed / (da.length / 4)) * 100).toFixed(4), maxDiff: max };
+        }, [a.toString("base64"), b.toString("base64")]);
+      const diffs = {};
+      for (const v of VIEWS) diffs[v] = await diff(shots.S0[v], shots.S2[v]);
+      await dp.close();
+      run.results.push({ tag: "S0 vs S2 畫面", diffs });
+      check("S2 與 S0 截圖相同（每個視角不同像素 ≤ 0.05%）", VIEWS.every((v) => diffs[v].changedPct <= 0.05), diffs);
+
+      // S1、S3、S4 設定生效
+      const p1 = await open("&gpu=1&diag=noshadow");
+      await frames(p1, 3);
+      const s1 = await p1.evaluate(() => window.__starwishC10b.shadowState());
+      check("S1：關陰影後陰影貼圖 Draw 0", s1.lastFrameShadowDraws === 0 && s1.casters === 0, s1);
+      await p1.close();
+      const modes = {};
+      for (const [tag, q] of [["S3a", "&shadowfilter=low"], ["S3b", "&shadowfilter=high"], ["S3c", "&shadowfilter=pcf"], ["S4", "&shadowmap=1024"]]) {
+        const pg = await open("&gpu=1" + q);
+        await frames(pg, 2);
+        modes[tag] = await pg.evaluate(() => window.__starwishC10b.shadowState());
+        await pg.close();
+      }
+      run.results.push({ tag: "S3/S4", modes });
+      check("S3a：PCSS 低取樣", modes.S3a.contact && modes.S3a.filteringQuality === 2 && /S3a/.test(modes.S3a.mode), modes.S3a);
+      check("S3b：PCSS 高取樣", modes.S3b.contact && modes.S3b.filteringQuality === 0 && /S3b/.test(modes.S3b.mode), modes.S3b);
+      check("S3c：一般 PCF（非 PCSS）", !modes.S3c.contact && modes.S3c.pcf && /S3c/.test(modes.S3c.mode), modes.S3c);
+      check("S4：陰影貼圖 1024、仍是 PCSS32", modes.S4.mapSize === 1024 && modes.S4.contact && modes.S4.filteringQuality === 1, modes.S4);
+
+      // 載入後休息＋自動測試＋畫布鎖定＋報告欄位（S2、不開 GPU 探測）
+      const pb = await open("&shadowrefresh=once&rest=3&bench=6&warmup=10&fixsize=1");
+      const resting = await pb.evaluate(() => window.__starwishC10b.benchState().state);
+      await pb.waitForFunction(() => window.__starwishC10b.benchState().state === "done", null, { timeout: 300000 });
+      const br = await pb.evaluate(() => window.__starwishC10b.benchState().result);
+      const rep = await pb.evaluate(() => window.__starwishC10b.report());
+      run.results.push({ tag: "S2 自動測試", resting, bench: br });
+      check("rest=3：載入後先不開始，之後自動測試", resting === "off" && !!br && /載入後先停 3 秒/.test(br.label), { resting, label: br && br.label });
+      check("報告：主場景／陰影 Draw、測試期間陰影更新 0 次、GPU 探測關、畫布鎖定、resize 紀錄", !!br && br.shadowRendersInTest === 0 && br.avgShadowDraws === 0 && br.avgMainDraws > 0 && br.gpuProbe === false && br.fixSize === true && Array.isArray(br.resizeEvents) && /陰影模式 S2/.test(rep) && /主場景/.test(rep) && /GPU 探測 關/.test(rep), br);
+      await pb.close();
+    } catch (e) {
+      run.errors.push(`exception: ${e.message}`);
+    }
+    await ctx.close();
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 11;
+    if (!run.ok) failures++;
+    report.runs.push(run);
+    console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
+    for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}${v.ok ? "" : "  " + JSON.stringify(v.detail).slice(0, 900)}`);
+    for (const r of run.results) console.log(`   · ${r.tag}: ${JSON.stringify(r)}`.slice(0, 3000));
+    for (const e of run.errors) console.log(`   ! ${e}`);
+  }
+
+  // ---------- C1.0-P P3-2：優化組合 vs 原始 HQ（含男生披風徽記修正版；WebKit）----------
+  if (name === "webkit") {
+    const vp = VIEWPORTS[0];
+    const run = { browser: name, viewport: `${vp.name} / C1.0-P P3-2 優化組合＋徽記修正`, checks: {}, errors: [], screenshots: [], results: [] };
+    const check = (key, ok, detail) => {
+      run.checks[key] = { ok, detail };
+    };
+    const frames = (page, n) => page.evaluate((k) => new Promise((r) => { let i = 0; const f = () => (++i >= k ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); }), n);
+    const BASE = "/?lab=c10b&quality=high&p1=1&p2=1&star=1";
+    const VIEWS = ["front", "left45", "back", "low", "emblem"];
+    const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+    const open = async (q) => {
+      const page = await ctx.newPage();
+      page.on("pageerror", (e) => run.errors.push(`${q} pageerror: ${e.message}`));
+      await page.goto(server.url + BASE + q, { waitUntil: "load" });
+      await page.waitForFunction(() => window.__starwishC10b?.ready === true, null, { timeout: 120000 });
+      await frames(page, 4);
+      return page;
+    };
+    const shots = {};
+    const take = async (page, tag) => {
+      shots[tag] = {};
+      await page.evaluate(() => document.querySelectorAll(".v3-top,.lab-panel,.perf-panel,.lab-bench-result").forEach((e) => (e.style.visibility = "hidden")));
+      for (const v of VIEWS) {
+        await page.evaluate((x) => window.__starwishC10b.view(x), v);
+        await frames(page, 3);
+        const f = `${outDir}${name}_c10p_p32_${tag}_${v}.png`;
+        shots[tag][v] = await page.screenshot({ path: f });
+        run.screenshots.push(f.split("/test-results/")[1]);
+      }
+    };
+    try {
+      const pa = await open("");
+      const ra = await pa.evaluate(() => window.__starwishC10b.renderInfo());
+      run.results.push({ tag: "原始 HQ", info: ra });
+      check("原始 HQ：HDR 後製管線開、男生為徽記修正版 GLB", ra.pipeline === true && ra.files.includes("novice_c10b1_male_hq.glb") && ra.files.includes("novice_c10b_female_hq.glb"), ra);
+      await take(pa, "orig");
+      await pa.close();
+
+      const pb = await open("&p3=1");
+      const rb = await pb.evaluate(() => window.__starwishC10b.renderInfo());
+      run.results.push({ tag: "P3-2", info: rb });
+      check("P3-2：不建 HDR 管線、色調映射在材質內、發光層暫停", rb.pipeline === false && rb.toneMappingInMaterials === true && rb.glowEnabled === false, rb);
+      const s1 = await pb.evaluate(() => window.__starwishC10b.shadowState());
+      await frames(pb, 6);
+      const s2 = await pb.evaluate(() => window.__starwishC10b.shadowState());
+      check("P3-2：角色不動時陰影貼圖不重畫（6 格 0 次）", s2.renders === s1.renders, [s1.renders, s2.renders]);
+      await pb.evaluate(() => window.__starwishC10b.moveChar(0, 0.05));
+      await frames(pb, 3);
+      const s3 = await pb.evaluate(() => window.__starwishC10b.shadowState());
+      await frames(pb, 4);
+      const s4 = await pb.evaluate(() => window.__starwishC10b.shadowState());
+      check("P3-2：角色移動後陰影貼圖立刻重畫 1 次，之後又停止", s3.renders - s2.renders >= 1 && s3.renders - s2.renders <= 2 && s4.renders === s3.renders, [s2.renders, s3.renders, s4.renders]);
+      await pb.evaluate(() => window.__starwishC10b.moveChar(0, -0.05));
+      await frames(pb, 3);
+      await take(pb, "p3");
+      await pb.close();
+
+      const dp = await ctx.newPage();
+      const diff = (a, b) =>
+        dp.evaluate(async ([x, y]) => {
+          const load = (b64) => new Promise((r) => { const i = new Image(); i.onload = () => r(i); i.src = "data:image/png;base64," + b64; });
+          const [ia, ib] = await Promise.all([load(x), load(y)]);
+          const c = document.createElement("canvas");
+          c.width = ia.width;
+          c.height = ia.height;
+          const g = c.getContext("2d");
+          g.drawImage(ia, 0, 0);
+          const da = g.getImageData(0, 0, c.width, c.height).data;
+          g.drawImage(ib, 0, 0);
+          const db = g.getImageData(0, 0, c.width, c.height).data;
+          let changed = 0, changed24 = 0, sum = 0, max = 0;
+          for (let k = 0; k < da.length; k += 4) {
+            const d = Math.max(Math.abs(da[k] - db[k]), Math.abs(da[k + 1] - db[k + 1]), Math.abs(da[k + 2] - db[k + 2]));
+            sum += d;
+            if (d > max) max = d;
+            if (d > 8) changed++;
+            if (d > 24) changed24++;
+          }
+          const n = da.length / 4;
+          return { changedPct: +((changed / n) * 100).toFixed(3), changed24Pct: +((changed24 / n) * 100).toFixed(3), meanDiff: +(sum / n).toFixed(3), maxDiff: max };
+        }, [a.toString("base64"), b.toString("base64")]);
+      const diffs = {};
+      for (const v of VIEWS) diffs[v] = await diff(shots.orig[v], shots.p3[v]);
+      await dp.close();
+      run.results.push({ tag: "原始 vs P3-2 畫面", diffs });
+      check("原始 vs P3-2：明顯差異（>24 色階）像素 ≤ 1%", VIEWS.every((v) => diffs[v].changed24Pct <= 1), diffs);
+    } catch (e) {
+      run.errors.push(`exception: ${e.message}`);
+    }
+    await ctx.close();
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 5;
+    if (!run.ok) failures++;
+    report.runs.push(run);
+    console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
+    for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}${v.ok ? "" : "  " + JSON.stringify(v.detail).slice(0, 900)}`);
+    for (const r of run.results) console.log(`   · ${r.tag}: ${JSON.stringify(r)}`.slice(0, 3000));
+    for (const e of run.errors) console.log(`   ! ${e}`);
+  }
+
+  // ---------- C1.0-B2：男生披風徽記縮小版（正式美術基準）獨立測試頁整合（WebKit）----------
+  if (name === "webkit") {
+    const vp = VIEWPORTS[0];
+    const run = { browser: name, viewport: `${vp.name} / C1.0-B2 徽記縮小版整合 ?lab=c10b&star=2&p3=1`, checks: {}, errors: [], screenshots: [], results: [] };
+    const check = (key, ok, detail) => {
+      run.checks[key] = { ok, detail };
+    };
+    const frames = (page, n) => page.evaluate((k) => new Promise((r) => { let i = 0; const f = () => (++i >= k ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); }), n);
+    const EMB = ["emblem", "emblemL45", "emblemR45", "femEmblem", "femEmblemL45", "femEmblemR45"];
+    const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+    const page = await ctx.newPage();
+    page.on("pageerror", (e) => run.errors.push(`pageerror: ${e.message}`));
+    page.on("console", (m) => m.type() === "error" && run.errors.push(`console: ${m.text()}`));
+    // 畫面中央小框（寬 30%、高 16%）內的金色像素數：鏡頭對準徽記、男女同距離 → 徽記大小的粗略比較（框內不含披風下緣的金色滾邊）
+    const goldPx = (buf) =>
+      page.evaluate(async (b64) => {
+        const i = await new Promise((r) => { const im = new Image(); im.onload = () => r(im); im.src = "data:image/png;base64," + b64; });
+        const c = document.createElement("canvas");
+        c.width = i.width;
+        c.height = i.height;
+        const g = c.getContext("2d");
+        g.drawImage(i, 0, 0);
+        const x0 = Math.round(i.width * 0.35), y0 = Math.round(i.height * 0.42), w = Math.round(i.width * 0.3), h = Math.round(i.height * 0.16);
+        const d = g.getImageData(x0, y0, w, h).data;
+        let n = 0;
+        for (let k = 0; k < d.length; k += 4) if (d[k] > 150 && d[k + 1] > 100 && d[k + 1] < 195 && d[k + 2] < 92 && d[k] - d[k + 2] > 110) n++; // 金色徽記；排除廣場地台的淡黃色（約 242,206,103）
+        return n;
+      }, buf.toString("base64"));
+    const shoot = async (tag, views) => {
+      const out = {};
+      await page.evaluate(() => document.querySelectorAll(".v3-top,.lab-panel,.perf-panel,.lab-bench-result").forEach((e) => (e.style.visibility = "hidden")));
+      for (const v of views) {
+        await page.evaluate((x) => window.__starwishC10b.view(x), v);
+        await frames(page, 3);
+        const f = `${outDir}${name}_c10b2_${tag}_${v}.png`;
+        const buf = await page.screenshot({ path: f });
+        run.screenshots.push(f.split("/test-results/")[1]);
+        if (EMB.includes(v)) out[v] = await goldPx(buf);
+      }
+      await page.evaluate(() => document.querySelectorAll(".v3-top,.lab-panel,.perf-panel,.lab-bench-result").forEach((e) => (e.style.visibility = "")));
+      return out;
+    };
+    const ratioOk = (g) => g.emblem > 0 && g.femEmblem > 0 && g.emblem / g.femEmblem > 0.6 && g.emblem / g.femEmblem < 1.6;
+    try {
+      await page.goto(server.url + "/?lab=c10b&quality=high&p1=1&p2=1&star=2&p3=1", { waitUntil: "load" });
+      await page.waitForFunction(() => window.__starwishC10b?.ready === true, null, { timeout: 120000 });
+      await frames(page, 4);
+      const ri = await page.evaluate(() => window.__starwishC10b.renderInfo());
+      check("HQ：男生 C1.0-B2、女生 C1.0-B（未修改）", ri.star === 2 && ri.files.includes("novice_c10b2_male_hq.glb") && ri.files.includes("novice_c10b_female_hq.glb") && ri.files.length === 2, ri);
+      const hq = await page.evaluate(() => window.__starwishC10b.info());
+      run.results.push({ tag: "C1.0-B2 HQ", triangles: hq.triangles, drawCalls: hq.drawCalls, materials: hq.materials, contextLost: hq.contextLost, chars: hq.chars, loads: hq.loads });
+      check("HQ：男女各約 20 萬三角形、身高 1.0～1.35 m、無骨架（P2 合併後各 12 個網格）", hq.chars.length === 2 && hq.chars.every((c) => c.meshes === 12) && hq.chars.every((c) => c.triangles > 195000 && c.triangles < 205000 && c.height > 1 && c.height < 1.35 && !c.skeleton), hq.chars);
+      check("HQ：沒有半透明材質、腳底在地台上", hq.transparentMaterials.length === 0 && hq.feet.every((y) => Math.abs(y - hq.baseY) < 0.03), { t: hq.transparentMaterials, feet: hq.feet, base: hq.baseY });
+      const gHq = await shoot("hq", ["back", "side", "lowBack", ...EMB]);
+      run.results.push({ tag: "HQ 徽記金色像素（畫面中央小框）", gold: gHq });
+      check("HQ：男生徽記與女生徽記大小相近（金色像素比 0.6～1.6）", ratioOk(gHq), gHq);
+      check("HQ：左右 45° 都看得到男生徽記", gHq.emblemL45 > gHq.emblem * 0.3 && gHq.emblemR45 > gHq.emblem * 0.3, gHq);
+      const bdHq = await page.evaluate(() => window.__starwishC10b.breakdown());
+      run.results.push({ tag: "C1.0-B2 HQ breakdown", breakdown: bdHq });
+
+      await page.evaluate(() => window.__starwishC10b.setLod("lite"));
+      await page.waitForFunction(() => window.__starwishC10b.lod === "lite" && !window.__starwishC10b.loading, null, { timeout: 120000 });
+      await frames(page, 4);
+      const rl = await page.evaluate(() => window.__starwishC10b.renderInfo());
+      check("Lite：男生 C1.0-B2 Lite、女生 C1.0-B Lite", rl.files.includes("novice_c10b2_male_lite.glb") && rl.files.includes("novice_c10b_female_lite.glb") && rl.files.length === 2, rl);
+      const lite = await page.evaluate(() => window.__starwishC10b.info());
+      run.results.push({ tag: "C1.0-B2 Lite", triangles: lite.triangles, drawCalls: lite.drawCalls, materials: lite.materials, contextLost: lite.contextLost, chars: lite.chars });
+      check("Lite：各約 4 萬三角形、身高與 HQ 相同（±1 cm）", lite.chars.length === 2 && lite.chars.every((c, i) => c.triangles > 38000 && c.triangles < 42000 && Math.abs(c.height - hq.chars[i].height) < 0.01), lite.chars);
+      const gLite = await shoot("lite", ["back", ...EMB]);
+      run.results.push({ tag: "Lite 徽記金色像素（畫面中央小框）", gold: gLite });
+      check("Lite：男生徽記與女生徽記大小相近、左右 45° 看得到", ratioOk(gLite) && gLite.emblemL45 > gLite.emblem * 0.3 && gLite.emblemR45 > gLite.emblem * 0.3, gLite);
+      const bdLite = await page.evaluate(() => window.__starwishC10b.breakdown());
+      run.results.push({ tag: "C1.0-B2 Lite breakdown", breakdown: bdLite });
+
+      await page.evaluate(() => window.__starwishC10b.setLod("hq"));
+      await page.waitForFunction(() => window.__starwishC10b.lod === "hq" && !window.__starwishC10b.loading, null, { timeout: 120000 });
+      await frames(page, 4);
+      const end = await page.evaluate(() => window.__starwishC10b.info());
+      check("HQ → Lite → HQ 共 3 次載入、沒有 WebGL Context Lost", end.loads.length === 3 && end.contextLost === 0, { loads: end.loads.length, lost: end.contextLost });
+    } catch (e) {
+      run.errors.push(`exception: ${e.message}`);
+    }
+    await ctx.close();
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 9;
+    if (!run.ok) failures++;
+    report.runs.push(run);
+    console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
+    for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}${v.ok ? "" : "  " + JSON.stringify(v.detail).slice(0, 900)}`);
+    for (const r of run.results) console.log(`   · ${r.tag}: ${JSON.stringify(r)}`.slice(0, 3000));
+    for (const e of run.errors) console.log(`   ! ${e}`);
+  }
+
+  // ---------- Stage 5.5 角色動畫（C1.0-B5 候選：骨架＋五個動作＋第二批渲染／陰影／攻速）＋星靈寵物系統（?lab=anim；WebKit）----------
+  if (name === "webkit") {
+    const vp = VIEWPORTS[0];
+    const run = { browser: name, viewport: `${vp.name} / Stage 5.5 角色動畫＋星靈寵物 ?lab=anim`, checks: {}, errors: [], screenshots: [], results: [] };
+    const check = (key, ok, detail) => {
+      run.checks[key] = { ok, detail };
+    };
+    const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2, hasTouch: true });
+    const page = await ctx.newPage();
+    page.on("pageerror", (e) => run.errors.push(`pageerror: ${e.message}`));
+    page.on("console", (m) => m.type() === "error" && run.errors.push(`console: ${m.text()}`));
+    const frames = (n) => page.evaluate((k) => new Promise((r) => { let i = 0; const f = () => (++i >= k ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); }), n);
+    const shot = async (tag) => {
+      const f = `${outDir}${name}_anim_${tag}.png`;
+      await page.screenshot({ path: f });
+      run.screenshots.push(f.split("/test-results/")[1]);
+    };
+    const waitState = (s, ms = 8000) => page.waitForFunction((x) => window.__starwishAnim.info().state === x, s, { timeout: ms }).then(() => true, () => false);
+    try {
+      for (const [g, lod] of [["male", "hq"], ["female", "hq"], ["female", "lite"], ["male", "lite"]]) {
+        await page.goto(server.url + `/?lab=anim&g=${g}&lod=${lod}&seed=7`, { waitUntil: "load" });
+        await page.waitForFunction(() => window.__starwishAnim?.ready === true, null, { timeout: 120000 });
+        await frames(5);
+        const info = await page.evaluate(() => window.__starwishAnim.info());
+        run.results.push({ tag: `${g}_${lod}`, info });
+        check(`${g} ${lod}：載入 C1.0-B5 GLB、17 根骨頭、依材質合併後 ≤ 26 個網格、5 個動作`, info.file === `novice_c10b5_${g}_${lod}.glb` && info.bones === 17 && info.skinnedMeshes > 0 && info.meshes <= 26 && ["Idle", "Run", "Jump", "Attack", "Hurt"].every((a) => info.animations.includes(a)) && info.contextLost === 0, info);
+        await frames(30);
+        const r2 = await page.evaluate(() => window.__starwishAnim.info());
+        check(`${g} ${lod}：P3-2 渲染（無 HDR 管線、畫布 MSAA、無發光物件時發光層暫停）＋腳下陰影（環境陰影只畫一次）`, r2.render.p3 && !r2.render.pipeline && r2.render.canvasAntialias && !r2.render.glowEnabled && r2.render.charShadow === "blob" && r2.render.shadowRenders <= 2, { render: r2.render, drawCalls: r2.drawCalls });
+        run.results.push({ tag: `${g}_${lod} draw`, drawCalls: r2.drawCalls, render: r2.render });
+        if (lod !== "hq") continue;
+        await shot(`${g}_idle`);
+        await page.evaluate(() => window.__starwishAnim.setInput(0, 1));
+        const runOk = await waitState("Run");
+        await frames(20);
+        await shot(`${g}_run`);
+        const mv = (await page.evaluate(() => window.__starwishAnim.info())).move;
+        run.results.push({ tag: `${g} run`, move: mv });
+        check(`${g}：跑步速度與正式遊戲相同（5 m/s），跑步動畫依速度加快（減少滑步）`, Math.abs(mv.speed - 5) < 0.01 && mv.runRate > 1.5, mv);
+        await page.evaluate(() => window.__starwishAnim.setInput(0, 0));
+        const idleOk = await waitState("Idle");
+        await page.evaluate(() => window.__starwishAnim.press("jump"));
+        const jumpOk = await waitState("Jump");
+        const jumpY = await page.waitForFunction(() => window.__starwishAnim.info().jumpY > 0.1, null, { timeout: 8000 }).then(() => true, () => false);
+        await shot(`${g}_jump`);
+        await waitState("Idle");
+        await page.evaluate(() => window.__starwishAnim.press("attack"));
+        const atkOk = await waitState("Attack");
+        await frames(8);
+        await shot(`${g}_attack`);
+        await waitState("Idle");
+        const atk = (await page.evaluate(() => window.__starwishAnim.info())).attack;
+        run.results.push({ tag: `${g} attack`, atk });
+        check(`${g}：攻擊 0.5 秒、命中事件 1 次、約在 0.2 秒`, Math.abs(atk.seconds - 0.5) < 1e-6 && atk.hits === 1 && atk.lastHitAt > 0.15 && atk.lastHitAt < 0.3, atk);
+        await page.evaluate(() => window.__starwishAnim.press("hurt"));
+        const hurtOk = await waitState("Hurt");
+        await frames(4);
+        await shot(`${g}_hurt`);
+        const backIdle = await waitState("Idle");
+        check(`${g}：動作切換 Idle → Run → Idle → Jump（離地）→ Attack → Hurt → Idle`, runOk && idleOk && jumpOk && jumpY && atkOk && hurtOk && backIdle, { runOk, idleOk, jumpOk, jumpY, atkOk, hurtOk, backIdle });
+      }
+      // 寵物流程（男生 HQ）
+      await page.goto(server.url + "/?lab=anim&g=male&lod=hq&seed=7", { waitUntil: "load" });
+      await page.waitForFunction(() => window.__starwishAnim?.ready === true, null, { timeout: 120000 });
+      const flow = await page.evaluate(() => {
+        const p = window.__starwishAnim.pet;
+        p.reset();
+        const drops = p.kill(40);
+        p.give("birdEgg", 1);
+        const pet = p.hatch("birdEgg");
+        const egg = p.state();
+        p.timeWarp(40);
+        const hatched = p.state();
+        p.give("shopFeed", 5);
+        const fed = [p.feed("shopFeed"), p.feed("shopFeed"), p.feed("shopFeed")];
+        p.timeWarp(30);
+        const evo = p.evolve();
+        const appr = p.appraise();
+        const after = p.state();
+        const first = JSON.stringify(after.pets.find((x) => x.id === (pet && pet.id)).affixes);
+        const again = [p.appraise(), p.appraise(), p.appraise()];
+        const second = JSON.stringify(p.state().pets.find((x) => x.id === (pet && pet.id)).affixes);
+        const avatarAs = window.__starwishAnim.info().attack.attackSpeed;
+        p.equip(null);
+        const unequipped = { stats: p.state().stats.stats, avatarAs: window.__starwishAnim.info().attack.attackSpeed };
+        p.equip(pet && pet.id);
+        return { drops, petId: pet && pet.id, eggStage: egg.pets[0] && egg.pets[0].stage, hatchedStage: hatched.pets.find((x) => x.id === (pet && pet.id)).stage, fed, evo, appr, after, noReroll: { first, second, again }, avatarAs, unequipped };
+      });
+      run.results.push({ tag: "pet flow", flow: { ...flow, after: { ...flow.after, pets: flow.after.pets.map((x) => ({ id: x.id, stage: x.stage, exp: Math.round(x.exp), affixes: x.affixes })) } } });
+      const kinds = new Set(flow.drops);
+      check("寵物：擊倒怪物會掉落種子／孵化蛋／鳥蛋／材料（測試用暫定機率）", ["seed", "egg", "birdEgg", "monsterMaterial"].every((k) => kinds.has(k)), [...kinds]);
+      const me = flow.after.pets.find((x) => x.id === flow.petId);
+      check("寵物：孵化（時間）→ 餵食 → 進化 → 鑑定（0～4 條、不重複）", flow.eggStage === 0 && flow.hatchedStage === 1 && flow.fed.every(Boolean) && flow.evo && flow.appr && me.stage === 2 && Array.isArray(me.affixes) && me.affixes.length <= 4 && new Set(me.affixes.map((a) => a.stat)).size === me.affixes.length, { me, flow: { eggStage: flow.eggStage, hatchedStage: flow.hatchedStage, fed: flow.fed, evo: flow.evo } });
+      check("寵物：裝備後出現並加成角色（攻速不超過 160）", flow.after.equippedId === flow.petId && flow.after.followerVisible && flow.after.stats.stats.attackSpeed <= 160, flow.after.stats);
+      check("寵物方案 A：再次鑑定一律拒絕、詞條不變；攻速加成同步到角色攻擊動作；卸下後恢復基礎", flow.noReroll.again.every((x) => x === false) && flow.noReroll.first === flow.noReroll.second && flow.avatarAs === flow.after.stats.stats.attackSpeed && flow.unequipped.avatarAs === 100 && flow.unequipped.stats.attack === 100, { noReroll: flow.noReroll, avatarAs: flow.avatarAs, unequipped: flow.unequipped });
+      // 重新載入：詞條從存檔讀回，不改變
+      await page.goto(server.url + "/?lab=anim&g=male&lod=hq&seed=99", { waitUntil: "load" });
+      await page.waitForFunction(() => window.__starwishAnim?.ready === true, null, { timeout: 120000 });
+      const reload = await page.evaluate((id) => JSON.stringify(window.__starwishAnim.pet.state().pets.find((x) => x.id === id).affixes), flow.petId);
+      check("寵物方案 A：重新載入（讀檔）後詞條完全相同", reload === flow.noReroll.first, { reload, first: flow.noReroll.first });
+      await page.evaluate(() => window.__starwishAnim.setInput(1, 0.4));
+      await frames(90);
+      await page.evaluate(() => window.__starwishAnim.setInput(0, 0));
+      await frames(90);
+      const fol = await page.evaluate(() => window.__starwishAnim.pet.state());
+      const d = Math.hypot(fol.followerPos[0] - fol.headPos[0], fol.followerPos[1] - fol.headPos[1], fol.followerPos[2] - fol.headPos[2]);
+      run.results.push({ tag: "follower", d, head: fol.headPos, pet: fol.followerPos });
+      check("寵物：角色移動後跟到頭部附近（0.2～0.8 m）、在頭頂高度附近", d > 0.15 && d < 0.8 && Math.abs(fol.followerPos[1] - fol.headPos[1]) < 0.4, { d, head: fol.headPos, pet: fol.followerPos });
+      await shot("pet_follow");
+      await page.evaluate(() => {
+        document.querySelector("[data-pet=toggle]")?.click();
+      });
+      await frames(3);
+      await shot("pet_panel");
+      // 對照：角色即時陰影（?charshadow=realtime）與舊渲染（?p3=0）
+      for (const q of ["charshadow=realtime", "p3=0"]) {
+        await page.goto(server.url + `/?lab=anim&g=female&lod=hq&seed=7&${q}`, { waitUntil: "load" });
+        await page.waitForFunction(() => window.__starwishAnim?.ready === true, null, { timeout: 120000 });
+        await frames(40);
+        const i = await page.evaluate(() => window.__starwishAnim.info());
+        run.results.push({ tag: `compare ${q}`, drawCalls: i.drawCalls, render: i.render });
+        if (q === "charshadow=realtime") check("對照：?charshadow=realtime 角色即時陰影（陰影每格重畫）", i.render.charShadow === "realtime" && i.render.shadowRenders > 10, i.render);
+        else check("對照：?p3=0 回到舊渲染設定（HDR 後製管線）", !i.render.p3, i.render);
+      }
+    } catch (e) {
+      run.errors.push(`exception: ${e.message}`);
+    }
+    await ctx.close();
+    run.ok = run.errors.length === 0 && Object.values(run.checks).every((c) => c.ok) && Object.keys(run.checks).length >= 20;
+    if (!run.ok) failures++;
+    report.runs.push(run);
+    console.log(`${run.ok ? "PASS" : "FAIL"}  ${name} / ${run.viewport}`);
+    for (const [k, v] of Object.entries(run.checks)) console.log(`   ${v.ok ? "✓" : "✗"} ${k}${v.ok ? "" : "  " + JSON.stringify(v.detail).slice(0, 900)}`);
+    for (const r of run.results) console.log(`   · ${r.tag}: ${JSON.stringify(r)}`.slice(0, 1500));
     for (const e of run.errors) console.log(`   ! ${e}`);
   }
 
