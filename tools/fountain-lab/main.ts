@@ -42,6 +42,9 @@ const alphaFrom = (bearing: number): number => {
   const t = (bearing * Math.PI) / 180;
   return Math.atan2(Math.cos(t), Math.sin(t));
 };
+/** 預覽用玩家位置：站在第 1 個停留點（202.5°）外側 2.8 m */
+// （必須在 VIEWS 之前定義：VIEWS 建立時就會呼叫 petMerchantViews()）
+const PM_PLAYER = { x: Math.sin(((202.5 - 4) * Math.PI) / 180) * 13.6, z: Math.cos(((202.5 - 4) * Math.PI) / 180) * 13.6 };
 const VIEWS: Record<string, View> = {
   // 俯視（正交）：廣場＋道路入口；全村
   top: { target: [0, 0, 0], alpha: -H, beta: 0.0001, radius: 80, ortho: 24 },
@@ -300,8 +303,6 @@ let sword: BuildingP3 | null = null;
 let platformArt: BuildingP3 | null = null;
 const state: { ready: boolean; error: string | null; loadMs: number } = { ready: false, error: null, loadMs: 0 };
 
-/** 預覽用玩家位置：站在第 1 個停留點（202.5°）外側 2.8 m */
-const PM_PLAYER = { x: Math.sin(((202.5 - 4) * Math.PI) / 180) * 13.6, z: Math.cos(((202.5 - 4) * Math.PI) / 180) * 13.6 };
 
 /** 寵物商人預覽視角（第 1 個停留點 202.5°、商人時間 4 s；行走中 16 s） */
 function petMerchantViews(): Record<string, View> {
