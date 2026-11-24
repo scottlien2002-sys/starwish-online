@@ -56,7 +56,8 @@ color:#fbf6ea;font:15px/1.5 -apple-system,'PingFang TC','Noto Sans TC',sans-seri
 .gw-btn:disabled{opacity:.45}.gw-go{background:linear-gradient(180deg,#f3d68b,#d9a94a)!important;color:#2a2040!important;text-align:center;font-weight:700}
 .gw-tabs{display:flex;gap:6px;margin:4px 0 8px}.gw-tab{flex:1;min-height:40px;border-radius:10px;border:1.5px solid rgba(232,196,110,.5);background:rgba(255,255,255,.05);color:#fbf6ea;font:inherit;font-size:14px}.gw-tab.on{background:rgba(232,196,110,.25);border-color:#e8c46e;color:#ffe7a8;font-weight:700}
 .gw-row{display:flex;gap:6px;align-items:center;margin-bottom:8px}.gw-in{flex:1;min-width:0;height:40px;border-radius:10px;border:1.5px solid rgba(232,196,110,.5);background:rgba(0,0,0,.25);color:#fbf6ea;padding:0 10px;font:inherit;font-size:16px}
-.gw-sel{height:40px;border-radius:10px;border:1.5px solid rgba(232,196,110,.5);background:rgba(20,24,60,.9);color:#fbf6ea;font:inherit;font-size:14px;padding:0 6px}
+.gw-sel{-webkit-appearance:none;appearance:none;height:40px;min-width:120px;border-radius:10px;border:1.5px solid rgba(232,196,110,.5);background:rgba(20,24,60,.9) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23e8c46e' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 10px center;color:#fbf6ea;font:inherit;font-size:14px;padding:0 28px 0 10px}
+.gw-sel option{background:#141a40;color:#fbf6ea}
 .gw-list{display:flex;flex-direction:column;gap:6px}
 .gw-card{display:flex;align-items:center;gap:10px;width:100%;min-height:58px;padding:8px 10px;border-radius:12px;border:1px solid rgba(232,196,110,.45);background:rgba(255,255,255,.05);color:#fbf6ea;font:inherit;text-align:left}
 .gw-card .ic{font-size:26px;width:36px;text-align:center;flex:none}.gw-card .mid{flex:1;min-width:0}.gw-card .nm{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gw-card .meta{font-size:12px;opacity:.78}
@@ -326,7 +327,7 @@ export class GuildWindow {
   }
 
   private affHtml(lines: readonly AffixLine[], appraised: boolean): string {
-    if (!appraised) return `<div class="gw-aff none"><span>鑑定狀態</span><span>未鑑定</span></div>`;
+    if (!appraised) return `<div class="gw-aff none"><span>尚未鑑定</span><span>詞條未知</span></div>`;
     if (!lines.length) return `<div class="gw-aff none"><span>無附加屬性</span><span>—</span></div>`;
     return lines.map((a) => `<div class="gw-aff ${a.polarity === "positive" ? "pos" : a.polarity === "negative" ? "neg" : "none"}"><span>${esc(a.label)}</span><span>${esc(a.text)}</span></div>`).join("");
   }
