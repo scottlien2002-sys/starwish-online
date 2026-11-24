@@ -4,6 +4,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { loadPlaywright, serve } from "../../tests/e2e/static-server.mjs";
 import * as L from "../../src/maps/village/layout.ts";
+import { PET_MERCHANT, petMerchantClearance } from "../../src/maps/village/petMerchant.ts";
 
 const dist = process.argv[2] ?? "out-lab";
 const out = process.argv[3] ?? "out/lab";
@@ -12,6 +13,7 @@ const knightReport = process.argv[5] ?? "out/knight_report.json";
 const mageReport = process.argv[6] ?? "out/mage_report.json";
 const swordReport = process.argv[7] ?? "out/sword_report.json";
 const platformReport = process.argv[8] ?? "out/platform_report.json";
+const merchantReport = process.argv[9] ?? "out/pet_merchant_report.json";
 mkdirSync(out, { recursive: true });
 const report = { startedAt: new Date().toISOString(), checks: {}, runs: [] };
 let fail = 0;
@@ -128,6 +130,17 @@ let fail = 0;
       ck(`高台 ${lod}：鋪面高度 ≤ 2.03 m、不蓋住北路、面數在額度內`, c.top_max_h <= 2.03 && c.top_in_north_road === 0 && v.within_budget, { ...c, triangles: v.triangles, budget: pr.budget[lod] });
     }
   }
+  // 寵物商人：巡走路線不穿過噴泉、水池、長椅、燈柱、出生點、建築；停留點不擋主路；模型尺寸與面數
+  {
+    const c = petMerchantClearance();
+    ck("寵物商人巡走路線：與噴泉水池、長椅、水晶燈座、路燈等碰撞物淨距 ≥ 0.4 m、不進入任何建築碰撞箱、全程可站立", c.minCircleGap >= 0.4 && !c.insideBox && c.allStandable, c);
+    ck("寵物商人巡走路線：離 24 個出生點 ≥ 1.5 m、離所有 NPC ≥ 3 m", c.minSpawnDist >= 1.5 && c.minNpcDist >= 3, c);
+    ck("寵物商人停留點避開主路與石階軸線（≥ 12°）；商人不是碰撞物（不擋主要通道）", c.stationAxisGapDeg >= 12 && !L.CIRCLE_COLLIDERS.some((x) => x.kind.includes("pet")) && !L.NPC_SPOTS.some((n) => n.id === PET_MERCHANT.id), { stationAxisGapDeg: c.stationAxisGapDeg, stations: PET_MERCHANT.stations, patrolR: PET_MERCHANT.patrolR });
+    const mr = JSON.parse(readFileSync(merchantReport, "utf8"));
+    for (const [lod, v] of Object.entries(mr.lods)) {
+      ck(`寵物商人 ${lod} 模型：高 ≤ 1.6 m、半徑 ≤ 路線檢查用的 ${PET_MERCHANT.bodyR + 0.1} m、面數在額度內`, v.height <= 1.6 && v.radius <= PET_MERCHANT.bodyR + 0.1 && v.within_budget, { height: v.height, radius: v.radius, triangles: v.triangles, budget: mr.budget[lod] });
+    }
+  }
   // 噴泉：外徑＝碰撞半徑 7 m、最高 6.5 m（P3-1A 驗收值）
   {
     const fr = JSON.parse(readFileSync(plazaReport.replace("plaza_report.json", "fountain_report.json"), "utf8"));
@@ -144,13 +157,13 @@ const pw = await loadPlaywright();
 const server = await serve(dist);
 // [瀏覽器, 模式, 畫質, lod, 截圖視角, 選項{ viewport, anim: [[名稱, 視角, 秒, fps]] }]
 const plan = [
-  ["chromium", "hq", "high", "hq", ["player_spawn_cam", "village_top", "north_plan", "north_wide", "north_trio", "mage_front", "mage_side", "mage_q45", "mage_q45r", "mage_top", "mage_npc", "mage_stairs", "mage_eye", "sword_front", "sword_side", "sword_q45", "sword_q45r", "sword_top", "sword_player_up", "sword_stairs", "sword_npc", "sword_eye", "platform_front", "platform_stair", "platform_wall"]],
-  ["chromium", "lite-low", "low", "lite", ["player_spawn_cam", "village_top", "north_wide", "mage_front", "mage_q45", "mage_top", "sword_front", "sword_q45", "sword_top", "platform_front", "platform_stair", "platform_wall"]],
-  // iPhone 直向（390×844，DPR 2）
-  ["chromium", "hq-portrait", "high", "hq", ["player_spawn_cam", "mage_npc", "sword_npc", "platform_stair"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 } }],
-  ["chromium", "lite-portrait", "low", "lite", ["player_spawn_cam", "sword_npc"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 } }],
-  ["webkit", "hq", "high", "hq", ["north_wide", "sword_q45", "mage_q45"]],
-  ["webkit", "lite-low", "low", "lite", ["north_wide"]],
+  ["chromium", "hq", "high", "hq", ["pm_spawn", "pm_front", "pm_q45", "pm_back", "pm_plaza", "pm_walk", "pm_path", "village_top"], { anim: [["pet_merchant", "pm_anim", 10, 15, 3]] }],
+  ["chromium", "lite-low", "low", "lite", ["pm_spawn", "pm_front", "pm_q45", "pm_back", "pm_plaza", "pm_walk"]],
+  // iPhone 直向（390×844，DPR 2）：出生點、站在商人前、對話面板（占位功能）
+  ["chromium", "hq-portrait", "high", "hq", ["pm_spawn", "pm_iphone"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 }, panel: true }],
+  ["chromium", "lite-portrait", "low", "lite", ["pm_spawn", "pm_iphone"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 } }],
+  ["webkit", "hq", "high", "hq", ["pm_q45", "pm_plaza"]],
+  ["webkit", "lite-low", "low", "lite", ["pm_front"]],
 ];
 
 for (const [bname, mode, quality, lod, views, opts = {}] of plan) {
@@ -179,7 +192,7 @@ for (const [bname, mode, quality, lod, views, opts = {}] of plan) {
     run.textureMemory = await page.evaluate(() => window.__lab.textureMemory());
     await page.evaluate(() => window.__lab.setView("pano"));
     // 繪製次數：全部開啟 − 拿掉某一部分 ＝ 該部分（含陰影）；none＝只有灰色量體與地面
-    const PARTS = ["fountain", "plaza", "knight", "mage", "sword", "platform"];
+    const PARTS = ["fountain", "plaza", "knight", "mage", "sword", "platform", "merchant"];
     const allOn = Object.fromEntries(PARTS.map((k) => [k, true]));
     const dc = { none: await page.evaluate((p) => window.__lab.drawCalls(p), Object.fromEntries(PARTS.map((k) => [k, false]))), all: await page.evaluate((p) => window.__lab.drawCalls(p), allOn) };
     run.partDrawCalls = {};
@@ -198,21 +211,36 @@ for (const [bname, mode, quality, lod, views, opts = {}] of plan) {
       run.shots.push(f.split("/").pop());
     }
     // 動畫：固定時間步進逐幀截圖（之後由 ffmpeg 合成 MP4／GIF）
-    for (const [name, view, secs, fps] of opts.anim ?? []) {
+    for (const [name, view, secs, fps, mt0] of opts.anim ?? []) {
       const dir = `${out}/anim_${mode}_${name}`;
       mkdirSync(dir, { recursive: true });
-      const urls = await page.evaluate(([v, sc, f]) => window.__lab.captureFrames(v, sc, f), [view, secs, fps]);
+      const urls = await page.evaluate(([v, sc, f, m]) => window.__lab.captureFrames(v, sc, f, m), [view, secs, fps, mt0]);
       urls.forEach((u, k) => writeFileSync(`${dir}/f${String(k).padStart(3, "0")}.jpg`, Buffer.from(u.split(",")[1], "base64")));
       const n = urls.length;
       (run.anims ??= []).push({ name, view, secs, fps, frames: n, dir: dir.split("/").pop() });
       await page.evaluate(() => window.__lab.setTime(3.2));
     }
+    // 寵物商人對話面板（占位功能）：開啟 → 鑑定 → 鳥蛋 → 返回 → 飼料 → 培育 → 離開，各步驟截圖
+    if (opts.panel) {
+      await page.evaluate(() => window.__lab.setView("pm_iphone"));
+      const steps = [["open", "panel_root"], ["choose:appraise", "panel_appraise"], ["kind:birdEgg", "panel_birdegg"], ["back", null], ["back", null], ["choose:feed", "panel_feed"], ["back", null], ["choose:guide", "panel_guide"], ["close", "panel_closed"]];
+      run.panel = [];
+      for (const [act, shot] of steps) {
+        const text = await page.evaluate((a) => window.__lab.petPanel(a), act);
+        run.panel.push({ act, text });
+        if (shot) {
+          await page.evaluate(() => window.__lab.frames(3));
+          const f = `${out}/${bname}_${mode}_${shot}.png`;
+          await page.screenshot({ path: f, timeout: 120000 });
+          run.shots.push(f.split("/").pop());
+        }
+      }
+    }
     if (bname === "chromium" && !mode.includes("portrait")) {
       run.flicker = {
-        player_spawn_cam: await page.evaluate(() => window.__lab.flickerTest("player_spawn_cam")),
-        north_wide: await page.evaluate(() => window.__lab.flickerTest("north_wide")),
-        platform_front: await page.evaluate(() => window.__lab.flickerTest("platform_front")),
-        sword_q45: await page.evaluate(() => window.__lab.flickerTest("sword_q45")),
+        pm_spawn: await page.evaluate(() => window.__lab.flickerTest("pm_spawn")),
+        pm_plaza: await page.evaluate(() => window.__lab.flickerTest("pm_plaza")),
+        pm_front: await page.evaluate(() => window.__lab.flickerTest("pm_front")),
       };
       await page.evaluate(() => window.__lab.setTime(null));
       await page.evaluate(() => window.__lab.setView("player_spawn"));
@@ -226,6 +254,13 @@ for (const [bname, mode, quality, lod, views, opts = {}] of plan) {
   await browser.close();
 }
 await server.close();
+{
+  const pr = report.runs.find((r) => r.panel);
+  const msgs = (pr?.panel ?? []).filter((x) => ["kind:birdEgg", "choose:feed", "choose:guide"].includes(x.act));
+  const ok = !!pr && msgs.length === 3 && msgs.every((x) => x.text.includes("尚未開放")) && pr.panel.at(-1).text === "";
+  report.checks["寵物商人對話面板：鑑定（種子／孵化蛋／鳥蛋）、飼料、培育與進化都可點選，未接入寵物系統時顯示「準備中」，不顯示任何機率或價格"] = { ok, detail: pr?.panel ?? "no panel run" };
+  if (!ok) fail++;
+}
 report.finishedAt = new Date().toISOString();
 writeFileSync(`${out}/lab_report.json`, JSON.stringify(report, null, 1));
 console.log(JSON.stringify(report, null, 1));

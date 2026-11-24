@@ -11,6 +11,7 @@ import {
   HemisphericLight,
   Mesh,
   MeshBuilder,
+  PointerEventTypes,
   Scene,
   SceneInstrumentation,
   SceneLoader,
@@ -25,11 +26,14 @@ import { type PlazaP3, setupPlazaP3 } from "../../src/maps/village/PlazaP3.ts";
 import { type KnightP3, setupKnightP3 } from "../../src/maps/village/KnightP3.ts";
 import { type MageP3, setupMageP3 } from "../../src/maps/village/MageP3.ts";
 import { type BuildingP3, setupBuildingP3 } from "../../src/maps/village/BuildingP3.ts";
+import { type PetMerchantP3, setupPetMerchantP3 } from "../../src/maps/village/PetMerchantP3.ts";
+import { PetMerchantPanel } from "../../src/maps/village/PetMerchantPanel.ts";
+import { PET_MERCHANT, petMerchantPathSamples, petMerchantPose } from "../../src/maps/village/petMerchant.ts";
 import { villageTextures } from "../../src/maps/village/villageTextures.ts";
 import { VILLAGE_SPAWN_CAMERA } from "../../src/maps/village/spawnCamera.ts";
 import { BOARD, BUILDINGS, buildingCenter, FORGE, NPC_SPOTS, PLATFORM, PORTALS, portalPillars, SOUTH_GATE, STAIR_FROM, STAIR_WIDTH, STAIRS } from "../../src/maps/village/layout.ts";
 
-type View = { target: [number, number, number]; alpha: number; beta: number; radius: number; fov?: number; ortho?: number; hide?: string[] };
+type View = { target: [number, number, number]; alpha: number; beta: number; radius: number; fov?: number; ortho?: number; hide?: string[]; /** 寵物商人時間（固定姿勢） */ mt?: number };
 const H = Math.PI / 2;
 /** 鏡頭位於目標的方位（北＝0°，順時針）→ ArcRotateCamera alpha */
 const alphaFrom = (bearing: number): number => {
@@ -108,7 +112,8 @@ const VIEWS: Record<string, View> = {
   sword_eye: { target: [-29.4, 9.5, 14.98], alpha: alphaFrom(117), beta: 1.98, radius: 19.5, fov: 1.0 },
   // P3-6 北側高台擋土牆與石階
   platform_front: { target: [0, 1.6, 23], alpha: -H, beta: 1.3, radius: 15, fov: 0.95 },
-  village_top: { target: [0, 0, 0], alpha: -H, beta: 0.0001, radius: 45, ortho: 52 },
+  village_top: { target: [0, 0, 0], alpha: -H, beta: 0.0001, radius: 45, ortho: 52, mt: 4 },
+  ...petMerchantViews(),
   platform_stair: { target: [-9.62, 1.0, 18.1], alpha: alphaFrom(152), beta: 1.25, radius: 9, fov: 0.9 },
   platform_wall: { target: [-5.95, 1.0, 22.2], alpha: alphaFrom(165), beta: 1.42, radius: 7, fov: 0.85 },
 };
@@ -293,8 +298,33 @@ let sword: BuildingP3 | null = null;
 let platformArt: BuildingP3 | null = null;
 const state: { ready: boolean; error: string | null; loadMs: number } = { ready: false, error: null, loadMs: 0 };
 
+/** 寵物商人預覽視角（第 1 個停留點 202.5°、商人時間 4 s；行走中 16 s） */
+function petMerchantViews(): Record<string, View> {
+  const s0 = petMerchantPose(4);
+  const w = petMerchantPose(16);
+  const b0 = PET_MERCHANT.stations[0]!;
+  const me = (p: { x: number; z: number }, h: number): [number, number, number] => [p.x, h, p.z];
+  const player = { x: Math.sin((b0 * Math.PI) / 180) * 13.6, z: Math.cos((b0 * Math.PI) / 180) * 13.6 };
+  return {
+    pm_front: { target: me(s0, 0.78), alpha: alphaFrom(b0), beta: 1.47, radius: 3.0, fov: 0.8, mt: 4 },
+    pm_q45: { target: me(s0, 0.75), alpha: alphaFrom(b0 + 42), beta: 1.38, radius: 3.2, fov: 0.8, mt: 4 },
+    pm_back: { target: me(s0, 0.8), alpha: alphaFrom(b0 + 135), beta: 1.36, radius: 3.0, fov: 0.8, mt: 4 },
+    pm_plaza: { target: me(s0, 1.2), alpha: alphaFrom(b0 + 22), beta: 1.32, radius: 10, fov: 0.85, mt: 4 },
+    pm_walk: { target: me(w, 0.75), alpha: alphaFrom(w.bearing + 70), beta: 1.38, radius: 4.2, fov: 0.8, mt: 16 },
+    pm_spawn: { target: [0, 0.85, -12.5], alpha: -H, beta: VILLAGE_SPAWN_CAMERA.beta, radius: 9, fov: 0.9, mt: 4 },
+    pm_iphone: { target: [player.x, 0.85, player.z], alpha: alphaFrom(b0), beta: 1.32, radius: 9, fov: 0.9, mt: 4 },
+    pm_path: { target: [0, 0, 0], alpha: -H, beta: 0.0001, radius: 45, ortho: 14.5, mt: 4 },
+    pm_anim: { target: [-5.6, 1.0, -9.2], alpha: alphaFrom(200), beta: 1.3, radius: 11, fov: 0.85 },
+  };
+}
+
 /** 已由正式模型取代的灰色量體（setView 不會再打開） */
 const REPLACED = new Set<string>(["knight", "mage"]);
+
+let merchant: PetMerchantP3 | null = null;
+let merchantT: number | null = null;
+let merchantPath: AbstractMesh | null = null;
+const petPanel = new PetMerchantPanel();
 
 function setView(name: string): void {
   const v = VIEWS[name];
@@ -302,6 +332,8 @@ function setView(name: string): void {
   camera.target.set(...v.target);
   camera.alpha = v.alpha;
   camera.beta = v.beta;
+  if (v.mt !== undefined) merchantT = v.mt;
+  merchantPath?.setEnabled(name === "pm_path");
   // 個別視角暫時隱藏擋住鏡頭的灰色量體（例如側面圖前方的教堂量體）
   for (const m of context) if (m.name.startsWith("bld_") || m.name.startsWith("roof_")) {
     const id = m.name.slice(m.name.indexOf("_") + 1);
@@ -397,13 +429,14 @@ async function flickerTime(view: string, steps = 30): Promise<{ maxRatio: number
 }
 
 /** 動畫短片：固定時間步進、直接在頁面內繪製並讀出畫布（比整頁截圖快很多），回傳 JPEG data URL 陣列 */
-async function captureFrames(view: string, secs: number, fps: number): Promise<string[]> {
+async function captureFrames(view: string, secs: number, fps: number, mt0?: number): Promise<string[]> {
   engine.stopRenderLoop();
   setView(view);
   const out: string[] = [];
   const n = Math.round(secs * fps);
   for (let k = 0; k < n; k++) {
     fx?.setTime(k / fps);
+    if (mt0 !== undefined) merchantT = mt0 + k / fps;
     scene.render();
     out.push(canvas.toDataURL("image/jpeg", 0.9));
     if (k % 10 === 9) await new Promise((r) => setTimeout(r, 0));
@@ -414,13 +447,14 @@ async function captureFrames(view: string, secs: number, fps: number): Promise<s
 }
 
 /** 繪製次數：只開啟指定部分 */
-async function drawCalls(parts: { fountain: boolean; plaza: boolean; knight?: boolean; mage?: boolean; sword?: boolean; platform?: boolean }): Promise<{ drawCalls: number; activeMeshes: number }> {
+async function drawCalls(parts: { fountain: boolean; plaza: boolean; knight?: boolean; mage?: boolean; sword?: boolean; platform?: boolean; merchant?: boolean }): Promise<{ drawCalls: number; activeMeshes: number }> {
   fx?.setEnabled(parts.fountain);
   plaza?.setEnabled(parts.plaza);
   knight?.setEnabled(parts.knight ?? true);
   mage?.setEnabled(parts.mage ?? true);
   sword?.setEnabled(parts.sword ?? true);
   platformArt?.setEnabled(parts.platform ?? true);
+  merchant?.setEnabled(parts.merchant ?? true);
   await frames(4);
   const r = { drawCalls: inst.drawCallsCounter.current, activeMeshes: scene.getActiveMeshes().length };
   fx?.setEnabled(true);
@@ -429,6 +463,7 @@ async function drawCalls(parts: { fountain: boolean; plaza: boolean; knight?: bo
   mage?.setEnabled(true);
   sword?.setEnabled(true);
   platformArt?.setEnabled(true);
+  merchant?.setEnabled(true);
   return r;
 }
 
@@ -462,6 +497,30 @@ async function load(): Promise<void> {
   platformArt = setupBuildingP3(scene, pf.meshes, "Platform", { lite, texBase: "./models/tex/", shadows: castShadows ? shadows : null, casters: [] });
   for (const m of context) if (["bld_sword", "roof_sword", "platform", "stair"].includes(m.name)) m.setEnabled(false);
   REPLACED.add("sword");
+  // 寵物商人（沿噴泉巡走；不凍結）＋巡走路線示意線（只在 pm_path 視角顯示）
+  const pm = await loadGlb(`pet_merchant_${q2}.glb`);
+  merchant = setupPetMerchantP3(scene, pm.meshes, { lite, shadows: castShadows ? shadows : null });
+  scene.onBeforeRenderObservable.add(() => merchant?.update(merchantT ?? performance.now() / 1000));
+  const ring = petMerchantPathSamples(0.5).map((p) => new Vector3(p.x, 0.06, p.z));
+  ring.push(ring[0]!.clone());
+  const line = MeshBuilder.CreateTube("pm_path_line", { path: ring, radius: 0.09, tessellation: 6 }, scene);
+  const lm = new StandardMaterial("pm_path_mat", scene);
+  lm.disableLighting = true;
+  lm.emissiveColor = new Color3(0.95, 0.35, 0.6);
+  line.material = lm;
+  const marks = PET_MERCHANT.stations.map((b, i) => {
+    const d = MeshBuilder.CreateCylinder(`pm_station_${i}`, { diameter: 0.9, height: 0.05, tessellation: 16 }, scene);
+    d.position.set(Math.sin((b * Math.PI) / 180) * PET_MERCHANT.patrolR, 0.07, Math.cos((b * Math.PI) / 180) * PET_MERCHANT.patrolR);
+    d.material = lm;
+    return d;
+  });
+  merchantPath = MeshBuilder.CreateBox("pm_path_root", { size: 0.01 }, scene);
+  merchantPath.isVisible = false;
+  for (const m of [line, ...marks]) m.parent = merchantPath;
+  merchantPath.setEnabled(false);
+  scene.onPointerObservable.add((pi) => {
+    if (pi.type === PointerEventTypes.POINTERTAP && pi.pickInfo?.pickedMesh?.metadata?.petMerchant) void petPanel.open();
+  });
   // 星晶每幀會動：不凍結它的世界矩陣
   for (const m of [...f.meshes, ...p.meshes, ...k.meshes, ...mg.meshes, ...sw.meshes, ...pf.meshes]) if (!fx.animated.includes(m)) m.freezeWorldMatrix();
   await scene.whenReadyAsync();
@@ -482,12 +541,26 @@ load().catch((e: unknown) => {
   views: Object.keys(VIEWS),
   setView,
   setTime: (t: number | null) => fx?.setTime(t),
+  setMerchantTime: (t: number | null) => {
+    merchantT = t;
+  },
+  /** 寵物商人對話面板：open／choose:<id>／kind:<kind>／back／close；回傳目前畫面文字 */
+  petPanel: async (a: string) => {
+    if (a === "open") await petPanel.open();
+    else if (a === "close") petPanel.close();
+    else {
+      const el = document.querySelector<HTMLButtonElement>(`.pet-merchant-panel button[data-act="${a}"]`);
+      el?.click();
+      await new Promise((r) => setTimeout(r, 50));
+    }
+    return document.querySelector(".pet-merchant-panel")?.textContent ?? "";
+  },
   frames,
   flickerTest,
   flickerTime,
   captureFrames,
   drawCalls,
-  stats: () => ({ fountain: fx?.stats ?? null, plaza: plaza?.stats ?? null, knight: knight?.stats ?? null, mage: mage?.stats ?? null, sword: sword?.stats ?? null, platform: platformArt?.stats ?? null }),
+  stats: () => ({ fountain: fx?.stats ?? null, plaza: plaza?.stats ?? null, knight: knight?.stats ?? null, mage: mage?.stats ?? null, sword: sword?.stats ?? null, platform: platformArt?.stats ?? null, merchant: merchant?.stats ?? null }),
   /** 全村共用貼圖快取：張數、像素、估計顯示記憶體（RGBA、含 mipmap ×1.33） */
   textureMemory: () => {
     const list = villageTextures(scene).map((t) => {
