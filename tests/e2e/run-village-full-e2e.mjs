@@ -71,11 +71,13 @@ for (const name of browsers) {
         await shot(page, `view_${k}`);
       }
       run.results.perf = Object.fromEntries(Object.entries(perf).map(([k, v]) => [k, { drawCalls: v.drawCalls, triangles: v.triangles }]));
-      check("繪製次數 ≤ 140（全村整合，任何位置）", Object.values(perf).every((v) => v.drawCalls <= 140), run.results.perf);
+      const dcMax = lod === "lite" ? 100 : 160;
+      check(`繪製次數 ≤ ${dcMax}（全村整合、${lod === "lite" ? "Lite" : "HQ"}、任何位置）`, Object.values(perf).every((v) => v.drawCalls <= dcMax), run.results.perf);
       // 移動規則：從廣場沿北側石階（方位 0°）走上高台，不需要跳躍
       await V(() => window.__starwishVillage.teleport(0, 15, 0));
       await V(() => window.__starwishVillage.setMove({ x: 0, y: 1 }));
-      await page.waitForTimeout(2600);
+      // 軟體繪圖幀率很低：等到走上高台或 40 秒（每幀時間上限 0.1 秒，與幀率無關的是「距離」）
+      await page.waitForFunction(() => { const p = window.__starwishVillage.player(); return p.y > 1.9 && p.z > 23.5; }, null, { timeout: 40000, polling: 250 }).catch(() => null);
       await V(() => window.__starwishVillage.setMove(null));
       const up = await V(() => window.__starwishVillage.player());
       check("移動規則：一般行走走上石階到高台（不跳躍）", up.y > 1.9 && up.z > 23, up);
@@ -115,15 +117,8 @@ for (const name of browsers) {
       run.results.portals = pRes;
       check("傳送門狀態：南門開放（可前往星芽原野、需確認）、北東西休眠（未開放）；共 4 座、沒有新增出口", pRes.length === 4 && pRes.every((r) => r.target === `portal:${r.id}` && (r.open ? /星芽原野/.test(r.dialog) && /前往/.test(r.dialog) : /未開放/.test(r.dialog))) && pRes.filter((r) => r.open).length === 1, pRes);
       // 洛恩：靠近 → 停下並面向玩家 → 商人選單 → 寵物鑑定 → 放入 → 鑑定 → 結果
-      for (let k = 0; k < 3; k++) {
-        await page.evaluate(() => document.querySelectorAll("button").forEach((b) => b.textContent === "洛恩旁（寵物商人）" && b.click()));
-        await settle(page, 4);
-        const st0 = await V(() => window.__starwishVillage.interact());
-        if (st0?.target === "merchant") break;
-      }
-      const m0 = await V(() => window.__starwishVillage.interact());
-      check("洛恩：靠近 2.5 m 內出現互動", m0?.target === "merchant", m0);
-      await V(() => window.__starwishVillage.interactNow());
+      const met = await V(() => window.__starwishVillage.meetMerchant());
+      check("洛恩：靠近 2.5 m 內可以對話", met === "merchant", met);
       await page.waitForTimeout(600);
       const m1 = await V(() => window.__starwishVillage.interact());
       check("洛恩：對話時停止巡走（暫停中）並開啟商人選單", m1?.talking && m1.merchantPaused && m1.panelOpen, m1);

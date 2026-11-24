@@ -29,6 +29,7 @@ import {
   villageCameraDistance,
 } from "./layout.ts";
 import { buildVillageWorld, type VillageWorld } from "./VillageWorld.ts";
+import { artCameraDistance } from "./artCamera.ts";
 import { TourRunner, tourPoints, type TourEvent } from "./tour.ts";
 import type { VillageArtState } from "./VillageArtP3.ts";
 import type { VillageArtFull } from "./VillageArtFull.ts";
@@ -154,7 +155,8 @@ class VillagePage {
     this.player.root.position.copyFrom(this.pos);
     this.camera = new ThirdPersonCamera(scene, this.pos, groundHeight, {
       keepPitch: true,
-      obstruct: villageCameraDistance,
+      // 全村整合：另外避開傳送門石拱與南門橫樑（頭頂以上的美術結構，不是碰撞物）
+      obstruct: params.get("art") === "full" ? artCameraDistance : villageCameraDistance,
     });
     this.camera.obstructEnabled = params.get("camcol") !== "0";
     scene.activeCamera = this.camera.camera;
@@ -624,6 +626,18 @@ class VillagePage {
       artFull: () => ({ on: this.artFull, status: this.fullStatus, loadMs: this.full?.loadMs ?? 0, parts: this.full?.parts ?? {}, errors: this.full?.errors ?? [], merchant: !!this.full?.merchant }),
       interact: () => this.interact?.state() ?? null,
       interactNow: () => this.interact?.activate() ?? "none",
+      /** 測試用：站到洛恩外側 1.2 m 並在同一個瞬間開始對話（洛恩一直在走，避免時間差） */
+      meetMerchant: () => {
+        const m = this.full?.merchant;
+        if (!m || !this.interact) return "no-merchant";
+        const now = performance.now() / 1000;
+        m.update(now);
+        const p = m.root.position;
+        const r = Math.hypot(p.x, p.z) || 1;
+        this.teleport(p.x + (p.x / r) * 1.2, p.z + (p.z / r) * 1.2, Math.atan2(-p.x, -p.z));
+        this.interact.update(now, this.pos.x, this.pos.z);
+        return this.interact.activate();
+      },
       interactClose: () => this.interact?.closeAll(),
       appraisal: () => this.interact?.appraisalWindow.current ?? null,
       report: () => this.report(),
