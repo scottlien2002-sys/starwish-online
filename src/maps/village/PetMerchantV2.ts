@@ -129,7 +129,7 @@ export function setupPetMerchantV2(
       const anim = turning ? "Turn" : tgt ? "Talk" : p.walking ? "Walk" : "Idle";
       play(anim, anim === "Walk" ? 0.95 : 1);
       // 小寵物：頭部右上方漂浮
-      if (head) head.getAbsolutePosition().copyTo(headPos);
+      if (head) headPos.copyFrom(head.getAbsolutePosition());
       else headPos.set(p.x, 1.0 * SCALE, p.z);
       const c = Math.cos(facing);
       const s = Math.sin(facing);
