@@ -1,0 +1,2166 @@
+{
+ "startedAt": "2026-11-24T00:21:13.484Z",
+ "checks": {
+  "benches 位置＝既有碰撞（誤差 < 1 cm）": {
+   "ok": true,
+   "detail": {
+    "count": 8,
+    "colliders": 8,
+    "maxErr": 0.0006168623426758979
+   }
+  },
+  "crystal_lamps 位置＝既有碰撞（誤差 < 1 cm）": {
+   "ok": true,
+   "detail": {
+    "count": 4,
+    "colliders": 4,
+    "maxErr": 0.0006867120224530259
+   }
+  },
+  "lamps 位置＝既有碰撞（誤差 < 1 cm）": {
+   "ok": true,
+   "detail": {
+    "count": 9,
+    "colliders": 9,
+    "maxErr": 0.0004953290527801279
+   }
+  },
+  "花圃不擋道路、石階、NPC、出生點、佈告欄、鍛造台；高度 ≤ 0.25 m": {
+   "ok": true,
+   "detail": {
+    "beds": 10,
+    "samples": 270,
+    "issues": []
+   }
+  },
+  "創角出生點站在羅盤徽上（V1.3 出生點不變）": {
+   "ok": true,
+   "detail": {
+    "spawn": {
+     "id": "spawn",
+     "label": "出生點",
+     "x": 0,
+     "z": -12.5,
+     "yaw": -1.2246467991473532e-16
+    },
+    "compass": {
+     "x": 0,
+     "z": -14.55,
+     "r": 2.45
+    }
+   }
+  },
+  "道路寬度與方向＝V1.3（4 條、半寬 3 m）": {
+   "ok": true,
+   "detail": [
+    {
+     "bearing": 0,
+     "from": 23,
+     "to": 40,
+     "half": 3,
+     "h": 2
+    },
+    {
+     "bearing": 90,
+     "from": 17.95,
+     "to": 40,
+     "half": 3,
+     "h": 0
+    },
+    {
+     "bearing": 180,
+     "from": 17.95,
+     "to": 40,
+     "half": 3,
+     "h": 0
+    },
+    {
+     "bearing": 270,
+     "from": 17.95,
+     "to": 40,
+     "half": 3,
+     "h": 0
+    }
+   ]
+  },
+  "Lite 接地陰影帶頂點透明度（COLOR_0 為 RGBA）": {
+   "ok": true,
+   "detail": {
+    "type": "VEC4"
+   }
+  },
+  "騎士軍團尺寸、方位與 V1.3 相同": {
+   "ok": true,
+   "detail": {
+    "v13": {
+     "id": "knight",
+     "name": "騎士軍團",
+     "role": "騎士轉職",
+     "bearing": 332,
+     "w": 16,
+     "d": 14,
+     "eave": 9,
+     "top": 19,
+     "floor": 2,
+     "front": 27,
+     "shape": "castle"
+    },
+    "model": {
+     "bearing": 332,
+     "front": 27,
+     "w": 16,
+     "d": 14,
+     "top": 19,
+     "floor": 2,
+     "door": [
+      -14.07,
+      26.462
+     ]
+    }
+   }
+  },
+  "騎士軍團 lite 模型完全在原碰撞箱內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "x": [
+      -7.999,
+      7.999
+     ],
+     "y": [
+      0,
+      13.995
+     ],
+     "h": [
+      0,
+      19
+     ]
+    },
+    "collider": {
+     "kind": "building:knight",
+     "x": -15.962033134720288,
+     "z": 30.020218157203516,
+     "hw": 8,
+     "hd": 7,
+     "rot": 5.794493116621174,
+     "y0": 1.5,
+     "y1": 21
+    }
+   }
+  },
+  "騎士軍團 hq 模型完全在原碰撞箱內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "x": [
+      -7.989,
+      7.989
+     ],
+     "y": [
+      0,
+      13.995
+     ],
+     "h": [
+      0,
+      19
+     ]
+    },
+    "collider": {
+     "kind": "building:knight",
+     "x": -15.962033134720288,
+     "z": 30.020218157203516,
+     "hw": 8,
+     "hd": 7,
+     "rot": 5.794493116621174,
+     "y0": 1.5,
+     "y1": 21
+    }
+   }
+  },
+  "正門面向噴泉（門比建築中心更靠近噴泉）": {
+   "ok": true,
+   "detail": {
+    "door": [
+     -14.07,
+     26.462
+    ],
+    "doorR": "29.97",
+    "centerR": "34.00"
+   }
+  },
+  "騎士轉職 NPC 站位不變（正門前 2 m、在碰撞箱外）": {
+   "ok": true,
+   "detail": {
+    "npc": {
+     "id": "knight",
+     "name": "騎士軍團",
+     "role": "騎士轉職",
+     "x": -11.736789069647271,
+     "z": 22.073689821473174,
+     "yaw": 2.652900463031381,
+     "floor": 2,
+     "interactR": 3
+    }
+   }
+  },
+  "法師軍團尺寸、方位與 V1.3 相同": {
+   "ok": true,
+   "detail": {
+    "v13": {
+     "id": "mage",
+     "name": "法師軍團",
+     "role": "法師轉職",
+     "bearing": 26,
+     "w": 13,
+     "d": 13,
+     "eave": 8,
+     "top": 20,
+     "floor": 2,
+     "front": 27,
+     "shape": "tower"
+    },
+    "model": {
+     "bearing": 26,
+     "front": 27,
+     "w": 13,
+     "d": 13,
+     "top": 20,
+     "floor": 2,
+     "door": [
+      12.612,
+      25.858
+     ],
+     "stair_top": [
+      10.083,
+      20.672
+     ]
+    }
+   }
+  },
+  "法師軍團 lite 模型完全在原碰撞箱內、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "x": [
+      -5.955,
+      6.016
+     ],
+     "y": [
+      0,
+      12.906
+     ],
+     "h": [
+      0,
+      19.98
+     ]
+    },
+    "collider": {
+     "kind": "building:mage",
+     "x": 14.685433417434092,
+     "z": 30.109600551022094,
+     "hw": 6.5,
+     "hd": 6.5,
+     "rot": 0.4537856055185257,
+     "y0": 1.5,
+     "y1": 22
+    },
+    "triangles": 4630,
+    "budget": 10000
+   }
+  },
+  "法師軍團 hq 模型完全在原碰撞箱內、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "x": [
+      -6.047,
+      6.097
+     ],
+     "y": [
+      0,
+      12.906
+     ],
+     "h": [
+      0,
+      19.98
+     ]
+    },
+    "collider": {
+     "kind": "building:mage",
+     "x": 14.685433417434092,
+     "z": 30.109600551022094,
+     "hw": 6.5,
+     "hd": 6.5,
+     "rot": 0.4537856055185257,
+     "y0": 1.5,
+     "y1": 22
+    },
+    "triangles": 13709,
+    "budget": 26000
+   }
+  },
+  "法師軍團正門面向噴泉（門比建築中心更靠近噴泉）": {
+   "ok": true,
+   "detail": {
+    "door": [
+     12.612,
+     25.858
+    ],
+    "doorR": "28.77",
+    "centerR": "33.50"
+   }
+  },
+  "法師軍團正門中心正對 26° 高台石階（側向偏差 < 0.1 m）": {
+   "ok": true,
+   "detail": {
+    "lateral": "0.000",
+    "stairs": [
+     297,
+     332,
+     0,
+     26
+    ]
+   }
+  },
+  "法師軍團 NPC 站位不變（正門石階前 2 m、高台上、在碰撞箱外）": {
+   "ok": true,
+   "detail": {
+    "npc": {
+     "id": "mage",
+     "name": "法師軍團",
+     "role": "法師轉職",
+     "x": 10.959278669726935,
+     "z": 22.469851157479177,
+     "yaw": -2.6878070480712677,
+     "floor": 2,
+     "interactR": 3
+    }
+   }
+  },
+  "劍士軍團尺寸、方位與 V1.3 相同": {
+   "ok": true,
+   "detail": {
+    "v13": {
+     "id": "sword",
+     "name": "劍士軍團",
+     "role": "劍士轉職",
+     "bearing": 297,
+     "w": 12,
+     "d": 12,
+     "eave": 7,
+     "top": 13,
+     "floor": 2,
+     "front": 27,
+     "shape": "hall"
+    },
+    "model": {
+     "bearing": 297,
+     "front": 27,
+     "w": 12,
+     "d": 12,
+     "top": 13,
+     "floor": 2,
+     "door": [
+      -27.069,
+      13.792
+     ]
+    }
+   }
+  },
+  "劍士軍團 lite 模型完全在原碰撞箱內、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "x": [
+      -5.95,
+      5.95
+     ],
+     "y": [
+      0,
+      11.95
+     ],
+     "h": [
+      0,
+      12.99
+     ]
+    },
+    "collider": {
+     "kind": "building:sword",
+     "x": -29.403215298216143,
+     "z": 14.98168649140504,
+     "hw": 6,
+     "hd": 6,
+     "rot": 5.183627878423159,
+     "y0": 1.5,
+     "y1": 15
+    },
+    "triangles": 3050,
+    "budget": 9000
+   }
+  },
+  "劍士軍團 hq 模型完全在原碰撞箱內、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "x": [
+      -5.95,
+      5.95
+     ],
+     "y": [
+      0,
+      11.95
+     ],
+     "h": [
+      0,
+      12.99
+     ]
+    },
+    "collider": {
+     "kind": "building:sword",
+     "x": -29.403215298216143,
+     "z": 14.98168649140504,
+     "hw": 6,
+     "hd": 6,
+     "rot": 5.183627878423159,
+     "y0": 1.5,
+     "y1": 15
+    },
+    "triangles": 6642,
+    "budget": 22000
+   }
+  },
+  "劍士軍團正門面向噴泉（門比建築中心更靠近噴泉）": {
+   "ok": true,
+   "detail": {
+    "door": [
+     -27.069,
+     13.792
+    ],
+    "doorR": "30.38",
+    "centerR": "33.00"
+   }
+  },
+  "劍士軍團正門中心正對 297° 高台石階（側向偏差 < 0.1 m）": {
+   "ok": true,
+   "detail": {
+    "lateral": "-0.000",
+    "stairs": [
+     297,
+     332,
+     0,
+     26
+    ]
+   }
+  },
+  "劍士軍團 NPC 站位不變（正門石階前 2 m、高台上、在碰撞箱外）": {
+   "ok": true,
+   "detail": {
+    "npc": {
+     "id": "sword",
+     "name": "劍士軍團",
+     "role": "劍士轉職",
+     "x": -22.2751631047092,
+     "z": 11.349762493488665,
+     "yaw": 2.0420352248333655,
+     "floor": 2,
+     "interactR": 3
+    }
+   }
+  },
+  "北側高台與石階尺寸＝V1.3（281°→44°、r 23～49、高 2 m；石階 4 道、r 18～23、寬 6 m）": {
+   "ok": true,
+   "detail": {
+    "model": {
+     "from": 281,
+     "to": 44,
+     "r0": 23,
+     "r1": 49,
+     "height": 2,
+     "stairs": [
+      297,
+      332,
+      0,
+      26
+     ],
+     "stair_from": 18,
+     "stair_width": 6
+    }
+   }
+  },
+  "高台 lite：擋土牆正面在 r 23，0.3 m 以下不凸出 r 22.95（牆腳花圃到 22.98）": {
+   "ok": true,
+   "detail": {
+    "wall_min_r_below_0_3m": 22.97,
+    "wall_min_r_any": 22.842,
+    "stairs_side_excess": 0,
+    "stairs_along_excess": 0,
+    "stairs_max_above_ramp": 0.24,
+    "top_max_h": 2.02,
+    "top_in_north_road": 0
+   }
+  },
+  "高台 lite：石階模型完全在石階範圍內、踏面與遊戲斜坡差 ≤ 0.25 m": {
+   "ok": true,
+   "detail": {
+    "wall_min_r_below_0_3m": 22.97,
+    "wall_min_r_any": 22.842,
+    "stairs_side_excess": 0,
+    "stairs_along_excess": 0,
+    "stairs_max_above_ramp": 0.24,
+    "top_max_h": 2.02,
+    "top_in_north_road": 0
+   }
+  },
+  "高台 lite：鋪面高度 ≤ 2.03 m、不蓋住北路、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "wall_min_r_below_0_3m": 22.97,
+    "wall_min_r_any": 22.842,
+    "stairs_side_excess": 0,
+    "stairs_along_excess": 0,
+    "stairs_max_above_ramp": 0.24,
+    "top_max_h": 2.02,
+    "top_in_north_road": 0,
+    "triangles": 3176,
+    "budget": 6000
+   }
+  },
+  "高台 hq：擋土牆正面在 r 23，0.3 m 以下不凸出 r 22.95（牆腳花圃到 22.98）": {
+   "ok": true,
+   "detail": {
+    "wall_min_r_below_0_3m": 22.97,
+    "wall_min_r_any": 22.842,
+    "stairs_side_excess": 0,
+    "stairs_along_excess": 0,
+    "stairs_max_above_ramp": 0.24,
+    "top_max_h": 2.02,
+    "top_in_north_road": 0
+   }
+  },
+  "高台 hq：石階模型完全在石階範圍內、踏面與遊戲斜坡差 ≤ 0.25 m": {
+   "ok": true,
+   "detail": {
+    "wall_min_r_below_0_3m": 22.97,
+    "wall_min_r_any": 22.842,
+    "stairs_side_excess": 0,
+    "stairs_along_excess": 0,
+    "stairs_max_above_ramp": 0.24,
+    "top_max_h": 2.02,
+    "top_in_north_road": 0
+   }
+  },
+  "高台 hq：鋪面高度 ≤ 2.03 m、不蓋住北路、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "wall_min_r_below_0_3m": 22.97,
+    "wall_min_r_any": 22.842,
+    "stairs_side_excess": 0,
+    "stairs_along_excess": 0,
+    "stairs_max_above_ramp": 0.24,
+    "top_max_h": 2.02,
+    "top_in_north_road": 0,
+    "triangles": 4190,
+    "budget": 10000
+   }
+  },
+  "寵物商人巡走路線：與噴泉水池、長椅、水晶燈座、路燈等碰撞物淨距 ≥ 0.4 m、不進入任何建築碰撞箱、全程可站立": {
+   "ok": true,
+   "detail": {
+    "minCircleGap": 0.5000527965275464,
+    "nearestCircle": "crystalLamp",
+    "insideBox": false,
+    "minSpawnDist": 1.6531278949223491,
+    "minNpcDist": 6.923313802942551,
+    "allStandable": true,
+    "stationAxisGapDeg": 22.5
+   }
+  },
+  "寵物商人巡走路線：離 24 個出生點 ≥ 1.5 m、離所有 NPC ≥ 3 m": {
+   "ok": true,
+   "detail": {
+    "minCircleGap": 0.5000527965275464,
+    "nearestCircle": "crystalLamp",
+    "insideBox": false,
+    "minSpawnDist": 1.6531278949223491,
+    "minNpcDist": 6.923313802942551,
+    "allStandable": true,
+    "stationAxisGapDeg": 22.5
+   }
+  },
+  "寵物商人停留點避開主路與石階軸線（≥ 12°）；商人不是碰撞物（不擋主要通道）": {
+   "ok": true,
+   "detail": {
+    "stationAxisGapDeg": 22.5,
+    "stations": [
+     202.5,
+     247.5,
+     67.5,
+     157.5
+    ],
+    "patrolR": 10.8
+   }
+  },
+  "寵物商人 lite 模型：高 ≤ 1.6 m、半徑 ≤ 路線檢查用的 0.44999999999999996 m、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "height": 1.505,
+    "radius": 0.448,
+    "triangles": 2849,
+    "budget": 3000
+   }
+  },
+  "寵物商人 hq 模型：高 ≤ 1.6 m、半徑 ≤ 路線檢查用的 0.44999999999999996 m、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "height": 1.505,
+    "radius": 0.448,
+    "triangles": 6890,
+    "budget": 8000
+   }
+  },
+  "噴泉 lite 外徑 r ≤ 7.0（＝碰撞半徑 7）、最高（含星晶浮動）≤ 6.5、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "radius": 7,
+     "top": 6.4
+    },
+    "crystalTopMax": 6.46,
+    "triangles": 10460,
+    "budget": 11000
+   }
+  },
+  "噴泉 hq 外徑 r ≤ 7.0（＝碰撞半徑 7）、最高（含星晶浮動）≤ 6.5、面數在額度內": {
+   "ok": true,
+   "detail": {
+    "bounds": {
+     "radius": 7,
+     "top": 6.4
+    },
+    "crystalTopMax": 6.46,
+    "triangles": 25644,
+    "budget": 28000
+   }
+  },
+  "寵物商人對話面板：鑑定（種子／孵化蛋／鳥蛋）、飼料、培育與進化都可點選，未接入寵物系統時顯示「準備中」，不顯示任何機率或價格": {
+   "ok": false,
+   "detail": [
+    {
+     "act": "open",
+     "text": "✦ 寵物商人功能準備中歡迎！撿到種子或蛋了嗎？我可以幫你看看裡面藏著什麼樣的寵物喔。鑑定寵物屬性種子・孵化蛋・鳥蛋購買寵物飼料飼料商店培育與進化資訊照顧方式・進化條件離開"
+    },
+    {
+     "act": "choose:appraise",
+     "text": "✦ 寵物商人功能準備中要鑑定哪一種呢？鑑定種子鑑定孵化蛋鑑定鳥蛋返回"
+    },
+    {
+     "act": "kind:birdEgg",
+     "text": "✦ 寵物商人功能準備中鑑定鳥蛋寵物系統尚未開放，敬請期待。返回離開"
+    },
+    {
+     "act": "back",
+     "text": "✦ 寵物商人功能準備中要鑑定哪一種呢？鑑定種子鑑定孵化蛋鑑定鳥蛋返回"
+    },
+    {
+     "act": "back",
+     "text": "✦ 寵物商人功能準備中歡迎！撿到種子或蛋了嗎？我可以幫你看看裡面藏著什麼樣的寵物喔。鑑定寵物屬性種子・孵化蛋・鳥蛋購買寵物飼料飼料商店培育與進化資訊照顧方式・進化條件離開"
+    },
+    {
+     "act": "choose:feed",
+     "text": "✦ 寵物商人功能準備中寵物飼料寵物系統尚未開放，敬請期待。返回離開"
+    },
+    {
+     "act": "back",
+     "text": "✦ 寵物商人功能準備中歡迎！撿到種子或蛋了嗎？我可以幫你看看裡面藏著什麼樣的寵物喔。鑑定寵物屬性種子・孵化蛋・鳥蛋購買寵物飼料飼料商店培育與進化資訊照顧方式・進化條件離開"
+    },
+    {
+     "act": "choose:guide",
+     "text": "✦ 寵物商人功能準備中培育與進化寵物系統尚未開放，敬請期待。返回離開"
+    },
+    {
+     "act": "close",
+     "text": "✦ 寵物商人功能準備中培育與進化寵物系統尚未開放，敬請期待。返回離開"
+    }
+   ]
+  }
+ },
+ "runs": [
+  {
+   "browser": "chromium",
+   "mode": "hq",
+   "errors": [],
+   "shots": [
+    "chromium_hq_pm_spawn.png",
+    "chromium_hq_pm_front.png",
+    "chromium_hq_pm_q45.png",
+    "chromium_hq_pm_back.png",
+    "chromium_hq_pm_plaza.png",
+    "chromium_hq_pm_walk.png",
+    "chromium_hq_pm_path.png",
+    "chromium_hq_village_top.png"
+   ],
+   "loadMs": 14259,
+   "stats": {
+    "fountain": {
+     "meshes": 7,
+     "triangles": 25644,
+     "byMesh": {
+      "stone": 16000,
+      "gold": 7064,
+      "crystal": 108,
+      "water": 704,
+      "falls": 1344,
+      "foam": 384,
+      "fx": 40
+     },
+     "materials": 6,
+     "opaqueMeshes": 3,
+     "transparentMeshes": 4,
+     "textures": 8,
+     "texturePixels": 1277952,
+     "shadowCasters": 2
+    },
+    "plaza": {
+     "meshes": 5,
+     "triangles": 26438,
+     "byMesh": {
+      "paving": 10792,
+      "gold": 3236,
+      "props": 12004,
+      "glass": 154,
+      "banner": 252
+     },
+     "materials": 1,
+     "transparentMeshes": 0,
+     "textures": 3,
+     "texturePixels": 655360,
+     "shadowCasters": 3
+    },
+    "knight": {
+     "meshes": 4,
+     "triangles": 12532,
+     "byMesh": {
+      "stone": 6343,
+      "roof": 664,
+      "gold": 3513,
+      "props": 2012
+     },
+     "materials": 4,
+     "shadowCasters": 4,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slate_hq.png",
+      "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "mage": {
+     "meshes": 5,
+     "triangles": 13709,
+     "byMesh": {
+      "stone": 6785,
+      "roof": 880,
+      "gold": 5302,
+      "props": 241,
+      "glow": 501
+     },
+     "materials": 5,
+     "shadowCasters": 2,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slate_hq.png",
+      "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "sword": {
+     "meshes": 4,
+     "triangles": 6642,
+     "byMesh": {
+      "stone": 3000,
+      "roof": 232,
+      "gold": 2893,
+      "props": 517
+     },
+     "materials": 4,
+     "shadowCasters": 2,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slate_hq.png",
+      "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "platform": {
+     "meshes": 4,
+     "triangles": 4190,
+     "byMesh": {
+      "stone": 2122,
+      "paving": 1168,
+      "gold": 612,
+      "glow": 288
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slab_hq.png",
+      "./models/tex/slab_nrm_hq.png"
+     ]
+    },
+    "merchant": {
+     "meshes": 4,
+     "triangles": 6874,
+     "byMesh": {
+      "props": 4308,
+      "gold": 802,
+      "glow": 430,
+      "pal": 1334
+     },
+     "shadowCasters": 1
+    }
+   },
+   "textureMemory": {
+    "count": 13,
+    "pixels": 3244032,
+    "mb": 16.46,
+    "list": [
+     {
+      "name": "slab_hq.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "slab_nrm_hq.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "pool_hq.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "caustic_star_hq.png",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "name": "water_nrm_512.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "fx_fall_hq.png",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "name": "fx_foam_hq.png",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "name": "fx_magic_hq.png",
+      "w": 256,
+      "h": 128
+     },
+     {
+      "name": "banner2_hq.png",
+      "w": 256,
+      "h": 512
+     },
+     {
+      "name": "ashlar_hq.png",
+      "w": 1024,
+      "h": 1024
+     },
+     {
+      "name": "ashlar_nrm_512.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "slate_hq.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "slate_nrm_512.png",
+      "w": 512,
+      "h": 512
+     }
+    ]
+   },
+   "partDrawCalls": {
+    "fountain": 9,
+    "plaza": 8,
+    "knight": 8,
+    "mage": 7,
+    "sword": 6,
+    "platform": 4,
+    "merchant": 5
+   },
+   "drawCalls": {
+    "none": {
+     "drawCalls": 73,
+     "activeMeshes": 38
+    },
+    "all": {
+     "drawCalls": 120,
+     "activeMeshes": 71
+    },
+    "no_fountain": {
+     "drawCalls": 111,
+     "activeMeshes": 64
+    },
+    "no_plaza": {
+     "drawCalls": 112,
+     "activeMeshes": 66
+    },
+    "no_knight": {
+     "drawCalls": 112,
+     "activeMeshes": 67
+    },
+    "no_mage": {
+     "drawCalls": 113,
+     "activeMeshes": 66
+    },
+    "no_sword": {
+     "drawCalls": 114,
+     "activeMeshes": 67
+    },
+    "no_platform": {
+     "drawCalls": 116,
+     "activeMeshes": 67
+    },
+    "no_merchant": {
+     "drawCalls": 115,
+     "activeMeshes": 67
+    }
+   },
+   "anims": [
+    {
+     "name": "pet_merchant",
+     "view": "pm_anim",
+     "secs": 10,
+     "fps": 15,
+     "frames": 150,
+     "dir": "anim_hq_pet_merchant"
+    }
+   ],
+   "flicker": {
+    "pm_spawn": {
+     "maxRatio": 0.003168402777777778,
+     "meanRatio": 0.0030183531746031745
+    },
+    "pm_plaza": {
+     "maxRatio": 0.006312003968253968,
+     "meanRatio": 0.005912078373015873
+    },
+    "pm_front": {
+     "maxRatio": 0.005543154761904762,
+     "meanRatio": 0.005062624007936508
+    }
+   },
+   "frameMsSoftware": 1.8000000000465661
+  },
+  {
+   "browser": "chromium",
+   "mode": "lite-low",
+   "errors": [],
+   "shots": [
+    "chromium_lite-low_pm_spawn.png",
+    "chromium_lite-low_pm_front.png",
+    "chromium_lite-low_pm_q45.png",
+    "chromium_lite-low_pm_back.png",
+    "chromium_lite-low_pm_plaza.png",
+    "chromium_lite-low_pm_walk.png"
+   ],
+   "loadMs": 2323,
+   "stats": {
+    "fountain": {
+     "meshes": 7,
+     "triangles": 10460,
+     "byMesh": {
+      "stone": 6856,
+      "gold": 2624,
+      "crystal": 92,
+      "water": 144,
+      "falls": 512,
+      "foam": 192,
+      "fx": 40
+     },
+     "materials": 6,
+     "opaqueMeshes": 3,
+     "transparentMeshes": 4,
+     "textures": 6,
+     "texturePixels": 188416,
+     "shadowCasters": 0
+    },
+    "plaza": {
+     "meshes": 4,
+     "triangles": 9232,
+     "byMesh": {
+      "paving": 3232,
+      "props": 5550,
+      "glass": 154,
+      "contact": 296
+     },
+     "materials": 2,
+     "transparentMeshes": 1,
+     "textures": 1,
+     "texturePixels": 65536,
+     "shadowCasters": 0
+    },
+    "knight": {
+     "meshes": 3,
+     "triangles": 4626,
+     "byMesh": {
+      "stone": 2599,
+      "roof": 246,
+      "props": 1781
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slate_lite.png"
+     ]
+    },
+    "mage": {
+     "meshes": 4,
+     "triangles": 4630,
+     "byMesh": {
+      "stone": 2229,
+      "roof": 396,
+      "props": 1677,
+      "glow": 328
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slate_lite.png"
+     ]
+    },
+    "sword": {
+     "meshes": 3,
+     "triangles": 3050,
+     "byMesh": {
+      "stone": 1660,
+      "roof": 88,
+      "props": 1302
+     },
+     "materials": 3,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slate_lite.png"
+     ]
+    },
+    "platform": {
+     "meshes": 3,
+     "triangles": 3176,
+     "byMesh": {
+      "stone": 2344,
+      "paving": 544,
+      "glow": 288
+     },
+     "materials": 3,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slab_lite.png"
+     ]
+    },
+    "merchant": {
+     "meshes": 3,
+     "triangles": 2839,
+     "byMesh": {
+      "props": 2232,
+      "glow": 153,
+      "pal": 454
+     },
+     "shadowCasters": 0
+    }
+   },
+   "textureMemory": {
+    "count": 8,
+    "pixels": 516096,
+    "mb": 2.62,
+    "list": [
+     {
+      "name": "slab_lite.png",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "name": "pool_lite.png",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "name": "caustic_star_lite.png",
+      "w": 128,
+      "h": 128
+     },
+     {
+      "name": "fx_fall_lite.png",
+      "w": 128,
+      "h": 128
+     },
+     {
+      "name": "fx_foam_lite.png",
+      "w": 128,
+      "h": 128
+     },
+     {
+      "name": "fx_magic_lite.png",
+      "w": 128,
+      "h": 64
+     },
+     {
+      "name": "ashlar_lite.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "slate_lite.png",
+      "w": 256,
+      "h": 256
+     }
+    ]
+   },
+   "partDrawCalls": {
+    "fountain": 7,
+    "plaza": 4,
+    "knight": 3,
+    "mage": 4,
+    "sword": 3,
+    "platform": 3,
+    "merchant": 3
+   },
+   "drawCalls": {
+    "none": {
+     "drawCalls": 31,
+     "activeMeshes": 38
+    },
+    "all": {
+     "drawCalls": 58,
+     "activeMeshes": 65
+    },
+    "no_fountain": {
+     "drawCalls": 51,
+     "activeMeshes": 58
+    },
+    "no_plaza": {
+     "drawCalls": 54,
+     "activeMeshes": 61
+    },
+    "no_knight": {
+     "drawCalls": 55,
+     "activeMeshes": 62
+    },
+    "no_mage": {
+     "drawCalls": 54,
+     "activeMeshes": 61
+    },
+    "no_sword": {
+     "drawCalls": 55,
+     "activeMeshes": 62
+    },
+    "no_platform": {
+     "drawCalls": 55,
+     "activeMeshes": 62
+    },
+    "no_merchant": {
+     "drawCalls": 55,
+     "activeMeshes": 62
+    }
+   },
+   "flicker": {
+    "pm_spawn": {
+     "maxRatio": 0.0021019345238095237,
+     "meanRatio": 0.0019518849206349206
+    },
+    "pm_plaza": {
+     "maxRatio": 0.0023251488095238095,
+     "meanRatio": 0.002075272817460317
+    },
+    "pm_front": {
+     "maxRatio": 0.0034970238095238097,
+     "meanRatio": 0.0033017113095238095
+    }
+   },
+   "frameMsSoftware": 1.299999999968956
+  },
+  {
+   "browser": "chromium",
+   "mode": "hq-portrait",
+   "errors": [],
+   "shots": [
+    "chromium_hq-portrait_pm_spawn.png",
+    "chromium_hq-portrait_pm_iphone.png",
+    "chromium_hq-portrait_panel_root.png",
+    "chromium_hq-portrait_panel_appraise.png",
+    "chromium_hq-portrait_panel_birdegg.png",
+    "chromium_hq-portrait_panel_feed.png",
+    "chromium_hq-portrait_panel_guide.png",
+    "chromium_hq-portrait_panel_closed.png"
+   ],
+   "loadMs": 5955,
+   "stats": {
+    "fountain": {
+     "meshes": 7,
+     "triangles": 25644,
+     "byMesh": {
+      "stone": 16000,
+      "gold": 7064,
+      "crystal": 108,
+      "water": 704,
+      "falls": 1344,
+      "foam": 384,
+      "fx": 40
+     },
+     "materials": 6,
+     "opaqueMeshes": 3,
+     "transparentMeshes": 4,
+     "textures": 8,
+     "texturePixels": 1277952,
+     "shadowCasters": 2
+    },
+    "plaza": {
+     "meshes": 5,
+     "triangles": 26438,
+     "byMesh": {
+      "paving": 10792,
+      "gold": 3236,
+      "props": 12004,
+      "glass": 154,
+      "banner": 252
+     },
+     "materials": 1,
+     "transparentMeshes": 0,
+     "textures": 3,
+     "texturePixels": 655360,
+     "shadowCasters": 3
+    },
+    "knight": {
+     "meshes": 4,
+     "triangles": 12532,
+     "byMesh": {
+      "stone": 6343,
+      "roof": 664,
+      "gold": 3513,
+      "props": 2012
+     },
+     "materials": 4,
+     "shadowCasters": 4,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slate_hq.png",
+      "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "mage": {
+     "meshes": 5,
+     "triangles": 13709,
+     "byMesh": {
+      "stone": 6785,
+      "roof": 880,
+      "gold": 5302,
+      "props": 241,
+      "glow": 501
+     },
+     "materials": 5,
+     "shadowCasters": 2,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slate_hq.png",
+      "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "sword": {
+     "meshes": 4,
+     "triangles": 6642,
+     "byMesh": {
+      "stone": 3000,
+      "roof": 232,
+      "gold": 2893,
+      "props": 517
+     },
+     "materials": 4,
+     "shadowCasters": 2,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slate_hq.png",
+      "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "platform": {
+     "meshes": 4,
+     "triangles": 4190,
+     "byMesh": {
+      "stone": 2122,
+      "paving": 1168,
+      "gold": 612,
+      "glow": 288
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slab_hq.png",
+      "./models/tex/slab_nrm_hq.png"
+     ]
+    },
+    "merchant": {
+     "meshes": 4,
+     "triangles": 6874,
+     "byMesh": {
+      "props": 4308,
+      "gold": 802,
+      "glow": 430,
+      "pal": 1334
+     },
+     "shadowCasters": 1
+    }
+   },
+   "textureMemory": {
+    "count": 13,
+    "pixels": 3244032,
+    "mb": 16.46,
+    "list": [
+     {
+      "name": "slab_hq.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "slab_nrm_hq.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "pool_hq.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "caustic_star_hq.png",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "name": "water_nrm_512.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "fx_fall_hq.png",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "name": "fx_foam_hq.png",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "name": "fx_magic_hq.png",
+      "w": 256,
+      "h": 128
+     },
+     {
+      "name": "banner2_hq.png",
+      "w": 256,
+      "h": 512
+     },
+     {
+      "name": "ashlar_hq.png",
+      "w": 1024,
+      "h": 1024
+     },
+     {
+      "name": "ashlar_nrm_512.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "slate_hq.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "slate_nrm_512.png",
+      "w": 512,
+      "h": 512
+     }
+    ]
+   },
+   "partDrawCalls": {
+    "fountain": 9,
+    "plaza": 8,
+    "knight": 4,
+    "mage": 7,
+    "sword": 2,
+    "platform": 8,
+    "merchant": 5
+   },
+   "drawCalls": {
+    "none": {
+     "drawCalls": 54,
+     "activeMeshes": 19
+    },
+    "all": {
+     "drawCalls": 93,
+     "activeMeshes": 44
+    },
+    "no_fountain": {
+     "drawCalls": 84,
+     "activeMeshes": 37
+    },
+    "no_plaza": {
+     "drawCalls": 85,
+     "activeMeshes": 39
+    },
+    "no_knight": {
+     "drawCalls": 89,
+     "activeMeshes": 44
+    },
+    "no_mage": {
+     "drawCalls": 86,
+     "activeMeshes": 39
+    },
+    "no_sword": {
+     "drawCalls": 91,
+     "activeMeshes": 44
+    },
+    "no_platform": {
+     "drawCalls": 85,
+     "activeMeshes": 36
+    },
+    "no_merchant": {
+     "drawCalls": 88,
+     "activeMeshes": 40
+    }
+   },
+   "panel": [
+    {
+     "act": "open",
+     "text": "✦ 寵物商人功能準備中歡迎！撿到種子或蛋了嗎？我可以幫你看看裡面藏著什麼樣的寵物喔。鑑定寵物屬性種子・孵化蛋・鳥蛋購買寵物飼料飼料商店培育與進化資訊照顧方式・進化條件離開"
+    },
+    {
+     "act": "choose:appraise",
+     "text": "✦ 寵物商人功能準備中要鑑定哪一種呢？鑑定種子鑑定孵化蛋鑑定鳥蛋返回"
+    },
+    {
+     "act": "kind:birdEgg",
+     "text": "✦ 寵物商人功能準備中鑑定鳥蛋寵物系統尚未開放，敬請期待。返回離開"
+    },
+    {
+     "act": "back",
+     "text": "✦ 寵物商人功能準備中要鑑定哪一種呢？鑑定種子鑑定孵化蛋鑑定鳥蛋返回"
+    },
+    {
+     "act": "back",
+     "text": "✦ 寵物商人功能準備中歡迎！撿到種子或蛋了嗎？我可以幫你看看裡面藏著什麼樣的寵物喔。鑑定寵物屬性種子・孵化蛋・鳥蛋購買寵物飼料飼料商店培育與進化資訊照顧方式・進化條件離開"
+    },
+    {
+     "act": "choose:feed",
+     "text": "✦ 寵物商人功能準備中寵物飼料寵物系統尚未開放，敬請期待。返回離開"
+    },
+    {
+     "act": "back",
+     "text": "✦ 寵物商人功能準備中歡迎！撿到種子或蛋了嗎？我可以幫你看看裡面藏著什麼樣的寵物喔。鑑定寵物屬性種子・孵化蛋・鳥蛋購買寵物飼料飼料商店培育與進化資訊照顧方式・進化條件離開"
+    },
+    {
+     "act": "choose:guide",
+     "text": "✦ 寵物商人功能準備中培育與進化寵物系統尚未開放，敬請期待。返回離開"
+    },
+    {
+     "act": "close",
+     "text": "✦ 寵物商人功能準備中培育與進化寵物系統尚未開放，敬請期待。返回離開"
+    }
+   ]
+  },
+  {
+   "browser": "chromium",
+   "mode": "lite-portrait",
+   "errors": [],
+   "shots": [
+    "chromium_lite-portrait_pm_spawn.png",
+    "chromium_lite-portrait_pm_iphone.png"
+   ],
+   "loadMs": 1923,
+   "stats": {
+    "fountain": {
+     "meshes": 7,
+     "triangles": 10460,
+     "byMesh": {
+      "stone": 6856,
+      "gold": 2624,
+      "crystal": 92,
+      "water": 144,
+      "falls": 512,
+      "foam": 192,
+      "fx": 40
+     },
+     "materials": 6,
+     "opaqueMeshes": 3,
+     "transparentMeshes": 4,
+     "textures": 6,
+     "texturePixels": 188416,
+     "shadowCasters": 0
+    },
+    "plaza": {
+     "meshes": 4,
+     "triangles": 9232,
+     "byMesh": {
+      "paving": 3232,
+      "props": 5550,
+      "glass": 154,
+      "contact": 296
+     },
+     "materials": 2,
+     "transparentMeshes": 1,
+     "textures": 1,
+     "texturePixels": 65536,
+     "shadowCasters": 0
+    },
+    "knight": {
+     "meshes": 3,
+     "triangles": 4626,
+     "byMesh": {
+      "stone": 2599,
+      "roof": 246,
+      "props": 1781
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slate_lite.png"
+     ]
+    },
+    "mage": {
+     "meshes": 4,
+     "triangles": 4630,
+     "byMesh": {
+      "stone": 2229,
+      "roof": 396,
+      "props": 1677,
+      "glow": 328
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slate_lite.png"
+     ]
+    },
+    "sword": {
+     "meshes": 3,
+     "triangles": 3050,
+     "byMesh": {
+      "stone": 1660,
+      "roof": 88,
+      "props": 1302
+     },
+     "materials": 3,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slate_lite.png"
+     ]
+    },
+    "platform": {
+     "meshes": 3,
+     "triangles": 3176,
+     "byMesh": {
+      "stone": 2344,
+      "paving": 544,
+      "glow": 288
+     },
+     "materials": 3,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slab_lite.png"
+     ]
+    },
+    "merchant": {
+     "meshes": 3,
+     "triangles": 2839,
+     "byMesh": {
+      "props": 2232,
+      "glow": 153,
+      "pal": 454
+     },
+     "shadowCasters": 0
+    }
+   },
+   "textureMemory": {
+    "count": 8,
+    "pixels": 516096,
+    "mb": 2.62,
+    "list": [
+     {
+      "name": "slab_lite.png",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "name": "pool_lite.png",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "name": "caustic_star_lite.png",
+      "w": 128,
+      "h": 128
+     },
+     {
+      "name": "fx_fall_lite.png",
+      "w": 128,
+      "h": 128
+     },
+     {
+      "name": "fx_foam_lite.png",
+      "w": 128,
+      "h": 128
+     },
+     {
+      "name": "fx_magic_lite.png",
+      "w": 128,
+      "h": 64
+     },
+     {
+      "name": "ashlar_lite.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "slate_lite.png",
+      "w": 256,
+      "h": 256
+     }
+    ]
+   },
+   "partDrawCalls": {
+    "fountain": 7,
+    "plaza": 4,
+    "knight": 0,
+    "mage": 4,
+    "sword": 0,
+    "platform": 3,
+    "merchant": 3
+   },
+   "drawCalls": {
+    "none": {
+     "drawCalls": 12,
+     "activeMeshes": 19
+    },
+    "all": {
+     "drawCalls": 33,
+     "activeMeshes": 40
+    },
+    "no_fountain": {
+     "drawCalls": 26,
+     "activeMeshes": 33
+    },
+    "no_plaza": {
+     "drawCalls": 29,
+     "activeMeshes": 36
+    },
+    "no_knight": {
+     "drawCalls": 33,
+     "activeMeshes": 40
+    },
+    "no_mage": {
+     "drawCalls": 29,
+     "activeMeshes": 36
+    },
+    "no_sword": {
+     "drawCalls": 33,
+     "activeMeshes": 40
+    },
+    "no_platform": {
+     "drawCalls": 30,
+     "activeMeshes": 37
+    },
+    "no_merchant": {
+     "drawCalls": 30,
+     "activeMeshes": 37
+    }
+   }
+  },
+  {
+   "browser": "webkit",
+   "mode": "hq",
+   "errors": [],
+   "shots": [
+    "webkit_hq_pm_q45.png",
+    "webkit_hq_pm_plaza.png"
+   ],
+   "loadMs": 4844,
+   "stats": {
+    "fountain": {
+     "meshes": 7,
+     "triangles": 25644,
+     "byMesh": {
+      "stone": 16000,
+      "gold": 7064,
+      "crystal": 108,
+      "water": 704,
+      "falls": 1344,
+      "foam": 384,
+      "fx": 40
+     },
+     "materials": 6,
+     "opaqueMeshes": 3,
+     "transparentMeshes": 4,
+     "textures": 8,
+     "texturePixels": 1277952,
+     "shadowCasters": 2
+    },
+    "plaza": {
+     "meshes": 5,
+     "triangles": 26438,
+     "byMesh": {
+      "paving": 10792,
+      "gold": 3236,
+      "props": 12004,
+      "glass": 154,
+      "banner": 252
+     },
+     "materials": 1,
+     "transparentMeshes": 0,
+     "textures": 3,
+     "texturePixels": 655360,
+     "shadowCasters": 3
+    },
+    "knight": {
+     "meshes": 4,
+     "triangles": 12532,
+     "byMesh": {
+      "stone": 6343,
+      "roof": 664,
+      "gold": 3513,
+      "props": 2012
+     },
+     "materials": 4,
+     "shadowCasters": 4,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slate_hq.png",
+      "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "mage": {
+     "meshes": 5,
+     "triangles": 13709,
+     "byMesh": {
+      "stone": 6785,
+      "roof": 880,
+      "gold": 5302,
+      "props": 241,
+      "glow": 501
+     },
+     "materials": 5,
+     "shadowCasters": 2,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slate_hq.png",
+      "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "sword": {
+     "meshes": 4,
+     "triangles": 6642,
+     "byMesh": {
+      "stone": 3000,
+      "roof": 232,
+      "gold": 2893,
+      "props": 517
+     },
+     "materials": 4,
+     "shadowCasters": 2,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slate_hq.png",
+      "./models/tex/slate_nrm_512.png"
+     ]
+    },
+    "platform": {
+     "meshes": 4,
+     "triangles": 4190,
+     "byMesh": {
+      "stone": 2122,
+      "paving": 1168,
+      "gold": 612,
+      "glow": 288
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_hq.png",
+      "./models/tex/ashlar_nrm_512.png",
+      "./models/tex/slab_hq.png",
+      "./models/tex/slab_nrm_hq.png"
+     ]
+    },
+    "merchant": {
+     "meshes": 4,
+     "triangles": 6874,
+     "byMesh": {
+      "props": 4308,
+      "gold": 802,
+      "glow": 430,
+      "pal": 1334
+     },
+     "shadowCasters": 1
+    }
+   },
+   "textureMemory": {
+    "count": 13,
+    "pixels": 3244032,
+    "mb": 16.46,
+    "list": [
+     {
+      "name": "slab_hq.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "slab_nrm_hq.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "pool_hq.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "caustic_star_hq.png",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "name": "water_nrm_512.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "fx_fall_hq.png",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "name": "fx_foam_hq.png",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "name": "fx_magic_hq.png",
+      "w": 256,
+      "h": 128
+     },
+     {
+      "name": "banner2_hq.png",
+      "w": 256,
+      "h": 512
+     },
+     {
+      "name": "ashlar_hq.png",
+      "w": 1024,
+      "h": 1024
+     },
+     {
+      "name": "ashlar_nrm_512.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "slate_hq.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "slate_nrm_512.png",
+      "w": 512,
+      "h": 512
+     }
+    ]
+   },
+   "partDrawCalls": {
+    "fountain": 9,
+    "plaza": 8,
+    "knight": 8,
+    "mage": 7,
+    "sword": 6,
+    "platform": 4,
+    "merchant": 5
+   },
+   "drawCalls": {
+    "none": {
+     "drawCalls": 73,
+     "activeMeshes": 38
+    },
+    "all": {
+     "drawCalls": 120,
+     "activeMeshes": 71
+    },
+    "no_fountain": {
+     "drawCalls": 111,
+     "activeMeshes": 64
+    },
+    "no_plaza": {
+     "drawCalls": 112,
+     "activeMeshes": 66
+    },
+    "no_knight": {
+     "drawCalls": 112,
+     "activeMeshes": 67
+    },
+    "no_mage": {
+     "drawCalls": 113,
+     "activeMeshes": 66
+    },
+    "no_sword": {
+     "drawCalls": 114,
+     "activeMeshes": 67
+    },
+    "no_platform": {
+     "drawCalls": 116,
+     "activeMeshes": 67
+    },
+    "no_merchant": {
+     "drawCalls": 115,
+     "activeMeshes": 67
+    }
+   }
+  },
+  {
+   "browser": "webkit",
+   "mode": "lite-low",
+   "errors": [],
+   "shots": [
+    "webkit_lite-low_pm_front.png"
+   ],
+   "loadMs": 2560,
+   "stats": {
+    "fountain": {
+     "meshes": 7,
+     "triangles": 10460,
+     "byMesh": {
+      "stone": 6856,
+      "gold": 2624,
+      "crystal": 92,
+      "water": 144,
+      "falls": 512,
+      "foam": 192,
+      "fx": 40
+     },
+     "materials": 6,
+     "opaqueMeshes": 3,
+     "transparentMeshes": 4,
+     "textures": 6,
+     "texturePixels": 188416,
+     "shadowCasters": 0
+    },
+    "plaza": {
+     "meshes": 4,
+     "triangles": 9232,
+     "byMesh": {
+      "paving": 3232,
+      "props": 5550,
+      "glass": 154,
+      "contact": 296
+     },
+     "materials": 2,
+     "transparentMeshes": 1,
+     "textures": 1,
+     "texturePixels": 65536,
+     "shadowCasters": 0
+    },
+    "knight": {
+     "meshes": 3,
+     "triangles": 4626,
+     "byMesh": {
+      "stone": 2599,
+      "roof": 246,
+      "props": 1781
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slate_lite.png"
+     ]
+    },
+    "mage": {
+     "meshes": 4,
+     "triangles": 4630,
+     "byMesh": {
+      "stone": 2229,
+      "roof": 396,
+      "props": 1677,
+      "glow": 328
+     },
+     "materials": 4,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slate_lite.png"
+     ]
+    },
+    "sword": {
+     "meshes": 3,
+     "triangles": 3050,
+     "byMesh": {
+      "stone": 1660,
+      "roof": 88,
+      "props": 1302
+     },
+     "materials": 3,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slate_lite.png"
+     ]
+    },
+    "platform": {
+     "meshes": 3,
+     "triangles": 3176,
+     "byMesh": {
+      "stone": 2344,
+      "paving": 544,
+      "glow": 288
+     },
+     "materials": 3,
+     "shadowCasters": 0,
+     "textureUrls": [
+      "./models/tex/ashlar_lite.png",
+      "./models/tex/slab_lite.png"
+     ]
+    },
+    "merchant": {
+     "meshes": 3,
+     "triangles": 2839,
+     "byMesh": {
+      "props": 2232,
+      "glow": 153,
+      "pal": 454
+     },
+     "shadowCasters": 0
+    }
+   },
+   "textureMemory": {
+    "count": 8,
+    "pixels": 516096,
+    "mb": 2.62,
+    "list": [
+     {
+      "name": "slab_lite.png",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "name": "pool_lite.png",
+      "w": 256,
+      "h": 256
+     },
+     {
+      "name": "caustic_star_lite.png",
+      "w": 128,
+      "h": 128
+     },
+     {
+      "name": "fx_fall_lite.png",
+      "w": 128,
+      "h": 128
+     },
+     {
+      "name": "fx_foam_lite.png",
+      "w": 128,
+      "h": 128
+     },
+     {
+      "name": "fx_magic_lite.png",
+      "w": 128,
+      "h": 64
+     },
+     {
+      "name": "ashlar_lite.png",
+      "w": 512,
+      "h": 512
+     },
+     {
+      "name": "slate_lite.png",
+      "w": 256,
+      "h": 256
+     }
+    ]
+   },
+   "partDrawCalls": {
+    "fountain": 7,
+    "plaza": 4,
+    "knight": 3,
+    "mage": 4,
+    "sword": 3,
+    "platform": 3,
+    "merchant": 3
+   },
+   "drawCalls": {
+    "none": {
+     "drawCalls": 31,
+     "activeMeshes": 38
+    },
+    "all": {
+     "drawCalls": 58,
+     "activeMeshes": 65
+    },
+    "no_fountain": {
+     "drawCalls": 51,
+     "activeMeshes": 58
+    },
+    "no_plaza": {
+     "drawCalls": 54,
+     "activeMeshes": 61
+    },
+    "no_knight": {
+     "drawCalls": 55,
+     "activeMeshes": 62
+    },
+    "no_mage": {
+     "drawCalls": 54,
+     "activeMeshes": 61
+    },
+    "no_sword": {
+     "drawCalls": 55,
+     "activeMeshes": 62
+    },
+    "no_platform": {
+     "drawCalls": 55,
+     "activeMeshes": 62
+    },
+    "no_merchant": {
+     "drawCalls": 55,
+     "activeMeshes": 62
+    }
+   }
+  }
+ ],
+ "finishedAt": "2026-11-24T00:42:22.345Z"
+}

@@ -1,0 +1,182 @@
+{
+ "lods": {
+  "lite": {
+   "triangles": 10460,
+   "within_budget": true,
+   "by_mesh": {
+    "stone": 6856,
+    "gold": 2624,
+    "crystal": 92,
+    "water": 144,
+    "falls": 512,
+    "foam": 192,
+    "fx": 40
+   },
+   "meshes": 7,
+   "ao_baked": 1,
+   "bounds": {
+    "radius": 7.0,
+    "top": 6.4
+   },
+   "bytes": 624240
+  },
+  "hq": {
+   "triangles": 25644,
+   "within_budget": true,
+   "by_mesh": {
+    "stone": 16000,
+    "gold": 7064,
+    "crystal": 108,
+    "water": 704,
+    "falls": 1344,
+    "foam": 384,
+    "fx": 40
+   },
+   "meshes": 7,
+   "ao_baked": 1,
+   "bounds": {
+    "radius": 7.0,
+    "top": 6.4
+   },
+   "bytes": 1336168
+  }
+ },
+ "budget": {
+  "hq": 28000,
+  "lite": 11000
+ },
+ "falls": [
+  {
+   "tip": [
+    3.38,
+    0.0,
+    2.14
+   ],
+   "land": [
+    4.03,
+    0.0,
+    0.58
+   ]
+  },
+  {
+   "tip": [
+    2.39,
+    2.39,
+    2.14
+   ],
+   "land": [
+    2.85,
+    2.85,
+    0.58
+   ]
+  },
+  {
+   "tip": [
+    0.0,
+    3.38,
+    2.14
+   ],
+   "land": [
+    0.0,
+    4.03,
+    0.58
+   ]
+  },
+  {
+   "tip": [
+    -2.39,
+    2.39,
+    2.14
+   ],
+   "land": [
+    -2.85,
+    2.85,
+    0.58
+   ]
+  },
+  {
+   "tip": [
+    -3.38,
+    0.0,
+    2.14
+   ],
+   "land": [
+    -4.03,
+    0.0,
+    0.58
+   ]
+  },
+  {
+   "tip": [
+    -2.39,
+    -2.39,
+    2.14
+   ],
+   "land": [
+    -2.85,
+    -2.85,
+    0.58
+   ]
+  },
+  {
+   "tip": [
+    -0.0,
+    -3.38,
+    2.14
+   ],
+   "land": [
+    -0.0,
+    -4.03,
+    0.58
+   ]
+  },
+  {
+   "tip": [
+    2.39,
+    -2.39,
+    2.14
+   ],
+   "land": [
+    2.85,
+    -2.85,
+    0.58
+   ]
+  }
+ ],
+ "log": [],
+ "seconds": 2.1,
+ "dims": {
+  "outer_diameter": 14.0,
+  "basin_inner_diameter": 12.0,
+  "rim_top": 0.86,
+  "finial_top": 1.1,
+  "bowl_diameter": 6.0,
+  "bowl_top": 2.34,
+  "crystal": [
+   4.66,
+   6.4
+  ],
+  "crystal_bob": 0.06,
+  "crystal_top_max": 6.46,
+  "magic_ring_z": 4.5,
+  "rings_diameter": [
+   3.5,
+   4.2
+  ],
+  "water1": {
+   "z": 0.62,
+   "r": [
+    0.9,
+    6.03
+   ]
+  },
+  "water2": {
+   "z": 2.24,
+   "r": [
+    0.55,
+    2.79
+   ]
+  },
+  "spouts": 8
+ }
+}

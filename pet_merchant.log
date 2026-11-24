@@ -1,0 +1,76 @@
+Blender 4.2.3 LTS (hash 0e22e4fcea03 built 2024-10-14 23:31:34)
+Fra:1 Mem:13.47M (Peak 13.47M) | Time:498744:20:16.87 | Mem:0.00M, Peak:0.00M | Scene | Synchronizing object | PetMerchant_props
+Fra:1 Mem:13.50M (Peak 13.50M) | Time:498744:20:16.87 | Mem:0.00M, Peak:0.00M | Scene | Synchronizing object | PetPal_props
+Fra:1 Mem:13.73M (Peak 13.73M) | Time:498744:20:16.87 | Mem:0.00M, Peak:0.00M | Scene | Initializing
+00:20:17 | INFO: Starting glTF 2.0 export
+00:20:17 | INFO: Extracting primitive: PetMerchant_props
+00:20:17 | INFO: Primitives created: 1
+00:20:17 | WARNING: Mesh PetMerchant_glow is not valid, and may be exported wrongly
+00:20:17 | INFO: Extracting primitive: PetMerchant_glow
+00:20:17 | INFO: Primitives created: 1
+00:20:17 | INFO: Extracting primitive: PetPal_props
+00:20:17 | INFO: Primitives created: 1
+00:20:17 | INFO: Finished glTF 2.0 export in 0.015821456909179688 s
+Fra:1 Mem:14.39M (Peak 14.39M) | Time:498744:20:17.08 | Mem:0.00M, Peak:0.00M | Scene | Synchronizing object | PetMerchant_props
+Fra:1 Mem:14.39M (Peak 14.39M) | Time:498744:20:17.08 | Mem:0.00M, Peak:0.00M | Scene | Synchronizing object | PetPal_props
+Fra:1 Mem:14.98M (Peak 14.98M) | Time:498744:20:17.08 | Mem:0.00M, Peak:0.00M | Scene | Initializing
+00:20:17 | INFO: Starting glTF 2.0 export
+00:20:17 | INFO: Extracting primitive: PetMerchant_props
+00:20:17 | INFO: Primitives created: 1
+00:20:17 | INFO: Extracting primitive: PetMerchant_gold
+00:20:17 | INFO: Primitives created: 1
+00:20:17 | WARNING: Mesh PetMerchant_glow is not valid, and may be exported wrongly
+00:20:17 | INFO: Extracting primitive: PetMerchant_glow
+00:20:17 | INFO: Primitives created: 1
+00:20:17 | INFO: Extracting primitive: PetPal_props
+00:20:17 | INFO: Primitives created: 1
+00:20:17 | INFO: Finished glTF 2.0 export in 0.024873971939086914 s
+INFO Draco mesh compression is available, use library at /opt/blender/4.2/python/lib/python3.11/site-packages/libextern_draco.so
+
+
+{
+ "lods": {
+  "lite": {
+   "triangles": 2849,
+   "by_mesh": {
+    "props": 2232,
+    "glow": 163,
+    "pal": 454
+   },
+   "meshes": 3,
+   "ao_baked": 1,
+   "bytes": 202824,
+   "within_budget": true,
+   "height": 1.505,
+   "radius": 0.448,
+   "pal_height": 0.415,
+   "pal_radius": 0.192
+  },
+  "hq": {
+   "triangles": 6890,
+   "by_mesh": {
+    "props": 4308,
+    "gold": 802,
+    "glow": 446,
+    "pal": 1334
+   },
+   "meshes": 4,
+   "ao_baked": 1,
+   "bytes": 520084,
+   "within_budget": true,
+   "height": 1.505,
+   "radius": 0.448,
+   "pal_height": 0.414,
+   "pal_radius": 0.192
+  }
+ },
+ "budget": {
+  "hq": 8000,
+  "lite": 3000
+ },
+ "stage": "PetMerchant",
+ "log": [],
+ "seconds": 0.5
+}
+
+Blender quit

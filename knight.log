@@ -1,0 +1,117 @@
+Blender 4.2.3 LTS (hash 0e22e4fcea03 built 2024-10-14 23:31:34)
+Fra:1 Mem:13.68M (Peak 13.68M) | Time:498744:20:12.38 | Mem:0.00M, Peak:0.00M | Scene | Synchronizing object | Knight_stone
+Fra:1 Mem:13.71M (Peak 13.71M) | Time:498744:20:12.38 | Mem:0.00M, Peak:0.00M | Scene | Synchronizing object | Knight_props
+Fra:1 Mem:14.16M (Peak 14.16M) | Time:498744:20:12.39 | Mem:0.00M, Peak:0.00M | Scene | Initializing
+Fra:1 Mem:13.36M (Peak 15.20M) | Time:498744:20:12.50 | Mem:0.00M, Peak:0.00M | Scene | Synchronizing object | Knight_stone
+Fra:1 Mem:13.47M (Peak 15.20M) | Time:498744:20:12.50 | Mem:0.00M, Peak:0.00M | Scene | Synchronizing object | Knight_props
+Fra:1 Mem:13.66M (Peak 15.20M) | Time:498744:20:12.50 | Mem:0.00M, Peak:0.00M | Scene | Initializing
+Fra:1 Mem:13.76M (Peak 15.20M) | Time:498744:20:12.52 | Mem:0.00M, Peak:0.00M | Scene | Synchronizing object | Knight_stone
+Fra:1 Mem:13.86M (Peak 15.20M) | Time:498744:20:12.52 | Mem:0.00M, Peak:0.00M | Scene | Synchronizing object | Knight_props
+Fra:1 Mem:14.06M (Peak 15.20M) | Time:498744:20:12.52 | Mem:0.00M, Peak:0.00M | Scene | Initializing
+00:20:12 | INFO: Starting glTF 2.0 export
+00:20:12 | INFO: Extracting primitive: Knight_stone
+00:20:12 | INFO: Primitives created: 1
+00:20:12 | INFO: Extracting primitive: Knight_roof
+00:20:12 | INFO: Primitives created: 1
+00:20:12 | INFO: Extracting primitive: Knight_props
+00:20:12 | INFO: Primitives created: 1
+00:20:12 | INFO: Finished glTF 2.0 export in 0.018887996673583984 s
+Fra:1 Mem:15.24M (Peak 15.24M) | Time:498744:20:12.80 | Mem:0.00M, Peak:0.00M | Scene | Synchronizing object | Knight_stone
+Fra:1 Mem:15.24M (Peak 15.24M) | Time:498744:20:12.80 | Mem:0.00M, Peak:0.00M | Scene | Synchronizing object | Knight_props
+Fra:1 Mem:16.53M (Peak 16.53M) | Time:498744:20:12.81 | Mem:0.00M, Peak:0.00M | Scene | Initializing
+Fra:1 Mem:14.53M (Peak 17.53M) | Time:498744:20:13.05 | Mem:0.00M, Peak:0.00M | Scene | Synchronizing object | Knight_stone
+Fra:1 Mem:14.71M (Peak 17.53M) | Time:498744:20:13.05 | Mem:0.00M, Peak:0.00M | Scene | Synchronizing object | Knight_props
+Fra:1 Mem:15.33M (Peak 17.53M) | Time:498744:20:13.05 | Mem:0.00M, Peak:0.00M | Scene | Initializing
+Fra:1 Mem:14.92M (Peak 17.53M) | Time:498744:20:13.08 | Mem:0.00M, Peak:0.00M | Scene | Synchronizing object | Knight_stone
+Fra:1 Mem:14.92M (Peak 17.53M) | Time:498744:20:13.08 | Mem:0.00M, Peak:0.00M | Scene | Synchronizing object | Knight_gold
+Fra:1 Mem:15.72M (Peak 17.53M) | Time:498744:20:13.08 | Mem:0.00M, Peak:0.00M | Scene | Initializing
+00:20:13 | INFO: Starting glTF 2.0 export
+00:20:13 | INFO: Extracting primitive: Knight_stone
+00:20:13 | INFO: Primitives created: 1
+00:20:13 | INFO: Extracting primitive: Knight_roof
+00:20:13 | INFO: Primitives created: 1
+00:20:13 | INFO: Extracting primitive: Knight_gold
+00:20:13 | INFO: Primitives created: 1
+00:20:13 | INFO: Extracting primitive: Knight_props
+00:20:13 | INFO: Primitives created: 1
+00:20:13 | INFO: Finished glTF 2.0 export in 0.030290603637695312 s
+INFO Draco mesh compression is available, use library at /opt/blender/4.2/python/lib/python3.11/site-packages/libextern_draco.so
+
+
+{
+ "lods": {
+  "lite": {
+   "triangles": 4626,
+   "by_mesh": {
+    "stone": 2599,
+    "roof": 246,
+    "props": 1781
+   },
+   "meshes": 3,
+   "ao_baked": 3,
+   "bytes": 317616,
+   "within_budget": true,
+   "bounds_local": {
+    "x": [
+     -7.999,
+     7.999
+    ],
+    "y": [
+     -0.0,
+     13.995
+    ],
+    "h": [
+     0.0,
+     19.0
+    ]
+   }
+  },
+  "hq": {
+   "triangles": 12532,
+   "by_mesh": {
+    "stone": 6343,
+    "roof": 664,
+    "gold": 3513,
+    "props": 2012
+   },
+   "meshes": 4,
+   "ao_baked": 3,
+   "bytes": 856016,
+   "within_budget": true,
+   "bounds_local": {
+    "x": [
+     -7.989,
+     7.989
+    ],
+    "y": [
+     -0.0,
+     13.995
+    ],
+    "h": [
+     0.0,
+     19.0
+    ]
+   }
+  }
+ },
+ "budget": {
+  "hq": 40000,
+  "lite": 16000
+ },
+ "layout": {
+  "bearing": 332.0,
+  "front": 27.0,
+  "w": 16.0,
+  "d": 14.0,
+  "top": 19.0,
+  "floor": 2.0,
+  "door": [
+   -14.07,
+   26.462
+  ]
+ },
+ "log": [],
+ "seconds": 1.0
+}
+
+Blender quit
