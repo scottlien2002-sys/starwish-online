@@ -135,7 +135,7 @@ export class VillageInteract {
       const n = t.npc;
       const cls = CLASS_NPC[n.id];
       const body = cls
-        ? `想成為${cls}嗎？${cls}轉職由職業系統提供，正在與 Claude A 的角色系統整合中。`
+        ? `想成為${cls}嗎？${cls}轉職功能正在整合中（預覽版），敬請期待。`
         : n.id === "smith"
           ? "鐵匠轉職、裝備詞條鑑定都找我（同一位鐵匠）。功能正在整合中。"
           : n.id === "board"

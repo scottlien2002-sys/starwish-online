@@ -123,15 +123,18 @@ for (const name of browsers) {
       const m1 = await V(() => window.__starwishVillage.interact());
       check("洛恩：對話時停止巡走（暫停中）並開啟商人選單", m1?.talking && m1.merchantPaused && m1.panelOpen, m1);
       await shot(page, "merchant_talk");
-      await page.click('[data-act="choose:appraise"]', { timeout: 10000 }).catch((e) => run.errors.push(`appraise button: ${e.message}`));
+      // 介面按鈕用 DOM 點擊（HQ 軟體繪圖約 1 FPS，Playwright 的「元素穩定」判定會逾時；點擊處理程式相同）
+      const tap = (sel) => page.evaluate((q) => { const b = document.querySelector(q); if (!b) return false; b.click(); return true; }, sel);
+      if (!(await tap('[data-act="choose:appraise"]'))) run.errors.push("appraise button missing");
       await page.waitForFunction(() => window.__starwishVillage.appraisal()?.phase === "empty", null, { timeout: 15000 }).catch(() => null);
       await shot(page, "appraise_1_open");
-      await page.click('.pa-win [data-id="s1"]', { timeout: 10000 }).catch((e) => run.errors.push(`tile: ${e.message}`));
+      if (!(await tap('.pa-win [data-id="s1"]'))) run.errors.push("tile missing");
       await page.waitForTimeout(500);
       await shot(page, "appraise_2_placed");
       const a1 = await V(() => window.__starwishVillage.appraisal());
-      await page.click('.pa-win [data-act="start"]', { timeout: 10000 }).catch((e) => run.errors.push(`start: ${e.message}`));
-      await page.click('.pa-win [data-act="start"]', { timeout: 2000, force: true }).catch(() => null);
+      // 連點兩次：第二次在鎖定中必須被忽略
+      if (!(await tap('.pa-win [data-act="start"]'))) run.errors.push("start missing");
+      await tap('.pa-win [data-act="start"]');
       await page.waitForTimeout(3400);
       await shot(page, "appraise_3_result");
       const a2 = await V(() => window.__starwishVillage.appraisal());
@@ -139,7 +142,7 @@ for (const name of browsers) {
       const hs = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
       const sb = await page.evaluate(() => document.querySelector('.pa-win [data-act="start"]')?.getBoundingClientRect().bottom ?? 9999);
       if (mode.includes("portrait")) check("iPhone 直向：鑑定視窗沒有橫向捲動、按鈕在畫面內", hs <= 0 && sb <= vp.height, { hScroll: hs, startBottom: sb });
-      await page.click('.pa-win [data-act="close"]', { timeout: 10000 }).catch(() => null);
+      await tap('.pa-win [data-act="close"]');
       await page.waitForTimeout(400);
       const m2 = await V(() => window.__starwishVillage.interact());
       await page.waitForTimeout(1500);
