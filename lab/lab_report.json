@@ -1,5 +1,5 @@
 {
- "startedAt": "2026-11-24T05:50:39.177Z",
+ "startedAt": "2026-11-24T07:42:28.595Z",
  "checks": {
   "benches 位置＝既有碰撞（誤差 < 1 cm）": {
    "ok": true,
@@ -628,7 +628,7 @@
      "Talk",
      "Turn"
     ],
-    "triangles": 59568,
+    "triangles": 59566,
     "budget": 60000
    }
   },
@@ -642,8 +642,48 @@
      "Talk",
      "Turn"
     ],
-    "triangles": 14596,
+    "triangles": 14594,
     "budget": 15000
+   }
+  },
+  "洛恩 V2.1 hq：同材質網格已合併（網格數 ≤ 12，目標約 11 次繪製）": {
+   "ok": true,
+   "detail": {
+    "meshes": 11,
+    "parts": 34,
+    "names": [
+     "PetPal_pal",
+     "PetPal_pal_eyes",
+     "pm_cloth",
+     "pm_dark",
+     "pm_egg",
+     "pm_face",
+     "pm_glow",
+     "pm_hair",
+     "pm_leather",
+     "pm_metal",
+     "pm_skin"
+    ]
+   }
+  },
+  "洛恩 V2.1 lite：同材質網格已合併（網格數 ≤ 12，目標約 11 次繪製）": {
+   "ok": true,
+   "detail": {
+    "meshes": 11,
+    "parts": 34,
+    "names": [
+     "PetPal_pal",
+     "PetPal_pal_eyes",
+     "pm_cloth",
+     "pm_dark",
+     "pm_egg",
+     "pm_face",
+     "pm_glow",
+     "pm_hair",
+     "pm_leather",
+     "pm_metal",
+     "pm_skin"
+    ]
    }
   },
   "噴泉 lite 外徑 r ≤ 7.0（＝碰撞半徑 7）、最高（含星晶浮動）≤ 6.5、面數在額度內": {
@@ -727,6 +767,11 @@
       "id": "b1",
       "kind": "birdEgg",
       "appraised": false
+     },
+     {
+      "id": "b2",
+      "kind": "birdEgg",
+      "appraised": false
      }
     ],
     "lines": [],
@@ -772,6 +817,11 @@
        "id": "b1",
        "kind": "birdEgg",
        "appraised": false
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
       }
      ],
      "lines": [],
@@ -813,6 +863,11 @@
        "id": "b1",
        "kind": "birdEgg",
        "appraised": false
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
       }
      ],
      "lines": [
@@ -827,7 +882,7 @@
        "polarity": "negative"
       }
      ],
-     "fee": "—",
+     "fee": "已支付 100 金幣（測試）",
      "startDisabled": true,
      "startBottom": 526,
      "viewportH": 844,
@@ -869,6 +924,11 @@
       "id": "b1",
       "kind": "birdEgg",
       "appraised": false
+     },
+     {
+      "id": "b2",
+      "kind": "birdEgg",
+      "appraised": false
      }
     ],
     "lines": [
@@ -896,7 +956,7 @@
      "polarity": "negative"
     },
     {
-     "label": "攻速",
+     "label": "攻擊速度",
      "text": "+6",
      "polarity": "positive"
     },
@@ -911,6 +971,114 @@
      "polarity": "positive"
     }
    ]
+  },
+  "星靈鑑定 chromium hq-portrait：鑑定特效期間顯示「鑑定中」（約 1 秒特效後才出結果）": {
+   "ok": true,
+   "detail": {
+    "step": "startTwice",
+    "open": true,
+    "phase": "appraising",
+    "selected": "s1",
+    "items": [
+     {
+      "id": "s1",
+      "kind": "seed",
+      "appraised": false
+     },
+     {
+      "id": "s2",
+      "kind": "seed",
+      "appraised": false
+     },
+     {
+      "id": "e1",
+      "kind": "egg",
+      "appraised": false
+     },
+     {
+      "id": "e0",
+      "kind": "egg",
+      "appraised": true
+     },
+     {
+      "id": "b1",
+      "kind": "birdEgg",
+      "appraised": false
+     },
+     {
+      "id": "b2",
+      "kind": "birdEgg",
+      "appraised": false
+     }
+    ],
+    "lines": [],
+    "fee": "100 金幣（測試）",
+    "startDisabled": true,
+    "startBottom": 503,
+    "viewportH": 844,
+    "hScroll": 0,
+    "test": true,
+    "shownLines": 0
+   }
+  },
+  "星靈鑑定 chromium hq-portrait：沒有屬性時顯示「無附加屬性」": {
+   "ok": true,
+   "detail": [
+    {
+     "label": "無附加屬性",
+     "text": "—",
+     "polarity": "none"
+    }
+   ]
+  },
+  "星靈鑑定 chromium hq-portrait：關閉後重新開啟，物品數量不變、已鑑定狀態保留": {
+   "ok": true,
+   "detail": {
+    "step": "reopen",
+    "open": true,
+    "phase": "empty",
+    "selected": null,
+    "items": [
+     {
+      "id": "s1",
+      "kind": "seed",
+      "appraised": true
+     },
+     {
+      "id": "s2",
+      "kind": "seed",
+      "appraised": true
+     },
+     {
+      "id": "e1",
+      "kind": "egg",
+      "appraised": false
+     },
+     {
+      "id": "e0",
+      "kind": "egg",
+      "appraised": true
+     },
+     {
+      "id": "b1",
+      "kind": "birdEgg",
+      "appraised": true
+     },
+     {
+      "id": "b2",
+      "kind": "birdEgg",
+      "appraised": false
+     }
+    ],
+    "lines": [],
+    "fee": "—",
+    "startDisabled": true,
+    "startBottom": 525,
+    "viewportH": 844,
+    "hScroll": 0,
+    "test": true,
+    "shownLines": 0
+   }
   },
   "星靈鑑定 chromium hq-portrait：iPhone 直向沒有橫向捲動、開始鑑定按鈕在畫面內": {
    "ok": true,
@@ -950,6 +1118,11 @@
      },
      {
       "id": "b1",
+      "kind": "birdEgg",
+      "appraised": false
+     },
+     {
+      "id": "b2",
       "kind": "birdEgg",
       "appraised": false
      }
@@ -997,6 +1170,11 @@
        "id": "b1",
        "kind": "birdEgg",
        "appraised": false
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
       }
      ],
      "lines": [],
@@ -1038,6 +1216,11 @@
        "id": "b1",
        "kind": "birdEgg",
        "appraised": false
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
       }
      ],
      "lines": [
@@ -1052,7 +1235,7 @@
        "polarity": "negative"
       }
      ],
-     "fee": "—",
+     "fee": "已支付 100 金幣（測試）",
      "startDisabled": true,
      "startBottom": 526,
      "viewportH": 844,
@@ -1094,6 +1277,11 @@
       "id": "b1",
       "kind": "birdEgg",
       "appraised": false
+     },
+     {
+      "id": "b2",
+      "kind": "birdEgg",
+      "appraised": false
      }
     ],
     "lines": [
@@ -1121,7 +1309,7 @@
      "polarity": "negative"
     },
     {
-     "label": "攻速",
+     "label": "攻擊速度",
      "text": "+6",
      "polarity": "positive"
     },
@@ -1136,6 +1324,114 @@
      "polarity": "positive"
     }
    ]
+  },
+  "星靈鑑定 chromium lite-portrait：鑑定特效期間顯示「鑑定中」（約 1 秒特效後才出結果）": {
+   "ok": true,
+   "detail": {
+    "step": "startTwice",
+    "open": true,
+    "phase": "appraising",
+    "selected": "s1",
+    "items": [
+     {
+      "id": "s1",
+      "kind": "seed",
+      "appraised": false
+     },
+     {
+      "id": "s2",
+      "kind": "seed",
+      "appraised": false
+     },
+     {
+      "id": "e1",
+      "kind": "egg",
+      "appraised": false
+     },
+     {
+      "id": "e0",
+      "kind": "egg",
+      "appraised": true
+     },
+     {
+      "id": "b1",
+      "kind": "birdEgg",
+      "appraised": false
+     },
+     {
+      "id": "b2",
+      "kind": "birdEgg",
+      "appraised": false
+     }
+    ],
+    "lines": [],
+    "fee": "100 金幣（測試）",
+    "startDisabled": true,
+    "startBottom": 503,
+    "viewportH": 844,
+    "hScroll": 0,
+    "test": true,
+    "shownLines": 0
+   }
+  },
+  "星靈鑑定 chromium lite-portrait：沒有屬性時顯示「無附加屬性」": {
+   "ok": true,
+   "detail": [
+    {
+     "label": "無附加屬性",
+     "text": "—",
+     "polarity": "none"
+    }
+   ]
+  },
+  "星靈鑑定 chromium lite-portrait：關閉後重新開啟，物品數量不變、已鑑定狀態保留": {
+   "ok": true,
+   "detail": {
+    "step": "reopen",
+    "open": true,
+    "phase": "empty",
+    "selected": null,
+    "items": [
+     {
+      "id": "s1",
+      "kind": "seed",
+      "appraised": true
+     },
+     {
+      "id": "s2",
+      "kind": "seed",
+      "appraised": true
+     },
+     {
+      "id": "e1",
+      "kind": "egg",
+      "appraised": false
+     },
+     {
+      "id": "e0",
+      "kind": "egg",
+      "appraised": true
+     },
+     {
+      "id": "b1",
+      "kind": "birdEgg",
+      "appraised": true
+     },
+     {
+      "id": "b2",
+      "kind": "birdEgg",
+      "appraised": false
+     }
+    ],
+    "lines": [],
+    "fee": "—",
+    "startDisabled": true,
+    "startBottom": 525,
+    "viewportH": 844,
+    "hScroll": 0,
+    "test": true,
+    "shownLines": 0
+   }
   },
   "星靈鑑定 chromium lite-portrait：iPhone 直向沒有橫向捲動、開始鑑定按鈕在畫面內": {
    "ok": true,
@@ -1175,6 +1471,11 @@
      },
      {
       "id": "b1",
+      "kind": "birdEgg",
+      "appraised": false
+     },
+     {
+      "id": "b2",
       "kind": "birdEgg",
       "appraised": false
      }
@@ -1222,6 +1523,11 @@
        "id": "b1",
        "kind": "birdEgg",
        "appraised": false
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
       }
      ],
      "lines": [],
@@ -1263,6 +1569,11 @@
        "id": "b1",
        "kind": "birdEgg",
        "appraised": false
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
       }
      ],
      "lines": [
@@ -1277,7 +1588,7 @@
        "polarity": "negative"
       }
      ],
-     "fee": "—",
+     "fee": "已支付 100 金幣（測試）",
      "startDisabled": true,
      "startBottom": 526,
      "viewportH": 720,
@@ -1319,6 +1630,11 @@
       "id": "b1",
       "kind": "birdEgg",
       "appraised": false
+     },
+     {
+      "id": "b2",
+      "kind": "birdEgg",
+      "appraised": false
      }
     ],
     "lines": [
@@ -1346,7 +1662,7 @@
      "polarity": "negative"
     },
     {
-     "label": "攻速",
+     "label": "攻擊速度",
      "text": "+6",
      "polarity": "positive"
     },
@@ -1361,6 +1677,114 @@
      "polarity": "positive"
     }
    ]
+  },
+  "星靈鑑定 webkit hq：鑑定特效期間顯示「鑑定中」（約 1 秒特效後才出結果）": {
+   "ok": true,
+   "detail": {
+    "step": "startTwice",
+    "open": true,
+    "phase": "appraising",
+    "selected": "s1",
+    "items": [
+     {
+      "id": "s1",
+      "kind": "seed",
+      "appraised": false
+     },
+     {
+      "id": "s2",
+      "kind": "seed",
+      "appraised": false
+     },
+     {
+      "id": "e1",
+      "kind": "egg",
+      "appraised": false
+     },
+     {
+      "id": "e0",
+      "kind": "egg",
+      "appraised": true
+     },
+     {
+      "id": "b1",
+      "kind": "birdEgg",
+      "appraised": false
+     },
+     {
+      "id": "b2",
+      "kind": "birdEgg",
+      "appraised": false
+     }
+    ],
+    "lines": [],
+    "fee": "100 金幣（測試）",
+    "startDisabled": true,
+    "startBottom": 503,
+    "viewportH": 720,
+    "hScroll": 0,
+    "test": true,
+    "shownLines": 0
+   }
+  },
+  "星靈鑑定 webkit hq：沒有屬性時顯示「無附加屬性」": {
+   "ok": true,
+   "detail": [
+    {
+     "label": "無附加屬性",
+     "text": "—",
+     "polarity": "none"
+    }
+   ]
+  },
+  "星靈鑑定 webkit hq：關閉後重新開啟，物品數量不變、已鑑定狀態保留": {
+   "ok": true,
+   "detail": {
+    "step": "reopen",
+    "open": true,
+    "phase": "empty",
+    "selected": null,
+    "items": [
+     {
+      "id": "s1",
+      "kind": "seed",
+      "appraised": true
+     },
+     {
+      "id": "s2",
+      "kind": "seed",
+      "appraised": true
+     },
+     {
+      "id": "e1",
+      "kind": "egg",
+      "appraised": false
+     },
+     {
+      "id": "e0",
+      "kind": "egg",
+      "appraised": true
+     },
+     {
+      "id": "b1",
+      "kind": "birdEgg",
+      "appraised": true
+     },
+     {
+      "id": "b2",
+      "kind": "birdEgg",
+      "appraised": false
+     }
+    ],
+    "lines": [],
+    "fee": "—",
+    "startDisabled": true,
+    "startBottom": 503,
+    "viewportH": 720,
+    "hScroll": 0,
+    "test": true,
+    "shownLines": 0
+   }
   },
   "星靈鑑定：桌面版可把背包物品拖進鑑定框": {
    "ok": true,
@@ -1391,6 +1815,11 @@
      },
      {
       "id": "b1",
+      "kind": "birdEgg",
+      "appraised": false
+     },
+     {
+      "id": "b2",
       "kind": "birdEgg",
       "appraised": false
      }
@@ -1435,7 +1864,7 @@
     "chromium_hq_village_top.png",
     "chromium_hq_appraise_drag.png"
    ],
-   "loadMs": 24244,
+   "loadMs": 40199,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -1546,16 +1975,16 @@
      ]
     },
     "merchant": {
-     "meshes": 34,
+     "meshes": 11,
      "triangles": 59566,
-     "bones": 50,
+     "bones": 27,
      "animations": [
       "Idle",
       "Talk",
       "Turn",
       "Walk"
      ],
-     "shadowCasters": 7
+     "shadowCasters": 6
     }
    },
    "textureMemory": {
@@ -1637,7 +2066,7 @@
     "mage": 7,
     "sword": 6,
     "platform": 4,
-    "merchant": 41
+    "merchant": 17
    },
    "drawCalls": {
     "none": {
@@ -1645,32 +2074,32 @@
      "activeMeshes": 37
     },
     "all": {
-     "drawCalls": 156,
-     "activeMeshes": 101
+     "drawCalls": 132,
+     "activeMeshes": 78
     },
     "no_fountain": {
-     "drawCalls": 147,
-     "activeMeshes": 94
+     "drawCalls": 123,
+     "activeMeshes": 71
     },
     "no_plaza": {
-     "drawCalls": 148,
-     "activeMeshes": 96
+     "drawCalls": 124,
+     "activeMeshes": 73
     },
     "no_knight": {
-     "drawCalls": 148,
-     "activeMeshes": 97
+     "drawCalls": 124,
+     "activeMeshes": 74
     },
     "no_mage": {
-     "drawCalls": 149,
-     "activeMeshes": 96
+     "drawCalls": 125,
+     "activeMeshes": 73
     },
     "no_sword": {
-     "drawCalls": 150,
-     "activeMeshes": 97
+     "drawCalls": 126,
+     "activeMeshes": 74
     },
     "no_platform": {
-     "drawCalls": 152,
-     "activeMeshes": 97
+     "drawCalls": 128,
+     "activeMeshes": 74
     },
     "no_merchant": {
      "drawCalls": 115,
@@ -1724,6 +2153,11 @@
       "id": "b1",
       "kind": "birdEgg",
       "appraised": false
+     },
+     {
+      "id": "b2",
+      "kind": "birdEgg",
+      "appraised": false
      }
     ],
     "lines": [],
@@ -1737,23 +2171,23 @@
    },
    "flicker": {
     "pm_spawn": {
-     "maxRatio": 0.003329613095238095,
-     "meanRatio": 0.0031206597222222217
+     "maxRatio": 0.0032800099206349207,
+     "meanRatio": 0.0031249999999999997
     },
     "pm_plaza": {
-     "maxRatio": 0.006876240079365079,
-     "meanRatio": 0.006490575396825396
+     "maxRatio": 0.006857638888888889,
+     "meanRatio": 0.006406870039682539
     },
     "pm_front": {
-     "maxRatio": 0.01236359126984127,
-     "meanRatio": 0.011767733134920636
+     "maxRatio": 0.012673611111111111,
+     "meanRatio": 0.011292782738095235
     },
     "pm_talk": {
-     "maxRatio": 0.005425347222222222,
-     "meanRatio": 0.00451202876984127
+     "maxRatio": 0.005524553571428572,
+     "meanRatio": 0.0043905009920634916
     }
    },
-   "frameMsSoftware": 1.5
+   "frameMsSoftware": 1.7000000001862645
   },
   {
    "browser": "chromium",
@@ -1767,7 +2201,7 @@
     "chromium_lite-low_pm_q45.png",
     "chromium_lite-low_pm_talk.png"
    ],
-   "loadMs": 3752,
+   "loadMs": 6170,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -1865,9 +2299,9 @@
      ]
     },
     "merchant": {
-     "meshes": 34,
-     "triangles": 14592,
-     "bones": 50,
+     "meshes": 11,
+     "triangles": 14591,
+     "bones": 27,
      "animations": [
       "Idle",
       "Talk",
@@ -1931,7 +2365,7 @@
     "mage": 4,
     "sword": 3,
     "platform": 3,
-    "merchant": 34
+    "merchant": 11
    },
    "drawCalls": {
     "none": {
@@ -1939,32 +2373,32 @@
      "activeMeshes": 37
     },
     "all": {
-     "drawCalls": 89,
-     "activeMeshes": 96
+     "drawCalls": 66,
+     "activeMeshes": 73
     },
     "no_fountain": {
-     "drawCalls": 82,
-     "activeMeshes": 89
+     "drawCalls": 59,
+     "activeMeshes": 66
     },
     "no_plaza": {
-     "drawCalls": 85,
-     "activeMeshes": 92
+     "drawCalls": 62,
+     "activeMeshes": 69
     },
     "no_knight": {
-     "drawCalls": 86,
-     "activeMeshes": 93
+     "drawCalls": 63,
+     "activeMeshes": 70
     },
     "no_mage": {
-     "drawCalls": 85,
-     "activeMeshes": 92
+     "drawCalls": 62,
+     "activeMeshes": 69
     },
     "no_sword": {
-     "drawCalls": 86,
-     "activeMeshes": 93
+     "drawCalls": 63,
+     "activeMeshes": 70
     },
     "no_platform": {
-     "drawCalls": 86,
-     "activeMeshes": 93
+     "drawCalls": 63,
+     "activeMeshes": 70
     },
     "no_merchant": {
      "drawCalls": 55,
@@ -1981,23 +2415,23 @@
    },
    "flicker": {
     "pm_spawn": {
-     "maxRatio": 0.0022569444444444442,
-     "meanRatio": 0.002090773809523809
+     "maxRatio": 0.0022631448412698415,
+     "meanRatio": 0.002130456349206349
     },
     "pm_plaza": {
-     "maxRatio": 0.0025049603174603177,
-     "meanRatio": 0.0021999007936507934
+     "maxRatio": 0.0025731646825396825,
+     "meanRatio": 0.0023493303571428576
     },
     "pm_front": {
-     "maxRatio": 0.006312003968253968,
-     "meanRatio": 0.005318080357142857
+     "maxRatio": 0.008277529761904762,
+     "meanRatio": 0.007122395833333334
     },
     "pm_talk": {
-     "maxRatio": 0.003763640873015873,
-     "meanRatio": 0.002917906746031746
+     "maxRatio": 0.004247271825396825,
+     "meanRatio": 0.0030071924603174605
     }
    },
-   "frameMsSoftware": 1.4500000001862645
+   "frameMsSoftware": 1.3666666665424902
   },
   {
    "browser": "chromium",
@@ -2013,12 +2447,13 @@
     "chromium_hq-portrait_appraise_4_result.png",
     "chromium_hq-portrait_appraise_5_already.png",
     "chromium_hq-portrait_appraise_6_bird.png",
+    "chromium_hq-portrait_appraise_7_none.png",
     "chromium_hq-portrait_panel_root.png",
     "chromium_hq-portrait_panel_feed.png",
     "chromium_hq-portrait_panel_guide.png",
     "chromium_hq-portrait_panel_closed.png"
    ],
-   "loadMs": 10913,
+   "loadMs": 13557,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -2129,16 +2564,16 @@
      ]
     },
     "merchant": {
-     "meshes": 34,
+     "meshes": 11,
      "triangles": 59566,
-     "bones": 50,
+     "bones": 27,
      "animations": [
       "Idle",
       "Talk",
       "Turn",
       "Walk"
      ],
-     "shadowCasters": 7
+     "shadowCasters": 6
     }
    },
    "textureMemory": {
@@ -2220,7 +2655,7 @@
     "mage": 7,
     "sword": 2,
     "platform": 4,
-    "merchant": 41
+    "merchant": 17
    },
    "drawCalls": {
     "none": {
@@ -2228,32 +2663,32 @@
      "activeMeshes": 18
     },
     "all": {
-     "drawCalls": 129,
-     "activeMeshes": 74
+     "drawCalls": 105,
+     "activeMeshes": 51
     },
     "no_fountain": {
-     "drawCalls": 120,
-     "activeMeshes": 67
+     "drawCalls": 96,
+     "activeMeshes": 44
     },
     "no_plaza": {
-     "drawCalls": 121,
-     "activeMeshes": 69
+     "drawCalls": 97,
+     "activeMeshes": 46
     },
     "no_knight": {
-     "drawCalls": 125,
-     "activeMeshes": 74
+     "drawCalls": 101,
+     "activeMeshes": 50
     },
     "no_mage": {
-     "drawCalls": 122,
-     "activeMeshes": 69
+     "drawCalls": 98,
+     "activeMeshes": 45
     },
     "no_sword": {
-     "drawCalls": 127,
-     "activeMeshes": 74
+     "drawCalls": 103,
+     "activeMeshes": 50
     },
     "no_platform": {
-     "drawCalls": 125,
-     "activeMeshes": 70
+     "drawCalls": 101,
+     "activeMeshes": 46
     },
     "no_merchant": {
      "drawCalls": 88,
@@ -2299,6 +2734,11 @@
        "id": "b1",
        "kind": "birdEgg",
        "appraised": false
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
       }
      ],
      "lines": [],
@@ -2338,6 +2778,11 @@
       },
       {
        "id": "b1",
+       "kind": "birdEgg",
+       "appraised": false
+      },
+      {
+       "id": "b2",
        "kind": "birdEgg",
        "appraised": false
       }
@@ -2381,6 +2826,11 @@
        "id": "b1",
        "kind": "birdEgg",
        "appraised": false
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
       }
      ],
      "lines": [],
@@ -2422,6 +2872,11 @@
        "id": "b1",
        "kind": "birdEgg",
        "appraised": false
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
       }
      ],
      "lines": [
@@ -2436,7 +2891,7 @@
        "polarity": "negative"
       }
      ],
-     "fee": "—",
+     "fee": "已支付 100 金幣（測試）",
      "startDisabled": true,
      "startBottom": 526,
      "viewportH": 844,
@@ -2472,6 +2927,11 @@
       },
       {
        "id": "b1",
+       "kind": "birdEgg",
+       "appraised": false
+      },
+      {
+       "id": "b2",
        "kind": "birdEgg",
        "appraised": false
       }
@@ -2521,6 +2981,11 @@
        "id": "b1",
        "kind": "birdEgg",
        "appraised": false
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
       }
      ],
      "lines": [],
@@ -2562,6 +3027,11 @@
        "id": "b1",
        "kind": "birdEgg",
        "appraised": true
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
       }
      ],
      "lines": [
@@ -2571,7 +3041,7 @@
        "polarity": "negative"
       },
       {
-       "label": "攻速",
+       "label": "攻擊速度",
        "text": "+6",
        "polarity": "positive"
       },
@@ -2586,7 +3056,7 @@
        "polarity": "positive"
       }
      ],
-     "fee": "—",
+     "fee": "已支付 100 金幣（測試）",
      "startDisabled": true,
      "startBottom": 526,
      "viewportH": 844,
@@ -2595,10 +3065,10 @@
      "shownLines": 4
     },
     {
-     "step": "close",
-     "open": false,
-     "phase": "result",
-     "selected": "b1",
+     "step": "place:s2",
+     "open": true,
+     "phase": "ready",
+     "selected": "s2",
      "items": [
       {
        "id": "s1",
@@ -2624,37 +3094,217 @@
        "id": "b1",
        "kind": "birdEgg",
        "appraised": true
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
+      }
+     ],
+     "lines": [],
+     "fee": "100 金幣（測試）",
+     "startDisabled": false,
+     "startBottom": 526,
+     "viewportH": 844,
+     "hScroll": 0,
+     "test": true,
+     "shownLines": 0
+    },
+    {
+     "step": "result_s2",
+     "open": true,
+     "phase": "result",
+     "selected": "s2",
+     "items": [
+      {
+       "id": "s1",
+       "kind": "seed",
+       "appraised": true
+      },
+      {
+       "id": "s2",
+       "kind": "seed",
+       "appraised": true
+      },
+      {
+       "id": "e1",
+       "kind": "egg",
+       "appraised": false
+      },
+      {
+       "id": "e0",
+       "kind": "egg",
+       "appraised": true
+      },
+      {
+       "id": "b1",
+       "kind": "birdEgg",
+       "appraised": true
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
       }
      ],
      "lines": [
       {
-       "label": "攻擊力",
-       "text": "-10%",
-       "polarity": "negative"
-      },
-      {
-       "label": "攻速",
-       "text": "+6",
-       "polarity": "positive"
-      },
-      {
-       "label": "防禦力",
-       "text": "-5%",
-       "polarity": "negative"
-      },
-      {
-       "label": "生命值",
-       "text": "+15%",
-       "polarity": "positive"
+       "label": "無附加屬性",
+       "text": "—",
+       "polarity": "none"
       }
      ],
+     "fee": "已支付 100 金幣（測試）",
+     "startDisabled": true,
+     "startBottom": 526,
+     "viewportH": 844,
+     "hScroll": 0,
+     "test": true,
+     "shownLines": 1
+    },
+    {
+     "step": "close",
+     "open": false,
+     "phase": "result",
+     "selected": "s2",
+     "items": [
+      {
+       "id": "s1",
+       "kind": "seed",
+       "appraised": true
+      },
+      {
+       "id": "s2",
+       "kind": "seed",
+       "appraised": true
+      },
+      {
+       "id": "e1",
+       "kind": "egg",
+       "appraised": false
+      },
+      {
+       "id": "e0",
+       "kind": "egg",
+       "appraised": true
+      },
+      {
+       "id": "b1",
+       "kind": "birdEgg",
+       "appraised": true
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
+      }
+     ],
+     "lines": [
+      {
+       "label": "無附加屬性",
+       "text": "—",
+       "polarity": "none"
+      }
+     ],
+     "fee": "已支付 100 金幣（測試）",
+     "startDisabled": true,
+     "startBottom": 0,
+     "viewportH": 844,
+     "hScroll": 0,
+     "test": true,
+     "shownLines": 1
+    },
+    {
+     "step": "reopen",
+     "open": true,
+     "phase": "empty",
+     "selected": null,
+     "items": [
+      {
+       "id": "s1",
+       "kind": "seed",
+       "appraised": true
+      },
+      {
+       "id": "s2",
+       "kind": "seed",
+       "appraised": true
+      },
+      {
+       "id": "e1",
+       "kind": "egg",
+       "appraised": false
+      },
+      {
+       "id": "e0",
+       "kind": "egg",
+       "appraised": true
+      },
+      {
+       "id": "b1",
+       "kind": "birdEgg",
+       "appraised": true
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
+      }
+     ],
+     "lines": [],
+     "fee": "—",
+     "startDisabled": true,
+     "startBottom": 525,
+     "viewportH": 844,
+     "hScroll": 0,
+     "test": true,
+     "shownLines": 0
+    },
+    {
+     "step": "close2",
+     "open": false,
+     "phase": "empty",
+     "selected": null,
+     "items": [
+      {
+       "id": "s1",
+       "kind": "seed",
+       "appraised": true
+      },
+      {
+       "id": "s2",
+       "kind": "seed",
+       "appraised": true
+      },
+      {
+       "id": "e1",
+       "kind": "egg",
+       "appraised": false
+      },
+      {
+       "id": "e0",
+       "kind": "egg",
+       "appraised": true
+      },
+      {
+       "id": "b1",
+       "kind": "birdEgg",
+       "appraised": true
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
+      }
+     ],
+     "lines": [],
      "fee": "—",
      "startDisabled": true,
      "startBottom": 0,
      "viewportH": 844,
      "hScroll": 0,
      "test": true,
-     "shownLines": 4
+     "shownLines": 0
     }
    ],
    "panel": [
@@ -2692,9 +3342,10 @@
     "chromium_lite-portrait_appraise_3_effect.png",
     "chromium_lite-portrait_appraise_4_result.png",
     "chromium_lite-portrait_appraise_5_already.png",
-    "chromium_lite-portrait_appraise_6_bird.png"
+    "chromium_lite-portrait_appraise_6_bird.png",
+    "chromium_lite-portrait_appraise_7_none.png"
    ],
-   "loadMs": 2231,
+   "loadMs": 3457,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -2792,9 +3443,9 @@
      ]
     },
     "merchant": {
-     "meshes": 34,
-     "triangles": 14592,
-     "bones": 50,
+     "meshes": 11,
+     "triangles": 14591,
+     "bones": 27,
      "animations": [
       "Idle",
       "Talk",
@@ -2858,7 +3509,7 @@
     "mage": 4,
     "sword": 0,
     "platform": 3,
-    "merchant": 34
+    "merchant": 11
    },
    "drawCalls": {
     "none": {
@@ -2866,32 +3517,32 @@
      "activeMeshes": 18
     },
     "all": {
-     "drawCalls": 64,
-     "activeMeshes": 71
+     "drawCalls": 41,
+     "activeMeshes": 48
     },
     "no_fountain": {
-     "drawCalls": 57,
-     "activeMeshes": 64
+     "drawCalls": 34,
+     "activeMeshes": 41
     },
     "no_plaza": {
-     "drawCalls": 60,
-     "activeMeshes": 67
+     "drawCalls": 37,
+     "activeMeshes": 44
     },
     "no_knight": {
-     "drawCalls": 64,
-     "activeMeshes": 71
+     "drawCalls": 41,
+     "activeMeshes": 48
     },
     "no_mage": {
-     "drawCalls": 60,
-     "activeMeshes": 67
+     "drawCalls": 37,
+     "activeMeshes": 44
     },
     "no_sword": {
-     "drawCalls": 64,
-     "activeMeshes": 71
+     "drawCalls": 41,
+     "activeMeshes": 48
     },
     "no_platform": {
-     "drawCalls": 61,
-     "activeMeshes": 68
+     "drawCalls": 38,
+     "activeMeshes": 45
     },
     "no_merchant": {
      "drawCalls": 30,
@@ -2937,6 +3588,11 @@
        "id": "b1",
        "kind": "birdEgg",
        "appraised": false
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
       }
      ],
      "lines": [],
@@ -2976,6 +3632,11 @@
       },
       {
        "id": "b1",
+       "kind": "birdEgg",
+       "appraised": false
+      },
+      {
+       "id": "b2",
        "kind": "birdEgg",
        "appraised": false
       }
@@ -3019,6 +3680,11 @@
        "id": "b1",
        "kind": "birdEgg",
        "appraised": false
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
       }
      ],
      "lines": [],
@@ -3060,6 +3726,11 @@
        "id": "b1",
        "kind": "birdEgg",
        "appraised": false
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
       }
      ],
      "lines": [
@@ -3074,7 +3745,7 @@
        "polarity": "negative"
       }
      ],
-     "fee": "—",
+     "fee": "已支付 100 金幣（測試）",
      "startDisabled": true,
      "startBottom": 526,
      "viewportH": 844,
@@ -3110,6 +3781,11 @@
       },
       {
        "id": "b1",
+       "kind": "birdEgg",
+       "appraised": false
+      },
+      {
+       "id": "b2",
        "kind": "birdEgg",
        "appraised": false
       }
@@ -3159,6 +3835,11 @@
        "id": "b1",
        "kind": "birdEgg",
        "appraised": false
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
       }
      ],
      "lines": [],
@@ -3200,6 +3881,11 @@
        "id": "b1",
        "kind": "birdEgg",
        "appraised": true
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
       }
      ],
      "lines": [
@@ -3209,7 +3895,7 @@
        "polarity": "negative"
       },
       {
-       "label": "攻速",
+       "label": "攻擊速度",
        "text": "+6",
        "polarity": "positive"
       },
@@ -3224,7 +3910,7 @@
        "polarity": "positive"
       }
      ],
-     "fee": "—",
+     "fee": "已支付 100 金幣（測試）",
      "startDisabled": true,
      "startBottom": 526,
      "viewportH": 844,
@@ -3233,10 +3919,10 @@
      "shownLines": 4
     },
     {
-     "step": "close",
-     "open": false,
-     "phase": "result",
-     "selected": "b1",
+     "step": "place:s2",
+     "open": true,
+     "phase": "ready",
+     "selected": "s2",
      "items": [
       {
        "id": "s1",
@@ -3262,37 +3948,217 @@
        "id": "b1",
        "kind": "birdEgg",
        "appraised": true
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
+      }
+     ],
+     "lines": [],
+     "fee": "100 金幣（測試）",
+     "startDisabled": false,
+     "startBottom": 526,
+     "viewportH": 844,
+     "hScroll": 0,
+     "test": true,
+     "shownLines": 0
+    },
+    {
+     "step": "result_s2",
+     "open": true,
+     "phase": "result",
+     "selected": "s2",
+     "items": [
+      {
+       "id": "s1",
+       "kind": "seed",
+       "appraised": true
+      },
+      {
+       "id": "s2",
+       "kind": "seed",
+       "appraised": true
+      },
+      {
+       "id": "e1",
+       "kind": "egg",
+       "appraised": false
+      },
+      {
+       "id": "e0",
+       "kind": "egg",
+       "appraised": true
+      },
+      {
+       "id": "b1",
+       "kind": "birdEgg",
+       "appraised": true
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
       }
      ],
      "lines": [
       {
-       "label": "攻擊力",
-       "text": "-10%",
-       "polarity": "negative"
-      },
-      {
-       "label": "攻速",
-       "text": "+6",
-       "polarity": "positive"
-      },
-      {
-       "label": "防禦力",
-       "text": "-5%",
-       "polarity": "negative"
-      },
-      {
-       "label": "生命值",
-       "text": "+15%",
-       "polarity": "positive"
+       "label": "無附加屬性",
+       "text": "—",
+       "polarity": "none"
       }
      ],
+     "fee": "已支付 100 金幣（測試）",
+     "startDisabled": true,
+     "startBottom": 526,
+     "viewportH": 844,
+     "hScroll": 0,
+     "test": true,
+     "shownLines": 1
+    },
+    {
+     "step": "close",
+     "open": false,
+     "phase": "result",
+     "selected": "s2",
+     "items": [
+      {
+       "id": "s1",
+       "kind": "seed",
+       "appraised": true
+      },
+      {
+       "id": "s2",
+       "kind": "seed",
+       "appraised": true
+      },
+      {
+       "id": "e1",
+       "kind": "egg",
+       "appraised": false
+      },
+      {
+       "id": "e0",
+       "kind": "egg",
+       "appraised": true
+      },
+      {
+       "id": "b1",
+       "kind": "birdEgg",
+       "appraised": true
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
+      }
+     ],
+     "lines": [
+      {
+       "label": "無附加屬性",
+       "text": "—",
+       "polarity": "none"
+      }
+     ],
+     "fee": "已支付 100 金幣（測試）",
+     "startDisabled": true,
+     "startBottom": 0,
+     "viewportH": 844,
+     "hScroll": 0,
+     "test": true,
+     "shownLines": 1
+    },
+    {
+     "step": "reopen",
+     "open": true,
+     "phase": "empty",
+     "selected": null,
+     "items": [
+      {
+       "id": "s1",
+       "kind": "seed",
+       "appraised": true
+      },
+      {
+       "id": "s2",
+       "kind": "seed",
+       "appraised": true
+      },
+      {
+       "id": "e1",
+       "kind": "egg",
+       "appraised": false
+      },
+      {
+       "id": "e0",
+       "kind": "egg",
+       "appraised": true
+      },
+      {
+       "id": "b1",
+       "kind": "birdEgg",
+       "appraised": true
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
+      }
+     ],
+     "lines": [],
+     "fee": "—",
+     "startDisabled": true,
+     "startBottom": 525,
+     "viewportH": 844,
+     "hScroll": 0,
+     "test": true,
+     "shownLines": 0
+    },
+    {
+     "step": "close2",
+     "open": false,
+     "phase": "empty",
+     "selected": null,
+     "items": [
+      {
+       "id": "s1",
+       "kind": "seed",
+       "appraised": true
+      },
+      {
+       "id": "s2",
+       "kind": "seed",
+       "appraised": true
+      },
+      {
+       "id": "e1",
+       "kind": "egg",
+       "appraised": false
+      },
+      {
+       "id": "e0",
+       "kind": "egg",
+       "appraised": true
+      },
+      {
+       "id": "b1",
+       "kind": "birdEgg",
+       "appraised": true
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
+      }
+     ],
+     "lines": [],
      "fee": "—",
      "startDisabled": true,
      "startBottom": 0,
      "viewportH": 844,
      "hScroll": 0,
      "test": true,
-     "shownLines": 4
+     "shownLines": 0
     }
    ]
   },
@@ -3308,9 +4174,10 @@
     "webkit_hq_appraise_3_effect.png",
     "webkit_hq_appraise_4_result.png",
     "webkit_hq_appraise_5_already.png",
-    "webkit_hq_appraise_6_bird.png"
+    "webkit_hq_appraise_6_bird.png",
+    "webkit_hq_appraise_7_none.png"
    ],
-   "loadMs": 5281,
+   "loadMs": 5484,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -3421,16 +4288,16 @@
      ]
     },
     "merchant": {
-     "meshes": 34,
+     "meshes": 11,
      "triangles": 59566,
-     "bones": 50,
+     "bones": 27,
      "animations": [
       "Idle",
       "Talk",
       "Turn",
       "Walk"
      ],
-     "shadowCasters": 7
+     "shadowCasters": 6
     }
    },
    "textureMemory": {
@@ -3512,7 +4379,7 @@
     "mage": 7,
     "sword": 6,
     "platform": 4,
-    "merchant": 41
+    "merchant": 17
    },
    "drawCalls": {
     "none": {
@@ -3520,32 +4387,32 @@
      "activeMeshes": 37
     },
     "all": {
-     "drawCalls": 156,
-     "activeMeshes": 101
+     "drawCalls": 132,
+     "activeMeshes": 78
     },
     "no_fountain": {
-     "drawCalls": 147,
-     "activeMeshes": 94
+     "drawCalls": 123,
+     "activeMeshes": 71
     },
     "no_plaza": {
-     "drawCalls": 148,
-     "activeMeshes": 96
+     "drawCalls": 124,
+     "activeMeshes": 73
     },
     "no_knight": {
-     "drawCalls": 148,
-     "activeMeshes": 97
+     "drawCalls": 124,
+     "activeMeshes": 74
     },
     "no_mage": {
-     "drawCalls": 149,
-     "activeMeshes": 96
+     "drawCalls": 125,
+     "activeMeshes": 73
     },
     "no_sword": {
-     "drawCalls": 150,
-     "activeMeshes": 97
+     "drawCalls": 126,
+     "activeMeshes": 74
     },
     "no_platform": {
-     "drawCalls": 152,
-     "activeMeshes": 97
+     "drawCalls": 128,
+     "activeMeshes": 74
     },
     "no_merchant": {
      "drawCalls": 115,
@@ -3591,6 +4458,11 @@
        "id": "b1",
        "kind": "birdEgg",
        "appraised": false
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
       }
      ],
      "lines": [],
@@ -3630,6 +4502,11 @@
       },
       {
        "id": "b1",
+       "kind": "birdEgg",
+       "appraised": false
+      },
+      {
+       "id": "b2",
        "kind": "birdEgg",
        "appraised": false
       }
@@ -3673,6 +4550,11 @@
        "id": "b1",
        "kind": "birdEgg",
        "appraised": false
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
       }
      ],
      "lines": [],
@@ -3714,6 +4596,11 @@
        "id": "b1",
        "kind": "birdEgg",
        "appraised": false
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
       }
      ],
      "lines": [
@@ -3728,7 +4615,7 @@
        "polarity": "negative"
       }
      ],
-     "fee": "—",
+     "fee": "已支付 100 金幣（測試）",
      "startDisabled": true,
      "startBottom": 526,
      "viewportH": 720,
@@ -3764,6 +4651,11 @@
       },
       {
        "id": "b1",
+       "kind": "birdEgg",
+       "appraised": false
+      },
+      {
+       "id": "b2",
        "kind": "birdEgg",
        "appraised": false
       }
@@ -3813,6 +4705,11 @@
        "id": "b1",
        "kind": "birdEgg",
        "appraised": false
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
       }
      ],
      "lines": [],
@@ -3854,6 +4751,11 @@
        "id": "b1",
        "kind": "birdEgg",
        "appraised": true
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
       }
      ],
      "lines": [
@@ -3863,7 +4765,7 @@
        "polarity": "negative"
       },
       {
-       "label": "攻速",
+       "label": "攻擊速度",
        "text": "+6",
        "polarity": "positive"
       },
@@ -3878,7 +4780,7 @@
        "polarity": "positive"
       }
      ],
-     "fee": "—",
+     "fee": "已支付 100 金幣（測試）",
      "startDisabled": true,
      "startBottom": 526,
      "viewportH": 720,
@@ -3887,10 +4789,10 @@
      "shownLines": 4
     },
     {
-     "step": "close",
-     "open": false,
-     "phase": "result",
-     "selected": "b1",
+     "step": "place:s2",
+     "open": true,
+     "phase": "ready",
+     "selected": "s2",
      "items": [
       {
        "id": "s1",
@@ -3916,37 +4818,217 @@
        "id": "b1",
        "kind": "birdEgg",
        "appraised": true
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
+      }
+     ],
+     "lines": [],
+     "fee": "100 金幣（測試）",
+     "startDisabled": false,
+     "startBottom": 526,
+     "viewportH": 720,
+     "hScroll": 0,
+     "test": true,
+     "shownLines": 0
+    },
+    {
+     "step": "result_s2",
+     "open": true,
+     "phase": "result",
+     "selected": "s2",
+     "items": [
+      {
+       "id": "s1",
+       "kind": "seed",
+       "appraised": true
+      },
+      {
+       "id": "s2",
+       "kind": "seed",
+       "appraised": true
+      },
+      {
+       "id": "e1",
+       "kind": "egg",
+       "appraised": false
+      },
+      {
+       "id": "e0",
+       "kind": "egg",
+       "appraised": true
+      },
+      {
+       "id": "b1",
+       "kind": "birdEgg",
+       "appraised": true
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
       }
      ],
      "lines": [
       {
-       "label": "攻擊力",
-       "text": "-10%",
-       "polarity": "negative"
-      },
-      {
-       "label": "攻速",
-       "text": "+6",
-       "polarity": "positive"
-      },
-      {
-       "label": "防禦力",
-       "text": "-5%",
-       "polarity": "negative"
-      },
-      {
-       "label": "生命值",
-       "text": "+15%",
-       "polarity": "positive"
+       "label": "無附加屬性",
+       "text": "—",
+       "polarity": "none"
       }
      ],
+     "fee": "已支付 100 金幣（測試）",
+     "startDisabled": true,
+     "startBottom": 526,
+     "viewportH": 720,
+     "hScroll": 0,
+     "test": true,
+     "shownLines": 1
+    },
+    {
+     "step": "close",
+     "open": false,
+     "phase": "result",
+     "selected": "s2",
+     "items": [
+      {
+       "id": "s1",
+       "kind": "seed",
+       "appraised": true
+      },
+      {
+       "id": "s2",
+       "kind": "seed",
+       "appraised": true
+      },
+      {
+       "id": "e1",
+       "kind": "egg",
+       "appraised": false
+      },
+      {
+       "id": "e0",
+       "kind": "egg",
+       "appraised": true
+      },
+      {
+       "id": "b1",
+       "kind": "birdEgg",
+       "appraised": true
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
+      }
+     ],
+     "lines": [
+      {
+       "label": "無附加屬性",
+       "text": "—",
+       "polarity": "none"
+      }
+     ],
+     "fee": "已支付 100 金幣（測試）",
+     "startDisabled": true,
+     "startBottom": 0,
+     "viewportH": 720,
+     "hScroll": 0,
+     "test": true,
+     "shownLines": 1
+    },
+    {
+     "step": "reopen",
+     "open": true,
+     "phase": "empty",
+     "selected": null,
+     "items": [
+      {
+       "id": "s1",
+       "kind": "seed",
+       "appraised": true
+      },
+      {
+       "id": "s2",
+       "kind": "seed",
+       "appraised": true
+      },
+      {
+       "id": "e1",
+       "kind": "egg",
+       "appraised": false
+      },
+      {
+       "id": "e0",
+       "kind": "egg",
+       "appraised": true
+      },
+      {
+       "id": "b1",
+       "kind": "birdEgg",
+       "appraised": true
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
+      }
+     ],
+     "lines": [],
+     "fee": "—",
+     "startDisabled": true,
+     "startBottom": 503,
+     "viewportH": 720,
+     "hScroll": 0,
+     "test": true,
+     "shownLines": 0
+    },
+    {
+     "step": "close2",
+     "open": false,
+     "phase": "empty",
+     "selected": null,
+     "items": [
+      {
+       "id": "s1",
+       "kind": "seed",
+       "appraised": true
+      },
+      {
+       "id": "s2",
+       "kind": "seed",
+       "appraised": true
+      },
+      {
+       "id": "e1",
+       "kind": "egg",
+       "appraised": false
+      },
+      {
+       "id": "e0",
+       "kind": "egg",
+       "appraised": true
+      },
+      {
+       "id": "b1",
+       "kind": "birdEgg",
+       "appraised": true
+      },
+      {
+       "id": "b2",
+       "kind": "birdEgg",
+       "appraised": false
+      }
+     ],
+     "lines": [],
      "fee": "—",
      "startDisabled": true,
      "startBottom": 0,
      "viewportH": 720,
      "hScroll": 0,
      "test": true,
-     "shownLines": 4
+     "shownLines": 0
     }
    ]
   },
@@ -3957,7 +5039,7 @@
    "shots": [
     "webkit_lite-low_pm_front.png"
    ],
-   "loadMs": 1835,
+   "loadMs": 2884,
    "stats": {
     "fountain": {
      "meshes": 7,
@@ -4055,9 +5137,9 @@
      ]
     },
     "merchant": {
-     "meshes": 34,
-     "triangles": 14592,
-     "bones": 50,
+     "meshes": 11,
+     "triangles": 14591,
+     "bones": 27,
      "animations": [
       "Idle",
       "Talk",
@@ -4121,7 +5203,7 @@
     "mage": 4,
     "sword": 3,
     "platform": 3,
-    "merchant": 34
+    "merchant": 11
    },
    "drawCalls": {
     "none": {
@@ -4129,32 +5211,32 @@
      "activeMeshes": 37
     },
     "all": {
-     "drawCalls": 89,
-     "activeMeshes": 96
+     "drawCalls": 66,
+     "activeMeshes": 73
     },
     "no_fountain": {
-     "drawCalls": 82,
-     "activeMeshes": 89
+     "drawCalls": 59,
+     "activeMeshes": 66
     },
     "no_plaza": {
-     "drawCalls": 85,
-     "activeMeshes": 92
+     "drawCalls": 62,
+     "activeMeshes": 69
     },
     "no_knight": {
-     "drawCalls": 86,
-     "activeMeshes": 93
+     "drawCalls": 63,
+     "activeMeshes": 70
     },
     "no_mage": {
-     "drawCalls": 85,
-     "activeMeshes": 92
+     "drawCalls": 62,
+     "activeMeshes": 69
     },
     "no_sword": {
-     "drawCalls": 86,
-     "activeMeshes": 93
+     "drawCalls": 63,
+     "activeMeshes": 70
     },
     "no_platform": {
-     "drawCalls": 86,
-     "activeMeshes": 93
+     "drawCalls": 63,
+     "activeMeshes": 70
     },
     "no_merchant": {
      "drawCalls": 55,
@@ -4171,5 +5253,5 @@
    }
   }
  ],
- "finishedAt": "2026-11-24T06:06:28.551Z"
+ "finishedAt": "2026-11-24T08:08:06.519Z"
 }
