@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-11-24T06:38:57.137Z",
+  "startedAt": "2026-11-24T08:02:15.916Z",
   "runs": [
     {
       "browser": "webkit",
@@ -28,7 +28,7 @@
               "count": 0,
               "equipped": null,
               "followerVisible": false,
-              "followerDist": 85.10962628615403
+              "followerDist": 85.10218964183186
             }
           }
         },
@@ -39,7 +39,7 @@
             "pipeline": false,
             "charShadow": "blob",
             "drawCalls": 135,
-            "fps": 0.6029544769369912,
+            "fps": 0.4444115250722168,
             "contextLost": 0
           }
         },
@@ -84,7 +84,7 @@
           "ok": true,
           "detail": {
             "attacks": 25,
-            "ms": 48703,
+            "ms": 65456,
             "kills": 3,
             "hits": 9,
             "drops": 4,
@@ -112,7 +112,7 @@
           "ok": true,
           "detail": {
             "attacks": 25,
-            "ms": 48703,
+            "ms": 65456,
             "kills": 3,
             "hits": 9,
             "drops": 4,
@@ -168,7 +168,7 @@
                 "count": 1,
                 "equipped": 1,
                 "followerVisible": true,
-                "followerDist": 60.853841588628384
+                "followerDist": 60.85326304668576
               },
               "stats": {
                 "attack": 100,
@@ -197,7 +197,7 @@
               "count": 1,
               "equipped": 1,
               "followerVisible": true,
-              "followerDist": 0.42864751948333185
+              "followerDist": 0.4287471664004498
             }
           }
         },
@@ -224,7 +224,7 @@
             "count": 1,
             "equipped": 1,
             "followerVisible": true,
-            "followerDist": 0.42864751948333185
+            "followerDist": 0.4287471664004498
           }
         },
         "寵物加成反映到角色屬性；攻速 ≤ 160 且同步到攻擊動作": {
@@ -232,16 +232,38 @@
           "detail": {
             "stats": {
               "attack": 100,
-              "attackSpeed": 102.7,
+              "attackSpeed": 102.8,
               "defense": 50,
               "maxHp": 100
             },
             "attack": {
-              "interval": 0.486854917234664,
-              "hitAt": 0.1947419668938656,
-              "attackSpeed": 102.7,
+              "interval": 0.48638132295719844,
+              "hitAt": 0.19455252918287938,
+              "attackSpeed": 102.8,
               "damage": 20
             }
+          }
+        },
+        "寵物商人鑑定：孵化前鑑定個體、不能重鑑、另一顆不受影響、孵化後詞條相同": {
+          "ok": false,
+          "detail": {
+            "target": "item:1",
+            "r1": {
+              "ok": true,
+              "affixes": [
+                {
+                  "stat": "maxHp",
+                  "value": -5
+                }
+              ]
+            },
+            "r2": {
+              "ok": false,
+              "affixes": null
+            },
+            "other": "missing",
+            "petAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]",
+            "itemAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]"
           }
         },
         "重新載入：寵物、詞條、裝備、背包保留": {
@@ -255,15 +277,15 @@
         "實玩效能測試流程（自動打怪、報告欄位、Context Lost 0）": {
           "ok": true,
           "detail": {
-            "seconds": 10.8,
-            "avgFps": 0.8339510748702742,
-            "low1Fps": 0.819672131147541,
-            "minFps": 0.819672131147541,
+            "seconds": 11.5,
+            "avgFps": 0.6092254134029592,
+            "low1Fps": 0.5592841163310962,
+            "minFps": 0.5592841163310962,
             "avgDraw": 131,
             "kills": 0,
             "contextLost": 0,
-            "first30": 0.8339510748702742,
-            "last30": 0.8339510748702744,
+            "first30": 0.609225413402959,
+            "last30": 0.6092254134029592,
             "quality": "high",
             "gender": "male",
             "lod": "hq",
@@ -286,7 +308,7 @@
             "count": 0,
             "equipped": null,
             "followerVisible": false,
-            "followerDist": 85.1089358932665
+            "followerDist": 85.09602321263421
           }
         },
         "&charshadow=realtime 可載入": {
@@ -296,7 +318,7 @@
             "pipeline": false,
             "charShadow": "realtime",
             "drawCalls": 160,
-            "fps": 0.7271669575334496,
+            "fps": 0.532197977647685,
             "contextLost": 0
           }
         },
@@ -307,15 +329,12 @@
             "pipeline": false,
             "charShadow": "realtime",
             "drawCalls": 160,
-            "fps": 0.7271669575334496,
+            "fps": 0.532197977647685,
             "contextLost": 0
           }
         }
       },
-      "errors": [
-        "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
-        "console: Failed to load resource: the server responded with a status of 404 (Not Found)"
-      ],
+      "errors": [],
       "screenshots": [
         "play-e2e/webkit_male_hq_spawn.png",
         "play-e2e/webkit_male_hq_zone01.png",
@@ -414,14 +433,14 @@
             "count": 0,
             "equipped": null,
             "followerVisible": false,
-            "followerDist": 85.10962628615403
+            "followerDist": 85.10218964183186
           },
           "render": {
             "p3": true,
             "pipeline": false,
             "charShadow": "blob",
             "drawCalls": 135,
-            "fps": 0.6029544769369912,
+            "fps": 0.4444115250722168,
             "contextLost": 0
           }
         },
@@ -433,7 +452,7 @@
         },
         "fight": {
           "attacks": 25,
-          "ms": 48703,
+          "ms": 65456,
           "kills": 3,
           "hits": 9,
           "drops": 4,
@@ -483,7 +502,7 @@
               "count": 1,
               "equipped": 1,
               "followerVisible": true,
-              "followerDist": 60.853841588628384
+              "followerDist": 60.85326304668576
             },
             "stats": {
               "attack": 100,
@@ -512,19 +531,38 @@
             "count": 1,
             "equipped": 1,
             "followerVisible": true,
-            "followerDist": 0.42864751948333185
+            "followerDist": 0.4287471664004498
           }
         },
+        "itemAppraisal": {
+          "target": "item:1",
+          "r1": {
+            "ok": true,
+            "affixes": [
+              {
+                "stat": "maxHp",
+                "value": -5
+              }
+            ]
+          },
+          "r2": {
+            "ok": false,
+            "affixes": null
+          },
+          "other": "missing",
+          "petAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]",
+          "itemAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]"
+        },
         "bench": {
-          "seconds": 10.8,
-          "avgFps": 0.8339510748702742,
-          "low1Fps": 0.819672131147541,
-          "minFps": 0.819672131147541,
+          "seconds": 11.5,
+          "avgFps": 0.6092254134029592,
+          "low1Fps": 0.5592841163310962,
+          "minFps": 0.5592841163310962,
           "avgDraw": 131,
           "kills": 0,
           "contextLost": 0,
-          "first30": 0.8339510748702742,
-          "last30": 0.8339510748702744,
+          "first30": 0.609225413402959,
+          "last30": 0.6092254134029592,
           "quality": "high",
           "gender": "male",
           "lod": "hq",
@@ -537,7 +575,7 @@
             "pipeline": false,
             "charShadow": "realtime",
             "drawCalls": 160,
-            "fps": 0.7271669575334496,
+            "fps": 0.532197977647685,
             "contextLost": 0
           }
         }
@@ -627,7 +665,7 @@
           "ok": true,
           "detail": {
             "attacks": 25,
-            "ms": 17379,
+            "ms": 23549,
             "kills": 3,
             "hits": 9,
             "drops": 4,
@@ -655,7 +693,7 @@
           "ok": true,
           "detail": {
             "attacks": 25,
-            "ms": 17379,
+            "ms": 23549,
             "kills": 3,
             "hits": 9,
             "drops": 4,
@@ -711,7 +749,7 @@
                 "count": 1,
                 "equipped": 1,
                 "followerVisible": true,
-                "followerDist": 60.844301940467105
+                "followerDist": 60.85382914142198
               },
               "stats": {
                 "attack": 100,
@@ -740,7 +778,7 @@
               "count": 1,
               "equipped": 1,
               "followerVisible": true,
-              "followerDist": 0.42185498099340896
+              "followerDist": 0.4194502459653054
             }
           }
         },
@@ -767,7 +805,7 @@
             "count": 1,
             "equipped": 1,
             "followerVisible": true,
-            "followerDist": 0.42185498099340896
+            "followerDist": 0.4194502459653054
           }
         },
         "寵物加成反映到角色屬性；攻速 ≤ 160 且同步到攻擊動作": {
@@ -787,6 +825,28 @@
             }
           }
         },
+        "寵物商人鑑定：孵化前鑑定個體、不能重鑑、另一顆不受影響、孵化後詞條相同": {
+          "ok": false,
+          "detail": {
+            "target": "item:1",
+            "r1": {
+              "ok": true,
+              "affixes": [
+                {
+                  "stat": "maxHp",
+                  "value": -5
+                }
+              ]
+            },
+            "r2": {
+              "ok": false,
+              "affixes": null
+            },
+            "other": "missing",
+            "petAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]",
+            "itemAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]"
+          }
+        },
         "重新載入：寵物、詞條、裝備、背包保留": {
           "ok": true,
           "detail": {
@@ -798,15 +858,15 @@
         "實玩效能測試流程（自動打怪、報告欄位、Context Lost 0）": {
           "ok": true,
           "detail": {
-            "seconds": 10.2,
-            "avgFps": 2.938871473354232,
-            "low1Fps": 2.717391304347826,
-            "minFps": 2.717391304347826,
-            "avgDraw": 114.16666666666667,
+            "seconds": 10.4,
+            "avgFps": 2.2123893805309733,
+            "low1Fps": 2.092050209205021,
+            "minFps": 2.092050209205021,
+            "avgDraw": 115.65217391304348,
             "kills": 1,
             "contextLost": 0,
-            "first30": 2.938871473354232,
-            "last30": 2.9388714733542316,
+            "first30": 2.212389380530973,
+            "last30": 2.2123893805309733,
             "quality": "medium",
             "gender": "female",
             "lod": "lite",
@@ -819,15 +879,13 @@
             "p3": true,
             "pipeline": false,
             "charShadow": "blob",
-            "drawCalls": 109,
-            "fps": 2.938871473354232,
+            "drawCalls": 116,
+            "fps": 2.1723388848660394,
             "contextLost": 0
           }
         }
       },
-      "errors": [
-        "console: Failed to load resource: the server responded with a status of 404 (Not Found)"
-      ],
+      "errors": [],
       "screenshots": [
         "play-e2e/webkit_female_lite_spawn.png",
         "play-e2e/webkit_female_lite_zone01.png",
@@ -945,7 +1003,7 @@
         },
         "fight": {
           "attacks": 25,
-          "ms": 17379,
+          "ms": 23549,
           "kills": 3,
           "hits": 9,
           "drops": 4,
@@ -995,7 +1053,7 @@
               "count": 1,
               "equipped": 1,
               "followerVisible": true,
-              "followerDist": 60.844301940467105
+              "followerDist": 60.85382914142198
             },
             "stats": {
               "attack": 100,
@@ -1024,19 +1082,38 @@
             "count": 1,
             "equipped": 1,
             "followerVisible": true,
-            "followerDist": 0.42185498099340896
+            "followerDist": 0.4194502459653054
           }
         },
+        "itemAppraisal": {
+          "target": "item:1",
+          "r1": {
+            "ok": true,
+            "affixes": [
+              {
+                "stat": "maxHp",
+                "value": -5
+              }
+            ]
+          },
+          "r2": {
+            "ok": false,
+            "affixes": null
+          },
+          "other": "missing",
+          "petAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]",
+          "itemAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]"
+        },
         "bench": {
-          "seconds": 10.2,
-          "avgFps": 2.938871473354232,
-          "low1Fps": 2.717391304347826,
-          "minFps": 2.717391304347826,
-          "avgDraw": 114.16666666666667,
+          "seconds": 10.4,
+          "avgFps": 2.2123893805309733,
+          "low1Fps": 2.092050209205021,
+          "minFps": 2.092050209205021,
+          "avgDraw": 115.65217391304348,
           "kills": 1,
           "contextLost": 0,
-          "first30": 2.938871473354232,
-          "last30": 2.9388714733542316,
+          "first30": 2.212389380530973,
+          "last30": 2.2123893805309733,
           "quality": "medium",
           "gender": "female",
           "lod": "lite",
@@ -1047,8 +1124,8 @@
             "p3": true,
             "pipeline": false,
             "charShadow": "blob",
-            "drawCalls": 109,
-            "fps": 2.938871473354232,
+            "drawCalls": 116,
+            "fps": 2.1723388848660394,
             "contextLost": 0
           }
         }
@@ -1056,7 +1133,7 @@
       "ok": false
     }
   ],
-  "finishedAt": "2026-11-24T06:42:55.513Z",
+  "finishedAt": "2026-11-24T08:07:25.338Z",
   "characterVersion": "c10b5a",
   "failures": 2
 }
