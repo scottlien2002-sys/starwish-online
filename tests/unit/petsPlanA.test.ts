@@ -174,7 +174,8 @@ test("PetManager（遊戲整合介面）：怪物掉落 → 孵化 → 鑑定一
   assert.equal(m.characterStats(BASE).attackSpeed, 100);
   const back = new PetManager(cfg, createRng(9), "preview", m.serialize());
   assert.deepEqual(back.save.pets.find((x) => x.id === p.id)!.affixes, [{ stat: "attackSpeed", value: 10 }]);
-  // 正式模式：未定案的掉落機率會拋錯（不自行假設）
+  // 正式模式：設定未定案 → 寵物功能停用、不掉寵物物品（不自行假設、也不讓遊戲當掉）
   const off = new PetManager(cfg, createRng(1), "official");
-  assert.throws(() => off.onMonsterKilled());
+  assert.equal(off.enabled, false);
+  assert.deepEqual(off.onMonsterKilled(), []);
 });

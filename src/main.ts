@@ -39,6 +39,18 @@ function main(): void {
   const lab = new URLSearchParams(location.search).get("lab");
   const map = new URLSearchParams(location.search).get("map");
   try {
+    // ?play=starsprout：Stage 5.6 整合測試（男女初心者在星芽原野打怪、掉落、背包、寵物）；&g=female、&lod=lite、&charshadow=realtime
+    if (new URLSearchParams(location.search).get("play") === "starsprout") {
+      document.body.classList.add("map-mode");
+      void import("./game/StarsproutGame.ts")
+        .then((m) => m.startStarsproutGame(canvas, hudRoot))
+        .then(() => hideBoot())
+        .catch((err: unknown) => {
+          console.error(err);
+          fail(`星芽原野整合測試載入失敗：${err instanceof Error ? err.message : String(err)}`);
+        });
+      return;
+    }
     // ?map=starsprout：Stage 6 星芽原野（第一階段：地形與主要路線，沒有怪物）；&lod=lite、&autoplay=route&loops=3
     if (map === "starsprout") {
       document.body.classList.add("map-mode");

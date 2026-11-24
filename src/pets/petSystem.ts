@@ -40,6 +40,8 @@ export interface PetTuning {
   bonusScaleByStage: number[] | null; // 各階段的加成倍率（0～1）
   feedExp: Record<FeedId, number> | null;
   drops: Record<ItemId, number> | null; // 每次擊倒怪物各物品的掉落機率
+  appraisalFee: number | null; // 寵物商人鑑定費用（金幣；尚無金幣系統）
+  feedPrice: Record<"shopFeed", number> | null; // 商店飼料價格
 }
 
 export interface PetConfig {
@@ -63,7 +65,9 @@ export interface PetConfig {
     bonusScaleByStage: number[];
     feedExp: Record<FeedId, number>;
     drops: Record<ItemId, number>;
+    services?: { appraisalFee: number; feedPrice: Record<"shopFeed", number> };
   };
+  services?: { appraisalFee: number | null; feedPrice: Record<"shopFeed", number | null> };
 }
 
 /** 正式設定尚未定案時拋出（不得自行假設機率或數值） */
@@ -90,6 +94,8 @@ export function resolveTuning(cfg: PetConfig, mode: "official" | "preview"): Pet
       bonusScaleByStage: p.bonusScaleByStage,
       feedExp: p.feedExp,
       drops: p.drops,
+      appraisalFee: p.services?.appraisalFee ?? 0,
+      feedPrice: p.services?.feedPrice ?? { shopFeed: 0 },
     };
   }
   const statW = cfg.appraisal.stats.every((s) => s.statWeight !== null)
@@ -112,7 +118,37 @@ export function resolveTuning(cfg: PetConfig, mode: "official" | "preview"): Pet
     bonusScaleByStage: cfg.growth.bonusScaleByStage,
     feedExp,
     drops,
+    appraisalFee: cfg.services?.appraisalFee ?? null,
+    feedPrice: shopFeedPrice(cfg),
   };
+}
+
+function shopFeedPrice(cfg: PetConfig): Record<"shopFeed", number> | null {
+  const v = cfg.services ? cfg.services.feedPrice.shopFeed : null;
+  return v === null || v === undefined ? null : { shopFeed: v };
+}
+
+/**
+ * 正式設定還缺哪些數值（空陣列 = 可以啟用寵物系統）。
+ * preview（測試設定）允許各數值等機率（valueWeights = null）。
+ * 遊戲用這個結果決定是否啟用寵物功能：缺值時停用寵物、顯示提示，但遊戲照常進入。
+ */
+export function missingTuning(t: PetTuning, mode: "official" | "preview"): string[] {
+  const label: [keyof PetTuning, string][] = [
+    ["affixCountWeights", "鑑定條數機率"],
+    ["statWeights", "鑑定屬性機率"],
+    ["valueWeights", "鑑定數值機率"],
+    ["hatchSeconds", "孵化時間"],
+    ["expPerSecond", "時間成長經驗"],
+    ["stageExp", "各階段經驗"],
+    ["evolveRequiresFeedCount", "進化餵食次數"],
+    ["bonusScaleByStage", "各階段加成倍率"],
+    ["feedExp", "飼料經驗"],
+    ["drops", "掉落率"],
+    ["appraisalFee", "鑑定費用"],
+    ["feedPrice", "飼料價格"],
+  ];
+  return label.filter(([k]) => t[k] === null && !(mode === "preview" && k === "valueWeights")).map(([, l]) => l);
 }
 
 function need<T>(v: T | null, field: string): T {
