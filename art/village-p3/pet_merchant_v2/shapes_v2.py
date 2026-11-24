@@ -98,7 +98,7 @@ def hair():
     H = NS.Hair("male", cap_extra=0.0, shell=((0.0, 0.06, 0.9), (0.216, 0.236, 0.226)))
     H.drop = False
     H.ex_scale = 0.62
-    NS.shell_cap(H)
+    NS.shell_cap(H, curved=True)  # 髮際線用弧形挖：額頭上方不會出現一條像髮帶的髮殼邊緣
     W = (176, 62)  # 髮旋：頭頂偏後
     F = H.flow
     # 瀏海：寬髮束互相重疊（不會出現一顆顆的髮尾），全部往同側斜掃；中間兩束較短，露出眉毛上方
@@ -128,6 +128,10 @@ def hair():
     # 髮旋：三束短而彎的髮束繞著髮旋轉（不是一點擠滿；沒有呆毛）
     for az, el in ((120, 52), (230, 50), (180, 40)):
         F(W, az, el, 0.12, 0.038, 0.018, ex_root=0.006, belly=0.009, bend=28, tip=0.25, plateau=0.35)
+    # 髮旋中心補一片很薄的髮塊（填平三束髮根交會處的小凹洞，不做成凸塊）
+    pw, nw = H.pt(W[0], W[1], 0.004)
+    t1 = unit(np.cross(nw, [0, 0, 1.0]))
+    H.part.add(ellipsoid(pw, (0.034, 0.034, 0.008), np.column_stack([t1, np.cross(nw, t1), nw])), 0.012)
     return H.part
 
 
