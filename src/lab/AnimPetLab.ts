@@ -278,7 +278,7 @@ export async function startAnimPetLab(canvas: HTMLCanvasElement, hudRoot: HTMLEl
       contextLost,
       drawCalls: perfRef?.drawCalls ?? 0,
       render: { p3, pipeline: quality.postProcess, canvasAntialias: quality.canvasAntialias, glowEnabled: !!render.glow?.isEnabled, charShadow, shadowRenders },
-      move: { speed: curSpeed, ...runRate(curSpeed), runRate: avatar.runRate },
+      move: { speed: curSpeed, ...runRate(curSpeed, avatar.groundSpeed), runRate: avatar.runRate },
       attack: { ...avatar.getAttackTiming(), hits, lastHitAt },
       events: [...events],
     }),

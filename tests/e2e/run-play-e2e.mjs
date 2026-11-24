@@ -75,6 +75,7 @@ for (const name of browsers) {
       await page.evaluate(() => window.__starwishPlay.setMove(0, 0));
       run.results.move = { speed: mv.speed, runRate: mv.runRate, slide: mv.slide, state: mv.state };
       check("移動 5 m/s、Run 動作、跑步倍率依速度", mv.state === "Run" && Math.abs(mv.speed - 5) < 0.3 && mv.runRate > 1.5, run.results.move);
+      if (VER === "c10b5a") check("B5a 跨步加大：5 m/s 跑步倍率 ≤ 2.4、滑步 < 0.1 m/s", mv.runRate <= 2.4 && Math.abs(mv.slide) < 0.1, run.results.move);
       check("移動後在原地之外、貼地", Math.hypot(mv.pos[0] - i0.pos[0], mv.pos[2] - i0.pos[2]) > 0.3, { from: i0.pos, to: mv.pos });
 
       // 跳躍

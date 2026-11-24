@@ -35,3 +35,12 @@ test("跑步播放倍率：跟著速度走、有上下限；上限以內不滑�
   assert.equal(animClock("Attack", 5, 1.3).rate, 1.3);
   assert.equal(animClock("Run", g, 1).rate, 1);
 });
+
+test("C1.0-B5a 跨步加大：5 m/s 時男女跑步倍率都在 2.4 倍以內、沒有滑步；B5 仍會滑", async () => {
+  const { ANIM_TIMING: T, runRate: rr } = await import("../../src/actors/animTiming.ts");
+  for (const g of ["male", "female"] as const) {
+    const a = rr(5, T.run.groundSpeedBy.c10b5a![g]);
+    assert.ok(a.rate <= 2.4 && Math.abs(a.slide) < 1e-9, `${g} ${JSON.stringify(a)}`);
+    assert.ok(rr(5, T.run.groundSpeedBy.c10b5![g]).slide > 0.5);
+  }
+});

@@ -876,7 +876,7 @@ class StarsproutGame {
           down: self.combat.isDown,
           speed: self.curSpeed,
           runRate: self.avatar.runRate,
-          slide: runRate(self.curSpeed).slide,
+          slide: runRate(self.curSpeed, self.avatar.groundSpeed).slide,
           attack: { interval: self.combat.tuning.attackInterval, hitAt: t.hitAt, attackSpeed: t.attackSpeed, damage: self.combat.tuning.attackDamage },
           stats: { ...self.stats },
           kills: self.kills,

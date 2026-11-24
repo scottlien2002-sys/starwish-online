@@ -51,6 +51,8 @@ export class NoviceAvatar {
   readonly file: string;
   /** 目前跑步播放倍率（除錯顯示） */
   runRate = 1;
+  /** 跑步動畫的步行地面速度（依版本與性別的 Blender 量測值） */
+  groundSpeed: number = ANIM_TIMING.run.groundSpeed;
   /** 攻速（遊戲屬性；100 = 基礎 0.5 秒）。只影響攻擊動作播放速度與命中時間點 */
   private attackSpeed = 100;
   private attackRate = 1;
@@ -91,7 +93,10 @@ export class NoviceAvatar {
   static async load(scene: Scene, opts: { gender: NoviceGender; lod: NoviceLod; baseUrl: string; version?: string }): Promise<NoviceAvatar> {
     const file = noviceFile(opts.gender, opts.lod, opts.version);
     const res = await SceneLoader.ImportMeshAsync("", opts.baseUrl, file, scene);
-    return new NoviceAvatar(scene, file, res);
+    const a = new NoviceAvatar(scene, file, res);
+    const gs = ANIM_TIMING.run.groundSpeedBy[opts.version ?? "c10b5"];
+    if (gs) a.groundSpeed = gs[opts.gender];
+    return a;
   }
 
   get bones(): number {
@@ -210,7 +215,7 @@ export class NoviceAvatar {
       this.emit({ type: "hit", attackId: this.attackId });
     }
     // 跑步：依實際速度調整播放倍率（步幅固定，速度越快踩得越快），減少滑步
-    const clock = animClock(this.sm.state, input.speed, this.attackRate);
+    const clock = animClock(this.sm.state, input.speed, this.attackRate, this.groundSpeed);
     this.runRate = clock.runRate;
     const g = this.groups.get(this.sm.state);
     if (g) g.speedRatio = clock.rate;

@@ -15,6 +15,11 @@ export const ANIM_TIMING = Object.freeze({
   run: Object.freeze({
     /** 跑步動畫在播放倍率 1 時的「步行地面速度」（公尺／秒；C1.0-B5 Blender 量測：男 1.66、女 1.79，取平均） */
     groundSpeed: 1.72,
+    /** 各版本、性別的量測值（Blender 量測支撐腳往後的速度）。C1.0-B5a 跨步加大 → 5 m/s 只需約 2.1～2.2 倍，不超過上限、不滑步 */
+    groundSpeedBy: Object.freeze({
+      c10b5: Object.freeze({ male: 1.66, female: 1.79 }),
+      c10b5a: Object.freeze({ male: 2.26, female: 2.41 }),
+    }) as Readonly<Record<string, Readonly<Record<"male" | "female", number>>>>,
     /** 播放倍率限制：太慢看起來像慢動作、太快腳會糊在一起；超過上限的部分仍會滑步 */
     minRate: 0.8,
     maxRate: 2.4,
@@ -37,8 +42,8 @@ export function runRate(speed: number, groundSpeed: number = ANIM_TIMING.run.gro
 }
 
 /** 每個狀態的動畫播放倍率 */
-export function animClock(state: AnimName, speed: number, attackRate: number): { rate: number; runRate: number } {
-  const r = runRate(speed).rate;
+export function animClock(state: AnimName, speed: number, attackRate: number, groundSpeed: number = ANIM_TIMING.run.groundSpeed): { rate: number; runRate: number } {
+  const r = runRate(speed, groundSpeed).rate;
   if (state === "Run") return { rate: r, runRate: r };
   if (state === "Attack") return { rate: attackRate, runRate: r };
   return { rate: 1, runRate: r };
