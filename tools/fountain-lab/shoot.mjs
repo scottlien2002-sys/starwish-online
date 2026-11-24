@@ -268,7 +268,18 @@ for (const [bname, mode, quality, lod, views, opts = {}] of plan) {
       await page.evaluate(() => window.__lab.appraisal("open"));
       await page.waitForTimeout(400);
       try {
-        await page.dragAndDrop('.pa-win [data-id="e1"]', '.pa-win [data-act="slot"]', { timeout: 10000 });
+        // 以真實的 HTML5 拖放事件序列（dragstart → dragover → drop，共用同一個 DataTransfer）驗證視窗的拖放處理；
+        // Playwright 的 dragAndDrop 在無頭模式對 HTML5 拖放不穩定（等待元素穩定逾時）
+        await page.evaluate(() => {
+          const tile = document.querySelector('.pa-win [data-id="e1"]');
+          const slot = document.querySelector('.pa-win [data-act="slot"]');
+          const dt = new DataTransfer();
+          tile.dispatchEvent(new DragEvent("dragstart", { bubbles: true, cancelable: true, dataTransfer: dt }));
+          slot.dispatchEvent(new DragEvent("dragenter", { bubbles: true, cancelable: true, dataTransfer: dt }));
+          slot.dispatchEvent(new DragEvent("dragover", { bubbles: true, cancelable: true, dataTransfer: dt }));
+          slot.dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer: dt }));
+          tile.dispatchEvent(new DragEvent("dragend", { bubbles: true, cancelable: true, dataTransfer: dt }));
+        });
         await page.waitForTimeout(300);
         run.drag = await page.evaluate(() => window.__lab.appraisal("state"));
         const f = `${out}/${bname}_${mode}_appraise_drag.png`;
