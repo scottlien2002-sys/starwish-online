@@ -77,7 +77,8 @@ export function setupPetMerchantV2(
     }
     m.receiveShadows = true;
     // 只讓大輪廓零件投射陰影（外套、頭髮、頭、身體、長褲、靴子）：小配件不進陰影繪製，省下約 20 次繪製
-    const big = /(coat|hair|head|body|trousers|boot_[lr])/.test(m.name) && !/(trim|gold|gem|sole|strap|buckle)/.test(m.name);
+    // V2.1 起網格依材質合併（pm_cloth、pm_hair、pm_face、pm_skin、pm_leather…）：大面積布料、頭髮、臉、皮革投射陰影
+    const big = /(cloth|hair|face|skin|leather|dark)/.test(m.name) && !/(glow|metal|eye|egg)/.test(m.name);
     if (opt.shadows && big) {
       opt.shadows.addShadowCaster(m, false);
       casters++;

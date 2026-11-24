@@ -97,6 +97,17 @@ def amber_face(src, dst):
     return int(blue.sum())
 
 
+# V2.1：頭部（A 的頭＋B 的頭髮）以頸部為支點略縮小，讓頭身比較接近 22～25 歲的青年（避免過度幼兒化）。
+# 只改洛恩自己的輸出頂點；A 的原始檔案不動。
+HEAD_SCALE = 0.92
+HEAD_PIVOT = np.array([0.0, 0.02, 0.6])
+HEAD_PARTS = {"head", "hair"}
+
+
+def head_tf(name, V):
+    return (V - HEAD_PIVOT) * HEAD_SCALE + HEAD_PIVOT if name in HEAD_PARTS else V
+
+
 def main(a_out, out):
     out = Path(out)
     out.mkdir(parents=True, exist_ok=True)
@@ -112,6 +123,7 @@ def main(a_out, out):
         for suf in ("__v", "__q", "__n", "__c", "__uv"):
             if k + suf in a:
                 data[key + suf] = a[k + suf]
+        data[key + "__v"] = head_tf(it["name"], a[k + "__v"]).astype(np.float32)
         data[key + "__c"] = recolor_kept(it["name"], a[k + "__c"]).astype(np.float32)
         info.append({**it, "key": key, "source": "A:C1.0-B4 male（唯讀）"})
         i += 1
@@ -132,7 +144,7 @@ def main(a_out, out):
             ao = sdf_ao(vol, origin, st, V, N)
             col = col * (0.55 + 0.45 * ao)[:, None]
         key = f"{i:02d}_{p.name}"
-        data[key + "__v"] = V.astype(np.float32)
+        data[key + "__v"] = head_tf(p.name, V).astype(np.float32)
         data[key + "__q"] = Q.astype(np.int32)
         data[key + "__n"] = N.astype(np.float32)
         data[key + "__c"] = np.clip(col, 0, 1).astype(np.float32)

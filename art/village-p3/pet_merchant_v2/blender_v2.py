@@ -381,6 +381,27 @@ def make_actions(rig):
     return out
 
 
+def merge_by_material(objs):
+    """V2.1：蒙皮後把同材質的零件合併成一個網格（保留頂點群組與骨架修改器）→ 約 9 個網格＋小寵物 2 個。
+    繪製次數從約 34～41 次降到約 11 次；外觀、骨架、動作不變。"""
+    groups = {}
+    for o in objs:
+        groups.setdefault(o.data.materials[0].name, []).append(o)
+    out = []
+    for mname, lst in groups.items():
+        bpy.ops.object.select_all(action="DESELECT")
+        for o in lst:
+            o.select_set(True)
+        bpy.context.view_layer.objects.active = lst[0]
+        if len(lst) > 1:
+            bpy.ops.object.join()
+        ob = bpy.context.view_layer.objects.active
+        ob.name = "pm_" + mname.replace("PM2_", "")
+        ob.data.name = ob.name
+        out.append(ob)
+    return out
+
+
 def export_glb(objs, rig, pal, path):
     bpy.ops.object.select_all(action="DESELECT")
     for o in objs + [rig] + pal:
@@ -405,6 +426,8 @@ def main():
         tris = tri_count(objs + pal)
         rig = build_rig()
         skin(objs, rig)
+        parts_before = len(objs)
+        objs = merge_by_material(objs)
         acts = make_actions(rig)
         if lod == "hq":
             for o in pal:
@@ -426,7 +449,7 @@ def main():
         bpy.context.scene.frame_set(0)
         path = os.path.join(OUT, f"pet_merchant_v2_{lod}.glb")
         export_glb(objs, rig, pal, path)
-        report["lods"][lod] = {"triangles": tris, "triangles_before_decimate": before, "within_budget": tris <= BUDGET[lod], "parts": len(objs) + len(pal),
+        report["lods"][lod] = {"triangles": tris, "triangles_before_decimate": before, "within_budget": tris <= BUDGET[lod], "parts": parts_before + len(pal), "meshes": len(objs) + len(pal), "mesh_names": sorted(o.name for o in objs + pal),
                                "materials": sorted(mats.keys()), "bones": [b.name for b in rig.data.bones], "actions": [{"name": n, "frames": f, "fps": FPS} for n, f in acts],
                                "bytes": os.path.getsize(path)}
         print(lod, tris, flush=True)
