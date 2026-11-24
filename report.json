@@ -1,5 +1,5 @@
 {
- "startedAt": "2026-11-24T08:35:14.537Z",
+ "startedAt": "2026-11-24T09:06:37.749Z",
  "note": "CI 軟體繪圖：FPS 不代表 iPhone 實機",
  "runs": [
   {
@@ -34,29 +34,29 @@
      "detail": {
       "arrival": {
        "drawCalls": 105,
-       "triangles": 353091
+       "triangles": 353213
       },
       "spawn": {
        "drawCalls": 101,
-       "triangles": 353621
+       "triangles": 353743
       },
       "plaza_north": {
        "drawCalls": 104,
-       "triangles": 330192
+       "triangles": 330314
       },
       "east": {
        "drawCalls": 103,
-       "triangles": 340154
+       "triangles": 340276
       }
      }
     },
     "移動規則：一般行走走上石階到高台（不跳躍）": {
      "ok": true,
      "detail": {
-      "x": -5.817072295949935e-16,
+      "x": -5.510910596163096e-16,
       "y": 2,
-      "z": 24.500000000000117,
-      "yaw": -6.123233995719597e-17
+      "z": 24.00000000000011,
+      "yaw": -6.123233995667142e-17
      }
     },
     "NPC 互動：8 位 NPC 都能靠近後點擊對話（名稱、職責）": {
@@ -66,31 +66,31 @@
        "id": "sword",
        "target": "npc:sword",
        "what": "npc:sword",
-       "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職由職業系統提供，正在與 Claude A "
+       "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職功能正在整合中（預覽版），敬請期待。\n  "
       },
       {
        "id": "knight",
        "target": "npc:knight",
        "what": "npc:knight",
-       "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職由職業系統提供，正在與 Claude A "
+       "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職功能正在整合中（預覽版），敬請期待。\n  "
       },
       {
        "id": "mage",
        "target": "npc:mage",
        "what": "npc:mage",
-       "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職由職業系統提供，正在與 Claude A "
+       "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職功能正在整合中（預覽版），敬請期待。\n  "
       },
       {
        "id": "church",
        "target": "npc:church",
        "what": "npc:church",
-       "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職由職業系統提供，正在與 Claude A 的角"
+       "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職功能正在整合中（預覽版），敬請期待。\n    "
       },
       {
        "id": "circus",
        "target": "npc:circus",
        "what": "npc:circus",
-       "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職由職業系統提供，正在與 Claude A 的"
+       "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職功能正在整合中（預覽版），敬請期待。\n   "
       },
       {
        "id": "warehouse",
@@ -170,37 +170,44 @@
      }
     },
     "寵物鑑定：放入後可鑑定；連點只鑑定一次；結果逐條顯示；物品留在背包並變成已鑑定": {
-     "ok": false,
+     "ok": true,
      "detail": {
-      "before": "loading",
-      "after": "loading",
-      "lines": []
+      "before": "ready",
+      "after": "result",
+      "lines": [
+       {
+        "label": "攻擊力",
+        "text": "+15%",
+        "polarity": "positive"
+       },
+       {
+        "label": "生命值",
+        "text": "-5%",
+        "polarity": "negative"
+       }
+      ]
      }
     },
     "iPhone 直向：鑑定視窗沒有橫向捲動、按鈕在畫面內": {
-     "ok": false,
+     "ok": true,
      "detail": {
       "hScroll": 0,
-      "startBottom": 9999
+      "startBottom": 525.5
      }
     },
     "洛恩：關閉後恢復巡走": {
-     "ok": false,
+     "ok": true,
      "detail": {
       "target": "merchant",
-      "talking": true,
+      "talking": false,
       "dialog": "",
       "panelOpen": true,
       "appraisalOpen": false,
-      "merchantPaused": true
+      "merchantPaused": false
      }
     }
    },
-   "errors": [
-    "appraise button: page.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('[data-act=\"choose:appraise\"]')\n    - locator resolved to <button type=\"button\" data-act=\"choose:appraise\">…</button>\n  - attempting click action\n    - waiting for element to be visible, enabled and stable\n",
-    "tile: page.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.pa-win [data-id=\"s1\"]')\n",
-    "start: page.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.pa-win [data-act=\"start\"]')\n"
-   ],
+   "errors": [],
    "screenshots": [
     "chromium_hq-portrait_view_arrival.png",
     "chromium_hq-portrait_view_spawn.png",
@@ -220,7 +227,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 142891,
+     "loadMs": 122551,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -276,7 +283,7 @@
       },
       "寵物商人洛恩": {
        "meshes": 11,
-       "triangles": 59566
+       "triangles": 59568
       }
      },
      "errors": [],
@@ -285,19 +292,19 @@
     "perf": {
      "arrival": {
       "drawCalls": 105,
-      "triangles": 353091
+      "triangles": 353213
      },
      "spawn": {
       "drawCalls": 101,
-      "triangles": 353621
+      "triangles": 353743
      },
      "plaza_north": {
       "drawCalls": 104,
-      "triangles": 330192
+      "triangles": 330314
      },
      "east": {
       "drawCalls": 103,
-      "triangles": 340154
+      "triangles": 340276
      }
     },
     "npcs": [
@@ -305,31 +312,31 @@
       "id": "sword",
       "target": "npc:sword",
       "what": "npc:sword",
-      "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職由職業系統提供，正在與 Claude A "
+      "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職功能正在整合中（預覽版），敬請期待。\n  "
      },
      {
       "id": "knight",
       "target": "npc:knight",
       "what": "npc:knight",
-      "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職由職業系統提供，正在與 Claude A "
+      "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職功能正在整合中（預覽版），敬請期待。\n  "
      },
      {
       "id": "mage",
       "target": "npc:mage",
       "what": "npc:mage",
-      "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職由職業系統提供，正在與 Claude A "
+      "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職功能正在整合中（預覽版），敬請期待。\n  "
      },
      {
       "id": "church",
       "target": "npc:church",
       "what": "npc:church",
-      "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職由職業系統提供，正在與 Claude A 的角"
+      "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職功能正在整合中（預覽版），敬請期待。\n    "
      },
      {
       "id": "circus",
       "target": "npc:circus",
       "what": "npc:circus",
-      "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職由職業系統提供，正在與 Claude A 的"
+      "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職功能正在整合中（預覽版），敬請期待。\n   "
      },
      {
       "id": "warehouse",
@@ -376,9 +383,9 @@
       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
      }
     ],
-    "fpsSoftware": 100
+    "fpsSoftware": 99
    },
-   "ok": false
+   "ok": true
   },
   {
    "browser": "chromium",
@@ -412,19 +419,19 @@
      "detail": {
       "arrival": {
        "drawCalls": 67,
-       "triangles": 114045
+       "triangles": 114050
       },
       "spawn": {
        "drawCalls": 63,
-       "triangles": 113950
+       "triangles": 113955
       },
       "plaza_north": {
-       "drawCalls": 67,
-       "triangles": 106488
+       "drawCalls": 66,
+       "triangles": 106401
       },
       "east": {
        "drawCalls": 65,
-       "triangles": 111508
+       "triangles": 111513
       }
      }
     },
@@ -444,31 +451,31 @@
        "id": "sword",
        "target": "npc:sword",
        "what": "npc:sword",
-       "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職由職業系統提供，正在與 Claude A "
+       "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職功能正在整合中（預覽版），敬請期待。\n  "
       },
       {
        "id": "knight",
        "target": "npc:knight",
        "what": "npc:knight",
-       "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職由職業系統提供，正在與 Claude A "
+       "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職功能正在整合中（預覽版），敬請期待。\n  "
       },
       {
        "id": "mage",
        "target": "npc:mage",
        "what": "npc:mage",
-       "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職由職業系統提供，正在與 Claude A "
+       "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職功能正在整合中（預覽版），敬請期待。\n  "
       },
       {
        "id": "church",
        "target": "npc:church",
        "what": "npc:church",
-       "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職由職業系統提供，正在與 Claude A 的角"
+       "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職功能正在整合中（預覽版），敬請期待。\n    "
       },
       {
        "id": "circus",
        "target": "npc:circus",
        "what": "npc:circus",
-       "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職由職業系統提供，正在與 Claude A 的"
+       "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職功能正在整合中（預覽版），敬請期待。\n   "
       },
       {
        "id": "warehouse",
@@ -600,7 +607,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 19337,
+     "loadMs": 15813,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -656,7 +663,7 @@
       },
       "寵物商人洛恩": {
        "meshes": 11,
-       "triangles": 14591
+       "triangles": 14596
       }
      },
      "errors": [],
@@ -665,19 +672,19 @@
     "perf": {
      "arrival": {
       "drawCalls": 67,
-      "triangles": 114045
+      "triangles": 114050
      },
      "spawn": {
       "drawCalls": 63,
-      "triangles": 113950
+      "triangles": 113955
      },
      "plaza_north": {
-      "drawCalls": 67,
-      "triangles": 106488
+      "drawCalls": 66,
+      "triangles": 106401
      },
      "east": {
       "drawCalls": 65,
-      "triangles": 111508
+      "triangles": 111513
      }
     },
     "npcs": [
@@ -685,31 +692,31 @@
       "id": "sword",
       "target": "npc:sword",
       "what": "npc:sword",
-      "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職由職業系統提供，正在與 Claude A "
+      "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職功能正在整合中（預覽版），敬請期待。\n  "
      },
      {
       "id": "knight",
       "target": "npc:knight",
       "what": "npc:knight",
-      "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職由職業系統提供，正在與 Claude A "
+      "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職功能正在整合中（預覽版），敬請期待。\n  "
      },
      {
       "id": "mage",
       "target": "npc:mage",
       "what": "npc:mage",
-      "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職由職業系統提供，正在與 Claude A "
+      "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職功能正在整合中（預覽版），敬請期待。\n  "
      },
      {
       "id": "church",
       "target": "npc:church",
       "what": "npc:church",
-      "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職由職業系統提供，正在與 Claude A 的角"
+      "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職功能正在整合中（預覽版），敬請期待。\n    "
      },
      {
       "id": "circus",
       "target": "npc:circus",
       "what": "npc:circus",
-      "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職由職業系統提供，正在與 Claude A 的"
+      "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職功能正在整合中（預覽版），敬請期待。\n   "
      },
      {
       "id": "warehouse",
@@ -792,19 +799,19 @@
      "detail": {
       "arrival": {
        "drawCalls": 134,
-       "triangles": 370424
+       "triangles": 370546
       },
       "spawn": {
        "drawCalls": 115,
-       "triangles": 363956
+       "triangles": 364078
       },
       "plaza_north": {
        "drawCalls": 116,
-       "triangles": 335637
+       "triangles": 335759
       },
       "east": {
        "drawCalls": 134,
-       "triangles": 370663
+       "triangles": 370785
       }
      }
     },
@@ -824,31 +831,31 @@
        "id": "sword",
        "target": "npc:sword",
        "what": "npc:sword",
-       "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職由職業系統提供，正在與 Claude A "
+       "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職功能正在整合中（預覽版），敬請期待。\n  "
       },
       {
        "id": "knight",
        "target": "npc:knight",
        "what": "npc:knight",
-       "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職由職業系統提供，正在與 Claude A "
+       "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職功能正在整合中（預覽版），敬請期待。\n  "
       },
       {
        "id": "mage",
        "target": "npc:mage",
        "what": "npc:mage",
-       "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職由職業系統提供，正在與 Claude A "
+       "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職功能正在整合中（預覽版），敬請期待。\n  "
       },
       {
        "id": "church",
        "target": "npc:church",
        "what": "npc:church",
-       "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職由職業系統提供，正在與 Claude A 的角"
+       "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職功能正在整合中（預覽版），敬請期待。\n    "
       },
       {
        "id": "circus",
        "target": "npc:circus",
        "what": "npc:circus",
-       "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職由職業系統提供，正在與 Claude A 的"
+       "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職功能正在整合中（預覽版），敬請期待。\n   "
       },
       {
        "id": "warehouse",
@@ -928,30 +935,37 @@
      }
     },
     "寵物鑑定：放入後可鑑定；連點只鑑定一次；結果逐條顯示；物品留在背包並變成已鑑定": {
-     "ok": false,
+     "ok": true,
      "detail": {
-      "before": "loading",
-      "after": "loading",
-      "lines": []
+      "before": "ready",
+      "after": "result",
+      "lines": [
+       {
+        "label": "攻擊力",
+        "text": "+15%",
+        "polarity": "positive"
+       },
+       {
+        "label": "生命值",
+        "text": "-5%",
+        "polarity": "negative"
+       }
+      ]
      }
     },
     "洛恩：關閉後恢復巡走": {
-     "ok": false,
+     "ok": true,
      "detail": {
       "target": "merchant",
-      "talking": true,
+      "talking": false,
       "dialog": "",
       "panelOpen": true,
       "appraisalOpen": false,
-      "merchantPaused": true
+      "merchantPaused": false
      }
     }
    },
-   "errors": [
-    "appraise button: page.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('[data-act=\"choose:appraise\"]')\n    - locator resolved to <button type=\"button\" data-act=\"choose:appraise\">…</button>\n  - attempting click action\n    - waiting for element to be visible, enabled and stable\n",
-    "tile: page.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.pa-win [data-id=\"s1\"]')\n",
-    "start: page.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.pa-win [data-act=\"start\"]')\n"
-   ],
+   "errors": [],
    "screenshots": [
     "chromium_hq-landscape_view_arrival.png",
     "chromium_hq-landscape_view_spawn.png",
@@ -966,7 +980,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 117270,
+     "loadMs": 104753,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -1022,7 +1036,7 @@
       },
       "寵物商人洛恩": {
        "meshes": 11,
-       "triangles": 59566
+       "triangles": 59568
       }
      },
      "errors": [],
@@ -1031,19 +1045,19 @@
     "perf": {
      "arrival": {
       "drawCalls": 134,
-      "triangles": 370424
+      "triangles": 370546
      },
      "spawn": {
       "drawCalls": 115,
-      "triangles": 363956
+      "triangles": 364078
      },
      "plaza_north": {
       "drawCalls": 116,
-      "triangles": 335637
+      "triangles": 335759
      },
      "east": {
       "drawCalls": 134,
-      "triangles": 370663
+      "triangles": 370785
      }
     },
     "npcs": [
@@ -1051,31 +1065,31 @@
       "id": "sword",
       "target": "npc:sword",
       "what": "npc:sword",
-      "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職由職業系統提供，正在與 Claude A "
+      "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職功能正在整合中（預覽版），敬請期待。\n  "
      },
      {
       "id": "knight",
       "target": "npc:knight",
       "what": "npc:knight",
-      "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職由職業系統提供，正在與 Claude A "
+      "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職功能正在整合中（預覽版），敬請期待。\n  "
      },
      {
       "id": "mage",
       "target": "npc:mage",
       "what": "npc:mage",
-      "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職由職業系統提供，正在與 Claude A "
+      "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職功能正在整合中（預覽版），敬請期待。\n  "
      },
      {
       "id": "church",
       "target": "npc:church",
       "what": "npc:church",
-      "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職由職業系統提供，正在與 Claude A 的角"
+      "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職功能正在整合中（預覽版），敬請期待。\n    "
      },
      {
       "id": "circus",
       "target": "npc:circus",
       "what": "npc:circus",
-      "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職由職業系統提供，正在與 Claude A 的"
+      "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職功能正在整合中（預覽版），敬請期待。\n   "
      },
      {
       "id": "warehouse",
@@ -1122,9 +1136,9 @@
       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
      }
     ],
-    "fpsSoftware": 122
+    "fpsSoftware": 118
    },
-   "ok": false
+   "ok": true
   },
   {
    "browser": "webkit",
@@ -1158,19 +1172,19 @@
      "detail": {
       "arrival": {
        "drawCalls": 105,
-       "triangles": 353091
+       "triangles": 353213
       },
       "spawn": {
        "drawCalls": 101,
-       "triangles": 353621
+       "triangles": 353743
       },
       "plaza_north": {
        "drawCalls": 105,
-       "triangles": 330300
+       "triangles": 330422
       },
       "east": {
        "drawCalls": 103,
-       "triangles": 340154
+       "triangles": 340276
       }
      }
     },
@@ -1190,31 +1204,31 @@
        "id": "sword",
        "target": "npc:sword",
        "what": "npc:sword",
-       "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職由職業系統提供，正在與 Claude A "
+       "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職功能正在整合中（預覽版），敬請期待。\n  "
       },
       {
        "id": "knight",
        "target": "npc:knight",
        "what": "npc:knight",
-       "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職由職業系統提供，正在與 Claude A "
+       "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職功能正在整合中（預覽版），敬請期待。\n  "
       },
       {
        "id": "mage",
        "target": "npc:mage",
        "what": "npc:mage",
-       "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職由職業系統提供，正在與 Claude A "
+       "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職功能正在整合中（預覽版），敬請期待。\n  "
       },
       {
        "id": "church",
        "target": "npc:church",
        "what": "npc:church",
-       "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職由職業系統提供，正在與 Claude A 的角"
+       "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職功能正在整合中（預覽版），敬請期待。\n    "
       },
       {
        "id": "circus",
        "target": "npc:circus",
        "what": "npc:circus",
-       "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職由職業系統提供，正在與 Claude A 的"
+       "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職功能正在整合中（預覽版），敬請期待。\n   "
       },
       {
        "id": "warehouse",
@@ -1351,7 +1365,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 727,
+     "loadMs": 716,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -1407,7 +1421,7 @@
       },
       "寵物商人洛恩": {
        "meshes": 11,
-       "triangles": 59566
+       "triangles": 59568
       }
      },
      "errors": [],
@@ -1416,19 +1430,19 @@
     "perf": {
      "arrival": {
       "drawCalls": 105,
-      "triangles": 353091
+      "triangles": 353213
      },
      "spawn": {
       "drawCalls": 101,
-      "triangles": 353621
+      "triangles": 353743
      },
      "plaza_north": {
       "drawCalls": 105,
-      "triangles": 330300
+      "triangles": 330422
      },
      "east": {
       "drawCalls": 103,
-      "triangles": 340154
+      "triangles": 340276
      }
     },
     "npcs": [
@@ -1436,31 +1450,31 @@
       "id": "sword",
       "target": "npc:sword",
       "what": "npc:sword",
-      "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職由職業系統提供，正在與 Claude A "
+      "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職功能正在整合中（預覽版），敬請期待。\n  "
      },
      {
       "id": "knight",
       "target": "npc:knight",
       "what": "npc:knight",
-      "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職由職業系統提供，正在與 Claude A "
+      "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職功能正在整合中（預覽版），敬請期待。\n  "
      },
      {
       "id": "mage",
       "target": "npc:mage",
       "what": "npc:mage",
-      "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職由職業系統提供，正在與 Claude A "
+      "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職功能正在整合中（預覽版），敬請期待。\n  "
      },
      {
       "id": "church",
       "target": "npc:church",
       "what": "npc:church",
-      "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職由職業系統提供，正在與 Claude A 的角"
+      "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職功能正在整合中（預覽版），敬請期待。\n    "
      },
      {
       "id": "circus",
       "target": "npc:circus",
       "what": "npc:circus",
-      "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職由職業系統提供，正在與 Claude A 的"
+      "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職功能正在整合中（預覽版），敬請期待。\n   "
      },
      {
       "id": "warehouse",
@@ -1507,7 +1521,7 @@
       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
      }
     ],
-    "fpsSoftware": 100
+    "fpsSoftware": 101
    },
    "ok": true
   },
@@ -1543,29 +1557,29 @@
      "detail": {
       "arrival": {
        "drawCalls": 67,
-       "triangles": 114045
+       "triangles": 114050
       },
       "spawn": {
        "drawCalls": 63,
-       "triangles": 113950
+       "triangles": 113955
       },
       "plaza_north": {
        "drawCalls": 67,
-       "triangles": 106488
+       "triangles": 106493
       },
       "east": {
        "drawCalls": 65,
-       "triangles": 111508
+       "triangles": 111513
       }
      }
     },
     "移動規則：一般行走走上石階到高台（不跳躍）": {
      "ok": true,
      "detail": {
-      "x": -5.746655104998964e-16,
+      "x": -5.452739873203591e-16,
       "y": 2,
-      "z": 24.38499999999997,
-      "yaw": -6.123233995713074e-17
+      "z": 23.905000000000015,
+      "yaw": -6.123233995645925e-17
      }
     },
     "NPC 互動：8 位 NPC 都能靠近後點擊對話（名稱、職責）": {
@@ -1575,31 +1589,31 @@
        "id": "sword",
        "target": "npc:sword",
        "what": "npc:sword",
-       "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職由職業系統提供，正在與 Claude A "
+       "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職功能正在整合中（預覽版），敬請期待。\n  "
       },
       {
        "id": "knight",
        "target": "npc:knight",
        "what": "npc:knight",
-       "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職由職業系統提供，正在與 Claude A "
+       "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職功能正在整合中（預覽版），敬請期待。\n  "
       },
       {
        "id": "mage",
        "target": "npc:mage",
        "what": "npc:mage",
-       "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職由職業系統提供，正在與 Claude A "
+       "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職功能正在整合中（預覽版），敬請期待。\n  "
       },
       {
        "id": "church",
        "target": "npc:church",
        "what": "npc:church",
-       "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職由職業系統提供，正在與 Claude A 的角"
+       "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職功能正在整合中（預覽版），敬請期待。\n    "
       },
       {
        "id": "circus",
        "target": "npc:circus",
        "what": "npc:circus",
-       "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職由職業系統提供，正在與 Claude A 的"
+       "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職功能正在整合中（預覽版），敬請期待。\n   "
       },
       {
        "id": "warehouse",
@@ -1731,7 +1745,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 2387,
+     "loadMs": 2285,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -1787,7 +1801,7 @@
       },
       "寵物商人洛恩": {
        "meshes": 11,
-       "triangles": 14591
+       "triangles": 14596
       }
      },
      "errors": [],
@@ -1796,19 +1810,19 @@
     "perf": {
      "arrival": {
       "drawCalls": 67,
-      "triangles": 114045
+      "triangles": 114050
      },
      "spawn": {
       "drawCalls": 63,
-      "triangles": 113950
+      "triangles": 113955
      },
      "plaza_north": {
       "drawCalls": 67,
-      "triangles": 106488
+      "triangles": 106493
      },
      "east": {
       "drawCalls": 65,
-      "triangles": 111508
+      "triangles": 111513
      }
     },
     "npcs": [
@@ -1816,31 +1830,31 @@
       "id": "sword",
       "target": "npc:sword",
       "what": "npc:sword",
-      "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職由職業系統提供，正在與 Claude A "
+      "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職功能正在整合中（預覽版），敬請期待。\n  "
      },
      {
       "id": "knight",
       "target": "npc:knight",
       "what": "npc:knight",
-      "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職由職業系統提供，正在與 Claude A "
+      "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職功能正在整合中（預覽版），敬請期待。\n  "
      },
      {
       "id": "mage",
       "target": "npc:mage",
       "what": "npc:mage",
-      "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職由職業系統提供，正在與 Claude A "
+      "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職功能正在整合中（預覽版），敬請期待。\n  "
      },
      {
       "id": "church",
       "target": "npc:church",
       "what": "npc:church",
-      "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職由職業系統提供，正在與 Claude A 的角"
+      "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職功能正在整合中（預覽版），敬請期待。\n    "
      },
      {
       "id": "circus",
       "target": "npc:circus",
       "what": "npc:circus",
-      "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職由職業系統提供，正在與 Claude A 的"
+      "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職功能正在整合中（預覽版），敬請期待。\n   "
      },
      {
       "id": "warehouse",
@@ -1892,5 +1906,5 @@
    "ok": true
   }
  ],
- "finishedAt": "2026-11-24T09:03:39.895Z"
+ "finishedAt": "2026-11-24T09:30:07.220Z"
 }
