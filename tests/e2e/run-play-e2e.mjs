@@ -1,7 +1,7 @@
 // Stage 5.6 星芽原野整合（?play=starsprout）端對端測試：男女角色、移動、戰鬥、擊倒、掉落、撿取、背包、寵物（方案 A）、跟隨、屬性、正式設定缺值、效能測試流程。
 // 用法：node tests/e2e/run-play-e2e.mjs dist [webkit,chromium]
 // 注意：CI 是無頭瀏覽器＋軟體繪圖（約 2～10 FPS），遊戲時間比實際慢；FPS 不代表 iPhone。
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { loadPlaywright, serve } from "./static-server.mjs";
 
 const distDir = process.argv[2] ?? "dist";
@@ -9,6 +9,10 @@ const browsers = (process.argv[3] ?? "webkit").split(",");
 const outDir = new URL("../../test-results/play-e2e/", import.meta.url).pathname;
 mkdirSync(outDir, { recursive: true });
 
+// 動作修正版 C1.0-B5a 的 GLB 還沒放進來時，改用 B5（&ver=c10b5）測試其餘流程（報告會註明）
+const VER = existsSync(`${distDir}/models/novice_c10b5a_male_hq.glb`) ? "c10b5a" : "c10b5";
+const VERQ = VER === "c10b5a" ? "" : "&ver=c10b5";
+console.log(`角色模型版本：${VER}`);
 const pw = await loadPlaywright();
 const server = await serve(distDir);
 const report = { startedAt: new Date().toISOString(), runs: [] };
@@ -43,7 +47,7 @@ for (const name of browsers) {
     };
     const info = () => page.evaluate(() => window.__starwishPlay.info());
     const open = async (q2) => {
-      await page.goto(server.url + `/?play=starsprout&g=${g}&lod=${lod}&quality=${q}&seed=7${q2 ?? ""}`, { waitUntil: "load" });
+      await page.goto(server.url + `/?play=starsprout&g=${g}&lod=${lod}&quality=${q}&seed=7${VERQ}${q2 ?? ""}`, { waitUntil: "load" });
       return page
         .waitForFunction(() => window.__starwishPlay?.ready === true || document.querySelector(".boot-status.error"), null, { timeout: 180000 })
         .then(() => page.evaluate(() => window.__starwishPlay?.ready === true))
@@ -59,7 +63,7 @@ for (const name of browsers) {
       await frames(6);
       const i0 = await info();
       run.results.start = i0;
-      check(`${g} ${lod}：C1.0-B5a GLB、6 隻星露啵啵、寵物＝測試設定`, i0.file === `novice_c10b5a_${g}_${lod}.glb` && i0.monsters.length === 6 && i0.pets.enabled && i0.pets.mode === "preview", { file: i0.file, monsters: i0.monsters.length, pets: i0.pets });
+      check(`${g} ${lod}：${VER} GLB、6 隻星露啵啵、寵物＝測試設定`, i0.file === `novice_${VER}_${g}_${lod}.glb` && i0.monsters.length === 6 && i0.pets.enabled && i0.pets.mode === "preview", { file: i0.file, monsters: i0.monsters.length, pets: i0.pets });
       check("預設渲染：P3-2（無 HDR 管線）＋腳下柔邊陰影", i0.render.p3 && !i0.render.pipeline && i0.render.charShadow === "blob", i0.render);
       await shot("spawn");
 
@@ -191,6 +195,7 @@ for (const name of browsers) {
 }
 await server.close();
 report.finishedAt = new Date().toISOString();
+report.characterVersion = VER;
 report.failures = failures;
 writeFileSync(`${outDir}report.json`, JSON.stringify(report, null, 2));
 console.log(failures ? `\n${failures} 項失敗` : "\n全部通過");
