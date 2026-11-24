@@ -11,8 +11,9 @@ import { BOX_COLLIDERS, CIRCLE_COLLIDERS, insideBox, NPC_SPOTS, polar, ROADS, SP
 
 export const PET_MERCHANT = Object.freeze({
   id: "petMerchant",
-  name: "寵物商人",
-  role: "寵物鑑定・飼料・培育與進化資訊",
+  /** V2：暫定名稱「星靈培育師・洛恩」 */
+  name: "星靈培育師・洛恩",
+  role: "寵物商人：寵物鑑定・飼料・培育與進化資訊",
   /** 巡走半徑（m） */
   patrolR: 10.8,
   /** 行走速度（m/s；玩家 5 m/s） */
@@ -175,9 +176,10 @@ export function canTalkToPetMerchant(px: number, pz: number, t: number): boolean
 
 // ---------------- 與寵物系統連接的服務介面 ----------------
 
-/** 可鑑定的物品種類（都由打怪掉落；對應寵物由寵物系統決定） */
-export type PetItemKind = "seed" | "hatchEgg" | "birdEgg";
-export const PET_ITEM_LABEL: Readonly<Record<PetItemKind, string>> = { seed: "種子", hatchEgg: "孵化蛋", birdEgg: "鳥蛋" };
+/** 可鑑定的物品種類（都由打怪掉落）；id 與 Claude A 寵物核心 `PetSourceId`（seed／egg／birdEgg）相同 */
+export type PetItemKind = "seed" | "egg" | "birdEgg";
+export const PET_ITEM_KINDS: readonly PetItemKind[] = ["seed", "egg", "birdEgg"];
+export const PET_ITEM_LABEL: Readonly<Record<PetItemKind, string>> = { seed: "種子", egg: "孵化蛋", birdEgg: "鳥蛋" };
 
 export type PetServiceResult<T> = { ok: true; data: T } | { ok: false; reason: "unavailable" | "noItem" | "notEnoughGold" | "error"; message: string };
 
@@ -244,7 +246,7 @@ export function petMerchantService(): PetMerchantService {
 
 // ---------------- 對話選單狀態（畫面無關） ----------------
 
-export type PetMenuScreen = "closed" | "root" | "appraiseKind" | "message";
+export type PetMenuScreen = "closed" | "root" | "appraise" | "appraiseKind" | "message";
 export interface PetMenuState {
   screen: PetMenuScreen;
   /** message 畫面的標題與內容 */
@@ -255,7 +257,7 @@ export interface PetMenuState {
 }
 export type PetMenuOption = "appraise" | "feed" | "guide" | "leave";
 export const PET_MENU_OPTIONS: readonly { id: PetMenuOption; label: string; hint: string }[] = [
-  { id: "appraise", label: "鑑定寵物屬性", hint: "種子・孵化蛋・鳥蛋" },
+  { id: "appraise", label: "寵物鑑定", hint: "鑑定種子・孵化蛋・鳥蛋的寵物屬性" },
   { id: "feed", label: "購買寵物飼料", hint: "飼料商店" },
   { id: "guide", label: "培育與進化資訊", hint: "照顧方式・進化條件" },
   { id: "leave", label: "離開", hint: "" },
@@ -290,7 +292,8 @@ export async function petMenuStep(
     }
     case "choose":
       if (action.option === "leave") return { screen: "closed" };
-      if (action.option === "appraise") return { screen: "appraiseKind" };
+      // V2：開啟星靈鑑定視窗（PetAppraisalWindow）
+      if (action.option === "appraise") return { screen: "appraise" };
       if (action.option === "feed") {
         const r = await svc.feedOffers();
         return { screen: "message", title: "寵物飼料", lines: resultLines(r, (o) => (o.length ? o.map((x) => `・${x.name}　${x.price} 金幣`) : ["目前沒有飼料可以販售。"])), back: "root" };
@@ -301,4 +304,90 @@ export async function petMenuStep(
       }
   }
   return state;
+}
+
+// ---------------- 對話時暫停巡走（V2） ----------------
+
+/**
+ * 巡走時鐘：玩家開啟商人介面時暫停巡走（商人停下、面向玩家），關閉後從原地接著走（巡走時間扣掉暫停的時間）。
+ * 多人模式（shared）：
+ * - 每位玩家的「對話中」需要持續回報（heartbeat）；超過 holdTimeoutSec 沒回報就自動失效（玩家斷線、離開）
+ * - 連續暫停最長 maxPauseSec；時間到就恢復巡走（對話視窗可以繼續開著），之後 cooldownSec 內不再因對話暫停
+ * → 任何單一玩家都不能讓商人永久停住。單人模式沒有上限（只有自己）。
+ */
+export class PetMerchantPatrolClock {
+  private pausedTotal = 0;
+  private pauseStart: number | null = null;
+  private cooldownUntil = -Infinity;
+  private readonly holds = new Map<string, { since: number; seen: number; x: number; z: number }>();
+
+  readonly opts: { shared: boolean; holdTimeoutSec?: number; maxPauseSec?: number; cooldownSec?: number };
+
+  constructor(opts: { shared: boolean; holdTimeoutSec?: number; maxPauseSec?: number; cooldownSec?: number } = { shared: false }) {
+    this.opts = opts;
+  }
+
+  private get holdTimeout(): number {
+    return this.opts.holdTimeoutSec ?? 10;
+  }
+  private get maxPause(): number {
+    return this.opts.maxPauseSec ?? 90;
+  }
+  private get cooldown(): number {
+    return this.opts.cooldownSec ?? 20;
+  }
+
+  /** 玩家開啟介面／對話中持續回報（附玩家位置，讓商人面向他） */
+  hold(playerId: string, now: number, x: number, z: number): void {
+    const h = this.holds.get(playerId);
+    this.holds.set(playerId, { since: h?.since ?? now, seen: now, x, z });
+    this.update(now);
+  }
+
+  /** 玩家關閉介面 */
+  release(playerId: string, now: number): void {
+    this.holds.delete(playerId);
+    this.update(now);
+  }
+
+  private activeHolds(now: number): { x: number; z: number; since: number }[] {
+    for (const [id, h] of this.holds) if (this.opts.shared && now - h.seen > this.holdTimeout) this.holds.delete(id);
+    return [...this.holds.values()];
+  }
+
+  /** 依時間更新暫停狀態 */
+  update(now: number): void {
+    const want = this.activeHolds(now).length > 0 && now >= this.cooldownUntil;
+    if (this.pauseStart !== null) {
+      const tooLong = this.opts.shared && now - this.pauseStart >= this.maxPause;
+      if (!want || tooLong) {
+        const end = tooLong ? this.pauseStart + this.maxPause : now;
+        this.pausedTotal += end - this.pauseStart;
+        this.pauseStart = null;
+        if (tooLong) this.cooldownUntil = end + this.cooldown;
+      }
+    } else if (want) {
+      this.pauseStart = now;
+    }
+  }
+
+  paused(now: number): boolean {
+    this.update(now);
+    return this.pauseStart !== null;
+  }
+
+  /** 巡走用時間（暫停期間不前進） */
+  patrolTime(now: number): number {
+    this.update(now);
+    const p = this.pauseStart !== null ? now - this.pauseStart : 0;
+    return now - this.pausedTotal - p;
+  }
+
+  /** 暫停時要面向的玩家（最早開始對話的那位） */
+  talkTarget(now: number): { x: number; z: number } | null {
+    const hs = this.activeHolds(now);
+    if (!hs.length || this.pauseStart === null) return null;
+    hs.sort((a, b) => a.since - b.since);
+    return { x: hs[0]!.x, z: hs[0]!.z };
+  }
 }

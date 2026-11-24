@@ -78,20 +78,12 @@ test("占位服務：所有功能回覆「準備中」，不產生鑑定結果�
   assert.equal(petMerchantService(), PLACEHOLDER_PET_MERCHANT_SERVICE);
 });
 
-test("選單：開啟 → 鑑定 → 選種類 → 準備中訊息 → 返回 → 飼料 → 培育 → 離開", async () => {
+test("選單：開啟 → 寵物鑑定（開啟星靈鑑定視窗）→ 飼料 → 培育 → 離開", async () => {
   let s = await petMenuStep({ screen: "closed" }, { type: "open" });
   assert.equal(s.screen, "root");
   s = await petMenuStep(s, { type: "choose", option: "appraise" });
-  assert.equal(s.screen, "appraiseKind");
-  s = await petMenuStep(s, { type: "kind", kind: "birdEgg" });
-  assert.equal(s.screen, "message");
-  assert.equal(s.title, "鑑定鳥蛋");
-  assert.match(s.lines!.join(""), /尚未開放/);
-  s = await petMenuStep(s, { type: "back" });
-  assert.equal(s.screen, "appraiseKind");
-  s = await petMenuStep(s, { type: "back" });
-  assert.equal(s.screen, "root");
-  s = await petMenuStep(s, { type: "choose", option: "feed" });
+  assert.equal(s.screen, "appraise");
+  s = await petMenuStep({ screen: "root" }, { type: "choose", option: "feed" });
   assert.match(s.lines!.join(""), /尚未開放/);
   s = await petMenuStep(s, { type: "choose", option: "guide" });
   assert.equal(s.title, "培育與進化");
@@ -122,4 +114,115 @@ test("連接正式服務後，選單改用正式資料（測試用假服務）",
 
 test("寵物商人不改動既有 NPC 與出生點", () => {
   assert.equal(NPC_SPOTS.some((n) => n.id === PET_MERCHANT.id), false);
+});
+
+// ---------------- V2：對話暫停與星靈鑑定 ----------------
+import { PetMerchantPatrolClock } from "../../src/maps/village/petMerchant.ts";
+import {
+  begin,
+  canAppraise,
+  clearSlot,
+  createDemoAppraisalService,
+  feeText,
+  finish,
+  initialAppraisal,
+  linesFromAffixes,
+  place,
+  runAppraisal,
+  withItems,
+  type AppraisalState,
+} from "../../src/maps/village/petAppraisal.ts";
+
+test("對話暫停：開啟時停下、關閉後從原地接著走（巡走時間扣掉暫停）", () => {
+  const c = new PetMerchantPatrolClock({ shared: false });
+  assert.equal(c.patrolTime(10), 10);
+  c.hold("me", 10, 1, 2);
+  assert.equal(c.paused(15), true);
+  assert.equal(c.patrolTime(40), 10);
+  assert.deepEqual(c.talkTarget(40), { x: 1, z: 2 });
+  c.release("me", 40);
+  assert.equal(c.paused(41), false);
+  assert.equal(c.patrolTime(41), 11);
+});
+
+test("多人模式：單一玩家不能永久停住商人（回報逾時失效、連續暫停上限＋冷卻）", () => {
+  const c = new PetMerchantPatrolClock({ shared: true, holdTimeoutSec: 10, maxPauseSec: 90, cooldownSec: 20 });
+  c.hold("a", 0, 0, 0);
+  for (let t = 1; t <= 200; t++) c.hold("a", t, 0, 0); // 一直開著、一直回報
+  assert.equal(c.paused(200), false, "暫停超過 90 秒後必須恢復巡走");
+  assert.ok(c.patrolTime(200) >= 200 - 90 - 90, "最多只會被暫停有限時間");
+  const d = new PetMerchantPatrolClock({ shared: true, holdTimeoutSec: 10 });
+  d.hold("b", 0, 0, 0); // 開了就斷線、不再回報
+  assert.equal(d.paused(5), true);
+  assert.equal(d.paused(11), false, "沒有回報 10 秒後自動失效");
+});
+
+const fresh = async (): Promise<{ s: AppraisalState; svc: ReturnType<typeof createDemoAppraisalService> }> => {
+  const svc = createDemoAppraisalService({ delayMs: 5 });
+  const inv = await svc.inventory();
+  assert.ok(inv.ok);
+  return { s: withItems(initialAppraisal(), inv.ok ? inv.data : [], svc.testData), svc };
+};
+
+test("鑑定：只接受種子／孵化蛋／鳥蛋；鑑定框沒有物品時按鈕停用", async () => {
+  const { s } = await fresh();
+  assert.equal(canAppraise(s), false);
+  assert.equal(s.items.every((i) => ["seed", "egg", "birdEgg"].includes(i.kind)), true);
+  const bad = withItems(s, [...s.items, { id: "x", kind: "potion" as never, name: "藥水", appraised: false }], true);
+  assert.equal(bad.items.some((i) => i.id === "x"), false);
+  assert.equal(place(s, "x").selectedId, null);
+  assert.equal(canAppraise(place(s, "s1")), true);
+  assert.equal(canAppraise(clearSlot(place(s, "s1"))), false);
+});
+
+test("鑑定：已鑑定物品不能再鑑定", async () => {
+  const { s } = await fresh();
+  const p = place(s, "e0");
+  assert.equal(p.phase, "appraised");
+  assert.equal(canAppraise(p), false);
+  assert.ok(p.lines.length > 0);
+});
+
+test("鑑定：連點不會重複送出、只扣一次；完成後物品留在背包並更新為已鑑定（不消失、不複製）", async () => {
+  const { s, svc } = await fresh();
+  let st = place(s, "b1");
+  const n0 = st.items.length;
+  const set = (x: AppraisalState) => (st = x);
+  const a = runAppraisal(st, svc, set, "req-1");
+  // 鑑定進行中再點兩次：狀態已鎖定，不會送出
+  const b = runAppraisal(st, svc, set, "req-2");
+  const c2 = runAppraisal(st, svc, set, "req-3");
+  await Promise.all([a, b, c2]);
+  assert.equal(svc.charges(), 1);
+  assert.equal(svc.gold(), 900);
+  assert.equal(st.items.length, n0);
+  assert.equal(st.items.filter((i) => i.id === "b1").length, 1);
+  assert.equal(st.items.find((i) => i.id === "b1")!.appraised, true);
+  assert.equal(st.phase, "result");
+  assert.equal(st.lines.length, 4);
+  // 同一個 requestId 重送：服務回傳同一結果、不再扣款
+  await svc.appraise("b1", "req-1");
+  assert.equal(svc.charges(), 1);
+  // 再鑑定同一物品：拒絕
+  const again = await svc.appraise("b1", "req-9");
+  assert.equal(again.ok, false);
+  assert.equal(canAppraise(place(st, "b1")), false);
+});
+
+test("鑑定：結果顏色（正＝綠、負＝紅、無屬性＝灰）與費用顯示", () => {
+  const l = linesFromAffixes([{ label: "攻擊力", value: 15, unit: "percent" }, { label: "攻速", value: -2, unit: "flat" }]);
+  assert.deepEqual(l.map((x) => x.polarity), ["positive", "negative"]);
+  assert.equal(l[0]!.text, "+15%");
+  assert.equal(l[1]!.text, "-2");
+  assert.equal(linesFromAffixes([])[0]!.polarity, "none");
+  assert.equal(feeText({ fee: null, test: false }), "未定案");
+  assert.equal(feeText({ fee: 100, test: true }), "100 金幣（測試）");
+});
+
+test("鑑定：服務錯誤時解除鎖定、可以再試", async () => {
+  const { s } = await fresh();
+  const st = begin(place(s, "s1"), "r")!;
+  const e = finish(st, "r", { ok: false, reason: "error", message: "x" });
+  assert.equal(e.pending, null);
+  assert.equal(e.phase, "error");
 });

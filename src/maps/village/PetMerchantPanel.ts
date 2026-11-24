@@ -9,6 +9,8 @@ export class PetMerchantPanel {
   private state: PetMenuState = { screen: "closed" };
   private busy = false;
   onClose: (() => void) | null = null;
+  /** 選「寵物鑑定」：面板收起，由呼叫端開啟星靈鑑定視窗 */
+  onAppraise: (() => void) | null = null;
 
   constructor(parent: HTMLElement = document.body) {
     this.el = document.createElement("div");
@@ -56,6 +58,11 @@ export class PetMerchantPanel {
       this.state = await petMenuStep(this.state, a, petMerchantService());
     } finally {
       this.busy = false;
+    }
+    if (this.state.screen === "appraise") {
+      this.el.style.display = "none";
+      this.onAppraise?.();
+      return;
     }
     this.render();
     if (this.state.screen === "closed") this.onClose?.();
