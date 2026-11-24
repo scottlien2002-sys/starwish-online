@@ -60,7 +60,7 @@ for (const name of browsers) {
       await shot(page, "arrival");
 
       const lay = await page.evaluate(() => window.__starwishVillage.layout());
-      check("NPC 站位 8（6 職業＋倉庫＋佈告欄）、出生／復活點 24、傳送門 4", lay.npcs.length === 8 && lay.respawn.length === 24 && lay.portals.length === 4, { npcs: lay.npcs.length, respawn: lay.respawn.length, portals: lay.portals.length });
+      check("NPC 站位 9（6 職業＋倉庫＋佈告欄＋星願商會）、出生／復活點 24、傳送門 4", lay.npcs.length === 9 && lay.respawn.length === 24 && lay.portals.length === 4, { npcs: lay.npcs.length, respawn: lay.respawn.length, portals: lay.portals.length });
 
       // 走路：從傳送陣往北走 3 秒（5 m/s）
       const walk = await page.evaluate(async () => {

@@ -19,7 +19,7 @@ export function polar(bearingDeg: number, r: number): { x: number; z: number } {
   return { x: r * Math.sin(t), z: r * Math.cos(t) };
 }
 
-export type BuildingId = "sword" | "knight" | "mage" | "church" | "circus" | "warehouse" | "smith";
+export type BuildingId = "sword" | "knight" | "mage" | "church" | "circus" | "warehouse" | "smith" | "guild";
 
 export interface BuildingDef {
   id: BuildingId;
@@ -49,6 +49,10 @@ export const BUILDINGS: readonly BuildingDef[] = [
   { id: "circus", name: "馬戲團", role: "小丑轉職", bearing: 128, w: 14, d: 14, eave: 4, top: 10, floor: 0, front: 24, shape: "tent" },
   { id: "warehouse", name: "倉庫", role: "倉庫", bearing: 208, w: 10, d: 8, eave: 4.5, top: 7, floor: 0, front: 24, shape: "storehouse" },
   { id: "smith", name: "鐵匠鋪", role: "鐵匠轉職＋裝備鑑定", bearing: 240, w: 12, d: 10, eave: 5, top: 11, floor: 0, front: 24, shape: "shop" },
+  // 第三批追加（2026-11-24）：星願商會＝道具店＋玩家交易所。放在馬戲團與南路之間、佈告欄後方的空地（原本沒有使用），
+  // 與其他建築間距 ≥2.5 m、離南路路緣 ≥1.5 m、不碰任何既有碰撞與 NPC 互動區；正門朝噴泉。
+  // 商會 NPC 站在正門前、往南路側偏 3.5 m（不站在佈告欄正後方，從廣場直走過去不會被佈告欄擋住）
+  { id: "guild", name: "星願商會", role: "道具店＋玩家交易所", bearing: 160, w: 10, d: 8, eave: 5.5, top: 10, floor: 0, front: 27, shape: "shop" },
 ];
 
 /** 建築中心（佔地矩形中心） */
@@ -138,6 +142,11 @@ export const NPC_SPOTS: readonly NpcSpot[] = [
   ...BUILDINGS.map((b): NpcSpot => {
     let p = polar(b.bearing, b.floor > 0 ? b.front - 2 : b.front - 2.5);
     let name = b.name;
+    if (b.id === "guild") {
+      const t = (b.bearing * Math.PI) / 180;
+      p = { x: 25.0 * Math.sin(t) + 3.5 * Math.cos(t), z: 25.0 * Math.cos(t) - 3.5 * Math.sin(t) };
+      name = "商會掌櫃";
+    }
     if (b.id === "smith") {
       const t = (b.bearing * Math.PI) / 180;
       p = { x: 21.0 * Math.sin(t) + 1.8 * Math.cos(t), z: 21.0 * Math.cos(t) - 1.8 * Math.sin(t) };

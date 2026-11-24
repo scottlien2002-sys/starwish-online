@@ -43,14 +43,14 @@ for (const [name, fps, jitter] of [
   ["30 FPS", 30, 0.2],
   ["15 FPS", 15, 0.2],
 ] as const) {
-  test(`巡迴 3 圈 ${name}：真正卡住 0、腳本誤報 0、碰撞滑動 0、每圈約 72～77 秒`, () => {
+  test(`巡迴 3 圈 ${name}：真正卡住 0、腳本誤報 0、碰撞滑動 0、每圈約 72～82 秒（含星願商會）`, () => {
     const r = simulate(fps, jitter, 3);
     assert.equal(r.phase, "done");
     assert.equal(r.loopTimes.length, 3);
     assert.equal(r.stuckCount, 0, JSON.stringify(r.events));
     assert.equal(r.timeoutCount, 0, JSON.stringify(r.events));
     assert.equal(r.totalBlockedFrames, 0);
-    for (const t of r.loopTimes) assert.ok(t > 70 && t < 78, `一圈 ${t} 秒`);
+    for (const t of r.loopTimes) assert.ok(t > 70 && t < 83, `一圈 ${t} 秒`);
   });
 }
 
