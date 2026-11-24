@@ -464,7 +464,7 @@ class StarsproutGame {
     const i = mc.instance;
     if (r.killed) {
       this.kills++;
-      const items = this.pets.onMonsterKilled();
+      const items = this.pets.onMonsterKilled(false); // 地上掉落物：撿起時才放進背包
       if (items.length) {
         this.dropCount += items.length;
         for (const d of this.loot.spawn(items, i.currentPosition.x, i.currentPosition.z, this.now)) this.spawnLootMesh(d);

@@ -151,3 +151,16 @@ test("詞條檢查：超過 4 條、重複、數值不在清單、未知屬性�
   assert.ok(validateAffixes(cfg, [{ stat: "luck" as never, value: 1 }]).length);
   assert.ok(validateAffixes(cfg, [{ stat: "attack", value: 10 }, { stat: "attackSpeed", value: 2 }, { stat: "defense", value: 10 }, { stat: "maxHp", value: 10 }, { stat: "maxHp", value: 15 }]).length);
 });
+
+test("地上掉落物：擊倒時不直接放進背包（collect=false），撿起時才放進去 → 不重複計算", () => {
+  const m = new PetManager(cfg, createRng(4), "preview");
+  let rolled = 0;
+  for (let i = 0; i < 20; i++) {
+    const items = m.onMonsterKilled(false);
+    rolled += items.length;
+  }
+  assert.ok(rolled > 0);
+  assert.equal(Object.values(m.save.items).reduce((a, b) => a + b, 0), 0);
+  m.giveItem("seed", 1);
+  assert.equal(m.save.items.seed, 1);
+});

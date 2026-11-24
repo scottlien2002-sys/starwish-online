@@ -77,11 +77,12 @@ export class PetManager {
   }
 
   /** 戰鬥系統：怪物死亡時呼叫（之後可依怪物種類傳入不同掉落表；目前用 drops.default） */
-  onMonsterKilled(): ItemId[] {
+  /** collect = false：只決定掉落內容（遊戲把掉落物放在地上，撿起時才用 giveItem 放進背包） */
+  onMonsterKilled(collect = true): ItemId[] {
     if (!this.enabled) return [];
     const items = rollDrops(this.rng, this.tuning);
     if (items.length) {
-      addItems(this.save, items, Date.now());
+      if (collect) addItems(this.save, items, Date.now());
       this.emit({ type: "drops", items });
     }
     return items;

@@ -124,6 +124,8 @@ for (const name of browsers) {
       check("攻擊命中、擊倒 3 隻星露啵啵", f1.kills >= 3 && f1.hits >= 9, run.results.fight);
       check("攻擊 0.5 秒一下、0.2 秒命中（攻速 100）", Math.abs(f1.attack.interval - 0.5) < 1e-6 && Math.abs(f1.attack.hitAt - 0.2) < 1e-6, f1.attack);
       check("擊倒後掉落（測試掉落率），走近自動撿起放進背包", f1.drops > 0 && f1.picked > 0 && f1.picked + f1.loot === f1.drops, run.results.fight);
+      const bagCount = Object.values(f1.pets.items).reduce((a, b) => a + b, 0);
+      check("背包數量＝撿到的數量（掉落不重複計算）", bagCount === f1.picked, { items: f1.pets.items, picked: f1.picked });
       const deadMon = f1.monsters.filter((m) => m.state === "dead" || m.state === "death" || m.state === "respawn").length;
       run.results.monsterStates = f1.monsters.map((m) => m.state);
       check("被擊倒的怪物進入死亡／等待重生", deadMon >= 1 || f1.monsters.some((m) => m.hp < 60), run.results.monsterStates);
@@ -164,7 +166,8 @@ for (const name of browsers) {
         const target = bag[0].id;
         const r1 = await p.appraiseItem(target);
         const r2 = await p.appraiseItem(target);
-        const other = p.bag().find((b) => b.id === bag[1].id)?.affixes ?? "missing";
+        const o = p.bag().find((b) => b.id === bag[1].id);
+        const other = o === undefined ? "missing" : o.affixes;
         const petId = p.hatchItem(target);
         const pet = p.list().find((x) => x.id === petId);
         return { target, r1, r2, other, petAffixes: JSON.stringify(pet?.affixes), itemAffixes: JSON.stringify(r1.affixes) };
