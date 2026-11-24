@@ -1,0 +1,1931 @@
+{
+ "startedAt": "2026-11-24T07:32:18.396Z",
+ "note": "CI 軟體繪圖：FPS 不代表 iPhone 實機",
+ "runs": [
+  {
+   "browser": "chromium",
+   "mode": "hq-portrait",
+   "checks": {
+    "全村正式美術載入完成（14 組模型、沒有錯誤）": {
+     "ok": true,
+     "detail": {
+      "status": "loaded",
+      "parts": [
+       "環境",
+       "廣場與道路",
+       "星願之泉",
+       "高台與石階",
+       "騎士軍團",
+       "法師軍團",
+       "劍士軍團",
+       "鐵匠鋪",
+       "倉庫",
+       "委託佈告欄",
+       "祭司教堂",
+       "小丑馬戲團",
+       "傳送門與南門",
+       "寵物商人洛恩"
+      ],
+      "errors": []
+     }
+    },
+    "繪製次數 ≤ 140（全村整合，任何位置）": {
+     "ok": true,
+     "detail": {
+      "arrival": {
+       "drawCalls": 123,
+       "triangles": 321273
+      },
+      "spawn": {
+       "drawCalls": 119,
+       "triangles": 321803
+      },
+      "plaza_north": {
+       "drawCalls": 122,
+       "triangles": 298374
+      },
+      "east": {
+       "drawCalls": 121,
+       "triangles": 308336
+      }
+     }
+    },
+    "移動規則：一般行走走上石階到高台（不跳躍）": {
+     "ok": false,
+     "detail": {
+      "x": -9.184850993605148e-17,
+      "y": 0,
+      "z": 16.500000000000004,
+      "yaw": -6.031412569963934e-17
+     }
+    },
+    "NPC 互動：8 位 NPC 都能靠近後點擊對話（名稱、職責）": {
+     "ok": true,
+     "detail": [
+      {
+       "id": "sword",
+       "target": "npc:sword",
+       "what": "npc:sword",
+       "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職由職業系統提供，正在與 Claude A "
+      },
+      {
+       "id": "knight",
+       "target": "npc:knight",
+       "what": "npc:knight",
+       "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職由職業系統提供，正在與 Claude A "
+      },
+      {
+       "id": "mage",
+       "target": "npc:mage",
+       "what": "npc:mage",
+       "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職由職業系統提供，正在與 Claude A "
+      },
+      {
+       "id": "church",
+       "target": "npc:church",
+       "what": "npc:church",
+       "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職由職業系統提供，正在與 Claude A 的角"
+      },
+      {
+       "id": "circus",
+       "target": "npc:circus",
+       "what": "npc:circus",
+       "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職由職業系統提供，正在與 Claude A 的"
+      },
+      {
+       "id": "warehouse",
+       "target": "npc:warehouse",
+       "what": "npc:warehouse",
+       "dialog": "倉庫倉庫要寄放物品嗎？倉庫功能正在整合中。\n      關閉"
+      },
+      {
+       "id": "smith",
+       "target": "npc:smith",
+       "what": "npc:smith",
+       "dialog": "鐵匠鐵匠轉職＋裝備鑑定鐵匠轉職、裝備詞條鑑定都找我（同一位鐵匠）。功能正在整合中"
+      },
+      {
+       "id": "board",
+       "target": "npc:board",
+       "what": "npc:board",
+       "dialog": "每日委託佈告欄每日委託每日委託會貼在這裡。功能正在整合中。\n      關閉"
+      }
+     ]
+    },
+    "鐵匠只有一位（轉職＋裝備鑑定）": {
+     "ok": true,
+     "detail": {
+      "id": "smith",
+      "name": "鐵匠（鍛造台旁）",
+      "role": "鐵匠轉職＋裝備鑑定",
+      "x": -19.086533479473207,
+      "z": -8.941154273188019,
+      "yaw": 1.132702844874802,
+      "floor": 0,
+      "interactR": 3
+     }
+    },
+    "傳送門狀態：南門開放（可前往星芽原野、需確認）、北東西休眠（未開放）；共 4 座、沒有新增出口": {
+     "ok": true,
+     "detail": [
+      {
+       "id": "south",
+       "open": true,
+       "target": "portal:south",
+       "dialog": "南方傳送門開放通往 星芽原野 Lv1–10（新手營地）。要前往嗎？\n      前往取消"
+      },
+      {
+       "id": "north",
+       "open": false,
+       "target": "portal:north",
+       "dialog": "北方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+      },
+      {
+       "id": "east",
+       "open": false,
+       "target": "portal:east",
+       "dialog": "東方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+      },
+      {
+       "id": "west",
+       "open": false,
+       "target": "portal:west",
+       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+      }
+     ]
+    },
+    "洛恩：靠近 2.5 m 內出現互動": {
+     "ok": false,
+     "detail": {
+      "target": null,
+      "talking": false,
+      "dialog": "",
+      "panelOpen": false,
+      "appraisalOpen": false,
+      "merchantPaused": false
+     }
+    },
+    "洛恩：對話時停止巡走（暫停中）並開啟商人選單": {
+     "ok": false,
+     "detail": {
+      "target": null,
+      "talking": false,
+      "dialog": "",
+      "panelOpen": false,
+      "appraisalOpen": false,
+      "merchantPaused": false
+     }
+    },
+    "寵物鑑定：放入後可鑑定；連點只鑑定一次；結果逐條顯示；物品留在背包並變成已鑑定": {
+     "ok": false,
+     "detail": {
+      "before": "loading",
+      "after": "loading",
+      "lines": []
+     }
+    },
+    "iPhone 直向：鑑定視窗沒有橫向捲動、按鈕在畫面內": {
+     "ok": false,
+     "detail": {
+      "hScroll": 0,
+      "startBottom": 9999
+     }
+    },
+    "洛恩：關閉後恢復巡走": {
+     "ok": true,
+     "detail": {
+      "target": null,
+      "talking": false,
+      "dialog": "",
+      "panelOpen": false,
+      "appraisalOpen": false,
+      "merchantPaused": false
+     }
+    }
+   },
+   "errors": [
+    "appraise button: page.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('[data-act=\"choose:appraise\"]')\n",
+    "tile: page.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.pa-win [data-id=\"s1\"]')\n",
+    "start: page.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.pa-win [data-act=\"start\"]')\n"
+   ],
+   "screenshots": [
+    "chromium_hq-portrait_view_arrival.png",
+    "chromium_hq-portrait_view_spawn.png",
+    "chromium_hq-portrait_view_plaza_north.png",
+    "chromium_hq-portrait_view_east.png",
+    "chromium_hq-portrait_npc_church.png",
+    "chromium_hq-portrait_npc_circus.png",
+    "chromium_hq-portrait_npc_smith.png",
+    "chromium_hq-portrait_portal_south.png",
+    "chromium_hq-portrait_portal_east.png",
+    "chromium_hq-portrait_merchant_talk.png",
+    "chromium_hq-portrait_appraise_1_open.png",
+    "chromium_hq-portrait_appraise_2_placed.png",
+    "chromium_hq-portrait_appraise_3_result.png"
+   ],
+   "results": {
+    "art": {
+     "on": true,
+     "status": "loaded",
+     "loadMs": 141695,
+     "parts": {
+      "環境": {
+       "meshes": 2,
+       "triangles": 13522
+      },
+      "廣場與道路": {
+       "meshes": 5,
+       "triangles": 26438
+      },
+      "星願之泉": {
+       "meshes": 7,
+       "triangles": 25644
+      },
+      "高台與石階": {
+       "meshes": 4,
+       "triangles": 4190
+      },
+      "騎士軍團": {
+       "meshes": 4,
+       "triangles": 12532
+      },
+      "法師軍團": {
+       "meshes": 5,
+       "triangles": 13709
+      },
+      "劍士軍團": {
+       "meshes": 4,
+       "triangles": 6642
+      },
+      "鐵匠鋪": {
+       "meshes": 5,
+       "triangles": 2742
+      },
+      "倉庫": {
+       "meshes": 5,
+       "triangles": 1619
+      },
+      "委託佈告欄": {
+       "meshes": 5,
+       "triangles": 811
+      },
+      "祭司教堂": {
+       "meshes": 5,
+       "triangles": 3683
+      },
+      "小丑馬戲團": {
+       "meshes": 4,
+       "triangles": 2635
+      },
+      "傳送門與南門": {
+       "meshes": 7,
+       "triangles": 10507
+      },
+      "寵物商人洛恩": {
+       "meshes": 34,
+       "triangles": 59566
+      }
+     },
+     "errors": [],
+     "merchant": true
+    },
+    "perf": {
+     "arrival": {
+      "drawCalls": 123,
+      "triangles": 321273
+     },
+     "spawn": {
+      "drawCalls": 119,
+      "triangles": 321803
+     },
+     "plaza_north": {
+      "drawCalls": 122,
+      "triangles": 298374
+     },
+     "east": {
+      "drawCalls": 121,
+      "triangles": 308336
+     }
+    },
+    "npcs": [
+     {
+      "id": "sword",
+      "target": "npc:sword",
+      "what": "npc:sword",
+      "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職由職業系統提供，正在與 Claude A "
+     },
+     {
+      "id": "knight",
+      "target": "npc:knight",
+      "what": "npc:knight",
+      "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職由職業系統提供，正在與 Claude A "
+     },
+     {
+      "id": "mage",
+      "target": "npc:mage",
+      "what": "npc:mage",
+      "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職由職業系統提供，正在與 Claude A "
+     },
+     {
+      "id": "church",
+      "target": "npc:church",
+      "what": "npc:church",
+      "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職由職業系統提供，正在與 Claude A 的角"
+     },
+     {
+      "id": "circus",
+      "target": "npc:circus",
+      "what": "npc:circus",
+      "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職由職業系統提供，正在與 Claude A 的"
+     },
+     {
+      "id": "warehouse",
+      "target": "npc:warehouse",
+      "what": "npc:warehouse",
+      "dialog": "倉庫倉庫要寄放物品嗎？倉庫功能正在整合中。\n      關閉"
+     },
+     {
+      "id": "smith",
+      "target": "npc:smith",
+      "what": "npc:smith",
+      "dialog": "鐵匠鐵匠轉職＋裝備鑑定鐵匠轉職、裝備詞條鑑定都找我（同一位鐵匠）。功能正在整合中"
+     },
+     {
+      "id": "board",
+      "target": "npc:board",
+      "what": "npc:board",
+      "dialog": "每日委託佈告欄每日委託每日委託會貼在這裡。功能正在整合中。\n      關閉"
+     }
+    ],
+    "portals": [
+     {
+      "id": "south",
+      "open": true,
+      "target": "portal:south",
+      "dialog": "南方傳送門開放通往 星芽原野 Lv1–10（新手營地）。要前往嗎？\n      前往取消"
+     },
+     {
+      "id": "north",
+      "open": false,
+      "target": "portal:north",
+      "dialog": "北方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+     },
+     {
+      "id": "east",
+      "open": false,
+      "target": "portal:east",
+      "dialog": "東方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+     },
+     {
+      "id": "west",
+      "open": false,
+      "target": "portal:west",
+      "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+     }
+    ],
+    "fpsSoftware": 118
+   },
+   "ok": false
+  },
+  {
+   "browser": "chromium",
+   "mode": "lite-portrait",
+   "checks": {
+    "全村正式美術載入完成（14 組模型、沒有錯誤）": {
+     "ok": true,
+     "detail": {
+      "status": "loaded",
+      "parts": [
+       "環境",
+       "廣場與道路",
+       "星願之泉",
+       "高台與石階",
+       "騎士軍團",
+       "法師軍團",
+       "劍士軍團",
+       "鐵匠鋪",
+       "倉庫",
+       "委託佈告欄",
+       "祭司教堂",
+       "小丑馬戲團",
+       "傳送門與南門",
+       "寵物商人洛恩"
+      ],
+      "errors": []
+     }
+    },
+    "繪製次數 ≤ 140（全村整合，任何位置）": {
+     "ok": true,
+     "detail": {
+      "arrival": {
+       "drawCalls": 91,
+       "triangles": 114821
+      },
+      "spawn": {
+       "drawCalls": 86,
+       "triangles": 113951
+      },
+      "plaza_north": {
+       "drawCalls": 89,
+       "triangles": 106397
+      },
+      "east": {
+       "drawCalls": 88,
+       "triangles": 111509
+      }
+     }
+    },
+    "移動規則：一般行走走上石階到高台（不跳躍）": {
+     "ok": true,
+     "detail": {
+      "x": -4.898587196589419e-16,
+      "y": 2,
+      "z": 23.000000000000096,
+      "yaw": -6.123233994591822e-17
+     }
+    },
+    "NPC 互動：8 位 NPC 都能靠近後點擊對話（名稱、職責）": {
+     "ok": true,
+     "detail": [
+      {
+       "id": "sword",
+       "target": "npc:sword",
+       "what": "npc:sword",
+       "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職由職業系統提供，正在與 Claude A "
+      },
+      {
+       "id": "knight",
+       "target": "npc:knight",
+       "what": "npc:knight",
+       "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職由職業系統提供，正在與 Claude A "
+      },
+      {
+       "id": "mage",
+       "target": "npc:mage",
+       "what": "npc:mage",
+       "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職由職業系統提供，正在與 Claude A "
+      },
+      {
+       "id": "church",
+       "target": "npc:church",
+       "what": "npc:church",
+       "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職由職業系統提供，正在與 Claude A 的角"
+      },
+      {
+       "id": "circus",
+       "target": "npc:circus",
+       "what": "npc:circus",
+       "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職由職業系統提供，正在與 Claude A 的"
+      },
+      {
+       "id": "warehouse",
+       "target": "npc:warehouse",
+       "what": "npc:warehouse",
+       "dialog": "倉庫倉庫要寄放物品嗎？倉庫功能正在整合中。\n      關閉"
+      },
+      {
+       "id": "smith",
+       "target": "npc:smith",
+       "what": "npc:smith",
+       "dialog": "鐵匠鐵匠轉職＋裝備鑑定鐵匠轉職、裝備詞條鑑定都找我（同一位鐵匠）。功能正在整合中"
+      },
+      {
+       "id": "board",
+       "target": "npc:board",
+       "what": "npc:board",
+       "dialog": "每日委託佈告欄每日委託每日委託會貼在這裡。功能正在整合中。\n      關閉"
+      }
+     ]
+    },
+    "鐵匠只有一位（轉職＋裝備鑑定）": {
+     "ok": true,
+     "detail": {
+      "id": "smith",
+      "name": "鐵匠（鍛造台旁）",
+      "role": "鐵匠轉職＋裝備鑑定",
+      "x": -19.086533479473207,
+      "z": -8.941154273188019,
+      "yaw": 1.132702844874802,
+      "floor": 0,
+      "interactR": 3
+     }
+    },
+    "傳送門狀態：南門開放（可前往星芽原野、需確認）、北東西休眠（未開放）；共 4 座、沒有新增出口": {
+     "ok": true,
+     "detail": [
+      {
+       "id": "south",
+       "open": true,
+       "target": "portal:south",
+       "dialog": "南方傳送門開放通往 星芽原野 Lv1–10（新手營地）。要前往嗎？\n      前往取消"
+      },
+      {
+       "id": "north",
+       "open": false,
+       "target": "portal:north",
+       "dialog": "北方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+      },
+      {
+       "id": "east",
+       "open": false,
+       "target": "portal:east",
+       "dialog": "東方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+      },
+      {
+       "id": "west",
+       "open": false,
+       "target": "portal:west",
+       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+      }
+     ]
+    },
+    "洛恩：靠近 2.5 m 內出現互動": {
+     "ok": true,
+     "detail": {
+      "target": "merchant",
+      "talking": false,
+      "dialog": "",
+      "panelOpen": false,
+      "appraisalOpen": false,
+      "merchantPaused": false
+     }
+    },
+    "洛恩：對話時停止巡走（暫停中）並開啟商人選單": {
+     "ok": true,
+     "detail": {
+      "target": "merchant",
+      "talking": true,
+      "dialog": "",
+      "panelOpen": true,
+      "appraisalOpen": false,
+      "merchantPaused": true
+     }
+    },
+    "寵物鑑定：放入後可鑑定；連點只鑑定一次；結果逐條顯示；物品留在背包並變成已鑑定": {
+     "ok": true,
+     "detail": {
+      "before": "ready",
+      "after": "result",
+      "lines": [
+       {
+        "label": "攻擊力",
+        "text": "+15%",
+        "polarity": "positive"
+       },
+       {
+        "label": "生命值",
+        "text": "-5%",
+        "polarity": "negative"
+       }
+      ]
+     }
+    },
+    "iPhone 直向：鑑定視窗沒有橫向捲動、按鈕在畫面內": {
+     "ok": true,
+     "detail": {
+      "hScroll": 0,
+      "startBottom": 525.5
+     }
+    },
+    "洛恩：關閉後恢復巡走": {
+     "ok": true,
+     "detail": {
+      "target": "merchant",
+      "talking": false,
+      "dialog": "",
+      "panelOpen": true,
+      "appraisalOpen": false,
+      "merchantPaused": false
+     }
+    }
+   },
+   "errors": [],
+   "screenshots": [
+    "chromium_lite-portrait_view_arrival.png",
+    "chromium_lite-portrait_view_spawn.png",
+    "chromium_lite-portrait_view_plaza_north.png",
+    "chromium_lite-portrait_view_east.png",
+    "chromium_lite-portrait_merchant_talk.png",
+    "chromium_lite-portrait_appraise_1_open.png",
+    "chromium_lite-portrait_appraise_2_placed.png",
+    "chromium_lite-portrait_appraise_3_result.png"
+   ],
+   "results": {
+    "art": {
+     "on": true,
+     "status": "loaded",
+     "loadMs": 18900,
+     "parts": {
+      "環境": {
+       "meshes": 2,
+       "triangles": 4160
+      },
+      "廣場與道路": {
+       "meshes": 4,
+       "triangles": 9232
+      },
+      "星願之泉": {
+       "meshes": 7,
+       "triangles": 10460
+      },
+      "高台與石階": {
+       "meshes": 3,
+       "triangles": 3176
+      },
+      "騎士軍團": {
+       "meshes": 3,
+       "triangles": 4626
+      },
+      "法師軍團": {
+       "meshes": 4,
+       "triangles": 4630
+      },
+      "劍士軍團": {
+       "meshes": 3,
+       "triangles": 3050
+      },
+      "鐵匠鋪": {
+       "meshes": 4,
+       "triangles": 1738
+      },
+      "倉庫": {
+       "meshes": 4,
+       "triangles": 1011
+      },
+      "委託佈告欄": {
+       "meshes": 4,
+       "triangles": 487
+      },
+      "祭司教堂": {
+       "meshes": 4,
+       "triangles": 2218
+      },
+      "小丑馬戲團": {
+       "meshes": 3,
+       "triangles": 1137
+      },
+      "傳送門與南門": {
+       "meshes": 6,
+       "triangles": 4819
+      },
+      "寵物商人洛恩": {
+       "meshes": 34,
+       "triangles": 14592
+      }
+     },
+     "errors": [],
+     "merchant": true
+    },
+    "perf": {
+     "arrival": {
+      "drawCalls": 91,
+      "triangles": 114821
+     },
+     "spawn": {
+      "drawCalls": 86,
+      "triangles": 113951
+     },
+     "plaza_north": {
+      "drawCalls": 89,
+      "triangles": 106397
+     },
+     "east": {
+      "drawCalls": 88,
+      "triangles": 111509
+     }
+    },
+    "npcs": [
+     {
+      "id": "sword",
+      "target": "npc:sword",
+      "what": "npc:sword",
+      "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職由職業系統提供，正在與 Claude A "
+     },
+     {
+      "id": "knight",
+      "target": "npc:knight",
+      "what": "npc:knight",
+      "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職由職業系統提供，正在與 Claude A "
+     },
+     {
+      "id": "mage",
+      "target": "npc:mage",
+      "what": "npc:mage",
+      "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職由職業系統提供，正在與 Claude A "
+     },
+     {
+      "id": "church",
+      "target": "npc:church",
+      "what": "npc:church",
+      "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職由職業系統提供，正在與 Claude A 的角"
+     },
+     {
+      "id": "circus",
+      "target": "npc:circus",
+      "what": "npc:circus",
+      "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職由職業系統提供，正在與 Claude A 的"
+     },
+     {
+      "id": "warehouse",
+      "target": "npc:warehouse",
+      "what": "npc:warehouse",
+      "dialog": "倉庫倉庫要寄放物品嗎？倉庫功能正在整合中。\n      關閉"
+     },
+     {
+      "id": "smith",
+      "target": "npc:smith",
+      "what": "npc:smith",
+      "dialog": "鐵匠鐵匠轉職＋裝備鑑定鐵匠轉職、裝備詞條鑑定都找我（同一位鐵匠）。功能正在整合中"
+     },
+     {
+      "id": "board",
+      "target": "npc:board",
+      "what": "npc:board",
+      "dialog": "每日委託佈告欄每日委託每日委託會貼在這裡。功能正在整合中。\n      關閉"
+     }
+    ],
+    "portals": [
+     {
+      "id": "south",
+      "open": true,
+      "target": "portal:south",
+      "dialog": "南方傳送門開放通往 星芽原野 Lv1–10（新手營地）。要前往嗎？\n      前往取消"
+     },
+     {
+      "id": "north",
+      "open": false,
+      "target": "portal:north",
+      "dialog": "北方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+     },
+     {
+      "id": "east",
+      "open": false,
+      "target": "portal:east",
+      "dialog": "東方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+     },
+     {
+      "id": "west",
+      "open": false,
+      "target": "portal:west",
+      "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+     }
+    ],
+    "fpsSoftware": 91
+   },
+   "ok": true
+  },
+  {
+   "browser": "chromium",
+   "mode": "hq-landscape",
+   "checks": {
+    "全村正式美術載入完成（14 組模型、沒有錯誤）": {
+     "ok": true,
+     "detail": {
+      "status": "loaded",
+      "parts": [
+       "環境",
+       "廣場與道路",
+       "星願之泉",
+       "高台與石階",
+       "騎士軍團",
+       "法師軍團",
+       "劍士軍團",
+       "鐵匠鋪",
+       "倉庫",
+       "委託佈告欄",
+       "祭司教堂",
+       "小丑馬戲團",
+       "傳送門與南門",
+       "寵物商人洛恩"
+      ],
+      "errors": []
+     }
+    },
+    "繪製次數 ≤ 140（全村整合，任何位置）": {
+     "ok": false,
+     "detail": {
+      "arrival": {
+       "drawCalls": 152,
+       "triangles": 338606
+      },
+      "spawn": {
+       "drawCalls": 133,
+       "triangles": 332138
+      },
+      "plaza_north": {
+       "drawCalls": 134,
+       "triangles": 303819
+      },
+      "east": {
+       "drawCalls": 152,
+       "triangles": 338845
+      }
+     }
+    },
+    "移動規則：一般行走走上石階到高台（不跳躍）": {
+     "ok": false,
+     "detail": {
+      "x": -6.123233995736766e-17,
+      "y": 0,
+      "z": 15.999999999999996,
+      "yaw": -5.750879752987149e-17
+     }
+    },
+    "NPC 互動：8 位 NPC 都能靠近後點擊對話（名稱、職責）": {
+     "ok": true,
+     "detail": [
+      {
+       "id": "sword",
+       "target": "npc:sword",
+       "what": "npc:sword",
+       "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職由職業系統提供，正在與 Claude A "
+      },
+      {
+       "id": "knight",
+       "target": "npc:knight",
+       "what": "npc:knight",
+       "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職由職業系統提供，正在與 Claude A "
+      },
+      {
+       "id": "mage",
+       "target": "npc:mage",
+       "what": "npc:mage",
+       "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職由職業系統提供，正在與 Claude A "
+      },
+      {
+       "id": "church",
+       "target": "npc:church",
+       "what": "npc:church",
+       "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職由職業系統提供，正在與 Claude A 的角"
+      },
+      {
+       "id": "circus",
+       "target": "npc:circus",
+       "what": "npc:circus",
+       "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職由職業系統提供，正在與 Claude A 的"
+      },
+      {
+       "id": "warehouse",
+       "target": "npc:warehouse",
+       "what": "npc:warehouse",
+       "dialog": "倉庫倉庫要寄放物品嗎？倉庫功能正在整合中。\n      關閉"
+      },
+      {
+       "id": "smith",
+       "target": "npc:smith",
+       "what": "npc:smith",
+       "dialog": "鐵匠鐵匠轉職＋裝備鑑定鐵匠轉職、裝備詞條鑑定都找我（同一位鐵匠）。功能正在整合中"
+      },
+      {
+       "id": "board",
+       "target": "npc:board",
+       "what": "npc:board",
+       "dialog": "每日委託佈告欄每日委託每日委託會貼在這裡。功能正在整合中。\n      關閉"
+      }
+     ]
+    },
+    "鐵匠只有一位（轉職＋裝備鑑定）": {
+     "ok": true,
+     "detail": {
+      "id": "smith",
+      "name": "鐵匠（鍛造台旁）",
+      "role": "鐵匠轉職＋裝備鑑定",
+      "x": -19.086533479473207,
+      "z": -8.941154273188019,
+      "yaw": 1.132702844874802,
+      "floor": 0,
+      "interactR": 3
+     }
+    },
+    "傳送門狀態：南門開放（可前往星芽原野、需確認）、北東西休眠（未開放）；共 4 座、沒有新增出口": {
+     "ok": true,
+     "detail": [
+      {
+       "id": "south",
+       "open": true,
+       "target": "portal:south",
+       "dialog": "南方傳送門開放通往 星芽原野 Lv1–10（新手營地）。要前往嗎？\n      前往取消"
+      },
+      {
+       "id": "north",
+       "open": false,
+       "target": "portal:north",
+       "dialog": "北方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+      },
+      {
+       "id": "east",
+       "open": false,
+       "target": "portal:east",
+       "dialog": "東方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+      },
+      {
+       "id": "west",
+       "open": false,
+       "target": "portal:west",
+       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+      }
+     ]
+    },
+    "洛恩：靠近 2.5 m 內出現互動": {
+     "ok": false,
+     "detail": {
+      "target": null,
+      "talking": false,
+      "dialog": "",
+      "panelOpen": false,
+      "appraisalOpen": false,
+      "merchantPaused": false
+     }
+    },
+    "洛恩：對話時停止巡走（暫停中）並開啟商人選單": {
+     "ok": false,
+     "detail": {
+      "target": null,
+      "talking": false,
+      "dialog": "",
+      "panelOpen": false,
+      "appraisalOpen": false,
+      "merchantPaused": false
+     }
+    },
+    "寵物鑑定：放入後可鑑定；連點只鑑定一次；結果逐條顯示；物品留在背包並變成已鑑定": {
+     "ok": false,
+     "detail": {
+      "before": "loading",
+      "after": "loading",
+      "lines": []
+     }
+    },
+    "洛恩：關閉後恢復巡走": {
+     "ok": true,
+     "detail": {
+      "target": "merchant",
+      "talking": false,
+      "dialog": "",
+      "panelOpen": false,
+      "appraisalOpen": false,
+      "merchantPaused": false
+     }
+    }
+   },
+   "errors": [
+    "appraise button: page.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('[data-act=\"choose:appraise\"]')\n",
+    "tile: page.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.pa-win [data-id=\"s1\"]')\n",
+    "start: page.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('.pa-win [data-act=\"start\"]')\n"
+   ],
+   "screenshots": [
+    "chromium_hq-landscape_view_arrival.png",
+    "chromium_hq-landscape_view_spawn.png",
+    "chromium_hq-landscape_view_plaza_north.png",
+    "chromium_hq-landscape_view_east.png",
+    "chromium_hq-landscape_merchant_talk.png",
+    "chromium_hq-landscape_appraise_1_open.png",
+    "chromium_hq-landscape_appraise_2_placed.png",
+    "chromium_hq-landscape_appraise_3_result.png"
+   ],
+   "results": {
+    "art": {
+     "on": true,
+     "status": "loaded",
+     "loadMs": 113165,
+     "parts": {
+      "環境": {
+       "meshes": 2,
+       "triangles": 13522
+      },
+      "廣場與道路": {
+       "meshes": 5,
+       "triangles": 26438
+      },
+      "星願之泉": {
+       "meshes": 7,
+       "triangles": 25644
+      },
+      "高台與石階": {
+       "meshes": 4,
+       "triangles": 4190
+      },
+      "騎士軍團": {
+       "meshes": 4,
+       "triangles": 12532
+      },
+      "法師軍團": {
+       "meshes": 5,
+       "triangles": 13709
+      },
+      "劍士軍團": {
+       "meshes": 4,
+       "triangles": 6642
+      },
+      "鐵匠鋪": {
+       "meshes": 5,
+       "triangles": 2742
+      },
+      "倉庫": {
+       "meshes": 5,
+       "triangles": 1619
+      },
+      "委託佈告欄": {
+       "meshes": 5,
+       "triangles": 811
+      },
+      "祭司教堂": {
+       "meshes": 5,
+       "triangles": 3683
+      },
+      "小丑馬戲團": {
+       "meshes": 4,
+       "triangles": 2635
+      },
+      "傳送門與南門": {
+       "meshes": 7,
+       "triangles": 10507
+      },
+      "寵物商人洛恩": {
+       "meshes": 34,
+       "triangles": 59566
+      }
+     },
+     "errors": [],
+     "merchant": true
+    },
+    "perf": {
+     "arrival": {
+      "drawCalls": 152,
+      "triangles": 338606
+     },
+     "spawn": {
+      "drawCalls": 133,
+      "triangles": 332138
+     },
+     "plaza_north": {
+      "drawCalls": 134,
+      "triangles": 303819
+     },
+     "east": {
+      "drawCalls": 152,
+      "triangles": 338845
+     }
+    },
+    "npcs": [
+     {
+      "id": "sword",
+      "target": "npc:sword",
+      "what": "npc:sword",
+      "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職由職業系統提供，正在與 Claude A "
+     },
+     {
+      "id": "knight",
+      "target": "npc:knight",
+      "what": "npc:knight",
+      "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職由職業系統提供，正在與 Claude A "
+     },
+     {
+      "id": "mage",
+      "target": "npc:mage",
+      "what": "npc:mage",
+      "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職由職業系統提供，正在與 Claude A "
+     },
+     {
+      "id": "church",
+      "target": "npc:church",
+      "what": "npc:church",
+      "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職由職業系統提供，正在與 Claude A 的角"
+     },
+     {
+      "id": "circus",
+      "target": "npc:circus",
+      "what": "npc:circus",
+      "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職由職業系統提供，正在與 Claude A 的"
+     },
+     {
+      "id": "warehouse",
+      "target": "npc:warehouse",
+      "what": "npc:warehouse",
+      "dialog": "倉庫倉庫要寄放物品嗎？倉庫功能正在整合中。\n      關閉"
+     },
+     {
+      "id": "smith",
+      "target": "npc:smith",
+      "what": "npc:smith",
+      "dialog": "鐵匠鐵匠轉職＋裝備鑑定鐵匠轉職、裝備詞條鑑定都找我（同一位鐵匠）。功能正在整合中"
+     },
+     {
+      "id": "board",
+      "target": "npc:board",
+      "what": "npc:board",
+      "dialog": "每日委託佈告欄每日委託每日委託會貼在這裡。功能正在整合中。\n      關閉"
+     }
+    ],
+    "portals": [
+     {
+      "id": "south",
+      "open": true,
+      "target": "portal:south",
+      "dialog": "南方傳送門開放通往 星芽原野 Lv1–10（新手營地）。要前往嗎？\n      前往取消"
+     },
+     {
+      "id": "north",
+      "open": false,
+      "target": "portal:north",
+      "dialog": "北方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+     },
+     {
+      "id": "east",
+      "open": false,
+      "target": "portal:east",
+      "dialog": "東方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+     },
+     {
+      "id": "west",
+      "open": false,
+      "target": "portal:west",
+      "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+     }
+    ],
+    "fpsSoftware": 140
+   },
+   "ok": false
+  },
+  {
+   "browser": "webkit",
+   "mode": "hq-portrait",
+   "checks": {
+    "全村正式美術載入完成（14 組模型、沒有錯誤）": {
+     "ok": true,
+     "detail": {
+      "status": "loaded",
+      "parts": [
+       "環境",
+       "廣場與道路",
+       "星願之泉",
+       "高台與石階",
+       "騎士軍團",
+       "法師軍團",
+       "劍士軍團",
+       "鐵匠鋪",
+       "倉庫",
+       "委託佈告欄",
+       "祭司教堂",
+       "小丑馬戲團",
+       "傳送門與南門",
+       "寵物商人洛恩"
+      ],
+      "errors": []
+     }
+    },
+    "繪製次數 ≤ 140（全村整合，任何位置）": {
+     "ok": true,
+     "detail": {
+      "arrival": {
+       "drawCalls": 123,
+       "triangles": 321273
+      },
+      "spawn": {
+       "drawCalls": 119,
+       "triangles": 321803
+      },
+      "plaza_north": {
+       "drawCalls": 123,
+       "triangles": 298482
+      },
+      "east": {
+       "drawCalls": 121,
+       "triangles": 308336
+      }
+     }
+    },
+    "移動規則：一般行走走上石階到高台（不跳躍）": {
+     "ok": false,
+     "detail": {
+      "x": -3.367778697655225e-16,
+      "y": 1.0000000000000242,
+      "z": 20.50000000000006,
+      "yaw": -6.123232740152588e-17
+     }
+    },
+    "NPC 互動：8 位 NPC 都能靠近後點擊對話（名稱、職責）": {
+     "ok": true,
+     "detail": [
+      {
+       "id": "sword",
+       "target": "npc:sword",
+       "what": "npc:sword",
+       "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職由職業系統提供，正在與 Claude A "
+      },
+      {
+       "id": "knight",
+       "target": "npc:knight",
+       "what": "npc:knight",
+       "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職由職業系統提供，正在與 Claude A "
+      },
+      {
+       "id": "mage",
+       "target": "npc:mage",
+       "what": "npc:mage",
+       "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職由職業系統提供，正在與 Claude A "
+      },
+      {
+       "id": "church",
+       "target": "npc:church",
+       "what": "npc:church",
+       "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職由職業系統提供，正在與 Claude A 的角"
+      },
+      {
+       "id": "circus",
+       "target": "npc:circus",
+       "what": "npc:circus",
+       "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職由職業系統提供，正在與 Claude A 的"
+      },
+      {
+       "id": "warehouse",
+       "target": "npc:warehouse",
+       "what": "npc:warehouse",
+       "dialog": "倉庫倉庫要寄放物品嗎？倉庫功能正在整合中。\n      關閉"
+      },
+      {
+       "id": "smith",
+       "target": "npc:smith",
+       "what": "npc:smith",
+       "dialog": "鐵匠鐵匠轉職＋裝備鑑定鐵匠轉職、裝備詞條鑑定都找我（同一位鐵匠）。功能正在整合中"
+      },
+      {
+       "id": "board",
+       "target": "npc:board",
+       "what": "npc:board",
+       "dialog": "每日委託佈告欄每日委託每日委託會貼在這裡。功能正在整合中。\n      關閉"
+      }
+     ]
+    },
+    "鐵匠只有一位（轉職＋裝備鑑定）": {
+     "ok": true,
+     "detail": {
+      "id": "smith",
+      "name": "鐵匠（鍛造台旁）",
+      "role": "鐵匠轉職＋裝備鑑定",
+      "x": -19.086533479473207,
+      "z": -8.941154273188019,
+      "yaw": 1.132702844874802,
+      "floor": 0,
+      "interactR": 3
+     }
+    },
+    "傳送門狀態：南門開放（可前往星芽原野、需確認）、北東西休眠（未開放）；共 4 座、沒有新增出口": {
+     "ok": true,
+     "detail": [
+      {
+       "id": "south",
+       "open": true,
+       "target": "portal:south",
+       "dialog": "南方傳送門開放通往 星芽原野 Lv1–10（新手營地）。要前往嗎？\n      前往取消"
+      },
+      {
+       "id": "north",
+       "open": false,
+       "target": "portal:north",
+       "dialog": "北方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+      },
+      {
+       "id": "east",
+       "open": false,
+       "target": "portal:east",
+       "dialog": "東方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+      },
+      {
+       "id": "west",
+       "open": false,
+       "target": "portal:west",
+       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+      }
+     ]
+    },
+    "洛恩：靠近 2.5 m 內出現互動": {
+     "ok": true,
+     "detail": {
+      "target": "merchant",
+      "talking": false,
+      "dialog": "",
+      "panelOpen": false,
+      "appraisalOpen": false,
+      "merchantPaused": false
+     }
+    },
+    "洛恩：對話時停止巡走（暫停中）並開啟商人選單": {
+     "ok": true,
+     "detail": {
+      "target": "merchant",
+      "talking": true,
+      "dialog": "",
+      "panelOpen": true,
+      "appraisalOpen": false,
+      "merchantPaused": true
+     }
+    },
+    "寵物鑑定：放入後可鑑定；連點只鑑定一次；結果逐條顯示；物品留在背包並變成已鑑定": {
+     "ok": true,
+     "detail": {
+      "before": "ready",
+      "after": "result",
+      "lines": [
+       {
+        "label": "攻擊力",
+        "text": "+15%",
+        "polarity": "positive"
+       },
+       {
+        "label": "生命值",
+        "text": "-5%",
+        "polarity": "negative"
+       }
+      ]
+     }
+    },
+    "iPhone 直向：鑑定視窗沒有橫向捲動、按鈕在畫面內": {
+     "ok": true,
+     "detail": {
+      "hScroll": 0,
+      "startBottom": 525.5
+     }
+    },
+    "洛恩：關閉後恢復巡走": {
+     "ok": true,
+     "detail": {
+      "target": "merchant",
+      "talking": false,
+      "dialog": "",
+      "panelOpen": true,
+      "appraisalOpen": false,
+      "merchantPaused": false
+     }
+    }
+   },
+   "errors": [],
+   "screenshots": [
+    "webkit_hq-portrait_view_arrival.png",
+    "webkit_hq-portrait_view_spawn.png",
+    "webkit_hq-portrait_view_plaza_north.png",
+    "webkit_hq-portrait_view_east.png",
+    "webkit_hq-portrait_npc_church.png",
+    "webkit_hq-portrait_npc_circus.png",
+    "webkit_hq-portrait_npc_smith.png",
+    "webkit_hq-portrait_portal_south.png",
+    "webkit_hq-portrait_portal_east.png",
+    "webkit_hq-portrait_merchant_talk.png",
+    "webkit_hq-portrait_appraise_1_open.png",
+    "webkit_hq-portrait_appraise_2_placed.png",
+    "webkit_hq-portrait_appraise_3_result.png"
+   ],
+   "results": {
+    "art": {
+     "on": true,
+     "status": "loaded",
+     "loadMs": 726,
+     "parts": {
+      "環境": {
+       "meshes": 2,
+       "triangles": 13522
+      },
+      "廣場與道路": {
+       "meshes": 5,
+       "triangles": 26438
+      },
+      "星願之泉": {
+       "meshes": 7,
+       "triangles": 25644
+      },
+      "高台與石階": {
+       "meshes": 4,
+       "triangles": 4190
+      },
+      "騎士軍團": {
+       "meshes": 4,
+       "triangles": 12532
+      },
+      "法師軍團": {
+       "meshes": 5,
+       "triangles": 13709
+      },
+      "劍士軍團": {
+       "meshes": 4,
+       "triangles": 6642
+      },
+      "鐵匠鋪": {
+       "meshes": 5,
+       "triangles": 2742
+      },
+      "倉庫": {
+       "meshes": 5,
+       "triangles": 1619
+      },
+      "委託佈告欄": {
+       "meshes": 5,
+       "triangles": 811
+      },
+      "祭司教堂": {
+       "meshes": 5,
+       "triangles": 3683
+      },
+      "小丑馬戲團": {
+       "meshes": 4,
+       "triangles": 2635
+      },
+      "傳送門與南門": {
+       "meshes": 7,
+       "triangles": 10507
+      },
+      "寵物商人洛恩": {
+       "meshes": 34,
+       "triangles": 59566
+      }
+     },
+     "errors": [],
+     "merchant": true
+    },
+    "perf": {
+     "arrival": {
+      "drawCalls": 123,
+      "triangles": 321273
+     },
+     "spawn": {
+      "drawCalls": 119,
+      "triangles": 321803
+     },
+     "plaza_north": {
+      "drawCalls": 123,
+      "triangles": 298482
+     },
+     "east": {
+      "drawCalls": 121,
+      "triangles": 308336
+     }
+    },
+    "npcs": [
+     {
+      "id": "sword",
+      "target": "npc:sword",
+      "what": "npc:sword",
+      "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職由職業系統提供，正在與 Claude A "
+     },
+     {
+      "id": "knight",
+      "target": "npc:knight",
+      "what": "npc:knight",
+      "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職由職業系統提供，正在與 Claude A "
+     },
+     {
+      "id": "mage",
+      "target": "npc:mage",
+      "what": "npc:mage",
+      "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職由職業系統提供，正在與 Claude A "
+     },
+     {
+      "id": "church",
+      "target": "npc:church",
+      "what": "npc:church",
+      "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職由職業系統提供，正在與 Claude A 的角"
+     },
+     {
+      "id": "circus",
+      "target": "npc:circus",
+      "what": "npc:circus",
+      "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職由職業系統提供，正在與 Claude A 的"
+     },
+     {
+      "id": "warehouse",
+      "target": "npc:warehouse",
+      "what": "npc:warehouse",
+      "dialog": "倉庫倉庫要寄放物品嗎？倉庫功能正在整合中。\n      關閉"
+     },
+     {
+      "id": "smith",
+      "target": "npc:smith",
+      "what": "npc:smith",
+      "dialog": "鐵匠鐵匠轉職＋裝備鑑定鐵匠轉職、裝備詞條鑑定都找我（同一位鐵匠）。功能正在整合中"
+     },
+     {
+      "id": "board",
+      "target": "npc:board",
+      "what": "npc:board",
+      "dialog": "每日委託佈告欄每日委託每日委託會貼在這裡。功能正在整合中。\n      關閉"
+     }
+    ],
+    "portals": [
+     {
+      "id": "south",
+      "open": true,
+      "target": "portal:south",
+      "dialog": "南方傳送門開放通往 星芽原野 Lv1–10（新手營地）。要前往嗎？\n      前往取消"
+     },
+     {
+      "id": "north",
+      "open": false,
+      "target": "portal:north",
+      "dialog": "北方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+     },
+     {
+      "id": "east",
+      "open": false,
+      "target": "portal:east",
+      "dialog": "東方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+     },
+     {
+      "id": "west",
+      "open": false,
+      "target": "portal:west",
+      "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+     }
+    ],
+    "fpsSoftware": 118
+   },
+   "ok": false
+  },
+  {
+   "browser": "webkit",
+   "mode": "lite-portrait",
+   "checks": {
+    "全村正式美術載入完成（14 組模型、沒有錯誤）": {
+     "ok": true,
+     "detail": {
+      "status": "loaded",
+      "parts": [
+       "環境",
+       "廣場與道路",
+       "星願之泉",
+       "高台與石階",
+       "騎士軍團",
+       "法師軍團",
+       "劍士軍團",
+       "鐵匠鋪",
+       "倉庫",
+       "委託佈告欄",
+       "祭司教堂",
+       "小丑馬戲團",
+       "傳送門與南門",
+       "寵物商人洛恩"
+      ],
+      "errors": []
+     }
+    },
+    "繪製次數 ≤ 140（全村整合，任何位置）": {
+     "ok": true,
+     "detail": {
+      "arrival": {
+       "drawCalls": 91,
+       "triangles": 114821
+      },
+      "spawn": {
+       "drawCalls": 86,
+       "triangles": 113951
+      },
+      "plaza_north": {
+       "drawCalls": 90,
+       "triangles": 106489
+      },
+      "east": {
+       "drawCalls": 88,
+       "triangles": 111509
+      }
+     }
+    },
+    "移動規則：一般行走走上石階到高台（不跳躍）": {
+     "ok": true,
+     "detail": {
+      "x": -8.097976959361875e-16,
+      "y": 2,
+      "z": 28.224999999999973,
+      "yaw": -6.123233995736766e-17
+     }
+    },
+    "NPC 互動：8 位 NPC 都能靠近後點擊對話（名稱、職責）": {
+     "ok": true,
+     "detail": [
+      {
+       "id": "sword",
+       "target": "npc:sword",
+       "what": "npc:sword",
+       "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職由職業系統提供，正在與 Claude A "
+      },
+      {
+       "id": "knight",
+       "target": "npc:knight",
+       "what": "npc:knight",
+       "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職由職業系統提供，正在與 Claude A "
+      },
+      {
+       "id": "mage",
+       "target": "npc:mage",
+       "what": "npc:mage",
+       "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職由職業系統提供，正在與 Claude A "
+      },
+      {
+       "id": "church",
+       "target": "npc:church",
+       "what": "npc:church",
+       "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職由職業系統提供，正在與 Claude A 的角"
+      },
+      {
+       "id": "circus",
+       "target": "npc:circus",
+       "what": "npc:circus",
+       "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職由職業系統提供，正在與 Claude A 的"
+      },
+      {
+       "id": "warehouse",
+       "target": "npc:warehouse",
+       "what": "npc:warehouse",
+       "dialog": "倉庫倉庫要寄放物品嗎？倉庫功能正在整合中。\n      關閉"
+      },
+      {
+       "id": "smith",
+       "target": "npc:smith",
+       "what": "npc:smith",
+       "dialog": "鐵匠鐵匠轉職＋裝備鑑定鐵匠轉職、裝備詞條鑑定都找我（同一位鐵匠）。功能正在整合中"
+      },
+      {
+       "id": "board",
+       "target": "npc:board",
+       "what": "npc:board",
+       "dialog": "每日委託佈告欄每日委託每日委託會貼在這裡。功能正在整合中。\n      關閉"
+      }
+     ]
+    },
+    "鐵匠只有一位（轉職＋裝備鑑定）": {
+     "ok": true,
+     "detail": {
+      "id": "smith",
+      "name": "鐵匠（鍛造台旁）",
+      "role": "鐵匠轉職＋裝備鑑定",
+      "x": -19.086533479473207,
+      "z": -8.941154273188019,
+      "yaw": 1.132702844874802,
+      "floor": 0,
+      "interactR": 3
+     }
+    },
+    "傳送門狀態：南門開放（可前往星芽原野、需確認）、北東西休眠（未開放）；共 4 座、沒有新增出口": {
+     "ok": true,
+     "detail": [
+      {
+       "id": "south",
+       "open": true,
+       "target": "portal:south",
+       "dialog": "南方傳送門開放通往 星芽原野 Lv1–10（新手營地）。要前往嗎？\n      前往取消"
+      },
+      {
+       "id": "north",
+       "open": false,
+       "target": "portal:north",
+       "dialog": "北方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+      },
+      {
+       "id": "east",
+       "open": false,
+       "target": "portal:east",
+       "dialog": "東方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+      },
+      {
+       "id": "west",
+       "open": false,
+       "target": "portal:west",
+       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+      }
+     ]
+    },
+    "洛恩：靠近 2.5 m 內出現互動": {
+     "ok": true,
+     "detail": {
+      "target": "merchant",
+      "talking": false,
+      "dialog": "",
+      "panelOpen": false,
+      "appraisalOpen": false,
+      "merchantPaused": false
+     }
+    },
+    "洛恩：對話時停止巡走（暫停中）並開啟商人選單": {
+     "ok": true,
+     "detail": {
+      "target": "merchant",
+      "talking": true,
+      "dialog": "",
+      "panelOpen": true,
+      "appraisalOpen": false,
+      "merchantPaused": true
+     }
+    },
+    "寵物鑑定：放入後可鑑定；連點只鑑定一次；結果逐條顯示；物品留在背包並變成已鑑定": {
+     "ok": true,
+     "detail": {
+      "before": "ready",
+      "after": "result",
+      "lines": [
+       {
+        "label": "攻擊力",
+        "text": "+15%",
+        "polarity": "positive"
+       },
+       {
+        "label": "生命值",
+        "text": "-5%",
+        "polarity": "negative"
+       }
+      ]
+     }
+    },
+    "iPhone 直向：鑑定視窗沒有橫向捲動、按鈕在畫面內": {
+     "ok": true,
+     "detail": {
+      "hScroll": 0,
+      "startBottom": 525.5
+     }
+    },
+    "洛恩：關閉後恢復巡走": {
+     "ok": true,
+     "detail": {
+      "target": "merchant",
+      "talking": false,
+      "dialog": "",
+      "panelOpen": true,
+      "appraisalOpen": false,
+      "merchantPaused": false
+     }
+    }
+   },
+   "errors": [],
+   "screenshots": [
+    "webkit_lite-portrait_view_arrival.png",
+    "webkit_lite-portrait_view_spawn.png",
+    "webkit_lite-portrait_view_plaza_north.png",
+    "webkit_lite-portrait_view_east.png",
+    "webkit_lite-portrait_merchant_talk.png",
+    "webkit_lite-portrait_appraise_1_open.png",
+    "webkit_lite-portrait_appraise_2_placed.png",
+    "webkit_lite-portrait_appraise_3_result.png"
+   ],
+   "results": {
+    "art": {
+     "on": true,
+     "status": "loaded",
+     "loadMs": 2465,
+     "parts": {
+      "環境": {
+       "meshes": 2,
+       "triangles": 4160
+      },
+      "廣場與道路": {
+       "meshes": 4,
+       "triangles": 9232
+      },
+      "星願之泉": {
+       "meshes": 7,
+       "triangles": 10460
+      },
+      "高台與石階": {
+       "meshes": 3,
+       "triangles": 3176
+      },
+      "騎士軍團": {
+       "meshes": 3,
+       "triangles": 4626
+      },
+      "法師軍團": {
+       "meshes": 4,
+       "triangles": 4630
+      },
+      "劍士軍團": {
+       "meshes": 3,
+       "triangles": 3050
+      },
+      "鐵匠鋪": {
+       "meshes": 4,
+       "triangles": 1738
+      },
+      "倉庫": {
+       "meshes": 4,
+       "triangles": 1011
+      },
+      "委託佈告欄": {
+       "meshes": 4,
+       "triangles": 487
+      },
+      "祭司教堂": {
+       "meshes": 4,
+       "triangles": 2218
+      },
+      "小丑馬戲團": {
+       "meshes": 3,
+       "triangles": 1137
+      },
+      "傳送門與南門": {
+       "meshes": 6,
+       "triangles": 4819
+      },
+      "寵物商人洛恩": {
+       "meshes": 34,
+       "triangles": 14592
+      }
+     },
+     "errors": [],
+     "merchant": true
+    },
+    "perf": {
+     "arrival": {
+      "drawCalls": 91,
+      "triangles": 114821
+     },
+     "spawn": {
+      "drawCalls": 86,
+      "triangles": 113951
+     },
+     "plaza_north": {
+      "drawCalls": 90,
+      "triangles": 106489
+     },
+     "east": {
+      "drawCalls": 88,
+      "triangles": 111509
+     }
+    },
+    "npcs": [
+     {
+      "id": "sword",
+      "target": "npc:sword",
+      "what": "npc:sword",
+      "dialog": "劍士軍團劍士轉職想成為劍士嗎？劍士轉職由職業系統提供，正在與 Claude A "
+     },
+     {
+      "id": "knight",
+      "target": "npc:knight",
+      "what": "npc:knight",
+      "dialog": "騎士軍團騎士轉職想成為騎士嗎？騎士轉職由職業系統提供，正在與 Claude A "
+     },
+     {
+      "id": "mage",
+      "target": "npc:mage",
+      "what": "npc:mage",
+      "dialog": "法師軍團法師轉職想成為法師嗎？法師轉職由職業系統提供，正在與 Claude A "
+     },
+     {
+      "id": "church",
+      "target": "npc:church",
+      "what": "npc:church",
+      "dialog": "教堂祭司轉職想成為祭司嗎？祭司轉職由職業系統提供，正在與 Claude A 的角"
+     },
+     {
+      "id": "circus",
+      "target": "npc:circus",
+      "what": "npc:circus",
+      "dialog": "馬戲團小丑轉職想成為小丑嗎？小丑轉職由職業系統提供，正在與 Claude A 的"
+     },
+     {
+      "id": "warehouse",
+      "target": "npc:warehouse",
+      "what": "npc:warehouse",
+      "dialog": "倉庫倉庫要寄放物品嗎？倉庫功能正在整合中。\n      關閉"
+     },
+     {
+      "id": "smith",
+      "target": "npc:smith",
+      "what": "npc:smith",
+      "dialog": "鐵匠鐵匠轉職＋裝備鑑定鐵匠轉職、裝備詞條鑑定都找我（同一位鐵匠）。功能正在整合中"
+     },
+     {
+      "id": "board",
+      "target": "npc:board",
+      "what": "npc:board",
+      "dialog": "每日委託佈告欄每日委託每日委託會貼在這裡。功能正在整合中。\n      關閉"
+     }
+    ],
+    "portals": [
+     {
+      "id": "south",
+      "open": true,
+      "target": "portal:south",
+      "dialog": "南方傳送門開放通往 星芽原野 Lv1–10（新手營地）。要前往嗎？\n      前往取消"
+     },
+     {
+      "id": "north",
+      "open": false,
+      "target": "portal:north",
+      "dialog": "北方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+     },
+     {
+      "id": "east",
+      "open": false,
+      "target": "portal:east",
+      "dialog": "東方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+     },
+     {
+      "id": "west",
+      "open": false,
+      "target": "portal:west",
+      "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
+     }
+    ],
+    "fpsSoftware": 88
+   },
+   "ok": true
+  }
+ ],
+ "finishedAt": "2026-11-24T08:01:13.668Z"
+}
