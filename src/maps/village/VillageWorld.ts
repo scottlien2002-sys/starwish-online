@@ -52,6 +52,7 @@ const ROOF: Record<BuildingDef["id"], RGB> = {
   circus: [0.86, 0.3, 0.28],
   warehouse: [0.38, 0.5, 0.74],
   smith: [0.45, 0.42, 0.7],
+  guild: [0.3, 0.4, 0.68],
 };
 const WALL: Record<BuildingDef["id"], RGB> = {
   sword: [0.88, 0.85, 0.78],
@@ -61,6 +62,7 @@ const WALL: Record<BuildingDef["id"], RGB> = {
   circus: [0.97, 0.95, 0.92],
   warehouse: [0.8, 0.76, 0.7],
   smith: [0.78, 0.72, 0.64],
+  guild: [0.95, 0.93, 0.88],
 };
 
 const lit = (c: RGB) => (px: number, py: number, pz: number, _nx: number, ny: number): RGB =>
