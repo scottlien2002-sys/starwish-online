@@ -39,15 +39,15 @@ jobs:
       - name: Install test browsers
         run: npx playwright install --with-deps chromium webkit
 
-      - name: Stage 6 map E2E (Chromium + WebKit)
-        id: mape2e
-        continue-on-error: true
-        run: node tests/e2e/run-map-e2e.mjs dist chromium,webkit
-
       - name: Stage 5.6 play E2E (WebKit)
         id: playe2e
         continue-on-error: true
         run: node tests/e2e/run-play-e2e.mjs dist webkit
+
+      - name: Stage 6 map E2E (Chromium + WebKit)
+        id: mape2e
+        continue-on-error: true
+        run: node tests/e2e/run-map-e2e.mjs dist chromium,webkit
 
       - name: Attach map test report (early, for the preview)
         if: startsWith(github.ref, 'refs/heads/feature/render')
