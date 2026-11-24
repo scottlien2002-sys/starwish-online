@@ -136,47 +136,24 @@
     },
     "poses": {
      "Idle@0.00": {
-      "hand_l|tabard": 18,
-      "glove_l|body": 5,
-      "glove_l|tabard": 10,
-      "hand_r|tabard": 15,
-      "hand_r|pouch": 24,
-      "glove_r|tabard": 2,
-      "glove_r|pouch": 47
+      "glove_l|body": 5
      },
      "Idle@0.50": {
-      "hand_l|tabard": 40,
       "glove_l|body": 1,
-      "glove_l|tabard": 63,
-      "hand_r|tabard": 46,
-      "hand_r|pouch": 71,
-      "glove_r|shirt": 1,
-      "glove_r|tabard": 71,
-      "glove_r|pouch": 75
+      "glove_r|shirt": 1
      },
      "Run@0.00": {
       "glove_l|body": 4,
-      "hand_r|pouch": 74,
-      "glove_r|shirt": 2,
-      "glove_r|pouch": 82
+      "glove_r|shirt": 2
      },
-     "Run@0.25": {
-      "hand_l|tabard": 27,
-      "glove_l|tabard": 25
-     },
+     "Run@0.25": {},
      "Run@0.50": {
       "glove_l|body": 4,
-      "hand_r|pouch": 74,
-      "glove_r|shirt": 2,
-      "glove_r|pouch": 82
+      "glove_r|shirt": 2
      },
      "Run@0.75": {
       "glove_l|body": 1,
-      "hand_r|tabard": 41,
-      "hand_r|pouch": 120,
-      "glove_r|shirt": 5,
-      "glove_r|tabard": 39,
-      "glove_r|pouch": 114
+      "glove_r|shirt": 5
      },
      "Jump@0.20": {
       "glove_l|body": 1,
@@ -190,32 +167,16 @@
       "glove_r|shirt": 1
      },
      "Attack@0.30": {
-      "hand_l|tabard": 119,
-      "glove_l|body": 3,
-      "glove_l|tabard": 116,
       "glove_r|shirt": 5
      },
-     "Attack@0.40": {
-      "hand_l|tabard": 16,
-      "glove_l|tabard": 53
-     },
+     "Attack@0.40": {},
      "Attack@0.60": {
       "glove_r|shirt": 1
      },
-     "Hurt@0.16": {
-      "hand_r|pouch": 63,
-      "glove_r|tabard": 9,
-      "glove_r|pouch": 128
-     },
+     "Hurt@0.16": {},
      "Hurt@0.50": {
-      "hand_l|tabard": 22,
       "glove_l|body": 1,
-      "glove_l|tabard": 52,
-      "hand_r|tabard": 38,
-      "hand_r|pouch": 101,
-      "glove_r|shirt": 1,
-      "glove_r|tabard": 54,
-      "glove_r|pouch": 99
+      "glove_r|shirt": 1
      }
     }
    },
@@ -335,7 +296,7 @@
  },
  "female": {
   "lite": {
-   "triangles": 39968,
+   "triangles": 39972,
    "parts": 31,
    "meshes_after_merge": 26,
    "mesh_names": [
@@ -446,7 +407,7 @@
    },
    "clip": {
     "rest": {
-     "hand_l|body": 38,
+     "hand_l|body": 40,
      "hand_l|blouse": 0,
      "hand_l|corset": 0,
      "hand_l|overskirt": 137,
@@ -463,7 +424,7 @@
      "hand_r|body": 37,
      "hand_r|blouse": 0,
      "hand_r|corset": 0,
-     "hand_r|overskirt": 145,
+     "hand_r|overskirt": 146,
      "hand_r|skirt_pink": 31,
      "hand_r|petticoat": 0,
      "hand_r|underskirt": 0,
@@ -477,44 +438,21 @@
      "boot_l|boot_r": 29
     },
     "poses": {
-     "Idle@0.00": {
-      "hand_l|overskirt": 6,
-      "hand_l|skirt_pink": 13,
-      "glove_l|overskirt": 25,
-      "hand_r|overskirt": 6,
-      "hand_r|skirt_pink": 28,
-      "glove_r|overskirt": 28
-     },
+     "Idle@0.00": {},
      "Idle@0.50": {
-      "hand_l|overskirt": 19,
-      "hand_l|skirt_pink": 66,
-      "hand_l|petticoat": 5,
-      "glove_l|overskirt": 47,
-      "glove_l|skirt_pink": 54,
-      "hand_r|overskirt": 16,
-      "hand_r|skirt_pink": 76,
-      "glove_r|overskirt": 50,
-      "glove_r|skirt_pink": 66,
       "boot_l|boot_r": 5
      },
      "Run@0.00": {
       "glove_l|body": 6
      },
      "Run@0.25": {
-      "hand_l|skirt_pink": 74,
-      "glove_l|body": 3,
-      "glove_l|overskirt": 14,
-      "glove_l|skirt_pink": 19
+      "glove_l|body": 3
      },
      "Run@0.50": {
       "glove_l|body": 6
      },
      "Run@0.75": {
-      "glove_l|body": 6,
-      "hand_r|overskirt": 2,
-      "hand_r|skirt_pink": 17,
-      "glove_r|overskirt": 17,
-      "glove_r|skirt_pink": 32
+      "glove_l|body": 6
      },
      "Jump@0.20": {
       "boot_l|boot_r": 6
@@ -526,57 +464,25 @@
       "boot_l|boot_r": 6
      },
      "Attack@0.30": {
-      "hand_l|overskirt": 6,
-      "hand_l|skirt_pink": 172,
-      "hand_l|petticoat": 116,
-      "hand_l|underskirt": 89,
       "glove_l|body": 3,
-      "glove_l|overskirt": 80,
-      "glove_l|skirt_pink": 147,
-      "glove_l|petticoat": 75,
       "boot_l|boot_r": 4
      },
      "Attack@0.40": {
-      "hand_l|overskirt": 21,
-      "hand_l|skirt_pink": 164,
-      "hand_l|petticoat": 44,
-      "glove_l|body": 3,
-      "glove_l|overskirt": 73,
-      "glove_l|skirt_pink": 170,
-      "glove_l|petticoat": 56
+      "glove_l|body": 3
      },
      "Attack@0.60": {
       "glove_l|body": 3
      },
      "Hurt@0.16": {
-      "hand_l|skirt_pink": 45,
-      "glove_l|body": 3,
-      "glove_l|overskirt": 64,
-      "glove_l|skirt_pink": 144,
-      "glove_l|petticoat": 84,
-      "hand_r|skirt_pink": 19,
-      "glove_r|overskirt": 72,
-      "glove_r|skirt_pink": 147,
-      "glove_r|petticoat": 90
+      "glove_l|body": 3
      },
-     "Hurt@0.50": {
-      "hand_l|overskirt": 16,
-      "hand_l|skirt_pink": 78,
-      "hand_l|petticoat": 4,
-      "glove_l|overskirt": 49,
-      "glove_l|skirt_pink": 52,
-      "hand_r|overskirt": 26,
-      "hand_r|skirt_pink": 69,
-      "hand_r|petticoat": 7,
-      "glove_r|overskirt": 50,
-      "glove_r|skirt_pink": 90
-     }
+     "Hurt@0.50": {}
     }
    },
    "run_ground_speed": 1.7923703603446484
   },
   "hq": {
-   "triangles": 199968,
+   "triangles": 199970,
    "parts": 31,
    "meshes_after_merge": 26,
    "mesh_names": [
