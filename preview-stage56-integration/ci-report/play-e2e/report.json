@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-11-24T08:02:15.916Z",
+  "startedAt": "2026-11-24T09:05:01.618Z",
   "runs": [
     {
       "browser": "webkit",
@@ -28,7 +28,7 @@
               "count": 0,
               "equipped": null,
               "followerVisible": false,
-              "followerDist": 85.10218964183186
+              "followerDist": 85.10575184120904
             }
           }
         },
@@ -39,7 +39,7 @@
             "pipeline": false,
             "charShadow": "blob",
             "drawCalls": 135,
-            "fps": 0.4444115250722168,
+            "fps": 0.4515352197471403,
             "contextLost": 0
           }
         },
@@ -84,7 +84,7 @@
           "ok": true,
           "detail": {
             "attacks": 25,
-            "ms": 65456,
+            "ms": 64513,
             "kills": 3,
             "hits": 9,
             "drops": 4,
@@ -112,7 +112,7 @@
           "ok": true,
           "detail": {
             "attacks": 25,
-            "ms": 65456,
+            "ms": 64513,
             "kills": 3,
             "hits": 9,
             "drops": 4,
@@ -125,6 +125,19 @@
               "attackSpeed": 100,
               "damage": 20
             }
+          }
+        },
+        "背包數量＝撿到的數量（掉落不重複計算）": {
+          "ok": true,
+          "detail": {
+            "items": {
+              "seed": 1,
+              "egg": 1,
+              "birdEgg": 0,
+              "monsterMaterial": 2,
+              "shopFeed": 0
+            },
+            "picked": 4
           }
         },
         "被擊倒的怪物進入死亡／等待重生": {
@@ -159,16 +172,16 @@
                 "mode": "preview",
                 "reason": "",
                 "items": {
-                  "seed": 2,
-                  "egg": 2,
+                  "seed": 1,
+                  "egg": 1,
                   "birdEgg": 0,
-                  "monsterMaterial": 4,
+                  "monsterMaterial": 2,
                   "shopFeed": 3
                 },
                 "count": 1,
                 "equipped": 1,
                 "followerVisible": true,
-                "followerDist": 60.85326304668576
+                "followerDist": 60.85415884961696
               },
               "stats": {
                 "attack": 100,
@@ -188,16 +201,16 @@
               "mode": "preview",
               "reason": "",
               "items": {
-                "seed": 2,
-                "egg": 2,
+                "seed": 1,
+                "egg": 1,
                 "birdEgg": 0,
-                "monsterMaterial": 4,
+                "monsterMaterial": 2,
                 "shopFeed": 3
               },
               "count": 1,
               "equipped": 1,
               "followerVisible": true,
-              "followerDist": 0.4287471664004498
+              "followerDist": 0.42485978366923616
             }
           }
         },
@@ -215,16 +228,16 @@
             "mode": "preview",
             "reason": "",
             "items": {
-              "seed": 2,
-              "egg": 2,
+              "seed": 1,
+              "egg": 1,
               "birdEgg": 0,
-              "monsterMaterial": 4,
+              "monsterMaterial": 2,
               "shopFeed": 3
             },
             "count": 1,
             "equipped": 1,
             "followerVisible": true,
-            "followerDist": 0.4287471664004498
+            "followerDist": 0.42485978366923616
           }
         },
         "寵物加成反映到角色屬性；攻速 ≤ 160 且同步到攻擊動作": {
@@ -245,9 +258,9 @@
           }
         },
         "寵物商人鑑定：孵化前鑑定個體、不能重鑑、另一顆不受影響、孵化後詞條相同": {
-          "ok": false,
+          "ok": true,
           "detail": {
-            "target": "item:1",
+            "target": "item:2",
             "r1": {
               "ok": true,
               "affixes": [
@@ -261,7 +274,7 @@
               "ok": false,
               "affixes": null
             },
-            "other": "missing",
+            "other": null,
             "petAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]",
             "itemAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]"
           }
@@ -277,15 +290,15 @@
         "實玩效能測試流程（自動打怪、報告欄位、Context Lost 0）": {
           "ok": true,
           "detail": {
-            "seconds": 11.5,
-            "avgFps": 0.6092254134029592,
-            "low1Fps": 0.5592841163310962,
-            "minFps": 0.5592841163310962,
+            "seconds": 11.2,
+            "avgFps": 0.6275775506544736,
+            "low1Fps": 0.6195786864931846,
+            "minFps": 0.6195786864931846,
             "avgDraw": 131,
             "kills": 0,
             "contextLost": 0,
-            "first30": 0.609225413402959,
-            "last30": 0.6092254134029592,
+            "first30": 0.6275775506544737,
+            "last30": 0.6275775506544737,
             "quality": "high",
             "gender": "male",
             "lod": "hq",
@@ -308,7 +321,7 @@
             "count": 0,
             "equipped": null,
             "followerVisible": false,
-            "followerDist": 85.09602321263421
+            "followerDist": 85.09402948194166
           }
         },
         "&charshadow=realtime 可載入": {
@@ -318,7 +331,7 @@
             "pipeline": false,
             "charShadow": "realtime",
             "drawCalls": 160,
-            "fps": 0.532197977647685,
+            "fps": 0.5477651183172656,
             "contextLost": 0
           }
         },
@@ -329,7 +342,7 @@
             "pipeline": false,
             "charShadow": "realtime",
             "drawCalls": 160,
-            "fps": 0.532197977647685,
+            "fps": 0.5477651183172656,
             "contextLost": 0
           }
         }
@@ -433,14 +446,14 @@
             "count": 0,
             "equipped": null,
             "followerVisible": false,
-            "followerDist": 85.10218964183186
+            "followerDist": 85.10575184120904
           },
           "render": {
             "p3": true,
             "pipeline": false,
             "charShadow": "blob",
             "drawCalls": 135,
-            "fps": 0.4444115250722168,
+            "fps": 0.4515352197471403,
             "contextLost": 0
           }
         },
@@ -452,7 +465,7 @@
         },
         "fight": {
           "attacks": 25,
-          "ms": 65456,
+          "ms": 64513,
           "kills": 3,
           "hits": 9,
           "drops": 4,
@@ -493,16 +506,16 @@
               "mode": "preview",
               "reason": "",
               "items": {
-                "seed": 2,
-                "egg": 2,
+                "seed": 1,
+                "egg": 1,
                 "birdEgg": 0,
-                "monsterMaterial": 4,
+                "monsterMaterial": 2,
                 "shopFeed": 3
               },
               "count": 1,
               "equipped": 1,
               "followerVisible": true,
-              "followerDist": 60.85326304668576
+              "followerDist": 60.85415884961696
             },
             "stats": {
               "attack": 100,
@@ -522,20 +535,20 @@
             "mode": "preview",
             "reason": "",
             "items": {
-              "seed": 2,
-              "egg": 2,
+              "seed": 1,
+              "egg": 1,
               "birdEgg": 0,
-              "monsterMaterial": 4,
+              "monsterMaterial": 2,
               "shopFeed": 3
             },
             "count": 1,
             "equipped": 1,
             "followerVisible": true,
-            "followerDist": 0.4287471664004498
+            "followerDist": 0.42485978366923616
           }
         },
         "itemAppraisal": {
-          "target": "item:1",
+          "target": "item:2",
           "r1": {
             "ok": true,
             "affixes": [
@@ -549,20 +562,20 @@
             "ok": false,
             "affixes": null
           },
-          "other": "missing",
+          "other": null,
           "petAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]",
           "itemAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]"
         },
         "bench": {
-          "seconds": 11.5,
-          "avgFps": 0.6092254134029592,
-          "low1Fps": 0.5592841163310962,
-          "minFps": 0.5592841163310962,
+          "seconds": 11.2,
+          "avgFps": 0.6275775506544736,
+          "low1Fps": 0.6195786864931846,
+          "minFps": 0.6195786864931846,
           "avgDraw": 131,
           "kills": 0,
           "contextLost": 0,
-          "first30": 0.609225413402959,
-          "last30": 0.6092254134029592,
+          "first30": 0.6275775506544737,
+          "last30": 0.6275775506544737,
           "quality": "high",
           "gender": "male",
           "lod": "hq",
@@ -575,12 +588,12 @@
             "pipeline": false,
             "charShadow": "realtime",
             "drawCalls": 160,
-            "fps": 0.532197977647685,
+            "fps": 0.5477651183172656,
             "contextLost": 0
           }
         }
       },
-      "ok": false
+      "ok": true
     },
     {
       "browser": "webkit",
@@ -665,7 +678,7 @@
           "ok": true,
           "detail": {
             "attacks": 25,
-            "ms": 23549,
+            "ms": 23284,
             "kills": 3,
             "hits": 9,
             "drops": 4,
@@ -693,7 +706,7 @@
           "ok": true,
           "detail": {
             "attacks": 25,
-            "ms": 23549,
+            "ms": 23284,
             "kills": 3,
             "hits": 9,
             "drops": 4,
@@ -706,6 +719,19 @@
               "attackSpeed": 100,
               "damage": 20
             }
+          }
+        },
+        "背包數量＝撿到的數量（掉落不重複計算）": {
+          "ok": true,
+          "detail": {
+            "items": {
+              "seed": 1,
+              "egg": 1,
+              "birdEgg": 0,
+              "monsterMaterial": 2,
+              "shopFeed": 0
+            },
+            "picked": 4
           }
         },
         "被擊倒的怪物進入死亡／等待重生": {
@@ -740,16 +766,16 @@
                 "mode": "preview",
                 "reason": "",
                 "items": {
-                  "seed": 2,
-                  "egg": 2,
+                  "seed": 1,
+                  "egg": 1,
                   "birdEgg": 0,
-                  "monsterMaterial": 4,
+                  "monsterMaterial": 2,
                   "shopFeed": 3
                 },
                 "count": 1,
                 "equipped": 1,
                 "followerVisible": true,
-                "followerDist": 60.85382914142198
+                "followerDist": 60.854123785309945
               },
               "stats": {
                 "attack": 100,
@@ -769,16 +795,16 @@
               "mode": "preview",
               "reason": "",
               "items": {
-                "seed": 2,
-                "egg": 2,
+                "seed": 1,
+                "egg": 1,
                 "birdEgg": 0,
-                "monsterMaterial": 4,
+                "monsterMaterial": 2,
                 "shopFeed": 3
               },
               "count": 1,
               "equipped": 1,
               "followerVisible": true,
-              "followerDist": 0.4194502459653054
+              "followerDist": 0.41921473276396914
             }
           }
         },
@@ -796,16 +822,16 @@
             "mode": "preview",
             "reason": "",
             "items": {
-              "seed": 2,
-              "egg": 2,
+              "seed": 1,
+              "egg": 1,
               "birdEgg": 0,
-              "monsterMaterial": 4,
+              "monsterMaterial": 2,
               "shopFeed": 3
             },
             "count": 1,
             "equipped": 1,
             "followerVisible": true,
-            "followerDist": 0.4194502459653054
+            "followerDist": 0.41921473276396914
           }
         },
         "寵物加成反映到角色屬性；攻速 ≤ 160 且同步到攻擊動作": {
@@ -813,22 +839,22 @@
           "detail": {
             "stats": {
               "attack": 100,
-              "attackSpeed": 102.6,
+              "attackSpeed": 102.7,
               "defense": 50,
               "maxHp": 100
             },
             "attack": {
-              "interval": 0.4873294346978557,
-              "hitAt": 0.19493177387914232,
-              "attackSpeed": 102.6,
+              "interval": 0.486854917234664,
+              "hitAt": 0.1947419668938656,
+              "attackSpeed": 102.7,
               "damage": 20
             }
           }
         },
         "寵物商人鑑定：孵化前鑑定個體、不能重鑑、另一顆不受影響、孵化後詞條相同": {
-          "ok": false,
+          "ok": true,
           "detail": {
-            "target": "item:1",
+            "target": "item:2",
             "r1": {
               "ok": true,
               "affixes": [
@@ -842,7 +868,7 @@
               "ok": false,
               "affixes": null
             },
-            "other": "missing",
+            "other": null,
             "petAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]",
             "itemAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]"
           }
@@ -858,15 +884,15 @@
         "實玩效能測試流程（自動打怪、報告欄位、Context Lost 0）": {
           "ok": true,
           "detail": {
-            "seconds": 10.4,
-            "avgFps": 2.2123893805309733,
-            "low1Fps": 2.092050209205021,
-            "minFps": 2.092050209205021,
+            "seconds": 10.3,
+            "avgFps": 2.2349625886697115,
+            "low1Fps": 2.061855670103093,
+            "minFps": 2.061855670103093,
             "avgDraw": 115.65217391304348,
             "kills": 1,
             "contextLost": 0,
-            "first30": 2.212389380530973,
-            "last30": 2.2123893805309733,
+            "first30": 2.2349625886697115,
+            "last30": 2.2349625886697115,
             "quality": "medium",
             "gender": "female",
             "lod": "lite",
@@ -880,7 +906,7 @@
             "pipeline": false,
             "charShadow": "blob",
             "drawCalls": 116,
-            "fps": 2.1723388848660394,
+            "fps": 2.1976411984470006,
             "contextLost": 0
           }
         }
@@ -1003,7 +1029,7 @@
         },
         "fight": {
           "attacks": 25,
-          "ms": 23549,
+          "ms": 23284,
           "kills": 3,
           "hits": 9,
           "drops": 4,
@@ -1044,16 +1070,16 @@
               "mode": "preview",
               "reason": "",
               "items": {
-                "seed": 2,
-                "egg": 2,
+                "seed": 1,
+                "egg": 1,
                 "birdEgg": 0,
-                "monsterMaterial": 4,
+                "monsterMaterial": 2,
                 "shopFeed": 3
               },
               "count": 1,
               "equipped": 1,
               "followerVisible": true,
-              "followerDist": 60.85382914142198
+              "followerDist": 60.854123785309945
             },
             "stats": {
               "attack": 100,
@@ -1073,20 +1099,20 @@
             "mode": "preview",
             "reason": "",
             "items": {
-              "seed": 2,
-              "egg": 2,
+              "seed": 1,
+              "egg": 1,
               "birdEgg": 0,
-              "monsterMaterial": 4,
+              "monsterMaterial": 2,
               "shopFeed": 3
             },
             "count": 1,
             "equipped": 1,
             "followerVisible": true,
-            "followerDist": 0.4194502459653054
+            "followerDist": 0.41921473276396914
           }
         },
         "itemAppraisal": {
-          "target": "item:1",
+          "target": "item:2",
           "r1": {
             "ok": true,
             "affixes": [
@@ -1100,20 +1126,20 @@
             "ok": false,
             "affixes": null
           },
-          "other": "missing",
+          "other": null,
           "petAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]",
           "itemAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]"
         },
         "bench": {
-          "seconds": 10.4,
-          "avgFps": 2.2123893805309733,
-          "low1Fps": 2.092050209205021,
-          "minFps": 2.092050209205021,
+          "seconds": 10.3,
+          "avgFps": 2.2349625886697115,
+          "low1Fps": 2.061855670103093,
+          "minFps": 2.061855670103093,
           "avgDraw": 115.65217391304348,
           "kills": 1,
           "contextLost": 0,
-          "first30": 2.212389380530973,
-          "last30": 2.2123893805309733,
+          "first30": 2.2349625886697115,
+          "last30": 2.2349625886697115,
           "quality": "medium",
           "gender": "female",
           "lod": "lite",
@@ -1125,15 +1151,15 @@
             "pipeline": false,
             "charShadow": "blob",
             "drawCalls": 116,
-            "fps": 2.1723388848660394,
+            "fps": 2.1976411984470006,
             "contextLost": 0
           }
         }
       },
-      "ok": false
+      "ok": true
     }
   ],
-  "finishedAt": "2026-11-24T08:07:25.338Z",
+  "finishedAt": "2026-11-24T09:10:07.964Z",
   "characterVersion": "c10b5a",
-  "failures": 2
+  "failures": 0
 }
