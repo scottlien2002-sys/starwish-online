@@ -427,6 +427,9 @@ def pose_idle(t):
     }, {"hips": (0.004 * sway, 0, 0.0025 * b)})
 
 
+RUN_THIGH = 52   # C1.0-B5a：大腿擺幅 ±40° → ±52°（跨步加大，減少 5 m/s 時的滑步；髖部下沉 0.8 cm 讓著地腳伸直時仍踩到地）
+
+
 def pose_run(t):
     """Run（0.6 秒循環）：大腿 ±40°、擺動腳膝蓋高抬、著地腳伸直往後推；手臂反向擺、前傾、一步一次上下起伏"""
     ph = 2 * math.pi * t
@@ -434,16 +437,16 @@ def pose_run(t):
     c = math.cos(ph)
 
     def knee(p):  # 擺動期（腳往前帶）膝蓋大彎；著地期接近伸直
-        return 8 + 70 * max(0.0, math.sin(ph + p)) ** 1.5
+        return 8 + 78 * max(0.0, math.sin(ph + p)) ** 1.5
 
     return ({
         "hips": axis_q(Z, 7 * s), "spine": axis_q(X, 12) @ axis_q(Z, -6 * s), "chest": axis_q(Z, -5 * s), "neck": axis_q(X, -4), "head": axis_q(X, -2),
-        "thigh.L": axis_q(X, -40 * s), "thigh.R": axis_q(X, 40 * s),
+        "thigh.L": axis_q(X, -RUN_THIGH * s), "thigh.R": axis_q(X, RUN_THIGH * s),
         "shin.L": axis_q(X, knee(math.pi / 2)), "shin.R": axis_q(X, knee(-math.pi / 2)),
         "foot.L": axis_q(X, -12 * c), "foot.R": axis_q(X, 12 * c),
         "upper_arm.L": axis_q(X, 45 * s) @ axis_q(Y, -ABD - 8), "upper_arm.R": axis_q(X, -45 * s) @ axis_q(Y, ABD + 8),
         "forearm.L": axis_q(X, -55 - 15 * s), "forearm.R": axis_q(X, -55 + 15 * s),
-    }, {"hips": (0, 0, 0.022 * abs(c) - 0.012)})
+    }, {"hips": (0, 0, 0.030 * abs(c) - 0.020)})
 
 
 def _jump_curve(t):
@@ -468,9 +471,10 @@ def pose_jump(t):
         "thigh.L": axis_q(X, -55 * crp - 45 * tuck + 8 * ext), "thigh.R": axis_q(X, -55 * crp - 30 * tuck + 8 * ext),
         "shin.L": axis_q(X, 95 * crp + 80 * tuck), "shin.R": axis_q(X, 95 * crp + 60 * tuck),
         "foot.L": axis_q(X, -40 * crp + 25 * ext + 10 * tuck), "foot.R": axis_q(X, -40 * crp + 25 * ext + 10 * tuck),
-        "upper_arm.L": axis_q(X, 35 * crp - 120 * max(up, 0) + 25 * max(-up, 0)) @ axis_q(Y, 12 * max(up, 0)),
-        "upper_arm.R": axis_q(X, 35 * crp - 120 * max(up, 0) + 25 * max(-up, 0)) @ axis_q(Y, -12 * max(up, 0)),
-        "forearm.L": axis_q(X, -25 * max(up, 0) - 20 * crp), "forearm.R": axis_q(X, -25 * max(up, 0) - 20 * crp),
+        # C1.0-B5a：上舉 120° → 95°、往外張 28°、前臂少彎 → 手在頭的兩側斜上方，不靠近臉
+        "upper_arm.L": axis_q(X, 35 * crp - 95 * max(up, 0) + 25 * max(-up, 0)) @ axis_q(Y, -ABD - 28 * max(up, 0)),
+        "upper_arm.R": axis_q(X, 35 * crp - 95 * max(up, 0) + 25 * max(-up, 0)) @ axis_q(Y, ABD + 28 * max(up, 0)),
+        "forearm.L": axis_q(X, -10 * max(up, 0) - 20 * crp), "forearm.R": axis_q(X, -10 * max(up, 0) - 20 * crp),
     }, {"hips": (0, 0, -0.09 * crp)})
 
 
@@ -507,11 +511,12 @@ def pose_hurt(t):
     k = k * k * (3 - 2 * k) if s < 0.08 else k
     rb = 0.25 * math.sin(math.pi * max(0.0, min(1.0, (s - 0.2) / 0.2)))   # 回彈：往前一點點
     return ({
-        "spine": axis_q(X, -15 * k + 4 * rb), "chest": axis_q(X, -9 * k + 3 * rb), "neck": axis_q(X, -6 * k), "head": axis_q(X, -14 * k) @ axis_q(Z, 6 * k),
+        # C1.0-B5a：後仰幅度縮小約 40%（脊椎 15→9°、胸 9→5°、頸 6→4°、頭 14→8°）
+        "spine": axis_q(X, -9 * k + 3 * rb), "chest": axis_q(X, -5 * k + 2 * rb), "neck": axis_q(X, -4 * k), "head": axis_q(X, -8 * k) @ axis_q(Z, 5 * k),
         "upper_arm.L": axis_q(Y, -ABD - 28 * k) @ axis_q(X, -12 * k), "upper_arm.R": axis_q(Y, ABD + 28 * k) @ axis_q(X, -12 * k),
         "forearm.L": axis_q(X, -30 * k), "forearm.R": axis_q(X, -30 * k),
         "thigh.L": axis_q(X, -10 * k), "thigh.R": axis_q(X, -6 * k), "shin.L": axis_q(X, 18 * k), "shin.R": axis_q(X, 12 * k),
-    }, {"hips": (0, 0.045 * k, -0.02 * k)})
+    }, {"hips": (0, 0.03 * k, -0.015 * k)})
 
 
 ACTIONS = [("Idle", 2.4, pose_idle, True), ("Run", 0.6, pose_run, True), ("Jump", 1.0, pose_jump, False),
