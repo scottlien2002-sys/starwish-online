@@ -31,6 +31,8 @@ import {
 import { buildVillageWorld, type VillageWorld } from "./VillageWorld.ts";
 import { TourRunner, tourPoints, type TourEvent } from "./tour.ts";
 import type { VillageArtState } from "./VillageArtP3.ts";
+import type { VillageArtFull } from "./VillageArtFull.ts";
+import type { VillageInteract } from "./VillageInteract.ts";
 
 /**
  * Stage 6 P2-3 第一階段：星芽村 Grey-box 測試頁（?map=village）。
@@ -104,6 +106,11 @@ class VillagePage {
   /** 正式美術開關（&art=p3）；預設關閉＝Grey-box */
   private readonly artP3: boolean;
   private artState: VillageArtState | null = null;
+  /** 全村整合（&art=full）：三批正式候選美術＋洛恩 V2.1＋NPC／傳送門互動 */
+  private readonly artFull: boolean;
+  private full: VillageArtFull | null = null;
+  private fullStatus = "off";
+  private interact: VillageInteract | null = null;
 
   constructor(canvas: HTMLCanvasElement, hudRoot: HTMLElement) {
     const t0 = performance.now();
@@ -155,20 +162,45 @@ class VillagePage {
     this.render = setupRendering(scene, this.camera.camera, this.quality);
     // Grey-box 沒有需要發光的物件：關閉發光層（避免全部自發光標記被加上光暈）
     if (this.render.glow) this.render.glow.isEnabled = false;
-    this.world = buildVillageWorld(scene, this.quality.shadows.filter === "contact" ? this.shadows : null, this.lite);
+    this.artFull = params.get("art") === "full";
+    this.world = buildVillageWorld(scene, this.quality.shadows.filter === "contact" ? this.shadows : null, this.lite, this.artFull);
     if (params.get("labels") === "0") this.world.setLabels(false);
     this.artP3 = params.get("art") === "p3";
     if (this.artP3) {
       void import("./VillageArtP3.ts").then((m) => m.loadVillageArtP3(scene, this.lite, this.shadows, (st) => (this.artState = st)));
     }
     if (params.get("marks") === "0") this.world.setMarkers(false);
+    if (this.artFull) {
+      // 正式美術有自己的發光物（噴泉、傳送門、彩繪玻璃）：用材質自發光，不開全畫面發光層
+      this.fullStatus = "loading";
+      void import("./VillageArtFull.ts")
+        .then((m) => m.loadVillageArtFull(scene, this.lite, this.quality.shadows.filter === "contact" ? this.shadows : null, (msg) => (this.fullStatus = msg)))
+        .then(async (full) => {
+          this.full = full;
+          const { VillageInteract } = await import("./VillageInteract.ts");
+          this.interact = new VillageInteract(scene, full.merchant, {
+            avatarUrl: `${import.meta.env.BASE_URL}models/village-p3/pm2_avatar.png`,
+            goToMap: (map) => {
+              const q = new URLSearchParams(location.search);
+              q.set("map", map);
+              q.delete("art");
+              location.search = q.toString();
+            },
+          });
+          this.fullStatus = full.errors.length ? `部分載入失敗：${full.errors.join("；")}` : "loaded";
+          this.hud.toast(`星芽村全村整合載入完成（${(full.loadMs / 1000).toFixed(1)} 秒）：靠近 NPC、洛恩或傳送門會出現互動按鈕`, 3600);
+        })
+        .catch((e: unknown) => {
+          this.fullStatus = `error: ${e instanceof Error ? e.message : String(e)}`;
+        });
+    }
 
     this.hud = new Hud(hudRoot);
     this.hud.setLevel(10);
     this.hud.setBars({ hp: 100, maxHp: 100, mp: 40, maxMp: 40, exp: 0, expToNext: 100 });
     const build = hudRoot.querySelector<HTMLSpanElement>(".hud-build");
-    if (build) build.textContent = `星芽村 V1.3 ${params.get("art") === "p3" ? "P3-0 美術流程測試" : "Grey-box"} ${this.modeName()}`;
-    this.hud.events.on("skillPressed", () => this.hud.toast("星芽村 Grey-box：這一階段沒有戰鬥與 NPC 功能", 1500));
+    if (build) build.textContent = `星芽村 V1.3 ${this.artFull ? "全村整合候選" : params.get("art") === "p3" ? "P3-0 美術流程測試" : "Grey-box"} ${this.modeName()}`;
+    this.hud.events.on("skillPressed", () => this.hud.toast(this.artFull ? "星芽村是安全區，沒有戰鬥（技能演出在野外地圖）" : "星芽村 Grey-box：這一階段沒有戰鬥與 NPC 功能", 1500));
     const joystick = new VirtualJoystick(this.hud.joystickZone, this.input, TUNING.joystick.radius, TUNING.joystick.deadZone);
     this.camTouch = new CameraTouchControl(canvas, this.input, TUNING.camera.rotateSensitivity, TUNING.camera.pitchSensitivity, TUNING.camera.pinchSensitivity);
     const block = (e: Event): void => e.preventDefault();
@@ -186,7 +218,7 @@ class VillagePage {
 
   start(): void {
     this.engine.runRenderLoop(this.frame);
-    this.hud.toast("星芽村 V1.3 Grey-box：佔位模型，只測配置、比例、道路、傳送門位置與碰撞。上方「村莊」可傳送與測試", 4200);
+    this.hud.toast(this.artFull ? "星芽村全村整合候選（預覽版）：載入正式美術中…" : "星芽村 V1.3 Grey-box：佔位模型，只測配置、比例、道路、傳送門位置與碰撞。上方「村莊」可傳送與測試", 4200);
   }
 
   modeName(): string {
@@ -260,6 +292,7 @@ class VillagePage {
     }
     this.sun.position.copyFrom(this.pos).subtractInPlace(this.sun.direction.scale(45));
     this.world.update(dt, this.overview ? 1e6 : this.pos.x, this.overview ? 1e6 : this.pos.z);
+    this.interact?.update(performance.now() / 1000, this.pos.x, this.pos.z);
     this.scene.render();
     this.perf.update(dt);
     if (tour && touring) this.tourFrame(tour, rawDt, blockedNow);
@@ -389,6 +422,10 @@ class VillagePage {
           ? `正式美術 art=p3（${a.stage}）：${a.status === "loaded" ? "已載入" : a.status === "error" ? `載入失敗 ${a.error}` : "載入中"} ${a.file}，${a.ms} ms，網格 ${a.meshes}、材質 ${a.materials}、貼圖 ${a.textures}、三角形 ${a.triangles}`
           : "正式美術 art=p3：尚未開始載入",
       );
+    } else if (this.artFull) {
+      const f = this.full;
+      lines.push(`全村整合 art=full：${this.fullStatus}${f ? `，載入 ${f.loadMs} ms` : ""}`);
+      if (f) for (const [k, v] of Object.entries(f.parts)) lines.push(`  ${k}：網格 ${v.meshes}、三角形 ${v.triangles}`);
     } else lines.push("正式美術：關閉（Grey-box）");
     const r = this.lastTour;
     if (!r) {
@@ -455,6 +492,17 @@ class VillagePage {
     for (const s of VILLAGE_SPOTS) {
       btn(go, s.label, () => {
         this.teleport(s.x, s.z, s.yaw);
+        panel.classList.remove("open");
+      });
+    }
+    if (this.artFull) {
+      btn(go, "洛恩旁（寵物商人）", () => {
+        const m = this.full?.merchant;
+        if (!m) return this.hud.toast("洛恩還在載入中", 1200);
+        const p = m.root.position;
+        const r = Math.hypot(p.x, p.z) || 1;
+        // 站在洛恩外側 1.6 m（巡走路線在噴泉外圈 r 10.8，外側是廣場空地）
+        this.teleport(p.x + (p.x / r) * 1.6, p.z + (p.z / r) * 1.6, Math.atan2(-p.x, -p.z));
         panel.classList.remove("open");
       });
     }
@@ -573,6 +621,11 @@ class VillagePage {
       tourState: () => ({ phase: this.tour ? this.tour.runner.phase : this.lastTour ? "done" : null, loop: this.tour?.runner.loop ?? 0, result: this.lastTour }),
       blockedFrames: () => this.blockedFrames,
       artState: () => this.artState,
+      artFull: () => ({ on: this.artFull, status: this.fullStatus, loadMs: this.full?.loadMs ?? 0, parts: this.full?.parts ?? {}, errors: this.full?.errors ?? [], merchant: !!this.full?.merchant }),
+      interact: () => this.interact?.state() ?? null,
+      interactNow: () => this.interact?.activate() ?? "none",
+      interactClose: () => this.interact?.closeAll(),
+      appraisal: () => this.interact?.appraisalWindow.current ?? null,
       report: () => this.report(),
     };
     window.__starwishVillage = api;

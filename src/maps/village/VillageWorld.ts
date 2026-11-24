@@ -235,7 +235,12 @@ export interface VillageWorld {
   stats(): { meshes: number; triangles: number; labels: number };
 }
 
-export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null, lite: boolean): VillageWorld {
+/**
+ * art＝true（Stage 6 P3 全村整合）：正式美術模型取代佔位量體 —
+ * 只保留地面（含外圍緩坡）、NPC 佔位人形與互動圈、文字標籤；廣場、道路、高台、石階、建築、噴泉、燈具、傳送門、
+ * 鍛造台、佈告欄、樹籬、遠景、水面、標記改由美術模型提供。碰撞、配置、移動完全不變（都在 layout.ts）。
+ */
+export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null, lite: boolean, art = false): VillageWorld {
   const mat = new StandardMaterial("PH_vMat", scene);
   mat.diffuseColor = Color3.White();
   mat.specularColor = new Color3(0.04, 0.04, 0.04);
@@ -261,6 +266,7 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
     g.updateVerticesData("normal", nrm);
     add(geoOf(g, (px, py, pz, _nx, ny) => shade(GRASS, (0.92 + noise(px * 0.3, py, pz * 0.3) * 0.12) * (0.9 + ny * 0.1))));
   }
+  if (!art) {
   // 廣場：環形廣場、噴泉步道、道路
   add(cyl(scene, FOUNTAIN.plazaR * 2, FOUNTAIN.plazaR * 2, 0.08, lite ? 48 : 72, 0, 0.0, 0, PLAZA));
   add(cyl(scene, FOUNTAIN.walkwayR * 2, FOUNTAIN.walkwayR * 2, 0.1, lite ? 40 : 64, 0, 0.02, 0, WALKWAY));
@@ -409,6 +415,7 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
   ];
   add(joinGeo(far));
 
+  }
   const staticMesh = bake(scene, "PH_villageStatic", statics, mat)!;
   staticMesh.receiveShadows = true;
   staticMesh.isPickable = false;
@@ -443,6 +450,7 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
   };
   const flat = (c: RGB) => () => c;
   const m = (mesh: Mesh, c: RGB): Geo => geoOf(mesh, flat(c));
+  if (!art) {
   // 星形水晶（佔位：上下兩個四角錐）
   {
     const a = MeshBuilder.CreateCylinder("PH_vTmp", { diameterTop: 0, diameterBottom: 1.6, height: 1.1, tessellation: 4 }, scene);
@@ -453,6 +461,7 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
   }
   // 互動範圍：細圓環（r 10.5）
   mark(m(MeshBuilder.CreateTorus("PH_vTmp", { diameter: FOUNTAIN.interactR * 2, thickness: 0.08, tessellation: 96 }, scene), [0.35, 0.65, 1]), 0, 0.12, 0);
+  }
   // NPC 站位：金色星形底座＋粉紅色佔位人形＋互動圈
   for (const n of NPC_SPOTS) {
     const pad = MeshBuilder.CreateCylinder("PH_vTmp", { diameter: 1.2, height: 0.06, tessellation: 5 }, scene);
@@ -463,6 +472,7 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
     ring.position.y = 0.08;
     mark(joinGeo([m(pad, [1, 0.82, 0.3]), m(body, [1, 0.55, 0.75]), m(ring, [1, 0.72, 0.85])]), n.x, n.floor, n.z, n.yaw);
   }
+  if (!art) {
   // 復活點：小綠圓
   for (const s of RESPAWN_SLOTS) {
     const d = MeshBuilder.CreateCylinder("PH_vTmp", { diameter: 0.8, height: 0.04, tessellation: 12 }, scene);
@@ -486,6 +496,7 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
     tri.position.y = 0.07;
     mark(m(tri, [0.3, 0.6, 1]), ARRIVAL_SPOT.x, 0, ARRIVAL_SPOT.z, Math.PI);
   }
+  }
   const markMesh = bake(scene, "PH_villageMarks", marks, markMat)!;
   markMesh.isPickable = false;
   markMesh.freezeWorldMatrix();
@@ -506,6 +517,7 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
   }
   ringA.rotation.x = 1.1;
   ringB.rotation.z = 1.25;
+  if (art) for (const x of [waterMesh, ringA, ringB]) x.setEnabled(false);
 
   // 佔位階段：只有角色投影（shadows 由頁面管理）；建築陰影之後烘進頂點色
   void shadows;
@@ -518,12 +530,14 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
     // 大標籤在角色附近 6 m 內隱藏、小標籤 2.5 m（不擋住角色）
     labels.push({ mesh: p, x, z, hide: w >= 3.5 ? 6 : 2.5 });
   };
-  for (const b of BUILDINGS) {
-    const c = buildingCenter(b);
-    label(b.name, b.role, c.x, b.floor + b.top + 1.5, c.z, 6);
+  if (!art) {
+    for (const b of BUILDINGS) {
+      const c = buildingCenter(b);
+      label(b.name, b.role, c.x, b.floor + b.top + 1.5, c.z, 6);
+    }
   }
-  for (const n of NPC_SPOTS) label(n.name.replace("（鍛造台旁）", ""), n.id === "board" ? "互動" : "NPC 預留", n.x, n.floor + 2.2, n.z, 2.4);
-  label("星願之泉", "出生・復活（座標預留）", 0, 9, 0, 5);
+  for (const n of NPC_SPOTS) label(n.name.replace("（鍛造台旁）", ""), art ? n.role : n.id === "board" ? "互動" : "NPC 預留", n.x, n.floor + 2.2, n.z, 2.4);
+  if (!art) label("星願之泉", "出生・復活（座標預留）", 0, 9, 0, 5);
   for (const p of PORTALS) label(p.name, p.open ? "開放：星芽原野 Lv1–10" : "未開放", p.x, p.floor + 3.4, p.z, 3.8);
 
   let labelsOn = true;

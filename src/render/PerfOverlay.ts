@@ -91,7 +91,7 @@ export class PerfOverlay {
       this.uiTimer = 0;
       this.last = this.read();
       const s = this.last;
-      this.text.innerHTML = `FPS ${Math.round(s.fps)}<br>Draw ${s.drawCalls}<br>Mesh ${s.activeMeshes}<br>${s.pixelRatio}x`;
+      this.text.innerHTML = `FPS ${Math.round(s.fps)}<br>Draw ${s.drawCalls}<br>Tri ${(this.scene.getActiveIndices() / 3000).toFixed(1)}k<br>Mesh ${s.activeMeshes}<br>${s.pixelRatio}x`;
     }
   }
 
