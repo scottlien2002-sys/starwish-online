@@ -26,14 +26,16 @@ import { type PlazaP3, setupPlazaP3 } from "../../src/maps/village/PlazaP3.ts";
 import { type KnightP3, setupKnightP3 } from "../../src/maps/village/KnightP3.ts";
 import { type MageP3, setupMageP3 } from "../../src/maps/village/MageP3.ts";
 import { type BuildingP3, setupBuildingP3 } from "../../src/maps/village/BuildingP3.ts";
-import { type PetMerchantP3, setupPetMerchantP3 } from "../../src/maps/village/PetMerchantP3.ts";
+import { type PetMerchantV2, setupPetMerchantV2 } from "../../src/maps/village/PetMerchantV2.ts";
+import { PetAppraisalWindow } from "../../src/maps/village/PetAppraisalWindow.ts";
+import { connectPetAppraisalService, createDemoAppraisalService } from "../../src/maps/village/petAppraisal.ts";
 import { PetMerchantPanel } from "../../src/maps/village/PetMerchantPanel.ts";
 import { PET_MERCHANT, petMerchantPathSamples, petMerchantPose } from "../../src/maps/village/petMerchant.ts";
 import { villageTextures } from "../../src/maps/village/villageTextures.ts";
 import { VILLAGE_SPAWN_CAMERA } from "../../src/maps/village/spawnCamera.ts";
 import { BOARD, BUILDINGS, buildingCenter, FORGE, NPC_SPOTS, PLATFORM, PORTALS, portalPillars, SOUTH_GATE, STAIR_FROM, STAIR_WIDTH, STAIRS } from "../../src/maps/village/layout.ts";
 
-type View = { target: [number, number, number]; alpha: number; beta: number; radius: number; fov?: number; ortho?: number; hide?: string[]; /** 寵物商人時間（固定姿勢） */ mt?: number };
+type View = { target: [number, number, number]; alpha: number; beta: number; radius: number; fov?: number; ortho?: number; hide?: string[]; /** 寵物商人時間（固定姿勢） */ mt?: number; /** 玩家正在和商人對話（商人停下、面向玩家） */ talk?: boolean };
 const H = Math.PI / 2;
 /** 鏡頭位於目標的方位（北＝0°，順時針）→ ArcRotateCamera alpha */
 const alphaFrom = (bearing: number): number => {
@@ -298,6 +300,9 @@ let sword: BuildingP3 | null = null;
 let platformArt: BuildingP3 | null = null;
 const state: { ready: boolean; error: string | null; loadMs: number } = { ready: false, error: null, loadMs: 0 };
 
+/** 預覽用玩家位置：站在第 1 個停留點（202.5°）外側 2.8 m */
+const PM_PLAYER = { x: Math.sin(((202.5 - 4) * Math.PI) / 180) * 13.6, z: Math.cos(((202.5 - 4) * Math.PI) / 180) * 13.6 };
+
 /** 寵物商人預覽視角（第 1 個停留點 202.5°、商人時間 4 s；行走中 16 s） */
 function petMerchantViews(): Record<string, View> {
   const s0 = petMerchantPose(4);
@@ -306,7 +311,7 @@ function petMerchantViews(): Record<string, View> {
   const me = (p: { x: number; z: number }, h: number): [number, number, number] => [p.x, h, p.z];
   const polarDeg = (b: number, r: number): { x: number; z: number } => ({ x: Math.sin((b * Math.PI) / 180) * r, z: Math.cos((b * Math.PI) / 180) * r });
   // 玩家站在商人外側 2.8 m（避開 r 18.6 的路燈，鏡頭略偏 10°）
-  const player = { x: Math.sin(((b0 - 4) * Math.PI) / 180) * 13.6, z: Math.cos(((b0 - 4) * Math.PI) / 180) * 13.6 };
+  const player = PM_PLAYER;
   return {
     pm_front: { target: me(s0, 0.78), alpha: alphaFrom(b0), beta: 1.47, radius: 3.0, fov: 0.8, mt: 4 },
     pm_q45: { target: me(s0, 0.75), alpha: alphaFrom(b0 + 42), beta: 1.38, radius: 3.2, fov: 0.8, mt: 4 },
@@ -315,6 +320,10 @@ function petMerchantViews(): Record<string, View> {
     pm_walk: { target: me(w, 0.75), alpha: alphaFrom(w.bearing + 70), beta: 1.38, radius: 4.2, fov: 0.8, mt: 16 },
     pm_spawn: { target: [0, 0.85, -12.5], alpha: -H, beta: VILLAGE_SPAWN_CAMERA.beta, radius: 9, fov: 0.9, mt: 4 },
     pm_iphone: { target: [player.x, 0.85, player.z], alpha: alphaFrom(b0 - 14), beta: 1.32, radius: 9, fov: 0.9, mt: 4 },
+    // V2：近距離美術（正、側、背、45°）與對話中（停下、面向玩家）
+    pm_side: { target: me(s0, 0.75), alpha: alphaFrom(b0 + 90), beta: 1.45, radius: 3.0, fov: 0.8, mt: 4 },
+    pm_talk: { target: [(s0.x + player.x) / 2, 0.9, (s0.z + player.z) / 2], alpha: alphaFrom(b0 + 70), beta: 1.36, radius: 4.4, fov: 0.85, mt: 4, talk: true },
+    pm_talk_iphone: { target: [player.x, 0.85, player.z], alpha: alphaFrom(b0 - 14), beta: 1.32, radius: 9, fov: 0.9, mt: 4, talk: true },
     pm_path: { target: [0, 0, 0], alpha: -H, beta: 0.0001, radius: 45, ortho: 14.5, mt: 4 },
     // 巡走動畫：從第 1 個停留點（202.5°）往 247.5° 走；鏡頭在廣場外側（路燈 r 18.6 之內），看向 212° 一帶
     pm_anim: { target: me(polarDeg(214, PET_MERCHANT.patrolR), 0.85), alpha: alphaFrom(214), beta: 1.33, radius: 6.2, fov: 0.85 },
@@ -324,10 +333,25 @@ function petMerchantViews(): Record<string, View> {
 /** 已由正式模型取代的灰色量體（setView 不會再打開） */
 const REPLACED = new Set<string>(["knight", "mage"]);
 
-let merchant: PetMerchantP3 | null = null;
+let merchant: PetMerchantV2 | null = null;
+let talking = false;
 let merchantT: number | null = null;
 let merchantPath: AbstractMesh | null = null;
 const petPanel = new PetMerchantPanel();
+// 預覽頁：鑑定使用「測試資料」服務（畫面標示「測試資料・非正式數值」）
+connectPetAppraisalService(createDemoAppraisalService());
+const appraisal = new PetAppraisalWindow({ avatarUrl: "./models/pm2_avatar.png", onBack: () => void petPanel.open(), onClose: () => setTalking(false) });
+petPanel.onAppraise = () => void appraisal.open();
+petPanel.onClose = () => {
+  if (!appraisal.isOpen) setTalking(false);
+};
+const mNow = (): number => merchantT ?? performance.now() / 1000;
+function setTalking(on: boolean): void {
+  talking = on;
+  if (!merchant) return;
+  if (on) merchant.clock.hold("me", mNow(), PM_PLAYER.x, PM_PLAYER.z);
+  else merchant.clock.release("me", mNow());
+}
 
 function setView(name: string): void {
   const v = VIEWS[name];
@@ -336,6 +360,7 @@ function setView(name: string): void {
   camera.alpha = v.alpha;
   camera.beta = v.beta;
   if (v.mt !== undefined) merchantT = v.mt;
+  setTalking(!!v.talk);
   merchantPath?.setEnabled(name === "pm_path");
   // 個別視角暫時隱藏擋住鏡頭的灰色量體（例如側面圖前方的教堂量體）
   for (const m of context) if (m.name.startsWith("bld_") || m.name.startsWith("roof_")) {
@@ -501,9 +526,14 @@ async function load(): Promise<void> {
   for (const m of context) if (["bld_sword", "roof_sword", "platform", "stair"].includes(m.name)) m.setEnabled(false);
   REPLACED.add("sword");
   // 寵物商人（沿噴泉巡走；不凍結）＋巡走路線示意線（只在 pm_path 視角顯示）
-  const pm = await loadGlb(`pet_merchant_${q2}.glb`);
-  merchant = setupPetMerchantP3(scene, pm.meshes, { lite, shadows: castShadows ? shadows : null });
-  scene.onBeforeRenderObservable.add(() => merchant?.update(merchantT ?? performance.now() / 1000));
+  // V2：骨架角色＋動作（Idle／Walk／Talk／Turn）；開啟介面時暫停巡走、面向玩家
+  const pmc = await SceneLoader.LoadAssetContainerAsync("./models/", `pet_merchant_v2_${q2}.glb`, scene);
+  pmc.addAllToScene();
+  merchant = setupPetMerchantV2(scene, { meshes: pmc.meshes, animationGroups: pmc.animationGroups, transformNodes: pmc.transformNodes, rootNodes: pmc.rootNodes }, { lite, shadows: castShadows ? shadows : null });
+  scene.onBeforeRenderObservable.add(() => {
+    if (talking) merchant?.clock.hold("me", mNow(), PM_PLAYER.x, PM_PLAYER.z);
+    merchant?.update(mNow());
+  });
   const ring = petMerchantPathSamples(0.5).map((p) => new Vector3(p.x, 0.06, p.z));
   ring.push(ring[0]!.clone());
   const line = MeshBuilder.CreateTube("pm_path_line", { path: ring, radius: 0.09, tessellation: 6 }, scene);
@@ -522,7 +552,10 @@ async function load(): Promise<void> {
   for (const m of [line, ...marks]) m.parent = merchantPath;
   merchantPath.setEnabled(false);
   scene.onPointerObservable.add((pi) => {
-    if (pi.type === PointerEventTypes.POINTERTAP && pi.pickInfo?.pickedMesh?.metadata?.petMerchant) void petPanel.open();
+    if (pi.type === PointerEventTypes.POINTERTAP && pi.pickInfo?.pickedMesh?.metadata?.petMerchant) {
+      setTalking(true);
+      void petPanel.open();
+    }
   });
   // 星晶每幀會動：不凍結它的世界矩陣
   for (const m of [...f.meshes, ...p.meshes, ...k.meshes, ...mg.meshes, ...sw.meshes, ...pf.meshes]) if (!fx.animated.includes(m)) m.freezeWorldMatrix();
@@ -548,6 +581,67 @@ load().catch((e: unknown) => {
     merchantT = t;
   },
   /** 寵物商人對話面板：open／choose:<id>／kind:<kind>／back／close；回傳目前畫面文字 */
+  /** 星靈鑑定視窗操作：open／place:<id>／start／startTwice／state／back／close；回傳狀態摘要 */
+  appraisal: async (a: string) => {
+    if (a === "open") {
+      setTalking(true);
+      await appraisal.open();
+    } else if (a.startsWith("place:")) await appraisal.placeItem(a.slice(6));
+    else if (a === "start") void appraisal.start();
+    else if (a === "startTwice") {
+      // 連點兩次（第二次在鎖定中，必須被忽略）
+      document.querySelector<HTMLButtonElement>('.pa-win [data-act="start"]')?.click();
+      document.querySelector<HTMLButtonElement>('.pa-win [data-act="start"]')?.click();
+    } else if (a === "close") appraisal.close();
+    else if (a === "back") document.querySelector<HTMLButtonElement>('.pa-win [data-act="back"]')?.click();
+    const st = appraisal.current;
+    const win = document.querySelector<HTMLElement>(".pa-win");
+    const go = document.querySelector<HTMLButtonElement>('.pa-win [data-act="start"]');
+    const r = go?.getBoundingClientRect();
+    return {
+      open: appraisal.isOpen,
+      phase: st.phase,
+      selected: st.selectedId,
+      items: st.items.map((i) => ({ id: i.id, kind: i.kind, appraised: i.appraised })),
+      lines: st.lines,
+      fee: document.querySelector(".pa-fee b")?.textContent ?? "",
+      startDisabled: go?.disabled ?? null,
+      startBottom: r ? Math.round(r.bottom) : null,
+      viewportH: window.innerHeight,
+      hScroll: Math.max(document.documentElement.scrollWidth - window.innerWidth, win ? win.scrollWidth - win.clientWidth : 0),
+      test: !!document.querySelector(".pa-win .pa-test"),
+      shownLines: document.querySelectorAll(".pa-win .pa-line").length,
+    };
+  },
+  /** 對話暫停檢查：開啟介面 → 巡走時間凍結、商人面向玩家；關閉 → 恢復 */
+  talkCheck: () => {
+    if (!merchant) return null;
+    const keep = merchantT;
+    setTalking(false);
+    let t = 12;
+    merchantT = t;
+    const walking = merchant.update(t);
+    setTalking(true);
+    let a = merchant.update(t);
+    for (let k = 0; k < 120; k++) a = merchant.update((t += 0.05));
+    const want = Math.atan2(PM_PLAYER.x - a.x, PM_PLAYER.z - a.z);
+    let dy = Math.abs(a.facing - want) % (2 * Math.PI);
+    if (dy > Math.PI) dy = 2 * Math.PI - dy;
+    const stillPos = merchant.update((t += 0.05));
+    setTalking(false);
+    let b = merchant.update((t += 0.05));
+    for (let k = 0; k < 40; k++) b = merchant.update((t += 0.05));
+    merchantT = keep;
+    return {
+      walkingBefore: walking.walking,
+      stoppedWhileTalking: Math.hypot(stillPos.x - a.x, stillPos.z - a.z) < 1e-6,
+      facesPlayerDeg: +((dy * 180) / Math.PI).toFixed(1),
+      talkAnim: a.anim,
+      resumed: Math.hypot(b.x - a.x, b.z - a.z) > 0.5,
+      animAfter: b.anim,
+    };
+  },
+  merchantInfo: () => (merchant ? { ...merchant.update(mNow()), stats: merchant.stats } : null),
   petPanel: async (a: string) => {
     if (a === "open") await petPanel.open();
     else if (a === "close") {

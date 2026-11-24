@@ -14,6 +14,7 @@ const mageReport = process.argv[6] ?? "out/mage_report.json";
 const swordReport = process.argv[7] ?? "out/sword_report.json";
 const platformReport = process.argv[8] ?? "out/platform_report.json";
 const merchantReport = process.argv[9] ?? "out/pet_merchant_report.json";
+const merchantV2Report = process.argv[10] ?? "out/pm2/pm2_report.json";
 mkdirSync(out, { recursive: true });
 const report = { startedAt: new Date().toISOString(), checks: {}, runs: [] };
 let fail = 0;
@@ -141,6 +142,14 @@ let fail = 0;
       ck(`寵物商人 ${lod} 模型：高 ≤ 1.6 m、半徑 ≤ 路線檢查用的 ${PET_MERCHANT.bodyR + 0.1} m、面數在額度內`, v.height <= 1.6 && v.radius <= PET_MERCHANT.bodyR + 0.1 && v.within_budget, { height: v.height, radius: v.radius, triangles: v.triangles, budget: mr.budget[lod] });
     }
   }
+  // 寵物商人 V2：骨架、四個動作、面數
+  {
+    const r2 = JSON.parse(readFileSync(merchantV2Report, "utf8"));
+    for (const [lod, v] of Object.entries(r2.lods)) {
+      const names = v.actions.map((a) => a.name);
+      ck(`洛恩（寵物商人 V2）${lod}：17 根骨頭、動作 Idle／Walk／Talk／Turn、面數在額度內`, v.bones.length === 17 && ["Idle", "Walk", "Talk", "Turn"].every((n) => names.includes(n)) && v.within_budget, { bones: v.bones.length, actions: names, triangles: v.triangles, budget: r2.budget[lod] });
+    }
+  }
   // 噴泉：外徑＝碰撞半徑 7 m、最高 6.5 m（P3-1A 驗收值）
   {
     const fr = JSON.parse(readFileSync(plazaReport.replace("plaza_report.json", "fountain_report.json"), "utf8"));
@@ -157,12 +166,12 @@ const pw = await loadPlaywright();
 const server = await serve(dist);
 // [瀏覽器, 模式, 畫質, lod, 截圖視角, 選項{ viewport, anim: [[名稱, 視角, 秒, fps]] }]
 const plan = [
-  ["chromium", "hq", "high", "hq", ["pm_spawn", "pm_front", "pm_q45", "pm_back", "pm_plaza", "pm_walk", "pm_path", "village_top"], { anim: [["pet_merchant", "pm_anim", 10, 15, 5]] }],
-  ["chromium", "lite-low", "low", "lite", ["pm_spawn", "pm_front", "pm_q45", "pm_back", "pm_plaza", "pm_walk"]],
-  // iPhone 直向（390×844，DPR 2）：出生點、站在商人前、對話面板（占位功能）
-  ["chromium", "hq-portrait", "high", "hq", ["pm_spawn", "pm_iphone"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 }, panel: true }],
-  ["chromium", "lite-portrait", "low", "lite", ["pm_spawn", "pm_iphone"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 } }],
-  ["webkit", "hq", "high", "hq", ["pm_q45", "pm_plaza"]],
+  ["chromium", "hq", "high", "hq", ["pm_spawn", "pm_front", "pm_side", "pm_back", "pm_q45", "pm_talk", "pm_plaza", "pm_walk", "pm_path", "village_top"], { anim: [["pet_merchant_v2", "pm_anim", 10, 15, 5]], drag: true }],
+  ["chromium", "lite-low", "low", "lite", ["pm_spawn", "pm_front", "pm_side", "pm_back", "pm_q45", "pm_talk"]],
+  // iPhone 直向（390×844，DPR 2）：出生點、走到商人前、對話中、星靈鑑定視窗完整流程
+  ["chromium", "hq-portrait", "high", "hq", ["pm_spawn", "pm_iphone", "pm_talk_iphone"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 }, panel: true, appraisal: true }],
+  ["chromium", "lite-portrait", "low", "lite", ["pm_spawn", "pm_talk_iphone"], { viewport: { width: 390, height: 844, deviceScaleFactor: 2 }, appraisal: true }],
+  ["webkit", "hq", "high", "hq", ["pm_q45", "pm_talk"], { appraisal: true }],
   ["webkit", "lite-low", "low", "lite", ["pm_front"]],
 ];
 
@@ -220,10 +229,60 @@ for (const [bname, mode, quality, lod, views, opts = {}] of plan) {
       (run.anims ??= []).push({ name, view, secs, fps, frames: n, dir: dir.split("/").pop() });
       await page.evaluate(() => window.__lab.setTime(3.2));
     }
-    // 寵物商人對話面板（占位功能）：開啟 → 鑑定 → 鳥蛋 → 返回 → 飼料 → 培育 → 離開，各步驟截圖
+    run.talkCheck = await page.evaluate(() => window.__lab.talkCheck());
+    // 星靈鑑定視窗：開啟（空）→ 放入種子（顯示費用）→ 連點開始鑑定 → 特效中 → 逐條結果 → 已鑑定物品 → 背包狀態
+    if (opts.appraisal) {
+      await page.evaluate(() => window.__lab.setView("pm_talk_iphone"));
+      const shot = async (name) => {
+        const f = `${out}/${bname}_${mode}_${name}.png`;
+        await page.screenshot({ path: f, timeout: 120000 });
+        run.shots.push(f.split("/").pop());
+      };
+      const A = (a) => page.evaluate((x) => window.__lab.appraisal(x), a);
+      const log = [];
+      log.push({ step: "open", ...(await A("open")) });
+      await page.waitForTimeout(400);
+      await shot("appraise_1_empty");
+      log.push({ step: "place:s1", ...(await A("place:s1")) });
+      await page.waitForTimeout(300);
+      await shot("appraise_2_ready");
+      log.push({ step: "startTwice", ...(await A("startTwice")) });
+      await page.waitForTimeout(420);
+      await shot("appraise_3_effect");
+      await page.waitForTimeout(2600);
+      log.push({ step: "result", ...(await A("state")) });
+      await shot("appraise_4_result");
+      log.push({ step: "place:e0", ...(await A("place:e0")) });
+      await page.waitForTimeout(300);
+      await shot("appraise_5_already");
+      log.push({ step: "place:b1", ...(await A("place:b1")) });
+      await A("start");
+      await page.waitForTimeout(3400);
+      log.push({ step: "result_b1", ...(await A("state")) });
+      await shot("appraise_6_bird");
+      log.push({ step: "close", ...(await A("close")) });
+      run.appraisal = log;
+    }
+    // 桌面：把背包物品拖進鑑定框
+    if (opts.drag) {
+      await page.evaluate(() => window.__lab.appraisal("open"));
+      await page.waitForTimeout(400);
+      try {
+        await page.dragAndDrop('.pa-win [data-id="e1"]', '.pa-win [data-act="slot"]', { timeout: 10000 });
+        await page.waitForTimeout(300);
+        run.drag = await page.evaluate(() => window.__lab.appraisal("state"));
+        const f = `${out}/${bname}_${mode}_appraise_drag.png`;
+        await page.screenshot({ path: f, timeout: 120000 });
+        run.shots.push(f.split("/").pop());
+      } catch (e) {
+        run.drag = { error: String(e.message ?? e) };
+      }
+      await page.evaluate(() => window.__lab.appraisal("close"));
+    }
+    // 寵物商人對話面板：開啟 → 飼料 → 培育 → 離開（「寵物鑑定」改開星靈鑑定視窗）
     if (opts.panel) {
-      await page.evaluate(() => window.__lab.setView("pm_iphone"));
-      const steps = [["open", "panel_root"], ["choose:appraise", "panel_appraise"], ["kind:birdEgg", "panel_birdegg"], ["back", null], ["back", null], ["choose:feed", "panel_feed"], ["back", null], ["choose:guide", "panel_guide"], ["close", "panel_closed"]];
+      await page.evaluate(() => window.__lab.setView("pm_talk_iphone"));
+      const steps = [["open", "panel_root"], ["choose:feed", "panel_feed"], ["back", null], ["choose:guide", "panel_guide"], ["close", "panel_closed"]];
       run.panel = [];
       for (const [act, shot] of steps) {
         const text = await page.evaluate((a) => window.__lab.petPanel(a), act);
@@ -241,6 +300,7 @@ for (const [bname, mode, quality, lod, views, opts = {}] of plan) {
         pm_spawn: await page.evaluate(() => window.__lab.flickerTest("pm_spawn")),
         pm_plaza: await page.evaluate(() => window.__lab.flickerTest("pm_plaza")),
         pm_front: await page.evaluate(() => window.__lab.flickerTest("pm_front")),
+      pm_talk: await page.evaluate(() => window.__lab.flickerTest("pm_talk")),
       };
       await page.evaluate(() => window.__lab.setTime(null));
       await page.evaluate(() => window.__lab.setView("player_spawn"));
@@ -255,11 +315,26 @@ for (const [bname, mode, quality, lod, views, opts = {}] of plan) {
 }
 await server.close();
 {
+  const ck2 = (k, ok, detail) => {
+    report.checks[k] = { ok, detail };
+    if (!ok) fail++;
+  };
   const pr = report.runs.find((r) => r.panel);
-  const msgs = (pr?.panel ?? []).filter((x) => ["kind:birdEgg", "choose:feed", "choose:guide"].includes(x.act));
-  const ok = !!pr && msgs.length === 3 && msgs.every((x) => x.text.includes("尚未開放")) && pr.panel.at(-1).text === "";
-  report.checks["寵物商人對話面板：鑑定（種子／孵化蛋／鳥蛋）、飼料、培育與進化都可點選，未接入寵物系統時顯示「準備中」，不顯示任何機率或價格"] = { ok, detail: pr?.panel ?? "no panel run" };
-  if (!ok) fail++;
+  const msgs = (pr?.panel ?? []).filter((x) => ["choose:feed", "choose:guide"].includes(x.act));
+  ck2("商人對話面板：飼料、培育與進化在寵物系統接入前顯示「準備中」（不顯示機率或價格）；關閉後面板消失", !!pr && msgs.length === 2 && msgs.every((x) => x.text.includes("尚未開放")) && pr.panel.at(-1).text === "", pr?.panel ?? "no panel run");
+  for (const r of report.runs.filter((x) => x.appraisal)) {
+    const L = Object.fromEntries(r.appraisal.map((x) => [x.step, x]));
+    const tag = `${r.browser} ${r.mode}`;
+    ck2(`星靈鑑定 ${tag}：鑑定框沒有物品時按鈕停用；只列出種子／孵化蛋／鳥蛋；標示「測試資料」`, L.open?.startDisabled === true && L.open.items.length > 0 && L.open.items.every((i) => ["seed", "egg", "birdEgg"].includes(i.kind)) && L.open.test, L.open);
+    ck2(`星靈鑑定 ${tag}：放入後顯示費用、按鈕可按；連點只鑑定一次；物品留在背包並變成已鑑定（數量不變）`, L["place:s1"]?.startDisabled === false && /金幣|未定案/.test(L["place:s1"].fee) && L.result?.phase === "result" && L.result.items.length === L.open.items.length && L.result.items.filter((i) => i.id === "s1").length === 1 && L.result.items.find((i) => i.id === "s1")?.appraised === true && L.result.shownLines === L.result.lines.length && L.result.lines.length > 0, { ready: L["place:s1"], result: L.result });
+    ck2(`星靈鑑定 ${tag}：已鑑定物品不能再鑑定（按鈕停用、顯示原結果）`, L["place:e0"]?.phase === "appraised" && L["place:e0"].startDisabled === true && L["place:e0"].lines.length > 0, L["place:e0"]);
+    ck2(`星靈鑑定 ${tag}：正屬性綠、負屬性紅（鳥蛋 4 條含正負）`, L.result_b1?.lines.some((l) => l.polarity === "positive") && L.result_b1.lines.some((l) => l.polarity === "negative"), L.result_b1?.lines);
+    if (r.mode.includes("portrait")) ck2(`星靈鑑定 ${tag}：iPhone 直向沒有橫向捲動、開始鑑定按鈕在畫面內`, L.open.hScroll <= 0 && L["place:s1"].startBottom <= L["place:s1"].viewportH, { hScroll: L.open.hScroll, startBottom: L["place:s1"].startBottom, viewportH: L["place:s1"].viewportH });
+  }
+  const dr = report.runs.find((r) => r.drag);
+  ck2("星靈鑑定：桌面版可把背包物品拖進鑑定框", dr?.drag?.selected === "e1" && dr.drag.phase === "ready", dr?.drag ?? "no drag run");
+  const tc = report.runs.find((r) => r.talkCheck)?.talkCheck;
+  ck2("洛恩：開啟介面時停止巡走、轉身面向玩家並播放 Talk；關閉後恢復巡走", !!tc && tc.walkingBefore && tc.stoppedWhileTalking && tc.facesPlayerDeg < 5 && tc.talkAnim === "Talk" && tc.resumed, tc);
 }
 report.finishedAt = new Date().toISOString();
 writeFileSync(`${out}/lab_report.json`, JSON.stringify(report, null, 1));

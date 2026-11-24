@@ -18,6 +18,9 @@ on:
       - "src/maps/village/petMerchant.ts"
       - "src/maps/village/PetMerchantP3.ts"
       - "src/maps/village/PetMerchantPanel.ts"
+      - "src/maps/village/PetMerchantV2.ts"
+      - "src/maps/village/PetAppraisalWindow.ts"
+      - "src/maps/village/petAppraisal.ts"
       - "tests/unit/village-pet-merchant.test.ts"
       - "src/maps/village/villageTextures.ts"
       - "src/maps/village/villageMaterials.ts"
@@ -101,6 +104,28 @@ jobs:
           /opt/blender/blender -b --factory-startup -noaudio -P art/village-p3/build_pet_merchant.py -- --out "$PWD/out" 2>&1 | tee out/pet_merchant.log | grep -v "^Fra:" | grep -v "Sample" | tail -30
           for f in pet_merchant_hq.glb pet_merchant_lite.glb pet_merchant_report.json; do test -f "out/$f"; done
 
+      - name: Pet merchant V2 — read-only base from Claude A (pinned commit) + Loen parts (SDF)
+        run: |
+          # Claude A 男初心者 C1.0-B4（feature/novice-c10b4-rig）固定 commit：只讀取、不修改、不推送
+          A_SHA=2225e29dfc489731c8d736211e2af5b90c13a066
+          git fetch --no-tags --depth=1 origin "$A_SHA"
+          mkdir -p /tmp/a_art && git archive "$A_SHA" art | tar -x -C /tmp/a_art
+          python3 /tmp/a_art/art/novice-c10b4/export_c10b4.py /tmp/a_out male | tail -3
+          A_ART=/tmp/a_art/art python3 art/village-p3/pet_merchant_v2/export_v2.py /tmp/a_out /tmp/pm2 | tail -25
+
+      - name: Pet merchant V2 — Blender (decimate, rig, Idle/Walk/Talk/Turn, renders, GLB)
+        run: |
+          mkdir -p out/pm2
+          /opt/blender/blender -b --factory-startup -noaudio -P art/village-p3/pet_merchant_v2/blender_v2.py -- --parts /tmp/pm2 --out "$PWD/out/pm2" 2>&1 | grep -v "^Fra:" | grep -v "Sample" | tail -25
+          cp out/pm2/pet_merchant_v2_hq.glb out/pm2/pet_merchant_v2_lite.glb out/
+          python3 - <<'PY'
+          from PIL import Image, ImageDraw
+          im = Image.open("out/pm2/pm2_head_front.png").convert("RGB")
+          w, h = im.size
+          c = im.crop((int(w * 0.16), int(h * 0.1), int(w * 0.84), int(h * 0.78))).resize((256, 256), Image.LANCZOS)
+          c.save("out/pm2/pm2_avatar.png")
+          PY
+
       - name: Validate GLB (Khronos glTF-Validator)
         run: |
           mkdir -p /tmp/gv && cd /tmp/gv && npm init -y >/dev/null && npm i --no-save gltf-validator@latest 2>&1 | tail -3
@@ -109,7 +134,7 @@ jobs:
             const v = require("gltf-validator"); const fs = require("fs");
             (async () => {
               let bad = 0; const s = {};
-              for (const q of ["p30_sample_hq", "p30_sample_lite", "fountain_hq", "fountain_lite", "plaza_hq", "plaza_lite", "knight_hq", "knight_lite", "mage_hq", "mage_lite", "sword_hq", "sword_lite", "platform_hq", "platform_lite", "pet_merchant_hq", "pet_merchant_lite"]) {
+              for (const q of ["p30_sample_hq", "p30_sample_lite", "fountain_hq", "fountain_lite", "plaza_hq", "plaza_lite", "knight_hq", "knight_lite", "mage_hq", "mage_lite", "sword_hq", "sword_lite", "platform_hq", "platform_lite", "pet_merchant_hq", "pet_merchant_lite", "pet_merchant_v2_hq", "pet_merchant_v2_lite"]) {
                 const b = fs.readFileSync(`out/${q}.glb`);
                 const r = await v.validateBytes(new Uint8Array(b));
                 const dv = new DataView(b.buffer, b.byteOffset); const len = dv.getUint32(12, true);
@@ -135,7 +160,7 @@ jobs:
           npm test 2>&1 | tail -8
           mkdir -p tools/fountain-lab/public/models/fx
           mkdir -p tools/fountain-lab/public/models/tex
-          cp out/fountain_hq.glb out/fountain_lite.glb out/plaza_hq.glb out/plaza_lite.glb out/knight_hq.glb out/knight_lite.glb out/mage_hq.glb out/mage_lite.glb out/sword_hq.glb out/sword_lite.glb out/platform_hq.glb out/platform_lite.glb out/pet_merchant_hq.glb out/pet_merchant_lite.glb tools/fountain-lab/public/models/
+          cp out/fountain_hq.glb out/fountain_lite.glb out/plaza_hq.glb out/plaza_lite.glb out/knight_hq.glb out/knight_lite.glb out/mage_hq.glb out/mage_lite.glb out/sword_hq.glb out/sword_lite.glb out/platform_hq.glb out/platform_lite.glb out/pet_merchant_hq.glb out/pet_merchant_lite.glb out/pet_merchant_v2_hq.glb out/pet_merchant_v2_lite.glb out/pm2/pm2_avatar.png tools/fountain-lab/public/models/
           cp out/textures/*.png tools/fountain-lab/public/models/tex/
           cp out/textures/water_hq.png out/textures/water_lite.png out/textures/water_nrm_hq.png out/textures/fx_*.png tools/fountain-lab/public/models/fx/
           npx vite build tools/fountain-lab --base ./ --outDir "$PWD/out-lab" --emptyOutDir
