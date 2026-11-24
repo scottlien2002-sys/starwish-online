@@ -162,16 +162,16 @@ def road_inlays(gm, gcol, paving, hq):
 
 def fx_meshes(fx, rune, hq):
     """南門光柱（加色混合：頂點色由亮到黑＝淡出）與漂浮符文環；頂點以門中心為原點"""
-    n = 14 if hq else 8
+    n = 22 if hq else 12
     for k in range(n):
-        b0 = k * 360 / n + (7 if k % 2 else 0)
-        w = 9 if k % 3 else 14
-        r = 3.0 if k % 2 else 2.6
-        hgt = 4.6 if k % 3 else 6.0
+        b0 = k * 360 / n + (5 if k % 2 else 0)
+        w = (3.5, 5.0, 2.5)[k % 3]
+        r = (3.0, 2.75, 2.9)[k % 3]
+        hgt = (4.2, 5.6, 3.4)[k % 3]
         a, c = G.pol(b0, r), G.pol(b0 + w, r)
-        bot, top = (0.55, 0.75, 1.0), (0.0, 0.0, 0.0)
-        mid = (0.42, 0.36, 0.75)
-        rows = [(0.08, bot), (hgt * 0.45, mid), (hgt, top)]
+        bot = (0.5, 0.72, 1.0) if k % 2 else (0.62, 0.5, 1.0)
+        mid, top = (0.2, 0.24, 0.45), (0.0, 0.0, 0.0)
+        rows = [(0.08, bot), (hgt * 0.4, mid), (hgt, top)]
         for (h1, c1), (h2, c2) in zip(rows, rows[1:]):
             q = [fx.vert((a[0], a[1], h1), c1), fx.vert((c[0], c[1], h1), c1), fx.vert((c[0], c[1], h2), c2), fx.vert((a[0], a[1], h2), c2)]
             fx.face(q, G.sub((a[0] + c[0], a[1] + c[1], 0), (0, 0, 0)))
@@ -183,6 +183,16 @@ def fx_meshes(fx, rune, hq):
         x, z = G.pol(b, 2.62)
         Fd = G.frame(x, z, b, 0.3)
         A.flat_poly(rune, [Fd(-0.14, -0.14, 0)[:2], Fd(0.14, -0.14, 0)[:2], Fd(0.0, 0.2, 0)[:2]], 0.3, (0.7, 0.8, 1.0) if k % 2 else (0.85, 0.7, 1.0))
+
+
+def world_box_uv(pts, tile=2.4):
+    """世界座標方塊投影（依面法線選平面），石紋不會斜拉"""
+    n = A.norm(pts)
+    if abs(n[2]) > 0.7:
+        return [(p[0] / tile, p[1] / tile) for p in pts]
+    if abs(n[0]) > abs(n[1]):
+        return [(p[1] / tile, p[2] / tile) for p in pts]
+    return [(p[0] / tile, p[2] / tile) for p in pts]
 
 
 def build(lod):
@@ -238,7 +248,7 @@ def extra(mbs):
 
 
 def main():
-    A.export_lods("portals", build, BUDGET, OUT, {"stone": lambda pts: [(p[0] / 2.4 + p[2] / 2.4, p[1] / 2.4 + p[2] / 2.4) for p in pts], "paving": lambda pts: [(p[0] / 2.0, p[1] / 2.0) for p in pts]},
+    A.export_lods("portals", build, BUDGET, OUT, {"stone": world_box_uv, "paving": lambda pts: [(p[0] / 2.0, p[1] / 2.0) for p in pts]},
                   {"portal_r": PORTAL_R, "dist": PORTAL_DIST, "south_gate": SOUTH_GATE, "fx_origin": [PORTALS[0]["x"], PORTALS[0]["z"]], "roads": ROADS}, extra=extra, ao_keys=("stone",))
 
 

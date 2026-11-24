@@ -29,6 +29,7 @@ export function setupPortalsP3(scene: Scene, meshes: AbstractMesh[], opt: { lite
     m.specularColor = Color3.Black();
     m.emissiveColor = c.clone();
     m.alphaMode = Constants.ALPHA_ADD;
+    m.alpha = 0.999; // 低於 1 才會走透明繪製流程（加法混合才生效；黑色＝完全透明）
     m.disableDepthWrite = true;
     m.backFaceCulling = false;
     return m;

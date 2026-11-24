@@ -24,8 +24,8 @@ F, local, EX, EY = A.local_fn(OX, OZ, BEARING, FLOOR)
 BUDGET = {"hq": 12000, "lite": 5000}
 C = {
     "roof": (0.36, 0.56, 0.42), "roof_d": (0.26, 0.4, 0.31),
-    "plank": (0.66, 0.47, 0.3), "plank2": (0.6, 0.42, 0.27), "frame": (0.36, 0.23, 0.14),
-    "door": (0.45, 0.28, 0.17), "iron": A.IRON, "glass": (0.2, 0.3, 0.5),
+    "plank": (0.84, 0.66, 0.45), "plank2": (0.74, 0.56, 0.37), "frame": (0.46, 0.3, 0.18),
+    "door": (0.52, 0.33, 0.2), "iron": A.IRON, "glass": (0.2, 0.3, 0.5),
     "sack": (0.86, 0.78, 0.6), "rope": (0.75, 0.62, 0.42), "crate": (0.68, 0.5, 0.3),
 }
 X0, X1, Y0, Y1 = -4.75, 4.75, 1.3, 7.75  # 主牆（前方留 1.3 m 給門廊貨物）
@@ -62,7 +62,7 @@ def build(lod):
     # ---- 屋頂（屋脊沿 y：前後為山牆）----
     A.gable_roof(roof, F, X0 - 0.24, X1 + 0.24, Y0 - 0.35, Y1 + 0.2, EAVE - 0.2, TOP - 0.15, C["roof"], C["roof_d"], ridge_along="y", thick=0.16)
     for y, fy in ((Y0, -1), (Y1, 1)):
-        A.gable_wall(props, F, X0, X1, y + 0.04 * (-fy), EAVE, TOP - 0.35, C["plank"], fy)
+        A.gable_wall(stone, F, X0, X1, y + 0.04 * (-fy), EAVE, TOP - 0.35, A.WALL, fy)
         if hq:  # 山牆斜邊木框
             A.plank(props, F, (X0, EAVE), (0.0, TOP - 0.35), 0.16, y - 0.1 * (fy < 0) , y + 0.1 * (fy > 0), C["frame"])
             A.plank(props, F, (X1, EAVE), (0.0, TOP - 0.35), 0.16, y - 0.1 * (fy < 0), y + 0.1 * (fy > 0), C["frame"])
