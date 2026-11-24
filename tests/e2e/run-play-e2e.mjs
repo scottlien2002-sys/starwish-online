@@ -33,7 +33,9 @@ for (const name of browsers) {
     const ctx = await browser.newContext({ viewport: { width: 852, height: 393 }, deviceScaleFactor: 2, hasTouch: true });
     const page = await ctx.newPage();
     page.on("pageerror", (e) => run.errors.push(`pageerror: ${e.message}`));
-    page.on("console", (m) => m.type() === "error" && run.errors.push(`console: ${m.text()}`));
+    // 清除存檔用的空白頁（404）不算錯誤
+    let clearing = false;
+    page.on("console", (m) => !clearing && m.type() === "error" && run.errors.push(`console: ${m.text()}`));
     const frames = (n) => page.evaluate((k) => new Promise((r) => { let i = 0; const f = () => (++i >= k ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); }), n);
     const shot = async (label) => {
       const f = `${outDir}${name}_${g}_${lod}_${label}.png`;
@@ -55,7 +57,9 @@ for (const name of browsers) {
     };
     try {
       // 清除存檔：先開一個不會載入遊戲的同源網址（避免遊戲載入到一半就換頁，產生「載入中斷」的錯誤訊息）
-      await page.goto(server.url + "/__clear__", { waitUntil: "load" }).catch(() => {});
+      clearing = true;
+        await page.goto(server.url + "/__clear__", { waitUntil: "load" }).catch(() => {});
+        clearing = false;
       await page.evaluate(() => localStorage.clear());
       const ready = await open();
       const bootError = await page.evaluate(() => document.querySelector(".boot-status.error")?.textContent ?? null);
@@ -166,7 +170,9 @@ for (const name of browsers) {
 
       if (g === "male") {
         // 正式設定缺值：寵物停用、提示、遊戲照常進入與打怪
+        clearing = true;
         await page.goto(server.url + "/__clear__", { waitUntil: "load" }).catch(() => {});
+        clearing = false;
         await page.evaluate(() => localStorage.clear());
         const ok3 = await open("&pets=official");
         await frames(4);
