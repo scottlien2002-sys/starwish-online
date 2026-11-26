@@ -41,7 +41,7 @@ export interface VillageNpcs {
   readonly stats: Record<string, { triangles: number; farTriangles: number; meshes: number; animations: string[] }>;
   /** talkId：正在對話的 NPC（spot id），null＝沒有；px/pz：玩家位置；camera：用於距離 LOD 與畫面外判斷 */
   update(now: number, dt: number, talkId: string | null, px: number, pz: number, camera?: Camera | null): void;
-  state(): Record<string, { anim: string; facing: number; home: number; lod: 0 | 1; paused: boolean }>;
+  state(): Record<string, { anim: string; facing: number; home: number; lod: 0 | 1; paused: boolean; blinkTargets: number; nextAct: number }>;
   setEnabled(on: boolean): void;
   /** 效能診斷：false＝一律使用近距模型 */
   setLod(on: boolean): void;
@@ -282,7 +282,7 @@ export function setupVillageNpcs(
       }
     },
     state() {
-      return Object.fromEntries(all.map((o) => [o.spot.id, { anim: o.current, facing: o.facing, home: o.spot.yaw, lod: o.lod, paused: o.paused }]));
+      return Object.fromEntries(all.map((o) => [o.spot.id, { anim: o.current, facing: o.facing, home: o.spot.yaw, lod: o.lod, paused: o.paused, blinkTargets: o.morphs.length, nextAct: Math.round((o.nextAct - clock) * 10) / 10 }]));
     },
     setEnabled(on) {
       for (const o of all) o.root.setEnabled(on);

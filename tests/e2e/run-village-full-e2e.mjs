@@ -79,6 +79,14 @@ for (const name of browsers) {
       run.results.npcModels = npcInfo.stats;
       const npcIds = ["sword", "knight", "smith", "mage", "church", "circus", "warehouse", "guild"];
       check("Stage 6.2 正式NPC：8 位都已載入（取代佔位人形），各 1 個網格，具備待機／轉身／對話動作", npcIds.every((id) => npcInfo.stats[id] && npcInfo.stats[id].meshes === 1 && ["Idle", "Turn", "Talk"].every((a) => npcInfo.stats[id].animations.includes(a))) && npcIds.every((id) => npcInfo.state[id]?.anim === "Idle"), npcInfo);
+      // Stage 6.6：全村美術升級（外觀開啟、草叢小花、NPC 眨眼形狀鍵與職業小動作）
+      {
+        const a66 = await V(() => window.__starwishVillage.art66());
+        run.results.art66 = a66;
+        const minT = q === "high" ? 1200 : q === "medium" ? 700 : 300;
+        check(`Stage 6.6 美術升級開啟：草叢 ≥ ${minT}、小花 ≥ ${Math.round(minT / 3)}（各 1 次繪製）、曝光 1.0／對比 1.12`, a66.look === true && a66.foliage && a66.foliage.tufts >= minT && a66.foliage.flowers >= Math.round(minT / 3) && a66.foliage.drawCalls === 2 && Math.abs(a66.lighting.exposure - 1) < 1e-6 && Math.abs(a66.lighting.contrast - 1.12) < 1e-6, a66);
+        check("Stage 6.6 NPC 生活感：8 位都有眨眼（形狀鍵）與職業小動作 Act，小動作時間錯開", npcIds.every((id) => npcInfo.stats[id].animations.includes("Act") && npcInfo.state[id].blinkTargets >= 1) && new Set(npcIds.map((id) => npcInfo.state[id].nextAct)).size >= 6, Object.fromEntries(npcIds.map((id) => [id, { anims: npcInfo.stats[id].animations, blink: npcInfo.state[id].blinkTargets, nextAct: npcInfo.state[id].nextAct }])));
+      }
       await page.waitForTimeout(800);
       // 效能（CI 軟體繪圖，只看相對數字）
       // Stage 6.5：四個位置的量測前先等正式角色載入完成（數字包含正式角色與寵物）

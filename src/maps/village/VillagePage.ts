@@ -833,6 +833,10 @@ class VillagePage {
         const pt = c.pet;
         lines.push(`寵物：${pt.label}（${pt.model}）｜高度 ${pt.size} m、三角面 ${pt.triangles}、網格 ${pt.meshes}｜本幀 Draw Calls：主畫面 ${cs.draws.petMain}｜與角色頭部／身體最小間距 ${pt.minGapCm ?? "—"} cm（修正前 ${pt.minRawGapCm ?? "—"} cm，間距保護修正 ${pt.corrections} 次）`);
       } else lines.push(`玩家角色：${this.charStatus === "off" ? "簡易測試角色（&char=simple）" : `正式角色 ${this.charStatus}`}`);
+      if (this.look66) {
+        const fs = this.foliage?.stats;
+        lines.push(`美術：Stage 6.6 全村升級（物件細節貼圖／草地／光影 曝光 1.0、對比 1.12／雲朵天空／NPC 專屬五官＋眨眼＋職業小動作）｜草叢 ${fs?.tufts ?? 0}、小花 ${fs?.flowers ?? 0}（${fs?.triangles ?? 0} 面、${fs?.drawCalls ?? 0} 次繪製）｜&look=65 可切回 Stage 6.5 外觀比較`);
+      } else lines.push("美術：Stage 6.5 外觀（&look=65）");
       const ri = this.resourceInfo();
       lines.push(`模型與貼圖 ${ri.files} 個：網路下載 ${ri.network} 個（${ri.networkMB} MB）、瀏覽器快取 ${ri.cached} 個${ri.unknown ? `、無法判斷 ${ri.unknown} 個` : ""}｜重複請求：${ri.duplicates.length ? ri.duplicates.join("、") : "無"}｜載入時間${ri.network === 0 && ri.cached > 0 ? "（全部來自快取，不能當作首次載入時間）" : ri.cached > 0 ? "（部分來自快取）" : "（首次下載）"}`);
     }
@@ -1068,6 +1072,8 @@ class VillagePage {
       view: (name: string) => this.view(name),
       shotCam: (on: boolean, tx?: number, ty?: number, tz?: number, a?: number, b?: number, r?: number) => shotCam(this, on, tx, ty, tz, a, b, r),
       shotTargets: () => shotTargets(this),
+      /** Stage 6.6 美術升級狀態（外觀開關、草叢小花數量與面數） */
+      art66: () => ({ look: this.look66, foliage: this.foliage?.stats ?? null, lighting: { exposure: this.scene.imageProcessingConfiguration.exposure, contrast: this.scene.imageProcessingConfiguration.contrast } }),
       freeze: (on: boolean) => {
         this.frozen = on;
       },
