@@ -53,7 +53,10 @@ export class VillageInteract {
   private npcTalk: string | null = null;
   private lastNow: number | null = null;
 
+  private readonly scene: Scene;
+
   constructor(scene: Scene, merchant: PetMerchantV2 | null, opts: { avatarUrl: string; goToMap: (map: "starsprout") => void }) {
+    this.scene = scene;
     this.merchant = merchant;
     this.opts = opts;
     const st = document.createElement("style");
@@ -105,11 +108,11 @@ export class VillageInteract {
     this.px = px;
     this.pz = pz;
     if (this.npcTalk && this.dlg.hidden && !this.guild.isOpen) this.npcTalk = null;
-    this.npcs?.update(now, dt, this.npcTalk, px, pz);
+    this.npcs?.update(now, dt, this.npcTalk, px, pz, this.scene.activeCamera);
     if (this.merchant) {
       // 對話中：每幀送出心跳（玩家位置），讓洛恩停下並面向玩家；關閉後釋放
       if (this.talking) this.merchant.clock.hold("player", now, px, pz);
-      this.merchant.update(now);
+      this.merchant.update(now, undefined, this.scene.activeCamera);
     }
     if (this.busy) {
       this.btn.hidden = true;

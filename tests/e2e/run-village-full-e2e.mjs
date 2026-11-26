@@ -21,6 +21,8 @@ const MODES = [
   ["hq-portrait", "high", "hq", { width: 390, height: 844 }],
   ["lite-portrait", "low", "lite", { width: 390, height: 844 }],
   ["hq-landscape", "high", "hq", { width: 844, height: 390 }],
+  // Stage 6.3：重現 Stage 6.2（?perf=s62：原始高面數角色、PCSS 2048 高取樣、2x、沒有 LOD）— 只量 CI 數據做前後比較
+  ["s62-hq-portrait", "high", "hq", { width: 390, height: 844 }, "&perf=s62"],
 ];
 
 for (const name of browsers) {
@@ -32,8 +34,8 @@ for (const name of browsers) {
     failures++;
     continue;
   }
-  for (const [mode, q, lod, vp] of MODES) {
-    if (name === "webkit" && mode === "hq-landscape") continue;
+  for (const [mode, q, lod, vp, extra = ""] of MODES) {
+    if (name === "webkit" && (mode === "hq-landscape" || mode.startsWith("s62"))) continue;
     const run = { browser: name, mode, checks: {}, errors: [], screenshots: [], results: {} };
     report.runs.push(run);
     const check = (k, ok, detail) => {
@@ -52,7 +54,7 @@ for (const name of browsers) {
     page.on("console", (m) => m.type() === "error" && run.errors.push(`console: ${m.text()}`));
     const V = (fn, arg) => page.evaluate(fn, arg);
     try {
-      await page.goto(server.url + `/?map=village&art=full&quality=${q}&lod=${lod}`, { waitUntil: "load" });
+      await page.goto(server.url + `/?map=village&art=full&quality=${q}&lod=${lod}${extra}`, { waitUntil: "load" });
       await page.waitForFunction(() => window.__starwishVillage?.ready === true, null, { timeout: 120000 });
       await page.waitForFunction(() => { const a = window.__starwishVillage.artFull(); return a.status === "loaded" || a.status.startsWith("部分") || a.status.startsWith("error"); }, null, { timeout: 420000 });
       const art = await V(() => window.__starwishVillage.artFull());
@@ -72,9 +74,28 @@ for (const name of browsers) {
         } else await V(([a, b, c]) => window.__starwishVillage.teleport(a, b, c), [x, z, yaw]);
         await settle(page, 20);
         perf[k] = await V(() => window.__starwishVillage.info());
+        const ps = await V(() => window.__starwishVillage.perfState());
+        perf[k].casters = ps.casters;
+        perf[k].breakdown = await V(() => window.__starwishVillage.perfBreakdown());
         await shot(page, `view_${k}`);
       }
-      run.results.perf = Object.fromEntries(Object.entries(perf).map(([k, v]) => [k, { drawCalls: v.drawCalls, triangles: v.triangles }]));
+      run.results.perf = Object.fromEntries(Object.entries(perf).map(([k, v]) => [k, { drawCalls: v.drawCalls, triangles: v.triangles, casters: v.casters }]));
+      run.results.breakdown = Object.fromEntries(Object.entries(perf).map(([k, v]) => [k, v.breakdown]));
+      const pstate = await V(() => window.__starwishVillage.perfState());
+      run.results.perfState = { cfg: pstate.cfg, shadow: pstate.shadow, npcStats: pstate.npcStats, merchant: pstate.merchant, pixelRatio: pstate.pixelRatio, render: pstate.render };
+      run.results.dataSource = "CI 軟體繪圖（不是 iPhone 實機）";
+      if (mode.startsWith("s62")) {
+        check("Stage 6.2 重現模式：原始高面數角色（洛恩 > 50000 面、NPC > 14000 面）、PCSS 2048、沒有 LOD", pstate.cfg.profile === "s62" && pstate.shadow === "pcss2048" && pstate.merchant && pstate.merchant.triangles > 50000 && Object.values(pstate.npcStats).every((n) => n.triangles > 14000 && n.farTriangles === 0), { merchant: pstate.merchant?.triangles, npc: Object.values(pstate.npcStats).map((n) => n.triangles) });
+        run.ok = Object.values(run.checks).every((c) => c.ok) && run.errors.filter((x) => !x.startsWith("console")).length === 0;
+        await ctx.close();
+        continue;
+      }
+      {
+        const npcMax = lod === "lite" ? 6500 : 12000;
+        const pmMax = lod === "lite" ? 6500 : 15000;
+        check(`Stage 6.3 角色面數：NPC ≤ ${npcMax}、洛恩 ≤ ${pmMax}，並有遠距模型（≤ 4000）`, pstate.merchant && pstate.merchant.triangles <= pmMax && pstate.merchant.farTriangles > 0 && pstate.merchant.farTriangles <= 4000 && Object.values(pstate.npcStats).every((n) => n.triangles <= npcMax && n.farTriangles > 0 && n.farTriangles <= 4000), { merchant: pstate.merchant, npc: pstate.npcStats });
+        if (lod === "hq") check("Stage 6.3 陰影：PCSS 1024 中取樣，陰影投射物依距離剔除（本幀投射物少於全部）", pstate.shadow === "pcss1024" && Object.values(perf).some((v) => v.casters.active < v.casters.total), Object.fromEntries(Object.entries(perf).map(([k, v]) => [k, v.casters])));
+      }
       const dcMax = lod === "lite" ? 100 : 160;
       check(`繪製次數 ≤ ${dcMax}（全村整合、${lod === "lite" ? "Lite" : "HQ"}、任何位置）`, Object.values(perf).every((v) => v.drawCalls <= dcMax), run.results.perf);
       // 移動規則：從廣場沿北側石階（方位 0°）走上高台，不需要跳躍
@@ -211,6 +232,15 @@ for (const name of browsers) {
       await page.waitForTimeout(1500);
       check("洛恩：關閉後恢復巡走", m2 && !m2.talking, m2);
       run.results.fpsSoftware = (await V(() => window.__starwishVillage.info())).drawCalls;
+      // Stage 6.3 效能診斷（實機一鍵 A/B）：CI 只驗證流程能跑完前 2 項並產生報告（數字是軟體繪圖，不代表 iPhone）
+      if (name === "chromium" && mode === "hq-portrait") {
+        await V(() => window.__starwishVillage.startDiag(2));
+        await page.waitForFunction(() => { const d = window.__starwishVillage.diagState(); return !d.running && d.results && d.results.length === 2; }, null, { timeout: 180000, polling: 500 }).catch(() => null);
+        const dg = await V(() => window.__starwishVillage.diagState());
+        const rep = await V(() => window.__starwishVillage.report());
+        run.results.diag = dg.results;
+        check("效能診斷：一鍵執行、逐項量測並寫入報告（CI 只跑前 2 項）", dg.results?.length === 2 && /效能診斷/.test(rep) && /這台裝置/.test(rep), dg);
+      }
     } catch (e) {
       run.errors.push(String(e.message ?? e));
       failures++;

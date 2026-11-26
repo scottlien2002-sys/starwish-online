@@ -35,6 +35,8 @@ import { TourRunner, tourPoints, type TourEvent } from "./tour.ts";
 import type { VillageArtState } from "./VillageArtP3.ts";
 import type { VillageArtFull } from "./VillageArtFull.ts";
 import type { VillageInteract } from "./VillageInteract.ts";
+import { type DiagStep, diagSteps, SHADOW_LABEL, type VillagePerfConfig, villagePerfConfig } from "./villagePerf.ts";
+import { VillageShadows } from "./villageShadows.ts";
 
 /**
  * Stage 6 P2-3 第一階段：星芽村 Grey-box 測試頁（?map=village）。
@@ -55,6 +57,21 @@ export function startVillageMap(canvas: HTMLCanvasElement, hudRoot: HTMLElement)
 }
 
 /** 巡迴測試期間的效能取樣（巡迴判定在 tour.ts） */
+interface DiagResult {
+  id: string;
+  label: string;
+  avgFps: number;
+  low1Fps: number;
+  minFps: number;
+  stutters: number;
+  avgDraw: number;
+  avgTris: number;
+  res: number;
+}
+
+const DIAG_WARM = 1.5;
+const DIAG_SAMPLE = 4.5;
+
 interface TourSampling {
   runner: TourRunner;
   dts: number[];
@@ -72,7 +89,16 @@ class VillagePage {
   private readonly camera: ThirdPersonCamera;
   private readonly sun: DirectionalLight;
   private readonly shadows: ShadowGenerator;
-  private readonly render: RenderSetup;
+  private render: RenderSetup;
+  /** Stage 6.3 效能設定（網址參數＋預設） */
+  private readonly perfCfg: VillagePerfConfig;
+  private readonly vshadows: VillageShadows;
+  /** 效能診斷：目前套用中的設定（從 perfCfg 出發，一次只改一項） */
+  private diag: { steps: DiagStep[]; i: number; t: number; dts: number[]; draws: number[]; tris: number[]; results: DiagResult[]; alpha0: number } | null = null;
+  private lastDiag: DiagResult[] | null = null;
+  private skipRender = false;
+  private hdrNow = true;
+  private postNow = true;
   private readonly perf: PerfOverlay;
   private readonly hud: Hud;
   private readonly input = new InputState();
@@ -118,7 +144,12 @@ class VillagePage {
     const t0 = performance.now();
     const params = new URLSearchParams(location.search);
     this.lite = params.get("lod") === "lite";
-    this.quality = pickQuality();
+    const q0 = pickQuality();
+    this.perfCfg = villagePerfConfig(params, { quality: q0.level, lite: this.lite, qualityMaxRes: q0.maxPixelRatio, qualityMsaa: q0.msaaSamples, qualityPost: q0.postProcess });
+    // Stage 6.3：解析度上限、MSAA、後製依效能設定（HQ 預設 1.5x；?perf=s62 重現 Stage 6.2 的 2x）
+    this.quality = { ...q0, maxPixelRatio: this.perfCfg.maxRes, msaaSamples: this.perfCfg.msaa, postProcess: this.perfCfg.post };
+    this.hdrNow = this.perfCfg.hdr;
+    this.postNow = this.perfCfg.post;
     this.engine = createEngine(canvas, this.quality);
     this.engine.onContextLostObservable.add(() => this.contextLost++);
     const scene = new Scene(this.engine);
@@ -148,12 +179,14 @@ class VillagePage {
     this.shadows = createShadows(this.sun, this.quality);
     this.shadows.darkness = 0.35;
     this.shadowQ = params.get("shadowq") === "medium" && this.shadows.useContactHardeningShadow ? "medium" : "default";
+    this.vshadows = new VillageShadows(scene, this.sun, this.shadows, this.perfCfg.shadow, this.perfCfg.casterCull);
     if (this.shadowQ === "medium") this.shadows.filteringQuality = ShadowGenerator.QUALITY_MEDIUM;
 
     this.pos.set(ARRIVAL_SPOT.x, groundHeight(ARRIVAL_SPOT.x, ARRIVAL_SPOT.z), ARRIVAL_SPOT.z);
     this.yaw = ARRIVAL_SPOT.yaw;
     this.player = new PlayerAvatar(scene, this.shadows);
     this.player.root.position.copyFrom(this.pos);
+    this.vshadows.addFootSource({ pos: () => this.pos, radius: 0.42 });
     this.camera = new ThirdPersonCamera(scene, this.pos, groundHeight, {
       keepPitch: true,
       // 全村整合：另外避開傳送門石拱與南門橫樑（頭頂以上的美術結構，不是碰撞物）
@@ -162,7 +195,7 @@ class VillagePage {
     this.camera.obstructEnabled = params.get("camcol") !== "0";
     scene.activeCamera = this.camera.camera;
     this.camera.snap(this.pos, this.alphaBehind(this.yaw), TUNING.camera.defaultBeta, TUNING.camera.distance);
-    this.render = setupRendering(scene, this.camera.camera, this.quality);
+    this.render = setupRendering(scene, this.camera.camera, this.quality, { hdr: this.perfCfg.hdr });
     // Grey-box 沒有需要發光的物件：關閉發光層（避免全部自發光標記被加上光暈）
     if (this.render.glow) this.render.glow.isEnabled = false;
     this.artFull = params.get("art") === "full";
@@ -177,7 +210,12 @@ class VillagePage {
       // 正式美術有自己的發光物（噴泉、傳送門、彩繪玻璃）：用材質自發光，不開全畫面發光層
       this.fullStatus = "loading";
       void import("./VillageArtFull.ts")
-        .then((m) => m.loadVillageArtFull(scene, this.lite, this.quality.shadows.filter === "contact" ? this.shadows : null, (msg) => (this.fullStatus = msg)))
+        .then((m) =>
+          m.loadVillageArtFull(scene, this.lite, this.quality.shadows.filter === "contact" ? this.shadows : null, (msg) => (this.fullStatus = msg), {
+            lod: { lod: this.perfCfg.npcLod, near: this.perfCfg.lodNear, animThrottle: this.perfCfg.animThrottle, animFar: this.perfCfg.animFar },
+            originalModels: this.perfCfg.originalModels,
+          }),
+        )
         .then(async (full) => {
           this.full = full;
           const { VillageInteract } = await import("./VillageInteract.ts");
@@ -191,6 +229,15 @@ class VillagePage {
             },
           });
           this.interact.npcs = full.npcs;
+          // 腳底柔和陰影（只在 shadow=blob 時顯示）：洛恩＋八位 NPC
+          if (full.merchant) {
+            const mr = full.merchant.root;
+            this.vshadows.addFootSource({ pos: () => mr.position, radius: 0.45 });
+          }
+          for (const id of full.npcs?.ids ?? []) {
+            const n = NPC_SPOTS.find((x) => x.id === id);
+            if (n) this.vshadows.addFootSource({ pos: () => ({ x: n.x, y: n.floor, z: n.z }), radius: 0.45 });
+          }
           this.fullStatus = full.errors.length ? `部分載入失敗：${full.errors.join("；")}` : "loaded";
           this.hud.toast(`星芽村全村整合載入完成（${(full.loadMs / 1000).toFixed(1)} 秒）：靠近 NPC、洛恩或傳送門會出現互動按鈕`, 3600);
         })
@@ -212,6 +259,7 @@ class VillagePage {
     canvas.addEventListener("contextmenu", block);
     this.keyboard = new KeyboardInput(this.input, () => joystick.active);
     this.perf = new PerfOverlay(this.engine, scene, this.quality, hudRoot);
+    if (this.perfCfg.resLock) this.perf.lockResolution(this.perfCfg.maxRes);
     this.buildPanel(hudRoot);
     window.addEventListener("resize", () => this.engine.resize());
     this.loadMs = performance.now() - t0;
@@ -297,7 +345,9 @@ class VillagePage {
     this.sun.position.copyFrom(this.pos).subtractInPlace(this.sun.direction.scale(45));
     this.world.update(dt, this.overview ? 1e6 : this.pos.x, this.overview ? 1e6 : this.pos.z);
     this.interact?.update(performance.now() / 1000, this.pos.x, this.pos.z);
-    this.scene.render();
+    this.vshadows.update(performance.now() / 1000, this.pos.x, this.pos.z);
+    if (this.diag) this.diagFrame(rawDt);
+    if (!this.skipRender) this.scene.render();
     this.perf.update(dt);
     if (tour && touring) this.tourFrame(tour, rawDt, blockedNow);
     this.fpsTimer += dt;
@@ -348,6 +398,94 @@ class VillagePage {
     this.reportBox.hidden = false;
     this.panel.classList.add("open");
     this.hud.toast(`巡迴完成：平均 ${s.avgFps.toFixed(1)} FPS、真正卡住 ${r.stuckCount} 次`, 3500);
+  }
+
+  // ---------------- Stage 6.3 效能診斷（實機一鍵 A/B） ----------------
+  /** 固定在中央廣場（看得到噴泉與北側建築），鏡頭每項繞一圈；每項只改一個因素，量 FPS／1% Low／Draw／三角形 */
+  startDiag(limit?: number): void {
+    if (this.tour || this.diag) return;
+    this.interact?.closeAll();
+    this.teleport(0, -12.5, 0);
+    this.perf.lockResolution(this.perfCfg.maxRes);
+    const all = diagSteps(this.quality.level === "high" && !this.lite);
+    const steps = limit ? all.slice(0, limit) : all;
+    this.diag = { steps, i: 0, t: 0, dts: [], draws: [], tris: [], results: [], alpha0: this.camera.camera.alpha };
+    this.applyDiag(steps[0]!, true);
+    this.hud.toast(`效能診斷開始：${steps.length} 項 × ${DIAG_WARM + DIAG_SAMPLE} 秒（約 ${Math.round((steps.length * (DIAG_WARM + DIAG_SAMPLE)) / 6) / 10} 分鐘），請不要操作`, 3500);
+  }
+
+  private diagFrame(rawDt: number): void {
+    const d = this.diag!;
+    const step = d.steps[d.i]!;
+    d.t += Math.min(rawDt, 0.25);
+    // 鏡頭繞廣場一圈（每項相同的路徑）
+    this.camera.camera.alpha = d.alpha0 + (2 * Math.PI * d.t) / (DIAG_WARM + DIAG_SAMPLE);
+    if (d.t > DIAG_WARM) {
+      d.dts.push(rawDt);
+      d.draws.push(this.perf.drawCalls);
+      d.tris.push(this.scene.getActiveIndices() / 3);
+    }
+    if (d.t < DIAG_WARM + DIAG_SAMPLE) return;
+    const s = summarizeFrames(d.dts, d.draws);
+    d.results.push({
+      id: step.id,
+      label: step.label,
+      avgFps: s.avgFps,
+      low1Fps: s.low1Fps,
+      minFps: s.minFps,
+      stutters: d.dts.filter((x) => x > 0.05).length,
+      avgDraw: s.avgDrawCalls,
+      avgTris: d.tris.reduce((a, b) => a + b, 0) / Math.max(1, d.tris.length),
+      res: this.perf.pixelRatio,
+    });
+    this.applyDiag(step, false);
+    d.i++;
+    d.t = 0;
+    d.dts = [];
+    d.draws = [];
+    d.tris = [];
+    if (d.i >= d.steps.length) {
+      this.lastDiag = d.results;
+      this.diag = null;
+      if (!this.perfCfg.resLock) this.perf.lockResolution(null);
+      this.reportBox.value = this.report();
+      this.reportBox.hidden = false;
+      this.panel.classList.add("open");
+      this.hud.toast("效能診斷完成：報告已顯示在「村莊」面板（可複製）", 3500);
+      return;
+    }
+    this.applyDiag(d.steps[d.i]!, true);
+  }
+
+  /** on＝套用這一項的變更；off＝回到目前預設 */
+  private applyDiag(step: DiagStep, on: boolean): void {
+    const c = step.change;
+    const cfg = this.perfCfg;
+    if (c.maxRes !== undefined) this.perf.lockResolution(on ? c.maxRes : cfg.maxRes);
+    if (c.shadow !== undefined) this.vshadows.apply(on ? c.shadow : cfg.shadow);
+    if (c.msaa !== undefined && this.render.pipeline) this.render.pipeline.samples = on ? c.msaa : cfg.msaa;
+    if (c.hdr !== undefined || c.post !== undefined) {
+      const hdr = on && c.hdr !== undefined ? c.hdr : cfg.hdr;
+      const post = on && c.post !== undefined ? c.post : cfg.post;
+      this.rebuildRendering(hdr, post);
+    }
+    if (c.npcLod !== undefined) this.full?.npcs?.setLod(on ? c.npcLod : cfg.npcLod);
+    if (c.hideCharacters) {
+      this.full?.npcs?.setEnabled(!on);
+      this.full?.merchant?.setEnabled(!on);
+    }
+    if (c.hideStatic) for (const m of this.full?.statics ?? []) m.setEnabled(!on);
+    if (c.skipRender) this.skipRender = on;
+  }
+
+  private rebuildRendering(hdr: boolean, post: boolean): void {
+    if (hdr === this.hdrNow && post === this.postNow) return;
+    this.render.pipeline?.dispose();
+    this.render.glow?.dispose();
+    this.render = setupRendering(this.scene, this.camera.camera, { ...this.quality, postProcess: post }, { hdr });
+    if (this.render.glow) this.render.glow.isEnabled = false;
+    this.hdrNow = hdr;
+    this.postNow = post;
   }
 
   // ---------------- 傳送與視角 ----------------
@@ -431,6 +569,21 @@ class VillagePage {
       lines.push(`全村整合 art=full：${this.fullStatus}${f ? `，載入 ${f.loadMs} ms` : ""}`);
       if (f) for (const [k, v] of Object.entries(f.parts)) lines.push(`  ${k}：網格 ${v.meshes}、三角形 ${v.triangles}`);
     } else lines.push("正式美術：關閉（Grey-box）");
+    const pc = this.perfCfg;
+    lines.push(
+      `Stage 6.3 效能設定：${pc.profile === "s62" ? "重現 Stage 6.2（原始高面數角色、PCSS 2048 高取樣、2x、沒有 LOD）" : "優化預設"}｜陰影 ${SHADOW_LABEL[this.vshadows.mode]}｜解析度上限 ${pc.maxRes}x${pc.resLock ? "（固定）" : "（動態，FPS<40 往下調）"}，目前 ${this.perf.pixelRatio}x｜MSAA ${pc.msaa}、HDR ${this.hdrNow ? "開" : "關"}、後製 ${this.postNow ? "開" : "關"}｜NPC LOD ${pc.npcLod ? `開（${pc.lodNear} m）` : "關"}、遠距／畫面外暫停動作 ${pc.animThrottle ? "開" : "關"}、陰影投射物剔除 ${pc.casterCull ? "開" : "關"}`,
+    );
+    lines.push(`陰影投射物：本幀 ${this.vshadows.activeCasters}／全部 ${this.vshadows.totalCasters}（投射物三角形 ${this.vshadows.casterTriangles()}）；畫面解析度 ${this.engine.getRenderWidth()}×${this.engine.getRenderHeight()}（裝置 ${window.devicePixelRatio}x）`);
+    lines.push("資料來源：本報告數字是「這台裝置」的實測（不是 CI）");
+    const dg = this.lastDiag;
+    if (dg) {
+      lines.push(`---- 效能診斷（中央廣場、鏡頭繞一圈，每項暖身 ${DIAG_WARM} 秒＋取樣 ${DIAG_SAMPLE} 秒；解析度固定）----`);
+      const base = dg[0]?.avgFps ?? 0;
+      for (const x of dg) {
+        const diff = base > 0 && x.id !== "base" ? `（${x.avgFps >= base ? "+" : ""}${(x.avgFps - base).toFixed(1)}）` : "";
+        lines.push(`${x.label}：平均 ${x.avgFps.toFixed(1)}${diff}／1% Low ${x.low1Fps.toFixed(1)}／最低 ${x.minFps.toFixed(1)}／卡頓 ${x.stutters}｜Draw ${x.avgDraw.toFixed(0)}｜三角形 ${Math.round(x.avgTris)}｜${x.res}x`);
+      }
+    }
     const r = this.lastTour;
     if (!r) {
       lines.push("尚未執行巡迴測試");
@@ -546,7 +699,24 @@ class VillagePage {
       panel.classList.remove("open");
       this.startTour(3);
     }, "go");
+    btn(test, "效能診斷（約 2 分鐘）", () => {
+      panel.classList.remove("open");
+      this.startDiag();
+    }, "go");
     btn(test, "複製報告", () => this.copyReport(), "alt");
+    const pv = section("效能版本（重新載入）");
+    for (const [label, perf] of [
+      ["優化版（Stage 6.3）", null],
+      ["Stage 6.2 原版（比較用）", "s62"],
+    ] as const) {
+      const b = btn(pv, label, () => {
+        const url = new URL(location.href);
+        if (perf) url.searchParams.set("perf", perf);
+        else url.searchParams.delete("perf");
+        location.replace(url.toString());
+      }, "alt");
+      if ((this.perfCfg.profile === "s62") === (perf === "s62")) b.classList.add("go");
+    }
     this.reportBox = document.createElement("textarea");
     this.reportBox.className = "map-report";
     this.reportBox.readOnly = true;
@@ -643,6 +813,31 @@ class VillagePage {
         return this.interact.activate();
       },
       interactClose: () => this.interact?.closeAll(),
+      /** Stage 6.3：效能設定、陰影投射物、角色 LOD 狀態、目前畫面的網格分類（CI 與實機都可呼叫） */
+      perfState: () => ({
+        cfg: this.perfCfg,
+        shadow: this.vshadows.mode,
+        casters: { active: this.vshadows.activeCasters, total: this.vshadows.totalCasters, triangles: this.vshadows.casterTriangles() },
+        pixelRatio: this.perf.pixelRatio,
+        render: { w: this.engine.getRenderWidth(), h: this.engine.getRenderHeight() },
+        npcs: this.full?.npcs?.state() ?? {},
+        npcStats: this.full?.npcs?.stats ?? {},
+        merchant: this.full?.merchant?.stats ?? null,
+      }),
+      perfBreakdown: () => {
+        const groups: Record<string, { meshes: number; triangles: number }> = {};
+        for (const m of this.scene.getActiveMeshes().data.slice(0, this.scene.getActiveMeshes().length)) {
+          const name = m.name;
+          const key = name.startsWith("PH_") ? `Grey-box/系統 ${name.replace(/\d+$/, "")}` : name.startsWith("npc_") ? "NPC" : name.startsWith("pm_") || name.startsWith("PetPal_") ? "洛恩" : name.split(/[_.]/)[0] || name;
+          const g = (groups[key] ??= { meshes: 0, triangles: 0 });
+          g.meshes++;
+          g.triangles += Math.round(m.getTotalIndices() / 3);
+        }
+        return { activeMeshes: this.scene.getActiveMeshes().length, activeTriangles: Math.round(this.scene.getActiveIndices() / 3), groups };
+      },
+      startDiag: (limit?: number) => this.startDiag(limit),
+      diagState: () => ({ running: !!this.diag, step: this.diag ? this.diag.i : -1, total: this.diag?.steps.length ?? 0, results: this.lastDiag }),
+      setShadow: (mode: string) => this.vshadows.apply(mode as VillagePerfConfig["shadow"]),
       appraisal: () => this.interact?.appraisalWindow.current ?? null,
       guild: (cmd: string) => this.interact?.guildCmd(cmd) ?? Promise.resolve(null),
       report: () => this.report(),

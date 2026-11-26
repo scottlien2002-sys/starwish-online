@@ -1,4 +1,5 @@
-import { type AbstractMesh, type AnimationGroup, Color3, type Material, type Mesh, type Node, type Scene, type ShadowGenerator, StandardMaterial, type Texture, TransformNode } from "@babylonjs/core";
+import { type AbstractMesh, type AnimationGroup, type Camera, Color3, type Material, type Mesh, type Node, type Scene, type ShadowGenerator, StandardMaterial, type Texture, TransformNode } from "@babylonjs/core";
+import { lodLevel } from "./villagePerf.ts";
 import { NPC_SPOTS, type NpcSpot } from "./layout.ts";
 
 /**
@@ -7,6 +8,8 @@ import { NPC_SPOTS, type NpcSpot } from "./layout.ts";
  * - 每位 NPC 一個 GLB（HQ／Lite），骨架動作 Idle／Talk／Turn；整個角色 1 個網格、1 個材質（臉部貼圖＋頂點色）
  * - 玩家對話時：轉身面向玩家（Turn）→ 對話（Talk）；對話結束後轉回原本的面向 → 待機（Idle）
  * - 只有畫面：NPC 的實際功能（轉職、強化、倉庫、商店…）由各系統透過 VillageInteract 提供
+ * - Stage 6.3 效能：距離 LOD（近：HQ／Lite 模型；遠：遠距模型，兩組動作同步播放、只顯示一組）、
+ *   遠距或畫面外暫停骨架動作（不影響對話：對話中的 NPC 一定在近距離）、包圍盒依骨架計算＋餘量（保留視錐剔除）
  */
 export interface NpcProfile {
   /** 對應的 NPC_SPOTS id（建築 id） */
@@ -35,24 +38,36 @@ export function npcProfile(spotId: string): NpcProfile | null {
 
 export interface VillageNpcs {
   readonly ids: readonly string[];
-  readonly stats: Record<string, { triangles: number; meshes: number; animations: string[] }>;
-  /** talkId：正在對話的 NPC（spot id），null＝沒有；px/pz：玩家位置 */
-  update(now: number, dt: number, talkId: string | null, px: number, pz: number): void;
-  state(): Record<string, { anim: string; facing: number; home: number }>;
+  readonly stats: Record<string, { triangles: number; farTriangles: number; meshes: number; animations: string[] }>;
+  /** talkId：正在對話的 NPC（spot id），null＝沒有；px/pz：玩家位置；camera：用於距離 LOD 與畫面外判斷 */
+  update(now: number, dt: number, talkId: string | null, px: number, pz: number, camera?: Camera | null): void;
+  state(): Record<string, { anim: string; facing: number; home: number; lod: 0 | 1; paused: boolean }>;
   setEnabled(on: boolean): void;
+  /** 效能診斷：false＝一律使用近距模型 */
+  setLod(on: boolean): void;
+  /** 所有 NPC 網格（近＋遠；效能診斷用） */
+  readonly meshes: readonly AbstractMesh[];
 }
 
-interface Loaded {
+export interface Loaded {
   meshes: AbstractMesh[];
   animationGroups: AnimationGroup[];
   transformNodes: TransformNode[];
   rootNodes: Node[];
 }
 
+export interface NpcLodOptions {
+  /** false＝只用主要模型 */
+  lod: boolean;
+  near: number;
+  animThrottle: boolean;
+  animFar: number;
+}
+
 const SCALE = 1.06; // 成年村民：比初心者略高（與洛恩相同）
 const TURN_RATE = 3.6; // rad/s
 
-function toStandard(scene: Scene, m: Material, cache: Map<Material, StandardMaterial>): StandardMaterial {
+export function toStandardNpc(scene: Scene, m: Material, cache: Map<Material, StandardMaterial>): StandardMaterial {
   const hit = cache.get(m);
   if (hit) return hit;
   const s = new StandardMaterial(`${m.name}_std`, scene);
@@ -66,6 +81,12 @@ function toStandard(scene: Scene, m: Material, cache: Map<Material, StandardMate
   return s;
 }
 
+/** 骨架角色的包圍盒：依骨架姿勢計算後放大（動作幅度小），讓視錐剔除可以正常運作（取代 alwaysSelectAsActiveMesh） */
+export function skinnedBounds(m: AbstractMesh, scale = 1.35): void {
+  (m as Mesh).refreshBoundingInfo({ applySkeleton: true, applyMorph: false });
+  m.getBoundingInfo().scale(scale);
+}
+
 const wrap = (a: number): number => {
   let d = a;
   while (d > Math.PI) d -= 2 * Math.PI;
@@ -73,41 +94,45 @@ const wrap = (a: number): number => {
   return d;
 };
 
-export function setupVillageNpcs(scene: Scene, loaded: Map<string, Loaded>, opt: { lite: boolean; shadows?: ShadowGenerator | null }): VillageNpcs {
+/** 一組模型（近或遠）的網格與動作 */
+interface Set_ {
+  meshes: AbstractMesh[];
+  anims: Map<string, AnimationGroup>;
+}
+
+export function setupVillageNpcs(
+  scene: Scene,
+  loaded: Map<string, { near: Loaded; far: Loaded | null }>,
+  opt: { lite: boolean; shadows?: ShadowGenerator | null; lod?: NpcLodOptions },
+): VillageNpcs {
   const cache = new Map<Material, StandardMaterial>();
   const stats: VillageNpcs["stats"] = {};
+  const lodOpt: NpcLodOptions = opt.lod ?? { lod: false, near: 18, animThrottle: false, animFar: 32 };
   interface One {
     spot: NpcSpot;
     root: TransformNode;
-    anims: Map<string, AnimationGroup>;
+    sets: Set_[];
     current: string;
     facing: number;
-    meshes: AbstractMesh[];
+    lod: 0 | 1;
+    paused: boolean;
   }
   const all: One[] = [];
-  let k = 0;
-  for (const prof of NPC_PROFILES) {
-    const spot = NPC_SPOTS.find((n) => n.id === prof.spot);
-    const r = loaded.get(prof.key);
-    if (!spot || !r) continue;
-    const root = new TransformNode(`npc_${prof.key}`, scene);
-    root.scaling.setAll(SCALE);
-    root.position.set(spot.x, spot.floor + 0.02, spot.z);
-    root.rotation.y = spot.yaw;
+  const allMeshes: AbstractMesh[] = [];
+  const prep = (r: Loaded, root: TransformNode): { set: Set_; tris: number } => {
     for (const n of r.rootNodes) n.parent = root;
     let tris = 0;
     const meshes: AbstractMesh[] = [];
     for (const m of r.meshes) {
       if (m.getTotalIndices() === 0) continue;
-      if (m.material) m.material = toStandard(scene, m.material, cache);
+      if (m.material) m.material = toStandardNpc(scene, m.material, cache);
       m.isPickable = false;
       m.receiveShadows = true;
-      // 骨架角色：動作幅度小（原地待機／轉身／對話）→ 用綁骨後的包圍盒＋餘量，保留視錐裁切（看不到的 NPC 不繪製）
-      (m as Mesh).refreshBoundingInfo({ applySkeleton: true, applyMorph: false });
-      m.getBoundingInfo().scale(1.35);
+      skinnedBounds(m);
       tris += m.getTotalIndices() / 3;
       meshes.push(m);
-      if (opt.shadows && !opt.lite) opt.shadows.addShadowCaster(m, false);
+      allMeshes.push(m);
+      if (opt.shadows) opt.shadows.addShadowCaster(m, false);
     }
     const anims = new Map(r.animationGroups.map((g) => [g.name, g]));
     for (const g of r.animationGroups) {
@@ -117,33 +142,68 @@ export function setupVillageNpcs(scene: Scene, loaded: Map<string, Loaded>, opt:
         ta.animation.blendingSpeed = 0.08;
       }
     }
-    const one: One = { spot, root, anims, current: "", facing: spot.yaw, meshes };
-    // 待機錯開起點：八位不會同時呼吸
-    const idle = anims.get("Idle");
-    if (idle) {
-      idle.start(true, 0.92 + 0.04 * (k % 4));
-      idle.goToFrame(idle.from + ((idle.to - idle.from) * k) / 8);
-      one.current = "Idle";
+    return { set: { meshes, anims }, tris };
+  };
+  let k = 0;
+  for (const prof of NPC_PROFILES) {
+    const spot = NPC_SPOTS.find((n) => n.id === prof.spot);
+    const r = loaded.get(prof.key);
+    if (!spot || !r) continue;
+    const root = new TransformNode(`npc_${prof.key}`, scene);
+    root.scaling.setAll(SCALE);
+    root.position.set(spot.x, spot.floor + 0.02, spot.z);
+    root.rotation.y = spot.yaw;
+    const near = prep(r.near, root);
+    const far = r.far && lodOpt.lod ? prep(r.far, root) : null;
+    if (r.far && !far) for (const m of r.far.meshes) m.setEnabled(false);
+    const sets = far ? [near.set, far.set] : [near.set];
+    const one: One = { spot, root, sets, current: "", facing: spot.yaw, lod: 0, paused: false };
+    if (far) for (const m of far.set.meshes) m.isVisible = false;
+    // 待機錯開起點：八位不會同時呼吸（近／遠兩組同一個起點，切換 LOD 時姿勢一致）
+    for (const st of sets) {
+      const idle = st.anims.get("Idle");
+      if (idle) {
+        idle.start(true, 0.92 + 0.04 * (k % 4));
+        idle.goToFrame(idle.from + ((idle.to - idle.from) * k) / 8);
+      }
     }
+    one.current = "Idle";
     all.push(one);
-    stats[prof.spot] = { triangles: Math.round(tris), meshes: meshes.length, animations: [...anims.keys()] };
+    stats[prof.spot] = { triangles: Math.round(near.tris), farTriangles: Math.round(far?.tris ?? 0), meshes: near.set.meshes.length, animations: [...near.set.anims.keys()] };
     k++;
   }
 
+  let lodOn = true;
   const play = (o: One, name: string): void => {
     if (o.current === name) return;
-    const g = o.anims.get(name);
-    if (!g) return;
-    for (const [n, a] of o.anims) if (n !== name && a.isPlaying) a.stop();
-    g.start(true, 1);
+    for (const st of o.sets) {
+      const g = st.anims.get(name);
+      if (!g) continue;
+      for (const [n, a] of st.anims) if (n !== name && (a.isPlaying || a.isStarted)) a.stop();
+      g.start(true, 1);
+      if (o.paused) g.pause();
+    }
     o.current = name;
+  };
+  const setPaused = (o: One, p: boolean): void => {
+    if (o.paused === p) return;
+    o.paused = p;
+    for (const st of o.sets) {
+      const g = st.anims.get(o.current);
+      if (!g) continue;
+      if (p) g.pause();
+      else g.play(true);
+    }
   };
 
   return {
     ids: all.map((o) => o.spot.id),
     stats,
-    update(_now, dtIn, talkId, px, pz) {
+    meshes: allMeshes,
+    update(_now, dtIn, talkId, px, pz, camera) {
       const dt = Math.min(0.1, Math.max(0, dtIn));
+      const cx = camera ? camera.globalPosition.x : px;
+      const cz = camera ? camera.globalPosition.z : pz;
       for (const o of all) {
         const talking = talkId === o.spot.id;
         const want = talking ? Math.atan2(px - o.spot.x, pz - o.spot.z) : o.spot.yaw;
@@ -152,13 +212,30 @@ export function setupVillageNpcs(scene: Scene, loaded: Map<string, Loaded>, opt:
         o.facing = wrap(o.facing + (Math.abs(d) <= step ? d : Math.sign(d) * step));
         o.root.rotation.y = o.facing;
         play(o, Math.abs(d) > 0.3 ? "Turn" : talking ? "Talk" : "Idle");
+        const dist = Math.hypot(o.spot.x - cx, o.spot.z - cz);
+        if (o.sets.length > 1) {
+          const lv = talking || !lodOn ? 0 : lodLevel(dist, lodOpt.near, o.lod);
+          if (lv !== o.lod) {
+            o.lod = lv;
+            for (const m of o.sets[0]!.meshes) m.isVisible = lv === 0;
+            for (const m of o.sets[1]!.meshes) m.isVisible = lv === 1;
+          }
+        }
+        if (lodOpt.animThrottle) {
+          const shown = o.sets[o.lod]!.meshes[0];
+          const inView = !camera || !shown || camera.isInFrustum(shown);
+          setPaused(o, !talking && (dist > lodOpt.animFar || !inView));
+        }
       }
     },
     state() {
-      return Object.fromEntries(all.map((o) => [o.spot.id, { anim: o.current, facing: o.facing, home: o.spot.yaw }]));
+      return Object.fromEntries(all.map((o) => [o.spot.id, { anim: o.current, facing: o.facing, home: o.spot.yaw, lod: o.lod, paused: o.paused }]));
     },
     setEnabled(on) {
       for (const o of all) o.root.setEnabled(on);
+    },
+    setLod(on) {
+      lodOn = on;
     },
   };
 }

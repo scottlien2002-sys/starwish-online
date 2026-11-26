@@ -1,5 +1,7 @@
-import { type AbstractMesh, type AnimationGroup, Color3, type Material, type Node, type Scene, type ShadowGenerator, StandardMaterial, type Texture, TransformNode, Vector3 } from "@babylonjs/core";
+import { type AbstractMesh, type AnimationGroup, type Camera, Color3, type Material, type Node, type Scene, type ShadowGenerator, StandardMaterial, type Texture, TransformNode, Vector3 } from "@babylonjs/core";
 import { PetMerchantPatrolClock, petMerchantPose, type PetMerchantPose } from "./petMerchant.ts";
+import { type NpcLodOptions, skinnedBounds } from "./NpcP3.ts";
+import { lodLevel } from "./villagePerf.ts";
 
 /**
  * 寵物商人 V2「星靈培育師・洛恩」（只在獨立預覽頁使用；尚未接進村莊）。
@@ -13,9 +15,9 @@ export interface PetMerchantV2 {
   readonly root: TransformNode;
   readonly clock: PetMerchantPatrolClock;
   readonly pickMeshes: readonly AbstractMesh[];
-  readonly stats: { meshes: number; triangles: number; bones: number; animations: string[]; shadowCasters: number };
+  readonly stats: { meshes: number; triangles: number; farTriangles: number; bones: number; animations: string[]; shadowCasters: number };
   /** now：秒；回傳目前姿勢與動作 */
-  update(now: number, dt?: number): PetMerchantPose & { anim: string; facing: number };
+  update(now: number, dt?: number, camera?: Camera | null): PetMerchantPose & { anim: string; facing: number; lod: 0 | 1; paused: boolean };
   setEnabled(on: boolean): void;
 }
 
@@ -51,8 +53,9 @@ function toStandard(scene: Scene, m: Material, cache: Map<Material, StandardMate
 export function setupPetMerchantV2(
   scene: Scene,
   loaded: { meshes: AbstractMesh[]; animationGroups: AnimationGroup[]; transformNodes: TransformNode[]; rootNodes: Node[] },
-  opt: { lite: boolean; shadows?: ShadowGenerator | null; shared?: boolean },
+  opt: { lite: boolean; shadows?: ShadowGenerator | null; shared?: boolean; far?: { meshes: AbstractMesh[]; animationGroups: AnimationGroup[]; transformNodes: TransformNode[]; rootNodes: Node[] } | null; lod?: NpcLodOptions },
 ): PetMerchantV2 {
+  const lodOpt: NpcLodOptions = opt.lod ?? { lod: false, near: 18, animThrottle: false, animFar: 32 };
   const root = new TransformNode("petMerchantV2", scene);
   root.scaling.setAll(SCALE);
   const body = new TransformNode("petMerchantV2_body", scene);
@@ -68,7 +71,8 @@ export function setupPetMerchantV2(
     if (m.material) m.material = toStandard(scene, m.material, cache);
     m.isPickable = true;
     m.metadata = { petMerchant: true };
-    m.alwaysSelectAsActiveMesh = true; // 骨架角色的包圍盒會隨動作改變，避免被錯誤裁切
+    // Stage 6.3：不再 alwaysSelectAsActiveMesh（畫面外也會繪製、也會畫進陰影）；改用依骨架計算＋放大的包圍盒（Walk 動作幅度也涵蓋）
+    skinnedBounds(m, 1.45);
     tris += m.getTotalIndices() / 3;
     pick.push(m);
     if (m.name.startsWith("PetPal_")) {
@@ -85,34 +89,75 @@ export function setupPetMerchantV2(
     }
   }
   const anims = new Map(loaded.animationGroups.map((g) => [g.name, g]));
-  for (const g of loaded.animationGroups) {
+  // Stage 6.3 距離 LOD：遠距模型（同骨架、同動作）掛在同一個節點，只顯示一組；小寵物一律用近距模型那一隻
+  const nearMeshes = pick.filter((m) => !m.name.startsWith("PetPal_"));
+  const farMeshes: AbstractMesh[] = [];
+  const farAnims = new Map<string, AnimationGroup>();
+  if (opt.far && lodOpt.lod) {
+    for (const n of opt.far.rootNodes) n.parent = body;
+    for (const m of opt.far.meshes) {
+      if (m.getTotalIndices() === 0) continue;
+      if (m.name.startsWith("PetPal_")) {
+        m.setEnabled(false);
+        continue;
+      }
+      if (m.material) m.material = toStandard(scene, m.material, cache);
+      m.isPickable = true;
+      m.metadata = { petMerchant: true };
+      m.receiveShadows = true;
+      skinnedBounds(m, 1.45);
+      m.isVisible = false;
+      farMeshes.push(m);
+      pick.push(m);
+      if (opt.shadows && /(cloth|hair|face|skin|leather|dark)/.test(m.name) && !/(glow|metal|eye|egg)/.test(m.name)) opt.shadows.addShadowCaster(m, false);
+    }
+    for (const g of opt.far.animationGroups) farAnims.set(g.name, g);
+  } else if (opt.far) {
+    for (const m of opt.far.meshes) m.setEnabled(false);
+  }
+  for (const g of [...loaded.animationGroups, ...farAnims.values()]) {
     g.stop();
     for (const ta of g.targetedAnimations) {
       ta.animation.enableBlending = true;
       ta.animation.blendingSpeed = 0.08;
     }
   }
+  let lod: 0 | 1 = 0;
+  let animPaused = false;
   const head = loaded.transformNodes.find((n) => n.name === "head") ?? null;
   const clock = new PetMerchantPatrolClock({ shared: !!opt.shared });
   let current = "";
   let facing: number | null = null;
   let lastNow: number | null = null;
   const play = (name: string, speed = 1): void => {
-    const g = anims.get(name);
-    if (!g) return;
-    g.speedRatio = speed;
-    if (current === name) return;
-    for (const [n, o] of anims) if (n !== name && o.isPlaying) o.stop();
-    g.start(true, speed);
+    for (const set of farAnims.size ? [anims, farAnims] : [anims]) {
+      const g = set.get(name);
+      if (!g) continue;
+      g.speedRatio = speed;
+      if (current === name) continue;
+      for (const [n, o] of set) if (n !== name && (o.isPlaying || o.isStarted)) o.stop();
+      g.start(true, speed);
+      if (animPaused) g.pause();
+    }
     current = name;
+  };
+  const pauseAnims = (p: boolean): void => {
+    if (p === animPaused) return;
+    animPaused = p;
+    for (const set of [anims, farAnims]) {
+      const g = set.get(current);
+      if (!g) continue;
+      if (p) g.pause();
+      else g.play(true);
+    }
   };
   const headPos = new Vector3();
   return {
     root,
     clock,
     pickMeshes: pick,
-    stats: { meshes: pick.length, triangles: Math.round(tris), bones: loaded.transformNodes.length, animations: [...anims.keys()], shadowCasters: casters },
-    update(now, dtIn) {
+    stats: { meshes: nearMeshes.length + (pick.length - nearMeshes.length - farMeshes.length), triangles: Math.round(tris), farTriangles: Math.round(farMeshes.reduce((a, m) => a + m.getTotalIndices() / 3, 0)), bones: loaded.transformNodes.length, animations: [...anims.keys()], shadowCasters: casters },
+    update(now, dtIn, camera) {
       const dt = dtIn ?? (lastNow === null ? 0 : Math.min(0.1, Math.max(0, now - lastNow)));
       lastNow = now;
       const paused = clock.paused(now);
@@ -141,7 +186,23 @@ export function setupPetMerchantV2(
       // 角色面向 yaw（0＝+Z）：右手方向＝(cos, −sin)、前方＝(sin, cos)
       pal.position.set(headPos.x + ox * c + oz * s, headPos.y + PAL_OFF.y + 0.035 * Math.sin(now * 2.1), headPos.z - ox * s + oz * c);
       pal.rotation.y = facing + 0.25 * Math.sin(now * 0.8);
-      return { ...p, anim, facing };
+      // 距離 LOD（以鏡頭距離判斷；對話中一定用近距模型）＋畫面外暫停動作（洛恩會走路，遠距不暫停，避免滑行）
+      const cx = camera ? camera.globalPosition.x : p.x;
+      const cz = camera ? camera.globalPosition.z : p.z;
+      const dist = Math.hypot(p.x - cx, p.z - cz);
+      if (farMeshes.length) {
+        const lv = tgt ? 0 : lodLevel(dist, lodOpt.near, lod);
+        if (lv !== lod) {
+          lod = lv;
+          for (const m of nearMeshes) m.isVisible = lv === 0;
+          for (const m of farMeshes) m.isVisible = lv === 1;
+        }
+      }
+      if (lodOpt.animThrottle && camera) {
+        const shown = (lod === 0 ? nearMeshes : farMeshes)[0];
+        pauseAnims(!tgt && !!shown && !camera.isInFrustum(shown));
+      }
+      return { ...p, anim, facing, lod, paused: animPaused };
     },
     setEnabled(on) {
       root.setEnabled(on);

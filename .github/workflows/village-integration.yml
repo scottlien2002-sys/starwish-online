@@ -1,24 +1,24 @@
 name: Village P3 full integration (E2E + screenshots)
 
-# 星芽村全村整合候選（Claude B）：只在 feature/render-village-integration 執行。
+# 星芽村全村整合候選（Claude B）：只在 feature/render-village-integration 與 Stage 6.3 效能優化分支 feature/render-village-perf63 執行。
 # 型別檢查 → 單元測試 → 建置 → 全村整合端對端測試（Chromium＋WebKit、iPhone 直向）→ 截圖與報告推到 art-village-integration 分支（一般 push，不 force）。
 # 獨立預覽網址由既有的 CI & Deploy 部署到 /preview-village-integration/（只替換自己的資料夾，不影響正式遊戲）。
 on:
   push:
-    branches: [feature/render-village-integration]
+    branches: [feature/render-village-integration, feature/render-village-perf63]
   workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: village-integration
+  group: village-integration-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -35,21 +35,24 @@ jobs:
         run: |
           npx playwright install --with-deps chromium webkit >/dev/null
           node tests/e2e/run-village-full-e2e.mjs dist chromium,webkit "$PWD/out/integration"
-      - name: Push results to art-village-integration (normal push, no force)
+      - name: Push results to art branch (normal push, no force)
         if: always()
+        env:
+          # 效能優化分支的結果另存，不覆蓋 art-village-integration
+          ART_BRANCH: ${{ github.ref_name == 'feature/render-village-perf63' && 'art-village-perf63' || 'art-village-integration' }}
         run: |
           mkdir -p out/integration
           echo "{\"commit\":\"${GITHUB_SHA}\",\"run\":\"${GITHUB_RUN_ID}\",\"builtAt\":\"$(date -u +%FT%TZ)\"}" > out/integration/build.json
           REPO="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if git ls-remote --exit-code --heads "$REPO" art-village-integration >/dev/null 2>&1; then
-            git clone -q --depth 1 --branch art-village-integration "$REPO" /tmp/artint
+          if git ls-remote --exit-code --heads "$REPO" "$ART_BRANCH" >/dev/null 2>&1; then
+            git clone -q --depth 1 --branch "$ART_BRANCH" "$REPO" /tmp/artint
           else
-            mkdir -p /tmp/artint && cd /tmp/artint && git init -q -b art-village-integration && git remote add origin "$REPO" && cd -
+            mkdir -p /tmp/artint && cd /tmp/artint && git init -q -b "$ART_BRANCH" && git remote add origin "$REPO" && cd -
           fi
           rsync -a --delete --exclude .git out/integration/ /tmp/artint/
           cd /tmp/artint
           git add -A
           git commit -qm "Village integration ${GITHUB_SHA::7}" || echo "no changes"
-          git push -q origin HEAD:art-village-integration
+          git push -q origin "HEAD:$ART_BRANCH"

@@ -5,7 +5,7 @@ import { setupEnvP3 } from "./EnvP3.ts";
 import { setupFountainP3 } from "./FountainP3.ts";
 import { setupKnightP3 } from "./KnightP3.ts";
 import { setupMageP3 } from "./MageP3.ts";
-import { NPC_PROFILES, setupVillageNpcs, type VillageNpcs } from "./NpcP3.ts";
+import { type Loaded as NpcLoaded, NPC_PROFILES, type NpcLodOptions, setupVillageNpcs, type VillageNpcs } from "./NpcP3.ts";
 import { type PetMerchantV2, setupPetMerchantV2 } from "./PetMerchantV2.ts";
 import { setupPlazaP3 } from "./PlazaP3.ts";
 import { setupPortalsP3 } from "./PortalP3.ts";
@@ -20,6 +20,8 @@ export interface VillageArtFull {
   readonly merchant: PetMerchantV2 | null;
   /** Stage 6.2：八位正式 NPC（載入失敗時為 null，村莊仍可使用；佔位人形已在 art 模式隱藏） */
   readonly npcs: VillageNpcs | null;
+  /** 靜態美術網格（效能診斷：隱藏建築與環境） */
+  readonly statics: readonly AbstractMesh[];
   readonly parts: Record<string, { triangles: number; meshes: number }>;
   readonly loadMs: number;
   readonly errors: string[];
@@ -32,7 +34,19 @@ interface Loaded {
   rootNodes: Node[];
 }
 
-export async function loadVillageArtFull(scene: Scene, lite: boolean, shadows: ShadowGenerator | null, onProgress?: (msg: string) => void): Promise<VillageArtFull> {
+/** Stage 6.3：角色 LOD 與模型版本 */
+export interface ArtPerfOptions {
+  lod: NpcLodOptions;
+  /** true＝載入 Stage 6.2 原始高面數角色（_s62 檔；?perf=s62 比較用） */
+  originalModels: boolean;
+}
+
+export async function loadVillageArtFull(scene: Scene, lite: boolean, shadows: ShadowGenerator | null, onProgress?: (msg: string) => void, perf?: ArtPerfOptions): Promise<VillageArtFull> {
+  const lodOpt: NpcLodOptions = perf?.lod ?? { lod: false, near: 18, animThrottle: false, animFar: 32 };
+  const orig = perf?.originalModels ?? false;
+  /** 角色檔名：近距＝hq／lite；遠距＝far（s62 原始檔沒有遠距版本） */
+  const charFile = (base: string): { near: string; far: string | null } =>
+    orig ? { near: `${base}_${lite ? "lite" : "hq"}_s62.glb`, far: null } : { near: `${base}_${lite ? "lite" : "hq"}.glb`, far: lodOpt.lod ? `${base}_far.glb` : null };
   const t0 = performance.now();
   const base = `${import.meta.env.BASE_URL}models/village-p3/`;
   const texBase = `${base}tex/`;
@@ -122,27 +136,38 @@ export async function loadVillageArtFull(scene: Scene, lite: boolean, shadows: S
   });
   let merchant: PetMerchantV2 | null = null;
   await step("merchant", async () => {
-    const r = await load(`pet_merchant_v2_${q}.glb`);
-    merchant = setupPetMerchantV2(scene, r, { lite, shadows });
+    const f = charFile("pet_merchant_v2");
+    const r = await load(f.near);
+    const far = f.far ? await load(f.far) : null;
+    merchant = setupPetMerchantV2(scene, r, { lite, shadows, far, lod: lodOpt });
     stat("寵物商人洛恩", r.meshes);
   });
   let npcs: VillageNpcs | null = null;
   await step("npcs", async () => {
-    const got = new Map<string, Loaded>();
-    for (const p of NPC_PROFILES) {
-      try {
-        got.set(p.key, await load(`npc_${p.key}_${q}.glb`));
-      } catch (e) {
-        errors.push(`npc ${p.key}: ${e instanceof Error ? e.message : String(e)}`);
-      }
-    }
-    npcs = setupVillageNpcs(scene, got, { lite, shadows });
-    const ms = [...got.values()].flatMap((r) => r.meshes);
+    const got = new Map<string, { near: NpcLoaded; far: NpcLoaded | null }>();
+    // 平行載入（八位 × 近／遠）：縮短全村載入時間
+    await Promise.all(
+      NPC_PROFILES.map(async (p) => {
+        try {
+          const f = charFile(`npc_${p.key}`);
+          const [near, far] = await Promise.all([load(f.near), f.far ? load(f.far) : Promise.resolve(null)]);
+          got.set(p.key, { near, far });
+        } catch (e) {
+          errors.push(`npc ${p.key}: ${e instanceof Error ? e.message : String(e)}`);
+        }
+      }),
+    );
+    npcs = setupVillageNpcs(scene, got, { lite, shadows, lod: lodOpt });
+    const ms = [...got.values()].flatMap((r) => r.near.meshes);
     stat("正式NPC（8位）", ms);
   });
   for (const m of statics) {
     m.isPickable = false;
-    if (!animated.has(m)) m.freezeWorldMatrix();
+    if (!animated.has(m)) {
+      m.freezeWorldMatrix();
+      // Stage 6.3：靜態網格不再每幀同步包圍盒
+      m.doNotSyncBoundingInfo = true;
+    }
   }
-  return { merchant, npcs, parts, loadMs: Math.round(performance.now() - t0), errors };
+  return { merchant, npcs, statics, parts, loadMs: Math.round(performance.now() - t0), errors };
 }

@@ -6,9 +6,9 @@
   "source": "feature/render-village-p3 531b2b1"
  },
  "pet_merchant": {
-  "branch": "art-village-p3-petmerchant",
-  "commit": "ffdd74a",
-  "source": "feature/render-village-p3-petmerchant fefb3a2 (V2.1 最終：網格合併 11 個、髮型修正)"
+  "branch": "art-village-npc",
+  "commit": "d5bc948",
+  "source": "Stage 6.3 洛恩 LOD 重建（同零件、真實減面）：HQ 13596／Lite 5573／遠距 3449；零件與管線讀自 feature/render-village-p3-petmerchant fefb3a2（未修改）"
  },
  "guild": {
   "branch": "art-village-p3",
@@ -17,7 +17,11 @@
  },
  "npcs": {
   "branch": "art-village-npc",
-  "commit": "2cbabdf",
-  "source": "feature/render-village-p3 81c3749（Stage 6.2 八位正式NPC；A 初心者 C1.0-B4 基礎網格唯讀，固定 commit 2225e29）"
+  "commit": "d5bc948",
+  "source": "feature/render-village-p3 cf65930（Stage 6.3：NPC HQ 約 9.6k／Lite 約 4.7k／遠距 1.7k–3.6k；A 初心者 C1.0-B4 基礎網格唯讀，固定 commit 2225e29）"
+ },
+ "stage62_originals": {
+  "files": "*_s62.glb",
+  "source": "Stage 6.2 原始角色（洛恩 59568 面、NPC 約 15.7k 面），?perf=s62 比較用；另有 art-village-p3-petmerchant、backup/art-village-npc-stage62 備份"
  }
 }

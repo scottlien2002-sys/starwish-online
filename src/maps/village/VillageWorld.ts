@@ -533,12 +533,13 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
   void shadows;
 
   // 文字標籤：建築名稱、NPC、傳送陣、噴泉
-  const labels: { mesh: Mesh; x: number; z: number; hide: number }[] = [];
+  const labels: { mesh: Mesh; x: number; z: number; hide: number; far: number }[] = [];
   const label = (text: string, sub: string, x: number, y: number, z: number, w: number): void => {
     const p = textPlane(scene, text, sub, w);
     p.position.set(x, y, z);
     // 大標籤在角色附近 6 m 內隱藏、小標籤 2.5 m（不擋住角色）
-    labels.push({ mesh: p, x, z, hide: w >= 3.5 ? 6 : 2.5 });
+    // Stage 6.3（art 模式）：太遠看不清楚的標籤不繪製（每個標籤是一次繪製）：建築名稱 45 m、NPC／傳送門 26 m
+    labels.push({ mesh: p, x, z, hide: w >= 3.5 ? 6 : 2.5, far: art ? (w >= 5 ? 45 : 26) : 1e9 });
   };
   if (!art) {
     for (const b of BUILDINGS) {
@@ -559,7 +560,10 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
       ringA.rotation.y += dt * 0.25;
       if (!labelsOn) return;
       // 角色附近 2.5 m 內的標籤隱藏（不擋住角色）
-      for (const l of labels) l.mesh.isVisible = Math.hypot(l.x - px, l.z - pz) > l.hide;
+      for (const l of labels) {
+        const d = Math.hypot(l.x - px, l.z - pz);
+        l.mesh.isVisible = d > l.hide && d < l.far;
+      }
     },
     setLabels(on: boolean): void {
       labelsOn = on;
