@@ -140,7 +140,7 @@ for (const name of browsers) {
       const clickErrs = [];
       while (tries < 3 && uiDetail !== `pet:${petId}`) {
         tries++;
-        await page.click(`.wp.open [data-pet="${petId}"]`, { timeout: 5000 }).catch((e) => clickErrs.push(String(e.message).split("\n").slice(0, 6).join(" | ")));
+        await page.click(`.wp.open [data-pet="${petId}"]`, { timeout: 30000 }).catch((e) => clickErrs.push(String(e.message).split("\n").slice(0, 6).join(" | ")));
         await wait(300);
         uiDetail = await V(() => window.__starwishWorld.info().panel);
       }
