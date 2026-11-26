@@ -35,8 +35,10 @@ for i, nid in enumerate(ids):
     x, y = 20 + (i % 4) * cw, 90 + (i // 4) * ch
     im = Image.open(D / f"npc_{nid}_front.png").convert("RGB")
     im = im.resize((cw - 20, int(im.height * (cw - 20) / im.width)))
-    im = im.crop((0, 0, cw - 20, 500))
-    sheet.paste(im, (x, y))
+    im = im.crop((0, max(0, im.height - 500), cw - 20, im.height)) if im.height >= 500 else im
+    bg = Image.new("RGB", (cw - 20, 500), im.getpixel((4, 4)))
+    bg.paste(im, (0, 500 - im.height))
+    sheet.paste(bg, (x, y))
     dr.text((x + 6, y + 504), r["name"], fill=(30, 34, 60), font=F1)
     dr.text((x + 6, y + 544), ROLE.get(nid, ""), fill=(90, 70, 40), font=F2)
     for k, line in enumerate(textwrap.wrap(r["design"], 22)[:4]):

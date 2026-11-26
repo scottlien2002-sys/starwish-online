@@ -470,7 +470,7 @@ def npc_swordmaster():
 
 
 def npc_knight():
-    """騎士軍團團長「艾德溫」：金髮整齊側分、短鬍、銀色全胸甲＋雙肩甲、皇家藍披風"""
+    """騎士軍團團長「艾德溫」：金髮整齊側分、八字鬍、銀色全胸甲＋雙肩甲、皇家藍披風"""
     g = "male"
     H = hair_base(g, BANGS_SWEEP, sweep=-14, ex=0.6)
     rx, ry = coat_profile(g, hem_r=0.205)
@@ -478,13 +478,13 @@ def npc_knight():
     emb = P("emblem", "metal", 0.0015, CHEST)
     for k in range(4):
         emb.add(rbox((0, -0.125, 0.53), (0.008, 0.004, 0.032), 0.002, rot((0, 1, 0), 45 * k)))
-    parts = [H.part, beard(g, big=False), mustache(g, curl=False, w=0.05), tabard, trim_mask(tabard, "tabard_trim", "trim", hem_z=0.15), breastplate(g), pauldrons(g, r=0.082),
+    parts = [H.part, mustache(g, curl=True, w=0.058), tabard, trim_mask(tabard, "tabard_trim", "trim", hem_z=0.15), breastplate(g), pauldrons(g, r=0.082),
              cape(g, length=0.1), trousers(g, "metal2"), cuffs(g, "gauntlet", "metal", r=0.042, at=0.68, thick=0.02), belt("belt", 0.42, 0.15, 0.11), collar(col="metal"), emb]
     return {"id": "knight", "name": "騎士軍團團長・艾德溫", "gender": g, "parts": parts, "iris": ((0.05, 0.15, 0.4), (0.2, 0.45, 0.9), (0.7, 0.85, 1.0)),
-            "colors": {"hair": ((0.78, 0.6, 0.28), (0.98, 0.86, 0.5)), "beard": (0.8, 0.62, 0.3), "mustache": (0.8, 0.62, 0.3), "tabard": (0.22, 0.32, 0.66),
+            "colors": {"hair": ((0.78, 0.6, 0.28), (0.98, 0.86, 0.5)), "mustache": (0.72, 0.52, 0.22), "tabard": (0.22, 0.32, 0.66),
                        "tabard_trim": (0.95, 0.76, 0.34), "armor": (0.86, 0.88, 0.92), "pauldron": (0.86, 0.88, 0.92), "cape": (0.18, 0.26, 0.58), "trousers": (0.7, 0.72, 0.78),
                        "gauntlet": (0.8, 0.82, 0.88), "belt": (0.36, 0.24, 0.16), "collar": (0.86, 0.88, 0.92), "emblem": (0.95, 0.76, 0.34)},
-            "keep_extra": set(), "design": "金髮側分、短鬍、藍眼；銀色胸甲＋雙肩甲＋護手、皇家藍罩袍與披風、胸前金星徽"}
+            "keep_extra": set(), "design": "金髮側分、翹八字鬍、藍眼；銀色胸甲＋雙肩甲＋護手、皇家藍罩袍與披風、胸前金星徽"}
 
 
 def npc_smith():
