@@ -24,7 +24,7 @@ for (const name of browsers) {
     failures++;
     continue;
   }
-  for (const g of ["male", "female"]) {
+  for (const g of (process.env.WORLD_GENDERS ?? "male,female").split(",")) {
     const run = { browser: name, label: g, checks: {}, errors: [], screenshots: [], results: {} };
     const check = (k, ok, detail) => (run.checks[k] = { ok: !!ok, detail });
     const ctx = await browser.newContext({ viewport: { width: 852, height: 393 }, deviceScaleFactor: 2, hasTouch: true });
@@ -132,9 +132,15 @@ for (const name of browsers) {
       // 選單每 0.5 秒更新內容；點擊若剛好遇到重畫，重試（最多 3 次，記錄次數）
       let uiDetail = "";
       let tries = 0;
+      await page.evaluate(() => {
+        window.__evlog = [];
+        for (const t of ["pointerdown", "mousedown", "pointerup", "mouseup", "click", "touchstart", "touchend"])
+          document.addEventListener(t, (e) => window.__evlog.push(`${t}:${e.target?.tagName}.${String(e.target?.className ?? "").slice(0, 20)}`), true);
+      });
+      const clickErrs = [];
       while (tries < 3 && uiDetail !== `pet:${petId}`) {
         tries++;
-        await page.click(`.wp.open [data-pet="${petId}"]`, { timeout: 5000 }).catch(() => {});
+        await page.click(`.wp.open [data-pet="${petId}"]`, { timeout: 5000 }).catch((e) => clickErrs.push(String(e.message).split("\n").slice(0, 6).join(" | ")));
         await wait(300);
         uiDetail = await V(() => window.__starwishWorld.info().panel);
       }
@@ -153,6 +159,8 @@ for (const name of browsers) {
           const after = window.__starwishWorld.info().panel;
           return { card: true, rect: [r.left, r.top, r.width, r.height], body: [br.top, br.height, body.scrollTop, body.scrollHeight], top: top ? `${top.tagName}.${top.className}` : null, isCard: top === c || c.contains(top), before, afterProgrammatic: after };
         }, petId);
+        diag.evlog = await page.evaluate(() => window.__evlog.slice(0, 20));
+        diag.clickErrs = clickErrs;
         run.results.petDetailDiag = diag;
         console.log(`  · [${name} ${g}] 寵物卡片診斷：${JSON.stringify(diag)}`);
         await page.click('.wp.open [data-a="back"]').catch(() => {});
