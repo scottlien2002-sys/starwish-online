@@ -16,6 +16,7 @@ import {
 import { BOARD, BUILDINGS, FORGE, NPC_SPOTS, PORTALS, ROAD_HALF, SOUTH_GATE, WALK_RADIUS, onPlatform, onStairs, polar } from "./layout.ts";
 import type { GraphicsTier } from "../../render/graphicsTiers.ts";
 import { villageTexture } from "./villageTextures.ts";
+import { sectorOf } from "./sectorSplit.ts";
 
 /**
  * Stage 6.6 星芽村全村美術升級（遊戲端）：不增加 Draw Calls 的材質與光影升級。
@@ -347,14 +348,18 @@ function flowerMesh(scene: Scene, name: string): Mesh {
 
 export interface Foliage66 {
   readonly meshes: Mesh[];
-  readonly stats: { tufts: number; flowers: number; triangles: number; drawCalls: number };
+  /** drawCalls＝網格數（扇區數 × 2）；實際每幀只畫鏡頭看得到的扇區 */
+  readonly stats: { tufts: number; flowers: number; triangles: number; drawCalls: number; sectors: number };
   setEnabled(on: boolean): void;
 }
 
-/** 草叢與小花：數量依畫質（高 1900／650、中 1200／420、低 600／220） */
+/** 草叢小花的扇區數（畫面外扇區不繪製） */
+export const FOLIAGE_SECTORS = 6;
+
+/** 草叢與小花：數量依畫質（高 1400／480、中 1200／420、低 600／220；Stage 6.6 高畫質下修以守住每幀三角面標準） */
 export function buildFoliage66(scene: Scene, tier: GraphicsTier, receiveShadows: boolean): Foliage66 {
-  const nT = tier === "high" ? 1900 : tier === "medium" ? 1200 : 600;
-  const nF = tier === "high" ? 650 : tier === "medium" ? 420 : 220;
+  const nT = tier === "high" ? 1400 : tier === "medium" ? 1200 : 600;
+  const nF = tier === "high" ? 480 : tier === "medium" ? 420 : 220;
   const mat = new StandardMaterial("VP66_foliage", scene);
   mat.diffuseColor = Color3.White();
   mat.specularColor = Color3.Black();
@@ -417,9 +422,7 @@ export function buildFoliage66(scene: Scene, tier: GraphicsTier, receiveShadows:
     return { mats: out.subarray(0, k * 16), count: k, pts };
   };
   const t = place(nT, 11, 6, 0.8, 1.5);
-  tuft.thinInstanceSetBuffer("matrix", t.mats, 16, true);
   const f = place(nF, 47, 4, 0.8, 1.25);
-  flower.thinInstanceSetBuffer("matrix", f.mats, 16, true);
   const palette = [
     [1.0, 0.97, 0.95],
     [1.0, 0.86, 0.92],
@@ -427,26 +430,52 @@ export function buildFoliage66(scene: Scene, tier: GraphicsTier, receiveShadows:
     [0.82, 0.84, 1.0],
     [1.0, 0.72, 0.78],
   ];
-  const cols = new Float32Array(f.count * 4);
+  const fcols = new Float32Array(f.count * 4);
   for (let i = 0; i < f.count; i++) {
     // 同一簇顏色相近
     const [x, z] = f.pts[i]!;
     const pi = Math.floor(vnoise(x / 3.5 + 9, z / 3.5 - 4) * palette.length * 0.999 + hash(i) * 0.6) % palette.length;
     const p = palette[pi]!;
-    cols.set([p[0]!, p[1]!, p[2]!, 1], i * 4);
+    fcols.set([p[0]!, p[1]!, p[2]!, 1], i * 4);
   }
-  flower.thinInstanceSetBuffer("color", cols, 4, true);
-  for (const m of [tuft, flower]) {
-    m.freezeWorldMatrix();
-    m.thinInstanceRefreshBoundingInfo(false);
-  }
+  // Stage 6.6：依方位角分成 FOLIAGE_SECTORS 個扇區，每個扇區一個網格（共用幾何與材質）。
+  // 畫面外的扇區由視錐剔除略過；草叢與小花總數不變。
+  const meshes: Mesh[] = [];
+  const split = (base: Mesh, pl: { mats: Float32Array; count: number; pts: [number, number][] }, cols: Float32Array | null): void => {
+    const groups: number[][] = Array.from({ length: FOLIAGE_SECTORS }, () => []);
+    for (let i = 0; i < pl.count; i++) groups[sectorOf(pl.pts[i]![0], pl.pts[i]![1], FOLIAGE_SECTORS)]!.push(i);
+    // 先複製（共用幾何與材質）再分別設定實例緩衝，避免複製到已設定的實例資料
+    const parts = groups.map((_, s) => (s === 0 ? base : (base.clone(`${base.name}_s${s}`) as Mesh)));
+    base.name = `${base.name}_s0`;
+    groups.forEach((g, s) => {
+      const m = parts[s]!;
+      if (!g.length) {
+        if (s !== 0) m.dispose();
+        return;
+      }
+      const mats = new Float32Array(g.length * 16);
+      g.forEach((i, k) => mats.set(pl.mats.subarray(i * 16, i * 16 + 16), k * 16));
+      m.thinInstanceSetBuffer("matrix", mats, 16, true);
+      if (cols) {
+        const c = new Float32Array(g.length * 4);
+        g.forEach((i, k) => c.set(cols.subarray(i * 4, i * 4 + 4), k * 4));
+        m.thinInstanceSetBuffer("color", c, 4, true);
+      }
+      m.alwaysSelectAsActiveMesh = false;
+      m.thinInstanceRefreshBoundingInfo(false);
+      m.freezeWorldMatrix();
+      meshes.push(m);
+    });
+    if (!groups[0]!.length) base.dispose();
+  };
+  split(tuft, t, null);
+  split(flower, f, fcols);
   const tris = t.count * 6 + f.count * 11;
   return {
-    meshes: [tuft, flower],
-    stats: { tufts: t.count, flowers: f.count, triangles: tris, drawCalls: 2 },
+    meshes,
+    stats: { tufts: t.count, flowers: f.count, triangles: tris, drawCalls: meshes.length, sectors: FOLIAGE_SECTORS },
     setEnabled(on) {
-      tuft.setEnabled(on);
-      flower.setEnabled(on);
+      for (const m of meshes) m.setEnabled(on);
     },
   };
 }

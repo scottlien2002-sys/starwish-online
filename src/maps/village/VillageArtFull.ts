@@ -76,9 +76,9 @@ export async function loadVillageArtFull(scene: Scene, lite: boolean, shadows: S
 
   await step("env", async () => {
     const r = await load(`env_${q}.glb`);
-    setupEnvP3(scene, r.meshes, { includeTerrain: false });
-    statics.push(...r.meshes);
-    stat("環境", r.meshes);
+    const env = setupEnvP3(scene, r.meshes, { includeTerrain: false });
+    statics.push(...env.meshes);
+    stat("環境", [...env.meshes]);
   });
   await step("plaza", async () => {
     const r = await load(`plaza_${q}.glb`);

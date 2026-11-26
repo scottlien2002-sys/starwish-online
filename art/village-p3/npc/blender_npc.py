@@ -481,7 +481,7 @@ def export_glb(objs, rig, path):
     for o in objs + [rig]:
         o.select_set(True)
     bpy.context.view_layer.objects.active = rig
-    kw = dict(filepath=path, export_format="GLB", use_selection=True, export_apply=True, export_yup=True, export_skins=True,
+    kw = dict(filepath=path, export_format="GLB", use_selection=True, export_apply=False, export_yup=True, export_skins=True, export_morph=True, export_morph_normal=False,
               export_animations=True, export_animation_mode="ACTIONS", export_force_sampling=True)
     try:
         bpy.ops.export_scene.gltf(**kw, export_optimize_animation_size=True, export_reset_pose_bones=True)

@@ -1,5 +1,9 @@
 import type { AbstractMesh, Scene } from "@babylonjs/core";
 import { villageProps } from "./villageMaterials.ts";
+import { splitBySector } from "./sectorSplit.ts";
+
+/** Stage 6.6：外圍樹林與樹籬切成 6 個扇區（畫面外的扇區不繪製；三角面總數不變） */
+export const ENV_SECTORS = 6;
 
 /**
  * Stage 6 P3-12 星芽村環境美術（外圍樹林、樹籬邊界、遠景山丘）。
@@ -7,7 +11,9 @@ import { villageProps } from "./villageMaterials.ts";
  * - Env_terrain 只給獨立預覽頁用；遊戲本體已有外圍緩坡地面，整合時傳 includeTerrain=false
  */
 export interface EnvP3 {
-  readonly stats: { meshes: number; triangles: number; byMesh: Record<string, number>; materials: number };
+  readonly stats: { meshes: number; triangles: number; byMesh: Record<string, number>; materials: number; sectors: number };
+  /** 實際使用中的網格（樹林切成扇區後的新網格） */
+  readonly meshes: readonly AbstractMesh[];
   setEnabled(on: boolean): void;
 }
 
@@ -27,10 +33,12 @@ export function setupEnvP3(scene: Scene, meshes: AbstractMesh[], opt: { includeT
     m.receiveShadows = k !== "far";
     m.hasVertexAlpha = false;
     byMesh[k] = Math.round(m.getTotalIndices() / 3);
-    used.push(m);
+    if (k === "props") used.push(...splitBySector(scene, m, ENV_SECTORS, "Env_props"));
+    else used.push(m);
   }
   return {
-    stats: { meshes: used.length, triangles: Object.values(byMesh).reduce((a, b) => a + b, 0), byMesh, materials: 1 },
+    stats: { meshes: used.length, triangles: Object.values(byMesh).reduce((a, b) => a + b, 0), byMesh, materials: 1, sectors: ENV_SECTORS },
+    meshes: used,
     setEnabled(on) {
       for (const m of used) m.setEnabled(on);
     },

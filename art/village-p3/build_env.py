@@ -41,7 +41,7 @@ def shade(col, k):
 
 def clump(mb, c, r, col, hq, rng):
     """Stage 6.6 葉團：多環圓球（環半徑隨機起伏）＋底部較暗、頂部受光（取代六面體）"""
-    seg = 7 if hq else 6
+    seg = 6  # Stage 6.6：HQ 由 7 段降為 6 段（守住高畫質每幀三角面）
     prof = [(0.0, -0.78 * r)]
     rings = (-0.45, 0.05, 0.55) if hq else (-0.35, 0.3)
     for t in rings:
@@ -59,7 +59,7 @@ def round_tree(mb, x, z, h0, s, rng, hq):
         for a in (0.4, 2.5, 4.4):
             G.tube(mb, [(x, z, h0 + 1.6 * s), (x + math.sin(a) * 0.55 * s, z + math.cos(a) * 0.55 * s, h0 + 2.35 * s)], 0.06 * s, 4, C["trunk"])
     leaf = rng.choice(C["leaf"])
-    blobs = [(0, 0, 2.95, 1.3), (0.75, 0.35, 2.55, 0.95), (-0.7, -0.4, 2.6, 0.95), (0.2, -0.75, 2.75, 0.85), (0.05, 0.1, 3.8, 0.95)] if hq else [(0, 0, 2.95, 1.45), (0.15, 0.0, 3.8, 0.9)]
+    blobs = [(0, 0, 2.95, 1.35), (0.75, 0.35, 2.55, 0.95), (-0.65, -0.5, 2.6, 1.0), (0.05, 0.1, 3.8, 0.95)] if hq else [(0, 0, 2.95, 1.45), (0.15, 0.0, 3.8, 0.9)]
     for bx, bz, bh, br in blobs:
         c = (x + bx * s, z + bz * s, h0 + bh * s)
         clump(mb, c, br * s, leaf if bh < 3.5 else C["leaf_hi"], hq, rng)
