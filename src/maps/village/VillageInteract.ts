@@ -27,6 +27,8 @@ export interface InteractOptions {
   guild?: GuildMarketService;
   /** 視窗關閉、金幣或背包可能改變時通知（更新畫面） */
   onChange?: () => void;
+  /** Stage 7.1：已開放的傳送陣由遊戲端「踩入自動傳送」處理，這裡不顯示互動按鈕與確認視窗 */
+  autoPortals?: boolean;
 }
 
 const CSS = `
@@ -151,7 +153,8 @@ export class VillageInteract {
       }
     }
     if (best) return { kind: "npc", npc: best };
-    for (const p of PORTALS) if (Math.hypot(p.x - this.px, p.z - this.pz) <= p.r + 0.3) return { kind: "portal", portal: p };
+    // Stage 7.1：完整遊戲裡已開放的傳送陣是「踩進去自動傳送」（不顯示按鈕或確認）；未開放的仍可查看說明
+    for (const p of PORTALS) if (!(this.opts.autoPortals && p.open) && Math.hypot(p.x - this.px, p.z - this.pz) <= p.r + 0.3) return { kind: "portal", portal: p };
     return null;
   }
 

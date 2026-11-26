@@ -53,9 +53,13 @@ import { createPetAppraisalService, type PetAppraisalService } from "../pets/pet
 import { isSoul } from "../pets/petSystem.ts";
 import type { WorldSession } from "./worldSession.ts";
 import { WorldPanel } from "../ui/WorldPanel.ts";
+import { MODEL_LOD_LABEL, pickModelLod } from "./modelLod.ts";
 import { NOVICE_VERSION } from "./noviceVersion.ts";
-import { FIELD_CAMP_ARRIVAL, FIELD_RETURN_STONE } from "../maps/village/mapLinks.ts";
-import { ARRIVAL_SPOT, RESPAWN_SLOTS } from "../maps/village/layout.ts";
+import { FIELD_CAMP_ARRIVAL } from "../maps/village/mapLinks.ts";
+import { PortalTrigger } from "./portalTrigger.ts";
+import { FIELD_CAMP_PORTAL } from "./worldPortals.ts";
+import { buildCampPortal, type CampPortal } from "./CampPortal.ts";
+import { RESPAWN_SLOTS } from "../maps/village/layout.ts";
 import { nextLootUid } from "../core/gameSave.ts";
 import { rollGold } from "../economy/economyConfig.ts";
 
@@ -121,7 +125,7 @@ export interface PlayApi {
   };
   bench(seconds: number): Promise<BenchReport>;
   /** Stage 7（?play=world）才有 */
-  world?: { info(): Record<string, unknown>; toVillage(): void; setHp(hp: number): void; stone(): void };
+  world?: { info(): Record<string, unknown>; toVillage(): void; setHp(hp: number): void };
 }
 
 interface BenchReport {
@@ -156,7 +160,7 @@ export async function startStarsproutGame(canvas: HTMLCanvasElement, hudRoot: HT
 class StarsproutGame {
   private readonly params = new URLSearchParams(location.search);
   private gender: NoviceGender = this.params.get("g") === "female" ? "female" : "male";
-  private readonly lod: NoviceLod & MapLod = this.params.get("lod") === "lite" ? "lite" : "hq";
+  private lod: NoviceLod & MapLod = this.params.get("lod") === "lite" ? "lite" : "hq";
   private readonly charShadow: CharShadowMode = this.params.get("charshadow") === "realtime" ? "realtime" : "blob";
   private readonly p3 = this.params.get("p3") !== "0";
   private version = this.params.get("ver") === "c10b5" ? "c10b5" : "c10b5a";
@@ -165,8 +169,6 @@ class StarsproutGame {
   private wpanel: WorldPanel | null = null;
   private downAt: number | null = null;
   private leaving = false;
-  private stoneBtn: HTMLButtonElement | null = null;
-  private stoneDlg: HTMLDivElement | null = null;
   private goldDropped = 0;
   private goldPicked = 0;
   private lootGold = new Map<number, { uid: string; gold: number }>();
@@ -239,6 +241,7 @@ class StarsproutGame {
     if (ws) {
       this.gender = ws.gender;
       this.version = NOVICE_VERSION;
+      this.lod = pickModelLod(this.params);
     }
     const base = pickQuality();
     // P3-2：不建立半浮點 HDR 後製管線、改用畫布原生 MSAA（&p3=0 回到原設定對照）
@@ -356,6 +359,7 @@ class StarsproutGame {
       if (e.code === "KeyJ" || e.code === "Enter") this.tryAttack(true);
     });
     this.perf = new PerfOverlay(this.engine, scene, this.quality, hudRoot);
+    if (ws) this.perf.setLabels({ model: MODEL_LOD_LABEL[this.lod], map: "星芽原野" });
     window.addEventListener("resize", () => this.engine.resize());
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) this.engine.stopRenderLoop(this.frame);
@@ -365,6 +369,7 @@ class StarsproutGame {
       this.wpanel = new WorldPanel(hudRoot, ws, {
         clock: () => this.petClock,
         changed: (msg) => this.afterPetChange(msg),
+        perf: () => this.perf,
         stats: () => {
           const t = this.combat.tuning;
           return { base: FIELD_TEST.baseStats, now: this.stats, combat: `戰鬥（測試設定）：每下 ${t.attackDamage} 傷害、${t.attackInterval.toFixed(3)} 秒一下、受到傷害 ×${t.damageTakenMul.toFixed(2)}｜擊倒 ${this.kills}、撿到金幣 ${this.goldPicked}` };
@@ -377,7 +382,7 @@ class StarsproutGame {
             else q.set(k, v);
             location.search = q.toString();
           };
-          btn(this.lod === "hq" ? "換 Lite" : "換 HQ", () => go("lod", this.lod === "hq" ? "lite" : null));
+          btn(`模型 LOD：${MODEL_LOD_LABEL[this.lod]} → 換 ${this.lod === "hq" ? "Lite" : "HQ"}`, () => go("lod", this.lod === "hq" ? "lite" : "hq"));
           btn(this.charShadow === "blob" ? "角色即時陰影" : "腳下柔邊陰影", () => go("charshadow", this.charShadow === "blob" ? "realtime" : null));
           btn("傳送到星露草坪", () => this.toZone01());
           btn("回營地", () => this.teleport(FIELD_CAMP_ARRIVAL.x, FIELD_CAMP_ARRIVAL.z));
@@ -452,7 +457,7 @@ class StarsproutGame {
       // 存檔的生命（null = 滿血）
       const hp = this.ws.save.character.hp;
       if (hp !== null) this.combat.hp = Math.min(this.combat.tuning.maxHp, Math.max(1, hp));
-      this.buildReturnStone();
+      void this.buildCampPortal();
       this.avatar.on((e) => {
         if (e.type === "deathEnd") this.hud.toast("你倒下了……稍後在星芽村的星願之泉復活", 2200);
       });
@@ -526,7 +531,7 @@ class StarsproutGame {
     this.sun.position.copyFrom(this.pos).subtractInPlace(this.sun.direction.scale(45));
     this.updateMonsters(dt);
     this.updateLoot(dt);
-    this.follower.update(dt, this.avatar.earAnchor(this.earTmp), this.yaw);
+    this.follower.update(dt, this.avatar.petAnchor(this.earTmp), this.yaw, this.avatar.headHalfWidth);
     if (this.ws) this.worldFrame(dt);
     this.world.update(dt, this.pos.x, this.pos.z);
     this.veg?.update(this.pos.x, this.pos.z, false);
@@ -543,7 +548,7 @@ class StarsproutGame {
     this.fpsTimer += dt;
     if (this.fpsTimer >= 0.5) {
       this.fpsTimer = 0;
-      this.hud.setFps(this.engine.getFps());
+      this.hud.setFps(this.ws ? this.perf.avgFps(2) : this.engine.getFps());
       if (this.ws) this.wpanel?.refresh();
       else if (this.panel.classList.contains("open") && this.panelTab !== "perf") this.renderPanel();
     }
@@ -753,62 +758,25 @@ class StarsproutGame {
   }
 
   // ---------------- Stage 7：星願石（返回星芽村）、死亡復活、定期存檔 ----------------
-  private buildReturnStone(): void {
-    const st = FIELD_RETURN_STONE;
-    const y = this.terrain.surface(st.x, st.z);
-    const disc = MeshBuilder.CreateCylinder("returnStoneDisc", { diameter: st.discR * 2, height: 0.08, tessellation: 32 }, this.scene);
-    disc.position.set(st.x, y + 0.04, st.z);
-    const pillar = MeshBuilder.CreateCylinder("returnStonePillar", { diameterTop: st.pillarR * 1.1, diameterBottom: st.pillarR * 2, height: 1.3, tessellation: 8 }, this.scene);
-    pillar.position.set(st.x, y + 0.65, st.z);
-    const gem = MeshBuilder.CreatePolyhedron("returnStoneGem", { type: 1, size: 0.22 }, this.scene);
-    gem.position.set(st.x, y + 1.6, st.z);
-    const stone = new StandardMaterial("returnStoneMat", this.scene);
-    stone.diffuseColor = new Color3(0.93, 0.92, 0.88);
-    stone.specularColor = new Color3(0.1, 0.1, 0.1);
-    const glow = new StandardMaterial("returnGemMat", this.scene);
-    glow.diffuseColor = new Color3(0.55, 0.75, 1);
-    glow.emissiveColor = new Color3(0.45, 0.65, 1);
-    disc.material = stone;
-    pillar.material = stone;
-    gem.material = glow;
-    for (const m of [disc, pillar, gem]) m.isPickable = false;
-    this.returnGem = gem;
-    this.colliders = [...this.colliders, { kind: "returnStone", x: st.x, z: st.z, r: st.pillarR }];
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "vi-btn world-stone-btn";
-    b.textContent = "✦ 星願石：返回星芽村";
-    b.hidden = true;
-    b.style.cssText = "position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 150px);z-index:40;padding:12px 20px;border-radius:24px;border:2px solid #e8c46e;background:linear-gradient(180deg,rgba(40,52,110,.94),rgba(22,28,66,.94));color:#fbf6ea;font:600 16px -apple-system,'PingFang TC',sans-serif";
-    b.addEventListener("pointerdown", (e) => e.stopPropagation());
-    b.addEventListener("click", () => this.openStoneDialog());
-    document.body.appendChild(b);
-    this.stoneBtn = b;
-  }
+  private campPortal: CampPortal | null = null;
+  private readonly portal = new PortalTrigger(FIELD_CAMP_PORTAL);
 
-  private returnGem: Mesh | null = null;
-
-  private openStoneDialog(): void {
-    if (this.stoneDlg) return;
-    const d = document.createElement("div");
-    d.className = "world-stone-dlg";
-    d.style.cssText = "position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);transform:translateX(-50%);width:min(94vw,440px);z-index:55;box-sizing:border-box;padding:14px 16px;border-radius:18px;border:2px solid #e8c46e;background:linear-gradient(180deg,rgba(32,40,92,.96),rgba(16,20,52,.96));color:#fbf6ea;font:15px/1.55 -apple-system,'PingFang TC',sans-serif";
-    d.innerHTML = `<h3 style="margin:0 0 6px;color:#f3d68b">星願石</h3><div>要返回星芽村嗎？（抵達南門內側）</div><div style="display:flex;gap:10px;margin-top:12px"><button type="button" data-a="go" style="flex:1;min-height:44px;border-radius:12px;border:1.5px solid #e8c46e;background:linear-gradient(180deg,#f3d68b,#d9a94a);color:#2a2040;font-weight:600">返回</button><button type="button" data-a="close" style="flex:1;min-height:44px;border-radius:12px;border:1.5px solid #e8c46e;background:rgba(255,255,255,.08);color:#fbf6ea">取消</button></div>`;
-    d.addEventListener("pointerdown", (e) => e.stopPropagation());
-    for (const btn of d.querySelectorAll<HTMLButtonElement>("button"))
-      btn.onclick = () => {
-        d.remove();
-        this.stoneDlg = null;
-        if (btn.dataset.a === "go") this.toVillage();
-      };
-    document.body.appendChild(d);
-    this.stoneDlg = d;
+  /** Stage 7.1：營地傳送陣（取代星願石；踩入自動回星芽村） */
+  private async buildCampPortal(): Promise<void> {
+    this.campPortal = await buildCampPortal(this.scene, {
+      x: FIELD_CAMP_PORTAL.x,
+      z: FIELD_CAMP_PORTAL.z,
+      radius: FIELD_CAMP_PORTAL.visualR,
+      surface: (x, z) => this.terrain.surface(x, z),
+      baseUrl: import.meta.env.BASE_URL,
+      lite: this.lod === "lite",
+    });
   }
 
   private toVillage(): void {
-    if (!this.ws || this.leaving) return;
+    if (!this.ws || this.leaving || this.ws.leaving) return;
     this.leaving = true;
-    this.ws.travelTo({ map: "village", x: ARRIVAL_SPOT.x, z: ARRIVAL_SPOT.z, yaw: ARRIVAL_SPOT.yaw }, this.combat.hp);
+    this.ws.travelTo({ ...FIELD_CAMP_PORTAL.to }, this.combat.hp);
   }
 
   private respawnInVillage(): void {
@@ -820,13 +788,9 @@ class StarsproutGame {
   }
 
   private worldFrame(dt: number): void {
-    const st = FIELD_RETURN_STONE;
-    const near = Math.hypot(this.pos.x - st.x, this.pos.z - st.z) <= st.interactR && !this.combat.isDown;
-    if (this.stoneBtn) this.stoneBtn.hidden = !near || !!this.stoneDlg;
-    if (this.returnGem) {
-      this.returnGem.rotation.y += dt * 0.9;
-      this.returnGem.position.y = this.terrain.surface(st.x, st.z) + 1.6 + Math.sin(this.now * 1.8) * 0.06;
-    }
+    this.campPortal?.update(dt);
+    // 踩進營地傳送陣 → 直接回星芽村（先存檔；倒地時不觸發；只觸發一次）
+    if (!this.combat.isDown && this.portal.update(this.pos.x, this.pos.z)) this.toVillage();
     this.rememberT += dt;
     if (this.rememberT >= 5 && !this.combat.isDown) {
       this.rememberT = 0;
@@ -1225,7 +1189,6 @@ class StarsproutGame {
         ? {
             info: () => {
               const ws = self.ws!;
-              const st = FIELD_RETURN_STONE;
               return {
                 map: "starsprout",
                 gold: ws.save.wallet.balance,
@@ -1234,8 +1197,10 @@ class StarsproutGame {
                 down: self.combat.isDown,
                 deathClip: self.avatar.hasDeathClip,
                 state: self.avatar.state,
-                stoneDist: Math.hypot(self.pos.x - st.x, self.pos.z - st.z),
-                stoneButton: !!self.stoneBtn && !self.stoneBtn.hidden,
+                portal: { armed: self.portal.isArmed, fired: self.portal.hasFired, dist: self.portal.distance(self.pos.x, self.pos.z), triggerR: self.portal.spec.triggerR, built: !!self.campPortal, meshes: self.campPortal?.meshes.length ?? 0 },
+                panel: self.wpanel?.where ?? "closed",
+                petGap: self.follower.headGap,
+                headHalfWidth: self.avatar.headHalfWidth,
                 goldDropped: self.goldDropped,
                 goldPicked: self.goldPicked,
                 goldOnGround: self.lootGold.size,
@@ -1253,7 +1218,6 @@ class StarsproutGame {
             setHp: (hp: number) => {
               self.combat.hp = Math.max(0, Math.min(self.combat.tuning.maxHp, hp));
             },
-            stone: () => self.openStoneDialog(),
           }
         : undefined,
     };

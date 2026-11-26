@@ -96,26 +96,96 @@ for (const name of browsers) {
       const goldBeforeField = gm.gold;
       const bagBeforeField = (await V(() => window.__starwishWorld.info())).bag.length;
 
-      // ---------- 4. 南門 → 星芽原野 ----------
-      await V(() => window.__starwishWorld.teleport(0, -41.5, Math.PI));
-      // 互動目標在下一次畫面更新時才判定（CI 軟體繪圖很慢）
-      await page.waitForFunction(() => window.__starwishWorld.info().interact?.target === "portal:south", null, { timeout: 30000 }).catch(() => {});
-      const tgt = await V(() => window.__starwishWorld.info().interact?.target);
-      const act = await V(() => window.__starwishWorld.activate());
-      await page.waitForFunction(() => !!document.querySelector('.vi-dlg button[data-a="go"]'), null, { timeout: 15000 }).catch(() => {});
-      const dlg = await V(() => window.__starwishWorld.info().interact?.dialog ?? "");
-      console.log(`  · [${name} ${g}] 傳送門：target=${tgt} activate=${act} dialog=${dlg.slice(0, 60)}`);
-      const nav = page.waitForNavigation({ timeout: 60000 }).catch(() => null);
-      await V(() => window.__starwishWorld.confirmDialog());
+      // ---------- 3b. 背包／寵物視窗：右上 X、子畫面返回、iPhone 可視範圍 ----------
+      const xCheck = () =>
+        page.evaluate(() => {
+          const x = document.querySelector(".wp.open .wp-x");
+          if (!x) return { ok: false, why: "no X" };
+          const r = x.getBoundingClientRect();
+          const vw = window.innerWidth, vh = window.innerHeight;
+          const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+          const panel = document.querySelector(".wp.open").getBoundingClientRect();
+          const btns = [...document.querySelectorAll(".wp.open button")].map((b) => b.getBoundingClientRect()).filter((b) => b.width > 0);
+          const outX = btns.filter((b) => b.left < -1 || b.right > vw + 1).length;
+          const body = document.querySelector(".wp.open .wp-body");
+          return { ok: true, inView: r.left >= 0 && r.top >= 0 && r.right <= vw && r.bottom <= vh, size: [r.width, r.height], onTop: top === x || x.contains(top), panelBottom: panel.bottom, vh, vw, outX, scrollable: body.scrollHeight > body.clientHeight ? "scroll" : "fits", bodyTouch: getComputedStyle(body).touchAction };
+        });
+      await page.click(".skill-1");
+      await wait(300);
+      let ui = await V(() => window.__starwishWorld.info().panel);
+      const x1 = await xCheck();
+      run.results.panelLandscape = x1;
+      check("背包按鈕開啟背包視窗，右上角 X 在畫面內、沒有被遮住、至少 40 px", ui === "bag" && x1.inView && x1.onTop && x1.size[0] >= 40 && x1.size[1] >= 40 && x1.panelBottom <= x1.vh && x1.outX === 0, { ui, x1 });
+      await page.click(".wp.open .wp-x");
+      await wait(200);
+      ui = await V(() => window.__starwishWorld.info().panel);
+      check("點 X 立即關閉背包視窗", ui === "closed", ui);
+      // 孵化一隻寵物（測試設定 30 秒）並裝備，檢查子畫面返回與跟隨位置
+      await V(() => window.__starwishWorld.give("seed", 1));
+      await page.click(".skill-1");
+      await wait(300);
+      await page.evaluate(() => [...document.querySelectorAll(".wp.open .wp-body button")].find((b) => b.textContent === "孵化" && !b.disabled)?.click());
+      await page.waitForFunction(() => window.__starwishWorld.info().pets.some((p) => p.stage >= 1), null, { timeout: 90000 }).catch(() => {});
+      await page.click('.wp.open [data-tab="pet"]');
+      await wait(300);
+      const petId = await V(() => window.__starwishWorld.info().pets.find((p) => p.stage >= 1)?.id ?? null);
+      await page.click(`.wp.open [data-pet="${petId}"]`).catch(() => {});
+      await wait(300);
+      const uiDetail = await V(() => window.__starwishWorld.info().panel);
+      await page.click('.wp.open [data-a="back"]').catch(() => {});
+      await wait(300);
+      const uiBack = await V(() => window.__starwishWorld.info().panel);
+      check("寵物子畫面：點寵物進入詳細、返回鍵回到寵物列表", petId !== null && uiDetail === `pet:${petId}` && uiBack === "pet", { petId, uiDetail, uiBack });
+      await page.click(`.wp.open [data-pet="${petId}"]`).catch(() => {});
+      await wait(300);
+      await page.evaluate(() => [...document.querySelectorAll(".wp.open .wp-body button")].find((b) => b.textContent === "裝備")?.click());
+      await wait(300);
+      // 直向 iPhone（393×852）：視窗與按鈕都在畫面內
+      await page.setViewportSize({ width: 393, height: 852 });
+      await wait(600);
+      const x2 = await xCheck();
+      run.results.panelPortrait = x2;
+      check("直向 iPhone：寵物視窗 X 在畫面內、沒有被遮住，按鈕不超出左右邊界，內容區可捲動（touch-action pan-y）", x2.inView && x2.onTop && x2.outX === 0 && x2.panelBottom <= x2.vh && /pan-y/.test(x2.bodyTouch), x2);
+      await shot("panel_portrait");
+      await page.click(".wp.open .wp-x");
+      await page.setViewportSize({ width: 852, height: 393 });
+      await wait(3500);
+      const pg = await V(() => ({ panel: window.__starwishWorld.info().panel, gap: window.__starwishWorld.info().petGap, hw: window.__starwishWorld.info().headHalfWidth, size: window.__starwishWorld.info().followerSize, eq: window.__starwishWorld.info().equipped }));
+      run.results.petGap = pg;
+      check("寵物跟在頭部側邊：與頭部外緣保持 15～25 cm 可見間距（大小不變）", pg.panel === "closed" && pg.eq === petId && pg.gap >= 0.15 && pg.gap <= 0.25 && pg.size > 0 && pg.size <= 0.08, pg);
+      await shot("village_pet");
+
+      // ---------- 4. 南門：走進傳送陣直接傳送（沒有確認視窗） ----------
+      const p0 = await V(() => window.__starwishWorld.info().portal);
+      check("星芽村：抵達點在南方傳送陣外、傳送陣已啟用、沒有觸發", p0.armed && !p0.fired && p0.dist > p0.triggerR, p0);
+      const nav = page.waitForNavigation({ timeout: 90000 }).catch(() => null);
+      // 一步一步走進去（每步 0.8 m）
+      let dlgSeen = false;
+      for (const z of [-39.8, -40.6, -41.4, -42.2, -43.0]) {
+        const fired = await V((zz) => {
+          const w = window.__starwishWorld;
+          if (w.info().portal.fired) return true;
+          w.teleport(0, zz, Math.PI);
+          return false;
+        }, z).catch(() => true);
+        if (fired) break;
+        dlgSeen = dlgSeen || (await page.evaluate(() => { const d = document.querySelector(".vi-dlg"); return !!d && !d.hidden; }).catch(() => false));
+        await wait(400);
+      }
+      check("南方傳送陣：踩進去直接傳送，沒有出現確認視窗或傳送按鈕", !dlgSeen, { dlgSeen });
       await nav;
       await waitField();
       await page.waitForFunction(() => window.__starwishPlay.info().monsters.length > 0, null, { timeout: 60000 }).catch(() => {});
       let fi = await V(() => window.__starwishPlay.world.info());
       const fp = await V(() => window.__starwishPlay.info());
       run.results.fieldArrive = { fi, pos: fp.pos };
-      check("南方傳送門 → 星芽原野新手營地", tgt === "portal:south" && fi.map === "starsprout" && Math.hypot(fp.pos[0] + 56, fp.pos[2] + 64) < 1.5, { tgt, pos: fp.pos });
+      check("南方傳送陣 → 星芽原野新手營地（抵達在營地傳送陣外側）", fi.map === "starsprout" && Math.hypot(fp.pos[0] + 56, fp.pos[2] + 64) < 1.5 && fi.portal.dist > fi.portal.triggerR, { pos: fp.pos, portal: fi.portal });
+      await wait(3000);
+      const fi2 = await V(() => window.__starwishPlay.world.info());
+      check("營地傳送陣：已建立（魔法陣＋符文＋光柱）、抵達後啟用但不會自動觸發（不會兩張地圖無限往返）", fi2.map === "starsprout" && fi2.portal.built && fi2.portal.meshes >= 3 && fi2.portal.armed && !fi2.portal.fired, fi2.portal);
       check("切換地圖：金幣、背包、模型性別保留", fi.gold === goldBeforeField && fi.bag === bagBeforeField - 0 && fp.gender === g, { gold: fi.gold, goldBeforeField, bag: fi.bag, bagBeforeField });
       check("星芽原野：一般移動沒有跳躍按鈕", fi.jumpButton === false, fi.jumpButton);
+      check("切換地圖後寵物仍裝備、在頭部側邊 15～25 cm", fi.pets.length >= 1 && fi.petGap >= 0.15 && fi.petGap <= 0.25, { gap: fi.petGap, pets: fi.pets });
       await shot("field_arrive");
 
       // ---------- 5. 打怪、金幣掉落、撿取 ----------
@@ -152,20 +222,26 @@ for (const name of browsers) {
       check("掉落物唯一編號：每個撿起的掉落只入帳一次", new Set(drops.map((d) => d.requestId)).size === drops.length && fight.w.claimed >= drops.length, { drops: drops.length, claimed: fight.w.claimed });
       await shot("field_fight");
 
-      // ---------- 6. 星願石返回星芽村，存檔保留 ----------
+      // ---------- 6. 走進營地傳送陣返回星芽村，存檔保留 ----------
       const beforeBack = await V(() => window.__starwishPlay.world.info());
-      await V(() => window.__starwishPlay.teleport(-56, -66.3));
-      await page.waitForFunction(() => window.__starwishPlay.world.info().stoneButton === true, null, { timeout: 20000 }).catch(() => {});
-      const stoneBtn = await V(() => window.__starwishPlay.world.info().stoneButton);
-      await V(() => window.__starwishPlay.world.stone());
-      await shot("field_stone");
-      const nav2 = page.waitForNavigation({ timeout: 60000 }).catch(() => null);
-      await page.click('.world-stone-dlg button[data-a="go"]');
+      await V(() => window.__starwishPlay.teleport(-56, -64.5));
+      await shot("field_portal");
+      const nav2 = page.waitForNavigation({ timeout: 90000 }).catch(() => null);
+      for (const z of [-65.3, -66.1, -66.9, -67.7]) {
+        const fired = await V((zz) => {
+          const api = window.__starwishPlay;
+          if (api.world.info().portal.fired) return true;
+          api.teleport(-56, zz);
+          return false;
+        }, z).catch(() => true);
+        if (fired) break;
+        await wait(400);
+      }
       await nav2;
       await waitVillage();
       vi = await V(() => window.__starwishWorld.info());
       run.results.backVillage = { gold: vi.gold, pos: vi.pos, bag: vi.bag.length };
-      check("星願石：在石頭旁出現按鈕，確認後返回星芽村南門內側", stoneBtn && vi.map === "village" && Math.hypot(vi.pos[0] - 0, vi.pos[2] + 39) < 1.5, { stoneBtn, pos: vi.pos });
+      check("營地傳送陣：踩進去直接回到星芽村南門內側（南方傳送陣外、沒有再被傳回原野）", vi.map === "village" && Math.hypot(vi.pos[0] - 0, vi.pos[2] + 39) < 1.5 && vi.portal.armed && !vi.portal.fired, { pos: vi.pos, portal: vi.portal });
       check("返回村莊：金幣、背包、物品數量保留", vi.gold === beforeBack.gold && vi.bag.length === beforeBack.bag && vi.items.monsterMaterial === beforeBack.items.monsterMaterial, { vi: vi.gold, field: beforeBack.gold });
       await shot("village_back");
 
@@ -224,7 +300,7 @@ for (const name of browsers) {
       console.log(`  ! [${name} ${g}] 狀態：${JSON.stringify(run.results.exceptionState).slice(0, 900)}`);
       await shot("exception");
     }
-    run.ok = Object.values(run.checks).every((c) => c.ok) && run.errors.length === 0 && Object.keys(run.checks).length >= 14;
+    run.ok = Object.values(run.checks).every((c) => c.ok) && run.errors.length === 0 && Object.keys(run.checks).length >= 20;
     if (!run.ok) failures++;
     for (const [k, c] of Object.entries(run.checks)) console.log(`${c.ok ? "✓" : "✗"} [${name} ${g}] ${k}${c.ok ? "" : "  " + JSON.stringify(c.detail).slice(0, 400)}`);
     for (const e of run.errors) console.log(`  ! [${name} ${g}] ${e}`);

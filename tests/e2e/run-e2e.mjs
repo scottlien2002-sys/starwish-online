@@ -2560,7 +2560,7 @@ for (const name of browsers) {
       const fol = await page.evaluate(() => window.__starwishAnim.pet.state());
       const d = Math.hypot(fol.followerPos[0] - fol.headPos[0], fol.followerPos[1] - fol.headPos[1], fol.followerPos[2] - fol.headPos[2]);
       run.results.push({ tag: "follower", d, head: fol.headPos, pet: fol.followerPos });
-      check("寵物：角色移動後跟到耳朵旁（0.05～0.45 m）、在耳朵高度附近（Stage 7）", d > 0.05 && d < 0.45 && Math.abs(fol.followerPos[1] - fol.headPos[1]) < 0.2, { d, ear: fol.headPos, pet: fol.followerPos });
+      check("寵物：角色移動後跟在頭部側邊、與頭部外緣保持 15～25 cm 間距、在耳朵高度附近（Stage 7.1）", fol.headGap >= 0.15 && fol.headGap <= 0.25 && Math.abs(fol.followerPos[1] - fol.headPos[1]) < 0.2, { d, gap: fol.headGap, halfWidth: fol.headHalfWidth, size: fol.petSize, head: fol.headPos, pet: fol.followerPos });
       await shot("pet_follow");
       await page.evaluate(() => {
         document.querySelector("[data-pet=toggle]")?.click();

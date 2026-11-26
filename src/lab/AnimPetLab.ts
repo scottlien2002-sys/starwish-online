@@ -93,7 +93,7 @@ export interface AnimLabApi {
     evolve(): boolean;
     equip(id: number | null): boolean;
     timeWarp(seconds: number): void;
-    state(): { items: Record<ItemId, number>; pets: Pet[]; equippedId: number | null; stats: ReturnType<typeof applyPetBonus>; followerVisible: boolean; followerPos: number[]; headPos: number[] };
+    state(): { items: Record<ItemId, number>; pets: Pet[]; equippedId: number | null; stats: ReturnType<typeof applyPetBonus>; followerVisible: boolean; followerPos: number[]; headPos: number[]; headGap: number; headHalfWidth: number; petSize: number };
     reset(): void;
   };
 }
@@ -356,6 +356,9 @@ export async function startAnimPetLab(canvas: HTMLCanvasElement, hudRoot: HTMLEl
           followerVisible: follower.visible,
           followerPos: follower.position.asArray(),
           headPos: head.asArray(),
+          headGap: follower.headGap,
+          headHalfWidth: avatar.headHalfWidth,
+          petSize: follower.size,
         };
       },
       reset: () => {
@@ -440,7 +443,7 @@ export async function startAnimPetLab(canvas: HTMLCanvasElement, hudRoot: HTMLEl
   const pos = new Vector3(0, heightAt(0, 0), 0);
   let yaw = 0;
   const headTmp = new Vector3();
-  const headWorld = (): Vector3 => avatar.earAnchor(headTmp); // Stage 7：寵物在耳朵旁
+  const headWorld = (): Vector3 => avatar.petAnchor(headTmp); // Stage 7.1：頭部中心（耳朵高度）；寵物在頭部外緣外側
   let petTick = 0;
   engine.runRenderLoop(() => {
     const dt = Math.min(0.05, engine.getDeltaTime() / 1000);
@@ -466,7 +469,7 @@ export async function startAnimPetLab(canvas: HTMLCanvasElement, hudRoot: HTMLEl
     charRoot.position.set(pos.x, groundY + h, pos.z);
     charRoot.rotation.y = yaw; // 模型正面朝 +z（yaw 0）
     camera.target.copyFrom(Vector3.Lerp(camera.target, new Vector3(pos.x, charRoot.position.y + 0.7, pos.z), Math.min(1, dt * 6)));
-    follower.update(dt, headWorld(), yaw);
+    follower.update(dt, headWorld(), yaw, avatar.headHalfWidth);
     petTick += dt;
     if (petTick > 1) {
       petTick = 0;

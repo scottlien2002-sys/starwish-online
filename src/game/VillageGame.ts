@@ -21,6 +21,9 @@ import { PetFollower } from "../pets/PetFollower.ts";
 import { isSoul } from "../pets/petSystem.ts";
 import { WorldSession } from "./worldSession.ts";
 import { WorldPanel } from "../ui/WorldPanel.ts";
+import { MODEL_LOD_LABEL, pickModelLod } from "./modelLod.ts";
+import { PortalTrigger } from "./portalTrigger.ts";
+import { VILLAGE_SOUTH_PORTAL } from "./worldPortals.ts";
 import { FIELD_TEST } from "./fieldRules.ts";
 import { combatTuningFromStats } from "./fieldRules.ts";
 import { NOVICE_VERSION } from "./noviceVersion.ts";
@@ -52,7 +55,7 @@ declare global {
 
 class VillageGame {
   private readonly params = new URLSearchParams(location.search);
-  private readonly lod: NoviceLod = this.params.get("lod") === "lite" ? "lite" : "hq";
+  private readonly lod: NoviceLod = pickModelLod(this.params);
   private readonly charShadow: CharShadowMode = this.params.get("charshadow") === "realtime" ? "realtime" : "blob";
   private readonly quality: QualitySettings;
   private readonly engine: Engine;
@@ -160,10 +163,12 @@ class VillageGame {
     canvas.addEventListener("contextmenu", block);
     this.keyboard = new KeyboardInput(this.input, () => joystick.active);
     this.perf = new PerfOverlay(this.engine, scene, this.quality, hudRoot);
+    this.perf.setLabels({ model: MODEL_LOD_LABEL[this.lod], map: "星芽村" });
     this.follower = new PetFollower(scene, w.pets.cfg.visual?.stageSize);
     this.panel = new WorldPanel(hudRoot, w, {
       clock: () => Date.now(),
       changed: () => this.afterChange(),
+      perf: () => this.perf,
       stats: () => {
         const now = w.pets.characterStats({ ...FIELD_TEST.baseStats });
         const t = combatTuningFromStats(now);
@@ -176,7 +181,7 @@ class VillageGame {
           else q.set(k, v);
           location.search = q.toString();
         };
-        btn(this.lod === "hq" ? "換 Lite" : "換 HQ", () => go("lod", this.lod === "hq" ? "lite" : null));
+        btn(`模型 LOD：${MODEL_LOD_LABEL[this.lod]} → 換 ${this.lod === "hq" ? "Lite" : "HQ"}`, () => go("lod", this.lod === "hq" ? "lite" : "hq"));
         btn(this.charShadow === "blob" ? "角色即時陰影" : "腳下柔邊陰影", () => go("charshadow", this.charShadow === "blob" ? "realtime" : null));
       },
     });
@@ -219,6 +224,7 @@ class VillageGame {
           appraisal: w.appraisal,
           guild: w.guild,
           onChange: () => this.afterChange(),
+          autoPortals: true,
         });
         this.interact.npcs = full.npcs;
         // 洛恩的其他服務（飼料、進化、復活、培育指南）：接在角色存檔與金幣上
@@ -244,6 +250,8 @@ class VillageGame {
     return Math.atan2(-Math.cos(yaw), -Math.sin(yaw));
   }
 
+  private readonly portal = new PortalTrigger(VILLAGE_SOUTH_PORTAL);
+
   private hp(): number | null {
     return this.w.save.character.hp;
   }
@@ -254,6 +262,7 @@ class VillageGame {
   }
 
   private toField(): void {
+    if (this.w.leaving) return;
     this.w.travelTo({ ...FIELD_CAMP_ARRIVAL }, this.hp());
   }
 
@@ -294,6 +303,8 @@ class VillageGame {
       this.pos.z = r.z;
       this.yaw = turnTowards(this.yaw, v.x, v.z, TUNING.player.turnSharpness, dt);
     }
+    // Stage 7.1：踩進已開放的南方傳送陣 → 直接傳送（先存檔；只觸發一次）
+    if (this.portal.update(this.pos.x, this.pos.z)) this.toField();
     const gy = groundHeight(this.pos.x, this.pos.z);
     this.pos.y = gy;
     this.avatar.update(dt, { speed: this.curSpeed }, gy);
@@ -303,7 +314,7 @@ class VillageGame {
     this.sun.position.copyFrom(this.pos).subtractInPlace(this.sun.direction.scale(45));
     this.world.update(dt, this.pos.x, this.pos.z);
     this.interact?.update(performance.now() / 1000, this.pos.x, this.pos.z);
-    this.follower.update(dt, this.avatar.earAnchor(this.earTmp), this.yaw);
+    this.follower.update(dt, this.avatar.petAnchor(this.earTmp), this.yaw, this.avatar.headHalfWidth);
     this.scene.render();
     this.perf.update(dt);
     this.petTick += dt;
@@ -321,7 +332,7 @@ class VillageGame {
     this.fpsTimer += dt;
     if (this.fpsTimer >= 0.5) {
       this.fpsTimer = 0;
-      this.hud.setFps(this.engine.getFps());
+      this.hud.setFps(this.perf.avgFps(2));
       this.hud.setBars({ hp: this.hp() ?? 100, maxHp: combatTuningFromStats(this.w.pets.characterStats({ ...FIELD_TEST.baseStats })).maxHp, mp: 40, maxMp: 40, exp: 0, expToNext: 100 });
       this.panel.refresh();
     }
@@ -350,6 +361,11 @@ class VillageGame {
         deaths: self.w.save.character.deaths,
         art: self.artStatus,
         interact: self.interact?.state() ?? null,
+        portal: { armed: self.portal.isArmed, fired: self.portal.hasFired, dist: self.portal.distance(self.pos.x, self.pos.z), triggerR: self.portal.spec.triggerR },
+        panel: self.panel.where,
+        petGap: self.follower.headGap,
+        headHalfWidth: self.avatar.headHalfWidth,
+        quality: { lod: self.lod, render: self.params.get("quality") ?? "auto", scale: self.engine.getHardwareScalingLevel() },
         mode: self.w.mode,
         render: { drawCalls: self.perf.drawCalls, contextLost: self.contextLost, charShadow: self.charShadow },
         jumpButtonVisible: (self.hudRoot.querySelector<HTMLButtonElement>(".skill-3")?.style.display ?? "") !== "none" && /跳/.test(self.hudRoot.textContent ?? ""),

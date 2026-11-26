@@ -88,6 +88,14 @@ export class NoviceAvatar {
     this.triangles = res.meshes.reduce((a, m) => a + Math.round((m.getTotalIndices() || 0) / 3), 0);
     this.headBone = res.skeletons[0]?.bones.find((b) => b.name === "head") ?? null;
     this.skinnedRef = res.meshes.find((m) => !!m.skeleton) ?? null;
+    // 頭部側邊半寬（頭、頭髮、馬尾、蝴蝶結的綁定姿勢包圍盒，左右取大者）
+    let hw = 0;
+    for (const m of res.meshes) {
+      if (!/hair|head|face|bow|ponytail/i.test(m.name) || !m.getTotalVertices()) continue;
+      const bi = m.getBoundingInfo().boundingBox;
+      hw = Math.max(hw, Math.abs(bi.minimum.x), Math.abs(bi.maximum.x));
+    }
+    if (hw > 0.15 && hw < 0.6) this.headHalfWidth = hw;
     const durations = Object.fromEntries([...this.groups].map(([n, g]) => [n, (g.to - g.from) / 60])) as Partial<Record<AnimName, number>>;
     this.sm = new AnimStateMachine(durations);
     for (const n of ANIM_NAMES) this.weights.set(n, n === "Idle" ? 1 : 0);
@@ -192,6 +200,18 @@ export class NoviceAvatar {
       return out.set(this.tmp.x, this.tmp.y + 0.55, this.tmp.z);
     }
     return out.set(this.root.position.x, this.root.position.y + 1.25, this.root.position.z);
+  }
+
+  /** 頭部（含頭髮、髮飾）側邊半寬（公尺）：載入時從模型量測 */
+  headHalfWidth = 0.33;
+
+  /** 寵物跟隨用：頭部中心、耳朵高度的世界座標（頭骨起點往上 0.14 m） */
+  petAnchor(out = new Vector3()): Vector3 {
+    if (this.headBone && this.skinnedRef) {
+      this.headBone.getAbsolutePositionToRef(this.skinnedRef, this.tmp);
+      return out.set(this.tmp.x, this.tmp.y + 0.14, this.tmp.z);
+    }
+    return out.set(this.root.position.x, this.root.position.y + 0.82, this.root.position.z);
   }
 
   /**

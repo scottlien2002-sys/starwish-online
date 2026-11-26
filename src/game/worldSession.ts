@@ -110,6 +110,17 @@ export class WorldSession {
     travel(this.save, to);
     this.save.character.hp = hp;
     this.persist();
+    // 傳送畫面（淡出＋文字），頁面切換期間不能再操作
+    try {
+      const o = document.createElement("div");
+      o.className = "world-travel";
+      o.style.cssText = "position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,rgba(70,110,230,.55),rgba(20,24,70,.9));color:#fbf6ea;font:700 20px 'PingFang TC',system-ui,sans-serif;letter-spacing:2px;opacity:0;transition:opacity .25s;pointer-events:auto";
+      o.textContent = to.map === "village" ? "✦ 傳送到星芽村…" : "✦ 傳送到星芽原野…";
+      document.body.appendChild(o);
+      requestAnimationFrame(() => (o.style.opacity = "1"));
+    } catch {
+      // 沒有畫面（測試環境）
+    }
     const q = new URLSearchParams(location.search);
     q.set("play", "world");
     q.delete("newgame");

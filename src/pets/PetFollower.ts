@@ -16,6 +16,12 @@ export interface PetLook {
 
 /** 各階段高度（公尺）：未設定時用的預設值與 pets.json visual.stageSize 相同 */
 export const DEFAULT_STAGE_SIZE: readonly number[] = [0.1, 0.075, 0.115, 0.16, 0.22];
+/** 寵物外緣與頭部外緣（含頭髮、髮飾）之間的可見間距（公尺）：企劃 15～25 cm */
+export const PET_GAP = 0.2;
+/** 任何時候（轉身、衝刺）都不會比這更靠近頭部外緣 */
+export const PET_MIN_GAP = 0.15;
+/** 頭部側邊半寬的預設值（初心者 B5：男 0.32、女 0.33 含蝴蝶結） */
+export const DEFAULT_HEAD_HALF_WIDTH = 0.33;
 /** 程式模型在 scale = 1 時的大約高度（公尺） */
 const BASE_HEIGHT = 0.17;
 
@@ -139,6 +145,11 @@ export class PetFollower {
   private t = 0;
   readonly position = new Vector3();
   private placed = false;
+  private readonly center = new Vector3();
+  private angle = 0;
+  private radius = 0;
+  private lastHalfWidth = DEFAULT_HEAD_HALF_WIDTH;
+  private readonly lastHead = new Vector3();
 
   private readonly scene: Scene;
   private readonly stageSize: readonly number[];
@@ -169,35 +180,59 @@ export class PetFollower {
   }
 
   /**
-   * ear：角色右耳的世界座標（NoviceAvatar.earAnchor）；yaw：角色面向（弧度，0 = +z）。
-   * 寵物停在耳朵外側（體積越大離越遠，不會穿進頭髮），稍微偏後、上下漂浮或拍翅
+   * 頭部側邊跟隨（Stage 7.1）。
+   * head：頭部中心、耳朵高度的世界座標（NoviceAvatar.petAnchor）；halfWidth：頭部（含頭髮、髮飾）側邊半寬；yaw：角色面向（0 = +z）。
+   * 寵物中心放在角色右側：頭部外緣 + 可見間距 PET_GAP + 寵物半徑。
+   * 以「繞頭部的角度＋距離」平滑跟隨：轉身時沿著圓弧繞過去，不會穿過頭；另外保證任何時候都不會靠近頭部外緣 PET_MIN_GAP 以內。
    */
-  update(dt: number, ear: Vector3, yaw: number): void {
+  update(dt: number, head: Vector3, yaw: number, halfWidth = DEFAULT_HEAD_HALF_WIDTH): void {
     this.t += dt;
     if (!this.parts || !this.look) return;
     const fly = this.look.motion === "fly" && this.look.stage > 0;
-    const out = 0.07 + this.size * 0.6;
-    const rx = Math.cos(yaw);
-    const rz = -Math.sin(yaw);
-    const fx = Math.sin(yaw);
-    const fz = Math.cos(yaw);
-    const sway = Math.sin(this.t * 0.7) * 0.03;
+    const r = halfWidth + PET_GAP + this.size * 0.5;
+    const sway = Math.sin(this.t * 0.7) * 0.025;
     const bob = Math.sin(this.t * (fly ? 5.5 : 2.2)) * (fly ? 0.02 : 0.03);
-    const back = -0.04 + sway;
-    const target = new Vector3(ear.x + rx * out + fx * back, ear.y + 0.02 + bob, ear.z + rz * out + fz * back);
+    // 目標角度：角色右側（右 = (cos yaw, -sin yaw)），稍微偏後一點
+    const back = 0.12 + sway / Math.max(0.3, r);
+    const want = Math.atan2(-Math.sin(yaw), Math.cos(yaw)) - back; // atan2(z, x)
     if (!this.placed) {
-      this.position.copyFrom(target);
+      this.center.copyFrom(head);
+      this.angle = want;
+      this.radius = r;
       this.placed = true;
     }
-    const k = 1 - Math.exp(-dt * 4.5); // 平滑跟隨（不會瞬間貼上）
-    Vector3.LerpToRef(this.position, target, k, this.position);
+    const kc = 1 - Math.exp(-dt * 12);
+    Vector3.LerpToRef(this.center, head, kc, this.center);
+    const ka = 1 - Math.exp(-dt * 5);
+    this.angle = Scalar.LerpAngle(this.angle, want, ka);
+    this.radius += (r - this.radius) * ka;
+    const x = this.center.x + Math.cos(this.angle) * this.radius;
+    const z = this.center.z + Math.sin(this.angle) * this.radius;
+    // 保證間距：用「真正的」頭部位置檢查（中心跟隨有延遲）
+    const dx = x - head.x;
+    const dz = z - head.z;
+    const d = Math.hypot(dx, dz);
+    const min = halfWidth + PET_MIN_GAP + this.size * 0.5;
+    if (d < min) {
+      const k = min / Math.max(1e-4, d);
+      this.position.set(head.x + dx * k, 0, head.z + dz * k);
+    } else this.position.set(x, 0, z);
+    this.position.y = this.center.y + 0.02 + bob;
+    this.lastHalfWidth = halfWidth;
+    this.lastHead.copyFrom(head);
     const root = this.parts.root;
     root.position.copyFrom(this.position);
-    // 面向移動方向（沒什麼移動時面向角色前方）
+    // 面向角色前方
     root.rotation.y = Scalar.LerpAngle(root.rotation.y, yaw, Math.min(1, dt * 3));
     if (this.parts.spin) this.parts.spin.rotation.y += dt * 1.2;
     const flap = Math.sin(this.t * 14) * 0.9;
     for (const w of this.parts.wings) w.rotation.z = (w.metadata as { side: number }).side * flap;
+  }
+
+  /** 寵物外緣到頭部外緣的水平間距（公尺；測試用） */
+  get headGap(): number {
+    if (!this.parts) return Number.NaN;
+    return Math.hypot(this.position.x - this.lastHead.x, this.position.z - this.lastHead.z) - this.lastHalfWidth - this.size * 0.5;
   }
 
   dispose(): void {

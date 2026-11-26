@@ -226,3 +226,22 @@ test("洛恩（Stage 7）：鑑定收費、飼料用金幣、進化列表階段 
   assert.ok(ledgerConsistent(w.save.wallet, start));
   assert.ok(changed > 0);
 });
+
+test("傳送陣自動傳送：踩入觸發一次、未開放不觸發、在陣內出生要先走出去才啟用（防止無限往返）", async () => {
+  const { PortalTrigger } = await import("../../src/game/portalTrigger.ts");
+  const t = new PortalTrigger({ id: "a", x: 0, z: 0, triggerR: 2, open: true });
+  assert.equal(t.update(5, 0), false);
+  assert.equal(t.isArmed, true);
+  assert.equal(t.update(1.5, 0), true);
+  assert.equal(t.update(1.0, 0), false); // 只觸發一次
+  assert.equal(t.update(0, 0), false);
+  const closed = new PortalTrigger({ id: "b", x: 0, z: 0, triggerR: 2, open: false });
+  assert.equal(closed.update(5, 0), false);
+  assert.equal(closed.update(0, 0), false);
+  const inside = new PortalTrigger({ id: "c", x: 0, z: 0, triggerR: 2, open: true });
+  assert.equal(inside.update(0.5, 0), false); // 出生在陣內：不觸發
+  assert.equal(inside.update(2.5, 0), false); // 還沒走出解鎖半徑（3）
+  assert.equal(inside.update(1.0, 0), false);
+  assert.equal(inside.update(3.5, 0), false); // 走出去 → 啟用
+  assert.equal(inside.update(1.0, 0), true);
+});
