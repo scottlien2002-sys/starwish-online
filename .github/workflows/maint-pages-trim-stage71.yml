@@ -1,0 +1,35 @@
+name: Maintenance — trim Stage 7.1 preview (keep it playable)
+# Stage 7.1 已驗收預覽保留（實機 FPS 待補登），只移除它不使用的檔案：
+#   ci-report 的地圖／村莊 E2E 截圖、舊版角色模型（c10b～c10b5，遊戲用 c10b5a／c10b5b）、村莊比較用模型（*_s62、p30_sample）
+# 一般 push，不 force；其他預覽不動。
+on:
+  push:
+    branches: [maint/pages-trim-stage71]
+permissions:
+  contents: write
+concurrency:
+  group: pages-cleanup
+  cancel-in-progress: false
+jobs:
+  trim:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - run: |
+          set -e
+          for attempt in 1 2 3 4 5; do
+            rm -rf /tmp/pages
+            git clone -q --depth 1 -b gh-pages "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" /tmp/pages
+            cd /tmp/pages
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            D=preview-stage71-world
+            du -sm $D
+            git rm -rq --ignore-unmatch "$D/ci-report/map-e2e" "$D/ci-report/village-e2e" "$D/ci-report/world-e2e"
+            for f in $D/models/novice_c10b_*.glb $D/models/novice_c10b1_*.glb $D/models/novice_c10b2_*.glb $D/models/novice_c10b3_*.glb $D/models/novice_c10b4_*.glb $D/models/novice_c10b5_*.glb $D/models/village-p3/*_s62.glb $D/models/village-p3/p30_sample_*.glb; do [ -e "$f" ] && git rm -q "$f"; done
+            git commit -qm "Trim /preview-stage71-world/ unused files (screenshots, old novice models) — stays playable" || { echo nothing; exit 0; }
+            du -sm $D; du -sm --exclude=.git .
+            if git push -q origin gh-pages; then echo pushed; exit 0; fi
+            cd /; sleep $((attempt * 10))
+          done
+          exit 1
