@@ -125,7 +125,10 @@ def build(lod):
         rad = rng.uniform(22, 36)
         hgt = rng.uniform(10, 24)
         col = rng.choice(C["far"])
-        G.lathe(far, x, z, -1.0, [(rad, 0.0), (rad * 0.75, hgt * 0.45), (rad * 0.35, hgt * 0.88), (0.0, hgt)], 10 if hq else 7, col)
+        # Stage 6.6：山腳偏綠偏暗、山頂偏藍偏亮（空氣遠近感），山脊多一圈起伏
+        lo, hi = shade(col, 0.86), (min(1, col[0] * 1.08 + 0.04), min(1, col[1] * 1.06 + 0.03), min(1, col[2] * 1.1 + 0.06))
+        prof = [(rad, 0.0), (rad * 0.82, hgt * 0.3), (rad * 0.6, hgt * 0.58), (rad * 0.3, hgt * 0.88), (0.0, hgt)] if hq else [(rad, 0.0), (rad * 0.75, hgt * 0.45), (rad * 0.35, hgt * 0.88), (0.0, hgt)]
+        G.lathe(far, x, z, -1.0, prof, 12 if hq else 7, lambda h, lo=lo, hi=hi, hgt=hgt, col=col: lo if h < hgt * 0.35 - 1 else (col if h < hgt * 0.7 - 1 else hi), phase=rng.uniform(0, 1), smooth=True)
     # ---- 預覽用外圍緩坡（r 50～72）----
     rings = [50.0, 51.0, 53.0, 56.0, 60.0, 64.0, 68.0, 72.0] if hq else [50.0, 51.0, 55.0, 62.0, 72.0]
     segs = 72 if hq else 40
