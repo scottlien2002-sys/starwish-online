@@ -1,0 +1,2707 @@
+{
+  "startedAt": "2026-11-26T17:32:53.245Z",
+  "runs": [
+    {
+      "browser": "chromium",
+      "lod": "hq",
+      "checks": {
+        "啟動": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "地形 16 塊": {
+          "ok": true,
+          "detail": 16
+        },
+        "hq 使用 high 畫質渲染": {
+          "ok": true,
+          "detail": "high"
+        },
+        "HQ 地形 1 公尺網格（約 6.5 萬三角形）": {
+          "ok": true,
+          "detail": 64800
+        },
+        "營地與胡蘿蔔園：物件、網格建立（6 個以內）": {
+          "ok": true,
+          "detail": {
+            "props": 196,
+            "meshes": 6,
+            "triangles": 14388,
+            "detailOn": [
+              true,
+              false
+            ],
+            "casters": 1,
+            "buildMs": 49
+          }
+        },
+        "植被：樹 ≥ 400、草叢與花有建立": {
+          "ok": true,
+          "detail": {
+            "trees": 502,
+            "smalls": 566,
+            "grass": 25105,
+            "flowers": 4297,
+            "hiChunks": 4,
+            "grassCells": 13,
+            "flowerCells": 4,
+            "shadowChunks": 3,
+            "buildMs": 268,
+            "colliders": 794
+          }
+        },
+        "3D 畫面有繪製": {
+          "ok": true,
+          "detail": {
+            "samples": 6348,
+            "distinctColors": 648,
+            "opaqueRatio": 1
+          }
+        },
+        "搖桿移動、角色貼地": {
+          "ok": true,
+          "detail": {
+            "p0": {
+              "x": -56,
+              "y": 2,
+              "z": -64,
+              "yaw": 0.7266423406817256
+            },
+            "p1": {
+              "x": -55.66781808058504,
+              "y": 2,
+              "z": -63.62629534065817,
+              "yaw": 0.7266423406817258
+            },
+            "ground": 2
+          }
+        },
+        "鏡頭：畫面右側單指拖曳可旋轉（canvas 接收）": {
+          "ok": true,
+          "detail": {
+            "target": "CANVAS",
+            "dAlpha": -0.7799999999999989,
+            "touches": 0
+          }
+        },
+        "鏡頭：iOS 漏送 pointerup 後，下一次單指拖曳仍是旋轉（不會誤判成縮放）": {
+          "ok": true,
+          "detail": {
+            "dAlpha": 0.7799999999999985,
+            "dRadius": 0,
+            "touches": 0
+          }
+        },
+        "鏡頭：左下搖桿只移動角色，不轉鏡頭": {
+          "ok": true,
+          "detail": {
+            "target": "hud-joystick-zone",
+            "dAlpha": 0,
+            "moved": 6.733767762990911
+          }
+        },
+        "鏡頭：技能鍵／面板按鈕不會觸發鏡頭（不是 canvas）": {
+          "ok": true,
+          "detail": [
+            "BUTTON",
+            "BUTTON"
+          ]
+        },
+        "鏡頭：雙指張開拉近，距離 5–15 公尺，縮放時不旋轉": {
+          "ok": true,
+          "detail": {
+            "r0": 9,
+            "r1": 5.000000000167099,
+            "dAlpha": 0
+          }
+        },
+        "鏡頭：俯角限制內、鏡頭不鑽進地面": {
+          "ok": true,
+          "detail": {
+            "beta": 0.5500000000000008,
+            "aboveGround": 5.082164495753997
+          }
+        },
+        "鏡頭避障：對照組（關閉）鏡頭維持 9 m（視線穿過帳篷）": {
+          "ok": true,
+          "detail": {
+            "off": {
+              "radius": 9,
+              "horiz": 4.540861574200273,
+              "coneR": 0.14250000000000007,
+              "aboveTop": true
+            },
+            "allowedWhenOn": 3.3866979762480427
+          }
+        },
+        "鏡頭避障：帳篷擋住時鏡頭拉近、在帳篷外": {
+          "ok": true,
+          "detail": {
+            "radius": 3.386697976548757,
+            "desired": 9,
+            "allowed": 3.3866979762480427,
+            "horiz": 0.786075709852544,
+            "coneR": 0.4586513251203399,
+            "aboveTop": false
+          }
+        },
+        "鏡頭避障：停住時距離不抖動（40 幀變化 < 2 公分）": {
+          "ok": true,
+          "detail": 2.1190915688862333e-10
+        },
+        "鏡頭避障：轉開後平滑回到玩家設定距離、角度不重置": {
+          "ok": true,
+          "detail": {
+            "dAlpha": -1.5600000000000005,
+            "start": 8.824911966692186,
+            "end": 9,
+            "desired": 9,
+            "maxDrop": 0,
+            "maxStep": 0.08814188909741283
+          }
+        },
+        "溪流河道不可走、岸邊可走": {
+          "ok": true,
+          "detail": {
+            "here": true,
+            "water": false
+          }
+        },
+        "B1 橋中央可走、橋面高於水面": {
+          "ok": true,
+          "detail": {
+            "mid": true,
+            "y": 6.747612551936899
+          }
+        },
+        "傳送門平時可見，走進去提示需擊敗 Boss 並達成條件": {
+          "ok": true,
+          "detail": "傳送門：擊敗王冠重錘兔並達成通關條件後才能使用（第一階段尚無 Boss）"
+        },
+        "標示可開關": {
+          "ok": true,
+          "detail": false
+        },
+        "路線測試：自動沿主路前進、沒有卡住": {
+          "ok": true,
+          "detail": {
+            "st": {
+              "phase": "running",
+              "loop": 0,
+              "t": 0.9999999999999999,
+              "result": null
+            },
+            "pl": {
+              "x": -52.34599888643544,
+              "y": 2,
+              "z": -59.88924874723986,
+              "yaw": 0.7266423406817262
+            }
+          }
+        },
+        "陰影品質可切換（原始 ↔ PCSS32）": {
+          "ok": true,
+          "detail": [
+            true,
+            {
+              "q": "medium",
+              "filtering": 1,
+              "contact": true,
+              "mapSize": 2048
+            },
+            true,
+            {
+              "q": "default",
+              "filtering": 0,
+              "contact": true,
+              "mapSize": 2048
+            }
+          ]
+        },
+        "傳送門平台、符文附近畫面中央沒有過曝（純白像素 < 3%）": {
+          "ok": true,
+          "detail": [
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 193.3169394353041
+            },
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 201.29275668170266
+            },
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 207.08793705822845
+            }
+          ]
+        },
+        "報告文字（含模式）": {
+          "ok": true,
+          "detail": "星願物語 Stage 6 P2-2 星芽原野 營地與胡蘿蔔園測試報告\n時間 2026/11/26 17:58:05\n網址參數 ?map=starsprout&quality=high&lod=hq\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 HQ：渲染畫質 high（解析度上限 2x、後製 開、陰影 柔和 PCSS 2048）／地圖 HQ／載入 821 ms\n發光效果 修正後；診斷 無\n對照設定：陰影"
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": 0
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "map-e2e/chromium_hq_spawn.png",
+        "map-e2e/chromium_hq_camp.png",
+        "map-e2e/chromium_hq_bridge.png",
+        "map-e2e/chromium_hq_highland.png",
+        "map-e2e/chromium_hq_farm.png",
+        "map-e2e/chromium_hq_ruins.png",
+        "map-e2e/chromium_hq_arena.png",
+        "map-e2e/chromium_hq_forest.png",
+        "map-e2e/chromium_hq_hill.png",
+        "map-e2e/chromium_hq_field.png",
+        "map-e2e/chromium_hq_flowersea.png",
+        "map-e2e/chromium_hq_campwide.png",
+        "map-e2e/chromium_hq_campfire.png",
+        "map-e2e/chromium_hq_campgate.png",
+        "map-e2e/chromium_hq_farmwide.png",
+        "map-e2e/chromium_hq_farmnear.png",
+        "map-e2e/chromium_hq_overview.png",
+        "map-e2e/chromium_hq_overview_nav.png",
+        "map-e2e/chromium_hq_portal.png",
+        "map-e2e/chromium_hq_route.png"
+      ],
+      "results": {
+        "info": {
+          "quality": "high",
+          "lod": "hq",
+          "loadMs": 821.3000000000466,
+          "chunks": 16,
+          "terrainVerts": 33856,
+          "terrainTris": 64800,
+          "drawCalls": 98,
+          "activeMeshes": 67,
+          "trianglesActive": 488993.3333333333,
+          "meshes": 157,
+          "materials": 18,
+          "textures": 10,
+          "labels": true,
+          "props": {
+            "props": 196,
+            "meshes": 6,
+            "triangles": 14388,
+            "detailOn": [
+              true,
+              false
+            ],
+            "casters": 1,
+            "buildMs": 49
+          },
+          "veg": {
+            "trees": 502,
+            "smalls": 566,
+            "grass": 25105,
+            "flowers": 4297,
+            "hiChunks": 4,
+            "grassCells": 13,
+            "flowerCells": 4,
+            "shadowChunks": 3,
+            "buildMs": 268,
+            "colliders": 794
+          },
+          "nav": false,
+          "contextLost": 0,
+          "render": "1704×786 @2x",
+          "bridges": [
+            "B1",
+            "B2"
+          ],
+          "arena": {
+            "x": 0,
+            "z": 66,
+            "r": 12,
+            "y": 17
+          },
+          "portal": {
+            "x": 0,
+            "z": 82,
+            "r": 5,
+            "y": 17,
+            "facing": 3.141592653589793
+          }
+        },
+        "cameraTouch": {
+          "rotate": {
+            "target": "CANVAS",
+            "dAlpha": -0.7799999999999989,
+            "touches": 0
+          },
+          "stale": {
+            "dAlpha": 0.7799999999999985,
+            "dRadius": 0,
+            "touches": 0
+          },
+          "joystick": {
+            "target": "hud-joystick-zone",
+            "dAlpha": 0,
+            "moved": 6.733767762990911
+          },
+          "buttons": [
+            "BUTTON",
+            "BUTTON"
+          ],
+          "pinch": {
+            "r0": 9,
+            "r1": 5.000000000167099,
+            "dAlpha": 0
+          },
+          "pitch": {
+            "beta": 0.5500000000000008,
+            "aboveGround": 5.082164495753997
+          }
+        },
+        "cameraAvoid": {
+          "tent": {
+            "x": -60.13,
+            "z": -56.23
+          },
+          "obstacles": 501,
+          "off": {
+            "radius": 9,
+            "horiz": 4.540861574200273,
+            "coneR": 0.14250000000000007,
+            "aboveTop": true
+          },
+          "on": {
+            "radius": 3.386697976548757,
+            "desired": 9,
+            "allowed": 3.3866979762480427,
+            "horiz": 0.786075709852544,
+            "coneR": 0.4586513251203399,
+            "aboveTop": false
+          },
+          "jitter": 2.1190915688862333e-10,
+          "recover": {
+            "dAlpha": -1.5600000000000005,
+            "start": 8.824911966692186,
+            "end": 9,
+            "desired": 9,
+            "maxDrop": 0,
+            "maxStep": 0.08814188909741283
+          },
+          "drawCalls": {
+            "on": 73,
+            "off": 78
+          }
+        },
+        "route": {
+          "st": {
+            "phase": "running",
+            "loop": 0,
+            "t": 0.9999999999999999,
+            "result": null
+          },
+          "pl": {
+            "x": -52.34599888643544,
+            "y": 2,
+            "z": -59.88924874723986,
+            "yaw": 0.7266423406817262
+          }
+        },
+        "exposure": [
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 193.3169394353041
+          },
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 201.29275668170266
+          },
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 207.08793705822845
+          }
+        ],
+        "after": {
+          "quality": "high",
+          "lod": "hq",
+          "loadMs": 821.3000000000466,
+          "chunks": 16,
+          "terrainVerts": 33856,
+          "terrainTris": 64800,
+          "drawCalls": 98,
+          "activeMeshes": 67,
+          "trianglesActive": 415245.3333333333,
+          "meshes": 157,
+          "materials": 18,
+          "textures": 10,
+          "labels": true,
+          "props": {
+            "props": 196,
+            "meshes": 6,
+            "triangles": 14388,
+            "detailOn": [
+              false,
+              true
+            ],
+            "casters": 1,
+            "buildMs": 49
+          },
+          "veg": {
+            "trees": 502,
+            "smalls": 566,
+            "grass": 25105,
+            "flowers": 4297,
+            "hiChunks": 6,
+            "grassCells": 14,
+            "flowerCells": 6,
+            "shadowChunks": 4,
+            "buildMs": 268,
+            "colliders": 794
+          },
+          "nav": false,
+          "contextLost": 0,
+          "render": "1704×786 @1x",
+          "bridges": [
+            "B1",
+            "B2"
+          ],
+          "arena": {
+            "x": 0,
+            "z": 66,
+            "r": 12,
+            "y": 17
+          },
+          "portal": {
+            "x": 0,
+            "z": 82,
+            "r": 5,
+            "y": 17,
+            "facing": 3.141592653589793
+          }
+        }
+      },
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "lod": "lite-mid",
+      "checks": {
+        "啟動": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "地形 16 塊": {
+          "ok": true,
+          "detail": 16
+        },
+        "lite-mid 使用 medium 畫質渲染": {
+          "ok": true,
+          "detail": "medium"
+        },
+        "Lite 地形 1.5 公尺網格（約 2.9 萬三角形）": {
+          "ok": true,
+          "detail": 28800
+        },
+        "營地與胡蘿蔔園：物件、網格建立（6 個以內）": {
+          "ok": true,
+          "detail": {
+            "props": 196,
+            "meshes": 6,
+            "triangles": 14388,
+            "detailOn": [
+              true,
+              false
+            ],
+            "casters": 0,
+            "buildMs": 51
+          }
+        },
+        "植被：樹 ≥ 400、草叢與花有建立": {
+          "ok": true,
+          "detail": {
+            "trees": 502,
+            "smalls": 566,
+            "grass": 11457,
+            "flowers": 2580,
+            "hiChunks": 4,
+            "grassCells": 9,
+            "flowerCells": 4,
+            "shadowChunks": 0,
+            "buildMs": 223,
+            "colliders": 794
+          }
+        },
+        "3D 畫面有繪製": {
+          "ok": true,
+          "detail": {
+            "samples": 3568,
+            "distinctColors": 461,
+            "opaqueRatio": 1
+          }
+        },
+        "搖桿移動、角色貼地": {
+          "ok": true,
+          "detail": {
+            "p0": {
+              "x": -56,
+              "y": 2,
+              "z": -64,
+              "yaw": 0.7266423406817256
+            },
+            "p1": {
+              "x": -53.342544644680345,
+              "y": 2,
+              "z": -61.01036272526534,
+              "yaw": 0.726642340681726
+            },
+            "ground": 2
+          }
+        },
+        "鏡頭：畫面右側單指拖曳可旋轉（canvas 接收）": {
+          "ok": true,
+          "detail": {
+            "target": "CANVAS",
+            "dAlpha": -0.7799999999999989,
+            "touches": 0
+          }
+        },
+        "鏡頭：iOS 漏送 pointerup 後，下一次單指拖曳仍是旋轉（不會誤判成縮放）": {
+          "ok": true,
+          "detail": {
+            "dAlpha": 0.7799999999999985,
+            "dRadius": 0,
+            "touches": 0
+          }
+        },
+        "鏡頭：左下搖桿只移動角色，不轉鏡頭": {
+          "ok": true,
+          "detail": {
+            "target": "hud-joystick-zone",
+            "dAlpha": 0,
+            "moved": 8.710840111043426
+          }
+        },
+        "鏡頭：技能鍵／面板按鈕不會觸發鏡頭（不是 canvas）": {
+          "ok": true,
+          "detail": [
+            "BUTTON",
+            "BUTTON"
+          ]
+        },
+        "鏡頭：雙指張開拉近，距離 5–15 公尺，縮放時不旋轉": {
+          "ok": true,
+          "detail": {
+            "r0": 9,
+            "r1": 5.000000000004565,
+            "dAlpha": 0
+          }
+        },
+        "鏡頭：俯角限制內、鏡頭不鑽進地面": {
+          "ok": true,
+          "detail": {
+            "beta": 0.55,
+            "aboveGround": 5.164965020590799
+          }
+        },
+        "鏡頭避障：對照組（關閉）鏡頭維持 9 m（視線穿過帳篷）": {
+          "ok": true,
+          "detail": {
+            "off": {
+              "radius": 9,
+              "horiz": 4.540861574200273,
+              "coneR": 0.14250000000000007,
+              "aboveTop": true
+            },
+            "allowedWhenOn": 3.3866979762480427
+          }
+        },
+        "鏡頭避障：帳篷擋住時鏡頭拉近、在帳篷外": {
+          "ok": true,
+          "detail": {
+            "radius": 3.386697976548757,
+            "desired": 9,
+            "allowed": 3.3866979762480427,
+            "horiz": 0.786075709852544,
+            "coneR": 0.4586513251203399,
+            "aboveTop": false
+          }
+        },
+        "鏡頭避障：停住時距離不抖動（40 幀變化 < 2 公分）": {
+          "ok": true,
+          "detail": 2.1190915688862333e-10
+        },
+        "鏡頭避障：轉開後平滑回到玩家設定距離、角度不重置": {
+          "ok": true,
+          "detail": {
+            "dAlpha": -1.5600000000000005,
+            "start": 8.824911966692186,
+            "end": 9,
+            "desired": 9,
+            "maxDrop": 0,
+            "maxStep": 0.08814188909741283
+          }
+        },
+        "溪流河道不可走、岸邊可走": {
+          "ok": true,
+          "detail": {
+            "here": true,
+            "water": false
+          }
+        },
+        "B1 橋中央可走、橋面高於水面": {
+          "ok": true,
+          "detail": {
+            "mid": true,
+            "y": 6.747612551936899
+          }
+        },
+        "傳送門平時可見，走進去提示需擊敗 Boss 並達成條件": {
+          "ok": true,
+          "detail": "傳送門：擊敗王冠重錘兔並達成通關條件後才能使用（第一階段尚無 Boss）"
+        },
+        "標示可開關": {
+          "ok": true,
+          "detail": false
+        },
+        "傳送門平台、符文附近畫面中央沒有過曝（純白像素 < 3%）": {
+          "ok": true,
+          "detail": [
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 193.8117572309071
+            },
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 201.32508897520316
+            },
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 207.9021071012259
+            }
+          ]
+        },
+        "報告文字（含模式）": {
+          "ok": true,
+          "detail": "星願物語 Stage 6 P2-2 星芽原野 營地與胡蘿蔔園測試報告\n時間 2026/11/26 18:01:25\n網址參數 ?map=starsprout&quality=medium&lod=lite\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 Lite 中畫質：渲染畫質 medium（解析度上限 1.5x、後製 開、陰影 PCF 1024）／地圖 Lite／載入 664 ms\n發光效果 修正後；"
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": 0
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "map-e2e/chromium_lite-mid_spawn.png",
+        "map-e2e/chromium_lite-mid_camp.png",
+        "map-e2e/chromium_lite-mid_bridge.png",
+        "map-e2e/chromium_lite-mid_highland.png",
+        "map-e2e/chromium_lite-mid_farm.png",
+        "map-e2e/chromium_lite-mid_ruins.png",
+        "map-e2e/chromium_lite-mid_arena.png",
+        "map-e2e/chromium_lite-mid_forest.png",
+        "map-e2e/chromium_lite-mid_hill.png",
+        "map-e2e/chromium_lite-mid_field.png",
+        "map-e2e/chromium_lite-mid_flowersea.png",
+        "map-e2e/chromium_lite-mid_campwide.png",
+        "map-e2e/chromium_lite-mid_campfire.png",
+        "map-e2e/chromium_lite-mid_campgate.png",
+        "map-e2e/chromium_lite-mid_farmwide.png",
+        "map-e2e/chromium_lite-mid_farmnear.png",
+        "map-e2e/chromium_lite-mid_overview.png",
+        "map-e2e/chromium_lite-mid_overview_nav.png",
+        "map-e2e/chromium_lite-mid_portal.png"
+      ],
+      "results": {
+        "info": {
+          "quality": "medium",
+          "lod": "lite",
+          "loadMs": 664.1000000000931,
+          "chunks": 16,
+          "terrainVerts": 15376,
+          "terrainTris": 28800,
+          "drawCalls": 86,
+          "activeMeshes": 63,
+          "trianglesActive": 284653.3333333333,
+          "meshes": 157,
+          "materials": 18,
+          "textures": 10,
+          "labels": true,
+          "props": {
+            "props": 196,
+            "meshes": 6,
+            "triangles": 14388,
+            "detailOn": [
+              true,
+              false
+            ],
+            "casters": 0,
+            "buildMs": 51
+          },
+          "veg": {
+            "trees": 502,
+            "smalls": 566,
+            "grass": 11457,
+            "flowers": 2580,
+            "hiChunks": 4,
+            "grassCells": 9,
+            "flowerCells": 4,
+            "shadowChunks": 0,
+            "buildMs": 223,
+            "colliders": 794
+          },
+          "nav": false,
+          "contextLost": 0,
+          "render": "1278×589 @1.5x",
+          "bridges": [
+            "B1",
+            "B2"
+          ],
+          "arena": {
+            "x": 0,
+            "z": 66,
+            "r": 12,
+            "y": 17
+          },
+          "portal": {
+            "x": 0,
+            "z": 82,
+            "r": 5,
+            "y": 17,
+            "facing": 3.141592653589793
+          }
+        },
+        "cameraTouch": {
+          "rotate": {
+            "target": "CANVAS",
+            "dAlpha": -0.7799999999999989,
+            "touches": 0
+          },
+          "stale": {
+            "dAlpha": 0.7799999999999985,
+            "dRadius": 0,
+            "touches": 0
+          },
+          "joystick": {
+            "target": "hud-joystick-zone",
+            "dAlpha": 0,
+            "moved": 8.710840111043426
+          },
+          "buttons": [
+            "BUTTON",
+            "BUTTON"
+          ],
+          "pinch": {
+            "r0": 9,
+            "r1": 5.000000000004565,
+            "dAlpha": 0
+          },
+          "pitch": {
+            "beta": 0.55,
+            "aboveGround": 5.164965020590799
+          }
+        },
+        "cameraAvoid": {
+          "tent": {
+            "x": -60.13,
+            "z": -56.23
+          },
+          "obstacles": 501,
+          "off": {
+            "radius": 9,
+            "horiz": 4.540861574200273,
+            "coneR": 0.14250000000000007,
+            "aboveTop": true
+          },
+          "on": {
+            "radius": 3.386697976548757,
+            "desired": 9,
+            "allowed": 3.3866979762480427,
+            "horiz": 0.786075709852544,
+            "coneR": 0.4586513251203399,
+            "aboveTop": false
+          },
+          "jitter": 2.1190915688862333e-10,
+          "recover": {
+            "dAlpha": -1.5600000000000005,
+            "start": 8.824911966692186,
+            "end": 9,
+            "desired": 9,
+            "maxDrop": 0,
+            "maxStep": 0.08814188909741283
+          },
+          "drawCalls": {
+            "on": 61,
+            "off": 65
+          }
+        },
+        "exposure": [
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 193.8117572309071
+          },
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 201.32508897520316
+          },
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 207.9021071012259
+          }
+        ],
+        "after": {
+          "quality": "medium",
+          "lod": "lite",
+          "loadMs": 664.1000000000931,
+          "chunks": 16,
+          "terrainVerts": 15376,
+          "terrainTris": 28800,
+          "drawCalls": 86,
+          "activeMeshes": 64,
+          "trianglesActive": 252759.33333333334,
+          "meshes": 157,
+          "materials": 18,
+          "textures": 10,
+          "labels": true,
+          "props": {
+            "props": 196,
+            "meshes": 6,
+            "triangles": 14388,
+            "detailOn": [
+              false,
+              true
+            ],
+            "casters": 0,
+            "buildMs": 51
+          },
+          "veg": {
+            "trees": 502,
+            "smalls": 566,
+            "grass": 11457,
+            "flowers": 2580,
+            "hiChunks": 4,
+            "grassCells": 10,
+            "flowerCells": 4,
+            "shadowChunks": 0,
+            "buildMs": 223,
+            "colliders": 794
+          },
+          "nav": false,
+          "contextLost": 0,
+          "render": "1278×589 @1x",
+          "bridges": [
+            "B1",
+            "B2"
+          ],
+          "arena": {
+            "x": 0,
+            "z": 66,
+            "r": 12,
+            "y": 17
+          },
+          "portal": {
+            "x": 0,
+            "z": 82,
+            "r": 5,
+            "y": 17,
+            "facing": 3.141592653589793
+          }
+        }
+      },
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "lod": "lite-low",
+      "checks": {
+        "啟動": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "地形 16 塊": {
+          "ok": true,
+          "detail": 16
+        },
+        "lite-low 使用 low 畫質渲染": {
+          "ok": true,
+          "detail": "low"
+        },
+        "Lite 地形 1.5 公尺網格（約 2.9 萬三角形）": {
+          "ok": true,
+          "detail": 28800
+        },
+        "營地與胡蘿蔔園：物件、網格建立（6 個以內）": {
+          "ok": true,
+          "detail": {
+            "props": 196,
+            "meshes": 6,
+            "triangles": 14388,
+            "detailOn": [
+              true,
+              false
+            ],
+            "casters": 0,
+            "buildMs": 48
+          }
+        },
+        "植被：樹 ≥ 400、草叢與花有建立": {
+          "ok": true,
+          "detail": {
+            "trees": 502,
+            "smalls": 566,
+            "grass": 11457,
+            "flowers": 2580,
+            "hiChunks": 4,
+            "grassCells": 9,
+            "flowerCells": 4,
+            "shadowChunks": 0,
+            "buildMs": 230,
+            "colliders": 794
+          }
+        },
+        "3D 畫面有繪製": {
+          "ok": true,
+          "detail": {
+            "samples": 2479,
+            "distinctColors": 410,
+            "opaqueRatio": 1
+          }
+        },
+        "搖桿移動、角色貼地": {
+          "ok": true,
+          "detail": {
+            "p0": {
+              "x": -56,
+              "y": 2,
+              "z": -64,
+              "yaw": 0.7266423406817256
+            },
+            "p1": {
+              "x": -52.01381696702052,
+              "y": 2,
+              "z": -59.51554408789801,
+              "yaw": 0.726642340681726
+            },
+            "ground": 2
+          }
+        },
+        "鏡頭：畫面右側單指拖曳可旋轉（canvas 接收）": {
+          "ok": true,
+          "detail": {
+            "target": "CANVAS",
+            "dAlpha": -0.7799999999999989,
+            "touches": 0
+          }
+        },
+        "鏡頭：iOS 漏送 pointerup 後，下一次單指拖曳仍是旋轉（不會誤判成縮放）": {
+          "ok": true,
+          "detail": {
+            "dAlpha": 0.7799999999999985,
+            "dRadius": 0,
+            "touches": 0
+          }
+        },
+        "鏡頭：左下搖桿只移動角色，不轉鏡頭": {
+          "ok": true,
+          "detail": {
+            "target": "hud-joystick-zone",
+            "dAlpha": 0,
+            "moved": 8.710840111043426
+          }
+        },
+        "鏡頭：技能鍵／面板按鈕不會觸發鏡頭（不是 canvas）": {
+          "ok": true,
+          "detail": [
+            "BUTTON",
+            "BUTTON"
+          ]
+        },
+        "鏡頭：雙指張開拉近，距離 5–15 公尺，縮放時不旋轉": {
+          "ok": true,
+          "detail": {
+            "r0": 9,
+            "r1": 5.000000000000414,
+            "dAlpha": 0
+          }
+        },
+        "鏡頭：俯角限制內、鏡頭不鑽進地面": {
+          "ok": true,
+          "detail": {
+            "beta": 0.55,
+            "aboveGround": 5.164965020590799
+          }
+        },
+        "鏡頭避障：對照組（關閉）鏡頭維持 9 m（視線穿過帳篷）": {
+          "ok": true,
+          "detail": {
+            "off": {
+              "radius": 9,
+              "horiz": 4.540861574200273,
+              "coneR": 0.14250000000000007,
+              "aboveTop": true
+            },
+            "allowedWhenOn": 3.3866979762480427
+          }
+        },
+        "鏡頭避障：帳篷擋住時鏡頭拉近、在帳篷外": {
+          "ok": true,
+          "detail": {
+            "radius": 3.386697976548757,
+            "desired": 9,
+            "allowed": 3.3866979762480427,
+            "horiz": 0.786075709852544,
+            "coneR": 0.4586513251203399,
+            "aboveTop": false
+          }
+        },
+        "鏡頭避障：停住時距離不抖動（40 幀變化 < 2 公分）": {
+          "ok": true,
+          "detail": 2.1190915688862333e-10
+        },
+        "鏡頭避障：轉開後平滑回到玩家設定距離、角度不重置": {
+          "ok": true,
+          "detail": {
+            "dAlpha": -1.5600000000000005,
+            "start": 8.824911966692186,
+            "end": 9,
+            "desired": 9,
+            "maxDrop": 0,
+            "maxStep": 0.08814188909741283
+          }
+        },
+        "溪流河道不可走、岸邊可走": {
+          "ok": true,
+          "detail": {
+            "here": true,
+            "water": false
+          }
+        },
+        "B1 橋中央可走、橋面高於水面": {
+          "ok": true,
+          "detail": {
+            "mid": true,
+            "y": 6.747612551936899
+          }
+        },
+        "傳送門平時可見，走進去提示需擊敗 Boss 並達成條件": {
+          "ok": true,
+          "detail": "傳送門：擊敗王冠重錘兔並達成通關條件後才能使用（第一階段尚無 Boss）"
+        },
+        "標示可開關": {
+          "ok": true,
+          "detail": false
+        },
+        "傳送門平台、符文附近畫面中央沒有過曝（純白像素 < 3%）": {
+          "ok": true,
+          "detail": [
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 190.42728812816065
+            },
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 199.2839061853789
+            },
+            {
+              "whiteAll": 0.004690431519699813,
+              "whiteCenter": 0,
+              "meanLuma": 206.69360771692345
+            }
+          ]
+        },
+        "報告文字（含模式）": {
+          "ok": true,
+          "detail": "星願物語 Stage 6 P2-2 星芽原野 營地與胡蘿蔔園測試報告\n時間 2026/11/26 18:03:53\n網址參數 ?map=starsprout&quality=low&lod=lite\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 Lite 低畫質：渲染畫質 low（解析度上限 1.25x、後製 關、陰影 PCF 512）／地圖 Lite／載入 699 ms\n發光效果 修正後；診斷 無\n對"
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": 0
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "map-e2e/chromium_lite-low_spawn.png",
+        "map-e2e/chromium_lite-low_camp.png",
+        "map-e2e/chromium_lite-low_bridge.png",
+        "map-e2e/chromium_lite-low_highland.png",
+        "map-e2e/chromium_lite-low_farm.png",
+        "map-e2e/chromium_lite-low_ruins.png",
+        "map-e2e/chromium_lite-low_arena.png",
+        "map-e2e/chromium_lite-low_forest.png",
+        "map-e2e/chromium_lite-low_hill.png",
+        "map-e2e/chromium_lite-low_field.png",
+        "map-e2e/chromium_lite-low_flowersea.png",
+        "map-e2e/chromium_lite-low_campwide.png",
+        "map-e2e/chromium_lite-low_campfire.png",
+        "map-e2e/chromium_lite-low_campgate.png",
+        "map-e2e/chromium_lite-low_farmwide.png",
+        "map-e2e/chromium_lite-low_farmnear.png",
+        "map-e2e/chromium_lite-low_overview.png",
+        "map-e2e/chromium_lite-low_overview_nav.png",
+        "map-e2e/chromium_lite-low_portal.png"
+      ],
+      "results": {
+        "info": {
+          "quality": "low",
+          "lod": "lite",
+          "loadMs": 699.4000000003725,
+          "chunks": 16,
+          "terrainVerts": 15376,
+          "terrainTris": 28800,
+          "drawCalls": 79,
+          "activeMeshes": 63,
+          "trianglesActive": 284653.3333333333,
+          "meshes": 157,
+          "materials": 18,
+          "textures": 7,
+          "labels": true,
+          "props": {
+            "props": 196,
+            "meshes": 6,
+            "triangles": 14388,
+            "detailOn": [
+              true,
+              false
+            ],
+            "casters": 0,
+            "buildMs": 48
+          },
+          "veg": {
+            "trees": 502,
+            "smalls": 566,
+            "grass": 11457,
+            "flowers": 2580,
+            "hiChunks": 4,
+            "grassCells": 9,
+            "flowerCells": 4,
+            "shadowChunks": 0,
+            "buildMs": 230,
+            "colliders": 794
+          },
+          "nav": false,
+          "contextLost": 0,
+          "render": "1065×491 @1.25x",
+          "bridges": [
+            "B1",
+            "B2"
+          ],
+          "arena": {
+            "x": 0,
+            "z": 66,
+            "r": 12,
+            "y": 17
+          },
+          "portal": {
+            "x": 0,
+            "z": 82,
+            "r": 5,
+            "y": 17,
+            "facing": 3.141592653589793
+          }
+        },
+        "cameraTouch": {
+          "rotate": {
+            "target": "CANVAS",
+            "dAlpha": -0.7799999999999989,
+            "touches": 0
+          },
+          "stale": {
+            "dAlpha": 0.7799999999999985,
+            "dRadius": 0,
+            "touches": 0
+          },
+          "joystick": {
+            "target": "hud-joystick-zone",
+            "dAlpha": 0,
+            "moved": 8.710840111043426
+          },
+          "buttons": [
+            "BUTTON",
+            "BUTTON"
+          ],
+          "pinch": {
+            "r0": 9,
+            "r1": 5.000000000000414,
+            "dAlpha": 0
+          },
+          "pitch": {
+            "beta": 0.55,
+            "aboveGround": 5.164965020590799
+          }
+        },
+        "cameraAvoid": {
+          "tent": {
+            "x": -60.13,
+            "z": -56.23
+          },
+          "obstacles": 501,
+          "off": {
+            "radius": 9,
+            "horiz": 4.540861574200273,
+            "coneR": 0.14250000000000007,
+            "aboveTop": true
+          },
+          "on": {
+            "radius": 3.386697976548757,
+            "desired": 9,
+            "allowed": 3.3866979762480427,
+            "horiz": 0.786075709852544,
+            "coneR": 0.4586513251203399,
+            "aboveTop": false
+          },
+          "jitter": 2.1190915688862333e-10,
+          "recover": {
+            "dAlpha": -1.5600000000000005,
+            "start": 8.824911966692186,
+            "end": 9,
+            "desired": 9,
+            "maxDrop": 0,
+            "maxStep": 0.08814188909741283
+          },
+          "drawCalls": {
+            "on": 54,
+            "off": 58
+          }
+        },
+        "exposure": [
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 190.42728812816065
+          },
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 199.2839061853789
+          },
+          {
+            "whiteAll": 0.004690431519699813,
+            "whiteCenter": 0,
+            "meanLuma": 206.69360771692345
+          }
+        ],
+        "after": {
+          "quality": "low",
+          "lod": "lite",
+          "loadMs": 699.4000000003725,
+          "chunks": 16,
+          "terrainVerts": 15376,
+          "terrainTris": 28800,
+          "drawCalls": 79,
+          "activeMeshes": 64,
+          "trianglesActive": 252759.33333333334,
+          "meshes": 157,
+          "materials": 18,
+          "textures": 7,
+          "labels": true,
+          "props": {
+            "props": 196,
+            "meshes": 6,
+            "triangles": 14388,
+            "detailOn": [
+              false,
+              true
+            ],
+            "casters": 0,
+            "buildMs": 48
+          },
+          "veg": {
+            "trees": 502,
+            "smalls": 566,
+            "grass": 11457,
+            "flowers": 2580,
+            "hiChunks": 4,
+            "grassCells": 10,
+            "flowerCells": 4,
+            "shadowChunks": 0,
+            "buildMs": 230,
+            "colliders": 794
+          },
+          "nav": false,
+          "contextLost": 0,
+          "render": "1065×491 @1x",
+          "bridges": [
+            "B1",
+            "B2"
+          ],
+          "arena": {
+            "x": 0,
+            "z": 66,
+            "r": 12,
+            "y": 17
+          },
+          "portal": {
+            "x": 0,
+            "z": 82,
+            "r": 5,
+            "y": 17,
+            "facing": 3.141592653589793
+          }
+        }
+      },
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "lod": "hq",
+      "checks": {
+        "啟動": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "地形 16 塊": {
+          "ok": true,
+          "detail": 16
+        },
+        "hq 使用 high 畫質渲染": {
+          "ok": true,
+          "detail": "high"
+        },
+        "HQ 地形 1 公尺網格（約 6.5 萬三角形）": {
+          "ok": true,
+          "detail": 64800
+        },
+        "營地與胡蘿蔔園：物件、網格建立（6 個以內）": {
+          "ok": true,
+          "detail": {
+            "props": 196,
+            "meshes": 6,
+            "triangles": 14388,
+            "detailOn": [
+              true,
+              false
+            ],
+            "casters": 1,
+            "buildMs": 58
+          }
+        },
+        "植被：樹 ≥ 400、草叢與花有建立": {
+          "ok": true,
+          "detail": {
+            "trees": 502,
+            "smalls": 566,
+            "grass": 25105,
+            "flowers": 4297,
+            "hiChunks": 4,
+            "grassCells": 13,
+            "flowerCells": 4,
+            "shadowChunks": 3,
+            "buildMs": 280,
+            "colliders": 794
+          }
+        },
+        "3D 畫面有繪製": {
+          "ok": true,
+          "detail": {
+            "samples": 6348,
+            "distinctColors": 652,
+            "opaqueRatio": 1
+          }
+        },
+        "搖桿移動、角色貼地": {
+          "ok": true,
+          "detail": {
+            "p0": {
+              "x": -56,
+              "y": 2,
+              "z": -64,
+              "yaw": 0.7266423406817256
+            },
+            "p1": {
+              "x": -54.67127232234017,
+              "y": 2,
+              "z": -62.50518136263267,
+              "yaw": 0.726642340681726
+            },
+            "ground": 2
+          }
+        },
+        "鏡頭：畫面右側單指拖曳可旋轉（canvas 接收）": {
+          "ok": true,
+          "detail": {
+            "target": "CANVAS",
+            "dAlpha": -0.7800000000000007,
+            "touches": 0
+          }
+        },
+        "鏡頭：iOS 漏送 pointerup 後，下一次單指拖曳仍是旋轉（不會誤判成縮放）": {
+          "ok": true,
+          "detail": {
+            "dAlpha": 0.7800000000000002,
+            "dRadius": 0,
+            "touches": 0
+          }
+        },
+        "鏡頭：左下搖桿只移動角色，不轉鏡頭": {
+          "ok": true,
+          "detail": {
+            "target": "hud-joystick-zone",
+            "dAlpha": 0,
+            "moved": 2.9448051948051965
+          }
+        },
+        "鏡頭：技能鍵／面板按鈕不會觸發鏡頭（不是 canvas）": {
+          "ok": true,
+          "detail": [
+            "BUTTON",
+            "BUTTON"
+          ]
+        },
+        "鏡頭：雙指張開拉近，距離 5–15 公尺，縮放時不旋轉": {
+          "ok": true,
+          "detail": {
+            "r0": 9,
+            "r1": 5.000000278594645,
+            "dAlpha": 0
+          }
+        },
+        "鏡頭：俯角限制內、鏡頭不鑽進地面": {
+          "ok": true,
+          "detail": {
+            "beta": 0.550000010835528,
+            "aboveGround": 5.054431561201268
+          }
+        },
+        "鏡頭避障：對照組（關閉）鏡頭維持 9 m（視線穿過帳篷）": {
+          "ok": true,
+          "detail": {
+            "off": {
+              "radius": 9,
+              "horiz": 4.540861574200273,
+              "coneR": 0.14250000000000007,
+              "aboveTop": true
+            },
+            "allowedWhenOn": 3.3866979762480427
+          }
+        },
+        "鏡頭避障：帳篷擋住時鏡頭拉近、在帳篷外": {
+          "ok": true,
+          "detail": {
+            "radius": 3.386697976548757,
+            "desired": 9,
+            "allowed": 3.3866979762480427,
+            "horiz": 0.7860757098525439,
+            "coneR": 0.4586513251203399,
+            "aboveTop": false
+          }
+        },
+        "鏡頭避障：停住時距離不抖動（40 幀變化 < 2 公分）": {
+          "ok": true,
+          "detail": 2.1190915688862333e-10
+        },
+        "鏡頭避障：轉開後平滑回到玩家設定距離、角度不重置": {
+          "ok": true,
+          "detail": {
+            "dAlpha": -1.5600000000000005,
+            "start": 8.824911966692186,
+            "end": 9,
+            "desired": 9,
+            "maxDrop": 0,
+            "maxStep": 0.08814188909741283
+          }
+        },
+        "溪流河道不可走、岸邊可走": {
+          "ok": true,
+          "detail": {
+            "here": true,
+            "water": false
+          }
+        },
+        "B1 橋中央可走、橋面高於水面": {
+          "ok": true,
+          "detail": {
+            "mid": true,
+            "y": 6.747612551936899
+          }
+        },
+        "傳送門平時可見，走進去提示需擊敗 Boss 並達成條件": {
+          "ok": true,
+          "detail": "傳送門：擊敗王冠重錘兔並達成通關條件後才能使用（第一階段尚無 Boss）"
+        },
+        "標示可開關": {
+          "ok": true,
+          "detail": false
+        },
+        "路線測試：自動沿主路前進、沒有卡住": {
+          "ok": true,
+          "detail": {
+            "st": {
+              "phase": "running",
+              "loop": 0,
+              "t": 5.1999999999999975,
+              "result": null
+            },
+            "pl": {
+              "x": -39.48778993398244,
+              "y": 2.425615083258566,
+              "z": -43.93393903975834,
+              "yaw": 0.6557580050865259
+            }
+          }
+        },
+        "陰影品質可切換（原始 ↔ PCSS32）": {
+          "ok": true,
+          "detail": [
+            true,
+            {
+              "q": "medium",
+              "filtering": 1,
+              "contact": true,
+              "mapSize": 2048
+            },
+            true,
+            {
+              "q": "default",
+              "filtering": 0,
+              "contact": true,
+              "mapSize": 2048
+            }
+          ]
+        },
+        "傳送門平台、符文附近畫面中央沒有過曝（純白像素 < 3%）": {
+          "ok": true,
+          "detail": [
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 193.29533396932231
+            },
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 201.27586363434037
+            },
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 207.054136871846
+            }
+          ]
+        },
+        "報告文字（含模式）": {
+          "ok": true,
+          "detail": "星願物語 Stage 6 P2-2 星芽原野 營地與胡蘿蔔園測試報告\n時間 2026/11/26 18:08:15\n網址參數 ?map=starsprout&quality=high&lod=hq\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 HQ：渲染畫質 high（解析度上限 2x、後製 開、陰影 柔和 PCSS 2048）／地圖 HQ／載入 963 ms\n發光效果 修正後；診斷 無\n對照設"
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": 0
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "map-e2e/webkit_hq_spawn.png",
+        "map-e2e/webkit_hq_camp.png",
+        "map-e2e/webkit_hq_bridge.png",
+        "map-e2e/webkit_hq_highland.png",
+        "map-e2e/webkit_hq_farm.png",
+        "map-e2e/webkit_hq_ruins.png",
+        "map-e2e/webkit_hq_arena.png",
+        "map-e2e/webkit_hq_forest.png",
+        "map-e2e/webkit_hq_hill.png",
+        "map-e2e/webkit_hq_field.png",
+        "map-e2e/webkit_hq_flowersea.png",
+        "map-e2e/webkit_hq_campwide.png",
+        "map-e2e/webkit_hq_campfire.png",
+        "map-e2e/webkit_hq_campgate.png",
+        "map-e2e/webkit_hq_farmwide.png",
+        "map-e2e/webkit_hq_farmnear.png",
+        "map-e2e/webkit_hq_overview.png",
+        "map-e2e/webkit_hq_overview_nav.png",
+        "map-e2e/webkit_hq_portal.png",
+        "map-e2e/webkit_hq_route.png"
+      ],
+      "results": {
+        "info": {
+          "quality": "high",
+          "lod": "hq",
+          "loadMs": 963,
+          "chunks": 16,
+          "terrainVerts": 33856,
+          "terrainTris": 64800,
+          "drawCalls": 98,
+          "activeMeshes": 67,
+          "trianglesActive": 488993.3333333333,
+          "meshes": 157,
+          "materials": 18,
+          "textures": 10,
+          "labels": true,
+          "props": {
+            "props": 196,
+            "meshes": 6,
+            "triangles": 14388,
+            "detailOn": [
+              true,
+              false
+            ],
+            "casters": 1,
+            "buildMs": 58
+          },
+          "veg": {
+            "trees": 502,
+            "smalls": 566,
+            "grass": 25105,
+            "flowers": 4297,
+            "hiChunks": 4,
+            "grassCells": 13,
+            "flowerCells": 4,
+            "shadowChunks": 3,
+            "buildMs": 280,
+            "colliders": 794
+          },
+          "nav": false,
+          "contextLost": 0,
+          "render": "1704×786 @2x",
+          "bridges": [
+            "B1",
+            "B2"
+          ],
+          "arena": {
+            "x": 0,
+            "z": 66,
+            "r": 12,
+            "y": 17
+          },
+          "portal": {
+            "x": 0,
+            "z": 82,
+            "r": 5,
+            "y": 17,
+            "facing": 3.141592653589793
+          }
+        },
+        "cameraTouch": {
+          "rotate": {
+            "target": "CANVAS",
+            "dAlpha": -0.7800000000000007,
+            "touches": 0
+          },
+          "stale": {
+            "dAlpha": 0.7800000000000002,
+            "dRadius": 0,
+            "touches": 0
+          },
+          "joystick": {
+            "target": "hud-joystick-zone",
+            "dAlpha": 0,
+            "moved": 2.9448051948051965
+          },
+          "buttons": [
+            "BUTTON",
+            "BUTTON"
+          ],
+          "pinch": {
+            "r0": 9,
+            "r1": 5.000000278594645,
+            "dAlpha": 0
+          },
+          "pitch": {
+            "beta": 0.550000010835528,
+            "aboveGround": 5.054431561201268
+          }
+        },
+        "cameraAvoid": {
+          "tent": {
+            "x": -60.13,
+            "z": -56.23
+          },
+          "obstacles": 501,
+          "off": {
+            "radius": 9,
+            "horiz": 4.540861574200273,
+            "coneR": 0.14250000000000007,
+            "aboveTop": true
+          },
+          "on": {
+            "radius": 3.386697976548757,
+            "desired": 9,
+            "allowed": 3.3866979762480427,
+            "horiz": 0.7860757098525439,
+            "coneR": 0.4586513251203399,
+            "aboveTop": false
+          },
+          "jitter": 2.1190915688862333e-10,
+          "recover": {
+            "dAlpha": -1.5600000000000005,
+            "start": 8.824911966692186,
+            "end": 9,
+            "desired": 9,
+            "maxDrop": 0,
+            "maxStep": 0.08814188909741283
+          },
+          "drawCalls": {
+            "on": 73,
+            "off": 78
+          }
+        },
+        "route": {
+          "st": {
+            "phase": "running",
+            "loop": 0,
+            "t": 5.1999999999999975,
+            "result": null
+          },
+          "pl": {
+            "x": -39.48778993398244,
+            "y": 2.425615083258566,
+            "z": -43.93393903975834,
+            "yaw": 0.6557580050865259
+          }
+        },
+        "exposure": [
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 193.29533396932231
+          },
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 201.27586363434037
+          },
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 207.054136871846
+          }
+        ],
+        "after": {
+          "quality": "high",
+          "lod": "hq",
+          "loadMs": 963,
+          "chunks": 16,
+          "terrainVerts": 33856,
+          "terrainTris": 64800,
+          "drawCalls": 99,
+          "activeMeshes": 68,
+          "trianglesActive": 421917.3333333333,
+          "meshes": 157,
+          "materials": 18,
+          "textures": 10,
+          "labels": true,
+          "props": {
+            "props": 196,
+            "meshes": 6,
+            "triangles": 14388,
+            "detailOn": [
+              false,
+              true
+            ],
+            "casters": 1,
+            "buildMs": 58
+          },
+          "veg": {
+            "trees": 502,
+            "smalls": 566,
+            "grass": 25105,
+            "flowers": 4297,
+            "hiChunks": 6,
+            "grassCells": 14,
+            "flowerCells": 6,
+            "shadowChunks": 4,
+            "buildMs": 280,
+            "colliders": 794
+          },
+          "nav": false,
+          "contextLost": 0,
+          "render": "1704×786 @1x",
+          "bridges": [
+            "B1",
+            "B2"
+          ],
+          "arena": {
+            "x": 0,
+            "z": 66,
+            "r": 12,
+            "y": 17
+          },
+          "portal": {
+            "x": 0,
+            "z": 82,
+            "r": 5,
+            "y": 17,
+            "facing": 3.141592653589793
+          }
+        }
+      },
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "lod": "lite-mid",
+      "checks": {
+        "啟動": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "地形 16 塊": {
+          "ok": true,
+          "detail": 16
+        },
+        "lite-mid 使用 medium 畫質渲染": {
+          "ok": true,
+          "detail": "medium"
+        },
+        "Lite 地形 1.5 公尺網格（約 2.9 萬三角形）": {
+          "ok": true,
+          "detail": 28800
+        },
+        "營地與胡蘿蔔園：物件、網格建立（6 個以內）": {
+          "ok": true,
+          "detail": {
+            "props": 196,
+            "meshes": 6,
+            "triangles": 14388,
+            "detailOn": [
+              true,
+              false
+            ],
+            "casters": 0,
+            "buildMs": 60
+          }
+        },
+        "植被：樹 ≥ 400、草叢與花有建立": {
+          "ok": true,
+          "detail": {
+            "trees": 502,
+            "smalls": 566,
+            "grass": 11457,
+            "flowers": 2580,
+            "hiChunks": 4,
+            "grassCells": 9,
+            "flowerCells": 4,
+            "shadowChunks": 0,
+            "buildMs": 243,
+            "colliders": 794
+          }
+        },
+        "3D 畫面有繪製": {
+          "ok": true,
+          "detail": {
+            "samples": 3568,
+            "distinctColors": 461,
+            "opaqueRatio": 1
+          }
+        },
+        "搖桿移動、角色貼地": {
+          "ok": true,
+          "detail": {
+            "p0": {
+              "x": -56,
+              "y": 2,
+              "z": -64,
+              "yaw": 0.7266423406817256
+            },
+            "p1": {
+              "x": -49.130477906498626,
+              "y": 2,
+              "z": -56.271787644810956,
+              "yaw": 0.726642340681726
+            },
+            "ground": 2
+          }
+        },
+        "鏡頭：畫面右側單指拖曳可旋轉（canvas 接收）": {
+          "ok": true,
+          "detail": {
+            "target": "CANVAS",
+            "dAlpha": -0.7800000000000007,
+            "touches": 0
+          }
+        },
+        "鏡頭：iOS 漏送 pointerup 後，下一次單指拖曳仍是旋轉（不會誤判成縮放）": {
+          "ok": true,
+          "detail": {
+            "dAlpha": 0.7800000000000007,
+            "dRadius": 0,
+            "touches": 0
+          }
+        },
+        "鏡頭：左下搖桿只移動角色，不轉鏡頭": {
+          "ok": true,
+          "detail": {
+            "target": "hud-joystick-zone",
+            "dAlpha": 0,
+            "moved": 4.3778571428571365
+          }
+        },
+        "鏡頭：技能鍵／面板按鈕不會觸發鏡頭（不是 canvas）": {
+          "ok": true,
+          "detail": [
+            "BUTTON",
+            "BUTTON"
+          ]
+        },
+        "鏡頭：雙指張開拉近，距離 5–15 公尺，縮放時不旋轉": {
+          "ok": true,
+          "detail": {
+            "r0": 9,
+            "r1": 5.00000057482022,
+            "dAlpha": 0
+          }
+        },
+        "鏡頭：俯角限制內、鏡頭不鑽進地面": {
+          "ok": true,
+          "detail": {
+            "beta": 0.5500000975677065,
+            "aboveGround": 4.967714815861603
+          }
+        },
+        "鏡頭避障：對照組（關閉）鏡頭維持 9 m（視線穿過帳篷）": {
+          "ok": true,
+          "detail": {
+            "off": {
+              "radius": 9,
+              "horiz": 4.540861574200273,
+              "coneR": 0.14250000000000007,
+              "aboveTop": true
+            },
+            "allowedWhenOn": 3.3866979762480427
+          }
+        },
+        "鏡頭避障：帳篷擋住時鏡頭拉近、在帳篷外": {
+          "ok": true,
+          "detail": {
+            "radius": 3.3866979809637785,
+            "desired": 9,
+            "allowed": 3.3866979762480427,
+            "horiz": 0.7860757056627576,
+            "coneR": 0.45865132442994017,
+            "aboveTop": false
+          }
+        },
+        "鏡頭避障：停住時距離不抖動（40 幀變化 < 2 公分）": {
+          "ok": true,
+          "detail": 3.5022211797297587e-9
+        },
+        "鏡頭避障：轉開後平滑回到玩家設定距離、角度不重置": {
+          "ok": true,
+          "detail": {
+            "dAlpha": -1.5600000000000005,
+            "start": 8.788764587697884,
+            "end": 9,
+            "desired": 9,
+            "maxDrop": 0,
+            "maxStep": 0.09833871587643728
+          }
+        },
+        "溪流河道不可走、岸邊可走": {
+          "ok": true,
+          "detail": {
+            "here": true,
+            "water": false
+          }
+        },
+        "B1 橋中央可走、橋面高於水面": {
+          "ok": true,
+          "detail": {
+            "mid": true,
+            "y": 6.747612551936899
+          }
+        },
+        "傳送門平時可見，走進去提示需擊敗 Boss 並達成條件": {
+          "ok": true,
+          "detail": "傳送門：擊敗王冠重錘兔並達成通關條件後才能使用（第一階段尚無 Boss）"
+        },
+        "標示可開關": {
+          "ok": true,
+          "detail": false
+        },
+        "傳送門平台、符文附近畫面中央沒有過曝（純白像素 < 3%）": {
+          "ok": true,
+          "detail": [
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 193.72000380898314
+            },
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 201.27122803888682
+            },
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 207.84857265597444
+            }
+          ]
+        },
+        "報告文字（含模式）": {
+          "ok": true,
+          "detail": "星願物語 Stage 6 P2-2 星芽原野 營地與胡蘿蔔園測試報告\n時間 2026/11/26 18:09:05\n網址參數 ?map=starsprout&quality=medium&lod=lite\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 Lite 中畫質：渲染畫質 medium（解析度上限 1.5x、後製 開、陰影 PCF 1024）／地圖 Lite／載入 881 ms\n發光效果 "
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": 0
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "map-e2e/webkit_lite-mid_spawn.png",
+        "map-e2e/webkit_lite-mid_camp.png",
+        "map-e2e/webkit_lite-mid_bridge.png",
+        "map-e2e/webkit_lite-mid_highland.png",
+        "map-e2e/webkit_lite-mid_farm.png",
+        "map-e2e/webkit_lite-mid_ruins.png",
+        "map-e2e/webkit_lite-mid_arena.png",
+        "map-e2e/webkit_lite-mid_forest.png",
+        "map-e2e/webkit_lite-mid_hill.png",
+        "map-e2e/webkit_lite-mid_field.png",
+        "map-e2e/webkit_lite-mid_flowersea.png",
+        "map-e2e/webkit_lite-mid_campwide.png",
+        "map-e2e/webkit_lite-mid_campfire.png",
+        "map-e2e/webkit_lite-mid_campgate.png",
+        "map-e2e/webkit_lite-mid_farmwide.png",
+        "map-e2e/webkit_lite-mid_farmnear.png",
+        "map-e2e/webkit_lite-mid_overview.png",
+        "map-e2e/webkit_lite-mid_overview_nav.png",
+        "map-e2e/webkit_lite-mid_portal.png"
+      ],
+      "results": {
+        "info": {
+          "quality": "medium",
+          "lod": "lite",
+          "loadMs": 881,
+          "chunks": 16,
+          "terrainVerts": 15376,
+          "terrainTris": 28800,
+          "drawCalls": 86,
+          "activeMeshes": 63,
+          "trianglesActive": 284653.3333333333,
+          "meshes": 157,
+          "materials": 18,
+          "textures": 10,
+          "labels": true,
+          "props": {
+            "props": 196,
+            "meshes": 6,
+            "triangles": 14388,
+            "detailOn": [
+              true,
+              false
+            ],
+            "casters": 0,
+            "buildMs": 60
+          },
+          "veg": {
+            "trees": 502,
+            "smalls": 566,
+            "grass": 11457,
+            "flowers": 2580,
+            "hiChunks": 4,
+            "grassCells": 9,
+            "flowerCells": 4,
+            "shadowChunks": 0,
+            "buildMs": 243,
+            "colliders": 794
+          },
+          "nav": false,
+          "contextLost": 0,
+          "render": "1278×589 @1.5x",
+          "bridges": [
+            "B1",
+            "B2"
+          ],
+          "arena": {
+            "x": 0,
+            "z": 66,
+            "r": 12,
+            "y": 17
+          },
+          "portal": {
+            "x": 0,
+            "z": 82,
+            "r": 5,
+            "y": 17,
+            "facing": 3.141592653589793
+          }
+        },
+        "cameraTouch": {
+          "rotate": {
+            "target": "CANVAS",
+            "dAlpha": -0.7800000000000007,
+            "touches": 0
+          },
+          "stale": {
+            "dAlpha": 0.7800000000000007,
+            "dRadius": 0,
+            "touches": 0
+          },
+          "joystick": {
+            "target": "hud-joystick-zone",
+            "dAlpha": 0,
+            "moved": 4.3778571428571365
+          },
+          "buttons": [
+            "BUTTON",
+            "BUTTON"
+          ],
+          "pinch": {
+            "r0": 9,
+            "r1": 5.00000057482022,
+            "dAlpha": 0
+          },
+          "pitch": {
+            "beta": 0.5500000975677065,
+            "aboveGround": 4.967714815861603
+          }
+        },
+        "cameraAvoid": {
+          "tent": {
+            "x": -60.13,
+            "z": -56.23
+          },
+          "obstacles": 501,
+          "off": {
+            "radius": 9,
+            "horiz": 4.540861574200273,
+            "coneR": 0.14250000000000007,
+            "aboveTop": true
+          },
+          "on": {
+            "radius": 3.3866979809637785,
+            "desired": 9,
+            "allowed": 3.3866979762480427,
+            "horiz": 0.7860757056627576,
+            "coneR": 0.45865132442994017,
+            "aboveTop": false
+          },
+          "jitter": 3.5022211797297587e-9,
+          "recover": {
+            "dAlpha": -1.5600000000000005,
+            "start": 8.788764587697884,
+            "end": 9,
+            "desired": 9,
+            "maxDrop": 0,
+            "maxStep": 0.09833871587643728
+          },
+          "drawCalls": {
+            "on": 61,
+            "off": 65
+          }
+        },
+        "exposure": [
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 193.72000380898314
+          },
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 201.27122803888682
+          },
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 207.84857265597444
+          }
+        ],
+        "after": {
+          "quality": "medium",
+          "lod": "lite",
+          "loadMs": 881,
+          "chunks": 16,
+          "terrainVerts": 15376,
+          "terrainTris": 28800,
+          "drawCalls": 86,
+          "activeMeshes": 64,
+          "trianglesActive": 252759.33333333334,
+          "meshes": 157,
+          "materials": 18,
+          "textures": 10,
+          "labels": true,
+          "props": {
+            "props": 196,
+            "meshes": 6,
+            "triangles": 14388,
+            "detailOn": [
+              false,
+              true
+            ],
+            "casters": 0,
+            "buildMs": 60
+          },
+          "veg": {
+            "trees": 502,
+            "smalls": 566,
+            "grass": 11457,
+            "flowers": 2580,
+            "hiChunks": 4,
+            "grassCells": 10,
+            "flowerCells": 4,
+            "shadowChunks": 0,
+            "buildMs": 243,
+            "colliders": 794
+          },
+          "nav": false,
+          "contextLost": 0,
+          "render": "1278×589 @1x",
+          "bridges": [
+            "B1",
+            "B2"
+          ],
+          "arena": {
+            "x": 0,
+            "z": 66,
+            "r": 12,
+            "y": 17
+          },
+          "portal": {
+            "x": 0,
+            "z": 82,
+            "r": 5,
+            "y": 17,
+            "facing": 3.141592653589793
+          }
+        }
+      },
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "lod": "lite-low",
+      "checks": {
+        "啟動": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "地形 16 塊": {
+          "ok": true,
+          "detail": 16
+        },
+        "lite-low 使用 low 畫質渲染": {
+          "ok": true,
+          "detail": "low"
+        },
+        "Lite 地形 1.5 公尺網格（約 2.9 萬三角形）": {
+          "ok": true,
+          "detail": 28800
+        },
+        "營地與胡蘿蔔園：物件、網格建立（6 個以內）": {
+          "ok": true,
+          "detail": {
+            "props": 196,
+            "meshes": 6,
+            "triangles": 14388,
+            "detailOn": [
+              true,
+              false
+            ],
+            "casters": 0,
+            "buildMs": 65
+          }
+        },
+        "植被：樹 ≥ 400、草叢與花有建立": {
+          "ok": true,
+          "detail": {
+            "trees": 502,
+            "smalls": 566,
+            "grass": 11457,
+            "flowers": 2580,
+            "hiChunks": 4,
+            "grassCells": 9,
+            "flowerCells": 4,
+            "shadowChunks": 0,
+            "buildMs": 226,
+            "colliders": 794
+          }
+        },
+        "3D 畫面有繪製": {
+          "ok": true,
+          "detail": {
+            "samples": 2479,
+            "distinctColors": 409,
+            "opaqueRatio": 1
+          }
+        },
+        "搖桿移動、角色貼地": {
+          "ok": true,
+          "detail": {
+            "p0": {
+              "x": -56,
+              "y": 2,
+              "z": -64,
+              "yaw": 0.7266423406817256
+            },
+            "p1": {
+              "x": -49.701830807892414,
+              "y": 2,
+              "z": -56.91455965887885,
+              "yaw": 0.726642340681726
+            },
+            "ground": 2
+          }
+        },
+        "鏡頭：畫面右側單指拖曳可旋轉（canvas 接收）": {
+          "ok": true,
+          "detail": {
+            "target": "CANVAS",
+            "dAlpha": -0.7800000000000002,
+            "touches": 0
+          }
+        },
+        "鏡頭：iOS 漏送 pointerup 後，下一次單指拖曳仍是旋轉（不會誤判成縮放）": {
+          "ok": true,
+          "detail": {
+            "dAlpha": 0.7799999999999989,
+            "dRadius": 0,
+            "touches": 0
+          }
+        },
+        "鏡頭：左下搖桿只移動角色，不轉鏡頭": {
+          "ok": true,
+          "detail": {
+            "target": "hud-joystick-zone",
+            "dAlpha": 0,
+            "moved": 4.308043831168837
+          }
+        },
+        "鏡頭：技能鍵／面板按鈕不會觸發鏡頭（不是 canvas）": {
+          "ok": true,
+          "detail": [
+            "BUTTON",
+            "BUTTON"
+          ]
+        },
+        "鏡頭：雙指張開拉近，距離 5–15 公尺，縮放時不旋轉": {
+          "ok": true,
+          "detail": {
+            "r0": 9,
+            "r1": 5.000000024713313,
+            "dAlpha": 0
+          }
+        },
+        "鏡頭：俯角限制內、鏡頭不鑽進地面": {
+          "ok": true,
+          "detail": {
+            "beta": 0.5500000141354353,
+            "aboveGround": 4.969296683122886
+          }
+        },
+        "鏡頭避障：對照組（關閉）鏡頭維持 9 m（視線穿過帳篷）": {
+          "ok": true,
+          "detail": {
+            "off": {
+              "radius": 9,
+              "horiz": 4.540861574200273,
+              "coneR": 0.14250000000000007,
+              "aboveTop": true
+            },
+            "allowedWhenOn": 3.3866979762480427
+          }
+        },
+        "鏡頭避障：帳篷擋住時鏡頭拉近、在帳篷外": {
+          "ok": true,
+          "detail": {
+            "radius": 3.386697976548757,
+            "desired": 9,
+            "allowed": 3.3866979762480427,
+            "horiz": 0.7860757098525439,
+            "coneR": 0.4586513251203399,
+            "aboveTop": false
+          }
+        },
+        "鏡頭避障：停住時距離不抖動（40 幀變化 < 2 公分）": {
+          "ok": true,
+          "detail": 2.1190915688862333e-10
+        },
+        "鏡頭避障：轉開後平滑回到玩家設定距離、角度不重置": {
+          "ok": true,
+          "detail": {
+            "dAlpha": -1.5600000000000005,
+            "start": 8.824911966692186,
+            "end": 9,
+            "desired": 9,
+            "maxDrop": 0,
+            "maxStep": 0.08814188909741283
+          }
+        },
+        "溪流河道不可走、岸邊可走": {
+          "ok": true,
+          "detail": {
+            "here": true,
+            "water": false
+          }
+        },
+        "B1 橋中央可走、橋面高於水面": {
+          "ok": true,
+          "detail": {
+            "mid": true,
+            "y": 6.747612551936899
+          }
+        },
+        "傳送門平時可見，走進去提示需擊敗 Boss 並達成條件": {
+          "ok": true,
+          "detail": "傳送門：擊敗王冠重錘兔並達成通關條件後才能使用（第一階段尚無 Boss）"
+        },
+        "標示可開關": {
+          "ok": true,
+          "detail": false
+        },
+        "傳送門平台、符文附近畫面中央沒有過曝（純白像素 < 3%）": {
+          "ok": true,
+          "detail": [
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 190.01233112303248
+            },
+            {
+              "whiteAll": 0,
+              "whiteCenter": 0,
+              "meanLuma": 199.1113328926285
+            },
+            {
+              "whiteAll": 0.004507390289662747,
+              "whiteCenter": 0,
+              "meanLuma": 206.64578841064963
+            }
+          ]
+        },
+        "報告文字（含模式）": {
+          "ok": true,
+          "detail": "星願物語 Stage 6 P2-2 星芽原野 營地與胡蘿蔔園測試報告\n時間 2026/11/26 18:10:06\n網址參數 ?map=starsprout&quality=low&lod=lite\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 Lite 低畫質：渲染畫質 low（解析度上限 1.25x、後製 關、陰影 PCF 512）／地圖 Lite／載入 861 ms\n發光效果 修正後；診斷"
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": 0
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "map-e2e/webkit_lite-low_spawn.png",
+        "map-e2e/webkit_lite-low_camp.png",
+        "map-e2e/webkit_lite-low_bridge.png",
+        "map-e2e/webkit_lite-low_highland.png",
+        "map-e2e/webkit_lite-low_farm.png",
+        "map-e2e/webkit_lite-low_ruins.png",
+        "map-e2e/webkit_lite-low_arena.png",
+        "map-e2e/webkit_lite-low_forest.png",
+        "map-e2e/webkit_lite-low_hill.png",
+        "map-e2e/webkit_lite-low_field.png",
+        "map-e2e/webkit_lite-low_flowersea.png",
+        "map-e2e/webkit_lite-low_campwide.png",
+        "map-e2e/webkit_lite-low_campfire.png",
+        "map-e2e/webkit_lite-low_campgate.png",
+        "map-e2e/webkit_lite-low_farmwide.png",
+        "map-e2e/webkit_lite-low_farmnear.png",
+        "map-e2e/webkit_lite-low_overview.png",
+        "map-e2e/webkit_lite-low_overview_nav.png",
+        "map-e2e/webkit_lite-low_portal.png"
+      ],
+      "results": {
+        "info": {
+          "quality": "low",
+          "lod": "lite",
+          "loadMs": 861,
+          "chunks": 16,
+          "terrainVerts": 15376,
+          "terrainTris": 28800,
+          "drawCalls": 79,
+          "activeMeshes": 63,
+          "trianglesActive": 284653.3333333333,
+          "meshes": 157,
+          "materials": 18,
+          "textures": 7,
+          "labels": true,
+          "props": {
+            "props": 196,
+            "meshes": 6,
+            "triangles": 14388,
+            "detailOn": [
+              true,
+              false
+            ],
+            "casters": 0,
+            "buildMs": 65
+          },
+          "veg": {
+            "trees": 502,
+            "smalls": 566,
+            "grass": 11457,
+            "flowers": 2580,
+            "hiChunks": 4,
+            "grassCells": 9,
+            "flowerCells": 4,
+            "shadowChunks": 0,
+            "buildMs": 226,
+            "colliders": 794
+          },
+          "nav": false,
+          "contextLost": 0,
+          "render": "1065×491 @1.25x",
+          "bridges": [
+            "B1",
+            "B2"
+          ],
+          "arena": {
+            "x": 0,
+            "z": 66,
+            "r": 12,
+            "y": 17
+          },
+          "portal": {
+            "x": 0,
+            "z": 82,
+            "r": 5,
+            "y": 17,
+            "facing": 3.141592653589793
+          }
+        },
+        "cameraTouch": {
+          "rotate": {
+            "target": "CANVAS",
+            "dAlpha": -0.7800000000000002,
+            "touches": 0
+          },
+          "stale": {
+            "dAlpha": 0.7799999999999989,
+            "dRadius": 0,
+            "touches": 0
+          },
+          "joystick": {
+            "target": "hud-joystick-zone",
+            "dAlpha": 0,
+            "moved": 4.308043831168837
+          },
+          "buttons": [
+            "BUTTON",
+            "BUTTON"
+          ],
+          "pinch": {
+            "r0": 9,
+            "r1": 5.000000024713313,
+            "dAlpha": 0
+          },
+          "pitch": {
+            "beta": 0.5500000141354353,
+            "aboveGround": 4.969296683122886
+          }
+        },
+        "cameraAvoid": {
+          "tent": {
+            "x": -60.13,
+            "z": -56.23
+          },
+          "obstacles": 501,
+          "off": {
+            "radius": 9,
+            "horiz": 4.540861574200273,
+            "coneR": 0.14250000000000007,
+            "aboveTop": true
+          },
+          "on": {
+            "radius": 3.386697976548757,
+            "desired": 9,
+            "allowed": 3.3866979762480427,
+            "horiz": 0.7860757098525439,
+            "coneR": 0.4586513251203399,
+            "aboveTop": false
+          },
+          "jitter": 2.1190915688862333e-10,
+          "recover": {
+            "dAlpha": -1.5600000000000005,
+            "start": 8.824911966692186,
+            "end": 9,
+            "desired": 9,
+            "maxDrop": 0,
+            "maxStep": 0.08814188909741283
+          },
+          "drawCalls": {
+            "on": 54,
+            "off": 58
+          }
+        },
+        "exposure": [
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 190.01233112303248
+          },
+          {
+            "whiteAll": 0,
+            "whiteCenter": 0,
+            "meanLuma": 199.1113328926285
+          },
+          {
+            "whiteAll": 0.004507390289662747,
+            "whiteCenter": 0,
+            "meanLuma": 206.64578841064963
+          }
+        ],
+        "after": {
+          "quality": "low",
+          "lod": "lite",
+          "loadMs": 861,
+          "chunks": 16,
+          "terrainVerts": 15376,
+          "terrainTris": 28800,
+          "drawCalls": 79,
+          "activeMeshes": 64,
+          "trianglesActive": 252759.33333333334,
+          "meshes": 157,
+          "materials": 18,
+          "textures": 7,
+          "labels": true,
+          "props": {
+            "props": 196,
+            "meshes": 6,
+            "triangles": 14388,
+            "detailOn": [
+              false,
+              true
+            ],
+            "casters": 0,
+            "buildMs": 65
+          },
+          "veg": {
+            "trees": 502,
+            "smalls": 566,
+            "grass": 11457,
+            "flowers": 2580,
+            "hiChunks": 4,
+            "grassCells": 10,
+            "flowerCells": 4,
+            "shadowChunks": 0,
+            "buildMs": 226,
+            "colliders": 794
+          },
+          "nav": false,
+          "contextLost": 0,
+          "render": "1065×491 @1x",
+          "bridges": [
+            "B1",
+            "B2"
+          ],
+          "arena": {
+            "x": 0,
+            "z": 66,
+            "r": 12,
+            "y": 17
+          },
+          "portal": {
+            "x": 0,
+            "z": 82,
+            "r": 5,
+            "y": 17,
+            "facing": 3.141592653589793
+          }
+        }
+      },
+      "ok": true
+    }
+  ],
+  "finishedAt": "2026-11-26T18:10:06.886Z",
+  "failures": 0
+}

@@ -1,0 +1,1934 @@
+{
+  "startedAt": "2026-11-26T17:19:21.275Z",
+  "runs": [
+    {
+      "browser": "chromium",
+      "lod": "hq",
+      "checks": {
+        "啟動": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "村莊網格建立（靜態 1＋水 1＋標記 1＋金環 2）": {
+          "ok": true,
+          "detail": {
+            "meshes": 5,
+            "triangles": 122406,
+            "labels": 22
+          }
+        },
+        "開場在南方傳送門內側抵達點 (0,−39)、面向北": {
+          "ok": true,
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "z": -39,
+            "yaw": 0
+          }
+        },
+        "NPC 站位 9（6 職業＋倉庫＋佈告欄＋星願商會）、出生／復活點 24、傳送門 4": {
+          "ok": true,
+          "detail": {
+            "npcs": 9,
+            "respawn": 24,
+            "portals": 4
+          }
+        },
+        "搖桿往前可以移動": {
+          "ok": true,
+          "detail": {
+            "moved": 20.000000000000284,
+            "p1": {
+              "x": -1.2246467991473497e-15,
+              "y": 0,
+              "z": -18.999999999999716,
+              "yaw": -6.123233995736766e-17
+            }
+          }
+        },
+        "北路石階走得上北側高台（Y 2）": {
+          "ok": true,
+          "detail": {
+            "x": -5.817072295949935e-16,
+            "y": 2,
+            "z": 24.500000000000117,
+            "yaw": -6.123233995719597e-17
+          }
+        },
+        "北路直通北方傳送門、停在高台外緣內（不會掉出地圖）": {
+          "ok": true,
+          "detail": {
+            "x": -2.6942229581241527e-15,
+            "y": 2,
+            "z": 48.900000000000446,
+            "yaw": -6.123233995736766e-17
+          }
+        },
+        "騎士軍團牆擋住（不能穿牆進入建築）": {
+          "ok": true,
+          "detail": {
+            "x": -12.534890726383276,
+            "y": 2,
+            "z": 23.57470072933335,
+            "yaw": 5.794493116621174,
+            "along": 26.699999999999996
+          }
+        },
+        "高台邊緣擋住（只能從石階上下）": {
+          "ok": true,
+          "detail": {
+            "x": -5.9787199418682215,
+            "y": 2,
+            "z": 22.216294004648553,
+            "yaw": 2.8797932657906435,
+            "r": 23.006712312807235
+          }
+        },
+        "四座傳送門位置正確、可站；只有南方開放（往星芽原野營地）": {
+          "ok": true,
+          "detail": [
+            {
+              "id": "south",
+              "x": 5.3884459162483544e-15,
+              "z": -44,
+              "open": true,
+              "dest": {
+                "map": "starsprout",
+                "x": -56,
+                "z": -64,
+                "label": "星芽原野 Lv1–10（新手營地）"
+              },
+              "ok": true,
+              "h": 0
+            },
+            {
+              "id": "north",
+              "x": 0,
+              "z": 44,
+              "open": false,
+              "dest": null,
+              "ok": true,
+              "h": 2
+            },
+            {
+              "id": "east",
+              "x": 44,
+              "z": 2.6942229581241772e-15,
+              "open": false,
+              "dest": null,
+              "ok": true,
+              "h": 0
+            },
+            {
+              "id": "west",
+              "x": -44,
+              "z": -8.082668874372531e-15,
+              "open": false,
+              "dest": null,
+              "ok": true,
+              "h": 0
+            }
+          ]
+        },
+        "星願之泉水池擋住（不會走進水裡）": {
+          "ok": true,
+          "detail": {
+            "x": -9.521963586303303e-14,
+            "y": 0,
+            "z": -7.3,
+            "yaw": -6.123233995736766e-17,
+            "r": 7.3
+          }
+        },
+        "每位 NPC 站位與前方 2 m 都可站": {
+          "ok": true,
+          "detail": [
+            {
+              "id": "sword",
+              "ok": true
+            },
+            {
+              "id": "knight",
+              "ok": true
+            },
+            {
+              "id": "mage",
+              "ok": true
+            },
+            {
+              "id": "church",
+              "ok": true
+            },
+            {
+              "id": "circus",
+              "ok": true
+            },
+            {
+              "id": "warehouse",
+              "ok": true
+            },
+            {
+              "id": "smith",
+              "ok": true
+            },
+            {
+              "id": "guild",
+              "ok": true
+            },
+            {
+              "id": "board",
+              "ok": true
+            }
+          ]
+        },
+        "復活點全部可站、在廣場地面": {
+          "ok": true,
+          "detail": 0
+        },
+        "Grey-box 繪製次數與三角形在預算內（Draw ≤ 70、三角形 ≤ 30.5 萬）": {
+          "ok": true,
+          "detail": {
+            "maxDraw": 51,
+            "maxTris": 135398
+          }
+        },
+        "報告文字（含模式）": {
+          "ok": true,
+          "detail": "星願物語 Stage 6 P2-3 星芽村 V1.3 Grey-box 測試報告\n時間 2026/11/26 17:25:12\n網址參數 ?map=village&quality=high&lod=hq\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 HQ：渲染畫質 high（解析度上限 2x、後製 開、陰影 柔和 PCSS 2048）／載入 289 ms\n村莊 V1.3 佔位網格 5、三角形 122406、文字標籤 22；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）\n碰撞 圓形 40、矩形 10；鏡頭避障 開\n目前畫面 Draw Calls 29、三角形 135354\n正式"
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": 0
+        },
+        "art=p3：流程樣品 GLB 載入成功（HQ／Lite 對應檔案）": {
+          "ok": true,
+          "detail": {
+            "status": "loaded",
+            "stage": "P3-0",
+            "file": "p30_sample_hq.glb",
+            "ms": 13545,
+            "meshes": 8,
+            "materials": 8,
+            "textures": 10,
+            "triangles": 4028
+          }
+        },
+        "art=p3：報告列出正式美術載入狀態；不影響 NPC／傳送門／出生點資料": {
+          "ok": true,
+          "detail": "村莊 V1.3 佔位網格 5、三角形 122406、文字標籤 22；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1） / 正式美術 art=p3（P3-0）：已載入 p30_sample_hq.glb，13545 ms，網格 8、材質 8、貼圖 10、三角形 4028"
+        },
+        "art=p3：沒有錯誤訊息": {
+          "ok": true,
+          "detail": []
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "village-e2e/chromium_hq_arrival.png",
+        "village-e2e/chromium_hq_gate.png",
+        "village-e2e/chromium_hq_plaza.png",
+        "village-e2e/chromium_hq_west.png",
+        "village-e2e/chromium_hq_east.png",
+        "village-e2e/chromium_hq_north.png",
+        "village-e2e/chromium_hq_northPortal.png",
+        "village-e2e/chromium_hq_smith.png",
+        "village-e2e/chromium_hq_circus.png",
+        "village-e2e/chromium_hq_church.png",
+        "village-e2e/chromium_hq_terrace.png",
+        "village-e2e/chromium_hq_overview.png",
+        "village-e2e/chromium_hq_plaza_nolabels.png",
+        "village-e2e/chromium_hq_p3sample.png"
+      ],
+      "results": {
+        "info": {
+          "quality": "high",
+          "lite": false,
+          "loadMs": 289.4000000000233,
+          "drawCalls": 36,
+          "triangles": 132008,
+          "world": {
+            "meshes": 5,
+            "triangles": 122406,
+            "labels": 22
+          },
+          "contextLost": 0,
+          "mode": "HQ"
+        },
+        "viewStats": {
+          "gate": {
+            "draw": 43,
+            "tris": 135382
+          },
+          "plaza": {
+            "draw": 36,
+            "tris": 135368
+          },
+          "west": {
+            "draw": 27,
+            "tris": 128296
+          },
+          "east": {
+            "draw": 27,
+            "tris": 128296
+          },
+          "north": {
+            "draw": 30,
+            "tris": 128636
+          },
+          "northPortal": {
+            "draw": 27,
+            "tris": 128296
+          },
+          "smith": {
+            "draw": 31,
+            "tris": 128638
+          },
+          "circus": {
+            "draw": 32,
+            "tris": 128640
+          },
+          "church": {
+            "draw": 30,
+            "tris": 128636
+          },
+          "terrace": {
+            "draw": 28,
+            "tris": 128298
+          },
+          "overview": {
+            "draw": 51,
+            "tris": 135398
+          }
+        },
+        "envBaseline": {
+          "overview": {
+            "draw": 28,
+            "tris": 50094
+          },
+          "plaza": {
+            "draw": 28,
+            "tris": 50094
+          },
+          "gate": {
+            "draw": 28,
+            "tris": 50094
+          }
+        },
+        "artP3": {
+          "status": "loaded",
+          "stage": "P3-0",
+          "file": "p30_sample_hq.glb",
+          "ms": 13545,
+          "meshes": 8,
+          "materials": 8,
+          "textures": 10,
+          "triangles": 4028
+        }
+      },
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "lod": "lite-mid",
+      "checks": {
+        "啟動": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "村莊網格建立（靜態 1＋水 1＋標記 1＋金環 2）": {
+          "ok": true,
+          "detail": {
+            "meshes": 5,
+            "triangles": 110822,
+            "labels": 22
+          }
+        },
+        "開場在南方傳送門內側抵達點 (0,−39)、面向北": {
+          "ok": true,
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "z": -39,
+            "yaw": 0
+          }
+        },
+        "NPC 站位 9（6 職業＋倉庫＋佈告欄＋星願商會）、出生／復活點 24、傳送門 4": {
+          "ok": true,
+          "detail": {
+            "npcs": 9,
+            "respawn": 24,
+            "portals": 4
+          }
+        },
+        "搖桿往前可以移動": {
+          "ok": true,
+          "detail": {
+            "moved": 20.000000000000284,
+            "p1": {
+              "x": -1.2246467991473497e-15,
+              "y": 0,
+              "z": -18.999999999999716,
+              "yaw": -6.123233995736766e-17
+            }
+          }
+        },
+        "北路石階走得上北側高台（Y 2）": {
+          "ok": true,
+          "detail": {
+            "x": -5.817072295949935e-16,
+            "y": 2,
+            "z": 24.500000000000117,
+            "yaw": -6.123233995719597e-17
+          }
+        },
+        "北路直通北方傳送門、停在高台外緣內（不會掉出地圖）": {
+          "ok": true,
+          "detail": {
+            "x": -2.6942229581241527e-15,
+            "y": 2,
+            "z": 48.900000000000446,
+            "yaw": -6.123233995736766e-17
+          }
+        },
+        "騎士軍團牆擋住（不能穿牆進入建築）": {
+          "ok": true,
+          "detail": {
+            "x": -12.534890726383276,
+            "y": 2,
+            "z": 23.57470072933335,
+            "yaw": 5.794493116621174,
+            "along": 26.699999999999996
+          }
+        },
+        "高台邊緣擋住（只能從石階上下）": {
+          "ok": true,
+          "detail": {
+            "x": -5.9787199418682215,
+            "y": 2,
+            "z": 22.216294004648553,
+            "yaw": 2.8797932657906435,
+            "r": 23.006712312807235
+          }
+        },
+        "四座傳送門位置正確、可站；只有南方開放（往星芽原野營地）": {
+          "ok": true,
+          "detail": [
+            {
+              "id": "south",
+              "x": 5.3884459162483544e-15,
+              "z": -44,
+              "open": true,
+              "dest": {
+                "map": "starsprout",
+                "x": -56,
+                "z": -64,
+                "label": "星芽原野 Lv1–10（新手營地）"
+              },
+              "ok": true,
+              "h": 0
+            },
+            {
+              "id": "north",
+              "x": 0,
+              "z": 44,
+              "open": false,
+              "dest": null,
+              "ok": true,
+              "h": 2
+            },
+            {
+              "id": "east",
+              "x": 44,
+              "z": 2.6942229581241772e-15,
+              "open": false,
+              "dest": null,
+              "ok": true,
+              "h": 0
+            },
+            {
+              "id": "west",
+              "x": -44,
+              "z": -8.082668874372531e-15,
+              "open": false,
+              "dest": null,
+              "ok": true,
+              "h": 0
+            }
+          ]
+        },
+        "星願之泉水池擋住（不會走進水裡）": {
+          "ok": true,
+          "detail": {
+            "x": -9.521963586303303e-14,
+            "y": 0,
+            "z": -7.3,
+            "yaw": -6.123233995736766e-17,
+            "r": 7.3
+          }
+        },
+        "每位 NPC 站位與前方 2 m 都可站": {
+          "ok": true,
+          "detail": [
+            {
+              "id": "sword",
+              "ok": true
+            },
+            {
+              "id": "knight",
+              "ok": true
+            },
+            {
+              "id": "mage",
+              "ok": true
+            },
+            {
+              "id": "church",
+              "ok": true
+            },
+            {
+              "id": "circus",
+              "ok": true
+            },
+            {
+              "id": "warehouse",
+              "ok": true
+            },
+            {
+              "id": "smith",
+              "ok": true
+            },
+            {
+              "id": "guild",
+              "ok": true
+            },
+            {
+              "id": "board",
+              "ok": true
+            }
+          ]
+        },
+        "復活點全部可站、在廣場地面": {
+          "ok": true,
+          "detail": 0
+        },
+        "Grey-box 繪製次數與三角形在預算內（Draw ≤ 70、三角形 ≤ 30.5 萬）": {
+          "ok": true,
+          "detail": {
+            "maxDraw": 52,
+            "maxTris": 123814
+          }
+        },
+        "報告文字（含模式）": {
+          "ok": true,
+          "detail": "星願物語 Stage 6 P2-3 星芽村 V1.3 Grey-box 測試報告\n時間 2026/11/26 17:27:33\n網址參數 ?map=village&quality=medium&lod=lite\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 Lite 中畫質：渲染畫質 medium（解析度上限 1.5x、後製 開、陰影 PCF 1024）／載入 244 ms\n村莊 V1.3 佔位網格 5、三角形 110822、文字標籤 22；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）\n碰撞 圓形 40、矩形 10；鏡頭避障 開\n目前畫面 Draw Calls 30、三角形"
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": 0
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "village-e2e/chromium_lite-mid_arrival.png",
+        "village-e2e/chromium_lite-mid_gate.png",
+        "village-e2e/chromium_lite-mid_plaza.png",
+        "village-e2e/chromium_lite-mid_west.png",
+        "village-e2e/chromium_lite-mid_east.png",
+        "village-e2e/chromium_lite-mid_north.png",
+        "village-e2e/chromium_lite-mid_northPortal.png",
+        "village-e2e/chromium_lite-mid_smith.png",
+        "village-e2e/chromium_lite-mid_circus.png",
+        "village-e2e/chromium_lite-mid_church.png",
+        "village-e2e/chromium_lite-mid_terrace.png",
+        "village-e2e/chromium_lite-mid_overview.png",
+        "village-e2e/chromium_lite-mid_plaza_nolabels.png"
+      ],
+      "results": {
+        "info": {
+          "quality": "medium",
+          "lite": true,
+          "loadMs": 243.5,
+          "drawCalls": 37,
+          "triangles": 120424,
+          "world": {
+            "meshes": 5,
+            "triangles": 110822,
+            "labels": 22
+          },
+          "contextLost": 0,
+          "mode": "Lite 中畫質"
+        },
+        "viewStats": {
+          "gate": {
+            "draw": 44,
+            "tris": 123798
+          },
+          "plaza": {
+            "draw": 37,
+            "tris": 123784
+          },
+          "west": {
+            "draw": 28,
+            "tris": 116792
+          },
+          "east": {
+            "draw": 28,
+            "tris": 116792
+          },
+          "north": {
+            "draw": 31,
+            "tris": 117052
+          },
+          "northPortal": {
+            "draw": 28,
+            "tris": 116792
+          },
+          "smith": {
+            "draw": 32,
+            "tris": 117054
+          },
+          "circus": {
+            "draw": 33,
+            "tris": 117056
+          },
+          "church": {
+            "draw": 31,
+            "tris": 117052
+          },
+          "terrace": {
+            "draw": 29,
+            "tris": 116794
+          },
+          "overview": {
+            "draw": 52,
+            "tris": 123814
+          }
+        },
+        "envBaseline": {
+          "overview": {
+            "draw": 29,
+            "tris": 38510
+          },
+          "plaza": {
+            "draw": 29,
+            "tris": 38510
+          },
+          "gate": {
+            "draw": 29,
+            "tris": 38510
+          }
+        }
+      },
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "lod": "lite-low",
+      "checks": {
+        "啟動": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "村莊網格建立（靜態 1＋水 1＋標記 1＋金環 2）": {
+          "ok": true,
+          "detail": {
+            "meshes": 5,
+            "triangles": 110822,
+            "labels": 22
+          }
+        },
+        "開場在南方傳送門內側抵達點 (0,−39)、面向北": {
+          "ok": true,
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "z": -39,
+            "yaw": 0
+          }
+        },
+        "NPC 站位 9（6 職業＋倉庫＋佈告欄＋星願商會）、出生／復活點 24、傳送門 4": {
+          "ok": true,
+          "detail": {
+            "npcs": 9,
+            "respawn": 24,
+            "portals": 4
+          }
+        },
+        "搖桿往前可以移動": {
+          "ok": true,
+          "detail": {
+            "moved": 20.000000000000284,
+            "p1": {
+              "x": -1.2246467991473497e-15,
+              "y": 0,
+              "z": -18.999999999999716,
+              "yaw": -6.123233995736766e-17
+            }
+          }
+        },
+        "北路石階走得上北側高台（Y 2）": {
+          "ok": true,
+          "detail": {
+            "x": -5.817072295949935e-16,
+            "y": 2,
+            "z": 24.500000000000117,
+            "yaw": -6.123233995719597e-17
+          }
+        },
+        "北路直通北方傳送門、停在高台外緣內（不會掉出地圖）": {
+          "ok": true,
+          "detail": {
+            "x": -2.6439512070191842e-15,
+            "y": 2,
+            "z": 48.98949999999976,
+            "yaw": -6.123233995736766e-17
+          }
+        },
+        "騎士軍團牆擋住（不能穿牆進入建築）": {
+          "ok": true,
+          "detail": {
+            "x": -12.534890726383276,
+            "y": 2,
+            "z": 23.57470072933335,
+            "yaw": 5.794493116621174,
+            "along": 26.699999999999996
+          }
+        },
+        "高台邊緣擋住（只能從石階上下）": {
+          "ok": true,
+          "detail": {
+            "x": -5.9787199418682215,
+            "y": 2,
+            "z": 22.216294004648553,
+            "yaw": 2.8797932657906435,
+            "r": 23.006712312807235
+          }
+        },
+        "四座傳送門位置正確、可站；只有南方開放（往星芽原野營地）": {
+          "ok": true,
+          "detail": [
+            {
+              "id": "south",
+              "x": 5.3884459162483544e-15,
+              "z": -44,
+              "open": true,
+              "dest": {
+                "map": "starsprout",
+                "x": -56,
+                "z": -64,
+                "label": "星芽原野 Lv1–10（新手營地）"
+              },
+              "ok": true,
+              "h": 0
+            },
+            {
+              "id": "north",
+              "x": 0,
+              "z": 44,
+              "open": false,
+              "dest": null,
+              "ok": true,
+              "h": 2
+            },
+            {
+              "id": "east",
+              "x": 44,
+              "z": 2.6942229581241772e-15,
+              "open": false,
+              "dest": null,
+              "ok": true,
+              "h": 0
+            },
+            {
+              "id": "west",
+              "x": -44,
+              "z": -8.082668874372531e-15,
+              "open": false,
+              "dest": null,
+              "ok": true,
+              "h": 0
+            }
+          ]
+        },
+        "星願之泉水池擋住（不會走進水裡）": {
+          "ok": true,
+          "detail": {
+            "x": -9.521963586303303e-14,
+            "y": 0,
+            "z": -7.3,
+            "yaw": -6.123233995736766e-17,
+            "r": 7.3
+          }
+        },
+        "每位 NPC 站位與前方 2 m 都可站": {
+          "ok": true,
+          "detail": [
+            {
+              "id": "sword",
+              "ok": true
+            },
+            {
+              "id": "knight",
+              "ok": true
+            },
+            {
+              "id": "mage",
+              "ok": true
+            },
+            {
+              "id": "church",
+              "ok": true
+            },
+            {
+              "id": "circus",
+              "ok": true
+            },
+            {
+              "id": "warehouse",
+              "ok": true
+            },
+            {
+              "id": "smith",
+              "ok": true
+            },
+            {
+              "id": "guild",
+              "ok": true
+            },
+            {
+              "id": "board",
+              "ok": true
+            }
+          ]
+        },
+        "復活點全部可站、在廣場地面": {
+          "ok": true,
+          "detail": 0
+        },
+        "Grey-box 繪製次數與三角形在預算內（Draw ≤ 70、三角形 ≤ 30.5 萬）": {
+          "ok": true,
+          "detail": {
+            "maxDraw": 50,
+            "maxTris": 123814
+          }
+        },
+        "報告文字（含模式）": {
+          "ok": true,
+          "detail": "星願物語 Stage 6 P2-3 星芽村 V1.3 Grey-box 測試報告\n時間 2026/11/26 17:28:52\n網址參數 ?map=village&quality=low&lod=lite\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 Lite 低畫質：渲染畫質 low（解析度上限 1.25x、後製 關、陰影 PCF 512）／載入 248 ms\n村莊 V1.3 佔位網格 5、三角形 110822、文字標籤 22；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）\n碰撞 圓形 40、矩形 10；鏡頭避障 開\n目前畫面 Draw Calls 28、三角形 12377"
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": 0
+        },
+        "art=p3：流程樣品 GLB 載入成功（HQ／Lite 對應檔案）": {
+          "ok": true,
+          "detail": {
+            "status": "loaded",
+            "stage": "P3-0",
+            "file": "p30_sample_lite.glb",
+            "ms": 1004,
+            "meshes": 8,
+            "materials": 8,
+            "textures": 7,
+            "triangles": 1818
+          }
+        },
+        "art=p3：報告列出正式美術載入狀態；不影響 NPC／傳送門／出生點資料": {
+          "ok": true,
+          "detail": "村莊 V1.3 佔位網格 5、三角形 110822、文字標籤 22；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1） / 正式美術 art=p3（P3-0）：已載入 p30_sample_lite.glb，1004 ms，網格 8、材質 8、貼圖 7、三角形 1818"
+        },
+        "art=p3：沒有錯誤訊息": {
+          "ok": true,
+          "detail": []
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "village-e2e/chromium_lite-low_arrival.png",
+        "village-e2e/chromium_lite-low_gate.png",
+        "village-e2e/chromium_lite-low_plaza.png",
+        "village-e2e/chromium_lite-low_west.png",
+        "village-e2e/chromium_lite-low_east.png",
+        "village-e2e/chromium_lite-low_north.png",
+        "village-e2e/chromium_lite-low_northPortal.png",
+        "village-e2e/chromium_lite-low_smith.png",
+        "village-e2e/chromium_lite-low_circus.png",
+        "village-e2e/chromium_lite-low_church.png",
+        "village-e2e/chromium_lite-low_terrace.png",
+        "village-e2e/chromium_lite-low_overview.png",
+        "village-e2e/chromium_lite-low_plaza_nolabels.png",
+        "village-e2e/chromium_lite-low_p3sample.png"
+      ],
+      "results": {
+        "info": {
+          "quality": "low",
+          "lite": true,
+          "loadMs": 248.09999999997672,
+          "drawCalls": 35,
+          "triangles": 120424,
+          "world": {
+            "meshes": 5,
+            "triangles": 110822,
+            "labels": 22
+          },
+          "contextLost": 0,
+          "mode": "Lite 低畫質"
+        },
+        "viewStats": {
+          "gate": {
+            "draw": 42,
+            "tris": 123798
+          },
+          "plaza": {
+            "draw": 35,
+            "tris": 123784
+          },
+          "west": {
+            "draw": 26,
+            "tris": 116792
+          },
+          "east": {
+            "draw": 26,
+            "tris": 116792
+          },
+          "north": {
+            "draw": 29,
+            "tris": 117052
+          },
+          "northPortal": {
+            "draw": 26,
+            "tris": 116792
+          },
+          "smith": {
+            "draw": 30,
+            "tris": 117054
+          },
+          "circus": {
+            "draw": 31,
+            "tris": 117056
+          },
+          "church": {
+            "draw": 29,
+            "tris": 117052
+          },
+          "terrace": {
+            "draw": 27,
+            "tris": 116794
+          },
+          "overview": {
+            "draw": 50,
+            "tris": 123814
+          }
+        },
+        "envBaseline": {
+          "overview": {
+            "draw": 27,
+            "tris": 38510
+          },
+          "plaza": {
+            "draw": 27,
+            "tris": 38510
+          },
+          "gate": {
+            "draw": 27,
+            "tris": 38510
+          }
+        },
+        "artP3": {
+          "status": "loaded",
+          "stage": "P3-0",
+          "file": "p30_sample_lite.glb",
+          "ms": 1004,
+          "meshes": 8,
+          "materials": 8,
+          "textures": 7,
+          "triangles": 1818
+        }
+      },
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "lod": "hq",
+      "checks": {
+        "啟動": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "村莊網格建立（靜態 1＋水 1＋標記 1＋金環 2）": {
+          "ok": true,
+          "detail": {
+            "meshes": 5,
+            "triangles": 122406,
+            "labels": 22
+          }
+        },
+        "開場在南方傳送門內側抵達點 (0,−39)、面向北": {
+          "ok": true,
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "z": -39,
+            "yaw": 0
+          }
+        },
+        "NPC 站位 9（6 職業＋倉庫＋佈告欄＋星願商會）、出生／復活點 24、傳送門 4": {
+          "ok": true,
+          "detail": {
+            "npcs": 9,
+            "respawn": 24,
+            "portals": 4
+          }
+        },
+        "搖桿往前可以移動": {
+          "ok": true,
+          "detail": {
+            "moved": 20.000000000000284,
+            "p1": {
+              "x": -1.2246467991473497e-15,
+              "y": 0,
+              "z": -18.999999999999716,
+              "yaw": -6.123233995736766e-17
+            }
+          }
+        },
+        "北路石階走得上北側高台（Y 2）": {
+          "ok": true,
+          "detail": {
+            "x": -5.817072295949935e-16,
+            "y": 2,
+            "z": 24.500000000000117,
+            "yaw": -6.123233995719597e-17
+          }
+        },
+        "北路直通北方傳送門、停在高台外緣內（不會掉出地圖）": {
+          "ok": true,
+          "detail": {
+            "x": -2.5628795889156093e-15,
+            "y": 2,
+            "z": 48.97800000000034,
+            "yaw": -6.123233995736766e-17
+          }
+        },
+        "騎士軍團牆擋住（不能穿牆進入建築）": {
+          "ok": true,
+          "detail": {
+            "x": -12.534890726383276,
+            "y": 2,
+            "z": 23.57470072933335,
+            "yaw": 5.794493116621174,
+            "along": 26.699999999999996
+          }
+        },
+        "高台邊緣擋住（只能從石階上下）": {
+          "ok": true,
+          "detail": {
+            "x": -5.9787199418682215,
+            "y": 2,
+            "z": 22.216294004648553,
+            "yaw": 2.8797932657906435,
+            "r": 23.006712312807235
+          }
+        },
+        "四座傳送門位置正確、可站；只有南方開放（往星芽原野營地）": {
+          "ok": true,
+          "detail": [
+            {
+              "id": "south",
+              "x": 5.3884459162483544e-15,
+              "z": -44,
+              "open": true,
+              "dest": {
+                "map": "starsprout",
+                "x": -56,
+                "z": -64,
+                "label": "星芽原野 Lv1–10（新手營地）"
+              },
+              "ok": true,
+              "h": 0
+            },
+            {
+              "id": "north",
+              "x": 0,
+              "z": 44,
+              "open": false,
+              "dest": null,
+              "ok": true,
+              "h": 2
+            },
+            {
+              "id": "east",
+              "x": 44,
+              "z": 2.6942229581241772e-15,
+              "open": false,
+              "dest": null,
+              "ok": true,
+              "h": 0
+            },
+            {
+              "id": "west",
+              "x": -44,
+              "z": -8.082668874372531e-15,
+              "open": false,
+              "dest": null,
+              "ok": true,
+              "h": 0
+            }
+          ]
+        },
+        "星願之泉水池擋住（不會走進水裡）": {
+          "ok": true,
+          "detail": {
+            "x": -9.521963586303303e-14,
+            "y": 0,
+            "z": -7.3,
+            "yaw": -6.123233995736766e-17,
+            "r": 7.3
+          }
+        },
+        "每位 NPC 站位與前方 2 m 都可站": {
+          "ok": true,
+          "detail": [
+            {
+              "id": "sword",
+              "ok": true
+            },
+            {
+              "id": "knight",
+              "ok": true
+            },
+            {
+              "id": "mage",
+              "ok": true
+            },
+            {
+              "id": "church",
+              "ok": true
+            },
+            {
+              "id": "circus",
+              "ok": true
+            },
+            {
+              "id": "warehouse",
+              "ok": true
+            },
+            {
+              "id": "smith",
+              "ok": true
+            },
+            {
+              "id": "guild",
+              "ok": true
+            },
+            {
+              "id": "board",
+              "ok": true
+            }
+          ]
+        },
+        "復活點全部可站、在廣場地面": {
+          "ok": true,
+          "detail": 0
+        },
+        "Grey-box 繪製次數與三角形在預算內（Draw ≤ 70、三角形 ≤ 30.5 萬）": {
+          "ok": true,
+          "detail": {
+            "maxDraw": 51,
+            "maxTris": 135398
+          }
+        },
+        "報告文字（含模式）": {
+          "ok": true,
+          "detail": "星願物語 Stage 6 P2-3 星芽村 V1.3 Grey-box 測試報告\n時間 2026/11/26 17:30:08\n網址參數 ?map=village&quality=high&lod=hq\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 HQ：渲染畫質 high（解析度上限 2x、後製 開、陰影 柔和 PCSS 2048）／載入 436 ms\n村莊 V1.3 佔位網格 5、三角形 122406、文字標籤 22；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）\n碰撞 圓形 40、矩形 10；鏡頭避障 開\n目前畫面 Draw Calls 29、三角形 13535"
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": 0
+        },
+        "art=p3：流程樣品 GLB 載入成功（HQ／Lite 對應檔案）": {
+          "ok": true,
+          "detail": {
+            "status": "loaded",
+            "stage": "P3-0",
+            "file": "p30_sample_hq.glb",
+            "ms": 262,
+            "meshes": 8,
+            "materials": 8,
+            "textures": 10,
+            "triangles": 4028
+          }
+        },
+        "art=p3：報告列出正式美術載入狀態；不影響 NPC／傳送門／出生點資料": {
+          "ok": true,
+          "detail": "村莊 V1.3 佔位網格 5、三角形 122406、文字標籤 22；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1） / 正式美術 art=p3（P3-0）：已載入 p30_sample_hq.glb，262 ms，網格 8、材質 8、貼圖 10、三角形 4028"
+        },
+        "art=p3：沒有錯誤訊息": {
+          "ok": true,
+          "detail": []
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "village-e2e/webkit_hq_arrival.png",
+        "village-e2e/webkit_hq_gate.png",
+        "village-e2e/webkit_hq_plaza.png",
+        "village-e2e/webkit_hq_west.png",
+        "village-e2e/webkit_hq_east.png",
+        "village-e2e/webkit_hq_north.png",
+        "village-e2e/webkit_hq_northPortal.png",
+        "village-e2e/webkit_hq_smith.png",
+        "village-e2e/webkit_hq_circus.png",
+        "village-e2e/webkit_hq_church.png",
+        "village-e2e/webkit_hq_terrace.png",
+        "village-e2e/webkit_hq_overview.png",
+        "village-e2e/webkit_hq_plaza_nolabels.png",
+        "village-e2e/webkit_hq_p3sample.png"
+      ],
+      "results": {
+        "info": {
+          "quality": "high",
+          "lite": false,
+          "loadMs": 436,
+          "drawCalls": 35,
+          "triangles": 128646,
+          "world": {
+            "meshes": 5,
+            "triangles": 122406,
+            "labels": 22
+          },
+          "contextLost": 0,
+          "mode": "HQ"
+        },
+        "viewStats": {
+          "gate": {
+            "draw": 43,
+            "tris": 135382
+          },
+          "plaza": {
+            "draw": 36,
+            "tris": 135368
+          },
+          "west": {
+            "draw": 27,
+            "tris": 128296
+          },
+          "east": {
+            "draw": 27,
+            "tris": 128296
+          },
+          "north": {
+            "draw": 30,
+            "tris": 128636
+          },
+          "northPortal": {
+            "draw": 27,
+            "tris": 128296
+          },
+          "smith": {
+            "draw": 31,
+            "tris": 128638
+          },
+          "circus": {
+            "draw": 32,
+            "tris": 128640
+          },
+          "church": {
+            "draw": 30,
+            "tris": 128636
+          },
+          "terrace": {
+            "draw": 28,
+            "tris": 128298
+          },
+          "overview": {
+            "draw": 51,
+            "tris": 135398
+          }
+        },
+        "envBaseline": {
+          "overview": {
+            "draw": 28,
+            "tris": 50094
+          },
+          "plaza": {
+            "draw": 28,
+            "tris": 50094
+          },
+          "gate": {
+            "draw": 28,
+            "tris": 50094
+          }
+        },
+        "artP3": {
+          "status": "loaded",
+          "stage": "P3-0",
+          "file": "p30_sample_hq.glb",
+          "ms": 262,
+          "meshes": 8,
+          "materials": 8,
+          "textures": 10,
+          "triangles": 4028
+        }
+      },
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "lod": "lite-mid",
+      "checks": {
+        "啟動": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "村莊網格建立（靜態 1＋水 1＋標記 1＋金環 2）": {
+          "ok": true,
+          "detail": {
+            "meshes": 5,
+            "triangles": 110822,
+            "labels": 22
+          }
+        },
+        "開場在南方傳送門內側抵達點 (0,−39)、面向北": {
+          "ok": true,
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "z": -39,
+            "yaw": 0
+          }
+        },
+        "NPC 站位 9（6 職業＋倉庫＋佈告欄＋星願商會）、出生／復活點 24、傳送門 4": {
+          "ok": true,
+          "detail": {
+            "npcs": 9,
+            "respawn": 24,
+            "portals": 4
+          }
+        },
+        "搖桿往前可以移動": {
+          "ok": true,
+          "detail": {
+            "moved": 12.964999999999964,
+            "p1": {
+              "x": -7.938772875472702e-16,
+              "y": 0,
+              "z": -26.035000000000036,
+              "yaw": -6.123233995736765e-17
+            }
+          }
+        },
+        "北路石階走得上北側高台（Y 2）": {
+          "ok": true,
+          "detail": {
+            "x": -5.657868212060774e-16,
+            "y": 2,
+            "z": 24.240000000000006,
+            "yaw": -6.123233995701209e-17
+          }
+        },
+        "北路直通北方傳送門、停在高台外緣內（不會掉出地圖）": {
+          "ok": true,
+          "detail": {
+            "x": -2.306622246194046e-15,
+            "y": 2,
+            "z": 48.99333333333357,
+            "yaw": -6.123233995736766e-17
+          }
+        },
+        "騎士軍團牆擋住（不能穿牆進入建築）": {
+          "ok": true,
+          "detail": {
+            "x": -12.534890726383228,
+            "y": 2,
+            "z": 23.57470072933338,
+            "yaw": 5.794493116621174,
+            "along": 26.699999999999996
+          }
+        },
+        "高台邊緣擋住（只能從石階上下）": {
+          "ok": true,
+          "detail": {
+            "x": -5.705234484209897,
+            "y": 2,
+            "z": 22.283908812488804,
+            "yaw": 2.8797932657906435,
+            "r": 23.00265837861211
+          }
+        },
+        "四座傳送門位置正確、可站；只有南方開放（往星芽原野營地）": {
+          "ok": true,
+          "detail": [
+            {
+              "id": "south",
+              "x": 5.3884459162483544e-15,
+              "z": -44,
+              "open": true,
+              "dest": {
+                "map": "starsprout",
+                "x": -56,
+                "z": -64,
+                "label": "星芽原野 Lv1–10（新手營地）"
+              },
+              "ok": true,
+              "h": 0
+            },
+            {
+              "id": "north",
+              "x": 0,
+              "z": 44,
+              "open": false,
+              "dest": null,
+              "ok": true,
+              "h": 2
+            },
+            {
+              "id": "east",
+              "x": 44,
+              "z": 2.6942229581241772e-15,
+              "open": false,
+              "dest": null,
+              "ok": true,
+              "h": 0
+            },
+            {
+              "id": "west",
+              "x": -44,
+              "z": -8.082668874372531e-15,
+              "open": false,
+              "dest": null,
+              "ok": true,
+              "h": 0
+            }
+          ]
+        },
+        "星願之泉水池擋住（不會走進水裡）": {
+          "ok": true,
+          "detail": {
+            "x": -5.494609075867854e-15,
+            "y": 0,
+            "z": -7.3,
+            "yaw": -6.123233995736766e-17,
+            "r": 7.3
+          }
+        },
+        "每位 NPC 站位與前方 2 m 都可站": {
+          "ok": true,
+          "detail": [
+            {
+              "id": "sword",
+              "ok": true
+            },
+            {
+              "id": "knight",
+              "ok": true
+            },
+            {
+              "id": "mage",
+              "ok": true
+            },
+            {
+              "id": "church",
+              "ok": true
+            },
+            {
+              "id": "circus",
+              "ok": true
+            },
+            {
+              "id": "warehouse",
+              "ok": true
+            },
+            {
+              "id": "smith",
+              "ok": true
+            },
+            {
+              "id": "guild",
+              "ok": true
+            },
+            {
+              "id": "board",
+              "ok": true
+            }
+          ]
+        },
+        "復活點全部可站、在廣場地面": {
+          "ok": true,
+          "detail": 0
+        },
+        "Grey-box 繪製次數與三角形在預算內（Draw ≤ 70、三角形 ≤ 30.5 萬）": {
+          "ok": true,
+          "detail": {
+            "maxDraw": 52,
+            "maxTris": 123814
+          }
+        },
+        "報告文字（含模式）": {
+          "ok": true,
+          "detail": "星願物語 Stage 6 P2-3 星芽村 V1.3 Grey-box 測試報告\n時間 2026/11/26 17:30:44\n網址參數 ?map=village&quality=medium&lod=lite\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 Lite 中畫質：渲染畫質 medium（解析度上限 1.5x、後製 開、陰影 PCF 1024）／載入 369 ms\n村莊 V1.3 佔位網格 5、三角形 110822、文字標籤 22；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）\n碰撞 圓形 40、矩形 10；鏡頭避障 開\n目前畫面 Draw Calls 30"
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": 0
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "village-e2e/webkit_lite-mid_arrival.png",
+        "village-e2e/webkit_lite-mid_gate.png",
+        "village-e2e/webkit_lite-mid_plaza.png",
+        "village-e2e/webkit_lite-mid_west.png",
+        "village-e2e/webkit_lite-mid_east.png",
+        "village-e2e/webkit_lite-mid_north.png",
+        "village-e2e/webkit_lite-mid_northPortal.png",
+        "village-e2e/webkit_lite-mid_smith.png",
+        "village-e2e/webkit_lite-mid_circus.png",
+        "village-e2e/webkit_lite-mid_church.png",
+        "village-e2e/webkit_lite-mid_terrace.png",
+        "village-e2e/webkit_lite-mid_overview.png",
+        "village-e2e/webkit_lite-mid_plaza_nolabels.png"
+      ],
+      "results": {
+        "info": {
+          "quality": "medium",
+          "lite": true,
+          "loadMs": 369,
+          "drawCalls": 37,
+          "triangles": 120424,
+          "world": {
+            "meshes": 5,
+            "triangles": 110822,
+            "labels": 22
+          },
+          "contextLost": 0,
+          "mode": "Lite 中畫質"
+        },
+        "viewStats": {
+          "gate": {
+            "draw": 44,
+            "tris": 123798
+          },
+          "plaza": {
+            "draw": 37,
+            "tris": 123784
+          },
+          "west": {
+            "draw": 28,
+            "tris": 116792
+          },
+          "east": {
+            "draw": 28,
+            "tris": 116792
+          },
+          "north": {
+            "draw": 31,
+            "tris": 117052
+          },
+          "northPortal": {
+            "draw": 28,
+            "tris": 116792
+          },
+          "smith": {
+            "draw": 32,
+            "tris": 117054
+          },
+          "circus": {
+            "draw": 33,
+            "tris": 117056
+          },
+          "church": {
+            "draw": 31,
+            "tris": 117052
+          },
+          "terrace": {
+            "draw": 29,
+            "tris": 116794
+          },
+          "overview": {
+            "draw": 52,
+            "tris": 123814
+          }
+        },
+        "envBaseline": {
+          "overview": {
+            "draw": 29,
+            "tris": 38510
+          },
+          "plaza": {
+            "draw": 29,
+            "tris": 38510
+          },
+          "gate": {
+            "draw": 29,
+            "tris": 38510
+          }
+        }
+      },
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "lod": "lite-low",
+      "checks": {
+        "啟動": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "村莊網格建立（靜態 1＋水 1＋標記 1＋金環 2）": {
+          "ok": true,
+          "detail": {
+            "meshes": 5,
+            "triangles": 110822,
+            "labels": 22
+          }
+        },
+        "開場在南方傳送門內側抵達點 (0,−39)、面向北": {
+          "ok": true,
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "z": -39,
+            "yaw": 0
+          }
+        },
+        "NPC 站位 9（6 職業＋倉庫＋佈告欄＋星願商會）、出生／復活點 24、傳送門 4": {
+          "ok": true,
+          "detail": {
+            "npcs": 9,
+            "respawn": 24,
+            "portals": 4
+          }
+        },
+        "搖桿往前可以移動": {
+          "ok": true,
+          "detail": {
+            "moved": 18.985000000000092,
+            "p1": {
+              "x": -1.1624959740906268e-15,
+              "y": 0,
+              "z": -20.014999999999908,
+              "yaw": -6.123233995736766e-17
+            }
+          }
+        },
+        "北路石階走得上北側高台（Y 2）": {
+          "ok": true,
+          "detail": {
+            "x": -5.639498510073558e-16,
+            "y": 2,
+            "z": 24.210000000000004,
+            "yaw": -6.123233995698093e-17
+          }
+        },
+        "北路直通北方傳送門、停在高台外緣內（不會掉出地圖）": {
+          "ok": true,
+          "detail": {
+            "x": -2.3546896330605792e-15,
+            "y": 2,
+            "z": 48.98833333333339,
+            "yaw": -6.123233995736766e-17
+          }
+        },
+        "騎士軍團牆擋住（不能穿牆進入建築）": {
+          "ok": true,
+          "detail": {
+            "x": -12.53489072638325,
+            "y": 2,
+            "z": 23.574700729333365,
+            "yaw": 5.794493116621174,
+            "along": 26.699999999999996
+          }
+        },
+        "高台邊緣擋住（只能從石階上下）": {
+          "ok": true,
+          "detail": {
+            "x": -5.8583690858955615,
+            "y": 2,
+            "z": 22.242374001958385,
+            "yaw": 2.8797932657906435,
+            "r": 23.000949754076917
+          }
+        },
+        "四座傳送門位置正確、可站；只有南方開放（往星芽原野營地）": {
+          "ok": true,
+          "detail": [
+            {
+              "id": "south",
+              "x": 5.3884459162483544e-15,
+              "z": -44,
+              "open": true,
+              "dest": {
+                "map": "starsprout",
+                "x": -56,
+                "z": -64,
+                "label": "星芽原野 Lv1–10（新手營地）"
+              },
+              "ok": true,
+              "h": 0
+            },
+            {
+              "id": "north",
+              "x": 0,
+              "z": 44,
+              "open": false,
+              "dest": null,
+              "ok": true,
+              "h": 2
+            },
+            {
+              "id": "east",
+              "x": 44,
+              "z": 2.6942229581241772e-15,
+              "open": false,
+              "dest": null,
+              "ok": true,
+              "h": 0
+            },
+            {
+              "id": "west",
+              "x": -44,
+              "z": -8.082668874372531e-15,
+              "open": false,
+              "dest": null,
+              "ok": true,
+              "h": 0
+            }
+          ]
+        },
+        "星願之泉水池擋住（不會走進水裡）": {
+          "ok": true,
+          "detail": {
+            "x": -5.284148858884176e-14,
+            "y": 0,
+            "z": -7.3,
+            "yaw": -6.123233995736766e-17,
+            "r": 7.3
+          }
+        },
+        "每位 NPC 站位與前方 2 m 都可站": {
+          "ok": true,
+          "detail": [
+            {
+              "id": "sword",
+              "ok": true
+            },
+            {
+              "id": "knight",
+              "ok": true
+            },
+            {
+              "id": "mage",
+              "ok": true
+            },
+            {
+              "id": "church",
+              "ok": true
+            },
+            {
+              "id": "circus",
+              "ok": true
+            },
+            {
+              "id": "warehouse",
+              "ok": true
+            },
+            {
+              "id": "smith",
+              "ok": true
+            },
+            {
+              "id": "guild",
+              "ok": true
+            },
+            {
+              "id": "board",
+              "ok": true
+            }
+          ]
+        },
+        "復活點全部可站、在廣場地面": {
+          "ok": true,
+          "detail": 0
+        },
+        "Grey-box 繪製次數與三角形在預算內（Draw ≤ 70、三角形 ≤ 30.5 萬）": {
+          "ok": true,
+          "detail": {
+            "maxDraw": 50,
+            "maxTris": 123814
+          }
+        },
+        "報告文字（含模式）": {
+          "ok": true,
+          "detail": "星願物語 Stage 6 P2-3 星芽村 V1.3 Grey-box 測試報告\n時間 2026/11/26 17:31:26\n網址參數 ?map=village&quality=low&lod=lite\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 Lite 低畫質：渲染畫質 low（解析度上限 1.25x、後製 關、陰影 PCF 512）／載入 392 ms\n村莊 V1.3 佔位網格 5、三角形 110822、文字標籤 22；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）\n碰撞 圓形 40、矩形 10；鏡頭避障 開\n目前畫面 Draw Calls 28、三角形 1"
+        },
+        "巡迴 1 圈完成、真正卡住 0、腳本誤報 0": {
+          "ok": true,
+          "detail": {
+            "loopTimes": [
+              79.79600000000012
+            ],
+            "stuck": 0,
+            "timeouts": 0,
+            "blocked": 0,
+            "events": []
+          }
+        },
+        "巡迴報告含每圈時間、FPS、Draw Calls、Context Lost、卡住與誤報次數、異常事件欄": {
+          "ok": true,
+          "detail": "正式美術：關閉（Grey-box） / ---- 巡迴測試 1 圈（Lite 低畫質）---- / 每圈時間：79.8 秒；總時間 79.8 秒 / 真正卡住 0 次；腳本誤報（進度逾時但仍在移動）0 次；碰撞滑動 0 幀 / FPS 平均 14.5／1% Low 9.7／最低 8.9／卡頓(>50ms) 958 幀 / Draw Calls 平均 30／最高 40；每格三角形平均 119382 / 異常事件：無 / WebGL Context Lost 0 次"
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": 0
+        },
+        "art=p3：流程樣品 GLB 載入成功（HQ／Lite 對應檔案）": {
+          "ok": true,
+          "detail": {
+            "status": "loaded",
+            "stage": "P3-0",
+            "file": "p30_sample_lite.glb",
+            "ms": 122,
+            "meshes": 8,
+            "materials": 8,
+            "textures": 7,
+            "triangles": 1818
+          }
+        },
+        "art=p3：報告列出正式美術載入狀態；不影響 NPC／傳送門／出生點資料": {
+          "ok": true,
+          "detail": "村莊 V1.3 佔位網格 5、三角形 110822、文字標籤 22；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1） / 正式美術 art=p3（P3-0）：已載入 p30_sample_lite.glb，122 ms，網格 8、材質 8、貼圖 7、三角形 1818"
+        },
+        "art=p3：沒有錯誤訊息": {
+          "ok": true,
+          "detail": []
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "village-e2e/webkit_lite-low_arrival.png",
+        "village-e2e/webkit_lite-low_gate.png",
+        "village-e2e/webkit_lite-low_plaza.png",
+        "village-e2e/webkit_lite-low_west.png",
+        "village-e2e/webkit_lite-low_east.png",
+        "village-e2e/webkit_lite-low_north.png",
+        "village-e2e/webkit_lite-low_northPortal.png",
+        "village-e2e/webkit_lite-low_smith.png",
+        "village-e2e/webkit_lite-low_circus.png",
+        "village-e2e/webkit_lite-low_church.png",
+        "village-e2e/webkit_lite-low_terrace.png",
+        "village-e2e/webkit_lite-low_overview.png",
+        "village-e2e/webkit_lite-low_plaza_nolabels.png",
+        "village-e2e/webkit_lite-low_p3sample.png"
+      ],
+      "results": {
+        "info": {
+          "quality": "low",
+          "lite": true,
+          "loadMs": 392,
+          "drawCalls": 35,
+          "triangles": 120424,
+          "world": {
+            "meshes": 5,
+            "triangles": 110822,
+            "labels": 22
+          },
+          "contextLost": 0,
+          "mode": "Lite 低畫質"
+        },
+        "viewStats": {
+          "gate": {
+            "draw": 42,
+            "tris": 123798
+          },
+          "plaza": {
+            "draw": 35,
+            "tris": 123784
+          },
+          "west": {
+            "draw": 26,
+            "tris": 116792
+          },
+          "east": {
+            "draw": 26,
+            "tris": 116792
+          },
+          "north": {
+            "draw": 29,
+            "tris": 117052
+          },
+          "northPortal": {
+            "draw": 26,
+            "tris": 116792
+          },
+          "smith": {
+            "draw": 30,
+            "tris": 117054
+          },
+          "circus": {
+            "draw": 31,
+            "tris": 117056
+          },
+          "church": {
+            "draw": 29,
+            "tris": 117052
+          },
+          "terrace": {
+            "draw": 27,
+            "tris": 116794
+          },
+          "overview": {
+            "draw": 50,
+            "tris": 123814
+          }
+        },
+        "tour": {
+          "done": true,
+          "result": {
+            "loopTimes": [
+              79.79600000000012
+            ],
+            "avgFps": 14.54960148378363,
+            "low1Fps": 9.708737864077671,
+            "minFps": 8.928571428571429,
+            "avgDraw": 30.241171403962102,
+            "maxDraw": 40,
+            "avgTris": 119381.6210163652,
+            "stuck": 0,
+            "timeouts": 0,
+            "blockedFrames": 0,
+            "events": [],
+            "stutters": 958
+          }
+        },
+        "envBaseline": {
+          "overview": {
+            "draw": 27,
+            "tris": 38510
+          },
+          "plaza": {
+            "draw": 27,
+            "tris": 38510
+          },
+          "gate": {
+            "draw": 27,
+            "tris": 38510
+          }
+        },
+        "artP3": {
+          "status": "loaded",
+          "stage": "P3-0",
+          "file": "p30_sample_lite.glb",
+          "ms": 122,
+          "meshes": 8,
+          "materials": 8,
+          "textures": 7,
+          "triangles": 1818
+        }
+      },
+      "ok": true
+    }
+  ],
+  "finishedAt": "2026-11-26T17:32:52.896Z",
+  "failures": 0
+}
