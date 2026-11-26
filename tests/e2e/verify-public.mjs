@@ -55,7 +55,7 @@ for (const [name, vp] of [["webkit", { width: 393, height: 852 }], ["chromium", 
   page.on("response", (r) => r.status() >= 400 && bad.push(`${r.status()} ${r.url()}`));
   try {
     await page.goto(`${base}?play=world&newgame=1&lod=lite`, { waitUntil: "load" });
-    await page.waitForFunction(() => window.__starwishWorld?.ready === true && !!window.__starwishWorld.info().interact, null, { timeout: 300000 });
+    await page.waitForFunction(() => window.__starwishWorld?.ready === true && !!window.__starwishWorld.info().interact && /^(loaded|部分|error)/.test(window.__starwishWorld.info().art), null, { timeout: 300000 });
     const i = await page.evaluate(() => window.__starwishWorld.info());
     const ok = i.map === "village" && i.art === "loaded" && errs.length === 0 && bad.length === 0;
     if (!ok) fails++;
