@@ -1,0 +1,953 @@
+{
+ "budget": {
+  "hq": 10000,
+  "lite": 5000,
+  "far": 2000
+ },
+ "npcs": {
+  "swordmaster": {
+   "lods": {
+    "hq": {
+     "triangles": 9546,
+     "triangles_before_decimate": 1992120,
+     "within_budget": true,
+     "parts": 25,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_swordmaster_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      },
+      {
+       "name": "Act",
+       "frames": 78,
+       "fps": 30
+      }
+     ],
+     "bytes": 534268
+    },
+    "lite": {
+     "triangles": 4668,
+     "triangles_before_decimate": 1992120,
+     "within_budget": true,
+     "parts": 25,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_swordmaster_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      },
+      {
+       "name": "Act",
+       "frames": 78,
+       "fps": 30
+      }
+     ],
+     "bytes": 292744
+    },
+    "far": {
+     "triangles": 1926,
+     "triangles_before_decimate": 1991992,
+     "within_budget": true,
+     "parts": 24,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_swordmaster_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      },
+      {
+       "name": "Act",
+       "frames": 78,
+       "fps": 30
+      }
+     ],
+     "bytes": 186856
+    }
+   },
+   "name": "劍士軍團教官・雷恩",
+   "design": "紅色頭帶＋深紅刺短髮、綠眼；鋼製胸甲與左肩甲、深紅戰袍金滾邊；背上長劍與斜背帶",
+   "gender": "male"
+  },
+  "knight": {
+   "lods": {
+    "hq": {
+     "triangles": 9576,
+     "triangles_before_decimate": 1942796,
+     "within_budget": true,
+     "parts": 24,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_knight_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      },
+      {
+       "name": "Act",
+       "frames": 84,
+       "fps": 30
+      }
+     ],
+     "bytes": 519280
+    },
+    "lite": {
+     "triangles": 4820,
+     "triangles_before_decimate": 1942796,
+     "within_budget": true,
+     "parts": 24,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_knight_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      },
+      {
+       "name": "Act",
+       "frames": 84,
+       "fps": 30
+      }
+     ],
+     "bytes": 281192
+    },
+    "far": {
+     "triangles": 3630,
+     "triangles_before_decimate": 1942668,
+     "within_budget": false,
+     "parts": 23,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_knight_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      },
+      {
+       "name": "Act",
+       "frames": 84,
+       "fps": 30
+      }
+     ],
+     "bytes": 234308
+    }
+   },
+   "name": "騎士軍團團長・艾德溫",
+   "design": "金髮側分、翹八字鬍、藍眼；銀色胸甲＋雙肩甲＋護手、皇家藍罩袍與披風、胸前金星徽",
+   "gender": "male"
+  },
+  "smith": {
+   "lods": {
+    "hq": {
+     "triangles": 9534,
+     "triangles_before_decimate": 1453012,
+     "within_budget": true,
+     "parts": 24,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_smith_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      },
+      {
+       "name": "Act",
+       "frames": 78,
+       "fps": 30
+      }
+     ],
+     "bytes": 536032
+    },
+    "lite": {
+     "triangles": 4628,
+     "triangles_before_decimate": 1453012,
+     "within_budget": true,
+     "parts": 24,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_smith_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      },
+      {
+       "name": "Act",
+       "frames": 78,
+       "fps": 30
+      }
+     ],
+     "bytes": 296708
+    },
+    "far": {
+     "triangles": 1686,
+     "triangles_before_decimate": 1452884,
+     "within_budget": true,
+     "parts": 23,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_smith_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      },
+      {
+       "name": "Act",
+       "frames": 78,
+       "fps": 30
+      }
+     ],
+     "bytes": 183236
+    }
+   },
+   "name": "鐵匠師傅・巴爾克",
+   "design": "光頭、濃密棕色大鬍子、橘褐眼；額上護目鏡、米色工作衫＋厚皮圍裙、腰間鐵鎚、皮護腕",
+   "gender": "male"
+  },
+  "mage": {
+   "lods": {
+    "hq": {
+     "triangles": 9688,
+     "triangles_before_decimate": 1955076,
+     "within_budget": true,
+     "parts": 22,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_mage_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      },
+      {
+       "name": "Act",
+       "frames": 84,
+       "fps": 30
+      }
+     ],
+     "bytes": 555288
+    },
+    "lite": {
+     "triangles": 4680,
+     "triangles_before_decimate": 1955076,
+     "within_budget": true,
+     "parts": 22,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_mage_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      },
+      {
+       "name": "Act",
+       "frames": 84,
+       "fps": 30
+      }
+     ],
+     "bytes": 295440
+    },
+    "far": {
+     "triangles": 2636,
+     "triangles_before_decimate": 1954948,
+     "within_budget": false,
+     "parts": 21,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_mage_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      },
+      {
+       "name": "Act",
+       "frames": 84,
+       "fps": 30
+      }
+     ],
+     "bytes": 216096
+    }
+   },
+   "name": "法師軍團導師・瑟琳娜",
+   "design": "銀紫長髮、紫眼；紫色大巫師帽＋金帶、紫色長袍金滾邊與長袖、胸前星形墜飾、右手發光法杖",
+   "gender": "female"
+  },
+  "priest": {
+   "lods": {
+    "hq": {
+     "triangles": 9680,
+     "triangles_before_decimate": 1955360,
+     "within_budget": true,
+     "parts": 20,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_priest_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      },
+      {
+       "name": "Act",
+       "frames": 84,
+       "fps": 30
+      }
+     ],
+     "bytes": 552792
+    },
+    "lite": {
+     "triangles": 4690,
+     "triangles_before_decimate": 1955360,
+     "within_budget": true,
+     "parts": 20,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_priest_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      },
+      {
+       "name": "Act",
+       "frames": 84,
+       "fps": 30
+      }
+     ],
+     "bytes": 294964
+    },
+    "far": {
+     "triangles": 2862,
+     "triangles_before_decimate": 1955232,
+     "within_budget": false,
+     "parts": 19,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_priest_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      },
+      {
+       "name": "Act",
+       "frames": 84,
+       "fps": 30
+      }
+     ],
+     "bytes": 223832
+    }
+   },
+   "name": "祭司教堂導師・艾莉亞",
+   "design": "白色頭紗、淡金瀏海、天藍眼；白長袍＋天空藍披肩、金腰帶、左手聖典、胸前星願墜飾",
+   "gender": "female"
+  },
+  "clown": {
+   "lods": {
+    "hq": {
+     "triangles": 9676,
+     "triangles_before_decimate": 2034860,
+     "within_budget": true,
+     "parts": 26,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_clown_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      },
+      {
+       "name": "Act",
+       "frames": 66,
+       "fps": 30
+      }
+     ],
+     "bytes": 565336
+    },
+    "lite": {
+     "triangles": 4664,
+     "triangles_before_decimate": 2034860,
+     "within_budget": true,
+     "parts": 26,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_clown_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      },
+      {
+       "name": "Act",
+       "frames": 66,
+       "fps": 30
+      }
+     ],
+     "bytes": 297776
+    },
+    "far": {
+     "triangles": 2862,
+     "triangles_before_decimate": 2034732,
+     "within_budget": false,
+     "parts": 25,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_clown_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      },
+      {
+       "name": "Act",
+       "frames": 66,
+       "fps": 30
+      }
+     ],
+     "bytes": 227632
+    }
+   },
+   "name": "小丑馬戲團團長・波波洛",
+   "design": "紅色高禮帽金帶、橘色捲髮、紅鼻子、綠眼、臉頰星星彩繪；紅色燕尾服＋奶油背心、藍領結、紅白條紋褲、手杖",
+   "gender": "male"
+  },
+  "warehouse": {
+   "lods": {
+    "hq": {
+     "triangles": 9682,
+     "triangles_before_decimate": 1681048,
+     "within_budget": true,
+     "parts": 20,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_warehouse_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      },
+      {
+       "name": "Act",
+       "frames": 84,
+       "fps": 30
+      }
+     ],
+     "bytes": 557548
+    },
+    "lite": {
+     "triangles": 4676,
+     "triangles_before_decimate": 1681048,
+     "within_budget": true,
+     "parts": 20,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_warehouse_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      },
+      {
+       "name": "Act",
+       "frames": 84,
+       "fps": 30
+      }
+     ],
+     "bytes": 296688
+    },
+    "far": {
+     "triangles": 2582,
+     "triangles_before_decimate": 1680920,
+     "within_budget": false,
+     "parts": 19,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_warehouse_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      },
+      {
+       "name": "Act",
+       "frames": 84,
+       "fps": 30
+      }
+     ],
+     "bytes": 215436
+    }
+   },
+   "name": "倉庫管理員・米拉",
+   "design": "棕髮包子頭＋綠頭巾、圓框眼鏡、榛色眼；米白襯衫＋綠色工作圍裙、腰間金鑰匙串、左手記帳本",
+   "gender": "female"
+  },
+  "guild": {
+   "lods": {
+    "hq": {
+     "triangles": 9676,
+     "triangles_before_decimate": 1566152,
+     "within_budget": true,
+     "parts": 24,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_guild_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      },
+      {
+       "name": "Act",
+       "frames": 84,
+       "fps": 30
+      }
+     ],
+     "bytes": 524560
+    },
+    "lite": {
+     "triangles": 4670,
+     "triangles_before_decimate": 1566152,
+     "within_budget": true,
+     "parts": 24,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_guild_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      },
+      {
+       "name": "Act",
+       "frames": 84,
+       "fps": 30
+      }
+     ],
+     "bytes": 284108
+    },
+    "far": {
+     "triangles": 2400,
+     "triangles_before_decimate": 1566024,
+     "within_budget": false,
+     "parts": 23,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_guild_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      },
+      {
+       "name": "Act",
+       "frames": 84,
+       "fps": 30
+      }
+     ],
+     "bytes": 196172
+    }
+   },
+   "name": "星願商會掌櫃・葛蘭特",
+   "design": "黑色油頭、捲翹八字鬍、灰眼＋金色單片眼鏡；白襯衫＋深藍背心金扣、酒紅領結、懷錶金鍊、天秤胸章",
+   "gender": "male"
+  }
+ }
+}
