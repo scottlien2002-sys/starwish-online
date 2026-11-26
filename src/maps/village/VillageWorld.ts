@@ -464,8 +464,16 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
   // 互動範圍：細圓環（r 10.5）
   mark(m(MeshBuilder.CreateTorus("PH_vTmp", { diameter: FOUNTAIN.interactR * 2, thickness: 0.08, tessellation: 96 }, scene), [0.35, 0.65, 1]), 0, 0.12, 0);
   }
-  // NPC 站位：金色星形底座＋粉紅色佔位人形＋互動圈
+  // NPC 站位：金色星形底座＋粉紅色佔位人形＋互動圈（art 模式：Stage 6.2 起由正式 NPC 模型取代，只保留佈告欄的互動圈）
   for (const n of NPC_SPOTS) {
+    if (art) {
+      if (n.id === "board") {
+        const ring = MeshBuilder.CreateTorus("PH_vTmp", { diameter: n.interactR * 2, thickness: 0.04, tessellation: 48 }, scene);
+        ring.position.y = 0.08;
+        mark(m(ring, [1, 0.78, 0.45]), n.x, n.floor, n.z, n.yaw);
+      }
+      continue;
+    }
     const pad = MeshBuilder.CreateCylinder("PH_vTmp", { diameter: 1.2, height: 0.06, tessellation: 5 }, scene);
     pad.position.y = 0.05;
     const body = MeshBuilder.CreateCapsule("PH_vTmp", { radius: 0.32, height: 1.25, tessellation: 8, subdivisions: 1 }, scene);

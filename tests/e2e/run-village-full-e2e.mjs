@@ -57,7 +57,11 @@ for (const name of browsers) {
       await page.waitForFunction(() => { const a = window.__starwishVillage.artFull(); return a.status === "loaded" || a.status.startsWith("部分") || a.status.startsWith("error"); }, null, { timeout: 240000 });
       const art = await V(() => window.__starwishVillage.artFull());
       run.results.art = art;
-      check("全村正式美術載入完成（15 組模型、沒有錯誤）", art.status === "loaded" && Object.keys(art.parts).length === 15 && art.merchant, { status: art.status, parts: Object.keys(art.parts), errors: art.errors });
+      check("全村正式美術載入完成（16 組模型＝15 組＋正式NPC、沒有錯誤）", art.status === "loaded" && Object.keys(art.parts).length === 16 && art.merchant, { status: art.status, parts: Object.keys(art.parts), errors: art.errors });
+      const npcInfo = await V(() => window.__starwishVillage.npcs());
+      run.results.npcModels = npcInfo.stats;
+      const npcIds = ["sword", "knight", "smith", "mage", "church", "circus", "warehouse", "guild"];
+      check("Stage 6.2 正式NPC：8 位都已載入（取代佔位人形），各 1 個網格，具備待機／轉身／對話動作", npcIds.every((id) => npcInfo.stats[id] && npcInfo.stats[id].meshes === 1 && ["Idle", "Turn", "Talk"].every((a) => npcInfo.stats[id].animations.includes(a))) && npcIds.every((id) => npcInfo.state[id]?.anim === "Idle"), npcInfo);
       await page.waitForTimeout(800);
       // 效能（CI 軟體繪圖，只看相對數字）
       const perf = {};
@@ -94,12 +98,16 @@ for (const name of browsers) {
         await settle(page, 2);
         const after = await V(() => window.__starwishVillage.interact());
         const g = n.id === "guild" ? await V(() => window.__starwishVillage.guild("noop")) : null;
-        npcRes.push({ id: n.id, target: st?.target, what, dialog: g ? (g.open ? "星願商會選單" : "") : after?.dialog?.slice(0, 40) });
-        if (["smith", "church", "circus", "guild"].includes(n.id) && mode === "hq-portrait") await shot(page, `npc_${n.id}`);
+        const talkAnim = n.id === "board" ? "-" : (await V(() => window.__starwishVillage.npcs())).state[n.id]?.anim;
+        npcRes.push({ id: n.id, target: st?.target, what, dialog: g ? (g.open ? "星願商會選單" : "") : after?.dialog?.slice(0, 40), talkAnim });
+        if (n.id !== "board" && mode === "hq-portrait") await shot(page, `npc_${n.id}`);
         await V(() => window.__starwishVillage.interactClose());
+        await settle(page, 3);
+        if (n.id !== "board") npcRes[npcRes.length - 1].afterAnim = (await V(() => window.__starwishVillage.npcs())).state[n.id]?.anim;
       }
       run.results.npcs = npcRes;
       check(`NPC 互動：${npcs.length} 位 NPC 都能靠近後點擊對話（名稱、職責）`, npcRes.every((r) => r.target === `npc:${r.id}` && r.what === `npc:${r.id}` && r.dialog.length > 0), npcRes);
+      check("正式NPC：對話時播放對話動作（Talk／面向玩家），結束後回到待機", npcRes.filter((r) => r.id !== "board").every((r) => (r.talkAnim === "Talk" || r.talkAnim === "Turn") && r.afterAnim !== "Talk"), npcRes.map((r) => ({ id: r.id, talk: r.talkAnim, after: r.afterAnim })));
       check("鐵匠只有一位（轉職＋裝備鑑定）", npcs.filter((n) => n.id === "smith").length === 1 && /轉職/.test(npcs.find((n) => n.id === "smith").role) && /鑑定/.test(npcs.find((n) => n.id === "smith").role), npcs.find((n) => n.id === "smith"));
       // 星願商會：選單 → 交易所三分類（裝備／寵物詳細資料）→ 購買 → 掛賣（鎖定）→ 取消（解鎖）→ 再掛賣 → 他人買走（示範）→ 領取收益
       {
@@ -178,6 +186,8 @@ for (const name of browsers) {
       await shot(page, "merchant_talk");
       // 介面按鈕用 DOM 點擊（HQ 軟體繪圖約 1 FPS，Playwright 的「元素穩定」判定會逾時；點擊處理程式相同）
       const tap = (sel) => page.evaluate((q) => { const b = document.querySelector(q); if (!b) return false; b.click(); return true; }, sel);
+      const menu = await page.evaluate(() => [...document.querySelectorAll('[data-act^="choose:"]')].map((b) => b.getAttribute("data-act")));
+      check("洛恩選單：寵物鑑定、飼料購買、寵物進化、寵物復活、培育指南 五項服務入口", ["appraise", "feed", "evolve", "revive", "guide"].every((k) => menu.includes(`choose:${k}`)), menu);
       if (!(await tap('[data-act="choose:appraise"]'))) run.errors.push("appraise button missing");
       await page.waitForFunction(() => window.__starwishVillage.appraisal()?.phase === "empty", null, { timeout: 15000 }).catch(() => null);
       await shot(page, "appraise_1_open");

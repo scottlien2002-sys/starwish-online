@@ -190,6 +190,7 @@ class VillagePage {
               location.search = q.toString();
             },
           });
+          this.interact.npcs = full.npcs;
           this.fullStatus = full.errors.length ? `部分載入失敗：${full.errors.join("；")}` : "loaded";
           this.hud.toast(`星芽村全村整合載入完成（${(full.loadMs / 1000).toFixed(1)} 秒）：靠近 NPC、洛恩或傳送門會出現互動按鈕`, 3600);
         })
@@ -624,7 +625,9 @@ class VillagePage {
       tourState: () => ({ phase: this.tour ? this.tour.runner.phase : this.lastTour ? "done" : null, loop: this.tour?.runner.loop ?? 0, result: this.lastTour }),
       blockedFrames: () => this.blockedFrames,
       artState: () => this.artState,
-      artFull: () => ({ on: this.artFull, status: this.fullStatus, loadMs: this.full?.loadMs ?? 0, parts: this.full?.parts ?? {}, errors: this.full?.errors ?? [], merchant: !!this.full?.merchant }),
+      artFull: () => ({ on: this.artFull, status: this.fullStatus, loadMs: this.full?.loadMs ?? 0, parts: this.full?.parts ?? {}, errors: this.full?.errors ?? [], merchant: !!this.full?.merchant, npcs: this.full?.npcs?.ids ?? [] }),
+      /** Stage 6.2：正式 NPC 的動作狀態（Idle／Turn／Talk、目前面向、原本面向） */
+      npcs: () => ({ stats: this.full?.npcs?.stats ?? {}, state: this.full?.npcs?.state() ?? {} }),
       interact: () => this.interact?.state() ?? null,
       interactNow: () => this.interact?.activate() ?? "none",
       /** 測試用：站到洛恩外側 1.2 m 並在同一個瞬間開始對話（洛恩一直在走，避免時間差） */

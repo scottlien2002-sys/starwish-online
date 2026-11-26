@@ -7,6 +7,10 @@ import {
   connectPetMerchantService,
   PET_MERCHANT,
   PET_MERCHANT_LOOP_SEC,
+  PET_MENU_OPTIONS,
+  PET_STAGES,
+  petStageName,
+  isPetStageName,
   petMenuStep,
   petMerchantClearance,
   petMerchantPose,
@@ -86,7 +90,7 @@ test("選單：開啟 → 寵物鑑定（開啟星靈鑑定視窗）→ 飼料 �
   s = await petMenuStep({ screen: "root" }, { type: "choose", option: "feed" });
   assert.match(s.lines!.join(""), /尚未開放/);
   s = await petMenuStep(s, { type: "choose", option: "guide" });
-  assert.equal(s.title, "培育與進化");
+  assert.equal(s.title, "培育指南");
   s = await petMenuStep(s, { type: "choose", option: "leave" });
   assert.equal(s.screen, "closed");
 });
@@ -275,4 +279,46 @@ test("每顆物品獨立識別：同名的兩顆種子各自鑑定、結果不�
   assert.equal(s.items.length, inv.data.length);
   assert.equal(s.lines[0]!.label, "無附加屬性");
   assert.equal(svc.charges(), 2);
+});
+
+test("Stage 6.2：成長階段統一為 初始／幼年期／成長期／完成體", () => {
+  assert.deepEqual([...PET_STAGES], ["初始", "幼年期", "成長期", "完成體"]);
+  assert.equal(petStageName(0), "初始");
+  assert.equal(petStageName(3), "完成體");
+  assert.equal(petStageName(9), "完成體");
+  assert.ok(!isPetStageName("成熟期"));
+});
+
+test("Stage 6.2：洛恩選單具備 鑑定／飼料／進化／復活／培育指南 五項服務入口", async () => {
+  assert.deepEqual(
+    PET_MENU_OPTIONS.map((o) => o.label),
+    ["寵物鑑定", "購買寵物飼料", "寵物進化", "寵物復活", "培育指南", "離開"],
+  );
+  // 占位服務：進化、復活回覆「準備中」，不產生結果
+  for (const option of ["evolve", "revive"] as const) {
+    const s = await petMenuStep({ screen: "root" }, { type: "choose", option });
+    assert.equal(s.screen, "message");
+    assert.match(s.lines!.join(""), /尚未開放/);
+  }
+  // 舊版服務（沒有選填的進化／復活方法，例如 A 現有的 adapter）也不會壞
+  const legacy: PetMerchantService = {
+    available: true,
+    appraisableItems: async () => ({ ok: true, data: [] }),
+    appraise: async (itemId) => ({ ok: true, data: { itemId, kind: "seed", lines: [] } }),
+    feedOffers: async () => ({ ok: true, data: [] }),
+    buyFeed: async () => ({ ok: true, data: { bought: 0 } }),
+    careGuide: async () => ({ ok: true, data: [] }),
+  };
+  const s1 = await petMenuStep({ screen: "root" }, { type: "choose", option: "evolve" }, legacy);
+  assert.match(s1.lines!.join(""), /尚未開放/);
+  // 正式服務：顯示階段名稱
+  const full: PetMerchantService = {
+    ...legacy,
+    evolvablePets: async () => ({ ok: true, data: [{ petId: "p1", name: "星芽兔", stage: 1, ready: true }] }),
+    revivablePets: async () => ({ ok: true, data: [{ petId: "p2", name: "小羽雀", stage: 3, ready: true }] }),
+  };
+  const s2 = await petMenuStep({ screen: "root" }, { type: "choose", option: "evolve" }, full);
+  assert.match(s2.lines!.join(""), /星芽兔（幼年期）→ 可進化為「成長期」/);
+  const s3 = await petMenuStep({ screen: "root" }, { type: "choose", option: "revive" }, full);
+  assert.match(s3.lines!.join(""), /小羽雀（完成體）/);
 });
