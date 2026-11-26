@@ -67,7 +67,9 @@ for (const name of browsers) {
     page.on("response", (r) => { if (r.status() >= 400) badResp.push(`${r.status()} ${r.url()}`); });
     const V = (fn, arg) => page.evaluate(fn, arg);
     try {
-      await page.goto(server.url + `/?map=village&art=full&quality=${q}`, { waitUntil: "load" });
+      // Stage 6.5：中畫質用女生角色（男女都驗證）
+      const gender = q === "medium" ? "female" : "male";
+      await page.goto(server.url + `/?map=village&art=full&quality=${q}&g=${gender}`, { waitUntil: "load" });
       await page.waitForFunction(() => window.__starwishVillage?.ready === true, null, { timeout: 120000 });
       await page.waitForFunction(() => { const a = window.__starwishVillage.artFull(); return a.status === "loaded" || a.status.startsWith("部分") || a.status.startsWith("error"); }, null, { timeout: 420000 });
       const art = await V(() => window.__starwishVillage.artFull());
@@ -262,6 +264,77 @@ for (const name of browsers) {
         const far = (await V(() => window.__starwishVillage.perfState())).npcs.mage;
         run.results.lod = { near, far };
         check("NPC 距離 LOD：靠近用近距模型、遠離用遠距模型（有遲滯，不會來回閃）", near.lod === 0 && far.lod === 1, { near, far });
+      }
+      // ---------------- Stage 6.5 正式玩家角色＋寵物跟隨 ----------------
+      {
+        await page.waitForFunction(() => { const c = window.__starwishVillage.charState(); return c.status === "loaded" || String(c.status).startsWith("error"); }, null, { timeout: 240000, polling: 500 });
+        await V(() => window.__starwishVillage.teleport(0, -16, 0));
+        await settle(page, 4);
+        const c0 = await V(() => window.__starwishVillage.charState());
+        const st = c0.stats;
+        run.results.character = { status: c0.status, model: st?.model, triangles: st?.triangles, meshes: st?.meshes, drawMeshes: st?.drawMeshes, bones: st?.bones, animations: st?.animations, shadow: st?.shadow, draws: c0.draws, pet: st?.pet, loadMs: st?.loadMs };
+        const wantFile = `novice_c10b5b_${gender}_${X.models}.glb`;
+        check(`正式玩家角色：Claude A 初心者 C1.0-B5b ${wantFile}（${q} 畫質＝${X.models === "hq" ? "HQ" : "Lite"}），簡易角色已隱藏`, c0.status === "loaded" && st && st.model === wantFile && st.gender === gender && !c0.simpleVisible && st.bones === 17, { status: c0.status, model: st?.model, simpleVisible: c0.simpleVisible, bones: st?.bones });
+        check("正式動作齊全：待機、跑步、跳躍（技能用）、攻擊、受傷、死亡", st && ["Idle", "Run", "Jump", "Attack", "Hurt", "Death"].every((a) => st.animations.includes(a)), st?.animations);
+        check("角色陰影依畫質：高／中＝即時陰影、低＝柔和腳底陰影", st && st.shadow === (X.map ? "即時陰影（陰影貼圖）" : "柔和腳底陰影") && (X.map ? c0.draws.shadow >= 1 : c0.draws.shadow === 0) && c0.draws.main >= 1, { shadow: st?.shadow, draws: c0.draws });
+        // 跑步：往前推搖桿 → Run；放開 → Idle
+        await V(() => window.__starwishVillage.setMove({ x: 0, y: 1 }));
+        await settle(page, 8);
+        const cRun = await V(() => window.__starwishVillage.charState());
+        await V(() => window.__starwishVillage.setMove(null));
+        await settle(page, 8);
+        const cIdle = await V(() => window.__starwishVillage.charState());
+        check("移動時播放跑步動作（依實際速度調整步頻），停下回到待機", cRun.anim === "Run" && cRun.speed > 0.5 && cIdle.anim === "Idle", { run: [cRun.anim, cRun.speed, cRun.runRate], idle: cIdle.anim });
+        // 攻擊（HUD 攻擊鈕）、受傷、死亡（不能移動）、復活
+        const acts = {};
+        await page.evaluate(() => document.querySelector('[data-slot="attack"]')?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true })));
+        await settle(page, 2);
+        acts.attackButton = (await V(() => window.__starwishVillage.charState())).anim;
+        await settle(page, 12);
+        await V(() => window.__starwishVillage.charAction("hurt"));
+        await settle(page, 2);
+        acts.hurt = (await V(() => window.__starwishVillage.charState())).anim;
+        await settle(page, 12);
+        await V(() => window.__starwishVillage.charAction("die"));
+        await settle(page, 25);
+        const pd0 = (await V(() => window.__starwishVillage.player()));
+        await V(() => window.__starwishVillage.setMove({ x: 0, y: 1 }));
+        await settle(page, 6);
+        const pd1 = (await V(() => window.__starwishVillage.player()));
+        await V(() => window.__starwishVillage.setMove(null));
+        acts.die = (await V(() => window.__starwishVillage.charState())).anim;
+        acts.movedWhileDead = Math.hypot(pd1.x - pd0.x, pd1.z - pd0.z);
+        await V(() => window.__starwishVillage.charAction("revive"));
+        await settle(page, 4);
+        acts.revive = (await V(() => window.__starwishVillage.charState())).anim;
+        await V(() => window.__starwishVillage.charAction("jump"));
+        await settle(page, 2);
+        acts.skillJump = (await V(() => window.__starwishVillage.charState())).anim;
+        await settle(page, 15);
+        acts.jumpButtons = await page.evaluate(() => [...document.querySelectorAll("button")].filter((b) => /跳/.test(b.textContent ?? "") || /jump/i.test(b.className + (b.dataset.slot ?? ""))).length);
+        run.results.characterActions = acts;
+        check("攻擊鈕→攻擊動作；受傷、死亡（死亡時不能移動）、復活動作正常", acts.attackButton === "Attack" && acts.hurt === "Hurt" && acts.die === "Death" && acts.movedWhileDead < 0.01 && acts.revive === "Idle", acts);
+        check("一般移動沒有跳躍按鈕；跳躍動作保留給技能（程式觸發可播放）", acts.jumpButtons === 0 && acts.skillJump === "Jump", acts);
+        // 寵物跟隨：停著時在耳朵旁；跑步＋快速轉身（前後左右來回）後，寵物沒有貼住或穿進角色
+        await V(() => window.__starwishVillage.teleport(0, -16, 0));
+        await V(() => window.__starwishVillage.setPet("bird4"));
+        await settle(page, 20);
+        const still = await V(() => window.__starwishVillage.charState());
+        const earDist = still.pet && still.pos ? Math.hypot(still.pet.x - still.pos.x, still.pet.z - still.pos.z) : null;
+        const earUp = still.pet && still.pos ? still.pet.y - still.pos.y : null;
+        for (const mv of [{ x: 0, y: 1 }, { x: 0, y: -1 }, { x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 1, y: -1 }, { x: -1, y: 1 }]) {
+          await V((m) => window.__starwishVillage.setMove(m), mv);
+          await settle(page, 6);
+        }
+        await V(() => window.__starwishVillage.setMove(null));
+        await settle(page, 10);
+        const after = await V(() => window.__starwishVillage.charState());
+        const pet = after.stats?.pet;
+        run.results.pet = { still: { horizontal: earDist, height: earUp }, pet };
+        check("寵物在角色耳朵旁（停著時水平距離 0.15～0.6 m、高度在頭部附近 0.6～1.3 m）", still.pet?.visible && earDist !== null && earDist > 0.15 && earDist < 0.6 && earUp > 0.6 && earUp < 1.3, { earDist, earUp });
+        check("寵物不貼住、不穿透角色：跑步與快速轉身後，與頭部／身體的最小間距 ≥ 2 cm（含 B 端間距保護）", pet && pet.minGapCm !== null && pet.minGapCm >= 1.9, pet);
+        const rep1 = await V(() => window.__starwishVillage.report());
+        check("效能報告列出玩家角色與寵物的模型版本、三角面、Draw Calls", /玩家角色：Claude A 正式初心者 C1\.0-B5b/.test(rep1) && /novice_c10b5b_/.test(rep1) && /寵物：/.test(rep1) && /Draw Calls：主畫面/.test(rep1), rep1.split("\n").filter((l) => /玩家角色|寵物/.test(l)));
       }
       // 星願之泉／傳送門動畫：兩次取樣，星晶或光效在動
       {

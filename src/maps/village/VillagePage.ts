@@ -39,6 +39,7 @@ import type { VillageArtFull } from "./VillageArtFull.ts";
 import type { VillageInteract } from "./VillageInteract.ts";
 import { type DiagStep, diagSteps, type FrameMark, type FrameSummary, SHADOW_LABEL, splitFrameStats, type VillagePerfConfig, villagePerfConfig } from "./villagePerf.ts";
 import { VillageShadows } from "./villageShadows.ts";
+import type { CharAction, VillageCharacter } from "./villageCharacter.ts";
 
 /**
  * Stage 6 P2-3 第一階段：星芽村 Grey-box 測試頁（?map=village）。
@@ -102,6 +103,11 @@ class VillagePage {
   private readonly scene: Scene;
   private readonly world: VillageWorld;
   private readonly player: PlayerAvatar;
+  /** Stage 6.5：正式玩家角色（Claude A 初心者 C1.0-B5b＋寵物跟隨）；載入完成前與 &char=simple 時用簡易角色 */
+  private char: VillageCharacter | null = null;
+  private charStatus: "off" | "loading" | "loaded" | string = "off";
+  private readonly charGender: "male" | "female";
+  private charSpeed = 0;
   private readonly camera: ThirdPersonCamera;
   private readonly sun: DirectionalLight;
   private readonly shadows: ShadowGenerator;
@@ -232,6 +238,7 @@ class VillagePage {
     this.yaw = ARRIVAL_SPOT.yaw;
     this.player = new PlayerAvatar(scene, this.shadows);
     this.player.root.position.copyFrom(this.pos);
+    this.charGender = params.get("g") === "female" ? "female" : "male";
     this.vshadows.addFootSource({ pos: () => this.pos, radius: 0.42 });
     this.camera = new ThirdPersonCamera(scene, this.pos, groundHeight, {
       keepPitch: true,
@@ -256,6 +263,29 @@ class VillagePage {
     if (this.artFull) {
       // 正式美術有自己的發光物（噴泉、傳送門、彩繪玻璃）：用材質自發光，不開全畫面發光層
       this.fullStatus = "loading";
+      // Stage 6.5：正式玩家角色（高畫質＝HQ、中／低＝Lite）。&char=simple 可改回簡易角色（比較用）
+      if (params.get("char") !== "simple") {
+        this.charStatus = "loading";
+        void import("./villageCharacter.ts")
+          .then((m) =>
+            m.VillageCharacter.create(scene, {
+              gender: this.charGender,
+              lod: this.lite ? "lite" : "hq",
+              baseUrl: `${import.meta.env.BASE_URL}models/`,
+              shadows: this.shadows,
+              realtimeShadow: this.perfCfg.shadow !== "blob" && this.perfCfg.shadow !== "off",
+              petId: params.get("pet") ?? undefined,
+            }),
+          )
+          .then((c) => {
+            this.char = c;
+            this.charStatus = "loaded";
+            this.player.root.setEnabled(false);
+          })
+          .catch((e: unknown) => {
+            this.charStatus = `error: ${e instanceof Error ? e.message : String(e)}`;
+          });
+      }
       void import("./VillageArtFull.ts")
         .then((m) =>
           m.loadVillageArtFull(scene, this.lite, this.shadows, (msg) => (this.fullStatus = msg), {
@@ -298,7 +328,14 @@ class VillagePage {
     this.hud.setBars({ hp: 100, maxHp: 100, mp: 40, maxMp: 40, exp: 0, expToNext: 100 });
     const build = hudRoot.querySelector<HTMLSpanElement>(".hud-build");
     if (build) build.textContent = `星芽村 V1.3 ${this.artFull ? "全村整合候選" : params.get("art") === "p3" ? "P3-0 美術流程測試" : "Grey-box"} ${this.modeName()}`;
-    this.hud.events.on("skillPressed", () => this.hud.toast(this.artFull ? "星芽村是安全區，沒有戰鬥（技能演出在野外地圖）" : "星芽村 Grey-box：這一階段沒有戰鬥與 NPC 功能", 1500));
+    this.hud.events.on("skillPressed", (e) => {
+      // Stage 6.5：攻擊鈕播放正式角色的攻擊動作（村莊是安全區，沒有傷害）；技能鈕維持提示
+      if (this.char && (e as { slot?: string }).slot === "attack") {
+        this.char.action("attack");
+        return;
+      }
+      this.hud.toast(this.artFull ? "星芽村是安全區，沒有戰鬥（技能演出在野外地圖）" : "星芽村 Grey-box：這一階段沒有戰鬥與 NPC 功能", 1500);
+    });
     const joystick = new VirtualJoystick(this.hud.joystickZone, this.input, TUNING.joystick.radius, TUNING.joystick.deadZone);
     this.camTouch = new CameraTouchControl(canvas, this.input, TUNING.camera.rotateSensitivity, TUNING.camera.pitchSensitivity, TUNING.camera.pinchSensitivity);
     const block = (e: Event): void => e.preventDefault();
@@ -326,6 +363,26 @@ class VillagePage {
     if (this.tier === "medium" && this.lite) return "Lite 中畫質";
     if (this.tier === "low" && this.lite) return "Lite 低畫質";
     return `${TIER_LABEL[this.tier]}＋${this.lite ? "Lite" : "HQ"} 模型（網址指定）`;
+  }
+
+  /** Stage 6.5：玩家角色與寵物的模型版本、三角面、本幀實際 Draw Calls（主畫面＝本幀繪製的網格；陰影＝本幀陰影貼圖的投射物） */
+  charInfo(): { status: string; stats: ReturnType<VillageCharacter["stats"]> | null; draws: { main: number; shadow: number; petMain: number } } {
+    const c = this.char;
+    if (!c) return { status: this.charStatus, stats: null, draws: { main: 0, shadow: 0, petMain: 0 } };
+    const active = new Set(this.scene.getActiveMeshes().data.slice(0, this.scene.getActiveMeshes().length));
+    const charMeshes = c.avatar.meshes.filter((m) => m.getTotalIndices() > 0);
+    const petMeshes = c.petMeshes().filter((m) => m.getTotalIndices() > 0);
+    const list = this.sun.shadowEnabled ? (this.shadows.getShadowMap()?.renderList ?? []) : [];
+    const inShadow = new Set(list);
+    return {
+      status: this.charStatus,
+      stats: c.stats(),
+      draws: {
+        main: charMeshes.filter((m) => active.has(m)).reduce((a, m) => a + m.subMeshes.length, 0),
+        shadow: charMeshes.filter((m) => inShadow.has(m) && m.isEnabled() && m.isVisible).reduce((a, m) => a + m.subMeshes.length, 0),
+        petMain: petMeshes.filter((m) => active.has(m)).length,
+      },
+    };
   }
 
   /** 切換畫質：保存偏好並重新載入（移除進階覆寫參數，避免殘留）；重新載入可保證不重複載入模型、不殘留渲染物件 */
@@ -412,6 +469,9 @@ class VillagePage {
       speed01 = Math.min(1, l);
     }
     let blockedNow = false;
+    if (this.char?.dead) speed01 = 0; // 死亡動作期間不能移動（測試按鈕「復活」後恢復）
+    const px0 = this.pos.x;
+    const pz0 = this.pos.z;
     if (speed01 > 0 && !this.overview) {
       const step = WALK_SPEED * speed01 * dt;
       const r = moveVillage(this.pos.x, this.pos.z, this.pos.x + moveX * step, this.pos.z + moveZ * step);
@@ -422,9 +482,15 @@ class VillagePage {
       this.yaw = turnTowards(this.yaw, moveX, moveZ, TUNING.player.turnSharpness, dt);
     }
     this.pos.y = groundHeight(this.pos.x, this.pos.z);
-    this.player.root.position.copyFrom(this.pos);
-    this.player.root.rotation.y = this.yaw;
-    this.player.update(dt, this.overview ? 0 : speed01);
+    if (this.char) {
+      // 正式角色：跑步動畫依實際水平速度（減少滑步）；離地高度只在技能跳躍時大於 0
+      this.charSpeed = dt > 0 ? Math.hypot(this.pos.x - px0, this.pos.z - pz0) / dt : 0;
+      this.char.update(dt, this.pos, this.yaw, this.overview ? 0 : this.charSpeed);
+    } else {
+      this.player.root.position.copyFrom(this.pos);
+      this.player.root.rotation.y = this.yaw;
+      this.player.update(dt, this.overview ? 0 : speed01);
+    }
     const cam = this.input.consumeCamera();
     if (!this.overview) {
       if (touring) {
@@ -737,6 +803,13 @@ class VillagePage {
     const pc = this.perfCfg;
     lines.push(`角色：NPC 距離 LOD ${pc.npcLod ? `開（${pc.lodNear} m）` : "關"}、畫面外剔除 開、遠距／畫面外暫停動作 ${pc.animThrottle ? "開" : "關"}、陰影投射物剔除 ${pc.casterCull ? `開（${this.vshadows.range} m 內）` : "關"}｜陰影投射物 本幀 ${this.vshadows.activeCasters}／全部 ${this.vshadows.totalCasters}（三角形 ${this.vshadows.casterTriangles()}）`);
     if (this.artFull) {
+      const cs = this.charInfo();
+      if (cs.stats) {
+        const c = cs.stats;
+        lines.push(`玩家角色：Claude A 正式初心者 ${c.version}｜${c.model}（${c.gender === "male" ? "男" : "女"}、${c.lod === "hq" ? "HQ" : "Lite"}）｜三角面 ${c.triangles}、網格 ${c.meshes}（可繪製 ${c.drawMeshes}、骨架網格 ${c.skinnedMeshes}）、骨骼 ${c.bones}｜動作 ${c.animations.join("／")}｜陰影 ${c.shadow}｜本幀 Draw Calls：主畫面 ${cs.draws.main}、陰影貼圖 ${cs.draws.shadow}｜來源 ${c.source}`);
+        const pt = c.pet;
+        lines.push(`寵物：${pt.label}（${pt.model}）｜高度 ${pt.size} m、三角面 ${pt.triangles}、網格 ${pt.meshes}｜本幀 Draw Calls：主畫面 ${cs.draws.petMain}｜與角色頭部／身體最小間距 ${pt.minGapCm ?? "—"} cm（修正前 ${pt.minRawGapCm ?? "—"} cm，間距保護修正 ${pt.corrections} 次）`);
+      } else lines.push(`玩家角色：${this.charStatus === "off" ? "簡易測試角色（&char=simple）" : `正式角色 ${this.charStatus}`}`);
       const ri = this.resourceInfo();
       lines.push(`模型與貼圖 ${ri.files} 個：網路下載 ${ri.network} 個（${ri.networkMB} MB）、瀏覽器快取 ${ri.cached} 個${ri.unknown ? `、無法判斷 ${ri.unknown} 個` : ""}｜重複請求：${ri.duplicates.length ? ri.duplicates.join("、") : "無"}｜載入時間${ri.network === 0 && ri.cached > 0 ? "（全部來自快取，不能當作首次載入時間）" : ri.cached > 0 ? "（部分來自快取）" : "（首次下載）"}`);
     }
@@ -870,6 +943,24 @@ class VillagePage {
       this.startDiag();
     }, "go");
     btn(test, "複製報告", () => this.copyReport(), "alt");
+    // Stage 6.5：正式角色（性別切換重新載入；動作測試；測試寵物）
+    if (this.artFull) {
+      const ch = section("角色（Claude A 正式初心者）");
+      for (const [label, g] of [["男", "male"], ["女", "female"]] as const) {
+        const b = btn(ch, label, () => {
+          const url = new URL(location.href);
+          url.searchParams.set("g", g);
+          url.searchParams.delete("char");
+          location.replace(url.toString());
+        }, "alt");
+        if (this.charGender === g) b.classList.add("go");
+      }
+      for (const [label, a] of [["攻擊", "attack"], ["受傷", "hurt"], ["死亡", "die"], ["復活", "revive"]] as const) btn(ch, label, () => this.char?.action(a), "alt");
+      const pt = section("寵物跟隨（測試寵物）");
+      void import("./villageCharacter.ts").then((m) => {
+        for (const p of m.PET_PRESETS) btn(pt, p.label, () => this.char?.setPet(p.id), "alt");
+      });
+    }
     const pv = section("效能版本（重新載入）");
     for (const [label, perf] of [
       ["目前畫質設定", null],
@@ -994,7 +1085,9 @@ class VillagePage {
         const groups: Record<string, { meshes: number; triangles: number }> = {};
         for (const m of this.scene.getActiveMeshes().data.slice(0, this.scene.getActiveMeshes().length)) {
           const name = m.name;
-          const key = name.startsWith("PH_") ? `Grey-box/系統 ${name.replace(/\d+$/, "")}` : name.startsWith("npc_") ? "NPC" : name.startsWith("pm_") || name.startsWith("PetPal_") ? "洛恩" : name.split(/[_.]/)[0] || name;
+          const isChar = !!this.char && this.char.avatar.meshes.includes(m);
+          const isPet = !!this.char && this.char.petMeshes().includes(m);
+          const key = isChar ? "玩家角色（正式）" : isPet ? "寵物" : name.startsWith("PH_") ? `Grey-box/系統 ${name.replace(/\d+$/, "")}` : name.startsWith("npc_") ? "NPC" : name.startsWith("pm_") || name.startsWith("PetPal_") ? "洛恩" : name.split(/[_.]/)[0] || name;
           const g = (groups[key] ??= { meshes: 0, triangles: 0 });
           g.meshes++;
           g.triangles += Math.round(m.getTotalIndices() / 3);
@@ -1002,6 +1095,13 @@ class VillagePage {
         return { activeMeshes: this.scene.getActiveMeshes().length, activeTriangles: Math.round(this.scene.getActiveIndices() / 3), groups };
       },
       startDiag: (limit?: number) => this.startDiag(limit),
+      /** Stage 6.5：正式玩家角色與寵物 */
+      charState: () => {
+        const i = this.charInfo();
+        return { ...i, anim: this.char?.avatar.state ?? null, runRate: this.char?.avatar.runRate ?? null, speed: this.charSpeed, simpleVisible: this.player.root.isEnabled(), pos: this.char ? { x: this.char.avatar.root.position.x, y: this.char.avatar.root.position.y, z: this.char.avatar.root.position.z } : null, pet: this.char ? { x: this.char.follower.position.x, y: this.char.follower.position.y, z: this.char.follower.position.z, visible: this.char.follower.visible } : null };
+      },
+      charAction: (a: CharAction) => this.char?.action(a),
+      setPet: (id: string) => this.char?.setPet(id),
       /** Stage 6.4：三段畫質、實際生效的渲染參數 */
       tier: () => ({ tier: this.tier, source: this.tierSource, models: this.lite ? "lite" : "hq", stored: loadTierPreference(), mode: this.modeName() }),
       switchTier: (t: GraphicsTier) => this.switchTier(t),
