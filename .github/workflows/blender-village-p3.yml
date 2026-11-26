@@ -1,0 +1,224 @@
+name: Blender — Village P3 art (Stage 6 P3)
+
+# Stage 6 P3 星芽村正式美術：免費 Blender 自動建模 → GLB（HQ／Lite）＋預覽圖。
+# 結果推到 art-village-p3 分支（一般 push，不 force；不影響遊戲網站與 main）。
+# 概念圖不放進儲存庫。
+on:
+  workflow_dispatch:
+  push:
+    branches: ["feature/render-village-p3"]
+    paths:
+      - "art/village-p3/**"
+      - "tools/fountain-lab/**"
+      - "src/maps/village/FountainP3.ts"
+      - "src/maps/village/PlazaP3.ts"
+      - "src/maps/village/KnightP3.ts"
+      - "src/maps/village/MageP3.ts"
+      - "src/maps/village/BuildingP3.ts"
+      - "src/maps/village/villageTextures.ts"
+      - "src/maps/village/villageMaterials.ts"
+      - "src/maps/village/spawnCamera.ts"
+      - "src/maps/village/VillagePage.ts"
+      - "tests/unit/village-spawn-camera.test.ts"
+      - ".github/workflows/blender-village-p3.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: blender-village-p3
+  cancel-in-progress: false
+
+env:
+  BLENDER_VERSION: "4.2.3"
+  BLENDER_SERIES: "4.2"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Generate textures (numpy + Pillow)
+        run: |
+          python3 -m pip install --quiet numpy pillow
+          python3 art/village-p3/gen_textures.py out/textures | tail -3
+
+      - name: System libraries for Blender (headless)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libsm6 libxkbcommon0 >/dev/null
+
+      - name: Download Blender ${{ env.BLENDER_VERSION }} (official, free)
+        run: |
+          URL="https://download.blender.org/release/Blender${BLENDER_SERIES}/blender-${BLENDER_VERSION}-linux-x64.tar.xz"
+          curl -fsSL --retry 5 --retry-delay 10 "$URL" -o /tmp/blender.tar.xz || curl -fsSL --retry 5 "https://mirrors.ocf.berkeley.edu/blender/release/Blender${BLENDER_SERIES}/blender-${BLENDER_VERSION}-linux-x64.tar.xz" -o /tmp/blender.tar.xz
+          mkdir -p /opt/blender && tar -xf /tmp/blender.tar.xz -C /opt/blender --strip-components=1
+          /opt/blender/blender --version | head -2
+
+      - name: P3-0 pipeline sample (model, AO bake, GLB hq/lite, previews)
+        run: |
+          /opt/blender/blender -b --factory-startup -noaudio -P art/village-p3/build_p30.py -- --tex "$PWD/out/textures" --out "$PWD/out" 2>&1 | tee out/blender.log | grep -v "^Fra:" | grep -v "Sample" | tail -40
+          for f in p30_sample_hq.glb p30_sample_lite.glb p30_front.png p30_q45.png p30_top.png p30_close.png p30_report.json; do test -f "out/$f"; done
+
+      - name: P3-1B Wish Fountain (shape + AO-baked stone + water/falls/foam meshes; budget check)
+        run: |
+          /opt/blender/blender -b --factory-startup -noaudio -P art/village-p3/build_fountain.py -- --tex "$PWD/out/textures" --out "$PWD/out" --previews 0 2>&1 | tee out/fountain.log | grep -v "^Fra:" | grep -v "Sample" | tail -80
+          for f in fountain_hq.glb fountain_lite.glb fountain_report.json; do test -f "out/$f"; done
+
+      - name: P3-2A Central plaza (paving, roads, benches, lamps, banners, flower beds; budget check)
+        run: |
+          /opt/blender/blender -b --factory-startup -noaudio -P art/village-p3/build_plaza.py -- --tex "$PWD/out/textures" --out "$PWD/out" 2>&1 | tee out/plaza.log | grep -v "^Fra:" | grep -v "Sample" | tail -40
+          for f in plaza_hq.glb plaza_lite.glb plaza_report.json; do test -f "out/$f"; done
+
+      - name: P3-2B Knight Order building (shape + AO; inside V1.3 collider; budget check)
+        run: |
+          /opt/blender/blender -b --factory-startup -noaudio -P art/village-p3/build_knight.py -- --out "$PWD/out" 2>&1 | tee out/knight.log | grep -v "^Fra:" | grep -v "Sample" | tail -40
+          for f in knight_hq.glb knight_lite.glb knight_report.json; do test -f "out/$f"; done
+
+      - name: P3-4 Mage Order tower — shape proposal (inside V1.3 collider; budget check)
+        run: |
+          /opt/blender/blender -b --factory-startup -noaudio -P art/village-p3/build_mage.py -- --out "$PWD/out" 2>&1 | tee out/mage.log | grep -v "^Fra:" | grep -v "Sample" | tail -40
+          for f in mage_hq.glb mage_lite.glb mage_report.json; do test -f "out/$f"; done
+
+      - name: P3-5 Sword Order hall (inside V1.3 collider; budget check)
+        run: |
+          /opt/blender/blender -b --factory-startup -noaudio -P art/village-p3/build_sword.py -- --out "$PWD/out" 2>&1 | tee out/sword.log | grep -v "^Fra:" | grep -v "Sample" | tail -30
+          for f in sword_hq.glb sword_lite.glb sword_report.json; do test -f "out/$f"; done
+
+      - name: P3-6 North platform retaining wall + stairs (no new colliders; budget check)
+        run: |
+          /opt/blender/blender -b --factory-startup -noaudio -P art/village-p3/build_platform.py -- --out "$PWD/out" 2>&1 | tee out/platform.log | grep -v "^Fra:" | grep -v "Sample" | tail -30
+          for f in platform_hq.glb platform_lite.glb platform_report.json; do test -f "out/$f"; done
+      - name: P3 batch 2 — board, smith, warehouse, portals + gate + road inlays (inside existing colliders; budget check)
+        run: |
+          for b in board smith warehouse portals church circus env; do
+            /opt/blender/blender -b --factory-startup -noaudio -P art/village-p3/build_$b.py -- --out "$PWD/out" 2>&1 | tee out/$b.log | grep -v "^Fra:" | grep -v "Sample" | tail -12
+            for q in hq lite; do test -f "out/${b}_$q.glb"; done
+            test -f "out/${b}_report.json"
+          done
+
+      - name: Validate GLB (Khronos glTF-Validator)
+        run: |
+          mkdir -p /tmp/gv && cd /tmp/gv && npm init -y >/dev/null && npm i --no-save gltf-validator@latest 2>&1 | tail -3
+          cd "$GITHUB_WORKSPACE"
+          NODE_PATH=/tmp/gv/node_modules node -e '
+            const v = require("gltf-validator"); const fs = require("fs");
+            (async () => {
+              let bad = 0; const s = {};
+              for (const q of ["p30_sample_hq", "p30_sample_lite", "fountain_hq", "fountain_lite", "plaza_hq", "plaza_lite", "knight_hq", "knight_lite", "mage_hq", "mage_lite", "sword_hq", "sword_lite", "platform_hq", "platform_lite", "board_hq", "board_lite", "smith_hq", "smith_lite", "warehouse_hq", "warehouse_lite", "portals_hq", "portals_lite", "church_hq", "church_lite", "circus_hq", "circus_lite", "env_hq", "env_lite"]) {
+                const b = fs.readFileSync(`out/${q}.glb`);
+                const r = await v.validateBytes(new Uint8Array(b));
+                const dv = new DataView(b.buffer, b.byteOffset); const len = dv.getUint32(12, true);
+                const j = JSON.parse(Buffer.from(b.subarray(20, 20 + len)).toString());
+                s[q] = { errors: r.issues.numErrors, warnings: r.issues.numWarnings, bytes: b.length, triangles: r.info.totalTriangleCount, materials: r.info.materialCount, meshes: j.meshes.length,
+                  images: (j.images || []).length, normalMaps: (j.materials || []).filter((m) => m.normalTexture).length,
+                  color0: j.meshes.filter((m) => m.primitives.some((p) => "COLOR_0" in p.attributes)).length };
+                console.log(q, JSON.stringify(s[q]));
+                bad += r.issues.numErrors;
+              }
+              fs.writeFileSync("out/validator_summary.json", JSON.stringify(s, null, 1));
+              if (bad) process.exit(1);
+            })();'
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: P3-1B Babylon preview lab (standalone page, NOT deployed) — typecheck, build, screenshots, cost
+        run: |
+          npm install --no-audit --no-fund
+          npm run typecheck
+          npm test 2>&1 | tail -8
+          mkdir -p tools/fountain-lab/public/models/fx
+          mkdir -p tools/fountain-lab/public/models/tex
+          cp out/fountain_hq.glb out/fountain_lite.glb out/plaza_hq.glb out/plaza_lite.glb out/knight_hq.glb out/knight_lite.glb out/mage_hq.glb out/mage_lite.glb out/sword_hq.glb out/sword_lite.glb out/platform_hq.glb out/platform_lite.glb out/board_*.glb out/smith_*.glb out/warehouse_*.glb out/portals_*.glb out/church_*.glb out/circus_*.glb out/env_*.glb tools/fountain-lab/public/models/
+          cp out/textures/*.png tools/fountain-lab/public/models/tex/
+          cp out/textures/water_hq.png out/textures/water_lite.png out/textures/water_nrm_hq.png out/textures/fx_*.png tools/fountain-lab/public/models/fx/
+          npx vite build tools/fountain-lab --base ./ --outDir "$PWD/out-lab" --emptyOutDir
+          npx playwright install --with-deps chromium webkit >/dev/null
+          node tools/fountain-lab/shoot.mjs out-lab out/lab out/plaza_report.json out/knight_report.json out/mage_report.json out/sword_report.json out/platform_report.json out/board_report.json out/smith_report.json out/warehouse_report.json out/portals_report.json out/church_report.json out/circus_report.json out/env_report.json | tail -150
+
+      - name: P3-2E animation clips (MP4 + GIF via ffmpeg)
+        if: always()
+        run: |
+          which ffmpeg >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null)
+          mkdir -p out/anim
+          for d in out/lab/anim_*; do
+            [ -d "$d" ] || continue
+            n=$(basename "$d")
+            ffmpeg -y -loglevel error -framerate 15 -i "$d/f%03d.jpg" -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -c:v libx264 -preset veryfast -crf 23 -pix_fmt yuv420p -movflags +faststart "out/anim/$n.mp4"
+            ffmpeg -y -loglevel error -framerate 15 -i "$d/f%03d.jpg" -vf "scale='min(480,iw)':-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=160[p];[b][p]paletteuse=dither=bayer:bayer_scale=4" "out/anim/$n.gif"
+            rm -rf "$d"
+          done
+          ls -la out/anim
+
+      - name: Contact sheet
+        if: always()
+        run: |
+          python3 - <<'PY'
+          from PIL import Image
+          import os
+          ims = [Image.open(f"out/p30_{v}.png").convert("RGB") for v in ("front", "q45", "top", "close") if os.path.exists(f"out/p30_{v}.png")]
+          if ims:
+              w, h = ims[0].size
+              sheet = Image.new("RGB", (w * 2, h * 2), (235, 236, 242))
+              for i, im in enumerate(ims):
+                  sheet.paste(im, ((i % 2) * w, (i // 2) * h))
+              sheet.save("out/p30_contact_sheet.png")
+          ims = [Image.open(f"out/fountain_{v}.png").convert("RGB") for v in ("front", "q45", "top", "close") if os.path.exists(f"out/fountain_{v}.png")]
+          if len(ims) == 4:
+              W, H = 1200, 800
+              sheet = Image.new("RGB", (W * 2, H * 2), (235, 236, 242))
+              for i, im in enumerate(ims):
+                  im = im.copy(); im.thumbnail((W, H))
+                  sheet.paste(im, ((i % 2) * W + (W - im.width) // 2, (i // 2) * H + (H - im.height) // 2))
+              sheet.save("out/fountain_contact_sheet.png")
+          ims = []
+          for v in ("player_spawn", "fountain_front", "fountain_close", "fountain_q45", "fountain_top", "fountain_water"):
+              p = f"out/lab/chromium_hq_{v}.png"
+              if os.path.exists(p):
+                  ims.append(Image.open(p).convert("RGB"))
+          if len(ims) >= 4:
+              w, h = ims[0].size
+              cols = 2
+              rows = (len(ims) + 1) // 2
+              sheet = Image.new("RGB", (w * cols, h * rows), (235, 236, 242))
+              for i, im in enumerate(ims):
+                  sheet.paste(im, ((i % cols) * w, (i // cols) * h))
+              sheet = sheet.resize((sheet.width // 2, sheet.height // 2))
+              sheet.save("out/p32e_hq_sheet.png")
+          ims = [Image.open(f"out/lab/chromium_hq_{v}.png").convert("RGB") for v in ("mage_front", "mage_side", "mage_q45", "mage_top") if os.path.exists(f"out/lab/chromium_hq_{v}.png")]
+          if len(ims) == 4:
+              w, h = ims[0].size
+              sheet = Image.new("RGB", (w * 2, h * 2), (235, 236, 242))
+              for i, im in enumerate(ims):
+                  sheet.paste(im, ((i % 2) * w, (i // 2) * h))
+              sheet.resize((w, h)).save("out/p34_mage_sheet.png")
+          ims = [Image.open(f"out/lab/chromium_hq_{v}.png").convert("RGB") for v in ("sword_front", "sword_side", "sword_q45", "sword_top") if os.path.exists(f"out/lab/chromium_hq_{v}.png")]
+          if len(ims) == 4:
+              w, h = ims[0].size
+              sheet = Image.new("RGB", (w * 2, h * 2), (235, 236, 242))
+              for i, im in enumerate(ims):
+                  sheet.paste(im, ((i % 2) * w, (i // 2) * h))
+              sheet.resize((w, h)).save("out/p35_sword_sheet.png")
+          PY
+
+      - name: Push results to art-village-p3 branch (normal push, no force)
+        if: always()
+        run: |
+          echo "{\"commit\":\"${GITHUB_SHA}\",\"blender\":\"${BLENDER_VERSION}\",\"builtAt\":\"$(date -u +%FT%TZ)\"}" > out/build.json
+          REPO="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads "$REPO" art-village-p3 >/dev/null 2>&1; then
+            git clone -q --depth 1 --branch art-village-p3 "$REPO" /tmp/artp3
+          else
+            mkdir -p /tmp/artp3 && cd /tmp/artp3 && git init -q -b art-village-p3 && git remote add origin "$REPO" && cd -
+          fi
+          rsync -a --delete --exclude .git out/ /tmp/artp3/
+          cd /tmp/artp3
+          git add -A
+          git commit -qm "Village P3 ${GITHUB_SHA::7}" || echo "no changes"
+          git push -q origin HEAD:art-village-p3
