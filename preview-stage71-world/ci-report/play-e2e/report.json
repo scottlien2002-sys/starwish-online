@@ -1,0 +1,1165 @@
+{
+  "startedAt": "2026-11-26T09:05:53.219Z",
+  "runs": [
+    {
+      "browser": "webkit",
+      "label": "male hq",
+      "checks": {
+        "啟動（地圖＋角色＋怪物）": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "male hq：c10b5a GLB、6 隻星露啵啵、寵物＝測試設定": {
+          "ok": true,
+          "detail": {
+            "file": "novice_c10b5a_male_hq.glb",
+            "monsters": 6,
+            "pets": {
+              "enabled": true,
+              "mode": "preview",
+              "reason": "",
+              "items": {
+                "seed": 0,
+                "egg": 0,
+                "birdEgg": 0,
+                "monsterMaterial": 0,
+                "shopFeed": 0
+              },
+              "count": 0,
+              "equipped": null,
+              "followerVisible": false,
+              "followerDist": 85.09641990788086
+            }
+          }
+        },
+        "預設渲染：P3-2（無 HDR 管線）＋腳下柔邊陰影": {
+          "ok": true,
+          "detail": {
+            "p3": true,
+            "pipeline": false,
+            "charShadow": "blob",
+            "drawCalls": 135,
+            "fps": 0.5037783375314862,
+            "contextLost": 0
+          }
+        },
+        "移動 5 m/s、Run 動作、跑步倍率依速度": {
+          "ok": true,
+          "detail": {
+            "speed": 5.000000000000001,
+            "runRate": 2.2123893805309742,
+            "slide": 0,
+            "state": "Run"
+          }
+        },
+        "B5a 跨步加大：5 m/s 跑步倍率 ≤ 2.4、滑步 < 0.1 m/s": {
+          "ok": true,
+          "detail": {
+            "speed": 5.000000000000001,
+            "runRate": 2.2123893805309742,
+            "slide": 0,
+            "state": "Run"
+          }
+        },
+        "移動後在原地之外、貼地": {
+          "ok": true,
+          "detail": {
+            "from": [
+              -56,
+              2,
+              -64
+            ],
+            "to": [
+              -52.345998886435474,
+              2,
+              -59.88924874723984
+            ]
+          }
+        },
+        "跳躍": {
+          "ok": true,
+          "detail": null
+        },
+        "攻擊命中、擊倒 3 隻星露啵啵": {
+          "ok": true,
+          "detail": {
+            "attacks": 25,
+            "ms": 38723,
+            "kills": 3,
+            "hits": 9,
+            "drops": 4,
+            "picked": 4,
+            "loot": 0,
+            "hp": 76,
+            "attack": {
+              "interval": 0.5,
+              "hitAt": 0.2,
+              "attackSpeed": 100,
+              "damage": 20
+            }
+          }
+        },
+        "攻擊 0.5 秒一下、0.2 秒命中（攻速 100）": {
+          "ok": true,
+          "detail": {
+            "interval": 0.5,
+            "hitAt": 0.2,
+            "attackSpeed": 100,
+            "damage": 20
+          }
+        },
+        "擊倒後掉落（測試掉落率），走近自動撿起放進背包": {
+          "ok": true,
+          "detail": {
+            "attacks": 25,
+            "ms": 38723,
+            "kills": 3,
+            "hits": 9,
+            "drops": 4,
+            "picked": 4,
+            "loot": 0,
+            "hp": 76,
+            "attack": {
+              "interval": 0.5,
+              "hitAt": 0.2,
+              "attackSpeed": 100,
+              "damage": 20
+            }
+          }
+        },
+        "背包數量＝撿到的數量（掉落不重複計算）": {
+          "ok": true,
+          "detail": {
+            "items": {
+              "seed": 1,
+              "egg": 1,
+              "birdEgg": 0,
+              "monsterMaterial": 2,
+              "shopFeed": 0
+            },
+            "picked": 4
+          }
+        },
+        "被擊倒的怪物進入死亡／等待重生": {
+          "ok": true,
+          "detail": [
+            "move",
+            "move",
+            "dead",
+            "dead",
+            "dead",
+            "move"
+          ]
+        },
+        "寵物：孵化、餵食、進化、鑑定成功": {
+          "ok": true,
+          "detail": {
+            "id": 1,
+            "hatched": 1,
+            "fed": [
+              true,
+              true,
+              true
+            ],
+            "evo": true,
+            "appr": true,
+            "again": false,
+            "first": "[{\"stat\":\"attackSpeed\",\"value\":4}]",
+            "second": "[{\"stat\":\"attackSpeed\",\"value\":4}]",
+            "after": {
+              "pets": {
+                "enabled": true,
+                "mode": "preview",
+                "reason": "",
+                "items": {
+                  "seed": 1,
+                  "egg": 1,
+                  "birdEgg": 0,
+                  "monsterMaterial": 2,
+                  "shopFeed": 3
+                },
+                "count": 1,
+                "equipped": 1,
+                "followerVisible": true,
+                "followerDist": 60.97862283394013
+              },
+              "stats": {
+                "attack": 100,
+                "attackSpeed": 102.5,
+                "defense": 50,
+                "maxHp": 100
+              },
+              "attack": {
+                "interval": 0.48780487804878053,
+                "hitAt": 0.19512195121951223,
+                "attackSpeed": 102.5,
+                "damage": 20
+              }
+            },
+            "follower": {
+              "enabled": true,
+              "mode": "preview",
+              "reason": "",
+              "items": {
+                "seed": 1,
+                "egg": 1,
+                "birdEgg": 0,
+                "monsterMaterial": 2,
+                "shopFeed": 3
+              },
+              "count": 1,
+              "equipped": 1,
+              "followerVisible": true,
+              "followerDist": 0.4028046363686877
+            }
+          }
+        },
+        "寵物方案 A：再鑑定拒絕、詞條不變": {
+          "ok": true,
+          "detail": {
+            "first": "[{\"stat\":\"attackSpeed\",\"value\":4}]",
+            "second": "[{\"stat\":\"attackSpeed\",\"value\":4}]"
+          }
+        },
+        "寵物裝備後在頭部附近跟隨（≤ 0.8 m）": {
+          "ok": true,
+          "detail": {
+            "enabled": true,
+            "mode": "preview",
+            "reason": "",
+            "items": {
+              "seed": 1,
+              "egg": 1,
+              "birdEgg": 0,
+              "monsterMaterial": 2,
+              "shopFeed": 3
+            },
+            "count": 1,
+            "equipped": 1,
+            "followerVisible": true,
+            "followerDist": 0.4028046363686877
+          }
+        },
+        "寵物加成反映到角色屬性；攻速 ≤ 160 且同步到攻擊動作": {
+          "ok": true,
+          "detail": {
+            "stats": {
+              "attack": 100,
+              "attackSpeed": 102.5,
+              "defense": 50,
+              "maxHp": 100
+            },
+            "attack": {
+              "interval": 0.48780487804878053,
+              "hitAt": 0.19512195121951223,
+              "attackSpeed": 102.5,
+              "damage": 20
+            }
+          }
+        },
+        "寵物商人鑑定：孵化前鑑定個體、不能重鑑、另一顆不受影響、孵化後詞條相同": {
+          "ok": true,
+          "detail": {
+            "target": "item:2",
+            "r1": {
+              "ok": true,
+              "affixes": [
+                {
+                  "stat": "maxHp",
+                  "value": -5
+                }
+              ]
+            },
+            "r2": {
+              "ok": false,
+              "affixes": null
+            },
+            "other": null,
+            "petAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]",
+            "itemAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]"
+          }
+        },
+        "重新載入：寵物、詞條、裝備、背包保留": {
+          "ok": true,
+          "detail": {
+            "reload": "[{\"stat\":\"attackSpeed\",\"value\":4}]",
+            "first": "[{\"stat\":\"attackSpeed\",\"value\":4}]",
+            "equipped": 1
+          }
+        },
+        "實玩效能測試流程（自動打怪、報告欄位、Context Lost 0）": {
+          "ok": true,
+          "detail": {
+            "seconds": 11.7,
+            "avgFps": 1.0261672652642382,
+            "low1Fps": 0.9891196834817014,
+            "minFps": 0.9891196834817014,
+            "avgDraw": 131,
+            "kills": 0,
+            "contextLost": 0,
+            "first30": 1.0261672652642382,
+            "last30": 1.0261672652642382,
+            "quality": "high",
+            "gender": "male",
+            "lod": "hq",
+            "charShadow": "blob"
+          }
+        },
+        "&pets=official：缺正式數值 → 寵物停用並提示、遊戲照常": {
+          "ok": true,
+          "detail": {
+            "enabled": false,
+            "mode": "official",
+            "reason": "寵物系統尚未開放：正式設定還缺 鑑定條數機率、鑑定屬性機率、鑑定數值機率、孵化時間、時間成長經驗、各階段經驗、進化餵食次數、各階段加成倍率、飼料經驗、掉落率、鑑定費用、飼料價格、飽食度與死亡復活規則",
+            "items": {
+              "seed": 0,
+              "egg": 0,
+              "birdEgg": 0,
+              "monsterMaterial": 0,
+              "shopFeed": 0
+            },
+            "count": 0,
+            "equipped": null,
+            "followerVisible": false,
+            "followerDist": 85.09363425501067
+          }
+        },
+        "&charshadow=realtime 可載入": {
+          "ok": true,
+          "detail": {
+            "p3": true,
+            "pipeline": false,
+            "charShadow": "realtime",
+            "drawCalls": 160,
+            "fps": 0.8955758552749419,
+            "contextLost": 0
+          }
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": {
+            "p3": true,
+            "pipeline": false,
+            "charShadow": "realtime",
+            "drawCalls": 160,
+            "fps": 0.8955758552749419,
+            "contextLost": 0
+          }
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "play-e2e/webkit_male_hq_spawn.png",
+        "play-e2e/webkit_male_hq_zone01.png",
+        "play-e2e/webkit_male_hq_fight.png",
+        "play-e2e/webkit_male_hq_pet.png"
+      ],
+      "results": {
+        "start": {
+          "gender": "male",
+          "lod": "hq",
+          "file": "novice_c10b5a_male_hq.glb",
+          "state": "Idle",
+          "pos": [
+            -56,
+            2,
+            -64
+          ],
+          "hp": 100,
+          "maxHp": 100,
+          "down": false,
+          "speed": 0,
+          "runRate": 0.8,
+          "slide": -1.8079999999999998,
+          "attack": {
+            "interval": 0.5,
+            "hitAt": 0.2,
+            "attackSpeed": 100,
+            "damage": 20
+          },
+          "stats": {
+            "attack": 100,
+            "attackSpeed": 100,
+            "defense": 50,
+            "maxHp": 100
+          },
+          "kills": 0,
+          "hits": 0,
+          "drops": 0,
+          "picked": 0,
+          "loot": 0,
+          "monsters": [
+            {
+              "id": "star_dew_bobo#1",
+              "state": "idle",
+              "hp": 60,
+              "x": -19.03,
+              "z": -49.9
+            },
+            {
+              "id": "star_dew_bobo#2",
+              "state": "idle",
+              "hp": 60,
+              "x": -22.99,
+              "z": -43.9
+            },
+            {
+              "id": "star_dew_bobo#3",
+              "state": "idle",
+              "hp": 60,
+              "x": -28.31,
+              "z": -48.74
+            },
+            {
+              "id": "star_dew_bobo#4",
+              "state": "idle",
+              "hp": 60,
+              "x": -31.52,
+              "z": -55.18
+            },
+            {
+              "id": "star_dew_bobo#5",
+              "state": "idle",
+              "hp": 60,
+              "x": -24.67,
+              "z": -57.36
+            },
+            {
+              "id": "star_dew_bobo#6",
+              "state": "idle",
+              "hp": 60,
+              "x": -17.49,
+              "z": -56.92
+            }
+          ],
+          "pets": {
+            "enabled": true,
+            "mode": "preview",
+            "reason": "",
+            "items": {
+              "seed": 0,
+              "egg": 0,
+              "birdEgg": 0,
+              "monsterMaterial": 0,
+              "shopFeed": 0
+            },
+            "count": 0,
+            "equipped": null,
+            "followerVisible": false,
+            "followerDist": 85.09641990788086
+          },
+          "render": {
+            "p3": true,
+            "pipeline": false,
+            "charShadow": "blob",
+            "drawCalls": 135,
+            "fps": 0.5037783375314862,
+            "contextLost": 0
+          }
+        },
+        "move": {
+          "speed": 5.000000000000001,
+          "runRate": 2.2123893805309742,
+          "slide": 0,
+          "state": "Run"
+        },
+        "fight": {
+          "attacks": 25,
+          "ms": 38723,
+          "kills": 3,
+          "hits": 9,
+          "drops": 4,
+          "picked": 4,
+          "loot": 0,
+          "hp": 76,
+          "attack": {
+            "interval": 0.5,
+            "hitAt": 0.2,
+            "attackSpeed": 100,
+            "damage": 20
+          }
+        },
+        "monsterStates": [
+          "move",
+          "move",
+          "dead",
+          "dead",
+          "dead",
+          "move"
+        ],
+        "pet": {
+          "id": 1,
+          "hatched": 1,
+          "fed": [
+            true,
+            true,
+            true
+          ],
+          "evo": true,
+          "appr": true,
+          "again": false,
+          "first": "[{\"stat\":\"attackSpeed\",\"value\":4}]",
+          "second": "[{\"stat\":\"attackSpeed\",\"value\":4}]",
+          "after": {
+            "pets": {
+              "enabled": true,
+              "mode": "preview",
+              "reason": "",
+              "items": {
+                "seed": 1,
+                "egg": 1,
+                "birdEgg": 0,
+                "monsterMaterial": 2,
+                "shopFeed": 3
+              },
+              "count": 1,
+              "equipped": 1,
+              "followerVisible": true,
+              "followerDist": 60.97862283394013
+            },
+            "stats": {
+              "attack": 100,
+              "attackSpeed": 102.5,
+              "defense": 50,
+              "maxHp": 100
+            },
+            "attack": {
+              "interval": 0.48780487804878053,
+              "hitAt": 0.19512195121951223,
+              "attackSpeed": 102.5,
+              "damage": 20
+            }
+          },
+          "follower": {
+            "enabled": true,
+            "mode": "preview",
+            "reason": "",
+            "items": {
+              "seed": 1,
+              "egg": 1,
+              "birdEgg": 0,
+              "monsterMaterial": 2,
+              "shopFeed": 3
+            },
+            "count": 1,
+            "equipped": 1,
+            "followerVisible": true,
+            "followerDist": 0.4028046363686877
+          }
+        },
+        "itemAppraisal": {
+          "target": "item:2",
+          "r1": {
+            "ok": true,
+            "affixes": [
+              {
+                "stat": "maxHp",
+                "value": -5
+              }
+            ]
+          },
+          "r2": {
+            "ok": false,
+            "affixes": null
+          },
+          "other": null,
+          "petAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]",
+          "itemAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]"
+        },
+        "bench": {
+          "seconds": 11.7,
+          "avgFps": 1.0261672652642382,
+          "low1Fps": 0.9891196834817014,
+          "minFps": 0.9891196834817014,
+          "avgDraw": 131,
+          "kills": 0,
+          "contextLost": 0,
+          "first30": 1.0261672652642382,
+          "last30": 1.0261672652642382,
+          "quality": "high",
+          "gender": "male",
+          "lod": "hq",
+          "charShadow": "blob"
+        },
+        "drawRealtime": 160,
+        "end": {
+          "render": {
+            "p3": true,
+            "pipeline": false,
+            "charShadow": "realtime",
+            "drawCalls": 160,
+            "fps": 0.8955758552749419,
+            "contextLost": 0
+          }
+        }
+      },
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "label": "female lite",
+      "checks": {
+        "啟動（地圖＋角色＋怪物）": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "female lite：c10b5a GLB、6 隻星露啵啵、寵物＝測試設定": {
+          "ok": true,
+          "detail": {
+            "file": "novice_c10b5a_female_lite.glb",
+            "monsters": 6,
+            "pets": {
+              "enabled": true,
+              "mode": "preview",
+              "reason": "",
+              "items": {
+                "seed": 0,
+                "egg": 0,
+                "birdEgg": 0,
+                "monsterMaterial": 0,
+                "shopFeed": 0
+              },
+              "count": 0,
+              "equipped": null,
+              "followerVisible": false,
+              "followerDist": 85.08967250789152
+            }
+          }
+        },
+        "預設渲染：P3-2（無 HDR 管線）＋腳下柔邊陰影": {
+          "ok": true,
+          "detail": {
+            "p3": true,
+            "pipeline": false,
+            "charShadow": "blob",
+            "drawCalls": 128,
+            "fps": null,
+            "contextLost": 0
+          }
+        },
+        "移動 5 m/s、Run 動作、跑步倍率依速度": {
+          "ok": true,
+          "detail": {
+            "speed": 5.000000000000001,
+            "runRate": 2.074688796680498,
+            "slide": 0,
+            "state": "Run"
+          }
+        },
+        "B5a 跨步加大：5 m/s 跑步倍率 ≤ 2.4、滑步 < 0.1 m/s": {
+          "ok": true,
+          "detail": {
+            "speed": 5.000000000000001,
+            "runRate": 2.074688796680498,
+            "slide": 0,
+            "state": "Run"
+          }
+        },
+        "移動後在原地之外、貼地": {
+          "ok": true,
+          "detail": {
+            "from": [
+              -56,
+              2,
+              -64
+            ],
+            "to": [
+              -52.345998886435474,
+              2,
+              -59.88924874723984
+            ]
+          }
+        },
+        "跳躍": {
+          "ok": true,
+          "detail": null
+        },
+        "攻擊命中、擊倒 3 隻星露啵啵": {
+          "ok": true,
+          "detail": {
+            "attacks": 25,
+            "ms": 14391,
+            "kills": 3,
+            "hits": 9,
+            "drops": 4,
+            "picked": 4,
+            "loot": 0,
+            "hp": 76,
+            "attack": {
+              "interval": 0.5,
+              "hitAt": 0.2,
+              "attackSpeed": 100,
+              "damage": 20
+            }
+          }
+        },
+        "攻擊 0.5 秒一下、0.2 秒命中（攻速 100）": {
+          "ok": true,
+          "detail": {
+            "interval": 0.5,
+            "hitAt": 0.2,
+            "attackSpeed": 100,
+            "damage": 20
+          }
+        },
+        "擊倒後掉落（測試掉落率），走近自動撿起放進背包": {
+          "ok": true,
+          "detail": {
+            "attacks": 25,
+            "ms": 14391,
+            "kills": 3,
+            "hits": 9,
+            "drops": 4,
+            "picked": 4,
+            "loot": 0,
+            "hp": 76,
+            "attack": {
+              "interval": 0.5,
+              "hitAt": 0.2,
+              "attackSpeed": 100,
+              "damage": 20
+            }
+          }
+        },
+        "背包數量＝撿到的數量（掉落不重複計算）": {
+          "ok": true,
+          "detail": {
+            "items": {
+              "seed": 1,
+              "egg": 1,
+              "birdEgg": 0,
+              "monsterMaterial": 2,
+              "shopFeed": 0
+            },
+            "picked": 4
+          }
+        },
+        "被擊倒的怪物進入死亡／等待重生": {
+          "ok": true,
+          "detail": [
+            "move",
+            "move",
+            "dead",
+            "dead",
+            "dead",
+            "move"
+          ]
+        },
+        "寵物：孵化、餵食、進化、鑑定成功": {
+          "ok": true,
+          "detail": {
+            "id": 1,
+            "hatched": 1,
+            "fed": [
+              true,
+              true,
+              true
+            ],
+            "evo": true,
+            "appr": true,
+            "again": false,
+            "first": "[{\"stat\":\"attackSpeed\",\"value\":4}]",
+            "second": "[{\"stat\":\"attackSpeed\",\"value\":4}]",
+            "after": {
+              "pets": {
+                "enabled": true,
+                "mode": "preview",
+                "reason": "",
+                "items": {
+                  "seed": 1,
+                  "egg": 1,
+                  "birdEgg": 0,
+                  "monsterMaterial": 2,
+                  "shopFeed": 3
+                },
+                "count": 1,
+                "equipped": 1,
+                "followerVisible": true,
+                "followerDist": 60.980552924901055
+              },
+              "stats": {
+                "attack": 100,
+                "attackSpeed": 102.5,
+                "defense": 50,
+                "maxHp": 100
+              },
+              "attack": {
+                "interval": 0.48780487804878053,
+                "hitAt": 0.19512195121951223,
+                "attackSpeed": 102.5,
+                "damage": 20
+              }
+            },
+            "follower": {
+              "enabled": true,
+              "mode": "preview",
+              "reason": "",
+              "items": {
+                "seed": 1,
+                "egg": 1,
+                "birdEgg": 0,
+                "monsterMaterial": 2,
+                "shopFeed": 3
+              },
+              "count": 1,
+              "equipped": 1,
+              "followerVisible": true,
+              "followerDist": 0.42019928319807653
+            }
+          }
+        },
+        "寵物方案 A：再鑑定拒絕、詞條不變": {
+          "ok": true,
+          "detail": {
+            "first": "[{\"stat\":\"attackSpeed\",\"value\":4}]",
+            "second": "[{\"stat\":\"attackSpeed\",\"value\":4}]"
+          }
+        },
+        "寵物裝備後在頭部附近跟隨（≤ 0.8 m）": {
+          "ok": true,
+          "detail": {
+            "enabled": true,
+            "mode": "preview",
+            "reason": "",
+            "items": {
+              "seed": 1,
+              "egg": 1,
+              "birdEgg": 0,
+              "monsterMaterial": 2,
+              "shopFeed": 3
+            },
+            "count": 1,
+            "equipped": 1,
+            "followerVisible": true,
+            "followerDist": 0.42019928319807653
+          }
+        },
+        "寵物加成反映到角色屬性；攻速 ≤ 160 且同步到攻擊動作": {
+          "ok": true,
+          "detail": {
+            "stats": {
+              "attack": 100,
+              "attackSpeed": 102.5,
+              "defense": 50,
+              "maxHp": 100
+            },
+            "attack": {
+              "interval": 0.48780487804878053,
+              "hitAt": 0.19512195121951223,
+              "attackSpeed": 102.5,
+              "damage": 20
+            }
+          }
+        },
+        "寵物商人鑑定：孵化前鑑定個體、不能重鑑、另一顆不受影響、孵化後詞條相同": {
+          "ok": true,
+          "detail": {
+            "target": "item:2",
+            "r1": {
+              "ok": true,
+              "affixes": [
+                {
+                  "stat": "maxHp",
+                  "value": -5
+                }
+              ]
+            },
+            "r2": {
+              "ok": false,
+              "affixes": null
+            },
+            "other": null,
+            "petAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]",
+            "itemAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]"
+          }
+        },
+        "重新載入：寵物、詞條、裝備、背包保留": {
+          "ok": true,
+          "detail": {
+            "reload": "[{\"stat\":\"attackSpeed\",\"value\":4}]",
+            "first": "[{\"stat\":\"attackSpeed\",\"value\":4}]",
+            "equipped": 1
+          }
+        },
+        "實玩效能測試流程（自動打怪、報告欄位、Context Lost 0）": {
+          "ok": true,
+          "detail": {
+            "seconds": 10.1,
+            "avgFps": 3.4736006351726876,
+            "low1Fps": 2.9673590504451037,
+            "minFps": 2.9673590504451037,
+            "avgDraw": 113.2,
+            "kills": 2,
+            "contextLost": 0,
+            "first30": 3.4736006351726876,
+            "last30": 3.4736006351726876,
+            "quality": "medium",
+            "gender": "female",
+            "lod": "lite",
+            "charShadow": "blob"
+          }
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": {
+            "p3": true,
+            "pipeline": false,
+            "charShadow": "blob",
+            "drawCalls": 108,
+            "fps": 3.4594095940959417,
+            "contextLost": 0
+          }
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "play-e2e/webkit_female_lite_spawn.png",
+        "play-e2e/webkit_female_lite_zone01.png",
+        "play-e2e/webkit_female_lite_fight.png",
+        "play-e2e/webkit_female_lite_pet.png"
+      ],
+      "results": {
+        "start": {
+          "gender": "female",
+          "lod": "lite",
+          "file": "novice_c10b5a_female_lite.glb",
+          "state": "Idle",
+          "pos": [
+            -56,
+            2,
+            -64
+          ],
+          "hp": 100,
+          "maxHp": 100,
+          "down": false,
+          "speed": 0,
+          "runRate": 0.8,
+          "slide": -1.9280000000000002,
+          "attack": {
+            "interval": 0.5,
+            "hitAt": 0.2,
+            "attackSpeed": 100,
+            "damage": 20
+          },
+          "stats": {
+            "attack": 100,
+            "attackSpeed": 100,
+            "defense": 50,
+            "maxHp": 100
+          },
+          "kills": 0,
+          "hits": 0,
+          "drops": 0,
+          "picked": 0,
+          "loot": 0,
+          "monsters": [
+            {
+              "id": "star_dew_bobo#1",
+              "state": "idle",
+              "hp": 60,
+              "x": -19.03,
+              "z": -49.9
+            },
+            {
+              "id": "star_dew_bobo#2",
+              "state": "idle",
+              "hp": 60,
+              "x": -22.99,
+              "z": -43.9
+            },
+            {
+              "id": "star_dew_bobo#3",
+              "state": "idle",
+              "hp": 60,
+              "x": -28.31,
+              "z": -48.74
+            },
+            {
+              "id": "star_dew_bobo#4",
+              "state": "idle",
+              "hp": 60,
+              "x": -31.52,
+              "z": -55.18
+            },
+            {
+              "id": "star_dew_bobo#5",
+              "state": "idle",
+              "hp": 60,
+              "x": -24.67,
+              "z": -57.36
+            },
+            {
+              "id": "star_dew_bobo#6",
+              "state": "idle",
+              "hp": 60,
+              "x": -17.49,
+              "z": -56.92
+            }
+          ],
+          "pets": {
+            "enabled": true,
+            "mode": "preview",
+            "reason": "",
+            "items": {
+              "seed": 0,
+              "egg": 0,
+              "birdEgg": 0,
+              "monsterMaterial": 0,
+              "shopFeed": 0
+            },
+            "count": 0,
+            "equipped": null,
+            "followerVisible": false,
+            "followerDist": 85.08967250789152
+          },
+          "render": {
+            "p3": true,
+            "pipeline": false,
+            "charShadow": "blob",
+            "drawCalls": 128,
+            "fps": null,
+            "contextLost": 0
+          }
+        },
+        "move": {
+          "speed": 5.000000000000001,
+          "runRate": 2.074688796680498,
+          "slide": 0,
+          "state": "Run"
+        },
+        "fight": {
+          "attacks": 25,
+          "ms": 14391,
+          "kills": 3,
+          "hits": 9,
+          "drops": 4,
+          "picked": 4,
+          "loot": 0,
+          "hp": 76,
+          "attack": {
+            "interval": 0.5,
+            "hitAt": 0.2,
+            "attackSpeed": 100,
+            "damage": 20
+          }
+        },
+        "monsterStates": [
+          "move",
+          "move",
+          "dead",
+          "dead",
+          "dead",
+          "move"
+        ],
+        "pet": {
+          "id": 1,
+          "hatched": 1,
+          "fed": [
+            true,
+            true,
+            true
+          ],
+          "evo": true,
+          "appr": true,
+          "again": false,
+          "first": "[{\"stat\":\"attackSpeed\",\"value\":4}]",
+          "second": "[{\"stat\":\"attackSpeed\",\"value\":4}]",
+          "after": {
+            "pets": {
+              "enabled": true,
+              "mode": "preview",
+              "reason": "",
+              "items": {
+                "seed": 1,
+                "egg": 1,
+                "birdEgg": 0,
+                "monsterMaterial": 2,
+                "shopFeed": 3
+              },
+              "count": 1,
+              "equipped": 1,
+              "followerVisible": true,
+              "followerDist": 60.980552924901055
+            },
+            "stats": {
+              "attack": 100,
+              "attackSpeed": 102.5,
+              "defense": 50,
+              "maxHp": 100
+            },
+            "attack": {
+              "interval": 0.48780487804878053,
+              "hitAt": 0.19512195121951223,
+              "attackSpeed": 102.5,
+              "damage": 20
+            }
+          },
+          "follower": {
+            "enabled": true,
+            "mode": "preview",
+            "reason": "",
+            "items": {
+              "seed": 1,
+              "egg": 1,
+              "birdEgg": 0,
+              "monsterMaterial": 2,
+              "shopFeed": 3
+            },
+            "count": 1,
+            "equipped": 1,
+            "followerVisible": true,
+            "followerDist": 0.42019928319807653
+          }
+        },
+        "itemAppraisal": {
+          "target": "item:2",
+          "r1": {
+            "ok": true,
+            "affixes": [
+              {
+                "stat": "maxHp",
+                "value": -5
+              }
+            ]
+          },
+          "r2": {
+            "ok": false,
+            "affixes": null
+          },
+          "other": null,
+          "petAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]",
+          "itemAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]"
+        },
+        "bench": {
+          "seconds": 10.1,
+          "avgFps": 3.4736006351726876,
+          "low1Fps": 2.9673590504451037,
+          "minFps": 2.9673590504451037,
+          "avgDraw": 113.2,
+          "kills": 2,
+          "contextLost": 0,
+          "first30": 3.4736006351726876,
+          "last30": 3.4736006351726876,
+          "quality": "medium",
+          "gender": "female",
+          "lod": "lite",
+          "charShadow": "blob"
+        },
+        "end": {
+          "render": {
+            "p3": true,
+            "pipeline": false,
+            "charShadow": "blob",
+            "drawCalls": 108,
+            "fps": 3.4594095940959417,
+            "contextLost": 0
+          }
+        }
+      },
+      "ok": true
+    }
+  ],
+  "finishedAt": "2026-11-26T09:09:06.779Z",
+  "characterVersion": "c10b5a",
+  "failures": 0
+}
