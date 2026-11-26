@@ -17,13 +17,19 @@ const report = { startedAt: new Date().toISOString(), note: "CI 軟體繪圖：F
 let failures = 0;
 const settle = (page, n = 3) => page.evaluate((k) => new Promise((r) => { let i = 0; const f = () => (++i >= k ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); }), n);
 
+// Stage 6.4：三段畫質（高／中／低）× iPhone 直向；高、中再測橫向（WebKit 只測直向）
 const MODES = [
-  ["hq-portrait", "high", "hq", { width: 390, height: 844 }],
-  ["lite-portrait", "low", "lite", { width: 390, height: 844 }],
-  ["hq-landscape", "high", "hq", { width: 844, height: 390 }],
-  // Stage 6.3：重現 Stage 6.2（?perf=s62：原始高面數角色、PCSS 2048 高取樣、2x、沒有 LOD）— 只量 CI 數據做前後比較
-  ["s62-hq-portrait", "high", "hq", { width: 390, height: 844 }, "&perf=s62"],
+  ["high-portrait", "high", { width: 390, height: 844 }],
+  ["medium-portrait", "medium", { width: 390, height: 844 }],
+  ["low-portrait", "low", { width: 390, height: 844 }],
+  ["high-landscape", "high", { width: 844, height: 390 }],
+  ["medium-landscape", "medium", { width: 844, height: 390 }],
 ];
+const TIER_EXPECT = {
+  high: { models: "hq", shadow: "pcf1024", map: 1024, res: 1.25, msaa: 4, post: true, dcMax: 160, triMax: 250000, npcMax: 12000, pmMax: 15000 },
+  medium: { models: "lite", shadow: "pcf1024", map: 1024, res: 1.25, msaa: 2, post: true, dcMax: 120, triMax: 100000, npcMax: 6500, pmMax: 6500 },
+  low: { models: "lite", shadow: "blob", map: 0, res: 1, msaa: 1, post: false, dcMax: 100, triMax: 100000, npcMax: 6500, pmMax: 6500 },
+};
 
 for (const name of browsers) {
   let browser;
@@ -34,8 +40,10 @@ for (const name of browsers) {
     failures++;
     continue;
   }
-  for (const [mode, q, lod, vp, extra = ""] of MODES) {
-    if (name === "webkit" && (mode === "hq-landscape" || mode.startsWith("s62"))) continue;
+  for (const [mode, q, vp] of MODES) {
+    if (name === "webkit" && mode.includes("landscape")) continue;
+    const lod = q === "high" ? "hq" : "lite";
+    const X = TIER_EXPECT[q];
     const run = { browser: name, mode, checks: {}, errors: [], screenshots: [], results: {} };
     report.runs.push(run);
     const check = (k, ok, detail) => {
@@ -52,9 +60,14 @@ for (const name of browsers) {
     const page = await ctx.newPage();
     page.on("pageerror", (e) => run.errors.push(`pageerror: ${e.message}`));
     page.on("console", (m) => m.type() === "error" && run.errors.push(`console: ${m.text()}`));
+    // 資源請求：同一個模型／貼圖不得重複請求；不得有 4xx／5xx
+    const reqCount = new Map();
+    const badResp = [];
+    page.on("request", (r) => { const u = r.url(); if (/\.(glb|png|jpg|ktx2)(\?|$)/.test(u)) reqCount.set(u, (reqCount.get(u) ?? 0) + 1); });
+    page.on("response", (r) => { if (r.status() >= 400) badResp.push(`${r.status()} ${r.url()}`); });
     const V = (fn, arg) => page.evaluate(fn, arg);
     try {
-      await page.goto(server.url + `/?map=village&art=full&quality=${q}&lod=${lod}${extra}`, { waitUntil: "load" });
+      await page.goto(server.url + `/?map=village&art=full&quality=${q}`, { waitUntil: "load" });
       await page.waitForFunction(() => window.__starwishVillage?.ready === true, null, { timeout: 120000 });
       await page.waitForFunction(() => { const a = window.__starwishVillage.artFull(); return a.status === "loaded" || a.status.startsWith("部分") || a.status.startsWith("error"); }, null, { timeout: 420000 });
       const art = await V(() => window.__starwishVillage.artFull());
@@ -84,20 +97,23 @@ for (const name of browsers) {
       const pstate = await V(() => window.__starwishVillage.perfState());
       run.results.perfState = { cfg: pstate.cfg, shadow: pstate.shadow, npcStats: pstate.npcStats, merchant: pstate.merchant, pixelRatio: pstate.pixelRatio, render: pstate.render };
       run.results.dataSource = "CI 軟體繪圖（不是 iPhone 實機）";
-      if (mode.startsWith("s62")) {
-        check("Stage 6.2 重現模式：原始高面數角色（洛恩 > 50000 面、NPC > 14000 面）、PCSS 2048、沒有 LOD", pstate.cfg.profile === "s62" && pstate.shadow === "pcss2048" && pstate.merchant && pstate.merchant.triangles > 50000 && Object.values(pstate.npcStats).every((n) => n.triangles > 14000 && n.farTriangles === 0), { merchant: pstate.merchant?.triangles, npc: Object.values(pstate.npcStats).map((n) => n.triangles) });
-        run.ok = Object.values(run.checks).every((c) => c.ok) && run.errors.filter((x) => !x.startsWith("console")).length === 0;
-        await ctx.close();
-        continue;
-      }
       {
-        const npcMax = lod === "lite" ? 6500 : 12000;
-        const pmMax = lod === "lite" ? 6500 : 15000;
-        check(`Stage 6.3 角色面數：NPC ≤ ${npcMax}、洛恩 ≤ ${pmMax}，並有遠距模型（≤ 4000）`, pstate.merchant && pstate.merchant.triangles <= pmMax && pstate.merchant.farTriangles > 0 && pstate.merchant.farTriangles <= 4000 && Object.values(pstate.npcStats).every((n) => n.triangles <= npcMax && n.farTriangles > 0 && n.farTriangles <= 4000), { merchant: pstate.merchant, npc: pstate.npcStats });
-        if (lod === "hq") check("Stage 6.3 陰影：PCSS 1024 中取樣，陰影投射物依距離剔除（本幀投射物少於全部）", pstate.shadow === "pcss1024" && Object.values(perf).some((v) => v.casters.active < v.casters.total), Object.fromEntries(Object.entries(perf).map(([k, v]) => [k, v.casters])));
+        const ti = await V(() => window.__starwishVillage.tier());
+        const rs = await V(() => window.__starwishVillage.renderState());
+        run.results.tier = ti;
+        run.results.renderState = rs;
+        check(`Stage 6.4 ${q} 畫質：模型 ${X.models}、陰影 ${X.shadow}（陰影貼圖 ${X.map || "不使用"}）、解析度上限 ${X.res}x、MSAA 要求 ${X.msaa}x、HDR 關、後製 ${X.post ? "開" : "關"}`, ti.tier === q && ti.models === X.models && rs.shadow === X.shadow && rs.shadowMapSize === X.map && rs.res.requestedMax === X.res && rs.msaa.requested === X.msaa && rs.hdr === false && rs.post === X.post && (rs.msaa.pipeline === null) === !X.post, { ti, rs });
+        check("MSAA 實際生效值有回報（要求、管線、渲染目標、裝置上限、生效值）", typeof rs.msaa.effective === "number" && rs.msaa.effective >= 1 && rs.msaa.effective <= X.msaa, rs.msaa);
+        check(`角色面數：NPC ≤ ${X.npcMax}、洛恩 ≤ ${X.pmMax}，並有遠距模型（≤ 4000）`, pstate.merchant && pstate.merchant.triangles <= X.pmMax && pstate.merchant.farTriangles > 0 && pstate.merchant.farTriangles <= 4000 && Object.values(pstate.npcStats).every((n) => n.triangles <= X.npcMax && n.farTriangles > 0 && n.farTriangles <= 4000), { merchant: pstate.merchant, npc: pstate.npcStats });
+        if (X.map) check("陰影投射物依距離剔除（至少一個位置本幀投射物少於全部）", Object.values(perf).some((v) => v.casters.active < v.casters.total), Object.fromEntries(Object.entries(perf).map(([k, v]) => [k, v.casters])));
+        const avgTri = Object.values(perf).reduce((a, v) => a + v.triangles, 0) / Object.values(perf).length;
+        run.results.avgTriangles = Math.round(avgTri);
+        check(`平均每幀三角面 ≤ ${X.triMax}（四個位置平均；含陰影貼圖繪製）`, avgTri <= X.triMax, { avg: Math.round(avgTri), perf: Object.fromEntries(Object.entries(perf).map(([k, v]) => [k, v.triangles])) });
+        const rep0 = await V(() => window.__starwishVillage.report());
+        check("報告讀取實際生效的渲染參數（陰影、解析度、framebuffer、HWS、DPR、MSAA、快取）", /陰影（實際）/.test(rep0) && rep0.includes(X.shadow === "blob" ? "柔和腳底陰影" : "PCF 1024") && !/PCSS 2048/.test(rep0) && /解析度（實際）：要求上限/.test(rep0) && /framebuffer/.test(rep0) && /Hardware Scaling/.test(rep0) && /裝置 DPR/.test(rep0) && /抗鋸齒（實際）/.test(rep0) && /模型與貼圖/.test(rep0), rep0.split("\n").slice(0, 12));
       }
-      const dcMax = lod === "lite" ? 100 : 160;
-      check(`繪製次數 ≤ ${dcMax}（全村整合、${lod === "lite" ? "Lite" : "HQ"}、任何位置）`, Object.values(perf).every((v) => v.drawCalls <= dcMax), run.results.perf);
+      const dcMax = X.dcMax;
+      check(`繪製次數 ≤ ${dcMax}（全村整合、${q} 畫質、任何位置）`, Object.values(perf).every((v) => v.drawCalls <= dcMax), run.results.perf);
       // 移動規則：從廣場沿北側石階（方位 0°）走上高台，不需要跳躍
       await V(() => window.__starwishVillage.teleport(0, 15, 0));
       await V(() => window.__starwishVillage.setMove({ x: 0, y: 1 }));
@@ -121,7 +137,7 @@ for (const name of browsers) {
         const g = n.id === "guild" ? await V(() => window.__starwishVillage.guild("noop")) : null;
         const talkAnim = n.id === "board" ? "-" : (await V(() => window.__starwishVillage.npcs())).state[n.id]?.anim;
         npcRes.push({ id: n.id, target: st?.target, what, dialog: g ? (g.open ? "星願商會選單" : "") : after?.dialog?.slice(0, 40), talkAnim });
-        if (n.id !== "board" && mode === "hq-portrait") await shot(page, `npc_${n.id}`);
+        if (n.id !== "board" && mode === "high-portrait") await shot(page, `npc_${n.id}`);
         await V(() => window.__starwishVillage.interactClose());
         await settle(page, 3);
         if (n.id !== "board") npcRes[npcRes.length - 1].afterAnim = (await V(() => window.__starwishVillage.npcs())).state[n.id]?.anim;
@@ -144,7 +160,7 @@ for (const name of browsers) {
         const ge = await G("cat:equipment");
         await page.waitForTimeout(300);
         const ge2 = await G("noop");
-        if (mode === "hq-portrait") await shot(page, "guild_2_market_equipment");
+        if (mode === "high-portrait") await shot(page, "guild_2_market_equipment");
         await G("cat:pet");
         await page.waitForTimeout(300);
         const gp = await G("noop");
@@ -156,7 +172,7 @@ for (const name of browsers) {
         await G("cat:pet");
         await page.waitForTimeout(300);
         await G("choose");
-        if (mode === "hq-portrait") await shot(page, "guild_4_listing_price");
+        if (mode === "high-portrait") await shot(page, "guild_4_listing_price");
         const gl = await G("price:800");
         const locked = await G("startListing");
         await G("cat:pet");
@@ -193,7 +209,7 @@ for (const name of browsers) {
         await settle(page, 2);
         const d = (await V(() => window.__starwishVillage.interact())).dialog;
         pRes.push({ id: p.id, open: p.open, target: st?.target, dialog: d.slice(0, 60) });
-        if (mode === "hq-portrait" && (p.id === "south" || p.id === "east")) await shot(page, `portal_${p.id}`);
+        if (mode === "high-portrait" && (p.id === "south" || p.id === "east")) await shot(page, `portal_${p.id}`);
         await V(() => window.__starwishVillage.interactClose());
       }
       run.results.portals = pRes;
@@ -232,20 +248,143 @@ for (const name of browsers) {
       await page.waitForTimeout(1500);
       check("洛恩：關閉後恢復巡走", m2 && !m2.talking, m2);
       run.results.fpsSoftware = (await V(() => window.__starwishVillage.info())).drawCalls;
-      // Stage 6.3 效能診斷（實機一鍵 A/B）：CI 只驗證流程能跑完前 2 項並產生報告（數字是軟體繪圖，不代表 iPhone）
-      if (name === "chromium" && mode === "hq-portrait") {
+      // ---------------- Stage 6.4 功能回歸 ----------------
+      // NPC 距離 LOD：站在 NPC 前 2 m → 近距模型；站到村莊另一側 → 遠距模型
+      {
+        const nb = (await V(() => window.__starwishVillage.layout().npcs)).find((n) => n.id === "mage");
+        await V(([a, b, c]) => window.__starwishVillage.teleport(a, b, c), [nb.x + Math.sin(nb.yaw) * 2, nb.z + Math.cos(nb.yaw) * 2, ((nb.yaw + Math.PI) * 180) / Math.PI]);
+        await settle(page, 4);
+        const near = (await V(() => window.__starwishVillage.perfState())).npcs.mage;
+        await V(([a, b]) => window.__starwishVillage.teleport(a, b, 180), [-nb.x * 0.9, -nb.z * 0.9]);
+        await settle(page, 4);
+        const far = (await V(() => window.__starwishVillage.perfState())).npcs.mage;
+        run.results.lod = { near, far };
+        check("NPC 距離 LOD：靠近用近距模型、遠離用遠距模型（有遲滯，不會來回閃）", near.lod === 0 && far.lod === 1, { near, far });
+      }
+      // 星願之泉／傳送門動畫：兩次取樣，星晶或光效在動
+      {
+        await V(() => window.__starwishVillage.teleport(0, -12.5, 0));
+        const a1 = await V(() => window.__starwishVillage.animProbe());
+        await page.waitForTimeout(1500);
+        await settle(page, 3);
+        const a2 = await V(() => window.__starwishVillage.animProbe());
+        const moved = a1.some((x, k) => a2[k] && (Math.abs(a2[k].ry - x.ry) > 1e-4 || Math.abs(a2[k].y - x.y) > 1e-4));
+        run.results.anim = { a1, a2 };
+        check("星願之泉星晶動畫（旋轉＋上下浮動）持續播放", a1.some((x) => /crystal/i.test(x.name)) && moved, { a1, a2 });
+      }
+      // 出生點與復活點：24 個都可站立，傳送後高度貼地
+      {
+        const lay = await V(() => window.__starwishVillage.layout());
+        const okStand = await V((pts) => pts.map((p) => window.__starwishVillage.standable(p.x, p.z)), lay.respawn);
+        const sp = lay.respawn[0];
+        await V(([a, b]) => window.__starwishVillage.teleport(a, b, 0), [sp.x, sp.z]);
+        const pl = await V(() => window.__starwishVillage.player());
+        const arr = lay.arrival;
+        await V(([a, b]) => window.__starwishVillage.teleport(a, b, 0), [arr.x, arr.z]);
+        const pa = await V(() => window.__starwishVillage.player());
+        check("出生點／復活點 24 個都可站立；傳送到復活點與南門抵達點正常", lay.respawn.length === 24 && okStand.every(Boolean) && Math.hypot(pl.x - sp.x, pl.z - sp.z) < 0.01 && Math.hypot(pa.x - arr.x, pa.z - arr.z) < 0.01, { n: lay.respawn.length, bad: okStand.filter((x) => !x).length });
+      }
+      // 鏡頭避障：站在 NPC 站位面向廣場（鏡頭在建築那一側）→ 至少一處鏡頭距離被縮短
+      {
+        const npcs2 = await V(() => window.__starwishVillage.layout().npcs);
+        const cams = [];
+        for (const n of npcs2.filter((x) => x.id !== "board")) {
+          await V(([a, b, c]) => window.__starwishVillage.teleport(a, b, c), [n.x, n.z, (n.yaw * 180) / Math.PI]);
+          await settle(page, 6);
+          const c = await V(() => window.__starwishVillage.camera());
+          cams.push({ id: n.id, radius: Math.round(c.radius * 100) / 100, desired: Math.round(c.desired * 100) / 100 });
+        }
+        run.results.cameraObstruct = cams;
+        check("鏡頭避障：靠建築時鏡頭距離自動縮短（不穿進建築）", cams.some((c) => c.radius < c.desired - 0.3) && cams.every((c) => c.radius <= c.desired + 0.01), cams);
+      }
+      // HDR 視覺比較（高、中畫質直向；Chromium）：同一個視角 HDR 關（目前預設）／開 各一張
+      if (name === "chromium" && mode.includes("portrait") && q !== "low") {
+        await V(() => window.__starwishVillage.view("plaza"));
+        await settle(page, 6);
+        await shot(page, "hdr_off_plaza");
+        await V(() => window.__starwishVillage.setHdr(true));
+        await settle(page, 6);
+        await shot(page, "hdr_on_plaza");
+        await V(() => window.__starwishVillage.setHdr(false));
+        await V(() => window.__starwishVillage.view("church"));
+        await settle(page, 6);
+        await shot(page, "hdr_off_church");
+        await V(() => window.__starwishVillage.setHdr(true));
+        await settle(page, 6);
+        await shot(page, "hdr_on_church");
+        await V(() => window.__starwishVillage.setHdr(false));
+        await settle(page, 3);
+      }
+      // 效能診斷：CI 只跑前 2 項（目前基準、解析度 1x），驗證「每項恢復基準」與「報告顯示實際解析度」
+      if (name === "chromium" && (mode === "high-portrait" || mode === "medium-portrait")) {
         await V(() => window.__starwishVillage.startDiag(2));
         await page.waitForFunction(() => { const d = window.__starwishVillage.diagState(); return !d.running && d.results && d.results.length === 2; }, null, { timeout: 180000, polling: 500 }).catch(() => null);
         const dg = await V(() => window.__starwishVillage.diagState());
         const rep = await V(() => window.__starwishVillage.report());
         run.results.diag = dg.results;
-        check("效能診斷：一鍵執行、逐項量測並寫入報告（CI 只跑前 2 項）", dg.results?.length === 2 && /效能診斷/.test(rep) && /這台裝置/.test(rep), dg);
+        const [b0, r1] = dg.results ?? [];
+        check("效能診斷：每項開始前恢復基準；報告顯示實際解析度（基準 = 畫質上限、1x 項目 = 1x，framebuffer 不同）", dg.results?.length === 2 && b0.baselineOk && r1.baselineOk && Math.abs(b0.res - X.res) < 0.01 && Math.abs(r1.res - 1) < 0.01 && b0.fb !== r1.fb && b0.locked && r1.locked && /效能診斷/.test(rep) && /這台裝置/.test(rep), dg.results);
+        const rs2 = await V(() => window.__starwishVillage.renderState());
+        check("診斷結束後恢復基準設定（解析度解除鎖定、陰影與後製回到畫質預設）", !rs2.res.locked && rs2.shadow === X.shadow && rs2.hdr === false && rs2.post === X.post, rs2);
+      }
+      // 資源：同一個模型／貼圖只請求一次；沒有 4xx／5xx；沒有 WebGL Context Lost
+      {
+        const dups = [...reqCount].filter(([, n]) => n > 1).map(([u, n]) => `${u.split("/").pop()}×${n}`);
+        const info = await V(() => window.__starwishVillage.info());
+        run.results.requests = { files: reqCount.size, dups, bad: badResp };
+        check("沒有重複的模型／貼圖請求、沒有失敗的資源請求、WebGL Context Lost 0", dups.length === 0 && badResp.length === 0 && info.contextLost === 0, { dups, bad: badResp, contextLost: info.contextLost });
       }
     } catch (e) {
       run.errors.push(String(e.message ?? e));
       failures++;
     }
     run.ok = Object.values(run.checks).every((c) => c.ok) && run.errors.filter((x) => !x.startsWith("console")).length === 0;
+    await ctx.close();
+  }
+  // Stage 6.4 三段畫質切換與偏好保存（用 Grey-box 頁面：畫質邏輯相同、載入快）
+  if (name === "chromium") {
+    const run = { browser: name, mode: "tier-switch", checks: {}, errors: [], screenshots: [], results: {} };
+    report.runs.push(run);
+    const check = (k, ok, detail) => {
+      run.checks[k] = { ok: !!ok, detail };
+      if (!ok) failures++;
+    };
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, hasTouch: true });
+    const page = await ctx.newPage();
+    page.on("pageerror", (e) => run.errors.push(`pageerror: ${e.message}`));
+    const V = (fn, arg) => page.evaluate(fn, arg);
+    const ready = () => page.waitForFunction(() => window.__starwishVillage?.ready === true, null, { timeout: 120000 });
+    try {
+      await page.goto(server.url + "/?map=village", { waitUntil: "load" });
+      await ready();
+      const first = await V(() => window.__starwishVillage.tier());
+      check("新玩家（沒有偏好、沒有網址參數）預設中畫質", first.tier === "medium" && first.source === "default" && first.models === "lite", first);
+      const seq = [];
+      for (const t of ["low", "high", "medium"]) {
+        await Promise.all([page.waitForNavigation({ waitUntil: "load" }), V((x) => window.__starwishVillage.switchTier(x), t)]);
+        await ready();
+        seq.push(await V(() => window.__starwishVillage.tier()));
+      }
+      check("三段畫質切換：低→高→中，每次模型精細度與設定正確、偏好已保存", seq.map((x) => [x.tier, x.models, x.stored]).join("|") === "low,lite,low|high,hq,high|medium,lite,medium", seq);
+      await page.goto(server.url + "/?map=village", { waitUntil: "load" });
+      await ready();
+      await Promise.all([page.waitForNavigation({ waitUntil: "load" }), V(() => window.__starwishVillage.switchTier("low"))]);
+      await ready();
+      await page.goto(server.url + "/?map=village", { waitUntil: "load" });
+      await ready();
+      const kept = await V(() => window.__starwishVillage.tier());
+      check("重新整理／重新進入後沿用玩家偏好（網址沒有 quality 參數）", kept.tier === "low" && kept.source === "stored", kept);
+      const urlWins = await (async () => {
+        await page.goto(server.url + "/?map=village&quality=high", { waitUntil: "load" });
+        await ready();
+        return V(() => window.__starwishVillage.tier());
+      })();
+      check("網址 ?quality= 優先於偏好，但不覆寫偏好", urlWins.tier === "high" && urlWins.source === "url" && urlWins.stored === "low", urlWins);
+    } catch (e) {
+      run.errors.push(String(e.message ?? e));
+      failures++;
+    }
+    run.ok = Object.values(run.checks).every((c) => c.ok) && run.errors.length === 0;
     await ctx.close();
   }
   await browser.close();
