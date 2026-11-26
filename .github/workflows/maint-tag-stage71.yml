@@ -1,0 +1,20 @@
+name: Maintenance — create version tag stage7.1-accepted
+# 建立版本標籤（指向 Stage 7.1 已驗收 commit edbd6740）；只建立新標籤，已存在就不動（不 force）。
+on:
+  push:
+    branches: [maint/tag-stage71]
+permissions:
+  contents: write
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --tags origin refs/tags/stage7.1-accepted; then echo "tag exists, not changed"; exit 0; fi
+          git tag -a stage7.1-accepted edbd6740845a69174af78ffa2c14029c9c3a81cf -m "Stage 7.1 世界整合：iPhone 實機功能驗收 10/10 通過（2026-11-27 使用者驗收；FPS 數值待補登）。備份分支 backup/stage71-accepted；預覽 /preview-stage71-world/"
+          git push origin refs/tags/stage7.1-accepted
