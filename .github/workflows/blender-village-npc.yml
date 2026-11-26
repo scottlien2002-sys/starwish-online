@@ -1,0 +1,107 @@
+name: Blender — Village NPCs (Stage 6.2)
+
+# Stage 6.2 星芽村八位正式 NPC：唯讀取用 Claude A 的男／女初心者基礎網格（固定 commit）＋ B 的各 NPC 零件
+# → 減面（HQ／Lite）、骨架＋蒙皮＋Idle／Talk／Turn、美術圖、GLB。
+# 結果推到 art-village-npc 分支（一般 push，不 force；不影響遊戲網站與 main）。
+on:
+  workflow_dispatch:
+  push:
+    branches: ["feature/render-village-p3"]
+    paths:
+      - "art/village-p3/npc/**"
+      - ".github/workflows/blender-village-npc.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: blender-village-npc
+  cancel-in-progress: false
+
+env:
+  BLENDER_VERSION: "4.2.3"
+  BLENDER_SERIES: "4.2"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: System libraries (Blender headless, CJK font for the overview sheet)
+        run: |
+          python3 -m pip install --quiet numpy pillow
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libsm6 libxkbcommon0 fonts-noto-cjk >/dev/null
+
+      - name: Download Blender ${{ env.BLENDER_VERSION }} (official, free)
+        run: |
+          URL="https://download.blender.org/release/Blender${BLENDER_SERIES}/blender-${BLENDER_VERSION}-linux-x64.tar.xz"
+          curl -fsSL --retry 5 --retry-delay 10 "$URL" -o /tmp/blender.tar.xz || curl -fsSL --retry 5 "https://mirrors.ocf.berkeley.edu/blender/release/Blender${BLENDER_SERIES}/blender-${BLENDER_VERSION}-linux-x64.tar.xz" -o /tmp/blender.tar.xz
+          mkdir -p /opt/blender && tar -xf /tmp/blender.tar.xz -C /opt/blender --strip-components=1
+          /opt/blender/blender --version | head -2
+
+      - name: Read-only base meshes from Claude A (pinned commit) + NPC parts (SDF)
+        run: |
+          # Claude A 初心者 C1.0-B4 固定 commit：只讀取、不修改、不推送
+          A_SHA=2225e29dfc489731c8d736211e2af5b90c13a066
+          git fetch --no-tags --depth=1 origin "$A_SHA"
+          mkdir -p /tmp/a_art && git archive "$A_SHA" art | tar -x -C /tmp/a_art
+          python3 /tmp/a_art/art/novice-c10b4/export_c10b4.py /tmp/a_out male | tail -2
+          python3 /tmp/a_art/art/novice-c10b4/export_c10b4.py /tmp/a_out female | tail -2
+          A_ART=/tmp/a_art/art python3 art/village-p3/npc/export_npc.py /tmp/a_out /tmp/npc | grep "==\|empty"
+
+      - name: Blender (decimate, rig, Idle/Talk/Turn, renders, GLB hq/lite)
+        run: |
+          mkdir -p out
+          /opt/blender/blender -b --factory-startup -noaudio -P art/village-p3/npc/blender_npc.py -- --parts /tmp/npc --out "$PWD/out" 2>&1 | grep -v "^Fra:" | grep -v "Sample" | grep -v "Rendered\|Denois\|Updating\|Synchron\|Loading\|Waiting\|Scene, \|Compil" | tail -40
+          python3 art/village-p3/npc/npc_sheet.py out
+          python3 - <<'PY'
+          from PIL import Image
+          import json
+          for nid in json.load(open("out/npc_report.json"))["npcs"]:
+              im = Image.open(f"out/npc_{nid}_head.png").convert("RGB")
+              w, h = im.size
+              im.crop((int(w * 0.12), int(h * 0.04), int(w * 0.88), int(h * 0.8))).resize((256, 256), Image.LANCZOS).save(f"out/npc_{nid}_avatar.png")
+          PY
+
+      - name: Validate GLB (Khronos glTF-Validator)
+        run: |
+          mkdir -p /tmp/gv && cd /tmp/gv && npm init -y >/dev/null && npm i --no-save gltf-validator@latest 2>&1 | tail -2
+          cd "$GITHUB_WORKSPACE"
+          NODE_PATH=/tmp/gv/node_modules node -e '
+            const v = require("gltf-validator"); const fs = require("fs");
+            (async () => {
+              let bad = 0; const s = {};
+              for (const f of fs.readdirSync("out").filter((n) => n.endsWith(".glb"))) {
+                const b = fs.readFileSync(`out/${f}`);
+                const r = await v.validateBytes(new Uint8Array(b));
+                s[f] = { errors: r.issues.numErrors, warnings: r.issues.numWarnings, bytes: b.length, triangles: r.info.totalTriangleCount, materials: r.info.materialCount, animations: r.info.animationCount };
+                console.log(f, JSON.stringify(s[f]));
+                bad += r.issues.numErrors;
+              }
+              fs.writeFileSync("out/validator_summary.json", JSON.stringify(s, null, 1));
+              if (bad) process.exit(1);
+            })();'
+
+      - name: Push results to art-village-npc (normal push, no force)
+        if: always()
+        env:
+          ART_BRANCH: art-village-npc
+        run: |
+          mkdir -p out
+          echo "{\"commit\":\"${GITHUB_SHA}\",\"blender\":\"${BLENDER_VERSION}\",\"builtAt\":\"$(date -u +%FT%TZ)\"}" > out/build.json
+          REPO="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads "$REPO" "$ART_BRANCH" >/dev/null 2>&1; then
+            git clone -q --depth 1 --branch "$ART_BRANCH" "$REPO" /tmp/artnpc
+          else
+            mkdir -p /tmp/artnpc && cd /tmp/artnpc && git init -q -b "$ART_BRANCH" && git remote add origin "$REPO" && cd -
+          fi
+          rsync -a --delete --exclude .git out/ /tmp/artnpc/
+          cd /tmp/artnpc
+          git add -A
+          git commit -qm "Village NPCs ${GITHUB_SHA::7}" || echo "no changes"
+          git push -q origin "HEAD:$ART_BRANCH"
