@@ -96,5 +96,27 @@ for (const [name, vp] of [["webkit", { width: 393, height: 852 }], ["chromium", 
   }
   await browser.close();
 }
+// Stage 7.2：骨骼動畫怪物測試頁（Babylon.js 9 實際載入、自動檢查）
+{
+  const browser = await pw.webkit.launch();
+  const ctx = await browser.newContext({ viewport: { width: 393, height: 852 }, deviceScaleFactor: 2, hasTouch: true });
+  const page = await ctx.newPage();
+  const errs = [];
+  page.on("pageerror", (e) => errs.push(e.message));
+  try {
+    await page.goto(`${base}?lab=rigged&q=lite&count=6`, { waitUntil: "load" });
+    await page.waitForFunction(() => window.__starwishRigLab?.done === true, null, { timeout: 300000 });
+    const r = await page.evaluate(() => ({ checks: window.__starwishRigLab.checks, spec: window.__starwishRigLab.spec }));
+    const bad = r.checks.filter((c) => !c.ok);
+    if (bad.length || errs.length) fails++;
+    console.log(`${bad.length || errs.length ? "✗" : "✓"} 骨骼動畫測試頁（${r.spec.fixture ? "接口測試替身" : "M004"}）：${r.checks.length - bad.length}/${r.checks.length} 項通過、錯誤 ${errs.length}`);
+    for (const c of bad) console.log(`   ✗ ${c.name}`);
+    if (process.env.SHOTS_DIR) await page.screenshot({ path: `${process.env.SHOTS_DIR}/5_rigged_lab.png` });
+  } catch (e) {
+    fails++;
+    console.log(`✗ 骨骼動畫測試頁：${e.message}`);
+  }
+  await browser.close();
+}
 console.log(fails ? `公開網址驗證失敗：${fails}` : "公開網址驗證通過");
 process.exit(fails ? 1 : 0);
