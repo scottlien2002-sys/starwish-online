@@ -116,8 +116,16 @@ export function setupVillageNpcs(
     facing: number;
     lod: 0 | 1;
     paused: boolean;
+    /** Stage 6.6 生活感：下次眨眼／職業小動作的時間、正在播放小動作到何時 */
+    nextBlink: number;
+    blinkAt: number;
+    nextAct: number;
+    actUntil: number;
+    morphs: { influence: number }[];
   }
   const all: One[] = [];
+  let clock = 0;
+  const rnd = (a: number, b: number): number => a + Math.random() * (b - a);
   const allMeshes: AbstractMesh[] = [];
   const prep = (r: Loaded, root: TransformNode): { set: Set_; tris: number } => {
     for (const n of r.rootNodes) n.parent = root;
@@ -157,7 +165,20 @@ export function setupVillageNpcs(
     const far = r.far && lodOpt.lod ? prep(r.far, root) : null;
     if (r.far && !far) for (const m of r.far.meshes) m.setEnabled(false);
     const sets = far ? [near.set, far.set] : [near.set];
-    const one: One = { spot, root, sets, current: "", facing: spot.yaw, lod: 0, paused: false };
+    // Stage 6.6：眨眼（眼皮形狀鍵；只有近距模型有）
+    const morphs: { influence: number }[] = [];
+    for (const m of near.set.meshes) {
+      const mm = (m as Mesh).morphTargetManager;
+      if (!mm) continue;
+      for (let i = 0; i < mm.numTargets; i++) {
+        const t = mm.getTarget(i);
+        if ((t.name ?? "").toLowerCase().includes("blink") || mm.numTargets === 1) {
+          t.influence = 0;
+          morphs.push(t);
+        }
+      }
+    }
+    const one: One = { spot, root, sets, current: "", facing: spot.yaw, lod: 0, paused: false, nextBlink: rnd(0.5, 4), blinkAt: -1, nextAct: rnd(22, 40), actUntil: 0, morphs };
     if (far) for (const m of far.set.meshes) m.isVisible = false;
     // 待機錯開起點：八位不會同時呼吸（近／遠兩組同一個起點，切換 LOD 時姿勢一致）
     for (const st of sets) {
@@ -180,10 +201,15 @@ export function setupVillageNpcs(
       const g = st.anims.get(name);
       if (!g) continue;
       for (const [n, a] of st.anims) if (n !== name && (a.isPlaying || a.isStarted)) a.stop();
-      g.start(true, 1);
+      g.start(name !== "Act", 1);
       if (o.paused) g.pause();
     }
     o.current = name;
+  };
+  /** Stage 6.6：職業小動作（Act，2～3 秒，播一次）長度 */
+  const actLen = (o: One): number => {
+    const g = o.sets[0]!.anims.get("Act");
+    return g ? (g.to - g.from) / 30 : 0;
   };
   const setPaused = (o: One, p: boolean): void => {
     if (o.paused === p) return;
@@ -202,6 +228,7 @@ export function setupVillageNpcs(
     meshes: allMeshes,
     update(_now, dtIn, talkId, px, pz, camera) {
       const dt = Math.min(0.1, Math.max(0, dtIn));
+      clock += dt;
       const cx = camera ? camera.globalPosition.x : px;
       const cz = camera ? camera.globalPosition.z : pz;
       for (const o of all) {
@@ -211,7 +238,33 @@ export function setupVillageNpcs(
         const step = TURN_RATE * dt;
         o.facing = wrap(o.facing + (Math.abs(d) <= step ? d : Math.sign(d) * step));
         o.root.rotation.y = o.facing;
-        play(o, Math.abs(d) > 0.3 ? "Turn" : talking ? "Talk" : "Idle");
+        // Stage 6.6：待機時偶爾播放職業小動作（各 NPC 時間錯開；對話、轉身、暫停時不播）
+        let idleName = "Idle";
+        if (!talking && Math.abs(d) <= 0.3 && !o.paused) {
+          if (o.actUntil > clock) idleName = "Act";
+          else if (clock >= o.nextAct && actLen(o) > 0) {
+            o.actUntil = clock + actLen(o);
+            o.nextAct = clock + actLen(o) + rnd(12, 26);
+            idleName = "Act";
+          }
+        } else if (o.current === "Act") {
+          o.actUntil = 0;
+        }
+        play(o, Math.abs(d) > 0.3 ? "Turn" : talking ? "Talk" : idleName);
+        // 眨眼：每 2.2～5.5 秒一次（偶爾連眨兩下），0.16 秒；遠距或暫停時不眨
+        if (o.morphs.length && o.lod === 0 && !o.paused) {
+          if (o.blinkAt < 0 && clock >= o.nextBlink) {
+            o.blinkAt = clock;
+            o.nextBlink = clock + (Math.random() < 0.18 ? 0.32 : rnd(2.2, 5.5));
+          }
+          let v = 0;
+          if (o.blinkAt >= 0) {
+            const t = (clock - o.blinkAt) / 0.16;
+            if (t >= 1) o.blinkAt = -1;
+            else v = Math.sin(Math.PI * Math.min(1, t * 1.15));
+          }
+          for (const m of o.morphs) m.influence = v;
+        }
         const dist = Math.hypot(o.spot.x - cx, o.spot.z - cz);
         if (o.sets.length > 1) {
           const lv = talking || !lodOn ? 0 : lodLevel(dist, lodOpt.near, o.lod);

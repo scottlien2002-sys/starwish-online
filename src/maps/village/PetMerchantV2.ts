@@ -152,6 +152,20 @@ export function setupPetMerchantV2(
     }
   };
   const headPos = new Vector3();
+  // Stage 6.6：眨眼（眼皮形狀鍵；只有近距模型有）
+  const blinkTargets: { influence: number }[] = [];
+  for (const m of nearMeshes) {
+    const mm = (m as unknown as { morphTargetManager?: { numTargets: number; getTarget(i: number): { influence: number; name?: string } } | null }).morphTargetManager;
+    if (!mm) continue;
+    for (let i = 0; i < mm.numTargets; i++) {
+      const t = mm.getTarget(i);
+      t.influence = 0;
+      blinkTargets.push(t);
+    }
+  }
+  let blinkClock = 0;
+  let nextBlink = 1.5;
+  let blinkAt = -1;
   return {
     root,
     clock,
@@ -160,6 +174,20 @@ export function setupPetMerchantV2(
     update(now, dtIn, camera) {
       const dt = dtIn ?? (lastNow === null ? 0 : Math.min(0.1, Math.max(0, now - lastNow)));
       lastNow = now;
+      if (blinkTargets.length) {
+        blinkClock += dt;
+        if (blinkAt < 0 && blinkClock >= nextBlink) {
+          blinkAt = blinkClock;
+          nextBlink = blinkClock + (Math.random() < 0.15 ? 0.3 : 2.4 + Math.random() * 3.2);
+        }
+        let v = 0;
+        if (blinkAt >= 0) {
+          const t = (blinkClock - blinkAt) / 0.16;
+          if (t >= 1) blinkAt = -1;
+          else v = Math.sin(Math.PI * Math.min(1, t * 1.15));
+        }
+        for (const b of blinkTargets) b.influence = v;
+      }
       const paused = clock.paused(now);
       const p = petMerchantPose(clock.patrolTime(now));
       root.position.set(p.x, 0.03, p.z);

@@ -29,7 +29,7 @@ ids = list(rep["npcs"])
 cw, ch = 400, 500 + 170
 sheet = Image.new("RGB", (cw * 4 + 40, ch * 2 + 110), (246, 244, 238))
 dr = ImageDraw.Draw(sheet)
-dr.text((24, 22), "星芽村 正式NPC 美術設計總覽（Stage 6.2）— 精緻日系Q版奇幻", fill=(40, 44, 70), font=font(38))
+dr.text((24, 22), "星芽村 正式NPC 美術設計總覽（Stage 6.6）— 每位獨立五官＋眨眼＋職業小動作", fill=(40, 44, 70), font=font(38))
 for i, nid in enumerate(ids):
     r = rep["npcs"][nid]
     x, y = 20 + (i % 4) * cw, 90 + (i // 4) * ch

@@ -82,7 +82,9 @@ def load(nid, lod):
     objs, mats = [], {}
     for it in meta["parts"]:
         k = it["key"]
-        v = d[k + "__v"].astype(np.float64)
+        if k + "__blink" in d and lod == "far":
+            continue  # 遠距模型不需要眨眼
+        v = (d[k + "__blink"] if k + "__blink" in d else d[k + "__v"]).astype(np.float64)
         q = d[k + "__q"]
         me = bpy.data.meshes.new(it["name"])
         me.vertices.add(len(v))
@@ -108,8 +110,35 @@ def load(nid, lod):
         ob["bind"] = json.dumps(it.get("bind"))
         bpy.context.scene.collection.objects.link(ob)
         me.shade_smooth()
+        if k + "__blink" in d:
+            add_blink_keys(ob, d[k + "__v"].astype(np.float64), v)
         objs.append(ob)
     return objs, mats, meta
+
+
+def add_blink_keys(ob, open_v, closed_v):
+    """Stage 6.6 眨眼：網格建在閉眼位置（法線朝前），Basis＝睜眼（收到睫毛線，只留 2% 高度）、Blink＝閉眼。"""
+    import bmesh
+    me = ob.data
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bm.normal_update()
+    ny = sum(f.normal.y for f in bm.faces)
+    if ny > 0:  # 臉朝 −y：法線要朝 −y
+        for f in bm.faces:
+            f.normal_flip()
+    bm.to_mesh(me)
+    bm.free()
+    me.update()
+    shut = closed_v
+    opened = open_v + (closed_v - open_v) * 0.02
+    ob.shape_key_add(name="Basis", from_mix=False)
+    kb = ob.shape_key_add(name="Blink", from_mix=False)
+    kb.data.foreach_set("co", shut.ravel())
+    ob.data.shape_keys.key_blocks["Basis"].data.foreach_set("co", opened.ravel())
+    me.vertices.foreach_set("co", opened.ravel())
+    me.update()
+    ob["blink"] = 1
 
 
 def tri_count(objs):
@@ -120,6 +149,9 @@ KEEP_MORE = {"hair": 2.0, "head": 1.8, "beard": 1.3, "mustache": 1.5, "glasses":
 
 
 def decimate_to(objs, target):
+    fixed = [o for o in objs if o.get("blink")]
+    target -= tri_count(fixed)
+    objs = [o for o in objs if not o.get("blink")]
     tris = {o.name: max(tri_count([o]), 1) for o in objs}
     lo, hi = 0.0, 1.0
     for _ in range(40):
@@ -365,7 +397,44 @@ def poses(nid):
         return with_rest({"chest": aq(Z, 10 * k), "spine": aq(Z, 6 * k), "head": aq(Z, 12 * k), "thigh.L": aq(X, -12 * max(s2, 0)), "shin.L": aq(X, 18 * max(s2, 0)),
                           "thigh.R": aq(X, -12 * max(-s2, 0)), "shin.R": aq(X, 18 * max(-s2, 0)), "upper_arm.L": aq(X, 6 * s2), "upper_arm.R": aq(X, -6 * s2)}), {"hips": (0, 0, 0.006 * abs(s2))}
 
-    return [("Idle", 2.4, idle), ("Talk", 2.4, talk), ("Turn", 0.8, turn)]
+    def act(t):
+        """Stage 6.6 職業小動作（播一次）：前後 25% 緩入緩出，中段保持；各 NPC 不同"""
+        k = min(1.0, t / 0.25, (1 - t) / 0.25)
+        k = k * k * (3 - 2 * k)
+        w = math.sin(2 * math.pi * t * 2)
+        A = ACTS.get(nid, ACTS["guild"])(k, w, t)
+        return with_rest(A[0]), A[1]
+
+    return [("Idle", 2.4, idle), ("Talk", 2.4, talk), ("Turn", 0.8, turn), ("Act", ACT_LEN.get(nid, 2.6), act)]
+
+
+# Stage 6.6 職業小動作：(k＝0→1→0 的強度, w＝小幅擺動, t) → (骨頭旋轉, 位移)
+ACT_LEN = {"swordmaster": 2.6, "knight": 2.8, "smith": 2.6, "mage": 2.8, "priest": 2.8, "clown": 2.2, "warehouse": 2.8, "guild": 2.8}
+ACTS = {
+    # 劍士：轉動肩膀、右手往後摸背上的劍柄
+    "swordmaster": lambda k, w, t: ({"upper_arm.R": aq(X, -95 * k) @ aq(Y, 25 * k), "forearm.R": aq(X, -70 * k), "chest": aq(Z, -6 * k), "head": aq(Z, 8 * k) @ aq(X, -4 * k),
+                                     "upper_arm.L": aq(Y, -6 * k * w)}, {}),
+    # 騎士：右手按胸行禮、微微低頭
+    "knight": lambda k, w, t: ({"upper_arm.R": aq(X, -40 * k) @ aq(Y, 30 * k), "forearm.R": aq(X, -105 * k) @ aq(Z, -25 * k), "hand.R": aq(Y, 20 * k), "head": aq(X, 12 * k),
+                               "chest": aq(X, 5 * k)}, {}),
+    # 鐵匠：抬手擦汗、伸展上身
+    "smith": lambda k, w, t: ({"upper_arm.R": aq(X, -100 * k) @ aq(Y, 30 * k), "forearm.R": aq(X, -95 * k) @ aq(Z, 20 * k), "head": aq(X, -8 * k) @ aq(Z, 5 * k * w),
+                              "chest": aq(X, -5 * k), "spine": aq(X, -3 * k)}, {}),
+    # 法師：抬起持杖的手、杖頂星光、頭輕輕偏
+    "mage": lambda k, w, t: ({"upper_arm.R": aq(X, -30 * k) @ aq(Y, -10 * k), "forearm.R": aq(X, -25 * k), "head": aq(Z, 10 * k) @ aq(X, -6 * k), "chest": aq(Z, 4 * k),
+                             "upper_arm.L": aq(X, -20 * k) @ aq(Y, -20 * k), "forearm.L": aq(X, -45 * k)}, {}),
+    # 祭司：低頭祈禱
+    "priest": lambda k, w, t: ({"head": aq(X, 22 * k), "neck": aq(X, 6 * k), "chest": aq(X, 6 * k), "upper_arm.R": aq(X, -30 * k) @ aq(Y, 28 * k), "forearm.R": aq(X, -80 * k) @ aq(Z, -20 * k)}, {}),
+    # 小丑：揮手＋小跳步
+    "clown": lambda k, w, t: ({"upper_arm.L": aq(X, -20 * k) @ aq(Y, -110 * k), "forearm.L": aq(Z, 25 * k * w) @ aq(X, -30 * k), "head": aq(Z, -8 * k * w), "chest": aq(Z, 4 * k * w),
+                              "thigh.L": aq(X, -10 * k * max(w, 0)), "shin.L": aq(X, 16 * k * max(w, 0))}, {"hips": (0, 0, 0.012 * k * abs(w))}),
+    # 倉庫管理員：低頭看帳本、空手翻頁
+    "warehouse": lambda k, w, t: ({"head": aq(X, 18 * k) @ aq(Z, -6 * k), "upper_arm.R": aq(X, -35 * k) @ aq(Y, 25 * k), "forearm.R": aq(X, -70 * k) @ aq(Z, -15 * k * (0.6 + 0.4 * w)),
+                                  "upper_arm.L": aq(X, -12 * k), "forearm.L": aq(X, -15 * k)}, {}),
+    # 商會掌櫃：拿出懷錶看時間
+    "guild": lambda k, w, t: ({"head": aq(X, 16 * k) @ aq(Z, 6 * k), "upper_arm.R": aq(X, -45 * k) @ aq(Y, 18 * k), "forearm.R": aq(X, -80 * k) @ aq(Z, -10 * k), "hand.R": aq(Y, -30 * k),
+                              "chest": aq(X, 3 * k)}, {}),
+}
 
 
 def make_actions(rig, acts):
@@ -396,7 +465,8 @@ def merge_by_material(objs, nid):
         bpy.ops.object.select_all(action="DESELECT")
         for o in lst:
             o.select_set(True)
-        bpy.context.view_layer.objects.active = lst[0]
+        lead = next((o for o in lst if o.get("blink")), lst[0])  # 有形狀鍵（眨眼）的物件當作合併目標，形狀鍵才會保留
+        bpy.context.view_layer.objects.active = lead
         if len(lst) > 1:
             bpy.ops.object.join()
         ob = bpy.context.view_layer.objects.active
@@ -435,7 +505,7 @@ def run(nid, report):
         acts = poses(nid)
         made = make_actions(rig, acts)
         if lod == "hq" and RENDER:
-            idle, talk, turn = (fn for _, _, fn in acts)
+            idle, talk, turn, act_fn = (fn for _, _, fn in acts)
             set_pose(rig, *idle(0.0))
             bpy.context.view_layer.update()
             zc = Z_BOTTOM + H * PX / 2
@@ -443,10 +513,20 @@ def run(nid, report):
                 shoot(cam, yaw, zc, H * PX, (W, H), os.path.join(OUT, f"npc_{nid}_{v}.png"))
             shoot(cam, 15, 0.84, 0.52, (520, 520), os.path.join(OUT, f"npc_{nid}_head.png"))
             bpy.context.scene.cycles.samples = 28
-            for name, fn, t in (("talk", talk, 0.3), ("turn", turn, 0.5)):
+            for name, fn, t in (("talk", talk, 0.3), ("turn", turn, 0.5), ("act", act_fn, 0.5)):
                 set_pose(rig, *fn(t))
                 bpy.context.view_layer.update()
                 shoot(cam, 30, zc, H * PX, (400, 500), os.path.join(OUT, f"npc_{nid}_{name}.png"))
+            set_pose(rig, *idle(0.0))
+            bpy.context.view_layer.update()
+            for o in objs:
+                if o.data.shape_keys and "Blink" in o.data.shape_keys.key_blocks:
+                    o.data.shape_keys.key_blocks["Blink"].value = 1.0
+            bpy.context.scene.cycles.samples = 48
+            shoot(cam, 15, 0.84, 0.52, (520, 520), os.path.join(OUT, f"npc_{nid}_blink.png"))
+            for o in objs:
+                if o.data.shape_keys and "Blink" in o.data.shape_keys.key_blocks:
+                    o.data.shape_keys.key_blocks["Blink"].value = 0.0
             set_pose(rig, {})
         bpy.context.scene.frame_set(0)
         path = os.path.join(OUT, f"npc_{nid}_{lod}.glb")

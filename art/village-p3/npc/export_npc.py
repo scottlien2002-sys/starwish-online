@@ -15,6 +15,7 @@ from PIL import Image
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import npc_parts as S  # noqa: E402
+import npc_face66 as F66  # noqa: E402  （Stage 6.6：每位 NPC 自己的五官、頭型、眨眼眼皮）
 import bobo_shape  # noqa: E402  （A 的 Surface Nets）
 from export_c0 import sdf_ao  # noqa: E402
 import novice_shapes as NS  # noqa: E402
@@ -104,6 +105,15 @@ def clown_paint(im, iris_mask):
     return out
 
 
+def paint_face66(npc_id, g, iris, dst):
+    face = F66.paint(npc_id, g, iris).resize((ATLAS, ATLAS - STRIP), Image.LANCZOS)
+    atlas = Image.new("RGB", (ATLAS, ATLAS), (255, 255, 255))
+    atlas.paste(face, (0, 0))
+    atlas.save(dst)
+    atlas.resize((ATLAS // 2, ATLAS // 2), Image.LANCZOS).save(str(dst).replace(".png", "_lite.png"))
+    return 0
+
+
 def head_tf(name, V):
     return (V - HEAD_PIVOT) * HEAD_SCALE + HEAD_PIVOT
 
@@ -124,10 +134,16 @@ def export_one(npc_id, a_out, out):
             if k + suf in a:
                 data[key + suf] = a[k + suf]
         V = a[k + "__v"]
+        if it["name"] == "head":
+            V = F66.deform_head(npc_id, V)
+            head_src = (a[k + "__v"], V)
         data[key + "__v"] = (head_tf(it["name"], V) if it["name"] == "head" else V).astype(np.float32)
         c = a[k + "__c"]
         if it["name"] in BOOTS and "boot" in npc["colors"]:
             c = tint(c, npc["colors"]["boot"])
+        if it["name"] in ("body", "hand_l", "hand_r"):
+            # Stage 6.6：每位 NPC 自己的膚色（A 的膚色 × 比例）
+            c = c * (F66.hx(F66.FACES[npc_id]["skin"]) / F66.hx("#fde4d2" if g == "male" else "#fde3d4"))[None, :]
         data[key + "__c"] = c.astype(np.float32)
         data[key + "__uv"] = face_uv(a[k + "__uv"]) if k + "__uv" in a else np.tile(np.array(WHITE_UV, np.float32), (len(V), 1))
         info.append({**it, "key": key, "bind": None, "source": f"A:C1.0-B4 {g}（唯讀）"})
@@ -163,8 +179,19 @@ def export_one(npc_id, a_out, out):
         print(f"  {npc_id:11s} {p.name:14s} {len(V):7d} verts {time.time() - t:5.1f}s", flush=True)
         i += 1
     out = Path(out)
+    n = paint_face66(npc_id, g, npc["iris"], out / f"npc_{npc_id}_face.png")
+    # 眨眼眼皮（Stage 6.6）：在變形後的頭部表面前方建立，與頭部一起縮放
+    orig, deformed = head_src
+    Vb, Vc, Q, C = F66.lid_mesh(orig, F66.eyes_info(npc_id, g))
+    key = f"{i:02d}_lids"
+    data[key + "__v"] = head_tf("lids", F66.deform_head(npc_id, Vb)).astype(np.float32)
+    data[key + "__blink"] = head_tf("lids", F66.deform_head(npc_id, Vc)).astype(np.float32)
+    data[key + "__q"] = Q
+    data[key + "__n"] = np.tile(np.array([0.0, -1.0, 0.0], np.float32), (len(Vb), 1))
+    data[key + "__c"] = np.clip(C, 0, 1).astype(np.float32)
+    data[key + "__uv"] = np.tile(np.array(WHITE_UV, np.float32), (len(Vb), 1))
+    info.append({"key": key, "name": "lids", "group": "skin", "palette": "lids", "step": 0, "verts": len(Vb), "quads": len(Q), "textured": False, "bind": {"head": 1.0}, "source": f"B:NPC {npc_id}（眨眼）"})
     np.savez_compressed(out / f"npc_{npc_id}_parts.npz", **data)
-    n = recolor_face(Path(a_out) / f"c10b4_face_{g}.png", out / f"npc_{npc_id}_face.png", npc["iris"], npc.get("makeup", False))
     joints = {"arm": [list(map(float, j)) for j in NS.arm_joints(g)], "leg": [list(map(float, j)) for j in NS.leg_joints(g)]}
     json.dump({"id": npc["id"], "key": npc_id, "name": npc["name"], "gender": g, "design": npc["design"], "parts": info, "joints": joints, "head_scale": HEAD_SCALE,
                "surface": meta.get("surface", {}), "face_recolored_px": n}, open(out / f"npc_{npc_id}_parts.json", "w"), ensure_ascii=False, indent=1)
