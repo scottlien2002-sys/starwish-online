@@ -198,7 +198,7 @@ for (const name of browsers) {
       await waitVillage();
       vi = await V(() => window.__starwishWorld.info());
       run.results.respawn = { pos: vi.pos, deaths: vi.deaths, hp: vi.hp, gold: vi.gold };
-      check("戰死：生命歸零後倒地（有死亡動作時播死亡動作）", !!death && (!death.deathClip || death.state === "Death"), death);
+      check("戰死：生命歸零後倒地並播 C1.0-B5b 死亡動作（不是整個角色僵硬往後倒）", !!death && death.deathClip === true && death.state === "Death", death);
       check("戰死 → 在星芽村復活（死亡次數 +1、滿血、金幣不變）", vi.map === "village" && vi.deaths === 1 && (vi.hp === null || vi.hp >= 100) && vi.gold === goldBeforeDeath, run.results.respawn);
       await shot("village_respawn");
     } catch (e) {
