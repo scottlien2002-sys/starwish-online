@@ -44,11 +44,6 @@ jobs:
         continue-on-error: true
         run: node tests/e2e/run-play-e2e.mjs dist webkit
 
-      - name: Stage 7 world loop E2E (WebKit + Chromium)
-        id: worlde2e
-        continue-on-error: true
-        run: node tests/e2e/run-world-e2e.mjs dist webkit,chromium
-
       - name: Stage 6 P2-3 village E2E (Chromium + WebKit)
         id: villagee2e
         continue-on-error: true
@@ -64,7 +59,7 @@ jobs:
         run: |
           mkdir -p dist/ci-report
           cp -r test-results/. dist/ci-report/ 2>/dev/null || true
-          echo "{\"commit\":\"${GITHUB_SHA}\",\"runId\":\"${GITHUB_RUN_ID}\",\"villageE2e\":\"${{ steps.villagee2e.outcome }}\",\"playE2e\":\"${{ steps.playe2e.outcome }}\",\"worldE2e\":\"${{ steps.worlde2e.outcome }}\",\"mapE2e\":\"${{ steps.mape2e.outcome }}\",\"note\":\"preview deployed before the long legacy E2E; see the Actions log for its result\"}" > dist/ci-report/summary.json
+          echo "{\"commit\":\"${GITHUB_SHA}\",\"runId\":\"${GITHUB_RUN_ID}\",\"villageE2e\":\"${{ steps.villagee2e.outcome }}\",\"playE2e\":\"${{ steps.playe2e.outcome }}\",\"mapE2e\":\"${{ steps.mape2e.outcome }}\",\"note\":\"preview deployed before the long legacy E2E; see the Actions log for its result\"}" > dist/ci-report/summary.json
 
       - name: Deploy preview (own folder only)
         # feature/render-* 分支各自部署到獨立子路徑，只替換自己的資料夾，不影響正式版與其他預覽版
@@ -129,7 +124,7 @@ jobs:
           git push -qf "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh-pages
 
       - name: Fail job if browser tests failed
-        if: steps.hud.outcome == 'failure' || steps.e2e.outcome == 'failure' || steps.mape2e.outcome == 'failure' || steps.playe2e.outcome == 'failure' || steps.villagee2e.outcome == 'failure' || steps.worlde2e.outcome == 'failure'
+        if: steps.hud.outcome == 'failure' || steps.e2e.outcome == 'failure' || steps.mape2e.outcome == 'failure' || steps.playe2e.outcome == 'failure' || steps.villagee2e.outcome == 'failure'
         run: |
           echo "瀏覽器測試未通過，詳見網站 ci-report/ 或上方記錄"
           exit 1

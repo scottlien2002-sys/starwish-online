@@ -1,6 +1,7 @@
 name: Stage 7 world loop E2E (quick, with screenshots)
 
-# 只跑 Stage 7 完整遊戲循環 E2E（建置＋WebKit/Chromium），上傳截圖與報告；不部署、不影響其他分支。
+# Stage 7 完整遊戲循環 E2E（建置＋WebKit/Chromium、男女），上傳截圖與報告；不部署。
+# 獨立於 CI & Deploy（避免超過該工作 150 分鐘上限），在同一個 commit 平行執行。
 on:
   push:
     branches: [feature/render-stage7-world]

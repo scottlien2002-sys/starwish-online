@@ -1021,6 +1021,16 @@ for (const name of browsers) {
         const staged = await page.evaluate((g) => window.__starwish.stageBoboPhoto(g === undefined ? {} : { glow: g }), v.glow);
         await page.waitForTimeout(2500);
         const perf = await page.evaluate(() => window.__starwish.perf());
+        // Draw Calls 單一瞬間會隨待機動作差 1（歷次 CI：57～59）→ 另外取 7 次（約 1.4 秒）的中位數做比較，門檻不變
+        perf.drawSamples = await page.evaluate(async () => {
+          const out = [];
+          for (let k = 0; k < 7; k++) {
+            out.push(window.__starwish.perf().drawCalls);
+            await new Promise((r) => setTimeout(r, 200));
+          }
+          return out;
+        });
+        perf.drawMedian = [...perf.drawSamples].sort((x, y) => x - y)[3];
         const res = await page.evaluate(async () => (await window.__starwish.bobo()).scene);
         const renderer = await page.evaluate(() => window.__starwish.renderer());
         const exp = await page.evaluate(() => window.__starwish.renderExperiments());
@@ -1040,8 +1050,8 @@ for (const name of browsers) {
       check(
         "V3.8R 高畫質預設 PCSS32（柔和陰影中品質，MSAA 4x、HDR 不變）；?shadowq=original 回退為原本高品質；Draw Calls 相同",
         !!a && !!b && a.exp.tag === "" && a.exp.shadowQuality === 1 && a.exp.msaa === 4 && a.exp.hdr === true && a.exp.shadowEnabled === true &&
-          b.exp.tag === "shadowq:original" && b.exp.shadowQuality === 0 && b.exp.msaa === 4 && b.exp.hdr === true && b.exp.shadowEnabled === true && Math.abs(b.perf.drawCalls - a.perf.drawCalls) <= 1, // 單一瞬間讀取的 Draw Calls 可能差 1
-        { def: a && a.exp, original: b && b.exp, draw: [a && a.perf.drawCalls, b && b.perf.drawCalls] },
+          b.exp.tag === "shadowq:original" && b.exp.shadowQuality === 0 && b.exp.msaa === 4 && b.exp.hdr === true && b.exp.shadowEnabled === true && Math.abs(b.perf.drawMedian - a.perf.drawMedian) <= 1, // 單一瞬間讀取的 Draw Calls 可能差 1 → 比較中位數（門檻不變）
+        { def: a && a.exp, original: b && b.exp, draw: [a && a.perf.drawCalls, b && b.perf.drawCalls], samples: [a && a.perf.drawSamples, b && b.perf.drawSamples] },
       );
     }
     for (const l of ["high", "medium", "low"]) {
