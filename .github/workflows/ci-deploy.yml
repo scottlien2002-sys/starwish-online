@@ -58,7 +58,9 @@ jobs:
         if: startsWith(github.ref, 'refs/heads/feature/render')
         run: |
           mkdir -p dist/ci-report
-          cp -r test-results/. dist/ci-report/ 2>/dev/null || true
+          # 預覽資料夾只放報告（JSON）與原野 E2E 截圖；地圖／村莊 E2E 的大量截圖（約 180 MB）不放進 GitHub Pages
+          # （gh-pages 全部預覽合計約 3.9 GB，超過 Pages 建議的 1 GB，部署容易逾時）
+          (cd test-results 2>/dev/null && find . -type f \( -name '*.json' -o -path './play-e2e/*' \) -exec cp --parents {} ../dist/ci-report/ \;) || true
           echo "{\"commit\":\"${GITHUB_SHA}\",\"runId\":\"${GITHUB_RUN_ID}\",\"villageE2e\":\"${{ steps.villagee2e.outcome }}\",\"playE2e\":\"${{ steps.playe2e.outcome }}\",\"mapE2e\":\"${{ steps.mape2e.outcome }}\",\"note\":\"preview deployed before the long legacy E2E; see the Actions log for its result\"}" > dist/ci-report/summary.json
 
       - name: Deploy preview (own folder only)
