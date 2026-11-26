@@ -20,8 +20,8 @@ export class VillageShadows {
   private readonly scene: Scene;
   mode: ShadowMode;
   casterCull: boolean;
-  /** 陰影盒半徑（正交盒 ±22 m 的半對角線） */
-  readonly range = 31.5;
+  /** 陰影投射物範圍（預設＝正交盒 ±22 m 的半對角線；中畫質 18 m） */
+  range = 31.5;
   private readonly master: AbstractMesh[] = [];
   private readonly masterSet = new Set<AbstractMesh>();
   private lastCull = -1;

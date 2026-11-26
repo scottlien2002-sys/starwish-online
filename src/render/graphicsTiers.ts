@@ -3,7 +3,7 @@
  *
  * 模型精細度（models）與渲染設定（解析度、陰影、後製）分開管理：
  *   高 High  ：HQ 模型、解析度上限 1.25x、PCF 1024、HDR 關、MSAA 4x、NPC LOD 18 m
- *   中 Medium：Lite 模型、解析度上限 1.25x、PCF 1024、HDR 關、MSAA 2x、NPC LOD 14 m（新玩家預設）
+ *   中 Medium：Lite 模型、解析度上限 1.25x、PCF 1024（陰影投射物 18 m 內）、HDR 關、MSAA 2x、NPC LOD 14 m（新玩家預設）
  *   低 Low   ：Lite 模型、解析度上限 1.0x、柔和腳底陰影、HDR 關、MSAA 1x（不使用後製管線）、NPC LOD 14 m
  * 三段都開：動態解析度（FPS 連續 2 秒 < 40 往下調，不超過上限）、畫面外剔除、遠距動作暫停、陰影投射物剔除。
  * PCSS 1024／PCSS 2048 只保留為進階選項（?shadow=），不作為任何手機預設。
@@ -35,6 +35,8 @@ export interface TierPreset {
   post: boolean;
   /** NPC／洛恩距離 LOD 切換距離（m） */
   lodNear: number;
+  /** 陰影投射物範圍（以玩家為中心的半徑，m）：超過的物件不畫進陰影貼圖 */
+  shadowRange: number;
   dynamicRes: true;
   offscreenCull: true;
   animThrottle: true;
@@ -42,9 +44,9 @@ export interface TierPreset {
 }
 
 export const TIER_PRESETS: Readonly<Record<GraphicsTier, TierPreset>> = Object.freeze({
-  high: { tier: "high", models: "hq", maxRes: 1.25, shadow: "pcf1024", hdr: false, msaa: 4, post: true, lodNear: 18, dynamicRes: true, offscreenCull: true, animThrottle: true, casterCull: true },
-  medium: { tier: "medium", models: "lite", maxRes: 1.25, shadow: "pcf1024", hdr: false, msaa: 2, post: true, lodNear: 14, dynamicRes: true, offscreenCull: true, animThrottle: true, casterCull: true },
-  low: { tier: "low", models: "lite", maxRes: 1, shadow: "blob", hdr: false, msaa: 1, post: false, lodNear: 14, dynamicRes: true, offscreenCull: true, animThrottle: true, casterCull: true },
+  high: { tier: "high", models: "hq", maxRes: 1.25, shadow: "pcf1024", hdr: false, msaa: 4, post: true, lodNear: 18, shadowRange: 31.5, dynamicRes: true, offscreenCull: true, animThrottle: true, casterCull: true },
+  medium: { tier: "medium", models: "lite", maxRes: 1.25, shadow: "pcf1024", hdr: false, msaa: 2, post: true, lodNear: 14, shadowRange: 18, dynamicRes: true, offscreenCull: true, animThrottle: true, casterCull: true },
+  low: { tier: "low", models: "lite", maxRes: 1, shadow: "blob", hdr: false, msaa: 1, post: false, lodNear: 14, shadowRange: 18, dynamicRes: true, offscreenCull: true, animThrottle: true, casterCull: true },
 });
 
 export function isGraphicsTier(v: unknown): v is GraphicsTier {

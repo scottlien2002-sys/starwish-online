@@ -36,6 +36,8 @@ export interface VillagePerfConfig {
   animThrottle: boolean;
   animFar: number;
   casterCull: boolean;
+  /** 陰影投射物範圍（m） */
+  shadowRange: number;
   originalModels: boolean;
   /** 被網址參數覆寫的項目（報告用） */
   overrides: string[];
@@ -99,6 +101,7 @@ export function villagePerfConfig(params: URLSearchParams, tier: GraphicsTier): 
     animThrottle,
     animFar: 32,
     casterCull,
+    shadowRange: num(params.get("shadowrange")) ?? p.shadowRange,
     originalModels: s62,
     overrides: ov,
   };

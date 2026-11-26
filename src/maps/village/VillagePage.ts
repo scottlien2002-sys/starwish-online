@@ -225,6 +225,7 @@ class VillagePage {
     this.shadows.darkness = 0.35;
     this.shadowQ = params.get("shadowq") === "medium" && this.shadows.useContactHardeningShadow ? "medium" : "default";
     this.vshadows = new VillageShadows(scene, this.sun, this.shadows, this.perfCfg.shadow, this.perfCfg.casterCull);
+    this.vshadows.range = this.perfCfg.shadowRange;
     if (this.shadowQ === "medium") this.shadows.filteringQuality = ShadowGenerator.QUALITY_MEDIUM;
 
     this.pos.set(ARRIVAL_SPOT.x, groundHeight(ARRIVAL_SPOT.x, ARRIVAL_SPOT.z), ARRIVAL_SPOT.z);
@@ -734,7 +735,7 @@ class VillagePage {
       if (f) for (const [k, v] of Object.entries(f.parts)) lines.push(`  ${k}：網格 ${v.meshes}、三角形 ${v.triangles}`);
     } else lines.push("正式美術：關閉（Grey-box）");
     const pc = this.perfCfg;
-    lines.push(`角色：NPC 距離 LOD ${pc.npcLod ? `開（${pc.lodNear} m）` : "關"}、畫面外剔除 開、遠距／畫面外暫停動作 ${pc.animThrottle ? "開" : "關"}、陰影投射物剔除 ${pc.casterCull ? "開" : "關"}｜陰影投射物 本幀 ${this.vshadows.activeCasters}／全部 ${this.vshadows.totalCasters}（三角形 ${this.vshadows.casterTriangles()}）`);
+    lines.push(`角色：NPC 距離 LOD ${pc.npcLod ? `開（${pc.lodNear} m）` : "關"}、畫面外剔除 開、遠距／畫面外暫停動作 ${pc.animThrottle ? "開" : "關"}、陰影投射物剔除 ${pc.casterCull ? `開（${this.vshadows.range} m 內）` : "關"}｜陰影投射物 本幀 ${this.vshadows.activeCasters}／全部 ${this.vshadows.totalCasters}（三角形 ${this.vshadows.casterTriangles()}）`);
     if (this.artFull) {
       const ri = this.resourceInfo();
       lines.push(`模型與貼圖 ${ri.files} 個：網路下載 ${ri.network} 個（${ri.networkMB} MB）、瀏覽器快取 ${ri.cached} 個${ri.unknown ? `、無法判斷 ${ri.unknown} 個` : ""}｜重複請求：${ri.duplicates.length ? ri.duplicates.join("、") : "無"}｜載入時間${ri.network === 0 && ri.cached > 0 ? "（全部來自快取，不能當作首次載入時間）" : ri.cached > 0 ? "（部分來自快取）" : "（首次下載）"}`);
