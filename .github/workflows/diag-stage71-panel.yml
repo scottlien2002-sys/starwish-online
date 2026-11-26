@@ -1,0 +1,22 @@
+name: Diag Stage 7.1 panel (WebKit male only, no deploy)
+on:
+  push:
+    branches: [diag/stage71-panel]
+permissions:
+  contents: read
+concurrency:
+  group: diag-stage71-panel
+  cancel-in-progress: true
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+      - run: npm run build
+      - run: npx playwright install --with-deps webkit
+      - run: WORLD_GENDERS=male node tests/e2e/run-world-e2e.mjs dist webkit
