@@ -1,5 +1,5 @@
 {
- "startedAt": "2026-11-26T05:41:19.738Z",
+ "startedAt": "2026-11-26T05:59:10.525Z",
  "note": "CI 軟體繪圖：FPS 不代表 iPhone 實機",
  "runs": [
   {
@@ -352,24 +352,24 @@
       "plaza_north": {
        "active": 53,
        "total": 67,
-       "triangles": 104789
+       "triangles": 113541
       },
       "east": {
-       "active": 34,
+       "active": 46,
        "total": 67,
-       "triangles": 69264
+       "triangles": 72117
       }
      }
     },
     "平均每幀三角面 ≤ 250000（四個位置平均；含陰影貼圖繪製）": {
      "ok": true,
      "detail": {
-      "avg": 207369,
+      "avg": 212513,
       "perf": {
        "arrival": 194941,
        "spawn": 229938,
-       "plaza_north": 217474,
-       "east": 187122
+       "plaza_north": 239558,
+       "east": 185616
       }
      }
     },
@@ -377,17 +377,17 @@
      "ok": true,
      "detail": [
       "星願物語 Stage 6.4 星芽村 測試報告",
-      "時間 2026/11/26 05:42:19",
+      "時間 2026/11/26 06:00:31",
       "網址參數 ?map=village&art=full&quality=high",
       "裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
-      "模式 HQ（高畫質）：畫質 高畫質（來源：網址指定）、模型 HQ／載入 127 ms",
+      "模式 HQ（高畫質）：畫質 高畫質（來源：網址指定）、模型 HQ／載入 169 ms",
       "陰影（實際）：一般柔化陰影 PCF 1024｜陰影貼圖 1024×1024，PCF，取樣品質 中",
       "解析度（實際）：要求上限 1.25x、實際 1x、framebuffer 390×844、Hardware Scaling 1、裝置 DPR 2｜動態解析度 已介入（第 2 級／1.25→1x）",
       "抗鋸齒（實際）：MSAA 要求 4x、後製管線 4x、渲染目標 無法讀取x、裝置上限 4x → 實際生效 4x｜HDR 關、後製管線 開",
       "村莊 V1.3 佔位網格 5、三角形 24030、文字標籤 13；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）",
       "碰撞 圓形 40、矩形 10；鏡頭避障 開",
-      "目前畫面 Draw Calls 86、三角形 187030",
-      "全村整合 art=full：loaded，載入 23483 ms"
+      "目前畫面 Draw Calls 84、三角形 185616",
+      "全村整合 art=full：loaded，載入 32054 ms"
      ]
     },
     "繪製次數 ≤ 160（全村整合、high 畫質、任何位置）": {
@@ -412,21 +412,21 @@
        }
       },
       "plaza_north": {
-       "drawCalls": 96,
-       "triangles": 217474,
+       "drawCalls": 105,
+       "triangles": 239558,
        "casters": {
         "active": 53,
         "total": 67,
-        "triangles": 104789
+        "triangles": 113541
        }
       },
       "east": {
-       "drawCalls": 89,
-       "triangles": 187122,
+       "drawCalls": 84,
+       "triangles": 185616,
        "casters": {
-        "active": 34,
+        "active": 46,
         "total": 67,
-        "triangles": 69264
+        "triangles": 72117
        }
       }
      }
@@ -826,7 +826,7 @@
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": -0.05565248802304268
+        "y": 0.05100637301802635
        },
        {
         "name": "Portal_fx",
@@ -836,14 +836,14 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": -0.00850666407495737
+        "y": 0.040062226355075836
        }
       ],
       "a2": [
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": -0.005260015372186899
+        "y": 0.0015710376901552081
        },
        {
         "name": "Portal_fx",
@@ -853,7 +853,7 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": 0.045200005173683167
+        "y": -0.011915616691112518
        }
       ]
      }
@@ -916,12 +916,12 @@
       {
        "id": "base",
        "label": "目前基準",
-       "avgFps": 3.7109375,
-       "low1Fps": 3.020235578375326,
-       "minFps": 3.020235578375326,
-       "stutters": 19,
-       "avgDraw": 91.42105263157895,
-       "avgTris": 213649.47368421053,
+       "avgFps": 2.8395646000946524,
+       "low1Fps": 2.285191956124436,
+       "minFps": 2.285191956124436,
+       "stutters": 18,
+       "avgDraw": 93.44444444444444,
+       "avgTris": 212208.27777777778,
        "res": 1.25,
        "fb": "487×1055",
        "hwScaling": 0.8,
@@ -936,12 +936,12 @@
       {
        "id": "res1",
        "label": "解析度 1x",
-       "avgFps": 5.352058401661306,
-       "low1Fps": 4.182350480970713,
-       "minFps": 4.182350480970713,
-       "stutters": 25,
-       "avgDraw": 91.24,
-       "avgTris": 212631.88,
+       "avgFps": 3.7821482602118177,
+       "low1Fps": 2.925687536571692,
+       "minFps": 2.925687536571692,
+       "stutters": 19,
+       "avgDraw": 93.21052631578948,
+       "avgTris": 213582.26315789475,
        "res": 1,
        "fb": "390×844",
        "hwScaling": 1,
@@ -1038,7 +1038,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 23483,
+     "loadMs": 32054,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -1220,21 +1220,21 @@
       }
      },
      "plaza_north": {
-      "drawCalls": 96,
-      "triangles": 217474,
+      "drawCalls": 105,
+      "triangles": 239558,
       "casters": {
        "active": 53,
        "total": 67,
-       "triangles": 104789
+       "triangles": 113541
       }
      },
      "east": {
-      "drawCalls": 89,
-      "triangles": 187122,
+      "drawCalls": 84,
+      "triangles": 185616,
       "casters": {
-       "active": 34,
+       "active": 46,
        "total": 67,
-       "triangles": 69264
+       "triangles": 72117
       }
      }
     },
@@ -1444,8 +1444,8 @@
       }
      },
      "plaza_north": {
-      "activeMeshes": 70,
-      "activeTriangles": 217474,
+      "activeMeshes": 83,
+      "activeTriangles": 239822,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -1504,7 +1504,7 @@
         "triangles": 4802
        },
        "__root__": {
-        "meshes": 16,
+        "meshes": 18,
         "triangles": 0
        },
        "Env": {
@@ -1539,6 +1539,10 @@
         "meshes": 7,
         "triangles": 10507
        },
+       "洛恩": {
+        "meshes": 11,
+        "triangles": 13596
+       },
        "NPC": {
         "meshes": 1,
         "triangles": 2394
@@ -1546,8 +1550,8 @@
       }
      },
      "east": {
-      "activeMeshes": 76,
-      "activeTriangles": 187122,
+      "activeMeshes": 63,
+      "activeTriangles": 185616,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -1602,7 +1606,7 @@
         "triangles": 12168
        },
        "__root__": {
-        "meshes": 18,
+        "meshes": 16,
         "triangles": 0
        },
        "Env": {
@@ -1637,10 +1641,6 @@
         "meshes": 4,
         "triangles": 9955
        },
-       "洛恩": {
-        "meshes": 11,
-        "triangles": 4359
-       },
        "NPC": {
         "meshes": 1,
         "triangles": 1686
@@ -1664,6 +1664,7 @@
       "animThrottle": true,
       "animFar": 32,
       "casterCull": true,
+      "shadowRange": 31.5,
       "originalModels": false,
       "overrides": []
      },
@@ -1814,7 +1815,7 @@
       "duplicates": []
      }
     },
-    "avgTriangles": 207369,
+    "avgTriangles": 212513,
     "npcs": [
      {
       "id": "sword",
@@ -2009,7 +2010,7 @@
       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
      }
     ],
-    "fpsSoftware": 104,
+    "fpsSoftware": 107,
     "lod": {
      "near": {
       "anim": "Idle",
@@ -2031,7 +2032,7 @@
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": -0.05565248802304268
+       "y": 0.05100637301802635
       },
       {
        "name": "Portal_fx",
@@ -2041,14 +2042,14 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": -0.00850666407495737
+       "y": 0.040062226355075836
       }
      ],
      "a2": [
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": -0.005260015372186899
+       "y": 0.0015710376901552081
       },
       {
        "name": "Portal_fx",
@@ -2058,7 +2059,7 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": 0.045200005173683167
+       "y": -0.011915616691112518
       }
      ]
     },
@@ -2108,12 +2109,12 @@
      {
       "id": "base",
       "label": "目前基準",
-      "avgFps": 3.7109375,
-      "low1Fps": 3.020235578375326,
-      "minFps": 3.020235578375326,
-      "stutters": 19,
-      "avgDraw": 91.42105263157895,
-      "avgTris": 213649.47368421053,
+      "avgFps": 2.8395646000946524,
+      "low1Fps": 2.285191956124436,
+      "minFps": 2.285191956124436,
+      "stutters": 18,
+      "avgDraw": 93.44444444444444,
+      "avgTris": 212208.27777777778,
       "res": 1.25,
       "fb": "487×1055",
       "hwScaling": 0.8,
@@ -2128,12 +2129,12 @@
      {
       "id": "res1",
       "label": "解析度 1x",
-      "avgFps": 5.352058401661306,
-      "low1Fps": 4.182350480970713,
-      "minFps": 4.182350480970713,
-      "stutters": 25,
-      "avgDraw": 91.24,
-      "avgTris": 212631.88,
+      "avgFps": 3.7821482602118177,
+      "low1Fps": 2.925687536571692,
+      "minFps": 2.925687536571692,
+      "stutters": 19,
+      "avgDraw": 93.21052631578948,
+      "avgTris": 213582.26315789475,
       "res": 1,
       "fb": "390×844",
       "hwScaling": 1,
@@ -2492,36 +2493,36 @@
      "ok": true,
      "detail": {
       "arrival": {
-       "active": 33,
+       "active": 20,
        "total": 64,
-       "triangles": 34914
+       "triangles": 17852
       },
       "spawn": {
-       "active": 57,
+       "active": 45,
        "total": 64,
-       "triangles": 56266
+       "triangles": 42119
       },
       "plaza_north": {
-       "active": 50,
+       "active": 38,
        "total": 64,
-       "triangles": 54741
+       "triangles": 46043
       },
       "east": {
-       "active": 32,
+       "active": 21,
        "total": 64,
-       "triangles": 38044
+       "triangles": 22257
       }
      }
     },
     "平均每幀三角面 ≤ 100000（四個位置平均；含陰影貼圖繪製）": {
-     "ok": false,
+     "ok": true,
      "detail": {
-      "avg": 103125,
+      "avg": 89201,
       "perf": {
-       "arrival": 96569,
-       "spawn": 112192,
-       "plaza_north": 109432,
-       "east": 94306
+       "arrival": 79507,
+       "spawn": 98045,
+       "plaza_north": 100734,
+       "east": 78519
       }
      }
     },
@@ -2529,56 +2530,56 @@
      "ok": true,
      "detail": [
       "星願物語 Stage 6.4 星芽村 測試報告",
-      "時間 2026/11/26 05:45:44",
+      "時間 2026/11/26 06:04:49",
       "網址參數 ?map=village&art=full&quality=medium",
       "裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
-      "模式 Lite 中畫質：畫質 中畫質（來源：網址指定）、模型 Lite／載入 122 ms",
+      "模式 Lite 中畫質：畫質 中畫質（來源：網址指定）、模型 Lite／載入 164 ms",
       "陰影（實際）：一般柔化陰影 PCF 1024｜陰影貼圖 1024×1024，PCF，取樣品質 中",
       "解析度（實際）：要求上限 1.25x、實際 1x、framebuffer 390×844、Hardware Scaling 1、裝置 DPR 2｜動態解析度 已介入（第 2 級／1.25→1x）",
       "抗鋸齒（實際）：MSAA 要求 2x、後製管線 2x、渲染目標 無法讀取x、裝置上限 4x → 實際生效 2x｜HDR 關、後製管線 開",
       "村莊 V1.3 佔位網格 5、三角形 17190、文字標籤 13；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）",
       "碰撞 圓形 40、矩形 10；鏡頭避障 開",
-      "目前畫面 Draw Calls 82、三角形 94306",
-      "全村整合 art=full：loaded，載入 16748 ms"
+      "目前畫面 Draw Calls 72、三角形 78519",
+      "全村整合 art=full：loaded，載入 21719 ms"
      ]
     },
     "繪製次數 ≤ 120（全村整合、medium 畫質、任何位置）": {
      "ok": true,
      "detail": {
       "arrival": {
-       "drawCalls": 80,
-       "triangles": 96569,
+       "drawCalls": 69,
+       "triangles": 79507,
        "casters": {
-        "active": 33,
+        "active": 20,
         "total": 64,
-        "triangles": 34914
+        "triangles": 17852
        }
       },
       "spawn": {
-       "drawCalls": 85,
-       "triangles": 112192,
+       "drawCalls": 76,
+       "triangles": 98045,
        "casters": {
-        "active": 57,
+        "active": 45,
         "total": 64,
-        "triangles": 56266
+        "triangles": 42119
        }
       },
       "plaza_north": {
-       "drawCalls": 87,
-       "triangles": 109432,
+       "drawCalls": 78,
+       "triangles": 100734,
        "casters": {
-        "active": 50,
+        "active": 38,
         "total": 64,
-        "triangles": 54741
+        "triangles": 46043
        }
       },
       "east": {
-       "drawCalls": 82,
-       "triangles": 94306,
+       "drawCalls": 72,
+       "triangles": 78519,
        "casters": {
-        "active": 32,
+        "active": 21,
         "total": 64,
-        "triangles": 38044
+        "triangles": 22257
        }
       }
      }
@@ -2586,10 +2587,10 @@
     "移動規則：一般行走走上石階到高台（不跳躍）": {
      "ok": true,
      "detail": {
-      "x": -5.817072295949935e-16,
+      "x": -6.123233995736774e-16,
       "y": 2,
-      "z": 24.500000000000117,
-      "yaw": -6.123233995719597e-17
+      "z": 25.000000000000124,
+      "yaw": -6.123233995732532e-17
      }
     },
     "NPC 互動：9 位 NPC 都能靠近後點擊對話（名稱、職責）": {
@@ -2978,7 +2979,7 @@
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": -0.057093288749456406
+        "y": 0.046237312257289886
        },
        {
         "name": "Portal_fx",
@@ -2988,14 +2989,14 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": 0.02511219121515751
+        "y": 0.00442375848069787
        }
       ],
       "a2": [
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": -0.026278181001544
+        "y": -0.019453005865216255
        },
        {
         "name": "Portal_fx",
@@ -3005,7 +3006,7 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": -0.045915864408016205
+        "y": 0.049931880086660385
        }
       ]
      }
@@ -3068,12 +3069,12 @@
       {
        "id": "base",
        "label": "目前基準",
-       "avgFps": 5.236698785085882,
-       "low1Fps": 4.430660168364858,
-       "minFps": 4.430660168364858,
-       "stutters": 25,
-       "avgDraw": 86.44,
-       "avgTris": 106271.8,
+       "avgFps": 3.827943991135287,
+       "low1Fps": 2.790178571429297,
+       "minFps": 2.790178571429297,
+       "stutters": 19,
+       "avgDraw": 76.73684210526316,
+       "avgTris": 92371.15789473684,
        "res": 1.25,
        "fb": "487×1055",
        "hwScaling": 0.8,
@@ -3088,12 +3089,12 @@
       {
        "id": "res1",
        "label": "解析度 1x",
-       "avgFps": 7.535795026375282,
-       "low1Fps": 6.2814070351754205,
-       "minFps": 6.2814070351754205,
-       "stutters": 35,
-       "avgDraw": 88.42857142857143,
-       "avgTris": 108730.45714285714,
+       "avgFps": 5.774536433047228,
+       "low1Fps": 4.844961240306798,
+       "minFps": 4.844961240306798,
+       "stutters": 27,
+       "avgDraw": 76.77777777777777,
+       "avgTris": 92339.37037037036,
        "res": 1,
        "fb": "390×844",
        "hwScaling": 1,
@@ -3178,7 +3179,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 16748,
+     "loadMs": 21719,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -3342,46 +3343,46 @@
     },
     "perf": {
      "arrival": {
-      "drawCalls": 80,
-      "triangles": 96569,
+      "drawCalls": 69,
+      "triangles": 79507,
       "casters": {
-       "active": 33,
+       "active": 20,
        "total": 64,
-       "triangles": 34914
+       "triangles": 17852
       }
      },
      "spawn": {
-      "drawCalls": 85,
-      "triangles": 112192,
+      "drawCalls": 76,
+      "triangles": 98045,
       "casters": {
-       "active": 57,
+       "active": 45,
        "total": 64,
-       "triangles": 56266
+       "triangles": 42119
       }
      },
      "plaza_north": {
-      "drawCalls": 87,
-      "triangles": 109432,
+      "drawCalls": 78,
+      "triangles": 100734,
       "casters": {
-       "active": 50,
+       "active": 38,
        "total": 64,
-       "triangles": 54741
+       "triangles": 46043
       }
      },
      "east": {
-      "drawCalls": 82,
-      "triangles": 94306,
+      "drawCalls": 72,
+      "triangles": 78519,
       "casters": {
-       "active": 32,
+       "active": 21,
        "total": 64,
-       "triangles": 38044
+       "triangles": 22257
       }
      }
     },
     "breakdown": {
      "arrival": {
       "activeMeshes": 64,
-      "activeTriangles": 96569,
+      "activeTriangles": 79507,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -3491,7 +3492,7 @@
      },
      "spawn": {
       "activeMeshes": 54,
-      "activeTriangles": 112192,
+      "activeTriangles": 98045,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -3584,8 +3585,8 @@
       }
      },
      "plaza_north": {
-      "activeMeshes": 63,
-      "activeTriangles": 109340,
+      "activeMeshes": 64,
+      "activeTriangles": 100734,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -3656,8 +3657,8 @@
         "triangles": 9232
        },
        "WishFountain": {
-        "meshes": 6,
-        "triangles": 10368
+        "meshes": 7,
+        "triangles": 10460
        },
        "Platform": {
         "meshes": 3,
@@ -3687,7 +3688,7 @@
      },
      "east": {
       "activeMeshes": 71,
-      "activeTriangles": 94306,
+      "activeTriangles": 78519,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -3804,6 +3805,7 @@
       "animThrottle": true,
       "animFar": 32,
       "casterCull": true,
+      "shadowRange": 18,
       "originalModels": false,
       "overrides": []
      },
@@ -3954,7 +3956,7 @@
       "duplicates": []
      }
     },
-    "avgTriangles": 103125,
+    "avgTriangles": 89201,
     "npcs": [
      {
       "id": "sword",
@@ -4149,7 +4151,7 @@
       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
      }
     ],
-    "fpsSoftware": 100,
+    "fpsSoftware": 82,
     "lod": {
      "near": {
       "anim": "Idle",
@@ -4171,7 +4173,7 @@
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": -0.057093288749456406
+       "y": 0.046237312257289886
       },
       {
        "name": "Portal_fx",
@@ -4181,14 +4183,14 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": 0.02511219121515751
+       "y": 0.00442375848069787
       }
      ],
      "a2": [
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": -0.026278181001544
+       "y": -0.019453005865216255
       },
       {
        "name": "Portal_fx",
@@ -4198,7 +4200,7 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": -0.045915864408016205
+       "y": 0.049931880086660385
       }
      ]
     },
@@ -4248,12 +4250,12 @@
      {
       "id": "base",
       "label": "目前基準",
-      "avgFps": 5.236698785085882,
-      "low1Fps": 4.430660168364858,
-      "minFps": 4.430660168364858,
-      "stutters": 25,
-      "avgDraw": 86.44,
-      "avgTris": 106271.8,
+      "avgFps": 3.827943991135287,
+      "low1Fps": 2.790178571429297,
+      "minFps": 2.790178571429297,
+      "stutters": 19,
+      "avgDraw": 76.73684210526316,
+      "avgTris": 92371.15789473684,
       "res": 1.25,
       "fb": "487×1055",
       "hwScaling": 0.8,
@@ -4268,12 +4270,12 @@
      {
       "id": "res1",
       "label": "解析度 1x",
-      "avgFps": 7.535795026375282,
-      "low1Fps": 6.2814070351754205,
-      "minFps": 6.2814070351754205,
-      "stutters": 35,
-      "avgDraw": 88.42857142857143,
-      "avgTris": 108730.45714285714,
+      "avgFps": 5.774536433047228,
+      "low1Fps": 4.844961240306798,
+      "minFps": 4.844961240306798,
+      "stutters": 27,
+      "avgDraw": 76.77777777777777,
+      "avgTris": 92339.37037037036,
       "res": 1,
       "fb": "390×844",
       "hwScaling": 1,
@@ -4292,7 +4294,7 @@
      "bad": []
     }
    },
-   "ok": false
+   "ok": true
   },
   {
    "browser": "chromium",
@@ -4630,9 +4632,9 @@
     "平均每幀三角面 ≤ 100000（四個位置平均；含陰影貼圖繪製）": {
      "ok": true,
      "detail": {
-      "avg": 58080,
+      "avg": 57154,
       "perf": {
-       "arrival": 65380,
+       "arrival": 61675,
        "spawn": 55946,
        "plaza_north": 54711,
        "east": 56282
@@ -4643,25 +4645,25 @@
      "ok": true,
      "detail": [
       "星願物語 Stage 6.4 星芽村 測試報告",
-      "時間 2026/11/26 05:48:00",
+      "時間 2026/11/26 06:07:41",
       "網址參數 ?map=village&art=full&quality=low",
       "裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
-      "模式 Lite 低畫質：畫質 低畫質（來源：網址指定）、模型 Lite／載入 98 ms",
+      "模式 Lite 低畫質：畫質 低畫質（來源：網址指定）、模型 Lite／載入 134 ms",
       "陰影（實際）：柔和腳底陰影（不使用陰影貼圖）｜陰影貼圖 不使用陰影貼圖",
       "解析度（實際）：要求上限 1x、實際 1x、framebuffer 390×844、Hardware Scaling 1、裝置 DPR 2｜動態解析度 未介入（階梯 1x）",
       "抗鋸齒（實際）：MSAA 要求 1x、沒有後製管線、畫布 MSAA 關、裝置上限 4x → 實際生效 1x｜HDR 關、後製管線 關",
       "村莊 V1.3 佔位網格 5、三角形 17190、文字標籤 13；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）",
       "碰撞 圓形 40、矩形 10；鏡頭避障 開",
       "目前畫面 Draw Calls 54、三角形 56282",
-      "全村整合 art=full：loaded，載入 11989 ms"
+      "全村整合 art=full：loaded，載入 16239 ms"
      ]
     },
     "繪製次數 ≤ 100（全村整合、low 畫質、任何位置）": {
      "ok": true,
      "detail": {
       "arrival": {
-       "drawCalls": 60,
-       "triangles": 65380,
+       "drawCalls": 51,
+       "triangles": 61675,
        "casters": {
         "active": 0,
         "total": 0,
@@ -4700,10 +4702,10 @@
     "移動規則：一般行走走上石階到高台（不跳躍）": {
      "ok": true,
      "detail": {
-      "x": -5.98791052443095e-16,
+      "x": -5.510910596163096e-16,
       "y": 2,
-      "z": 24.778999999999947,
-      "yaw": -6.123233995728905e-17
+      "z": 24.00000000000011,
+      "yaw": -6.123233995667142e-17
      }
     },
     "NPC 互動：9 位 NPC 都能靠近後點擊對話（名稱、職責）": {
@@ -5092,7 +5094,7 @@
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": 0.01481146551668644
+        "y": -0.05971802398562431
        },
        {
         "name": "Portal_fx",
@@ -5102,14 +5104,14 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": -0.0036791216116398573
+        "y": -0.00438427971675992
        }
       ],
       "a2": [
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": 0.051194075495004654
+        "y": -0.002627698937430978
        },
        {
         "name": "Portal_fx",
@@ -5119,7 +5121,7 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": 0.04221457615494728
+        "y": -0.048932574689388275
        }
       ]
      }
@@ -5203,7 +5205,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 11989,
+     "loadMs": 16239,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -5367,8 +5369,8 @@
     },
     "perf": {
      "arrival": {
-      "drawCalls": 60,
-      "triangles": 65380,
+      "drawCalls": 51,
+      "triangles": 61675,
       "casters": {
        "active": 0,
        "total": 0,
@@ -5405,8 +5407,8 @@
     },
     "breakdown": {
      "arrival": {
-      "activeMeshes": 74,
-      "activeTriangles": 65380,
+      "activeMeshes": 65,
+      "activeTriangles": 61675,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -5511,10 +5513,6 @@
        "Portal": {
         "meshes": 6,
         "triangles": 4819
-       },
-       "洛恩": {
-        "meshes": 9,
-        "triangles": 3705
        },
        "NPC": {
         "meshes": 1,
@@ -5621,8 +5619,8 @@
       }
      },
      "plaza_north": {
-      "activeMeshes": 65,
-      "activeTriangles": 54711,
+      "activeMeshes": 64,
+      "activeTriangles": 54619,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -5697,8 +5695,8 @@
         "triangles": 9232
        },
        "WishFountain": {
-        "meshes": 7,
-        "triangles": 10460
+        "meshes": 6,
+        "triangles": 10368
        },
        "Platform": {
         "meshes": 3,
@@ -5849,6 +5847,7 @@
       "animThrottle": true,
       "animFar": 32,
       "casterCull": true,
+      "shadowRange": 18,
       "originalModels": false,
       "overrides": []
      },
@@ -5998,7 +5997,7 @@
       "duplicates": []
      }
     },
-    "avgTriangles": 58080,
+    "avgTriangles": 57154,
     "npcs": [
      {
       "id": "sword",
@@ -6193,7 +6192,7 @@
       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
      }
     ],
-    "fpsSoftware": 61,
+    "fpsSoftware": 56,
     "lod": {
      "near": {
       "anim": "Idle",
@@ -6215,7 +6214,7 @@
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": 0.01481146551668644
+       "y": -0.05971802398562431
       },
       {
        "name": "Portal_fx",
@@ -6225,14 +6224,14 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": -0.0036791216116398573
+       "y": -0.00438427971675992
       }
      ],
      "a2": [
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": 0.051194075495004654
+       "y": -0.002627698937430978
       },
       {
        "name": "Portal_fx",
@@ -6242,7 +6241,7 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": 0.04221457615494728
+       "y": -0.048932574689388275
       }
      ]
     },
@@ -6646,7 +6645,7 @@
       "plaza_north": {
        "active": 53,
        "total": 67,
-       "triangles": 104789
+       "triangles": 113541
       },
       "east": {
        "active": 34,
@@ -6658,11 +6657,11 @@
     "平均每幀三角面 ≤ 250000（四個位置平均；含陰影貼圖繪製）": {
      "ok": true,
      "detail": {
-      "avg": 240803,
+      "avg": 245300,
       "perf": {
        "arrival": 228089,
        "spawn": 257823,
-       "plaza_north": 234396,
+       "plaza_north": 252385,
        "east": 242903
       }
      }
@@ -6671,17 +6670,17 @@
      "ok": true,
      "detail": [
       "星願物語 Stage 6.4 星芽村 測試報告",
-      "時間 2026/11/26 05:49:52",
+      "時間 2026/11/26 06:10:08",
       "網址參數 ?map=village&art=full&quality=high",
       "裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
-      "模式 HQ（高畫質）：畫質 高畫質（來源：網址指定）、模型 HQ／載入 115 ms",
+      "模式 HQ（高畫質）：畫質 高畫質（來源：網址指定）、模型 HQ／載入 166 ms",
       "陰影（實際）：一般柔化陰影 PCF 1024｜陰影貼圖 1024×1024，PCF，取樣品質 中",
       "解析度（實際）：要求上限 1.25x、實際 1x、framebuffer 844×390、Hardware Scaling 1、裝置 DPR 2｜動態解析度 已介入（第 2 級／1.25→1x）",
       "抗鋸齒（實際）：MSAA 要求 4x、後製管線 4x、渲染目標 無法讀取x、裝置上限 4x → 實際生效 4x｜HDR 關、後製管線 開",
       "村莊 V1.3 佔位網格 5、三角形 24030、文字標籤 13；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）",
       "碰撞 圓形 40、矩形 10；鏡頭避障 開",
-      "目前畫面 Draw Calls 128、三角形 242675",
-      "全村整合 art=full：loaded，載入 18642 ms"
+      "目前畫面 Draw Calls 134、三角形 245668",
+      "全村整合 art=full：loaded，載入 24950 ms"
      ]
     },
     "繪製次數 ≤ 160（全村整合、high 畫質、任何位置）": {
@@ -6707,11 +6706,11 @@
       },
       "plaza_north": {
        "drawCalls": 120,
-       "triangles": 234396,
+       "triangles": 252385,
        "casters": {
         "active": 53,
         "total": 67,
-        "triangles": 104789
+        "triangles": 113541
        }
       },
       "east": {
@@ -6728,10 +6727,10 @@
     "移動規則：一般行走走上石階到高台（不跳躍）": {
      "ok": true,
      "detail": {
-      "x": -6.123233995736774e-16,
+      "x": -5.510910596163096e-16,
       "y": 2,
-      "z": 25.000000000000124,
-      "yaw": -6.123233995732532e-17
+      "z": 24.00000000000011,
+      "yaw": -6.123233995667142e-17
      }
     },
     "NPC 互動：9 位 NPC 都能靠近後點擊對話（名稱、職責）": {
@@ -7107,7 +7106,7 @@
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": -0.012774991802871227
+        "y": 0.05994149297475815
        },
        {
         "name": "Portal_fx",
@@ -7117,14 +7116,14 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": 0.035227056592702866
+        "y": -0.048477284610271454
        }
       ],
       "a2": [
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": -0.05602088198065758
+        "y": 0.03615006059408188
        },
        {
         "name": "Portal_fx",
@@ -7134,7 +7133,7 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": 0.04641503468155861
+        "y": -0.035100776702165604
        }
       ]
      }
@@ -7215,7 +7214,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 18642,
+     "loadMs": 24950,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -7398,11 +7397,11 @@
      },
      "plaza_north": {
       "drawCalls": 120,
-      "triangles": 234396,
+      "triangles": 252385,
       "casters": {
        "active": 53,
        "total": 67,
-       "triangles": 104789
+       "triangles": 113541
       }
      },
      "east": {
@@ -7666,7 +7665,7 @@
      },
      "plaza_north": {
       "activeMeshes": 102,
-      "activeTriangles": 234396,
+      "activeTriangles": 252385,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -7770,7 +7769,7 @@
        },
        "洛恩": {
         "meshes": 11,
-        "triangles": 4359
+        "triangles": 13596
        },
        "NPC": {
         "meshes": 4,
@@ -7929,6 +7928,7 @@
       "animThrottle": true,
       "animFar": 32,
       "casterCull": true,
+      "shadowRange": 31.5,
       "originalModels": false,
       "overrides": []
      },
@@ -8079,7 +8079,7 @@
       "duplicates": []
      }
     },
-    "avgTriangles": 240803,
+    "avgTriangles": 245300,
     "npcs": [
      {
       "id": "sword",
@@ -8274,7 +8274,7 @@
       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
      }
     ],
-    "fpsSoftware": 131,
+    "fpsSoftware": 126,
     "lod": {
      "near": {
       "anim": "Idle",
@@ -8296,7 +8296,7 @@
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": -0.012774991802871227
+       "y": 0.05994149297475815
       },
       {
        "name": "Portal_fx",
@@ -8306,14 +8306,14 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": 0.035227056592702866
+       "y": -0.048477284610271454
       }
      ],
      "a2": [
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": -0.05602088198065758
+       "y": 0.03615006059408188
       },
       {
        "name": "Portal_fx",
@@ -8323,7 +8323,7 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": 0.04641503468155861
+       "y": -0.035100776702165604
       }
      ]
     },
@@ -8715,36 +8715,24 @@
      "ok": true,
      "detail": {
       "arrival": {
-       "active": 33,
+       "active": 20,
        "total": 64,
-       "triangles": 34914
+       "triangles": 17852
       },
       "spawn": {
-       "active": 57,
+       "active": 45,
        "total": 64,
-       "triangles": 56266
+       "triangles": 42119
       },
       "plaza_north": {
-       "active": 50,
+       "active": 26,
        "total": 64,
-       "triangles": 54741
+       "triangles": 43190
       },
       "east": {
-       "active": 32,
+       "active": 21,
        "total": 64,
-       "triangles": 38044
-      }
-     }
-    },
-    "平均每幀三角面 ≤ 100000（四個位置平均；含陰影貼圖繪製）": {
-     "ok": false,
-     "detail": {
-      "avg": 126855,
-      "perf": {
-       "arrival": 120025,
-       "spawn": 134777,
-       "plaza_north": 123204,
-       "east": 129415
+       "triangles": 22257
       }
      }
     },
@@ -8752,56 +8740,56 @@
      "ok": true,
      "detail": [
       "星願物語 Stage 6.4 星芽村 測試報告",
-      "時間 2026/11/26 05:52:02",
+      "時間 2026/11/26 06:12:54",
       "網址參數 ?map=village&art=full&quality=medium",
       "裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
-      "模式 Lite 中畫質：畫質 中畫質（來源：網址指定）、模型 Lite／載入 110 ms",
+      "模式 Lite 中畫質：畫質 中畫質（來源：網址指定）、模型 Lite／載入 142 ms",
       "陰影（實際）：一般柔化陰影 PCF 1024｜陰影貼圖 1024×1024，PCF，取樣品質 中",
       "解析度（實際）：要求上限 1.25x、實際 1x、framebuffer 844×390、Hardware Scaling 1、裝置 DPR 2｜動態解析度 已介入（第 2 級／1.25→1x）",
       "抗鋸齒（實際）：MSAA 要求 2x、後製管線 2x、渲染目標 無法讀取x、裝置上限 4x → 實際生效 2x｜HDR 關、後製管線 開",
       "村莊 V1.3 佔位網格 5、三角形 17190、文字標籤 13；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）",
       "碰撞 圓形 40、矩形 10；鏡頭避障 開",
-      "目前畫面 Draw Calls 115、三角形 129415",
-      "全村整合 art=full：loaded，載入 14168 ms"
+      "目前畫面 Draw Calls 104、三角形 113580",
+      "全村整合 art=full：loaded，載入 18448 ms"
      ]
     },
     "繪製次數 ≤ 120（全村整合、medium 畫質、任何位置）": {
      "ok": true,
      "detail": {
       "arrival": {
-       "drawCalls": 115,
-       "triangles": 120025,
+       "drawCalls": 104,
+       "triangles": 102963,
        "casters": {
-        "active": 33,
+        "active": 20,
         "total": 64,
-        "triangles": 34914
+        "triangles": 17852
        }
       },
       "spawn": {
-       "drawCalls": 109,
-       "triangles": 134777,
+       "drawCalls": 100,
+       "triangles": 120630,
        "casters": {
-        "active": 57,
+        "active": 45,
         "total": 64,
-        "triangles": 56266
+        "triangles": 42119
        }
       },
       "plaza_north": {
-       "drawCalls": 109,
-       "triangles": 123204,
+       "drawCalls": 94,
+       "triangles": 111653,
        "casters": {
-        "active": 50,
+        "active": 26,
         "total": 64,
-        "triangles": 54741
+        "triangles": 43190
        }
       },
       "east": {
-       "drawCalls": 115,
-       "triangles": 129415,
+       "drawCalls": 105,
+       "triangles": 113628,
        "casters": {
-        "active": 32,
+        "active": 21,
         "total": 64,
-        "triangles": 38044
+        "triangles": 22257
        }
       }
      }
@@ -9188,7 +9176,7 @@
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": -0.04077364504337311
+        "y": -0.04060455039143562
        },
        {
         "name": "Portal_fx",
@@ -9198,14 +9186,14 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": -0.04517685994505882
+        "y": 0.03952963650226593
        }
       ],
       "a2": [
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": 0.037859756499528885
+        "y": -0.05778553709387779
        },
        {
         "name": "Portal_fx",
@@ -9215,7 +9203,7 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": -0.015900935977697372
+        "y": 0.04007550701498985
        }
       ]
      }
@@ -9296,7 +9284,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 14168,
+     "loadMs": 18448,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -9460,46 +9448,46 @@
     },
     "perf": {
      "arrival": {
-      "drawCalls": 115,
-      "triangles": 120025,
+      "drawCalls": 104,
+      "triangles": 102963,
       "casters": {
-       "active": 33,
+       "active": 20,
        "total": 64,
-       "triangles": 34914
+       "triangles": 17852
       }
      },
      "spawn": {
-      "drawCalls": 109,
-      "triangles": 134777,
+      "drawCalls": 100,
+      "triangles": 120630,
       "casters": {
-       "active": 57,
+       "active": 45,
        "total": 64,
-       "triangles": 56266
+       "triangles": 42119
       }
      },
      "plaza_north": {
-      "drawCalls": 109,
-      "triangles": 123204,
+      "drawCalls": 94,
+      "triangles": 111653,
       "casters": {
-       "active": 50,
+       "active": 26,
        "total": 64,
-       "triangles": 54741
+       "triangles": 43190
       }
      },
      "east": {
-      "drawCalls": 115,
-      "triangles": 129415,
+      "drawCalls": 105,
+      "triangles": 113628,
       "casters": {
-       "active": 32,
+       "active": 21,
        "total": 64,
-       "triangles": 38044
+       "triangles": 22257
       }
      }
     },
     "breakdown": {
      "arrival": {
       "activeMeshes": 111,
-      "activeTriangles": 120025,
+      "activeTriangles": 102963,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -9633,7 +9621,7 @@
      },
      "spawn": {
       "activeMeshes": 88,
-      "activeTriangles": 134777,
+      "activeTriangles": 120630,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -9751,7 +9739,7 @@
      },
      "plaza_north": {
       "activeMeshes": 94,
-      "activeTriangles": 123204,
+      "activeTriangles": 114279,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -9864,8 +9852,8 @@
       }
      },
      "east": {
-      "activeMeshes": 113,
-      "activeTriangles": 129367,
+      "activeMeshes": 114,
+      "activeTriangles": 113628,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -9984,8 +9972,8 @@
         "triangles": 1668
        },
        "Portal": {
-        "meshes": 5,
-        "triangles": 4771
+        "meshes": 6,
+        "triangles": 4819
        },
        "洛恩": {
         "meshes": 11,
@@ -10014,6 +10002,7 @@
       "animThrottle": true,
       "animFar": 32,
       "casterCull": true,
+      "shadowRange": 18,
       "originalModels": false,
       "overrides": []
      },
@@ -10164,7 +10153,11 @@
       "duplicates": []
      }
     },
-    "avgTriangles": 126855,
+    "avgTriangles": 112219,
+    "landscapeTrianglesInfo": {
+     "avg": 112219,
+     "budgetPortrait": 100000
+    },
     "npcs": [
      {
       "id": "sword",
@@ -10359,7 +10352,7 @@
       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
      }
     ],
-    "fpsSoftware": 113,
+    "fpsSoftware": 104,
     "lod": {
      "near": {
       "anim": "Idle",
@@ -10381,7 +10374,7 @@
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": -0.04077364504337311
+       "y": -0.04060455039143562
       },
       {
        "name": "Portal_fx",
@@ -10391,14 +10384,14 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": -0.04517685994505882
+       "y": 0.03952963650226593
       }
      ],
      "a2": [
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": 0.037859756499528885
+       "y": -0.05778553709387779
       },
       {
        "name": "Portal_fx",
@@ -10408,7 +10401,7 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": -0.015900935977697372
+       "y": 0.04007550701498985
       }
      ]
     },
@@ -10460,7 +10453,7 @@
      "bad": []
     }
    },
-   "ok": false
+   "ok": true
   },
   {
    "browser": "chromium",
@@ -10890,11 +10883,11 @@
     "平均每幀三角面 ≤ 250000（四個位置平均；含陰影貼圖繪製）": {
      "ok": true,
      "detail": {
-      "avg": 212427,
+      "avg": 211360,
       "perf": {
        "arrival": 202153,
        "spawn": 238690,
-       "plaza_north": 221741,
+       "plaza_north": 217474,
        "east": 187122
       }
      }
@@ -10903,17 +10896,17 @@
      "ok": true,
      "detail": [
       "星願物語 Stage 6.4 星芽村 測試報告",
-      "時間 2026/11/26 05:53:41",
+      "時間 2026/11/26 06:15:03",
       "網址參數 ?map=village&art=full&quality=high",
       "裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15",
-      "模式 HQ（高畫質）：畫質 高畫質（來源：網址指定）、模型 HQ／載入 537 ms",
+      "模式 HQ（高畫質）：畫質 高畫質（來源：網址指定）、模型 HQ／載入 735 ms",
       "陰影（實際）：一般柔化陰影 PCF 1024｜陰影貼圖 1024×1024，PCF，取樣品質 中",
       "解析度（實際）：要求上限 1.25x、實際 1x、framebuffer 390×844、Hardware Scaling 1、裝置 DPR 2｜動態解析度 已介入（第 2 級／1.25→1x）",
       "抗鋸齒（實際）：MSAA 要求 4x、後製管線 4x、渲染目標 無法讀取x、裝置上限 8x → 實際生效 4x｜HDR 關、後製管線 開",
       "村莊 V1.3 佔位網格 5、三角形 24030、文字標籤 13；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）",
       "碰撞 圓形 40、矩形 10；鏡頭避障 開",
       "目前畫面 Draw Calls 89、三角形 187122",
-      "全村整合 art=full：loaded，載入 1002 ms"
+      "全村整合 art=full：loaded，載入 1299 ms"
      ]
     },
     "繪製次數 ≤ 160（全村整合、high 畫質、任何位置）": {
@@ -10938,8 +10931,8 @@
        }
       },
       "plaza_north": {
-       "drawCalls": 104,
-       "triangles": 221741,
+       "drawCalls": 96,
+       "triangles": 217474,
        "casters": {
         "active": 53,
         "total": 67,
@@ -10960,10 +10953,10 @@
     "移動規則：一般行走走上石階到高台（不跳躍）": {
      "ok": true,
      "detail": {
-      "x": -5.510910596163092e-16,
+      "x": -5.599697489101269e-16,
       "y": 2,
-      "z": 24.00000000000002,
-      "yaw": -6.123233995667142e-17
+      "z": 24.144999999999985,
+      "yaw": -6.123233995690375e-17
      }
     },
     "NPC 互動：9 位 NPC 都能靠近後點擊對話（名稱、職責）": {
@@ -11352,7 +11345,7 @@
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": 0.059503067284822464
+        "y": 0.00032426821417175233
        },
        {
         "name": "Portal_fx",
@@ -11362,14 +11355,14 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": 0.02663508802652359
+        "y": -0.04534800723195076
        }
       ],
       "a2": [
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": -0.030914803966879845
+        "y": -0.059258297085762024
        },
        {
         "name": "Portal_fx",
@@ -11379,7 +11372,7 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": -0.04888780787587166
+        "y": 0.0021602045744657516
        }
       ]
      }
@@ -11437,11 +11430,9 @@
      ]
     },
     "沒有重複的模型／貼圖請求、沒有失敗的資源請求、WebGL Context Lost 0": {
-     "ok": false,
+     "ok": true,
      "detail": {
-      "dups": [
-       "pm2_avatar.png×4"
-      ],
+      "dups": [],
       "bad": [],
       "contextLost": 0
      }
@@ -11477,7 +11468,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 1002,
+     "loadMs": 1299,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -11659,8 +11650,8 @@
       }
      },
      "plaza_north": {
-      "drawCalls": 104,
-      "triangles": 221741,
+      "drawCalls": 96,
+      "triangles": 217474,
       "casters": {
        "active": 53,
        "total": 67,
@@ -11887,8 +11878,8 @@
       }
      },
      "plaza_north": {
-      "activeMeshes": 78,
-      "activeTriangles": 221741,
+      "activeMeshes": 70,
+      "activeTriangles": 217474,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -11981,10 +11972,6 @@
        "Portal": {
         "meshes": 7,
         "triangles": 10507
-       },
-       "洛恩": {
-        "meshes": 8,
-        "triangles": 4267
        },
        "NPC": {
         "meshes": 1,
@@ -12111,6 +12098,7 @@
       "animThrottle": true,
       "animFar": 32,
       "casterCull": true,
+      "shadowRange": 31.5,
       "originalModels": false,
       "overrides": []
      },
@@ -12261,7 +12249,7 @@
       "duplicates": []
      }
     },
-    "avgTriangles": 212427,
+    "avgTriangles": 211360,
     "npcs": [
      {
       "id": "sword",
@@ -12456,7 +12444,7 @@
       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
      }
     ],
-    "fpsSoftware": 104,
+    "fpsSoftware": 100,
     "lod": {
      "near": {
       "anim": "Idle",
@@ -12478,7 +12466,7 @@
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": 0.059503067284822464
+       "y": 0.00032426821417175233
       },
       {
        "name": "Portal_fx",
@@ -12488,14 +12476,14 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": 0.02663508802652359
+       "y": -0.04534800723195076
       }
      ],
      "a2": [
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": -0.030914803966879845
+       "y": -0.059258297085762024
       },
       {
        "name": "Portal_fx",
@@ -12505,7 +12493,7 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": -0.04888780787587166
+       "y": 0.0021602045744657516
       }
      ]
     },
@@ -12553,13 +12541,11 @@
     ],
     "requests": {
      "files": 46,
-     "dups": [
-      "pm2_avatar.png×4"
-     ],
+     "dups": [],
      "bad": []
     }
    },
-   "ok": false
+   "ok": true
   },
   {
    "browser": "webkit",
@@ -12899,36 +12885,36 @@
      "ok": true,
      "detail": {
       "arrival": {
-       "active": 45,
+       "active": 20,
        "total": 64,
-       "triangles": 37767
+       "triangles": 17852
       },
       "spawn": {
-       "active": 57,
+       "active": 45,
        "total": 64,
-       "triangles": 58030
+       "triangles": 43883
       },
       "plaza_north": {
-       "active": 50,
+       "active": 26,
        "total": 64,
-       "triangles": 54741
+       "triangles": 43190
       },
       "east": {
-       "active": 32,
+       "active": 21,
        "total": 64,
-       "triangles": 38044
+       "triangles": 22257
       }
      }
     },
     "平均每幀三角面 ≤ 100000（四個位置平均；含陰影貼圖繪製）": {
-     "ok": false,
+     "ok": true,
      "detail": {
-      "avg": 106132,
+      "avg": 90793,
       "perf": {
-       "arrival": 103149,
-       "spawn": 113956,
-       "plaza_north": 113159,
-       "east": 94262
+       "arrival": 83234,
+       "spawn": 99809,
+       "plaza_north": 101608,
+       "east": 78519
       }
      }
     },
@@ -12936,56 +12922,56 @@
      "ok": true,
      "detail": [
       "星願物語 Stage 6.4 星芽村 測試報告",
-      "時間 2026/11/26 05:54:35",
+      "時間 2026/11/26 06:16:08",
       "網址參數 ?map=village&art=full&quality=medium",
       "裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15",
-      "模式 Lite 中畫質：畫質 中畫質（來源：網址指定）、模型 Lite／載入 252 ms",
+      "模式 Lite 中畫質：畫質 中畫質（來源：網址指定）、模型 Lite／載入 323 ms",
       "陰影（實際）：一般柔化陰影 PCF 1024｜陰影貼圖 1024×1024，PCF，取樣品質 中",
       "解析度（實際）：要求上限 1.25x、實際 1x、framebuffer 390×844、Hardware Scaling 1、裝置 DPR 2｜動態解析度 已介入（第 2 級／1.25→1x）",
       "抗鋸齒（實際）：MSAA 要求 2x、後製管線 2x、渲染目標 無法讀取x、裝置上限 8x → 實際生效 2x｜HDR 關、後製管線 開",
       "村莊 V1.3 佔位網格 5、三角形 17190、文字標籤 13；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）",
       "碰撞 圓形 40、矩形 10；鏡頭避障 開",
-      "目前畫面 Draw Calls 80、三角形 94284",
-      "全村整合 art=full：loaded，載入 2436 ms"
+      "目前畫面 Draw Calls 72、三角形 78519",
+      "全村整合 art=full：loaded，載入 3236 ms"
      ]
     },
     "繪製次數 ≤ 120（全村整合、medium 畫質、任何位置）": {
      "ok": true,
      "detail": {
       "arrival": {
-       "drawCalls": 97,
-       "triangles": 103149,
+       "drawCalls": 80,
+       "triangles": 83234,
        "casters": {
-        "active": 45,
+        "active": 20,
         "total": 64,
-        "triangles": 37767
+        "triangles": 17852
        }
       },
       "spawn": {
-       "drawCalls": 85,
-       "triangles": 113956,
+       "drawCalls": 76,
+       "triangles": 99809,
        "casters": {
-        "active": 57,
+        "active": 45,
         "total": 64,
-        "triangles": 58030
+        "triangles": 43883
        }
       },
       "plaza_north": {
-       "drawCalls": 98,
-       "triangles": 113159,
+       "drawCalls": 83,
+       "triangles": 101608,
        "casters": {
-        "active": 50,
+        "active": 26,
         "total": 64,
-        "triangles": 54741
+        "triangles": 43190
        }
       },
       "east": {
-       "drawCalls": 79,
-       "triangles": 94262,
+       "drawCalls": 72,
+       "triangles": 78519,
        "casters": {
-        "active": 32,
+        "active": 21,
         "total": 64,
-        "triangles": 38044
+        "triangles": 22257
        }
       }
      }
@@ -12993,10 +12979,10 @@
     "移動規則：一般行走走上石階到高台（不跳躍）": {
      "ok": true,
      "detail": {
-      "x": -5.78951774296911e-16,
+      "x": -5.639498510073557e-16,
       "y": 2,
-      "z": 24.454999999999956,
-      "yaw": -6.123233995717291e-17
+      "z": 24.210000000000008,
+      "yaw": -6.123233995698095e-17
      }
     },
     "NPC 互動：9 位 NPC 都能靠近後點擊對話（名稱、職責）": {
@@ -13385,7 +13371,7 @@
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": 0.049272287636995316
+        "y": -0.05548505857586861
        },
        {
         "name": "Portal_fx",
@@ -13395,14 +13381,14 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": 0.049261435866355896
+        "y": -0.04768030717968941
        }
       ],
       "a2": [
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": -0.047118011862039566
+        "y": -0.00072069326415658
        },
        {
         "name": "Portal_fx",
@@ -13412,7 +13398,7 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": -0.036124445497989655
+        "y": 0.020707231014966965
        }
       ]
      }
@@ -13459,7 +13445,7 @@
       },
       {
        "id": "smith",
-       "radius": 3.13,
+       "radius": 3.12,
        "desired": 9
       },
       {
@@ -13470,11 +13456,9 @@
      ]
     },
     "沒有重複的模型／貼圖請求、沒有失敗的資源請求、WebGL Context Lost 0": {
-     "ok": false,
+     "ok": true,
      "detail": {
-      "dups": [
-       "pm2_avatar.png×4"
-      ],
+      "dups": [],
       "bad": [],
       "contextLost": 0
      }
@@ -13498,7 +13482,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 2436,
+     "loadMs": 3236,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -13662,46 +13646,46 @@
     },
     "perf": {
      "arrival": {
-      "drawCalls": 97,
-      "triangles": 103149,
+      "drawCalls": 80,
+      "triangles": 83234,
       "casters": {
-       "active": 45,
+       "active": 20,
        "total": 64,
-       "triangles": 37767
+       "triangles": 17852
       }
      },
      "spawn": {
-      "drawCalls": 85,
-      "triangles": 113956,
+      "drawCalls": 76,
+      "triangles": 99809,
       "casters": {
-       "active": 57,
+       "active": 45,
        "total": 64,
-       "triangles": 58030
+       "triangles": 43883
       }
      },
      "plaza_north": {
-      "drawCalls": 98,
-      "triangles": 113159,
+      "drawCalls": 83,
+      "triangles": 101608,
       "casters": {
-       "active": 50,
+       "active": 26,
        "total": 64,
-       "triangles": 54741
+       "triangles": 43190
       }
      },
      "east": {
-      "drawCalls": 79,
-      "triangles": 94262,
+      "drawCalls": 72,
+      "triangles": 78519,
       "casters": {
-       "active": 32,
+       "active": 21,
        "total": 64,
-       "triangles": 38044
+       "triangles": 22257
       }
      }
     },
     "breakdown": {
      "arrival": {
       "activeMeshes": 77,
-      "activeTriangles": 103149,
+      "activeTriangles": 83234,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -13815,7 +13799,7 @@
      },
      "spawn": {
       "activeMeshes": 54,
-      "activeTriangles": 113956,
+      "activeTriangles": 99809,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -13909,7 +13893,7 @@
      },
      "plaza_north": {
       "activeMeshes": 77,
-      "activeTriangles": 113159,
+      "activeTriangles": 101608,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -14014,8 +13998,8 @@
       }
      },
      "east": {
-      "activeMeshes": 66,
-      "activeTriangles": 94262,
+      "activeMeshes": 71,
+      "activeTriangles": 78519,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -14070,7 +14054,7 @@
         "triangles": 5408
        },
        "__root__": {
-        "meshes": 16,
+        "meshes": 18,
         "triangles": 0
        },
        "Env": {
@@ -14106,8 +14090,8 @@
         "triangles": 4477
        },
        "洛恩": {
-        "meshes": 8,
-        "triangles": 3683
+        "meshes": 11,
+        "triangles": 3727
        },
        "NPC": {
         "meshes": 1,
@@ -14132,6 +14116,7 @@
       "animThrottle": true,
       "animFar": 32,
       "casterCull": true,
+      "shadowRange": 18,
       "originalModels": false,
       "overrides": []
      },
@@ -14282,7 +14267,7 @@
       "duplicates": []
      }
     },
-    "avgTriangles": 106132,
+    "avgTriangles": 90793,
     "npcs": [
      {
       "id": "sword",
@@ -14477,7 +14462,7 @@
       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
      }
     ],
-    "fpsSoftware": 99,
+    "fpsSoftware": 83,
     "lod": {
      "near": {
       "anim": "Idle",
@@ -14499,7 +14484,7 @@
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": 0.049272287636995316
+       "y": -0.05548505857586861
       },
       {
        "name": "Portal_fx",
@@ -14509,14 +14494,14 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": 0.049261435866355896
+       "y": -0.04768030717968941
       }
      ],
      "a2": [
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": -0.047118011862039566
+       "y": -0.00072069326415658
       },
       {
        "name": "Portal_fx",
@@ -14526,7 +14511,7 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": -0.036124445497989655
+       "y": 0.020707231014966965
       }
      ]
     },
@@ -14563,7 +14548,7 @@
      },
      {
       "id": "smith",
-      "radius": 3.13,
+      "radius": 3.12,
       "desired": 9
      },
      {
@@ -14574,13 +14559,11 @@
     ],
     "requests": {
      "files": 41,
-     "dups": [
-      "pm2_avatar.png×4"
-     ],
+     "dups": [],
      "bad": []
     }
    },
-   "ok": false
+   "ok": true
   },
   {
    "browser": "webkit",
@@ -14918,12 +14901,12 @@
     "平均每幀三角面 ≤ 100000（四個位置平均；含陰影貼圖繪製）": {
      "ok": true,
      "detail": {
-      "avg": 58085,
+      "avg": 59017,
       "perf": {
        "arrival": 65402,
        "spawn": 55946,
        "plaza_north": 58438,
-       "east": 52555
+       "east": 56282
       }
      }
     },
@@ -14931,17 +14914,17 @@
      "ok": true,
      "detail": [
       "星願物語 Stage 6.4 星芽村 測試報告",
-      "時間 2026/11/26 05:55:15",
+      "時間 2026/11/26 06:16:54",
       "網址參數 ?map=village&art=full&quality=low",
       "裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15",
-      "模式 Lite 低畫質：畫質 低畫質（來源：網址指定）、模型 Lite／載入 226 ms",
+      "模式 Lite 低畫質：畫質 低畫質（來源：網址指定）、模型 Lite／載入 268 ms",
       "陰影（實際）：柔和腳底陰影（不使用陰影貼圖）｜陰影貼圖 不使用陰影貼圖",
       "解析度（實際）：要求上限 1x、實際 1x、framebuffer 390×844、Hardware Scaling 1、裝置 DPR 2｜動態解析度 未介入（階梯 1x）",
       "抗鋸齒（實際）：MSAA 要求 1x、沒有後製管線、畫布 MSAA 關、裝置上限 8x → 實際生效 1x｜HDR 關、後製管線 關",
       "村莊 V1.3 佔位網格 5、三角形 17190、文字標籤 13；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）",
       "碰撞 圓形 40、矩形 10；鏡頭避障 開",
-      "目前畫面 Draw Calls 47、三角形 55727",
-      "全村整合 art=full：loaded，載入 2515 ms"
+      "目前畫面 Draw Calls 54、三角形 56282",
+      "全村整合 art=full：loaded，載入 3375 ms"
      ]
     },
     "繪製次數 ≤ 100（全村整合、low 畫質、任何位置）": {
@@ -14975,8 +14958,8 @@
        }
       },
       "east": {
-       "drawCalls": 43,
-       "triangles": 52555,
+       "drawCalls": 54,
+       "triangles": 56282,
        "casters": {
         "active": 0,
         "total": 0,
@@ -14988,10 +14971,10 @@
     "移動規則：一般行走走上石階到高台（不跳躍）": {
      "ok": true,
      "detail": {
-      "x": -5.538465149143904e-16,
+      "x": -5.477232809186538e-16,
       "y": 2,
-      "z": 24.044999999999973,
-      "yaw": -6.123233995675384e-17
+      "z": 23.944999999999983,
+      "yaw": -6.12323399565555e-17
      }
     },
     "NPC 互動：9 位 NPC 都能靠近後點擊對話（名稱、職責）": {
@@ -15380,7 +15363,7 @@
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": -0.05828412249684334
+        "y": 0.057056646794080734
        },
        {
         "name": "Portal_fx",
@@ -15390,14 +15373,14 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": -0.0020334795117378235
+        "y": 0.020720215514302254
        }
       ],
       "a2": [
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": 0.0008623781614005566
+        "y": 0.0003911486128345132
        },
        {
         "name": "Portal_fx",
@@ -15407,7 +15390,7 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": -0.04050175100564957
+        "y": 0.02370336838066578
        }
       ]
      }
@@ -15424,7 +15407,7 @@
      "detail": [
       {
        "id": "sword",
-       "radius": 1.97,
+       "radius": 1.96,
        "desired": 9
       },
       {
@@ -15434,42 +15417,40 @@
       },
       {
        "id": "mage",
-       "radius": 1.97,
+       "radius": 1.96,
        "desired": 9
       },
       {
        "id": "church",
-       "radius": 2.55,
+       "radius": 2.54,
        "desired": 9
       },
       {
        "id": "circus",
-       "radius": 2.55,
+       "radius": 2.54,
        "desired": 9
       },
       {
        "id": "warehouse",
-       "radius": 2.56,
+       "radius": 2.54,
        "desired": 9
       },
       {
        "id": "smith",
-       "radius": 3.14,
+       "radius": 3.13,
        "desired": 9
       },
       {
        "id": "guild",
-       "radius": 2,
+       "radius": 1.98,
        "desired": 9
       }
      ]
     },
     "沒有重複的模型／貼圖請求、沒有失敗的資源請求、WebGL Context Lost 0": {
-     "ok": false,
+     "ok": true,
      "detail": {
-      "dups": [
-       "pm2_avatar.png×4"
-      ],
+      "dups": [],
       "bad": [],
       "contextLost": 0
      }
@@ -15493,7 +15474,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 2515,
+     "loadMs": 3375,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -15684,8 +15665,8 @@
       }
      },
      "east": {
-      "drawCalls": 43,
-      "triangles": 52555,
+      "drawCalls": 54,
+      "triangles": 56282,
       "casters": {
        "active": 0,
        "total": 0,
@@ -16021,8 +16002,8 @@
       }
      },
      "east": {
-      "activeMeshes": 59,
-      "activeTriangles": 52555,
+      "activeMeshes": 72,
+      "activeTriangles": 56282,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -16081,7 +16062,7 @@
         "triangles": 2
        },
        "__root__": {
-        "meshes": 16,
+        "meshes": 18,
         "triangles": 0
        },
        "Env": {
@@ -16116,6 +16097,10 @@
         "meshes": 3,
         "triangles": 4477
        },
+       "洛恩": {
+        "meshes": 11,
+        "triangles": 3727
+       },
        "NPC": {
         "meshes": 1,
         "triangles": 1686
@@ -16139,6 +16124,7 @@
       "animThrottle": true,
       "animFar": 32,
       "casterCull": true,
+      "shadowRange": 18,
       "originalModels": false,
       "overrides": []
      },
@@ -16288,7 +16274,7 @@
       "duplicates": []
      }
     },
-    "avgTriangles": 58085,
+    "avgTriangles": 59017,
     "npcs": [
      {
       "id": "sword",
@@ -16505,7 +16491,7 @@
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": -0.05828412249684334
+       "y": 0.057056646794080734
       },
       {
        "name": "Portal_fx",
@@ -16515,14 +16501,14 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": -0.0020334795117378235
+       "y": 0.020720215514302254
       }
      ],
      "a2": [
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": 0.0008623781614005566
+       "y": 0.0003911486128345132
       },
       {
        "name": "Portal_fx",
@@ -16532,14 +16518,14 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": -0.04050175100564957
+       "y": 0.02370336838066578
       }
      ]
     },
     "cameraObstruct": [
      {
       "id": "sword",
-      "radius": 1.97,
+      "radius": 1.96,
       "desired": 9
      },
      {
@@ -16549,45 +16535,43 @@
      },
      {
       "id": "mage",
-      "radius": 1.97,
+      "radius": 1.96,
       "desired": 9
      },
      {
       "id": "church",
-      "radius": 2.55,
+      "radius": 2.54,
       "desired": 9
      },
      {
       "id": "circus",
-      "radius": 2.55,
+      "radius": 2.54,
       "desired": 9
      },
      {
       "id": "warehouse",
-      "radius": 2.56,
+      "radius": 2.54,
       "desired": 9
      },
      {
       "id": "smith",
-      "radius": 3.14,
+      "radius": 3.13,
       "desired": 9
      },
      {
       "id": "guild",
-      "radius": 2,
+      "radius": 1.98,
       "desired": 9
      }
     ],
     "requests": {
      "files": 41,
-     "dups": [
-      "pm2_avatar.png×4"
-     ],
+     "dups": [],
      "bad": []
     }
    },
-   "ok": false
+   "ok": true
   }
  ],
- "finishedAt": "2026-11-26T05:55:41.504Z"
+ "finishedAt": "2026-11-26T06:17:23.530Z"
 }
