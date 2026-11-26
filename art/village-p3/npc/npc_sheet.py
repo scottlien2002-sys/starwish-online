@@ -66,8 +66,11 @@ for nid in ids:
         out.paste(p, (x + 10 + k * 205, 480))
         d2.text((x + 16 + k * 205, 484), lab, fill=(90, 90, 100), font=F3)
     hq, li = r["lods"]["hq"], r["lods"]["lite"]
+    fa = r["lods"].get("far")
     d2.text((x + 10, 740), f"HQ {hq['triangles']} 面／{hq['meshes']} 網格", fill=(60, 60, 70), font=F3)
     d2.text((x + 10, 764), f"Lite {li['triangles']} 面／{li['meshes']} 網格", fill=(60, 60, 70), font=F3)
+    if fa:
+        d2.text((x + 10, 812), f"遠距 {fa['triangles']} 面", fill=(60, 60, 70), font=F3)
     d2.text((x + 10, 788), "動作：" + "、".join(a["name"] for a in hq["actions"]), fill=(60, 60, 70), font=F3)
     out.save(D / f"npc_turn_{nid}.png")
 print("sheet ok", len(ids))

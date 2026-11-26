@@ -26,7 +26,9 @@ os.makedirs(OUT, exist_ok=True)
 W, H = 640, 800
 PX = 0.00105 * 1040 / 640
 Z_BOTTOM = -0.02 - 10 * PX
-BUDGET = {"hq": 16000, "lite": 5000}
+# Stage 6.3（iPhone 實機效能）：HQ 16000 → 10000；新增遠距 LOD（far，HQ 與 Lite 模式在 30 m 外使用）
+BUDGET = {"hq": 10000, "lite": 5000, "far": 2000}
+LODS = ("hq", "lite", "far")
 FPS = 30
 SURFACE = {"face": (0.0, 0.55, 0.3), "body": (0.0, 0.72, 0.25, 0.15), "metal": (0.8, 0.32, 0.5), "glow": (0.0, 0.2, 0.5)}
 
@@ -76,7 +78,7 @@ def mat_class(it, lod):
 def load(nid, lod):
     d = np.load(os.path.join(PARTS, f"npc_{nid}_parts.npz"))
     meta = json.load(open(os.path.join(PARTS, f"npc_{nid}_parts.json")))
-    tex = os.path.join(PARTS, f"npc_{nid}_face{'_lite' if lod == 'lite' else ''}.png")
+    tex = os.path.join(PARTS, f"npc_{nid}_face{'' if lod == 'hq' else '_lite'}.png")
     objs, mats = [], {}
     for it in meta["parts"]:
         k = it["key"]
@@ -132,6 +134,21 @@ def decimate_to(objs, target):
         mod.use_collapse_triangulate = True
         bpy.ops.object.modifier_apply(modifier=mod.name)
         o.data.shade_smooth()
+    # 修正：塌陷減面的實際結果常比目標多 10～30%（小零件下限、邊界保護）→ 依實際面數再等比減一次，直到在預算內
+    for _ in range(4):
+        cur = tri_count(objs)
+        if cur <= target:
+            break
+        r = target / cur * 0.985
+        for o in objs:
+            if len(o.data.polygons) < 24:
+                continue
+            bpy.context.view_layer.objects.active = o
+            mod = o.modifiers.new("dec2", "DECIMATE")
+            mod.ratio = r
+            mod.use_collapse_triangulate = True
+            bpy.ops.object.modifier_apply(modifier=mod.name)
+            o.data.shade_smooth()
 
 
 def setup_scene():
@@ -404,7 +421,7 @@ def export_glb(objs, rig, path):
 
 def run(nid, report):
     rep = {"lods": {}}
-    for lod in ("hq", "lite"):
+    for lod in LODS:
         bpy.ops.wm.read_factory_settings(use_empty=True)
         objs, mats, meta = load(nid, lod)
         cam = setup_scene()
