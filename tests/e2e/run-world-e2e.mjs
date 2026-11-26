@@ -37,7 +37,8 @@ for (const name of browsers) {
       run.screenshots.push(f);
     };
     const wait = (ms) => page.waitForTimeout(ms);
-    const waitVillage = () => page.waitForFunction(() => window.__starwishWorld?.ready === true && window.__starwishWorld.info().art !== "loading", null, { timeout: 120000 });
+    // 美術載入完成後才建立互動（洛恩、商會、傳送門）→ 等到互動物件出現
+    const waitVillage = () => page.waitForFunction(() => window.__starwishWorld?.ready === true && !!window.__starwishWorld.info().interact, null, { timeout: 180000 });
     const waitField = () => page.waitForFunction(() => window.__starwishPlay?.ready === true && !!window.__starwishPlay.world, null, { timeout: 120000 });
     const V = (fn, arg) => page.evaluate(fn, arg);
     try {
@@ -183,13 +184,18 @@ for (const name of browsers) {
             const step = () => {
               const i = api.info();
               const w = api.world.info();
-              if (w.down && !seen) seen = { state: w.state, deathClip: w.deathClip };
-              if (!w.down) {
+              // 倒地在怪物更新時發生，角色動作在下一格才切換 → 看到倒地後再取幾格
+              if (w.down && !seen) seen = { state: w.state, deathClip: w.deathClip, states: [] };
+              if (seen && w.down) seen.states.push(w.state);
+              if (!w.down && !seen) {
                 if (i.hp > 1) api.world.setHp(1);
                 const m = i.monsters.find((x) => x.state !== "death" && x.hp > 0);
                 if (m && Math.hypot(m.x - i.pos[0], m.z - i.pos[2]) > 1.2) api.teleport(m.x + 0.9, m.z);
               }
-              if (seen || performance.now() - t0 > 120000) res(seen);
+              if ((seen && (seen.states.length >= 6 || !w.down)) || performance.now() - t0 > 120000) {
+                if (seen) seen.state = seen.states.includes("Death") ? "Death" : seen.states[seen.states.length - 1];
+                res(seen);
+              }
               else setTimeout(step, 150);
             };
             step();
