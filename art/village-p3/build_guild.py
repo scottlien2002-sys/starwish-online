@@ -19,11 +19,12 @@ OUT = os.path.abspath(args.get("--out", "out"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import vp3_arch as A  # noqa: E402
 import vp3_geo as G  # noqa: E402
+import vp3_detail66 as D66  # noqa: E402  （Stage 6.6 壁燈、花盆）
 
 BEARING, FRONT, W, D, EAVE, TOP, FLOOR = 160.0, 27.0, 10.0, 8.0, 5.5, 10.0, 0.0
 OX, OZ = G.pol(BEARING, FRONT)
 F, local, EX, EY = A.local_fn(OX, OZ, BEARING, FLOOR)
-BUDGET = {"hq": 15000, "lite": 6500}
+BUDGET = {"hq": 15700, "lite": 6850}  # Stage 6.6：＋壁燈與花盆
 C = {
     "roof": (0.3, 0.4, 0.68), "roof_d": (0.22, 0.29, 0.5), "door": (0.48, 0.3, 0.18), "frame": (0.38, 0.25, 0.15),
     "glass": (0.22, 0.32, 0.52), "shelf": (0.5, 0.34, 0.2), "awn_a": (0.26, 0.38, 0.72), "awn_b": (0.97, 0.94, 0.86),
@@ -176,6 +177,7 @@ def build(lod):
     for x in (-1.0, 1.8):
         fr = G.frame(*F(x, Y1 + 0.01, 0)[:2], BEARING + 180, FLOOR)
         A.window_box(stone, props, gm, gcol, fr, 0.7, 3.6, 1.1, glass=C["glass"], arch=True, hq=hq)
+    D66.decorate66("guild", locals(), F, lod)
     return {k: v for k, v in (("stone", stone), ("roof", roof), ("gold", gold), ("props", props), ("glow", glow)) if v.f}
 
 

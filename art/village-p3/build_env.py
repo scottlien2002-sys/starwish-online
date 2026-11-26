@@ -22,7 +22,7 @@ import vp3_arch as A  # noqa: E402
 import vp3_geo as G  # noqa: E402
 
 WALK_R = 50.0
-BUDGET = {"hq": 30000, "lite": 12000}
+BUDGET = {"hq": 40000, "lite": 14000}  # Stage 6.6：樹冠改成圓潤多層葉團
 C = {
     "trunk": (0.46, 0.32, 0.22), "leaf": [(0.42, 0.66, 0.36), (0.5, 0.72, 0.38), (0.36, 0.6, 0.36), (0.56, 0.74, 0.42)],
     "leaf_hi": (0.66, 0.82, 0.48), "pine": (0.27, 0.5, 0.38), "pine_hi": (0.38, 0.6, 0.44),
@@ -35,14 +35,34 @@ def ground_h(r):
     return min(6.0, (r - WALK_R - 1.0) * 0.35) - 0.02 if r > WALK_R + 1.0 else -0.02
 
 
+def shade(col, k):
+    return tuple(min(1.0, c * k) for c in col)
+
+
+def clump(mb, c, r, col, hq, rng):
+    """Stage 6.6 葉團：多環圓球（環半徑隨機起伏）＋底部較暗、頂部受光（取代六面體）"""
+    seg = 7 if hq else 6
+    prof = [(0.0, -0.78 * r)]
+    rings = (-0.45, 0.05, 0.55) if hq else (-0.35, 0.3)
+    for t in rings:
+        rr = r * (1 - t * t) ** 0.5 * rng.uniform(0.88, 1.08)
+        prof.append((rr, t * r))
+    prof.append((0.0, 0.92 * r))
+    dark, light = shade(col, 0.72), shade(col, 1.18)
+    G.lathe(mb, c[0], c[1], c[2], prof, seg, lambda h: dark if h < c[2] - 0.2 * r else (col if h < c[2] + 0.35 * r else light), phase=rng.uniform(0, 1), smooth=True)
+
+
 def round_tree(mb, x, z, h0, s, rng, hq):
     seg = 7 if hq else 5
-    G.lathe(mb, x, z, h0, [(0.22 * s, -0.1), (0.17 * s, 1.2 * s), (0.12 * s, 2.2 * s), (0.0, 2.25 * s)], seg, C["trunk"])
+    G.lathe(mb, x, z, h0, [(0.24 * s, -0.1), (0.17 * s, 1.2 * s), (0.12 * s, 2.2 * s), (0.0, 2.25 * s)], seg, C["trunk"])
+    if hq:  # 分枝
+        for a in (0.4, 2.5, 4.4):
+            G.tube(mb, [(x, z, h0 + 1.6 * s), (x + math.sin(a) * 0.55 * s, z + math.cos(a) * 0.55 * s, h0 + 2.35 * s)], 0.06 * s, 4, C["trunk"])
     leaf = rng.choice(C["leaf"])
-    blobs = [(0, 0, 2.9, 1.35), (0.6, 0.3, 2.5, 0.95), (-0.55, -0.35, 2.55, 0.95), (0.1, -0.1, 3.75, 0.9)] if hq else [(0, 0, 2.95, 1.45), (0.15, 0.0, 3.8, 0.85)]
+    blobs = [(0, 0, 2.95, 1.3), (0.75, 0.35, 2.55, 0.95), (-0.7, -0.4, 2.6, 0.95), (0.2, -0.75, 2.75, 0.85), (0.05, 0.1, 3.8, 0.95)] if hq else [(0, 0, 2.95, 1.45), (0.15, 0.0, 3.8, 0.9)]
     for bx, bz, bh, br in blobs:
         c = (x + bx * s, z + bz * s, h0 + bh * s)
-        G.blob(mb, c, br * s, br * s, br * s * 0.85, leaf if bh < 3.5 else C["leaf_hi"])
+        clump(mb, c, br * s, leaf if bh < 3.5 else C["leaf_hi"], hq, rng)
 
 
 def pine_tree(mb, x, z, h0, s, hq):

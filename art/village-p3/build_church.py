@@ -18,11 +18,12 @@ OUT = os.path.abspath(args.get("--out", "out"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import vp3_arch as A  # noqa: E402
 import vp3_geo as G  # noqa: E402
+import vp3_detail66 as D66  # noqa: E402  （Stage 6.6 壁燈、花盆）
 
 BEARING, FRONT, W, D, EAVE, TOP, FLOOR = 66.0, 24.0, 12.0, 18.0, 9.0, 18.0, 0.0
 OX, OZ = G.pol(BEARING, FRONT)
 F, local, EX, EY = A.local_fn(OX, OZ, BEARING, FLOOR)
-BUDGET = {"hq": 26000, "lite": 11000}
+BUDGET = {"hq": 26700, "lite": 11350}  # Stage 6.6：＋壁燈與花盆
 C = {
     "roof": (0.56, 0.7, 0.88), "roof_d": (0.42, 0.54, 0.7),
     "door": (0.55, 0.38, 0.24), "glass_b": (0.4, 0.62, 1.0), "glass_v": (0.72, 0.52, 1.0), "glass_g": (1.0, 0.84, 0.45),
@@ -216,6 +217,7 @@ def build(lod):
         A.vpoly(props, fb, [(-0.48, 8.75), (0.48, 8.75), (0.48, 6.2), (0.0, 5.75), (-0.48, 6.2)], -0.13, (0.24, 0.36, 0.7), -1)
         A.vpoly(gm, fb, A.star_outline(0, 7.5, 4, 0.32, 0.1), -0.135, gcol, -1)
         A.vpoly(gm, fb, [(-0.48, 6.2), (0.0, 5.75), (0.48, 6.2), (0.48, 6.28), (0.0, 5.84), (-0.48, 6.28)], -0.136, gcol, -1)
+    D66.decorate66("church", locals(), F, lod)
     return {k: v for k, v in (("stone", stone), ("roof", roof), ("gold", gold), ("props", props), ("glow", glow)) if v.f}
 
 

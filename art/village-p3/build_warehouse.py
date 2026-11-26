@@ -17,11 +17,12 @@ OUT = os.path.abspath(args.get("--out", "out"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import vp3_arch as A  # noqa: E402
 import vp3_geo as G  # noqa: E402
+import vp3_detail66 as D66  # noqa: E402  （Stage 6.6 壁燈、花盆）
 
 BEARING, FRONT, W, D, EAVE, TOP, FLOOR = 208.0, 24.0, 10.0, 8.0, 4.5, 7.0, 0.0
 OX, OZ = G.pol(BEARING, FRONT)
 F, local, EX, EY = A.local_fn(OX, OZ, BEARING, FLOOR)
-BUDGET = {"hq": 12000, "lite": 5000}
+BUDGET = {"hq": 12700, "lite": 5350}  # Stage 6.6：＋壁燈與花盆
 C = {
     "roof": (0.36, 0.56, 0.42), "roof_d": (0.26, 0.4, 0.31),
     "plank": (0.84, 0.66, 0.45), "plank2": (0.74, 0.56, 0.37), "frame": (0.46, 0.3, 0.18),
@@ -139,6 +140,7 @@ def build(lod):
         c = F(lx, Y0 - 0.33, 0)
         G.lathe(props, c[0], c[1], 2.45, [(0.06, -0.14), (0.09, -0.12), (0.09, 0.08), (0.05, 0.12), (0.0, 0.16)], 8 if hq else 6, C["iron"])
         G.lathe(glow, c[0], c[1], 2.45, [(0.0, -0.11), (0.075, -0.1), (0.075, 0.07), (0.0, 0.08)], 8 if hq else 6, (1.0, 0.82, 0.5))
+    D66.decorate66("warehouse", locals(), F, lod)
     return {k: v for k, v in (("stone", stone), ("roof", roof), ("gold", gold), ("props", props), ("glow", glow)) if v.f}
 
 

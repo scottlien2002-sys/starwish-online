@@ -350,10 +350,10 @@ export interface Foliage66 {
   setEnabled(on: boolean): void;
 }
 
-/** 草叢與小花：數量依畫質（高 2600／900、中 1500／520、低 700／260） */
+/** 草叢與小花：數量依畫質（高 1900／650、中 1200／420、低 600／220） */
 export function buildFoliage66(scene: Scene, tier: GraphicsTier, receiveShadows: boolean): Foliage66 {
-  const nT = tier === "high" ? 2600 : tier === "medium" ? 1500 : 700;
-  const nF = tier === "high" ? 900 : tier === "medium" ? 520 : 260;
+  const nT = tier === "high" ? 1900 : tier === "medium" ? 1200 : 600;
+  const nF = tier === "high" ? 650 : tier === "medium" ? 420 : 220;
   const mat = new StandardMaterial("VP66_foliage", scene);
   mat.diffuseColor = Color3.White();
   mat.specularColor = Color3.Black();

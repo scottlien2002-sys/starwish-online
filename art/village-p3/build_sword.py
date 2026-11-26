@@ -22,13 +22,14 @@ args = dict(zip(argv[::2], argv[1::2]))
 OUT = os.path.abspath(args.get("--out", "out"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import vp3_geo as G  # noqa: E402
+import vp3_detail66 as D66  # noqa: E402  （Stage 6.6 壁燈、花盆）
 from build_mage import annulus, circle, star_outline, vextrude, vpoly  # noqa: E402
 
 BEARING, FRONT, W, D, TOP, FLOOR = 297.0, 27.0, 12.0, 12.0, 13.0, 2.0
 OX, OZ = G.pol(BEARING, FRONT)
 F = G.frame(OX, OZ, BEARING, FLOOR)
 FACE = BEARING + 180
-BUDGET = {"hq": 22000, "lite": 9000}
+BUDGET = {"hq": 22700, "lite": 9350}  # Stage 6.6：＋壁燈與花盆
 LOD = {
     "hq": dict(arch=12, col=16, small=12, studs=True, hq=True, roof_sub=3),
     "lite": dict(arch=6, col=6, small=6, studs=False, hq=False, roof_sub=1),
@@ -412,6 +413,7 @@ def build(lod):
         vpoly(gm, F, [(cx - 0.24, 3.55), (cx + 0.24, 3.55), (cx + 0.24, 3.62), (cx - 0.24, 3.62)], yf - 0.003, gcol, -1)
         vpoly(gm, F, star_outline(cx, 4.65, 4, 0.12, 0.04), yf, gcol, -1)
         G.box(gm, F, x0 - 0.06, x1 + 0.06, yb - 0.04, yb + 0.02, 4.92, 4.98, gcol)
+    D66.decorate66("sword", locals(), F, lod)
     return {k: v for k, v in (("stone", stone), ("roof", roof), ("gold", gold), ("props", props)) if v.f}
 
 
