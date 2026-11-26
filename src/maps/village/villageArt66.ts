@@ -356,10 +356,10 @@ export interface Foliage66 {
 /** 草叢小花的扇區數。Stage 6.6 實測：橫向鏡頭看得到整圈村莊，分扇區省不到面數、反而多繪製次數，所以維持 1（各 1 個網格） */
 export const FOLIAGE_SECTORS = 1;
 
-/** 草叢與小花：數量依畫質（高 1300／450、中 1200／420、低 600／220；Stage 6.6 高畫質下修以守住每幀三角面標準） */
+/** 草叢與小花：數量依畫質（高 1200／420、中 1200／420、低 600／220；Stage 6.6 高畫質下修以守住每幀三角面標準） */
 export function buildFoliage66(scene: Scene, tier: GraphicsTier, receiveShadows: boolean): Foliage66 {
-  const nT = tier === "high" ? 1300 : tier === "medium" ? 1200 : 600;
-  const nF = tier === "high" ? 450 : tier === "medium" ? 420 : 220;
+  const nT = tier === "high" ? 1200 : tier === "medium" ? 1200 : 600;
+  const nF = tier === "high" ? 420 : tier === "medium" ? 420 : 220;
   const mat = new StandardMaterial("VP66_foliage", scene);
   mat.diffuseColor = Color3.White();
   mat.specularColor = Color3.Black();

@@ -55,7 +55,7 @@ def clump(mb, c, r, col, hq, rng):
 def round_tree(mb, x, z, h0, s, rng, hq):
     seg = 7 if hq else 5
     G.lathe(mb, x, z, h0, [(0.24 * s, -0.1), (0.17 * s, 1.2 * s), (0.12 * s, 2.2 * s), (0.0, 2.25 * s)], seg, C["trunk"])
-    if hq:  # 分枝
+    if False:  # 分枝（Stage 6.6：大多被葉團遮住，為守面數預算取消）
         for a in (0.4, 2.5, 4.4):
             G.tube(mb, [(x, z, h0 + 1.6 * s), (x + math.sin(a) * 0.55 * s, z + math.cos(a) * 0.55 * s, h0 + 2.35 * s)], 0.06 * s, 4, C["trunk"])
     leaf = rng.choice(C["leaf"])
@@ -98,7 +98,7 @@ def build(lod):
                 x, z = G.pol(a0 + (a1 - a0) * (0.3 + 0.4 * j), 51.2 + rng.uniform(-0.3, 0.3))
                 G.blob(props, (x, z, 1.24), 0.09, 0.09, 0.05, rng.choice(C["flower"]))
     # ---- 外圍樹林 ----
-    count = 100 if hq else 64  # Stage 6.6：HQ 120→100（橫向鏡頭看得到整圈樹林）
+    count = 80 if hq else 64  # Stage 6.6：HQ 120→80（橫向鏡頭看得到整圈樹林，守住高畫質每幀三角面標準）
     placed = []
     tries = 0
     while len(placed) < count and tries < 5000:
