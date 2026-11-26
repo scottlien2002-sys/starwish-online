@@ -1,0 +1,79 @@
+name: Village Stage 6.6 art shots (before/after, read-only)
+
+# Stage 6.6 星芽村全村美術升級（Claude B）：只在 feature/render-village-art66 執行。
+# 建置 → 同一組鏡頭拍「升級後」截圖（高／中／低）；第一次另外建置 Stage 6.5 候選（backup/render-village-stage66-base，只讀）拍「升級前」。
+# 結果推到 art-village-art66 分支的 shots/（一般 push，不 force）。不部署、不影響其他預覽與正式網站。
+# 注意：CI 是無頭瀏覽器＋軟體繪圖，只用來看畫面；FPS 不代表 iPhone 實機。
+on:
+  push:
+    branches: [feature/render-village-art66]
+  workflow_dispatch:
+    inputs:
+      before:
+        description: "重新拍升級前截圖"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: village-art66-shots-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  shots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Install, typecheck, build
+        run: |
+          npm install --no-audit --no-fund
+          npm run typecheck
+          npm run build
+          npx playwright install --with-deps chromium >/dev/null
+      - name: Need "before" shots?
+        id: need
+        run: |
+          REPO="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          if [ "${{ inputs.before }}" = "true" ]; then echo "before=1" >> "$GITHUB_OUTPUT"; exit 0; fi
+          if git ls-remote --exit-code --heads "$REPO" art-village-art66 >/dev/null 2>&1; then
+            git fetch -q --depth 1 origin art-village-art66
+            if git cat-file -e FETCH_HEAD:shots/before_report.json 2>/dev/null; then echo "before=0" >> "$GITHUB_OUTPUT"; exit 0; fi
+          fi
+          echo "before=1" >> "$GITHUB_OUTPUT"
+      - name: After shots (high / medium / low)
+        run: node tests/e2e/art66-shots.mjs dist "$PWD/out/shots" after high,medium,low chromium
+      - name: Before shots (Stage 6.5 candidate, read-only build)
+        if: steps.need.outputs.before == '1'
+        run: |
+          git worktree add -q /tmp/base origin/backup/render-village-stage66-base
+          node tools/art66/inject-shotcam.mjs /tmp/base
+          cd /tmp/base && npm install --no-audit --no-fund >/dev/null && npm run build >/dev/null && cd -
+          node tests/e2e/art66-shots.mjs /tmp/base/dist "$PWD/out/shots" before high,medium,low chromium
+      - name: Push shots to art-village-art66 (normal push, no force)
+        if: always()
+        run: |
+          echo "{\"commit\":\"${GITHUB_SHA}\",\"run\":\"${GITHUB_RUN_ID}\",\"builtAt\":\"$(date -u +%FT%TZ)\"}" > out/shots/build.json
+          REPO="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads "$REPO" art-village-art66 >/dev/null 2>&1; then
+            git clone -q --depth 1 --branch art-village-art66 "$REPO" /tmp/art66
+          else
+            mkdir -p /tmp/art66 && cd /tmp/art66 && git init -q -b art-village-art66 && git remote add origin "$REPO" && cd -
+          fi
+          mkdir -p /tmp/art66/shots
+          # 升級後截圖每次更新；升級前截圖只在重新拍時更新
+          rm -f /tmp/art66/shots/after_*
+          cp out/shots/* /tmp/art66/shots/
+          cd /tmp/art66
+          git add -A
+          git commit -qm "Art66 shots ${GITHUB_SHA::7}" || echo "no changes"
+          git push -q origin HEAD:art-village-art66

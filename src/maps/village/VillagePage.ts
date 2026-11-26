@@ -1,5 +1,8 @@
 import { villageInitialCamera } from "./spawnCamera.ts";
 import { Color3, DirectionalLight, type Engine, HemisphericLight, Scene, ShadowGenerator, Vector3 } from "@babylonjs/core";
+import { shotCam, shotTargets } from "./shotCam.ts";
+import { type Foliage66, addDetail66, addGrass66, applyLighting66, buildFoliage66, upgradeSky66 } from "./villageArt66.ts";
+import { VILLAGE_LOOK, villageProps } from "./villageMaterials.ts";
 import { TUNING } from "../../config/tuning.ts";
 import { InputState } from "../../input/InputState.ts";
 import { VirtualJoystick } from "../../input/VirtualJoystick.ts";
@@ -138,6 +141,9 @@ class VillagePage {
   private yaw = 0;
   private overview = false;
   private frozen = false;
+  /** Stage 6.6 全村美術升級外觀是否開啟（&look=65 關閉） */
+  private look66 = false;
+  private foliage: Foliage66 | null = null;
   private loadMs = 0;
   private contextLost = 0;
   private fpsTimer = 0;
@@ -264,6 +270,22 @@ class VillagePage {
     if (this.artFull) {
       // 正式美術有自己的發光物（噴泉、傳送門、彩繪玻璃）：用材質自發光，不開全畫面發光層
       this.fullStatus = "loading";
+      // Stage 6.6 全村美術升級（材質細節、草地、光影、天空、草叢小花）；&look=65 可改回 Stage 6.5 外觀（比較用）
+      this.look66 = params.get("look") !== "65";
+      if (this.look66) {
+        const texBase = `${import.meta.env.BASE_URL}models/village-p3/tex/`;
+        const opt66 = { tier: this.tier, texBase };
+        VILLAGE_LOOK.liteNormals = this.tier !== "low";
+        VILLAGE_LOOK.stoneAlbedo = 0.9;
+        VILLAGE_LOOK.stoneRough = 0.9;
+        VILLAGE_LOOK.slateRough = 0.55;
+        applyLighting66(scene, hemi, this.sun, this.shadows);
+        addDetail66(villageProps(scene), scene, opt66);
+        const ground = scene.getMaterialByName("PH_vMat");
+        if (ground) addGrass66(ground, scene, opt66);
+        upgradeSky66(scene, SKY_COLORS);
+        this.foliage = buildFoliage66(scene, this.tier, this.tier !== "low");
+      }
       // Stage 6.5：正式玩家角色（高畫質＝HQ、中／低＝Lite）。&char=simple 可改回簡易角色（比較用）
       if (params.get("char") !== "simple") {
         this.charStatus = "loading";
@@ -1044,6 +1066,8 @@ class VillagePage {
       height: (x: number, z: number) => groundHeight(x, z),
       layout: () => ({ npcs: NPC_SPOTS, respawn: RESPAWN_SLOTS, arrival: ARRIVAL_SPOT, fountain: FOUNTAIN, portals: PORTALS }),
       view: (name: string) => this.view(name),
+      shotCam: (on: boolean, tx?: number, ty?: number, tz?: number, a?: number, b?: number, r?: number) => shotCam(this, on, tx, ty, tz, a, b, r),
+      shotTargets: () => shotTargets(this),
       freeze: (on: boolean) => {
         this.frozen = on;
       },
