@@ -519,8 +519,70 @@ def pose_hurt(t):
     }, {"hips": (0, 0.03 * k, -0.015 * k)})
 
 
+# C1.0-B5b：死亡動作（Stage 7）。不是整個模型僵硬往後倒：被打的反應 → 膝蓋無力跪下 → 上身前垂 → 側身倒地 → 小幅回彈後靜止
+DEATH_SEC = 1.6
+DEATH_FIT = {"kneel": 0.0, "lie": 0.0}   # 貼地修正（公尺）：在 Blender 依實際網格最低點量出，讓跪下時膝蓋、倒地後身體剛好碰到地面
+
+
+def _ss(a, b, x):
+    u = max(0.0, min(1.0, (x - a) / (b - a)))
+    return u * u * (3 - 2 * u)
+
+
+def pose_death(t):
+    """Death（1.6 秒，最後一格維持）"""
+    r = math.sin(math.pi * max(0.0, min(1.0, t / 0.14)))          # 0～0.22 秒：被打的反應
+    b = _ss(0.08, 0.45, t)                                           # 膝蓋無力 → 跪坐
+    c = _ss(0.45, 0.82, t)                                           # 側身倒下（往角色右側）
+    st = math.exp(-((t - 0.82) / 0.06) ** 2) if t > 0.82 else 0.0    # 落地小回彈
+    return ({
+        "spine": axis_q(X, -7 * r + 24 * b + 10 * c), "chest": axis_q(X, -4 * r + 12 * b + 6 * c),
+        "neck": axis_q(X, -4 * r + 8 * b), "head": axis_q(X, -10 * r + 12 * b - 4 * c) @ axis_q(Z, -18 * c) @ axis_q(Y, 10 * c),
+        "hips": axis_q(Y, -72 * c) @ axis_q(X, 6 * b),
+        "thigh.L": axis_q(X, -88 * b + 10 * c) @ axis_q(Y, -6 * b), "thigh.R": axis_q(X, -88 * b - 8 * c) @ axis_q(Y, 6 * b),
+        "shin.L": axis_q(X, 155 * b - 25 * c), "shin.R": axis_q(X, 155 * b),
+        "foot.L": axis_q(X, 40 * b), "foot.R": axis_q(X, 40 * b),
+        "upper_arm.L": axis_q(Y, -ABD - 14 * r - 10 * b + 6 * c) @ axis_q(X, -10 * b - 55 * c),
+        "upper_arm.R": axis_q(Y, ABD + 14 * r + 18 * b + 30 * c) @ axis_q(X, -10 * b - 35 * c),
+        "forearm.L": axis_q(X, -25 * b - 35 * c), "forearm.R": axis_q(X, -20 * b - 15 * c),
+        "hand.L": axis_q(X, -15 * c), "hand.R": axis_q(X, -10 * c),
+    }, {"hips": (-0.03 * c, 0.02 * r - 0.03 * b, -0.25 * b + DEATH_FIT["kneel"] * b + (DEATH_FIT["lie"] - DEATH_FIT["kneel"]) * c + 0.012 * st)})
+
+
 ACTIONS = [("Idle", 2.4, pose_idle, True), ("Run", 0.6, pose_run, True), ("Jump", 1.0, pose_jump, False),
-           ("Attack", ATTACK_SEC, pose_attack, False), ("Hurt", 0.5, pose_hurt, False)]
+           ("Attack", ATTACK_SEC, pose_attack, False), ("Hurt", 0.5, pose_hurt, False), ("Death", DEATH_SEC, pose_death, False)]
+
+
+def _min_z(objs):
+    dg = bpy.context.evaluated_depsgraph_get()
+    zmin = 1e9
+    for o in objs:
+        ev = o.evaluated_get(dg)
+        me = ev.to_mesh()
+        mw = ev.matrix_world
+        for v in me.vertices:
+            z = (mw @ v.co).z
+            if z < zmin:
+                zmin = z
+        ev.to_mesh_clear()
+    return zmin
+
+
+def fit_death(objs, rig):
+    """量死亡動作跪下（t=0.45）與倒地（t=1）時全身最低點，修正髖部高度，讓身體剛好貼地（不穿地、不懸空）"""
+    DEATH_FIT["kneel"] = 0.0
+    DEATH_FIT["lie"] = 0.0
+    rots, locs = pose_death(0.45)
+    set_pose(rig, rots, locs)
+    bpy.context.view_layer.update()
+    DEATH_FIT["kneel"] = -_min_z(objs)
+    rots, locs = pose_death(1.0)
+    set_pose(rig, rots, locs)
+    bpy.context.view_layer.update()
+    DEATH_FIT["lie"] = DEATH_FIT["kneel"] - _min_z(objs)
+    set_pose(rig, {})
+    bpy.context.view_layer.update()
+    return dict(DEATH_FIT)
 
 
 def make_actions(rig):
@@ -574,7 +636,7 @@ CLIP_PAIRS = [
     (("hand_r", "glove_r"), ("body", "shirt", "vest", "tabard", "blouse", "corset", "overskirt", "skirt_pink", "petticoat", "underskirt", "pouch")),
     (("boot_l",), ("boot_r",)),
 ]
-CLIP_TIMES = {"Idle": (0.0, 0.5), "Run": (0.0, 0.25, 0.5, 0.75), "Jump": (0.2, 0.42, 0.84), "Attack": (0.3, 0.4, 0.6), "Hurt": (0.16, 0.5)}
+CLIP_TIMES = {"Idle": (0.0, 0.5), "Run": (0.0, 0.25, 0.5, 0.75), "Jump": (0.2, 0.42, 0.84), "Attack": (0.3, 0.4, 0.6), "Hurt": (0.16, 0.5), "Death": (0.3, 0.6, 1.0)}
 
 
 def clip_report(objs, rig):
@@ -662,7 +724,7 @@ def ear_shots(cam, pre, g):
         shoot(cam, VIEWS[v], 0.85, 0.5, (1100, 1100), os.path.join(OUT, f"{pre}_{g}_ear_{v}.png"))
 
 
-POSE_SHOTS = {"Idle": (0.0, 0.5), "Run": (0.0, 0.25, 0.5, 0.75), "Jump": (0.2, 0.3, 0.45, 0.8, 0.88), "Attack": (0.2, 0.32, 0.4, 0.6), "Hurt": (0.16, 0.3, 0.6)}
+POSE_SHOTS = {"Idle": (0.0, 0.5), "Run": (0.0, 0.25, 0.5, 0.75), "Jump": (0.2, 0.3, 0.45, 0.8, 0.88), "Attack": (0.2, 0.32, 0.4, 0.6), "Hurt": (0.16, 0.3, 0.6), "Death": (0.1, 0.3, 0.45, 0.65, 0.85, 1.0)}
 
 
 def main():
@@ -690,6 +752,7 @@ def main():
             rig = build_rig(g)
             skin(objs, rig)
             attach_rig(objs, rig)
+            death_fit = fit_death(objs, rig)
             acts = make_actions(rig)
             extra = {}
             if lod == "lite":
@@ -710,7 +773,7 @@ def main():
             export_rigged_glb(objs, rig, path)
             rep[lod] = {"triangles": tris, "parts": parts_before, "meshes_after_merge": len(objs), "mesh_names": [o.name for o in objs],
                         "materials": sorted(mats.keys()), "bones": [b.name for b in rig.data.bones],
-                        "actions": [{"name": n, "frames": f, "fps": FPS} for n, f in acts], "attack": {"seconds": ATTACK_SEC, "hit": ATTACK_HIT}, **extra}
+                        "actions": [{"name": n, "frames": f, "fps": FPS} for n, f in acts], "attack": {"seconds": ATTACK_SEC, "hit": ATTACK_HIT}, "death": {"seconds": DEATH_SEC, "fit": death_fit}, **extra}
             print(g, lod, tris, parts_before, "->", len(objs), acts, json.dumps(extra)[:1500], flush=True)
         report[g] = rep
     json.dump(report, open(os.path.join(OUT, "c10b5_report.json"), "w"), indent=1, ensure_ascii=False)
