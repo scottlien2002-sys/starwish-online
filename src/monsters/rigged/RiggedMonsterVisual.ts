@@ -65,14 +65,18 @@ function findExtras(container: AssetContainer): RigExtras | null {
   return null;
 }
 
-/** 檢查檔案是否存在（尚未交付時不載入、不報錯） */
+let manifest: Promise<Set<string>> | null = null;
+
+/**
+ * 檔案是否已交付：讀 models/monsters/manifest.json（不用 HEAD 探測，尚未交付時不會出現 404 錯誤）。
+ * 新增怪物 GLB 時把路徑加進清單；單元測試會檢查清單與實際檔案一致。
+ */
 export async function riggedAssetAvailable(baseUrl: string, spec: RiggedMonsterSpec, lod: RigLod): Promise<boolean> {
-  try {
-    const r = await fetch(`${baseUrl}models/${spec.files[lod]}`, { method: "HEAD", cache: "no-store" });
-    return r.ok && !(r.headers.get("content-type") ?? "").includes("text/html");
-  } catch {
-    return false;
-  }
+  manifest ??= fetch(`${baseUrl}models/monsters/manifest.json`, { cache: "no-store" })
+    .then((r) => (r.ok ? (r.json() as Promise<{ files?: string[] }>) : { files: [] }))
+    .then((j) => new Set(j.files ?? []))
+    .catch(() => new Set<string>());
+  return (await manifest).has(spec.files[lod]);
 }
 
 export function loadRiggedAsset(scene: Scene, baseUrl: string, spec: RiggedMonsterSpec, lod: RigLod): Promise<RiggedAsset> {

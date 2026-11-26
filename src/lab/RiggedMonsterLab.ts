@@ -117,7 +117,8 @@ export async function startRiggedMonsterLab(canvas: HTMLCanvasElement, hudRoot: 
         if (p.z > 6) p.z = -6;
         c.instance.yaw = 0;
         if (c.instance.sm.state === "idle") c.instance.setLocomotion(true);
-      }
+        c.speedOverride = sp;
+      } else c.speedOverride = null;
       c.update(dt, now(), null);
     }
   });

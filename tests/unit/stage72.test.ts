@@ -163,3 +163,12 @@ test("玩家近戰距離從怪物身體外緣算（風羽狐 0.45 m）；星露�
   const far = combat.nearestTarget(c.instance.currentPosition.x + R + 0.5, 0, [c.instance]);
   assert.equal(far, null);
 });
+
+test("怪物模型清單（manifest）與實際檔案一致：列出的都存在、monsters/ 底下的 GLB 都有列出", async () => {
+  const { readFileSync, readdirSync, existsSync, statSync } = await import("node:fs");
+  const root = new URL("../../public/models/", import.meta.url).pathname;
+  const m = JSON.parse(readFileSync(root + "monsters/manifest.json", "utf8")) as { files: string[] };
+  for (const f of m.files) assert.ok(existsSync(root + f), `清單有、檔案不存在：${f}`);
+  const walk = (d: string): string[] => readdirSync(root + d).flatMap((n) => (statSync(root + d + "/" + n).isDirectory() ? walk(d + "/" + n) : [d + "/" + n]));
+  for (const f of walk("monsters").filter((x) => x.endsWith(".glb"))) assert.ok(m.files.includes(f), `檔案存在但沒有列在清單：${f}`);
+});

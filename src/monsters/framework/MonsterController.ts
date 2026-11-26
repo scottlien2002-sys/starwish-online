@@ -19,6 +19,8 @@ export class MonsterController {
   lastFrame: AnimFrame | null = null;
   /** 這一幀的地面速度（公尺/秒） */
   groundSpeed = 0;
+  /** 測試頁手動移動怪物時指定地面速度（null = 依 AI 實際位移計算） */
+  speedOverride: number | null = null;
   private seenHitSeq = 0;
 
   constructor(instance: MonsterInstance, profile: MonsterAnimationProfile, visual: IMonsterVisual | null, brain: MonsterBrain | null) {
@@ -46,7 +48,7 @@ export class MonsterController {
     const frame = this.animator.update(dt);
     // 實際地面速度（AI 每幀最多走 min(dt, 0.1) 秒的距離，所以用同樣的時間換算）
     const step = Math.min(dt, 0.1);
-    this.groundSpeed = step > 0 ? Math.hypot(this.instance.currentPosition.x - p0x, this.instance.currentPosition.z - p0z) / step : 0;
+    this.groundSpeed = this.speedOverride ?? (step > 0 ? Math.hypot(this.instance.currentPosition.x - p0x, this.instance.currentPosition.z - p0z) / step : 0);
     this.lastFrame = frame;
     const v = this.visual;
     if (v) {
