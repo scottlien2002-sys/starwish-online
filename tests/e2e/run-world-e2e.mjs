@@ -181,6 +181,14 @@ for (const name of browsers) {
       run.results.panelPortrait = x2;
       check("直向 iPhone：寵物視窗 X 在畫面內、沒有被遮住，按鈕不超出左右邊界，內容區可捲動（touch-action pan-y）", x2.inView && x2.onTop && x2.outX === 0 && x2.panelBottom <= x2.vh && /pan-y/.test(x2.bodyTouch), x2);
       await shot("panel_portrait");
+      const ov = await page.evaluate(() => {
+        const a = document.querySelector(".map-toggle")?.getBoundingClientRect();
+        const b = document.querySelector(".perf-quality")?.getBoundingClientRect();
+        if (!a || !b) return { missing: true };
+        const overlap = !(a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top);
+        return { overlap, menu: [a.left, a.top, a.width, a.height], quality: [b.left, b.top, b.width, b.height] };
+      });
+      check("直向 iPhone：「選單」按鈕與「畫質」按鈕不重疊", ov.overlap === false, ov);
       await page.click(".wp.open .wp-x");
       await page.setViewportSize({ width: 852, height: 393 });
       await wait(3500);
