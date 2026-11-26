@@ -1,0 +1,54 @@
+name: Maintenance — prune old GitHub Pages previews (user-approved 2026-11-26)
+
+# 使用者核准（2026-11-26）：gh-pages 全部預覽約 3.9 GB，Pages 發布逾時。每條開發線只保留最新預覽：
+#   保留：preview-stage71-world（Claude A 最新）、preview-village-char65（Claude B 最新）、preview-village-final64（Claude B 驗收中候選）
+#   正式網站（根目錄 index.html、assets、models、ci-report）不動。
+# 移除的資料夾在 git 歷史中仍在，可依 PRUNED_PREVIEWS.md 的分支與 commit 重新部署還原。一般 push，不 force。
+on:
+  push:
+    branches: [maint/pages-cleanup-stage71]
+permissions:
+  contents: write
+concurrency:
+  group: pages-cleanup
+  cancel-in-progress: false
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Prune
+        run: |
+          set -e
+          KEEP="preview-stage71-world preview-village-char65 preview-village-final64"
+          for attempt in 1 2 3 4 5; do
+            rm -rf /tmp/pages
+            git clone -q --depth 1 -b gh-pages "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" /tmp/pages
+            cd /tmp/pages
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            BASE=$(git rev-parse HEAD)
+            echo "# 已從 GitHub Pages 移除的預覽（$(date -u +%FT%TZ)，使用者核准：每條開發線只保留最新）" > PRUNED_PREVIEWS.md
+            echo "" >> PRUNED_PREVIEWS.md
+            echo "還原：從表中的分支／commit 重新推到 feature/render-* 分支即會重新部署（或從 gh-pages commit ${BASE} 取回）。" >> PRUNED_PREVIEWS.md
+            echo "" >> PRUNED_PREVIEWS.md
+            echo "| 資料夾 | 分支 | commit | 大小 |" >> PRUNED_PREVIEWS.md
+            echo "|---|---|---|---|" >> PRUNED_PREVIEWS.md
+            for d in preview preview-*; do
+              [ -d "$d" ] || continue
+              case " $KEEP " in *" $d "*) echo "keep $d"; continue;; esac
+              info=$(cat "$d/preview.json" 2>/dev/null | tr -d '\n' || true)
+              br=$(echo "$info" | sed -n 's/.*"branch":"\([^"]*\)".*/\1/p')
+              cm=$(echo "$info" | sed -n 's/.*"commit":"\([^"]*\)".*/\1/p')
+              sz=$(du -sh "$d" | cut -f1)
+              echo "| $d | $br | $cm | $sz |" >> PRUNED_PREVIEWS.md
+              git rm -rq "$d"
+              echo "removed $d ($sz)"
+            done
+            git add PRUNED_PREVIEWS.md
+            git commit -qm "Prune old previews (keep latest per line: stage71-world, village-char65, village-final64) — user-approved"
+            du -sh --exclude=.git .
+            if git push -q origin gh-pages; then echo "pushed"; exit 0; fi
+            cd /; echo "push rejected (concurrent deploy), retry $attempt"; sleep $((attempt * 10))
+          done
+          exit 1
