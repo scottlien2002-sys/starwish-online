@@ -183,12 +183,43 @@ export class WorldPanel {
 
   /** 選單開著時定期更新（孵化倒數、飽食度）。內容沒變就不重畫；手指按著時不重畫（避免按鈕在點擊途中被換掉） */
   refresh(): void {
-    if (this.isOpen && !this.touching) this.render(false);
+    if (!this.isOpen || this.touching) return;
+    if (this.signature() !== this.lastSig) this.render(false);
+    else this.updateLive();
+  }
+
+  /** 一直在變的數字（文字節點，data-live）；按鈕不重建 */
+  private liveValue(key: string): string {
+    const [k, idStr] = key.split(":");
+    const p = this.w.pets;
+    if (k === "perf") {
+      const pf = this.hooks.perf?.();
+      if (!pf) return "";
+      const r = pf.session();
+      return `5 秒平均 <b>${pf.avgFps(5).toFixed(1)} FPS</b><br>累計 ${r.seconds} 秒：平均 <b>${r.avgFps} FPS</b>｜1% Low ${r.low1}｜最低 ${r.minFps}｜卡頓（>50 ms）${r.hitches} 次｜解析度 ${r.pixelRatio}x`;
+    }
+    const x = p.pet(Number(idStr));
+    if (!x) return "";
+    const care = p.tuning.care;
+    if (x.stage === 0) return `孵化剩 ${Math.ceil(Math.max(0, (p.tuning.hatchSeconds ?? 0) - (this.hooks.clock() - x.obtainedAt) / 1000))} 秒`;
+    const sat = care ? `飽食度 ${Math.round(x.satiety ?? care.satietyMax)}／${care.satietyMax}` : "";
+    if (k === "sat") return sat;
+    return `經驗 ${Math.floor(x.exp)}／餵食 ${x.feedCount}${sat ? `｜${sat}` : ""}｜發揮比例 ${(bonusScale(p.cfg, x, p.tuning) * 100).toFixed(0)}%`;
+  }
+
+  private live(key: string): string {
+    return `<span data-live="${key}">${this.liveValue(key)}</span>`;
+  }
+
+  private updateLive(): void {
+    for (const el of this.root.querySelectorAll<HTMLElement>("[data-live]")) {
+      const v = this.liveValue(el.dataset.live!);
+      if (el.innerHTML !== v) el.innerHTML = v;
+    }
   }
 
   private signature(): string {
     const p = this.w.pets;
-    const now = this.hooks.clock();
     return JSON.stringify([
       this.tab,
       this.view,
@@ -197,10 +228,10 @@ export class WorldPanel {
       p.save.items,
       p.bag().map((b) => [b.id, !!b.locked, b.affixes?.length ?? -1]),
       p.save.equippedId,
-      p.save.pets.map((x) => [x.id, x.stage, Math.floor(x.exp), x.feedCount, Math.round(x.satiety ?? -1), x.life ?? "", !!x.frozen, x.affixes?.length ?? -1, x.stage === 0 ? Math.ceil(((p.tuning.hatchSeconds ?? 0) * 1000 - (now - x.obtainedAt)) / 1000) : 0]),
+      // 只放「會改變按鈕或版面」的資料；倒數、飽食度、經驗這些一直在變的數字只更新文字（不重建按鈕，點擊不會落空）
+      p.save.pets.map((x) => [x.id, x.stage, x.feedCount, x.life ?? "", !!x.frozen, x.affixes?.length ?? -1, x.stage > 0 && canEvolve(p.cfg, x, p.tuning)]),
       this.w.save.wallet.seq,
       this.tab === "more" ? this.hooks.stats().combat ?? "" : "",
-      this.tab === "more" && this.hooks.perf ? Math.floor(this.hooks.perf().session().seconds) : 0,
       this.copied,
     ]);
   }
@@ -301,19 +332,16 @@ export class WorldPanel {
       else {
         line("<small>成長階段：初始 → 幼年期 → 成長期 → 完成體。點一隻寵物看詳細與操作。孵化、成長、飽食度、死亡與復活的數值都是測試設定（非正式）。</small>");
         if (!p.save.pets.length) line("還沒有寵物：到「背包」孵化種子或蛋。");
-        const care = p.tuning.care;
         for (const x of p.save.pets) {
           const sp = p.cfg.species.find((y) => y.id === x.species);
           const on = x.id === p.save.equippedId;
           const soul = isSoul(x);
-          const hatchLeft = x.stage === 0 ? Math.max(0, (p.tuning.hatchSeconds ?? 0) - (this.hooks.clock() - x.obtainedAt) / 1000) : 0;
-          const sat = care && x.stage > 0 ? `飽食度 ${Math.round(x.satiety ?? care.satietyMax)}／${care.satietyMax}` : "";
           const card = document.createElement("button");
           card.type = "button";
           card.className = `wp-card${on ? " on" : ""}${soul ? " soul" : ""}`;
           card.dataset.pet = String(x.id);
           card.style.cssText = "display:block;width:100%;text-align:left;border:1.5px solid rgba(111,140,240,.35);font:inherit;color:inherit";
-          card.innerHTML = `#${x.id} ${sp?.label ?? x.species}・<b>${sp?.stages[x.stage]?.label ?? x.stage}</b>${on ? "　<b>裝備中</b>" : ""}${soul ? "　<b>靈魂</b>" : ""}${x.frozen ? "　<small>掛賣中</small>" : ""}　<span style="float:right">›</span><br><small>${x.stage === 0 ? `孵化剩 ${Math.ceil(hatchLeft)} 秒` : sat}</small>`;
+          card.innerHTML = `#${x.id} ${sp?.label ?? x.species}・<b>${sp?.stages[x.stage]?.label ?? x.stage}</b>${on ? "　<b>裝備中</b>" : ""}${soul ? "　<b>靈魂</b>" : ""}${x.frozen ? "　<small>掛賣中</small>" : ""}　<span style="float:right">›</span><br><small>${this.live(`sat:${x.id}`)}</small>`;
           card.addEventListener("click", (e) => {
             e.stopPropagation();
             this.view = { kind: "pet", petId: x.id };
@@ -337,8 +365,8 @@ export class WorldPanel {
       if (pf) {
         const r = pf.session();
         const box = line(
-          `<b>效能（這台裝置實測，不是 CI）</b><br>地圖 ${r.map}｜模型 LOD <b>${r.model}</b>｜畫質 <b>${QUALITY_LABEL[r.quality as QualityLevel] ?? r.quality}</b>｜解析度 ${r.pixelRatio}x（低於 40 FPS 會自動降低）<br>` +
-            `5 秒平均 <b>${pf.avgFps(5).toFixed(1)} FPS</b><br>累計 ${r.seconds} 秒：平均 <b>${r.avgFps} FPS</b>｜1% Low ${r.low1}｜最低 ${r.minFps}｜卡頓（>50 ms）${r.hitches} 次` +
+          `<b>效能（這台裝置實測，不是 CI）</b><br>地圖 ${r.map}｜模型 LOD <b>${r.model}</b>｜畫質 <b>${QUALITY_LABEL[r.quality as QualityLevel] ?? r.quality}</b>（解析度低於 40 FPS 會自動降低）<br>` +
+            this.live("perf") +
             (this.copied ? `<br><small>${this.copied}</small>` : ""),
         );
         box.className = "wp-card";
@@ -389,12 +417,9 @@ export class WorldPanel {
     const on = x.id === p.save.equippedId;
     const soul = isSoul(x);
     const care = p.tuning.care;
-    const hatchLeft = x.stage === 0 ? Math.max(0, (p.tuning.hatchSeconds ?? 0) - (this.hooks.clock() - x.obtainedAt) / 1000) : 0;
     const d = line(
       `<b>#${x.id} ${sp?.label ?? x.species}・${sp?.stages[x.stage]?.label ?? x.stage}</b>${soul ? "　<b>靈魂</b>（可復活）" : ""}${x.frozen ? "　<small>掛賣中（暫停成長）</small>" : ""}<br>` +
-        (x.stage === 0
-          ? `孵化剩 ${Math.ceil(hatchLeft)} 秒`
-          : `經驗 ${Math.floor(x.exp)}／餵食 ${x.feedCount}${care ? `｜飽食度 ${Math.round(x.satiety ?? care.satietyMax)}／${care.satietyMax}` : ""}｜發揮比例 ${(bonusScale(p.cfg, x, p.tuning) * 100).toFixed(0)}%`) +
+        this.live(`grow:${x.id}`) +
         `<br>詞條：${affixLine(x.affixes)}<br><small>進化只提升發揮比例，鑑定詞條永遠不變。</small>`,
     );
     d.className = `wp-card${on ? " on" : ""}${soul ? " soul" : ""}`;
