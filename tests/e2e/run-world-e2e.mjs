@@ -129,9 +129,16 @@ for (const name of browsers) {
       await page.click('.wp.open [data-tab="pet"]');
       await wait(300);
       const petId = await V(() => window.__starwishWorld.info().pets.find((p) => p.stage >= 1)?.id ?? null);
-      await page.click(`.wp.open [data-pet="${petId}"]`).catch(() => {});
-      await wait(300);
-      const uiDetail = await V(() => window.__starwishWorld.info().panel);
+      // 選單每 0.5 秒更新內容；點擊若剛好遇到重畫，重試（最多 3 次，記錄次數）
+      let uiDetail = "";
+      let tries = 0;
+      while (tries < 3 && uiDetail !== `pet:${petId}`) {
+        tries++;
+        await page.click(`.wp.open [data-pet="${petId}"]`, { timeout: 5000 }).catch(() => {});
+        await wait(300);
+        uiDetail = await V(() => window.__starwishWorld.info().panel);
+      }
+      run.results.petDetailTries = tries;
       await page.click('.wp.open [data-a="back"]').catch(() => {});
       await wait(300);
       const uiBack = await V(() => window.__starwishWorld.info().panel);
@@ -176,6 +183,9 @@ for (const name of browsers) {
       await nav;
       await waitField();
       await page.waitForFunction(() => window.__starwishPlay.info().monsters.length > 0, null, { timeout: 60000 }).catch(() => {});
+      // 畫面開始更新後再讀（寵物跟隨在第一格才定位）
+      await page.waitForFunction(() => Number.isFinite(window.__starwishPlay.world.info().petGap) && window.__starwishPlay.world.info().petGap > 0, null, { timeout: 30000 }).catch(() => {});
+      await wait(1500);
       let fi = await V(() => window.__starwishPlay.world.info());
       const fp = await V(() => window.__starwishPlay.info());
       run.results.fieldArrive = { fi, pos: fp.pos };
