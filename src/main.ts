@@ -165,6 +165,18 @@ function main(): void {
         });
       return;
     }
+    // ?lab=rigged：Stage 7.2 骨骼動畫怪物接入測試（M004 風羽狐；未交付時用接口測試替身）&q=hq|lite&count=N
+    if (lab === "rigged") {
+      document.body.classList.add("lab-mode");
+      void import("./lab/RiggedMonsterLab.ts")
+        .then((m) => m.startRiggedMonsterLab(canvas, hudRoot))
+        .then(() => hideBoot())
+        .catch((err: unknown) => {
+          console.error(err);
+          fail(`骨骼動畫怪物測試頁載入失敗：${err instanceof Error ? err.message : String(err)}`);
+        });
+      return;
+    }
     const LAB_MONSTER: Record<string, string> = { bobo: "star_dew_bobo", dummy: "test_dummy" };
     if (lab && (lab in LAB_MONSTER || lab === "field")) {
       const start =

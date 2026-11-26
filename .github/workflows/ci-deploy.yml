@@ -78,6 +78,12 @@ jobs:
             rm -rf "/tmp/pages/$DIR"
             mkdir -p "/tmp/pages/$DIR"
             cp -r dist/. "/tmp/pages/$DIR/"
+            # 預覽不需要的舊版角色模型與比較用模型（正式頁面不使用；本機 dist 仍保留給後面的舊版測試）
+            (cd "/tmp/pages/$DIR/models" 2>/dev/null && rm -f novice_c10b_*.glb novice_c10b1_*.glb novice_c10b2_*.glb novice_c10b3_*.glb novice_c10b4_*.glb novice_c10b5_*.glb village-p3/*_s62.glb village-p3/p30_sample_*.glb) || true
+            # 容量檢查：GitHub Pages 建議 1 GB；超過 1000 MB 就不發布（先依「每條開發線只留最新」整理）
+            TOTAL=$(du -sm --exclude=.git /tmp/pages | cut -f1)
+            echo "預覽資料夾 $(du -sm "/tmp/pages/$DIR" | cut -f1) MB；發布後 gh-pages 合計 ${TOTAL} MB"
+            if [ "$TOTAL" -gt 1000 ]; then echo "::error::gh-pages 合計 ${TOTAL} MB 超過 1000 MB，取消發布（請先整理舊預覽）"; exit 1; fi
             echo "{\"branch\":\"${GITHUB_REF_NAME}\",\"commit\":\"${GITHUB_SHA}\",\"path\":\"/$DIR/\",\"builtAt\":\"$(date -u +%FT%TZ)\"}" > "/tmp/pages/$DIR/preview.json"
             cd /tmp/pages
             git config user.name "github-actions[bot]"

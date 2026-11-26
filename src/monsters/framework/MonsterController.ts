@@ -17,6 +17,8 @@ export class MonsterController {
   readonly visual: IMonsterVisual | null;
   readonly brain: MonsterBrain | null;
   lastFrame: AnimFrame | null = null;
+  /** 這一幀的地面速度（公尺/秒） */
+  groundSpeed = 0;
   private seenHitSeq = 0;
 
   constructor(instance: MonsterInstance, profile: MonsterAnimationProfile, visual: IMonsterVisual | null, brain: MonsterBrain | null) {
@@ -38,8 +40,13 @@ export class MonsterController {
    * @param target AI 的目標（沒有目標或無 AI 時可省略）
    */
   update(dt: number, now: number, target: MonsterTarget | null = null): AnimFrame {
+    const p0x = this.instance.currentPosition.x;
+    const p0z = this.instance.currentPosition.z;
     this.brain?.update(dt, now, target);
     const frame = this.animator.update(dt);
+    // 實際地面速度（AI 每幀最多走 min(dt, 0.1) 秒的距離，所以用同樣的時間換算）
+    const step = Math.min(dt, 0.1);
+    this.groundSpeed = step > 0 ? Math.hypot(this.instance.currentPosition.x - p0x, this.instance.currentPosition.z - p0z) / step : 0;
     this.lastFrame = frame;
     const v = this.visual;
     if (v) {
@@ -51,6 +58,8 @@ export class MonsterController {
         const r = this.instance.lastHitReaction;
         if (r) v.onHitReaction?.(r);
       }
+      v.setGroundSpeed?.(this.groundSpeed);
+      v.setHealth?.(this.instance.currentHp, this.instance.definition.maxHp);
       for (const s of frame.entered) v.onStateEnter(s);
       for (const e of frame.effects) v.playEffect(e);
       v.applyPose(frame.pose);

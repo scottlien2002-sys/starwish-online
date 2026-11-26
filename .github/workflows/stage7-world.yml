@@ -4,7 +4,7 @@ name: Stage 7 world loop E2E (quick, with screenshots)
 # 獨立於 CI & Deploy（避免超過該工作 150 分鐘上限），在同一個 commit 平行執行。
 on:
   push:
-    branches: [feature/render-stage7-world, feature/render-stage71-world]
+    branches: [feature/render-stage7-world, feature/render-stage71-world, feature/render-stage72-monsters]
 
 permissions:
   contents: read
@@ -16,7 +16,7 @@ concurrency:
 jobs:
   world:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 100
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -25,11 +25,20 @@ jobs:
       - run: npm ci --no-audit --no-fund || npm install --no-audit --no-fund
       - run: npm run build
       - run: npx playwright install --with-deps chromium webkit
+      - name: Rigged monster E2E (Stage 7.2)
+        id: rigged
+        continue-on-error: true
+        run: node tests/e2e/run-rigged-e2e.mjs dist webkit,chromium
       - name: World loop E2E
         run: node tests/e2e/run-world-e2e.mjs dist webkit,chromium
+      - name: Fail if rigged E2E failed
+        if: steps.rigged.outcome == 'failure'
+        run: exit 1
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: world-e2e
-          path: test-results/world-e2e/
+          path: |
+            test-results/world-e2e/
+            test-results/rigged-e2e/
           retention-days: 7

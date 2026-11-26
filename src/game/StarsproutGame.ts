@@ -54,6 +54,8 @@ import { isSoul } from "../pets/petSystem.ts";
 import type { WorldSession } from "./worldSession.ts";
 import { WorldPanel } from "../ui/WorldPanel.ts";
 import { MODEL_LOD_LABEL, pickModelLod } from "./modelLod.ts";
+import { M004_WINDFEATHER_FOX } from "../monsters/rigged/riggedSpec.ts";
+import { riggedAssetAvailable, RiggedMonsterVisual } from "../monsters/rigged/RiggedMonsterVisual.ts";
 import { NOVICE_VERSION } from "./noviceVersion.ts";
 import { FIELD_CAMP_ARRIVAL } from "../maps/village/mapLinks.ts";
 import { PortalTrigger } from "./portalTrigger.ts";
@@ -78,6 +80,8 @@ const ITEM_LABEL: Record<ItemId, string> = { seed: "種子", egg: "孵化蛋", b
 const ITEM_COLOR: Record<ItemId, string> = { seed: "#7bd96a", egg: "#fff3d6", birdEgg: "#9fd3ff", monsterMaterial: "#c79bff", shopFeed: "#ffcf6b" };
 const SAVE_KEY = "starwish.stage56.pets.v1";
 const ZONE01 = ZONES.find((z) => z.id === "01")!;
+/** 羽風高地（Lv.7 風羽狐，上限 4 隻；layout 既定） */
+const ZONE04 = ZONES.find((z) => z.id === "04")!;
 const START = MAIN_ROUTE[0]!;
 
 export interface PlayApi {
@@ -101,7 +105,9 @@ export interface PlayApi {
     drops: number;
     picked: number;
     loot: number;
-    monsters: { id: string; state: string; hp: number; x: number; z: number }[];
+    monsters: ({ id: string; state: string; hp: number; x: number; z: number } & Record<string, unknown>)[];
+    /** Stage 7.2：羽風高地的怪物狀態 */
+    foxStatus: string;
     pets: { enabled: boolean; mode: string; reason: string; items: Record<ItemId, number>; count: number; equipped: number | null; followerVisible: boolean; followerDist: number };
     render: { p3: boolean; pipeline: boolean; charShadow: CharShadowMode; drawCalls: number; fps: number; contextLost: number };
   };
@@ -109,6 +115,8 @@ export interface PlayApi {
   press(a: "attack" | "jump"): void;
   teleport(x: number, z: number): void;
   toZone01(): void;
+  /** 測試用：玩家生命回滿（解除倒地以外的狀態不變） */
+  heal(): void;
   pet: {
     give(item: ItemId, n?: number): void;
     hatch(source: PetSourceId): number | null;
@@ -196,6 +204,8 @@ class StarsproutGame {
   private contextLost = 0;
   private avatar!: NoviceAvatar;
   private monsters: MonsterController[] = [];
+  /** Stage 7.2：羽風高地的怪物狀態（畫面與測試顯示） */
+  private foxStatus = "";
   private readonly combat = new PreviewCombat();
   private stats: CharacterStats = { ...FIELD_TEST.baseStats };
   private readonly rng = createRng(Number(this.params.get("seed") ?? Date.now()) >>> 0);
@@ -434,6 +444,18 @@ class StarsproutGame {
     this.monsters = zoneSpawnPoints(ZONE01.x, ZONE01.z, ZONE01.r, FIELD_TEST.boboCount).map((p) =>
       factory.create("star_dew_bobo", { x: p.x, y: this.terrain.surface(p.x, p.z), z: p.z }, { modelId: BOBO_MODEL_IDS.v38r, animationProfileId: BOBO_PROFILE_IDS.v38r }),
     );
+    // ---------- Stage 7.2：M004 風羽狐（骨骼動畫怪物；Claude C 的 GLB 放進 public/models/monsters/m004/ 才會出現） ----------
+    // &rigfixture=1（只供自動測試）：風羽狐檔案還沒交付時，用灰色方塊的接口測試替身驗證 AI、命中與重生
+    const foxLod = this.ws ? pickModelLod(this.params) : this.lod;
+    const foxOk = await riggedAssetAvailable(import.meta.env.BASE_URL, M004_WINDFEATHER_FOX, foxLod);
+    const foxId = foxOk ? "windfeather_fox" : this.params.get("rigfixture") === "1" ? "rig_contract_fixture" : null;
+    this.foxStatus = foxOk ? `M004 風羽狐 ${foxLod === "hq" ? "HQ" : "Lite"}` : foxId ? "接口測試替身（風羽狐檔案未交付）" : "風羽狐檔案未交付（羽風高地暫時沒有怪物）";
+    if (foxId) {
+      const foxReg = registerBabylonVisuals(createMonsterRegistry(), { scene, shadows: this.shadows, quality, modelLod: foxLod });
+      const foxFactory = new MonsterFactory(foxReg);
+      const pts = zoneSpawnPoints(ZONE04.x, ZONE04.z, ZONE04.r * 0.75, ZONE04.cap ?? 4);
+      for (const p of pts) this.monsters.push(foxFactory.create(foxId, { x: p.x, y: this.terrain.surface(p.x, p.z), z: p.z }, { brain: { seed: Math.round(p.x * 31 + p.z * 17) } }));
+    }
     await Promise.all(this.monsters.map((m) => m.visual?.load() ?? Promise.resolve()));
     this.lockRing = MeshBuilder.CreateTorus("PH_lockRing", { diameter: 1.1, thickness: 0.05, tessellation: 40 }, scene);
     const ringMat = new StandardMaterial("PH_lockRingMat", scene);
@@ -1117,7 +1139,23 @@ class StarsproutGame {
           drops: self.dropCount,
           picked: self.picked,
           loot: self.loot.drops.length,
-          monsters: self.monsters.map((m) => ({ id: m.instance.instanceId, state: m.instance.sm.state, hp: m.instance.currentHp, x: m.instance.currentPosition.x, z: m.instance.currentPosition.z })),
+          monsters: self.monsters.map((m) => {
+            const v = m.visual instanceof RiggedMonsterVisual ? m.visual : null;
+            return {
+              id: m.instance.instanceId,
+              kind: m.instance.definition.monsterId,
+              state: m.instance.sm.state,
+              mode: m.brain?.mode ?? null,
+              hp: m.instance.currentHp,
+              maxHp: m.instance.definition.maxHp,
+              x: m.instance.currentPosition.x,
+              z: m.instance.currentPosition.z,
+              speed: Math.round(m.groundSpeed * 100) / 100,
+              attacks: { ...m.instance.attackLog },
+              ...(v ? { rig: { clip: v.clip, ratio: Math.round(v.ratio * 1000) / 1000, weights: v.weights(), hpBar: v.hpBarVisible, hpBarY: v.hpBarWorldY, lod: v.asset?.lod ?? null, fixture: v.asset?.check.fixture ?? null, visible: v.root.isEnabled() } } : {}),
+            };
+          }),
+          foxStatus: self.foxStatus,
           pets: {
             enabled: p.enabled,
             mode: p.mode,
@@ -1135,6 +1173,9 @@ class StarsproutGame {
       press: (a) => (a === "attack" ? void self.tryAttack(false) : (self.pending.jump = true)),
       teleport: (x, z) => self.teleport(x, z),
       toZone01: () => self.toZone01(),
+      heal: () => {
+        if (!self.combat.isDown) self.combat.hp = self.combat.tuning.maxHp;
+      },
       pet: {
         give: (item, n = 1) => p.giveItem(item, n),
         hatch: (source) => {

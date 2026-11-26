@@ -25,7 +25,7 @@ export interface CombatMonster {
   readonly instanceId: string;
   readonly isAlive: boolean;
   readonly currentPosition: { x: number; z: number };
-  readonly definition: { attack: number; attackRange: number; name: string };
+  readonly definition: { attack: number; attackRange: number; name: string; bodyRadius?: number };
   /** now：遊戲時間；kind：受擊種類（普通攻擊 = normal：不擊退、不硬直） */
   receiveDamage(amount: number, now?: number, kind?: "normal" | "control"): { applied: boolean; killed: boolean };
 }
@@ -81,7 +81,8 @@ export class PreviewCombat {
     let bestD: number = PREVIEW_COMBAT.playerAttackRange;
     for (const m of monsters) {
       if (!m.isAlive) continue;
-      const d = Math.hypot(m.currentPosition.x - px, m.currentPosition.z - pz);
+      // 距離從身體外緣算（bodyRadius；星露啵啵沒有設定 = 0，維持原本行為）
+      const d = Math.hypot(m.currentPosition.x - px, m.currentPosition.z - pz) - (m.definition.bodyRadius ?? 0);
       if (d <= bestD) {
         bestD = d;
         best = m;
@@ -100,7 +101,7 @@ export class PreviewCombat {
       return null;
     }
     const cur = this.lockedId ? monsters.find((m) => m.instanceId === this.lockedId) : undefined;
-    if (cur && cur.isAlive && Math.hypot(cur.currentPosition.x - px, cur.currentPosition.z - pz) <= PREVIEW_COMBAT.playerAttackRange) return cur;
+    if (cur && cur.isAlive && Math.hypot(cur.currentPosition.x - px, cur.currentPosition.z - pz) - (cur.definition.bodyRadius ?? 0) <= PREVIEW_COMBAT.playerAttackRange) return cur;
     const next = this.nearestTarget(px, pz, monsters);
     this.lockedId = next?.instanceId ?? null;
     return next;
@@ -135,7 +136,7 @@ export class PreviewCombat {
     if (this.isDown) return { ok: false, reason: "down" };
     const target = monsters.find((m) => m.instanceId === p.targetId);
     if (!target || !target.isAlive) return { ok: false, reason: "miss" };
-    const d = Math.hypot(target.currentPosition.x - px, target.currentPosition.z - pz);
+    const d = Math.hypot(target.currentPosition.x - px, target.currentPosition.z - pz) - (target.definition.bodyRadius ?? 0);
     if (d > PREVIEW_COMBAT.playerAttackRange + 0.6) return { ok: false, reason: "miss" };
     const dmg = this.tuning.attackDamage;
     const r = target.receiveDamage(dmg, now, this.attackHitKind);
