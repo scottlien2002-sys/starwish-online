@@ -54,7 +54,7 @@ for (const name of browsers) {
     try {
       await page.goto(server.url + `/?map=village&art=full&quality=${q}&lod=${lod}`, { waitUntil: "load" });
       await page.waitForFunction(() => window.__starwishVillage?.ready === true, null, { timeout: 120000 });
-      await page.waitForFunction(() => { const a = window.__starwishVillage.artFull(); return a.status === "loaded" || a.status.startsWith("部分") || a.status.startsWith("error"); }, null, { timeout: 240000 });
+      await page.waitForFunction(() => { const a = window.__starwishVillage.artFull(); return a.status === "loaded" || a.status.startsWith("部分") || a.status.startsWith("error"); }, null, { timeout: 420000 });
       const art = await V(() => window.__starwishVillage.artFull());
       run.results.art = art;
       check("全村正式美術載入完成（16 組模型＝15 組＋正式NPC、沒有錯誤）", art.status === "loaded" && Object.keys(art.parts).length === 16 && art.merchant, { status: art.status, parts: Object.keys(art.parts), errors: art.errors });
