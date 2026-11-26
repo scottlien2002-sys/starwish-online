@@ -1,0 +1,662 @@
+{
+ "male": {
+  "lite": {
+   "triangles": 40386,
+   "parts": 32,
+   "meshes_after_merge": 26,
+   "mesh_names": [
+    "face__face_male",
+    "body__male_skin",
+    "hands__male_glove",
+    "hands__male_rivet",
+    "feet__male_boot",
+    "feet__male_boot_gem",
+    "hair__male_hair",
+    "outfit__male_shirt",
+    "outfit__male_sleeve_trim",
+    "outfit__male_vest",
+    "outfit__male_vest_trim",
+    "outfit__male_lace",
+    "outfit__male_scarf",
+    "outfit__male_belt",
+    "outfit__male_buckle",
+    "outfit__male_pouch",
+    "outfit__male_shorts",
+    "outfit__male_tabard",
+    "outfit__male_tabard_trim",
+    "outfit__male_tabard_star",
+    "outfit__male_belt_edge",
+    "outfit__male_belt_loop",
+    "hands__male_glove_band",
+    "feet__male_boot_sole",
+    "feet__male_boot_strap",
+    "feet__male_boot_buckle"
+   ],
+   "materials": [
+    "face_male",
+    "male_belt",
+    "male_belt_edge",
+    "male_belt_loop",
+    "male_boot",
+    "male_boot_buckle",
+    "male_boot_gem",
+    "male_boot_sole",
+    "male_boot_strap",
+    "male_buckle",
+    "male_glove",
+    "male_glove_band",
+    "male_hair",
+    "male_lace",
+    "male_pouch",
+    "male_rivet",
+    "male_scarf",
+    "male_shirt",
+    "male_shorts",
+    "male_skin",
+    "male_sleeve_trim",
+    "male_tabard",
+    "male_tabard_star",
+    "male_tabard_trim",
+    "male_vest",
+    "male_vest_trim"
+   ],
+   "bones": [
+    "hips",
+    "spine",
+    "chest",
+    "neck",
+    "head",
+    "upper_arm.L",
+    "forearm.L",
+    "hand.L",
+    "upper_arm.R",
+    "forearm.R",
+    "hand.R",
+    "thigh.L",
+    "shin.L",
+    "foot.L",
+    "thigh.R",
+    "shin.R",
+    "foot.R"
+   ],
+   "actions": [
+    {
+     "name": "Idle",
+     "frames": 72,
+     "fps": 30
+    },
+    {
+     "name": "Run",
+     "frames": 18,
+     "fps": 30
+    },
+    {
+     "name": "Jump",
+     "frames": 30,
+     "fps": 30
+    },
+    {
+     "name": "Attack",
+     "frames": 15,
+     "fps": 30
+    },
+    {
+     "name": "Hurt",
+     "frames": 15,
+     "fps": 30
+    },
+    {
+     "name": "Death",
+     "frames": 48,
+     "fps": 30
+    }
+   ],
+   "attack": {
+    "seconds": 0.5,
+    "hit": 0.2
+   },
+   "death": {
+    "seconds": 1.6,
+    "fit": {
+     "kneel": 0.12049643695354462,
+     "lie": 0.3445589989423752
+    }
+   },
+   "clip": {
+    "rest": {
+     "hand_l|body": 40,
+     "hand_l|shirt": 0,
+     "hand_l|vest": 0,
+     "hand_l|tabard": 96,
+     "hand_l|pouch": 0,
+     "glove_l|body": 62,
+     "glove_l|shirt": 62,
+     "glove_l|vest": 0,
+     "glove_l|tabard": 122,
+     "glove_l|pouch": 0,
+     "hand_r|body": 42,
+     "hand_r|shirt": 0,
+     "hand_r|vest": 0,
+     "hand_r|tabard": 87,
+     "hand_r|pouch": 0,
+     "glove_r|body": 67,
+     "glove_r|shirt": 61,
+     "glove_r|vest": 0,
+     "glove_r|tabard": 121,
+     "glove_r|pouch": 0,
+     "boot_l|boot_r": 0
+    },
+    "poses": {
+     "Idle@0.00": {
+      "glove_l|body": 5
+     },
+     "Idle@0.50": {
+      "glove_l|body": 1,
+      "glove_r|shirt": 1
+     },
+     "Run@0.00": {
+      "glove_l|body": 4,
+      "glove_r|shirt": 2
+     },
+     "Run@0.25": {},
+     "Run@0.50": {
+      "glove_l|body": 4,
+      "glove_r|shirt": 2
+     },
+     "Run@0.75": {
+      "glove_l|body": 1,
+      "glove_r|shirt": 5
+     },
+     "Jump@0.20": {
+      "glove_l|body": 1,
+      "glove_r|shirt": 4
+     },
+     "Jump@0.42": {
+      "glove_l|body": 1,
+      "glove_r|shirt": 1
+     },
+     "Jump@0.84": {
+      "glove_l|body": 1,
+      "glove_r|shirt": 1
+     },
+     "Attack@0.30": {
+      "glove_r|shirt": 5
+     },
+     "Attack@0.40": {},
+     "Attack@0.60": {
+      "glove_r|shirt": 1
+     },
+     "Hurt@0.16": {},
+     "Hurt@0.50": {
+      "glove_l|body": 1,
+      "glove_r|shirt": 1
+     },
+     "Death@0.30": {
+      "glove_r|shirt": 1
+     },
+     "Death@0.60": {
+      "glove_l|body": 1,
+      "glove_r|shirt": 2
+     },
+     "Death@1.00": {
+      "glove_l|body": 3
+     }
+    }
+   },
+   "run_ground_speed": 2.2567059844732285
+  },
+  "hq": {
+   "triangles": 199968,
+   "parts": 32,
+   "meshes_after_merge": 26,
+   "mesh_names": [
+    "face__face_male",
+    "body__male_skin",
+    "hands__male_glove",
+    "hands__male_rivet",
+    "feet__male_boot",
+    "feet__male_boot_gem",
+    "hair__male_hair",
+    "outfit__male_shirt",
+    "outfit__male_sleeve_trim",
+    "outfit__male_vest",
+    "outfit__male_vest_trim",
+    "outfit__male_lace",
+    "outfit__male_scarf",
+    "outfit__male_belt",
+    "outfit__male_buckle",
+    "outfit__male_pouch",
+    "outfit__male_shorts",
+    "outfit__male_tabard",
+    "outfit__male_tabard_trim",
+    "outfit__male_tabard_star",
+    "outfit__male_belt_edge",
+    "outfit__male_belt_loop",
+    "hands__male_glove_band",
+    "feet__male_boot_sole",
+    "feet__male_boot_strap",
+    "feet__male_boot_buckle"
+   ],
+   "materials": [
+    "face_male",
+    "male_belt",
+    "male_belt_edge",
+    "male_belt_loop",
+    "male_boot",
+    "male_boot_buckle",
+    "male_boot_gem",
+    "male_boot_sole",
+    "male_boot_strap",
+    "male_buckle",
+    "male_glove",
+    "male_glove_band",
+    "male_hair",
+    "male_lace",
+    "male_pouch",
+    "male_rivet",
+    "male_scarf",
+    "male_shirt",
+    "male_shorts",
+    "male_skin",
+    "male_sleeve_trim",
+    "male_tabard",
+    "male_tabard_star",
+    "male_tabard_trim",
+    "male_vest",
+    "male_vest_trim"
+   ],
+   "bones": [
+    "hips",
+    "spine",
+    "chest",
+    "neck",
+    "head",
+    "upper_arm.L",
+    "forearm.L",
+    "hand.L",
+    "upper_arm.R",
+    "forearm.R",
+    "hand.R",
+    "thigh.L",
+    "shin.L",
+    "foot.L",
+    "thigh.R",
+    "shin.R",
+    "foot.R"
+   ],
+   "actions": [
+    {
+     "name": "Idle",
+     "frames": 72,
+     "fps": 30
+    },
+    {
+     "name": "Run",
+     "frames": 18,
+     "fps": 30
+    },
+    {
+     "name": "Jump",
+     "frames": 30,
+     "fps": 30
+    },
+    {
+     "name": "Attack",
+     "frames": 15,
+     "fps": 30
+    },
+    {
+     "name": "Hurt",
+     "frames": 15,
+     "fps": 30
+    },
+    {
+     "name": "Death",
+     "frames": 48,
+     "fps": 30
+    }
+   ],
+   "attack": {
+    "seconds": 0.5,
+    "hit": 0.2
+   },
+   "death": {
+    "seconds": 1.6,
+    "fit": {
+     "kneel": 0.11744870245456696,
+     "lie": 0.34136946499347687
+    }
+   }
+  }
+ },
+ "female": {
+  "lite": {
+   "triangles": 39972,
+   "parts": 31,
+   "meshes_after_merge": 26,
+   "mesh_names": [
+    "face__face_female",
+    "body__female_skin",
+    "hands__female_glove",
+    "feet__female_boot",
+    "feet__female_boot_strap",
+    "hair__female_hair",
+    "hair__female_ponytail",
+    "hair__female_bow",
+    "hair__female_bow_star",
+    "outfit__female_blouse",
+    "outfit__female_armband",
+    "outfit__female_choker",
+    "outfit__female_gems",
+    "outfit__female_corset",
+    "outfit__female_belt",
+    "outfit__female_buckle",
+    "outfit__female_front_panel",
+    "outfit__female_chest_trim",
+    "outfit__female_underskirt",
+    "outfit__female_petticoat",
+    "outfit__female_skirt_pink",
+    "outfit__female_skirt_trim",
+    "outfit__female_safety_shorts",
+    "outfit__female_overskirt",
+    "outfit__female_overskirt_trim",
+    "outfit__female_overskirt_emblem"
+   ],
+   "materials": [
+    "face_female",
+    "female_armband",
+    "female_belt",
+    "female_blouse",
+    "female_boot",
+    "female_boot_strap",
+    "female_bow",
+    "female_bow_star",
+    "female_buckle",
+    "female_chest_trim",
+    "female_choker",
+    "female_corset",
+    "female_front_panel",
+    "female_gems",
+    "female_glove",
+    "female_hair",
+    "female_overskirt",
+    "female_overskirt_emblem",
+    "female_overskirt_trim",
+    "female_petticoat",
+    "female_ponytail",
+    "female_safety_shorts",
+    "female_skin",
+    "female_skirt_pink",
+    "female_skirt_trim",
+    "female_underskirt"
+   ],
+   "bones": [
+    "hips",
+    "spine",
+    "chest",
+    "neck",
+    "head",
+    "upper_arm.L",
+    "forearm.L",
+    "hand.L",
+    "upper_arm.R",
+    "forearm.R",
+    "hand.R",
+    "thigh.L",
+    "shin.L",
+    "foot.L",
+    "thigh.R",
+    "shin.R",
+    "foot.R"
+   ],
+   "actions": [
+    {
+     "name": "Idle",
+     "frames": 72,
+     "fps": 30
+    },
+    {
+     "name": "Run",
+     "frames": 18,
+     "fps": 30
+    },
+    {
+     "name": "Jump",
+     "frames": 30,
+     "fps": 30
+    },
+    {
+     "name": "Attack",
+     "frames": 15,
+     "fps": 30
+    },
+    {
+     "name": "Hurt",
+     "frames": 15,
+     "fps": 30
+    },
+    {
+     "name": "Death",
+     "frames": 48,
+     "fps": 30
+    }
+   ],
+   "attack": {
+    "seconds": 0.5,
+    "hit": 0.2
+   },
+   "death": {
+    "seconds": 1.6,
+    "fit": {
+     "kneel": 0.08977475762367249,
+     "lie": 0.3530949354171753
+    }
+   },
+   "clip": {
+    "rest": {
+     "hand_l|body": 40,
+     "hand_l|blouse": 0,
+     "hand_l|corset": 0,
+     "hand_l|overskirt": 137,
+     "hand_l|skirt_pink": 0,
+     "hand_l|petticoat": 0,
+     "hand_l|underskirt": 0,
+     "glove_l|body": 47,
+     "glove_l|blouse": 0,
+     "glove_l|corset": 0,
+     "glove_l|overskirt": 116,
+     "glove_l|skirt_pink": 0,
+     "glove_l|petticoat": 0,
+     "glove_l|underskirt": 0,
+     "hand_r|body": 37,
+     "hand_r|blouse": 0,
+     "hand_r|corset": 0,
+     "hand_r|overskirt": 146,
+     "hand_r|skirt_pink": 31,
+     "hand_r|petticoat": 0,
+     "hand_r|underskirt": 0,
+     "glove_r|body": 48,
+     "glove_r|blouse": 0,
+     "glove_r|corset": 0,
+     "glove_r|overskirt": 111,
+     "glove_r|skirt_pink": 0,
+     "glove_r|petticoat": 0,
+     "glove_r|underskirt": 0,
+     "boot_l|boot_r": 29
+    },
+    "poses": {
+     "Idle@0.00": {},
+     "Idle@0.50": {
+      "boot_l|boot_r": 5
+     },
+     "Run@0.00": {
+      "glove_l|body": 6
+     },
+     "Run@0.25": {
+      "glove_l|body": 3
+     },
+     "Run@0.50": {
+      "glove_l|body": 6
+     },
+     "Run@0.75": {
+      "glove_l|body": 6
+     },
+     "Jump@0.20": {
+      "boot_l|boot_r": 6
+     },
+     "Jump@0.42": {},
+     "Jump@0.84": {
+      "boot_l|boot_r": 6
+     },
+     "Attack@0.30": {
+      "glove_l|body": 3,
+      "boot_l|boot_r": 4
+     },
+     "Attack@0.40": {
+      "glove_l|body": 3
+     },
+     "Attack@0.60": {
+      "glove_l|body": 3
+     },
+     "Hurt@0.16": {
+      "glove_l|body": 3
+     },
+     "Hurt@0.50": {},
+     "Death@0.30": {},
+     "Death@0.60": {
+      "glove_l|body": 5,
+      "boot_l|boot_r": 35
+     },
+     "Death@1.00": {
+      "glove_l|body": 9,
+      "boot_l|boot_r": 9
+     }
+    }
+   },
+   "run_ground_speed": 2.4061305820941925
+  },
+  "hq": {
+   "triangles": 199970,
+   "parts": 31,
+   "meshes_after_merge": 26,
+   "mesh_names": [
+    "face__face_female",
+    "body__female_skin",
+    "hands__female_glove",
+    "feet__female_boot",
+    "feet__female_boot_strap",
+    "hair__female_hair",
+    "hair__female_ponytail",
+    "hair__female_bow",
+    "hair__female_bow_star",
+    "outfit__female_blouse",
+    "outfit__female_armband",
+    "outfit__female_choker",
+    "outfit__female_gems",
+    "outfit__female_corset",
+    "outfit__female_belt",
+    "outfit__female_buckle",
+    "outfit__female_front_panel",
+    "outfit__female_chest_trim",
+    "outfit__female_underskirt",
+    "outfit__female_petticoat",
+    "outfit__female_skirt_pink",
+    "outfit__female_skirt_trim",
+    "outfit__female_safety_shorts",
+    "outfit__female_overskirt",
+    "outfit__female_overskirt_trim",
+    "outfit__female_overskirt_emblem"
+   ],
+   "materials": [
+    "face_female",
+    "female_armband",
+    "female_belt",
+    "female_blouse",
+    "female_boot",
+    "female_boot_strap",
+    "female_bow",
+    "female_bow_star",
+    "female_buckle",
+    "female_chest_trim",
+    "female_choker",
+    "female_corset",
+    "female_front_panel",
+    "female_gems",
+    "female_glove",
+    "female_hair",
+    "female_overskirt",
+    "female_overskirt_emblem",
+    "female_overskirt_trim",
+    "female_petticoat",
+    "female_ponytail",
+    "female_safety_shorts",
+    "female_skin",
+    "female_skirt_pink",
+    "female_skirt_trim",
+    "female_underskirt"
+   ],
+   "bones": [
+    "hips",
+    "spine",
+    "chest",
+    "neck",
+    "head",
+    "upper_arm.L",
+    "forearm.L",
+    "hand.L",
+    "upper_arm.R",
+    "forearm.R",
+    "hand.R",
+    "thigh.L",
+    "shin.L",
+    "foot.L",
+    "thigh.R",
+    "shin.R",
+    "foot.R"
+   ],
+   "actions": [
+    {
+     "name": "Idle",
+     "frames": 72,
+     "fps": 30
+    },
+    {
+     "name": "Run",
+     "frames": 18,
+     "fps": 30
+    },
+    {
+     "name": "Jump",
+     "frames": 30,
+     "fps": 30
+    },
+    {
+     "name": "Attack",
+     "frames": 15,
+     "fps": 30
+    },
+    {
+     "name": "Hurt",
+     "frames": 15,
+     "fps": 30
+    },
+    {
+     "name": "Death",
+     "frames": 48,
+     "fps": 30
+    }
+   ],
+   "attack": {
+    "seconds": 0.5,
+    "hit": 0.2
+   },
+   "death": {
+    "seconds": 1.6,
+    "fit": {
+     "kneel": 0.08896304666996002,
+     "lie": 0.3434881716966629
+    }
+   }
+  }
+ }
+}
