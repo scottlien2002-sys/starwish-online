@@ -1,0 +1,34 @@
+name: Stage 7 world loop E2E (quick, with screenshots)
+
+# 只跑 Stage 7 完整遊戲循環 E2E（建置＋WebKit/Chromium），上傳截圖與報告；不部署、不影響其他分支。
+on:
+  push:
+    branches: [feature/render-stage7-world]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stage7-world-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  world:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium webkit
+      - name: World loop E2E
+        run: node tests/e2e/run-world-e2e.mjs dist webkit,chromium
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: world-e2e
+          path: test-results/world-e2e/
+          retention-days: 7

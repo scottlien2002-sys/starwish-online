@@ -99,8 +99,10 @@ for (const name of browsers) {
       await V(() => window.__starwishWorld.teleport(0, -41.5, Math.PI));
       await wait(800);
       const tgt = await V(() => window.__starwishWorld.info().interact?.target);
-      await V(() => window.__starwishWorld.activate());
+      const act = await V(() => window.__starwishWorld.activate());
       await wait(300);
+      const dlg = await V(() => window.__starwishWorld.info().interact?.dialog ?? "");
+      console.log(`  · [${name} ${g}] 傳送門：target=${tgt} activate=${act} dialog=${dlg.slice(0, 60)}`);
       const nav = page.waitForNavigation({ timeout: 60000 }).catch(() => null);
       await V(() => window.__starwishWorld.confirmDialog());
       await nav;
@@ -203,6 +205,16 @@ for (const name of browsers) {
       await shot("village_respawn");
     } catch (e) {
       run.errors.push(`例外：${e.message}`);
+      run.results.exceptionState = await page
+        .evaluate(() => ({
+          url: location.href,
+          boot: document.getElementById("boot")?.textContent?.slice(0, 300) ?? null,
+          world: window.__starwishWorld ? { ready: window.__starwishWorld.ready, info: (() => { try { const i = window.__starwishWorld.info(); return { map: i.map, art: i.art, interact: i.interact, pos: i.pos }; } catch (x) { return String(x); } })() } : null,
+          play: window.__starwishPlay ? { ready: window.__starwishPlay.ready, world: !!window.__starwishPlay.world } : null,
+          save: (() => { try { const s = JSON.parse(localStorage.getItem("starwish.stage7.save.v1") ?? "null"); return s && s.character; } catch { return "bad"; } })(),
+        }))
+        .catch((x) => String(x));
+      console.log(`  ! [${name} ${g}] 狀態：${JSON.stringify(run.results.exceptionState).slice(0, 900)}`);
       await shot("exception");
     }
     run.ok = Object.values(run.checks).every((c) => c.ok) && run.errors.length === 0 && Object.keys(run.checks).length >= 14;
