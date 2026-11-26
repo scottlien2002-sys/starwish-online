@@ -196,3 +196,33 @@ test("寵物四個成長階段：大小依序變大、完成體不超過約臉�
   for (let i = 2; i < s.length; i++) assert.ok(s[i]! > s[i - 1]! * 1.3);
   assert.ok(s[4]! <= 0.24);
 });
+
+test("洛恩（Stage 7）：鑑定收費、飼料用金幣、進化列表階段 0～3、靈魂寵物付費復活", async () => {
+  const { createWorldPetMerchantService } = await import("../../src/economy/worldPetMerchant.ts");
+  const w = world(3);
+  let changed = 0;
+  const svc = createWorldPetMerchantService({ pets: w.pets, save: w.save, economy: w.economy, appraisal: w.appraisal, persist: () => {}, changed: () => changed++ });
+  w.pets.giveItem("seed", 1);
+  const seed = w.pets.bag()[0]!;
+  const start = w.save.wallet.balance;
+  const ap = await svc.appraise(seed.id);
+  assert.ok(ap.ok);
+  assert.equal(w.save.wallet.balance, start - 20);
+  const buy = await svc.buyFeed("shopFeed", 2);
+  assert.ok(buy.ok);
+  assert.equal(w.save.wallet.balance, start - 40);
+  assert.equal(w.save.pets.items.shopFeed, 2);
+  const p = w.pets.hatch("seed", 0, seed.id)!;
+  tickPet(p, w.pets.tuning, (w.pets.tuning.hatchSeconds ?? 0) * 1000 + 1);
+  const ev = await svc.evolvablePets!();
+  assert.ok(ev.ok && ev.data.length === 1 && ev.data[0]!.stage === 0);
+  p.life = "soul";
+  const rv = await svc.revivablePets!();
+  assert.ok(rv.ok && rv.data.length === 1);
+  const r = await svc.revive!(String(p.id), "rv-1");
+  assert.ok(r.ok);
+  assert.equal(isSoul(p), false);
+  assert.equal(w.save.wallet.balance, start - 40 - 50);
+  assert.ok(ledgerConsistent(w.save.wallet, start));
+  assert.ok(changed > 0);
+});

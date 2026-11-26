@@ -8,6 +8,7 @@ import { GuildWindow } from "./GuildWindow.ts";
 import { PetAppraisalWindow } from "./PetAppraisalWindow.ts";
 import { PetMerchantPanel } from "./PetMerchantPanel.ts";
 import type { PetMerchantV2 } from "./PetMerchantV2.ts";
+import { npcProfile, type VillageNpcs } from "./NpcP3.ts";
 
 /**
  * Stage 6 P3 全村整合：NPC、寵物商人洛恩、傳送門的點擊互動（iPhone 直向可用：靠近後畫面下方出現大按鈕，也可直接點洛恩）。
@@ -57,6 +58,11 @@ export class VillageInteract {
 
   private readonly merchant: PetMerchantV2 | null;
   private readonly opts: InteractOptions;
+  /** Stage 6.2：正式 NPC（對話時轉身面向玩家並播放對話動作） */
+  npcs: VillageNpcs | null = null;
+  /** 正在對話的 NPC（spot id）；對話框／商會視窗關閉後自動清除 */
+  private npcTalk: string | null = null;
+  private lastNow: number | null = null;
 
   constructor(scene: Scene, merchant: PetMerchantV2 | null, opts: InteractOptions) {
     this.merchant = merchant;
@@ -108,9 +114,13 @@ export class VillageInteract {
 
   /** 每幀：玩家位置、洛恩時間（秒） */
   update(now: number, px: number, pz: number): void {
+    const dt = this.lastNow === null ? 0 : now - this.lastNow;
+    this.lastNow = now;
     this.now = now;
     this.px = px;
     this.pz = pz;
+    if (this.npcTalk && this.dlg.hidden && !this.guild.isOpen) this.npcTalk = null;
+    this.npcs?.update(now, dt, this.npcTalk, px, pz);
     if (this.merchant) {
       // 對話中：每幀送出心跳（玩家位置），讓洛恩停下並面向玩家；關閉後釋放
       if (this.talking) this.merchant.clock.hold("player", now, px, pz);
@@ -153,6 +163,7 @@ export class VillageInteract {
       return "merchant";
     }
     if (t.kind === "npc" && t.npc.id === "guild") {
+      this.npcTalk = "guild";
       void this.guild.open();
       this.log.push({ t: this.now, what: "npc:guild" });
       return "npc:guild";
@@ -169,7 +180,9 @@ export class VillageInteract {
             : n.id === "warehouse"
               ? "要寄放物品嗎？倉庫功能正在整合中。"
               : "功能正在整合中。";
-      this.say(n.name.replace("（鍛造台旁）", ""), body, n.role);
+      const prof = npcProfile(n.id);
+      this.npcTalk = n.id;
+      this.say(prof ? `${prof.title}・${prof.name}` : n.name.replace("（鍛造台旁）", ""), prof ? `「${prof.greeting}」<br>${body}` : body, n.role);
       this.log.push({ t: this.now, what: `npc:${n.id}` });
       return `npc:${n.id}`;
     }

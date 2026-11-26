@@ -13,6 +13,7 @@
  * - 手續費、掛賣期限、掛賣上限、NPC 收購價格尚未定案：GuildConfig 每個欄位都可配置，null＝未定案（畫面顯示「未定案」）
  * - 每個會改資料的呼叫都帶 requestId：同一個 requestId 只處理一次（重送回傳第一次的結果），避免重複扣款或重複轉移
  */
+import type { PetStageName } from "./petMerchant.ts";
 
 export type MarketCategory = "item" | "equipment" | "pet";
 export const MARKET_CATEGORIES: readonly MarketCategory[] = ["item", "equipment", "pet"];
@@ -36,7 +37,7 @@ export interface MarketItem {
   /** 交易系統鎖定（掛賣中）：不能出售、再掛賣、使用 */
   locked: boolean;
   equipment?: { level: number; enhance: number; appraised: boolean; affixes: readonly AffixLine[] };
-  pet?: { stage: string; breedLevel: number; appraised: boolean; affixes: readonly AffixLine[]; /** 掛賣中：暫停飽食度與成長 */ frozen: boolean };
+  pet?: { /** 成長階段：初始／幼年期／成長期／完成體（PET_STAGES） */ stage: PetStageName; breedLevel: number; appraised: boolean; affixes: readonly AffixLine[]; /** 掛賣中：暫停飽食度與成長 */ frozen: boolean };
   description?: string;
 }
 
@@ -237,7 +238,7 @@ export function createDemoGuildService(opts: { delayMs?: number; config?: GuildC
     mk("equipment", "見習長劍", "sword", 1, { equipment: { level: 5, enhance: 3, appraised: true, affixes: [pctLine("攻擊力", 6), flatLine("攻擊速度", 2)] } }, 300),
     mk("equipment", "星紋皮甲", "armor", 1, { equipment: { level: 8, enhance: 0, appraised: false, affixes: [] } }, 420),
     mk("pet", "星芽兔", "pet_rabbit", 1, { pet: { stage: "幼年期", breedLevel: 3, appraised: true, affixes: [pctLine("攻擊力", 15), pctLine("生命值", -5)], frozen: false } }, 800),
-    mk("pet", "小羽雀", "pet_bird", 1, { pet: { stage: "成長期", breedLevel: 6, appraised: false, affixes: [], frozen: false } }, 900),
+    mk("pet", "小羽雀", "pet_bird", 1, { pet: { stage: "初始", breedLevel: 6, appraised: false, affixes: [], frozen: false } }, 900),
   ];
   const offers: ShopOffer[] = [
     { offerId: "shop:potion_red", name: "紅色治療藥水", icon: "potion_red", price: 40, description: "測試價格" },
@@ -261,8 +262,8 @@ export function createDemoGuildService(opts: { delayMs?: number; config?: GuildC
     other("示範玩家・阿光", { uid: "demo:o2", category: "item", name: "星芽草", icon: "herb", qty: 50, locked: true }, 180, 5000),
     other("示範玩家・米亞", { uid: "demo:o3", category: "equipment", name: "銀月短杖", icon: "staff", qty: 1, locked: true, equipment: { level: 10, enhance: 5, appraised: true, affixes: [pctLine("攻擊力", 20), pctLine("防禦力", -5), flatLine("攻擊速度", 4)] } }, 2400, 2000),
     other("示範玩家・阿光", { uid: "demo:o4", category: "equipment", name: "鐵壁圓盾", icon: "shield", qty: 1, locked: true, equipment: { level: 7, enhance: 1, appraised: true, affixes: [pctLine("防禦力", 15)] } }, 1500, 3000),
-    other("示範玩家・小星", { uid: "demo:o5", category: "pet", name: "雲朵羊", icon: "pet_sheep", qty: 1, locked: true, pet: { stage: "成熟期", breedLevel: 9, appraised: true, affixes: [pctLine("生命值", 20), flatLine("攻擊速度", -2)], frozen: true } }, 3200, 4000),
-    other("示範玩家・米亞", { uid: "demo:o6", category: "pet", name: "星芽兔", icon: "pet_rabbit", qty: 1, locked: true, pet: { stage: "幼年期", breedLevel: 1, appraised: false, affixes: [], frozen: true } }, 700, 6000),
+    other("示範玩家・小星", { uid: "demo:o5", category: "pet", name: "雲朵羊", icon: "pet_sheep", qty: 1, locked: true, pet: { stage: "完成體", breedLevel: 9, appraised: true, affixes: [pctLine("生命值", 20), flatLine("攻擊速度", -2)], frozen: true } }, 3200, 4000),
+    other("示範玩家・米亞", { uid: "demo:o6", category: "pet", name: "星芽兔", icon: "pet_rabbit", qty: 1, locked: true, pet: { stage: "成長期", breedLevel: 1, appraised: false, affixes: [], frozen: true } }, 700, 6000),
   ];
   const findInv = (uid: string): MarketItem | undefined => inv.find((i) => i.uid === uid);
   const ok = <T>(data: T): MarketResult<T> => ({ ok: true, data });

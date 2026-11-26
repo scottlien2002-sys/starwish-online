@@ -5,18 +5,21 @@ import { setupEnvP3 } from "./EnvP3.ts";
 import { setupFountainP3 } from "./FountainP3.ts";
 import { setupKnightP3 } from "./KnightP3.ts";
 import { setupMageP3 } from "./MageP3.ts";
+import { NPC_PROFILES, setupVillageNpcs, type VillageNpcs } from "./NpcP3.ts";
 import { type PetMerchantV2, setupPetMerchantV2 } from "./PetMerchantV2.ts";
 import { setupPlazaP3 } from "./PlazaP3.ts";
 import { setupPortalsP3 } from "./PortalP3.ts";
 
 /**
- * Stage 6 P3 星芽村全村整合（&art=full）：載入三批正式候選美術＋寵物商人洛恩 V2.1。
+ * Stage 6 P3 星芽村全村整合（&art=full）：載入三批正式候選美術＋寵物商人洛恩 V2.1＋Stage 6.2 八位正式 NPC。
  * - 只換「畫面」：碰撞、配置、NPC 站位、傳送門設定、移動規則全部沿用 layout.ts（不新增碰撞）
  * - 模型放在 public/models/village-p3/（由 Blender 美術工作流程產出的 HQ／Lite GLB 與共用貼圖）
  * - 靜態模型凍結世界矩陣；有動畫的（噴泉星晶、南門光柱／符文環、洛恩）不凍結
  */
 export interface VillageArtFull {
   readonly merchant: PetMerchantV2 | null;
+  /** Stage 6.2：八位正式 NPC（載入失敗時為 null，村莊仍可使用；佔位人形已在 art 模式隱藏） */
+  readonly npcs: VillageNpcs | null;
   readonly parts: Record<string, { triangles: number; meshes: number }>;
   readonly loadMs: number;
   readonly errors: string[];
@@ -123,9 +126,23 @@ export async function loadVillageArtFull(scene: Scene, lite: boolean, shadows: S
     merchant = setupPetMerchantV2(scene, r, { lite, shadows });
     stat("寵物商人洛恩", r.meshes);
   });
+  let npcs: VillageNpcs | null = null;
+  await step("npcs", async () => {
+    const got = new Map<string, Loaded>();
+    for (const p of NPC_PROFILES) {
+      try {
+        got.set(p.key, await load(`npc_${p.key}_${q}.glb`));
+      } catch (e) {
+        errors.push(`npc ${p.key}: ${e instanceof Error ? e.message : String(e)}`);
+      }
+    }
+    npcs = setupVillageNpcs(scene, got, { lite, shadows });
+    const ms = [...got.values()].flatMap((r) => r.meshes);
+    stat("正式NPC（8位）", ms);
+  });
   for (const m of statics) {
     m.isPickable = false;
     if (!animated.has(m)) m.freezeWorldMatrix();
   }
-  return { merchant, parts, loadMs: Math.round(performance.now() - t0), errors };
+  return { merchant, npcs, parts, loadMs: Math.round(performance.now() - t0), errors };
 }

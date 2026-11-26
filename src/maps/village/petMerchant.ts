@@ -201,6 +201,40 @@ export interface FeedOffer {
   price: number;
   description?: string;
 }
+/**
+ * 寵物成長階段（Stage 6.2 定案名稱）：索引 0～3 對應 A 寵物核心的 stage 數值。
+ * 進化條件、時間、機率由寵物系統（Claude A）決定，這裡只定名稱與順序。
+ */
+export const PET_STAGES = ["初始", "幼年期", "成長期", "完成體"] as const;
+export type PetStageName = (typeof PET_STAGES)[number];
+/** stage 數值 → 名稱（超出範圍時夾在 0～3） */
+export function petStageName(stage: number): PetStageName {
+  return PET_STAGES[Math.max(0, Math.min(PET_STAGES.length - 1, Math.floor(stage)))] ?? "初始";
+}
+export function isPetStageName(s: string): s is PetStageName {
+  return (PET_STAGES as readonly string[]).includes(s);
+}
+
+/** 進化／復活服務列出的寵物（只放畫面需要的欄位；完整資料在寵物系統） */
+export interface PetRef {
+  petId: string;
+  name: string;
+  /** 0～3（見 PET_STAGES） */
+  stage: number;
+  /** 進化：是否已達條件（條件由寵物系統判斷）；復活：一律 true */
+  ready: boolean;
+  /** 費用或條件說明文字（由寵物系統提供；這裡不定價） */
+  note?: string;
+}
+export interface EvolveResult {
+  petId: string;
+  fromStage: number;
+  toStage: number;
+}
+export interface ReviveResult {
+  petId: string;
+}
+
 export interface CareGuideEntry {
   title: string;
   body: string;
@@ -220,6 +254,17 @@ export interface PetMerchantService {
   buyFeed(offerId: string, qty: number): Promise<PetServiceResult<{ bought: number }>>;
   /** 培育與進化說明 */
   careGuide(): Promise<PetServiceResult<readonly CareGuideEntry[]>>;
+  /**
+   * Stage 6.2：寵物進化。可進化（或尚差條件）的寵物列表；選填——寵物系統未實作時畫面顯示「準備中」。
+   * 正式版的條件檢查、扣除材料與階段變更都在寵物系統（多人時由伺服器）完成。
+   */
+  evolvablePets?(): Promise<PetServiceResult<readonly PetRef[]>>;
+  /** 進化一隻寵物（requestId 用於防止重複送出） */
+  evolve?(petId: string, requestId: string): Promise<PetServiceResult<EvolveResult>>;
+  /** Stage 6.2：寵物復活。陣亡（需要復活）的寵物列表；選填 */
+  revivablePets?(): Promise<PetServiceResult<readonly PetRef[]>>;
+  /** 復活一隻寵物（費用由寵物系統決定；requestId 防重複） */
+  revive?(petId: string, requestId: string): Promise<PetServiceResult<ReviveResult>>;
 }
 
 const NOT_READY = "寵物系統尚未開放，敬請期待。";
@@ -233,6 +278,10 @@ export const PLACEHOLDER_PET_MERCHANT_SERVICE: PetMerchantService = Object.freez
   feedOffers: () => unavailable<readonly FeedOffer[]>(),
   buyFeed: () => unavailable<{ bought: number }>(),
   careGuide: () => unavailable<readonly CareGuideEntry[]>(),
+  evolvablePets: () => unavailable<readonly PetRef[]>(),
+  evolve: () => unavailable<EvolveResult>(),
+  revivablePets: () => unavailable<readonly PetRef[]>(),
+  revive: () => unavailable<ReviveResult>(),
 });
 
 let service: PetMerchantService = PLACEHOLDER_PET_MERCHANT_SERVICE;
@@ -255,11 +304,13 @@ export interface PetMenuState {
   /** message 畫面按「返回」回到哪裡 */
   back?: PetMenuScreen;
 }
-export type PetMenuOption = "appraise" | "feed" | "guide" | "leave";
+export type PetMenuOption = "appraise" | "feed" | "evolve" | "revive" | "guide" | "leave";
 export const PET_MENU_OPTIONS: readonly { id: PetMenuOption; label: string; hint: string }[] = [
   { id: "appraise", label: "寵物鑑定", hint: "鑑定種子・孵化蛋・鳥蛋的寵物屬性" },
   { id: "feed", label: "購買寵物飼料", hint: "飼料商店" },
-  { id: "guide", label: "培育與進化資訊", hint: "照顧方式・進化條件" },
+  { id: "evolve", label: "寵物進化", hint: "初始→幼年期→成長期→完成體" },
+  { id: "revive", label: "寵物復活", hint: "讓倒下的寵物重新站起來" },
+  { id: "guide", label: "培育指南", hint: "照顧方式・成長階段・進化條件" },
   { id: "leave", label: "離開", hint: "" },
 ];
 export const PET_MERCHANT_GREETING = "歡迎！撿到種子或蛋了嗎？我可以幫你看看裡面藏著什麼樣的寵物喔。";
@@ -294,13 +345,28 @@ export async function petMenuStep(
       if (action.option === "leave") return { screen: "closed" };
       // V2：開啟星靈鑑定視窗（PetAppraisalWindow）
       if (action.option === "appraise") return { screen: "appraise" };
+      if (action.option === "evolve" || action.option === "revive") {
+        const ev = action.option === "evolve";
+        const fn = ev ? svc.evolvablePets : svc.revivablePets;
+        const r: PetServiceResult<readonly PetRef[]> = fn ? await fn.call(svc) : { ok: false, reason: "unavailable", message: NOT_READY };
+        return {
+          screen: "message",
+          title: ev ? "寵物進化" : "寵物復活",
+          lines: resultLines(r, (pets) =>
+            pets.length
+              ? pets.map((p) => `・${p.name}（${petStageName(p.stage)}）${ev ? (p.ready ? `→ 可進化為「${petStageName(p.stage + 1)}」` : "：條件未達成") : ""}${p.note ? `　${p.note}` : ""}`)
+              : [ev ? "目前沒有可以進化的寵物。" : "目前沒有需要復活的寵物。"],
+          ),
+          back: "root",
+        };
+      }
       if (action.option === "feed") {
         const r = await svc.feedOffers();
         return { screen: "message", title: "寵物飼料", lines: resultLines(r, (o) => (o.length ? o.map((x) => `・${x.name}　${x.price} 金幣`) : ["目前沒有飼料可以販售。"])), back: "root" };
       }
       {
         const r = await svc.careGuide();
-        return { screen: "message", title: "培育與進化", lines: resultLines(r, (g) => g.map((e) => `【${e.title}】${e.body}`)), back: "root" };
+        return { screen: "message", title: "培育指南", lines: resultLines(r, (g) => g.map((e) => `【${e.title}】${e.body}`)), back: "root" };
       }
   }
   return state;

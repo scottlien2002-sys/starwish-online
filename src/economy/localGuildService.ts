@@ -8,6 +8,7 @@
  */
 import type { GuildConfig, GuildMarketService, Listing, MarketItem, MarketResult, MarketFail, AffixLine, ShopOffer } from "../maps/village/guildMarket.ts";
 import { sortListings, matchText, validatePrice } from "../maps/village/guildMarket.ts";
+import { petStageName } from "../maps/village/petMerchant.ts";
 import { addItems, affixText, bonusScale, isSoul, type FeedId, type ItemId, type PetSourceId } from "../pets/petSystem.ts";
 import type { PetManager } from "../pets/PetManager.ts";
 import type { GameSave, LocalListing } from "../core/gameSave.ts";
@@ -83,7 +84,7 @@ export function createLocalGuildService(d: LocalGuildDeps): GuildMarketService {
           icon: p.species === "bird" ? "pet_bird" : "pet_rabbit",
           qty: 1,
           locked: !!p.frozen,
-          pet: { stage: sp?.stages[p.stage]?.label ?? String(p.stage), breedLevel: Math.round(bonusScale(m.cfg, p, m.tuning) * 100), appraised: p.affixes !== null, affixes: petLines(p.affixes), frozen: !!p.frozen },
+          pet: { stage: petStageName(p.stage - 1), breedLevel: Math.round(bonusScale(m.cfg, p, m.tuning) * 100), appraised: p.affixes !== null, affixes: petLines(p.affixes), frozen: !!p.frozen },
         };
       });
   const findItem = (uid: string): MarketItem | undefined => [...listItems(), ...listPets()].find((x) => x.uid === uid && !x.locked);

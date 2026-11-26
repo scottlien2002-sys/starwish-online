@@ -220,6 +220,11 @@ class VillageGame {
           guild: w.guild,
           onChange: () => this.afterChange(),
         });
+        this.interact.npcs = full.npcs;
+        // 洛恩的其他服務（飼料、進化、復活、培育指南）：接在角色存檔與金幣上
+        const { connectPetMerchantService } = await import("../maps/village/petMerchant.ts");
+        const { createWorldPetMerchantService } = await import("../economy/worldPetMerchant.ts");
+        connectPetMerchantService(createWorldPetMerchantService({ pets: w.pets, save: w.save, economy: w.economy, appraisal: w.appraisal, persist: () => w.persist(), changed: () => this.afterChange() }));
         this.artStatus = full.errors.length ? `部分載入失敗：${full.errors.join("；")}` : "loaded";
       })
       .catch((e: unknown) => {
