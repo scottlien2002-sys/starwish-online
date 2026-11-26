@@ -99,12 +99,11 @@ test("取得 → 孵化（時間）→ 時間成長 → 餵食 → 進化；條�
   assert.equal(p.stage, 1);
   tickPet(p, T, (T.hatchSeconds! + 10) * 1000); // 10 秒 × 2 exp
   assert.ok(Math.abs(p.exp - 20) < 1e-9);
-  // 階段 1 → 2 需要累計 200 exp、餵食 3 次（preview 暫定值）
-  for (let i = 0; i < 3; i++) assert.ok(feedPet(s, p, "shopFeed", T));
-  assert.equal(p.feedCount, 3);
-  assert.ok(Math.abs(p.exp - 170) < 1e-9);
-  assert.equal(canEvolve(cfg, p, T), false); // 經驗不足
-  tickPet(p, T, (T.hatchSeconds! + 30) * 1000); // +20 秒 × 2 = 210
+  // 初始 → 幼年期 需要累計 60 exp、餵食 1 次（preview 暫定值）
+  tickPet(p, T, (T.hatchSeconds! + 30) * 1000); // +20 秒 × 2 = 60
+  assert.equal(canEvolve(cfg, p, T), false); // 經驗夠、還沒餵食
+  assert.ok(feedPet(s, p, "shopFeed", T));
+  assert.equal(p.feedCount, 1);
   assert.ok(canEvolve(cfg, p, T));
   assert.ok(evolve(cfg, p, T));
   assert.equal(p.stage, 2);
@@ -117,20 +116,20 @@ test("加成隨培育逐步發揮：蛋 0、階段內進度只推進一半、進
   const p = startHatch(s, cfg, "egg", 0)!;
   assert.equal(bonusScale(cfg, p, T), 0);
   p.stage = 1;
-  p.exp = 60;
+  p.exp = 20;
   const a = bonusScale(cfg, p, T);
-  p.exp = 200;
+  p.exp = 50;
   const b = bonusScale(cfg, p, T);
   assert.ok(a < b && b < T.bonusScaleByStage![2]!);
-  p.stage = 3;
-  assert.equal(bonusScale(cfg, p, T), T.bonusScaleByStage![3]);
+  p.stage = 4;
+  assert.equal(bonusScale(cfg, p, T), T.bonusScaleByStage![4]);
 });
 
 test("套用到角色：百分比與點數、負屬性會降低、攻速最終不超過 160", () => {
   const s = newSave();
   s.items.birdEgg = 1;
   const p = startHatch(s, cfg, "birdEgg", 0)!;
-  p.stage = 3;
+  p.stage = 4;
   p.affixes = [
     { stat: "attack", value: 25 },
     { stat: "attackSpeed", value: 10 },

@@ -28,7 +28,7 @@ import { animClock, ANIM_TIMING, attackPlaybackRate } from "../actors/animTiming
 export type NoviceGender = "male" | "female";
 export type NoviceLod = "hq" | "lite";
 export type CharShadowMode = "blob" | "realtime";
-export type AvatarEvent = { type: "hit"; attackId: number } | { type: "attackEnd"; attackId: number } | { type: "land" } | { type: "hurtEnd" };
+export type AvatarEvent = { type: "hit"; attackId: number } | { type: "attackEnd"; attackId: number } | { type: "land" } | { type: "hurtEnd" } | { type: "deathEnd" };
 
 export interface AvatarFrameInput {
   /** 實際水平移動速度（公尺／秒）。> 0.05 視為移動中，跑步動畫會依速度調整播放倍率，減少滑步 */
@@ -36,6 +36,10 @@ export interface AvatarFrameInput {
   jump?: boolean;
   attack?: boolean;
   hurt?: boolean;
+  /** 生命歸零：播放死亡動作（停在最後一格） */
+  die?: boolean;
+  /** 復活：回到 Idle */
+  revive?: boolean;
 }
 
 export function noviceFile(g: NoviceGender, lod: NoviceLod, version = "c10b5"): string {
@@ -105,6 +109,11 @@ export class NoviceAvatar {
 
   get skinnedMeshes(): number {
     return this.meshes.filter((m) => !!m.skeleton).length;
+  }
+
+  /** GLB 有沒有死亡動作（C1.0-B5b 起） */
+  get hasDeathClip(): boolean {
+    return this.groups.has("Death");
   }
 
   get state(): AnimName {
@@ -185,6 +194,20 @@ export class NoviceAvatar {
     return out.set(this.root.position.x, this.root.position.y + 1.25, this.root.position.z);
   }
 
+  /**
+   * 右耳的世界座標（寵物停在這附近）：頭骨起點（脖子上方）往上 0.14 m、往角色右側 0.17 m（耳朵的模型位置），跟著角色轉向
+   */
+  earAnchor(out = new Vector3()): Vector3 {
+    const yaw = this.root.rotation.y;
+    const rx = Math.cos(yaw);
+    const rz = -Math.sin(yaw);
+    if (this.headBone && this.skinnedRef) {
+      this.headBone.getAbsolutePositionToRef(this.skinnedRef, this.tmp);
+      return out.set(this.tmp.x + rx * 0.17, this.tmp.y + 0.14, this.tmp.z + rz * 0.17);
+    }
+    return out.set(this.root.position.x + rx * 0.17, this.root.position.y + 0.82, this.root.position.z + rz * 0.17);
+  }
+
   /** 跳躍目前的離地高度（公尺），由遊戲端加到角色的 y */
   jumpHeight(): number {
     return this.sm.jumpHeight(ANIM_TIMING.jump.height);
@@ -198,7 +221,9 @@ export class NoviceAvatar {
     const moving = input.speed > 0.05;
     const before = this.sm.state;
     const t0 = this.sm.time;
-    this.sm.update(dt, { moving, jump: input.jump, attack: input.attack, hurt: input.hurt });
+    const wasDeathDone = this.sm.state === "Death" && t0 >= this.sm.duration("Death");
+    this.sm.update(dt, { moving, jump: input.jump, attack: input.attack, hurt: input.hurt, die: input.die, revive: input.revive });
+    if (this.sm.state === "Death" && !wasDeathDone && this.sm.time >= this.sm.duration("Death")) this.emit({ type: "deathEnd" });
     const restarted = ONE_SHOT[this.sm.state] && this.sm.time < t0 && this.sm.state === before;
     if (this.sm.state !== before || restarted) {
       if (before === "Attack" && this.sm.state !== "Attack") this.emit({ type: "attackEnd", attackId: this.attackId });

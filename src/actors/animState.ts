@@ -1,17 +1,20 @@
 /**
  * 角色動畫狀態切換（純邏輯，不含 Babylon）。
  * 狀態：Idle、Run（循環）；Jump、Attack、Hurt（播一次，結束後回到 Run 或 Idle）。
- * 優先順序：Hurt > Attack = Jump > Run／Idle。Hurt 可以打斷任何動作；Attack、Jump 進行中不會被彼此打斷。
+ * 優先順序：Death > Hurt > Attack = Jump > Run／Idle。Hurt 可以打斷任何動作；Attack、Jump 進行中不會被彼此打斷。
+ * Death（Stage 7）：播一次、停在最後一格；之後只接受 revive（回到 Idle）。
  */
-export type AnimName = "Idle" | "Run" | "Jump" | "Attack" | "Hurt";
-export const ANIM_NAMES: readonly AnimName[] = Object.freeze(["Idle", "Run", "Jump", "Attack", "Hurt"]);
-export const ONE_SHOT: Readonly<Record<AnimName, boolean>> = Object.freeze({ Idle: false, Run: false, Jump: true, Attack: true, Hurt: true });
+export type AnimName = "Idle" | "Run" | "Jump" | "Attack" | "Hurt" | "Death";
+export const ANIM_NAMES: readonly AnimName[] = Object.freeze(["Idle", "Run", "Jump", "Attack", "Hurt", "Death"]);
+export const ONE_SHOT: Readonly<Record<AnimName, boolean>> = Object.freeze({ Idle: false, Run: false, Jump: true, Attack: true, Hurt: true, Death: true });
 
 export interface AnimInput {
   moving: boolean;
   jump?: boolean;
   attack?: boolean;
   hurt?: boolean;
+  die?: boolean;
+  revive?: boolean;
 }
 
 export class AnimStateMachine {
@@ -21,7 +24,7 @@ export class AnimStateMachine {
   private readonly durations: Record<AnimName, number>;
 
   constructor(durations: Partial<Record<AnimName, number>> = {}) {
-    this.durations = { Idle: 2.4, Run: 0.6, Jump: 1, Attack: 0.5, Hurt: 0.5, ...durations };
+    this.durations = { Idle: 2.4, Run: 0.6, Jump: 1, Attack: 0.5, Hurt: 0.5, Death: 1.6, ...durations };
   }
 
   /** 攻速改變時調整攻擊動作長度 */
@@ -37,6 +40,15 @@ export class AnimStateMachine {
   update(dt: number, input: AnimInput): boolean {
     const before = this.state;
     this.time += dt;
+    if (this.state === "Death") {
+      // 死亡：停在最後一格，只有復活能離開
+      if (input.revive) this.enter("Idle");
+      return this.state !== before;
+    }
+    if (input.die) {
+      this.enter("Death");
+      return true;
+    }
     const busy = ONE_SHOT[this.state] && this.time < this.durations[this.state];
     if (input.hurt) this.enter("Hurt");
     else if (!busy || this.state === "Run" || this.state === "Idle") {

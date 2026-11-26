@@ -39,6 +39,27 @@ function main(): void {
   const lab = new URLSearchParams(location.search).get("lab");
   const map = new URLSearchParams(location.search).get("map");
   try {
+    // ?play=world：Stage 7 完整遊戲（星芽村出生 → 南門 → 星芽原野 → 星願石返回；共用存檔）；&newgame=1 重新開始、&g=female 新存檔性別
+    if (new URLSearchParams(location.search).get("play") === "world") {
+      document.body.classList.add("map-mode");
+      void import("./game/worldSession.ts")
+        .then(async (ws) => {
+          const world = new ws.WorldSession(new URLSearchParams(location.search));
+          if (world.save.character.map === "starsprout") {
+            const m = await import("./game/StarsproutGame.ts");
+            await m.startStarsproutGame(canvas, hudRoot, world);
+          } else {
+            const m = await import("./game/VillageGame.ts");
+            await m.startVillageGame(canvas, hudRoot, world);
+          }
+        })
+        .then(() => hideBoot())
+        .catch((err: unknown) => {
+          console.error(err);
+          fail(`星願物語載入失敗：${err instanceof Error ? err.message : String(err)}`);
+        });
+      return;
+    }
     // ?play=starsprout：Stage 5.6 整合測試（男女初心者在星芽原野打怪、掉落、背包、寵物）；&g=female、&lod=lite、&charshadow=realtime
     if (new URLSearchParams(location.search).get("play") === "starsprout") {
       document.body.classList.add("map-mode");

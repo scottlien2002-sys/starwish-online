@@ -40,9 +40,27 @@ export interface PetTuning {
   bonusScaleByStage: number[] | null; // 各階段的加成倍率（0～1）
   feedExp: Record<FeedId, number> | null;
   drops: Record<ItemId, number> | null; // 每次擊倒怪物各物品的掉落機率
-  appraisalFee: number | null; // 寵物商人鑑定費用（金幣；尚無金幣系統）
+  appraisalFee: number | null; // 寵物商人鑑定費用（金幣）
   feedPrice: Record<"shopFeed", number> | null; // 商店飼料價格
+  care: PetCare | null; // 飽食度、死亡、靈魂復活（方案 B）
 }
+
+/** 飽食度與死亡（方案 B：靈魂復活型）。細節未確認的部分全部是可配置值 */
+export interface PetCare {
+  satietyMax: number;
+  satietyLossPerHour: number;
+  feedSatiety: Record<FeedId, number>;
+  /** 飽食度歸零後經過多久變成靈魂（分鐘） */
+  starveDeathMinutes: number;
+  /** 飽食度歸零時是否停止時間成長 */
+  growthStopsWhenHungry: boolean;
+  /** 靈魂復活費用（金幣） */
+  reviveFee: number;
+  /** 復活後的飽食度（相對上限的比例） */
+  reviveSatietyRatio: number;
+}
+
+type CareJson = { [K in keyof PetCare]: K extends "feedSatiety" ? Record<FeedId, number | null> : PetCare[K] | null };
 
 export interface PetConfig {
   schemaVersion: number;
@@ -66,8 +84,20 @@ export interface PetConfig {
     feedExp: Record<FeedId, number>;
     drops: Record<ItemId, number>;
     services?: { appraisalFee: number; feedPrice: Record<"shopFeed", number> };
+    care?: PetCare;
   };
   services?: { appraisalFee: number | null; feedPrice: Record<"shopFeed", number | null> };
+  care?: CareJson;
+  visual?: { stageSize: number[] };
+}
+
+function officialCare(cfg: PetConfig): PetCare | null {
+  const c = cfg.care;
+  if (!c) return null;
+  const fs = c.feedSatiety;
+  if (fs.monsterMaterial === null || fs.shopFeed === null) return null;
+  for (const k of ["satietyMax", "satietyLossPerHour", "starveDeathMinutes", "growthStopsWhenHungry", "reviveFee", "reviveSatietyRatio"] as const) if (c[k] === null || c[k] === undefined) return null;
+  return { ...(c as unknown as PetCare), feedSatiety: { monsterMaterial: fs.monsterMaterial, shopFeed: fs.shopFeed } };
 }
 
 /** 正式設定尚未定案時拋出（不得自行假設機率或數值） */
@@ -96,6 +126,7 @@ export function resolveTuning(cfg: PetConfig, mode: "official" | "preview"): Pet
       drops: p.drops,
       appraisalFee: p.services?.appraisalFee ?? 0,
       feedPrice: p.services?.feedPrice ?? { shopFeed: 0 },
+      care: p.care ?? null,
     };
   }
   const statW = cfg.appraisal.stats.every((s) => s.statWeight !== null)
@@ -120,6 +151,7 @@ export function resolveTuning(cfg: PetConfig, mode: "official" | "preview"): Pet
     drops,
     appraisalFee: cfg.services?.appraisalFee ?? null,
     feedPrice: shopFeedPrice(cfg),
+    care: officialCare(cfg),
   };
 }
 
@@ -147,6 +179,7 @@ export function missingTuning(t: PetTuning, mode: "official" | "preview"): strin
     ["drops", "掉落率"],
     ["appraisalFee", "鑑定費用"],
     ["feedPrice", "飼料價格"],
+    ["care", "飽食度與死亡復活規則"],
   ];
   return label.filter(([k]) => t[k] === null && !(mode === "preview" && k === "valueWeights")).map(([, l]) => l);
 }
@@ -215,7 +248,17 @@ export interface Pet {
   lastTickAt: number;
   affixes: PetAffix[] | null; // null = 尚未鑑定
   appraisedAt?: number;
+  /** 飽食度（孵化後才有） */
+  satiety?: number;
+  /** 飽食度歸零的時間（毫秒）；有東西吃就清除 */
+  starvedSince?: number | null;
+  /** alive = 活著；soul = 靈魂（方案 B：資料與詞條保留，可以復活） */
+  life?: "alive" | "soul";
+  /** 掛賣中：暫停飽食度消耗與成長（交易系統鎖定） */
+  frozen?: boolean;
 }
+
+export const isSoul = (p: Pet): boolean => p.life === "soul";
 
 /**
  * 背包裡的一顆種子／孵化蛋／鳥蛋（每一顆都是獨立個體，不能只有數量）。
@@ -227,6 +270,8 @@ export interface PetItem {
   obtainedAt: number;
   affixes: PetAffix[] | null;
   appraisedAt?: number;
+  /** 交易系統鎖定（掛賣中）：不能孵化、鑑定、出售、再掛賣 */
+  locked?: boolean;
 }
 
 export interface PetSave {
@@ -299,7 +344,7 @@ export function addItems(save: PetSave, items: readonly ItemId[], now = 0): void
 /** 用背包裡的種子／蛋／鳥蛋開始孵化（成為階段 0 的寵物） */
 export function startHatch(save: PetSave, cfg: PetConfig, source: PetSourceId, now: number, itemId?: string): Pet | null {
   const bag = syncBag(save, now);
-  const idx = itemId ? bag.findIndex((b) => b.id === itemId && b.kind === source) : bag.findIndex((b) => b.kind === source);
+  const idx = itemId ? bag.findIndex((b) => b.id === itemId && b.kind === source && !b.locked) : bag.findIndex((b) => b.kind === source && !b.locked);
   if (idx < 0) return null;
   const src = cfg.sources.find((s) => s.id === source);
   if (!src) return null;
@@ -317,26 +362,65 @@ export function stageCount(cfg: PetConfig, pet: Pet): number {
 }
 
 /** 時間前進：未孵化的蛋到時間就孵化（階段 1）；已孵化的寵物依時間增加經驗 */
-export function tickPet(pet: Pet, t: PetTuning, now: number): { hatched: boolean } {
+export function tickPet(pet: Pet, t: PetTuning, now: number): { hatched: boolean; died?: boolean } {
   const dt = Math.max(0, (now - pet.lastTickAt) / 1000);
   pet.lastTickAt = now;
+  // 掛賣中（交易系統鎖定）或靈魂：不消耗飽食度、不成長
+  if (pet.frozen || isSoul(pet)) return { hatched: false };
   if (pet.stage === 0) {
     if ((now - pet.obtainedAt) / 1000 >= need(t.hatchSeconds, "growth.hatchSeconds")) {
       pet.stage = 1;
+      if (t.care) {
+        pet.satiety = t.care.satietyMax;
+        pet.starvedSince = null;
+      }
+      pet.life = "alive";
       return { hatched: true };
     }
     return { hatched: false };
   }
-  pet.exp += dt * need(t.expPerSecond, "growth.expPerSecond");
+  const care = t.care;
+  if (!care) {
+    pet.exp += dt * need(t.expPerSecond, "growth.expPerSecond");
+    return { hatched: false };
+  }
+  // 飽食度：先算到歸零的那一刻，之後的時間不成長（若設定為飢餓停止成長）
+  const before = pet.satiety ?? care.satietyMax;
+  const loss = (dt * care.satietyLossPerHour) / 3600;
+  const fedSeconds = loss > 0 ? Math.min(dt, (before / care.satietyLossPerHour) * 3600) : dt;
+  pet.satiety = Math.max(0, before - loss);
+  const growSeconds = care.growthStopsWhenHungry ? fedSeconds : dt;
+  pet.exp += growSeconds * need(t.expPerSecond, "growth.expPerSecond");
+  if (pet.satiety <= 0) {
+    const zeroAt = now - (dt - fedSeconds) * 1000;
+    if (pet.starvedSince === null || pet.starvedSince === undefined) pet.starvedSince = zeroAt;
+    if (now - pet.starvedSince >= care.starveDeathMinutes * 60_000) {
+      pet.life = "soul";
+      return { hatched: false, died: true };
+    }
+  }
   return { hatched: false };
 }
 
+/** 方案 B：靈魂復活（費用由呼叫端用金幣扣款）；詞條、階段、經驗都保留 */
+export function revivePet(pet: Pet, t: PetTuning): boolean {
+  if (!isSoul(pet) || !t.care) return false;
+  pet.life = "alive";
+  pet.satiety = t.care.satietyMax * t.care.reviveSatietyRatio;
+  pet.starvedSince = null;
+  return true;
+}
+
 export function feedPet(save: PetSave, pet: Pet, food: FeedId, t: PetTuning): boolean {
-  if (pet.stage === 0 || save.items[food] <= 0) return false;
+  if (pet.stage === 0 || save.items[food] <= 0 || isSoul(pet) || pet.frozen) return false;
   const exp = need(t.feedExp, "feed.exp")[food];
   save.items[food] -= 1;
   pet.exp += exp;
   pet.feedCount += 1;
+  if (t.care) {
+    pet.satiety = Math.min(t.care.satietyMax, (pet.satiety ?? t.care.satietyMax) + t.care.feedSatiety[food]);
+    pet.starvedSince = null;
+  }
   return true;
 }
 
@@ -349,7 +433,7 @@ export function canEvolve(cfg: PetConfig, pet: Pet, t: PetTuning): boolean {
 }
 
 export function evolve(cfg: PetConfig, pet: Pet, t: PetTuning): boolean {
-  if (!canEvolve(cfg, pet, t)) return false;
+  if (isSoul(pet) || pet.frozen || !canEvolve(cfg, pet, t)) return false;
   pet.stage += 1;
   return true;
 }
@@ -431,7 +515,7 @@ export function appraisePet(save: PetSave, cfg: PetConfig, t: PetTuning, rng: Rn
 /** 鑑定背包裡的種子／孵化蛋／鳥蛋個體（方案 A：一次固定；不新增、不刪除、不改數量） */
 export function appraiseItem(save: PetSave, cfg: PetConfig, t: PetTuning, rng: Rng, itemId: string, mode: "official" | "preview" = "official", now = 0): AppraiseResult {
   const item = syncBag(save).find((b) => b.id === itemId);
-  if (!item) return { ok: false, reason: "not-found" };
+  if (!item || item.locked) return { ok: false, reason: "not-found" };
   if (item.affixes !== null) return { ok: false, reason: "already-appraised" };
   item.affixes = appraise(cfg, t, rng, mode);
   item.appraisedAt = now;
@@ -462,7 +546,7 @@ export interface CharacterStats {
 
 /** 寵物對角色的實際加成（詞條 × 培育倍率）。未鑑定、蛋階段 = 無加成。攻速最終不超過 160。 */
 export function applyPetBonus(base: CharacterStats, cfg: PetConfig, pet: Pet | null, t: PetTuning): { stats: CharacterStats; scale: number; effective: PetAffix[] } {
-  if (!pet || !pet.affixes || pet.stage === 0) return { stats: { ...base, attackSpeed: clampAttackSpeed(base.attackSpeed) }, scale: 0, effective: [] };
+  if (!pet || !pet.affixes || pet.stage === 0 || isSoul(pet)) return { stats: { ...base, attackSpeed: clampAttackSpeed(base.attackSpeed) }, scale: 0, effective: [] };
   const scale = bonusScale(cfg, pet, t);
   const s = { ...base };
   const effective: PetAffix[] = [];
@@ -487,7 +571,7 @@ export function equip(save: PetSave, petId: number | null): boolean {
     return true;
   }
   const p = save.pets.find((x) => x.id === petId);
-  if (!p) return false;
+  if (!p || p.frozen) return false;
   save.equippedId = petId;
   return true;
 }

@@ -1709,6 +1709,19 @@ for (const name of browsers) {
             new Promise((res) => {
               const api = window.__starwish;
               const t0 = performance.now();
+              // 時間基準：遊戲邏輯每幀最多前進 0.1 秒（Game.ts），所以「25 秒」要用遊戲時間量，
+              // 不然軟體繪圖幀率低於 10 fps 時，同樣 25 秒實際時間裡遊戲只跑了十幾秒（Stage 7 對照診斷的根因）。
+              // 門檻不變（≥10 下、≥1 隻擊倒、怪物 ≥2 下）；實際時間最多等 120 秒。
+              let gameSec = 0;
+              let frames = 0;
+              let lastRaf = null;
+              const raf = (t) => {
+                if (lastRaf !== null) gameSec += Math.min((t - lastRaf) / 1000, 0.1);
+                lastRaf = t;
+                frames++;
+                if (gameSec < 25) requestAnimationFrame(raf);
+              };
+              requestAnimationFrame(raf);
               const log = { samples: 0, cancelledAlive: 0, hurtStarts: 0, maxRecoil: 0, maxHitStreak: 0, hitsTakenStart: api.combat().hitsTaken, playerHitsByMonster: 0, monsterHitByPlayer: 0, landedAfterHit: false, deaths: 0, nan: 0 };
               const hitSince = new Map();
               let firstPlayerHit = null;
@@ -1759,14 +1772,18 @@ for (const name of browsers) {
                   prevTaken = taken;
                 }
                 log.samples++;
-                if (now - t0 > 25000) res(log);
-                else setTimeout(step, 50);
+                if (gameSec >= 25 || now - t0 > 120000) {
+                  log.gameSec = Math.round(gameSec * 10) / 10;
+                  log.wallSec = Math.round((now - t0) / 100) / 10;
+                  log.fps = Math.round((frames / ((now - t0) / 1000)) * 10) / 10;
+                  res(log);
+                } else setTimeout(step, 50);
               };
               step();
             }),
         );
         run.results.push({ tag: `${tag}：持續攻擊 25 秒`, fight });
-        check(`${tag}：持續攻擊 25 秒，玩家有打中怪物、怪物有被擊倒`, fight.monsterHitByPlayer >= 10 && fight.deaths >= 1, fight);
+        check(`${tag}：持續攻擊 25 秒（遊戲時間），玩家有打中怪物、怪物有被擊倒`, fight.gameSec >= 25 && fight.monsterHitByPlayer >= 10 && fight.deaths >= 1, fight);
         check(`${tag}：玩家開始攻擊後，怪物仍能恢復並真的打到玩家`, fight.landedAfterHit && fight.playerHitsByMonster >= 2, fight);
         check(`${tag}：持續普通攻擊 25 秒，沒有怪物進入受擊硬直、沒有播受傷動作、活著時攻擊沒有被取消`, fight.maxHitStreak === 0 && fight.hurtStarts === 0 && fight.cancelledAlive === 0, fight);
         check(`${tag}：被打時沒有被推離玩家（取樣間距離最多變大 0.3 公尺，含怪物彼此推開）`, fight.maxRecoil < 0.3, fight.maxRecoil);
@@ -2533,7 +2550,7 @@ for (const name of browsers) {
       const fol = await page.evaluate(() => window.__starwishAnim.pet.state());
       const d = Math.hypot(fol.followerPos[0] - fol.headPos[0], fol.followerPos[1] - fol.headPos[1], fol.followerPos[2] - fol.headPos[2]);
       run.results.push({ tag: "follower", d, head: fol.headPos, pet: fol.followerPos });
-      check("寵物：角色移動後跟到頭部附近（0.2～0.8 m）、在頭頂高度附近", d > 0.15 && d < 0.8 && Math.abs(fol.followerPos[1] - fol.headPos[1]) < 0.4, { d, head: fol.headPos, pet: fol.followerPos });
+      check("寵物：角色移動後跟到耳朵旁（0.05～0.45 m）、在耳朵高度附近（Stage 7）", d > 0.05 && d < 0.45 && Math.abs(fol.followerPos[1] - fol.headPos[1]) < 0.2, { d, ear: fol.headPos, pet: fol.followerPos });
       await shot("pet_follow");
       await page.evaluate(() => {
         document.querySelector("[data-pet=toggle]")?.click();

@@ -440,7 +440,7 @@ export async function startAnimPetLab(canvas: HTMLCanvasElement, hudRoot: HTMLEl
   const pos = new Vector3(0, heightAt(0, 0), 0);
   let yaw = 0;
   const headTmp = new Vector3();
-  const headWorld = (): Vector3 => avatar.headAnchor(headTmp);
+  const headWorld = (): Vector3 => avatar.earAnchor(headTmp); // Stage 7：寵物在耳朵旁
   let petTick = 0;
   engine.runRenderLoop(() => {
     const dt = Math.min(0.05, engine.getDeltaTime() / 1000);

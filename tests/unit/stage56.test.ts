@@ -113,7 +113,7 @@ test("寵物鑑定服務（B 線規格 V2.1）：個體物品、孵化前鑑定�
   const ids = inv.ok ? inv.data.map((x) => x.id) : [];
   assert.equal(new Set(ids).size, 3); // 同名的兩顆種子是不同個體
   const q = await svc.quote(ids[0]!);
-  assert.ok(q.ok && q.data.fee === 0 && q.data.test);
+  assert.ok(q.ok && q.data.fee === 20 && q.data.test); // 測試設定鑑定費用
   const a1 = await svc.appraise(ids[0]!, "req-1");
   assert.ok(a1.ok && a1.data.item.appraised && validateAffixes(cfg, a1.data.item.affixes as never).length === 0);
   // 重送同一個 requestId → 同一個結果

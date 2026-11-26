@@ -19,6 +19,7 @@ export const ANIM_TIMING = Object.freeze({
     groundSpeedBy: Object.freeze({
       c10b5: Object.freeze({ male: 1.66, female: 1.79 }),
       c10b5a: Object.freeze({ male: 2.26, female: 2.41 }),
+      c10b5b: Object.freeze({ male: 2.26, female: 2.41 }), // 跑步動作與 B5a 相同
     }) as Readonly<Record<string, Readonly<Record<"male" | "female", number>>>>,
     /** 播放倍率限制：太慢看起來像慢動作、太快腳會糊在一起；超過上限的部分仍會滑步 */
     minRate: 0.8,

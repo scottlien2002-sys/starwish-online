@@ -1,5 +1,7 @@
 /**
- * 星靈寵物跟隨（畫面）：裝備後出現在角色頭部附近，以飛翔（鳥）或魔法漂浮（種子、精靈）方式跟隨。
+ * 星靈寵物跟隨（畫面）：裝備後在角色耳朵旁，以飛翔（鳥）或魔法漂浮（種子、精靈）方式跟隨。
+ * 成長階段：初始、幼年期、成長期、完成體（stage 1～4；0 = 孵化中）。四個階段大小明顯不同（pets.json visual.stageSize），
+ * 完成體約等於角色臉部大小。靈魂狀態（方案 B）：半透明、淡藍白色。
  * 各階段外觀先用簡單的程式模型預留（之後換正式模型只要替換 buildStage）。
  */
 import { Color3, Mesh, MeshBuilder, Scalar, Scene, StandardMaterial, TransformNode, Vector3 } from "@babylonjs/core";
@@ -8,11 +10,23 @@ export interface PetLook {
   species: string;
   stage: number;
   motion: "float" | "fly";
+  /** 靈魂（死亡後，方案 B） */
+  soul?: boolean;
 }
 
+/** 各階段高度（公尺）：未設定時用的預設值與 pets.json visual.stageSize 相同 */
+export const DEFAULT_STAGE_SIZE: readonly number[] = [0.1, 0.075, 0.115, 0.16, 0.22];
+/** 程式模型在 scale = 1 時的大約高度（公尺） */
+const BASE_HEIGHT = 0.17;
+
+let SOUL = false;
 function mat(scene: Scene, name: string, c: string, emissive = 0.35, alpha = 1): StandardMaterial {
   const m = new StandardMaterial(name, scene);
-  const col = Color3.FromHexString(c);
+  const col = SOUL ? Color3.FromHexString("#cfe8ff") : Color3.FromHexString(c);
+  if (SOUL) {
+    alpha = 0.42;
+    emissive = 0.9;
+  }
   m.diffuseColor = col;
   m.emissiveColor = col.scale(emissive);
   m.specularColor = new Color3(0.15, 0.15, 0.15);
@@ -23,7 +37,8 @@ function mat(scene: Scene, name: string, c: string, emissive = 0.35, alpha = 1):
 /** 依種類與階段做出預留外觀（大小隨階段成長）；回傳根節點與需要拍動的翅膀 */
 function buildStage(scene: Scene, look: PetLook): { root: TransformNode; wings: Mesh[]; spin: TransformNode | null } {
   const root = new TransformNode(`pet_${look.species}_${look.stage}`, scene);
-  const s = [0.55, 0.7, 0.85, 1.0][look.stage] ?? 1;
+  SOUL = !!look.soul;
+  const s = 1; // 大小由 root.scaling 決定（各階段高度）
   const wings: Mesh[] = [];
   let spin: TransformNode | null = null;
   const add = (m: Mesh): Mesh => {
@@ -50,7 +65,7 @@ function buildStage(scene: Scene, look: PetLook): { root: TransformNode; wings: 
   if (look.species === "sprout") {
     const body = add(MeshBuilder.CreateSphere("sproutBody", { diameter: 0.16 * s, segments: 14 }, scene));
     body.material = mat(scene, "sproutBodyM", "#a8e07a", 0.35);
-    const n = 1 + look.stage; // 葉子數隨階段增加
+    const n = 1 + look.stage; // 葉子數隨階段增加（初始 2 片 → 完成體 5 片）
     spin = new TransformNode("sproutLeaves", scene);
     spin.parent = root;
     for (let i = 0; i < n; i++) {
@@ -64,7 +79,7 @@ function buildStage(scene: Scene, look: PetLook): { root: TransformNode; wings: 
       leaf.material = mat(scene, "leafM", "#58b85a", 0.3);
       (leaf.material as StandardMaterial).backFaceCulling = false;
     }
-    if (look.stage >= 3) {
+    if (look.stage >= 4) {
       const flower = add(MeshBuilder.CreateSphere("flower", { diameter: 0.07, segments: 10 }, scene));
       flower.position.y = 0.16;
       flower.material = mat(scene, "flowerM", "#ffd75e", 0.9);
@@ -108,7 +123,7 @@ function buildStage(scene: Scene, look: PetLook): { root: TransformNode; wings: 
       w.metadata = { side: sx };
       wings.push(w);
     }
-    if (look.stage >= 3) {
+    if (look.stage >= 4) {
       const tail = add(MeshBuilder.CreateCylinder("tail", { diameterTop: 0.06, diameterBottom: 0, height: 0.09, tessellation: 3 }, scene));
       tail.rotation.x = Math.PI / 2.4;
       tail.position.set(0, 0.02, 0.1);
@@ -126,34 +141,50 @@ export class PetFollower {
   private placed = false;
 
   private readonly scene: Scene;
+  private readonly stageSize: readonly number[];
+  /** 目前外觀的高度（公尺；測試用） */
+  size = 0;
 
-  constructor(scene: Scene) {
+  constructor(scene: Scene, stageSize: readonly number[] = DEFAULT_STAGE_SIZE) {
     this.scene = scene;
+    this.stageSize = stageSize;
   }
 
   /** 換寵物或換階段時重建外觀；null = 沒有裝備 */
   setLook(look: PetLook | null): void {
-    if (look && this.look && look.species === this.look.species && look.stage === this.look.stage) return;
+    if (look && this.look && look.species === this.look.species && look.stage === this.look.stage && !!look.soul === !!this.look.soul) return;
     this.parts?.root.dispose(false, true);
     this.parts = look ? buildStage(this.scene, look) : null;
     this.look = look;
-    if (this.parts) this.parts.root.position.copyFrom(this.position);
+    this.size = look ? (this.stageSize[look.stage] ?? BASE_HEIGHT) : 0;
+    if (this.parts) {
+      const k = this.size / BASE_HEIGHT;
+      this.parts.root.scaling.set(k, k, k);
+      this.parts.root.position.copyFrom(this.position);
+    }
   }
 
   get visible(): boolean {
     return !!this.parts;
   }
 
-  /** head：角色頭頂的世界座標；yaw：角色面向（弧度，0 = +z） */
-  update(dt: number, head: Vector3, yaw: number): void {
+  /**
+   * ear：角色右耳的世界座標（NoviceAvatar.earAnchor）；yaw：角色面向（弧度，0 = +z）。
+   * 寵物停在耳朵外側（體積越大離越遠，不會穿進頭髮），稍微偏後、上下漂浮或拍翅
+   */
+  update(dt: number, ear: Vector3, yaw: number): void {
     this.t += dt;
     if (!this.parts || !this.look) return;
     const fly = this.look.motion === "fly" && this.look.stage > 0;
-    // 目標：頭部右後上方，繞頭慢慢轉一點；漂浮上下擺動
-    const orbit = yaw + Math.PI * 0.75 + Math.sin(this.t * 0.6) * 0.35;
-    const r = 0.38;
-    const bob = Math.sin(this.t * (fly ? 5.5 : 2.2)) * (fly ? 0.03 : 0.045);
-    const target = new Vector3(head.x + Math.sin(orbit) * r, head.y + 0.18 + bob, head.z + Math.cos(orbit) * r);
+    const out = 0.07 + this.size * 0.6;
+    const rx = Math.cos(yaw);
+    const rz = -Math.sin(yaw);
+    const fx = Math.sin(yaw);
+    const fz = Math.cos(yaw);
+    const sway = Math.sin(this.t * 0.7) * 0.03;
+    const bob = Math.sin(this.t * (fly ? 5.5 : 2.2)) * (fly ? 0.02 : 0.03);
+    const back = -0.04 + sway;
+    const target = new Vector3(ear.x + rx * out + fx * back, ear.y + 0.02 + bob, ear.z + rz * out + fz * back);
     if (!this.placed) {
       this.position.copyFrom(target);
       this.placed = true;

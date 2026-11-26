@@ -12,6 +12,7 @@
     "feed": "pending",
     "drops": "pending",
     "bonusScale": "pending",
+    "care": "pending",
     "services": "pending"
   },
   "sources": [
@@ -21,11 +22,11 @@
   ],
   "species": [
     { "id": "sprout", "label": "星芽靈（暫定名稱）", "motion": "float", "stages": [
-      { "id": "seed", "label": "種子" }, { "id": "baby", "label": "幼芽" }, { "id": "young", "label": "成長期" }, { "id": "adult", "label": "綻放期" } ] },
+      { "id": "hatching", "label": "孵化中（種子）" }, { "id": "initial", "label": "初始" }, { "id": "juvenile", "label": "幼年期" }, { "id": "growing", "label": "成長期" }, { "id": "complete", "label": "完成體" } ] },
     { "id": "wisp", "label": "星光精靈（暫定名稱）", "motion": "float", "stages": [
-      { "id": "egg", "label": "蛋" }, { "id": "baby", "label": "幼體" }, { "id": "young", "label": "成長期" }, { "id": "adult", "label": "成熟期" } ] },
+      { "id": "hatching", "label": "孵化中（蛋）" }, { "id": "initial", "label": "初始" }, { "id": "juvenile", "label": "幼年期" }, { "id": "growing", "label": "成長期" }, { "id": "complete", "label": "完成體" } ] },
     { "id": "bird", "label": "星羽鳥（暫定名稱）", "motion": "fly", "stages": [
-      { "id": "egg", "label": "鳥蛋" }, { "id": "baby", "label": "雛鳥" }, { "id": "young", "label": "幼鳥" }, { "id": "adult", "label": "成鳥" } ] }
+      { "id": "hatching", "label": "孵化中（鳥蛋）" }, { "id": "initial", "label": "初始" }, { "id": "juvenile", "label": "幼年期" }, { "id": "growing", "label": "成長期" }, { "id": "complete", "label": "完成體" } ] }
   ],
   "appraisal": {
     "maxAffixes": 4,
@@ -51,6 +52,18 @@
     { "id": "shopFeed", "label": "商店飼料", "exp": null }
   ],
   "drops": { "default": { "seed": null, "egg": null, "birdEgg": null, "monsterMaterial": null } },
+  "stageNote": "成長階段統一為：初始、幼年期、成長期、完成體（2026-11-26 企劃確認）。陣列第 0 格是孵化中（不是成長階段，沒有加成、不跟隨）。",
+  "visual": { "note": "跟隨位置：角色耳朵旁；各階段大小（公尺，約略高度）明顯不同，完成體約等於角色臉部大小", "stageSize": [0, 0.075, 0.115, 0.16, 0.22] },
+  "care": {
+    "note": "飽食度、餓死、死亡與復活（方案 B：靈魂復活型）。數值與細節尚未確認 → null，正式模式停用寵物功能",
+    "satietyMax": null,
+    "satietyLossPerHour": null,
+    "feedSatiety": { "monsterMaterial": null, "shopFeed": null },
+    "starveDeathMinutes": null,
+    "growthStopsWhenHungry": null,
+    "reviveFee": null,
+    "reviveSatietyRatio": null
+  },
   "services": { "note": "寵物商人：鑑定費用、飼料價格（未定案；遊戲目前沒有金幣系統）", "appraisalFee": null, "feedPrice": { "shopFeed": null } },
   "preview": {
     "note": "只給測試頁（?lab=anim）使用的暫定數值，方便驗證流程；不是正式平衡數值，正式遊戲不得讀取。",
@@ -59,11 +72,12 @@
     "valueWeights": null,
     "hatchSeconds": 30,
     "expPerSecond": 2,
-    "stageExp": [0, 60, 200, 500],
-    "evolveRequiresFeedCount": [0, 1, 3, 5],
-    "bonusScaleByStage": [0, 0.3, 0.6, 1.0],
+    "stageExp": [0, 0, 60, 200, 500],
+    "evolveRequiresFeedCount": [0, 0, 1, 3, 5],
+    "bonusScaleByStage": [0, 0.25, 0.5, 0.75, 1.0],
     "feedExp": { "monsterMaterial": 20, "shopFeed": 50 },
     "drops": { "seed": 0.25, "egg": 0.15, "birdEgg": 0.1, "monsterMaterial": 0.6 },
-    "services": { "appraisalFee": 0, "feedPrice": { "shopFeed": 0 } }
+    "services": { "appraisalFee": 20, "feedPrice": { "shopFeed": 10 } },
+    "care": { "satietyMax": 100, "satietyLossPerHour": 120, "feedSatiety": { "monsterMaterial": 30, "shopFeed": 50 }, "starveDeathMinutes": 10, "growthStopsWhenHungry": true, "reviveFee": 50, "reviveSatietyRatio": 0.5 }
   }
 }

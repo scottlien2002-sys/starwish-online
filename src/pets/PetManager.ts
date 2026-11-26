@@ -5,10 +5,13 @@
  * mode："official" = 正式（未定案數值會拋 PetConfigPendingError）；"preview" = 測試頁暫定值。
  */
 import type { Rng } from "../core/rng.ts";
+import { transact, type WalletState } from "../economy/wallet.ts";
 import {
   addItems,
   applyPetBonus,
   appraiseItem,
+  isSoul,
+  revivePet,
   appraisePet,
   missingTuning,
   syncBag,
@@ -40,6 +43,8 @@ export type PetEvent =
   | { type: "appraised"; pet: Pet }
   | { type: "evolved"; pet: Pet }
   | { type: "equipChanged"; pet: Pet | null }
+  | { type: "died"; pet: Pet }
+  | { type: "revived"; pet: Pet }
   | { type: "changed" };
 
 export class PetManager {
@@ -99,7 +104,11 @@ export class PetManager {
   /** 每秒（或回到遊戲時）呼叫一次：孵化與時間成長 */
   tick(now: number): void {
     if (!this.enabled) return;
-    for (const p of this.save.pets) if (tickPet(p, this.tuning, now).hatched) this.emit({ type: "hatched", pet: p });
+    for (const p of this.save.pets) {
+      const r = tickPet(p, this.tuning, now);
+      if (r.hatched) this.emit({ type: "hatched", pet: p });
+      if (r.died) this.emit({ type: "died", pet: p });
+    }
   }
 
   feed(petId: number, food: FeedId): boolean {
@@ -157,6 +166,22 @@ export class PetManager {
 
   serialize(): string {
     return JSON.stringify(this.save);
+  }
+
+  /**
+   * 方案 B：靈魂復活（費用用金幣扣款；同一個 requestId 只處理一次）。
+   * 詞條、階段、經驗都保留；飽食度回到設定比例。
+   */
+  revive(petId: number, requestId: string, wallet: WalletState): { ok: true; charged: number } | { ok: false; message: string } {
+    if (!this.enabled) return { ok: false, message: this.disabledReason };
+    const care = this.tuning.care;
+    const p = this.pet(petId);
+    if (!care || !p) return { ok: false, message: "找不到這隻寵物。" };
+    if (!isSoul(p)) return { ok: false, message: "這隻寵物沒有死亡，不需要復活。" };
+    const r = transact(wallet, `revive:${requestId}`, "petService", care.reviveFee, `pet:${p.id}`, () => (revivePet(p, this.tuning) ? { ok: true, value: true } : { ok: false, message: "復活失敗。" }));
+    if (!r.ok) return { ok: false, message: r.message };
+    if (!r.repeated) this.emit({ type: "revived", pet: p });
+    return { ok: true, charged: r.charged };
   }
 
   /** 測試設定專用：給物品（商店購買、測試按鈕）。正式模式沒有金幣系統，不提供 */

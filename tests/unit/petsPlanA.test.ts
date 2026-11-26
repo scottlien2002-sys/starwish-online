@@ -27,7 +27,7 @@ const cfg = JSON.parse(readFileSync(new URL("../../src/config/pets.json", import
 const T = resolveTuning(cfg, "preview");
 const BASE: CharacterStats = { attack: 100, attackSpeed: 100, defense: 50, maxHp: 1000 };
 
-function hatched(stage = 3): { s: PetSave; id: number } {
+function hatched(stage = 4): { s: PetSave; id: number } {
   const s = newSave();
   s.items.birdEgg = 1;
   const p = startHatch(s, cfg, "birdEgg", 0)!;
@@ -36,7 +36,7 @@ function hatched(stage = 3): { s: PetSave; id: number } {
   return { s, id: p.id };
 }
 const pet = (s: PetSave, id: number) => s.pets.find((p) => p.id === id)!;
-const withAffixes = (affixes: PetAffix[], stage = 3) => {
+const withAffixes = (affixes: PetAffix[], stage = 4) => {
   const h = hatched(stage);
   pet(h.s, h.id).affixes = affixes;
   equip(h.s, h.id);
@@ -80,7 +80,7 @@ test("正負混合：正負詞條使用同一個發揮比例（各階段皆同�
     { stat: "attack", value: 20 },
     { stat: "defense", value: -10 },
   ];
-  for (const stage of [1, 2, 3]) {
+  for (const stage of [1, 2, 3, 4]) {
     const { s, id } = withAffixes(aff, stage);
     const p = pet(s, id);
     p.exp = T.stageExp![stage]!;
@@ -121,7 +121,7 @@ test("進化、存檔、讀檔都不改變詞條；進化只提升發揮比例",
   const snap = structuredClone(pet(s, id).affixes);
   let lastScale = bonusScale(cfg, pet(s, id), T);
   let now = T.hatchSeconds! * 1000;
-  for (let stage = 1; stage < 3; stage++) {
+  for (let stage = 1; stage < 4; stage++) {
     const p = pet(s, id);
     while (p.feedCount < T.evolveRequiresFeedCount![stage + 1]!) assert.ok(feedPet(s, p, "shopFeed", T));
     now += 600_000;
@@ -169,7 +169,7 @@ test("PetManager（遊戲整合介面）：怪物掉落 → 孵化 → 鑑定一
   assert.ok(m.appraise(p.id).ok);
   assert.equal(m.appraise(p.id).ok, false);
   pet(m.save, p.id).affixes = [{ stat: "attackSpeed", value: 10 }];
-  pet(m.save, p.id).stage = 3;
+  pet(m.save, p.id).stage = 4;
   m.equip(p.id);
   assert.equal(m.characterStats({ ...BASE, attackSpeed: 155 }).attackSpeed, 160);
   m.equip(null);
