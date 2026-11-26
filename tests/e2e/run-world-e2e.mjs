@@ -139,6 +139,25 @@ for (const name of browsers) {
         uiDetail = await V(() => window.__starwishWorld.info().panel);
       }
       run.results.petDetailTries = tries;
+      if (uiDetail !== `pet:${petId}`) {
+        const diag = await page.evaluate((id) => {
+          const c = document.querySelector(`.wp.open [data-pet="${id}"]`);
+          if (!c) return { card: false };
+          c.scrollIntoView({ block: "center" });
+          const r = c.getBoundingClientRect();
+          const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+          const body = document.querySelector(".wp.open .wp-body");
+          const br = body.getBoundingClientRect();
+          const before = window.__starwishWorld.info().panel;
+          c.click();
+          const after = window.__starwishWorld.info().panel;
+          return { card: true, rect: [r.left, r.top, r.width, r.height], body: [br.top, br.height, body.scrollTop, body.scrollHeight], top: top ? `${top.tagName}.${top.className}` : null, isCard: top === c || c.contains(top), before, afterProgrammatic: after };
+        }, petId);
+        run.results.petDetailDiag = diag;
+        console.log(`  · [${name} ${g}] 寵物卡片診斷：${JSON.stringify(diag)}`);
+        await page.click('.wp.open [data-a="back"]').catch(() => {});
+        await wait(300);
+      }
       await page.click('.wp.open [data-a="back"]').catch(() => {});
       await wait(300);
       const uiBack = await V(() => window.__starwishWorld.info().panel);
