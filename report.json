@@ -1,5 +1,5 @@
 {
- "startedAt": "2026-11-26T09:03:23.916Z",
+ "startedAt": "2026-11-26T09:34:14.465Z",
  "note": "CI 軟體繪圖：FPS 不代表 iPhone 實機",
  "runs": [
   {
@@ -364,22 +364,22 @@
     "村莊場景平均每幀三角面 ≤ 250000（不含玩家角色與寵物；含陰影貼圖繪製）": {
      "ok": true,
      "detail": {
-      "total": 402633,
-      "scene": 200800,
+      "total": 399363,
+      "scene": 197530,
       "character": 199965,
       "pet": 1868,
       "perView": {
        "arrival": {
-        "total": 389483,
+        "total": 385124,
         "character": 199965,
         "pet": 1868,
-        "draws": 110
+        "draws": 99
        },
        "spawn": {
-        "total": 424480,
+        "total": 420121,
         "character": 199965,
         "pet": 1868,
-        "draws": 115
+        "draws": 104
        },
        "plaza_north": {
         "total": 416409,
@@ -388,10 +388,10 @@
         "draws": 107
        },
        "east": {
-        "total": 380158,
+        "total": 375799,
         "character": 199965,
         "pet": 1868,
-        "draws": 106
+        "draws": 95
        }
       }
      }
@@ -400,25 +400,25 @@
      "ok": true,
      "detail": [
       "星願物語 Stage 6.4 星芽村 測試報告",
-      "時間 2026/11/26 09:05:07",
+      "時間 2026/11/26 09:35:33",
       "網址參數 ?map=village&art=full&quality=high&g=male",
       "裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
-      "模式 HQ（高畫質）：畫質 高畫質（來源：網址指定）、模型 HQ／載入 177 ms",
+      "模式 HQ（高畫質）：畫質 高畫質（來源：網址指定）、模型 HQ／載入 136 ms",
       "陰影（實際）：一般柔化陰影 PCF 1024｜陰影貼圖 1024×1024，PCF，取樣品質 中",
       "解析度（實際）：要求上限 1.25x、實際 1x、framebuffer 390×844、Hardware Scaling 1、裝置 DPR 2｜動態解析度 已介入（第 2 級／1.25→1x）",
       "抗鋸齒（實際）：MSAA 要求 4x、後製管線 4x、渲染目標 無法讀取x、裝置上限 4x → 實際生效 4x｜HDR 關、後製管線 開",
       "村莊 V1.3 佔位網格 5、三角形 24030、文字標籤 13；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）",
       "碰撞 圓形 40、矩形 10；鏡頭避障 開",
-      "目前畫面 Draw Calls 106、三角形 380158",
-      "全村整合 art=full：loaded，載入 40372 ms"
+      "目前畫面 Draw Calls 95、三角形 375799",
+      "全村整合 art=full：loaded，載入 30208 ms"
      ]
     },
     "繪製次數 ≤ 160（全村整合、high 畫質、任何位置）": {
      "ok": true,
      "detail": {
       "arrival": {
-       "drawCalls": 110,
-       "triangles": 389483,
+       "drawCalls": 99,
+       "triangles": 385124,
        "casters": {
         "active": 35,
         "total": 67,
@@ -426,8 +426,8 @@
        }
       },
       "spawn": {
-       "drawCalls": 115,
-       "triangles": 424480,
+       "drawCalls": 104,
+       "triangles": 420121,
        "casters": {
         "active": 60,
         "total": 67,
@@ -444,8 +444,8 @@
        }
       },
       "east": {
-       "drawCalls": 106,
-       "triangles": 380158,
+       "drawCalls": 95,
+       "triangles": 375799,
        "casters": {
         "active": 35,
         "total": 67,
@@ -457,10 +457,10 @@
     "移動規則：一般行走走上石階到高台（不跳躍）": {
      "ok": true,
      "detail": {
-      "x": -5.510910596163096e-16,
+      "x": -5.817072295949935e-16,
       "y": 2,
-      "z": 24.00000000000011,
-      "yaw": -6.123233995667142e-17
+      "z": 24.500000000000117,
+      "yaw": -6.123233995719597e-17
      }
     },
     "NPC 互動：9 位 NPC 都能靠近後點擊對話（名稱、職責）": {
@@ -911,21 +911,21 @@
     "寵物在角色耳朵旁（停著時水平距離 0.15～0.6 m、高度在頭部附近 0.6～1.3 m）": {
      "ok": true,
      "detail": {
-      "earDist": 0.36436975953692763,
-      "earUp": 0.8324605548362052
+      "earDist": 0.3677345188986811,
+      "earUp": 0.8433460325274615
      }
     },
     "寵物不貼住、不穿透角色：跑步與快速轉身後，與頭部／身體的最小間距 ≥ 2 cm（含 B 端間距保護）": {
-     "ok": false,
+     "ok": true,
      "detail": {
       "id": "bird4",
       "label": "鳥・完成體",
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -27,
-      "minGapCm": 1.2,
-      "corrections": 5,
+      "minRawGapCm": -27.6,
+      "minGapCm": 2,
+      "corrections": 3,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      }
     },
@@ -934,7 +934,7 @@
      "detail": [
       "  寵物商人洛恩：網格 11、三角形 13596",
       "玩家角色：Claude A 正式初心者 C1.0-B5b（c10b5b）｜novice_c10b5b_male_hq.glb（男、HQ）｜三角面 199965、網格 27（可繪製 26、骨架網格 26）、骨骼 17｜動作 Attack／Death／Hurt／Idle／Jump／Run｜陰影 柔和腳底陰影（A 預設）｜本幀 Draw Calls：主畫面 26、陰影貼圖 0｜來源 Claude A feature/render-stage7-world@1c858d10／art-novice-c10b5b（唯讀，未修改）",
-      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 1.2 cm（修正前 -27 cm，間距保護修正 5 次）"
+      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 2 cm（修正前 -27.6 cm，間距保護修正 3 次）"
      ]
     },
     "星願之泉星晶動畫（旋轉＋上下浮動）持續播放": {
@@ -944,7 +944,7 @@
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": 0.023129625245928764
+        "y": -0.05954330414533615
        },
        {
         "name": "Portal_fx",
@@ -954,14 +954,14 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": 0.0044679902493953705
+        "y": 0.02748952805995941
        }
       ],
       "a2": [
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": -0.0219348706305027
+        "y": -0.02649354189634323
        },
        {
         "name": "Portal_fx",
@@ -971,7 +971,7 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": 0.04205947369337082
+        "y": -0.027730179950594902
        }
       ]
      }
@@ -1034,12 +1034,12 @@
       {
        "id": "base",
        "label": "目前基準",
-       "avgFps": 2.2055850314295617,
-       "low1Fps": 1.8695083193115327,
-       "minFps": 1.8695083193115327,
+       "avgFps": 2.8800921629491927,
+       "low1Fps": 2.43546030199687,
+       "minFps": 2.43546030199687,
        "stutters": 18,
-       "avgDraw": 104.83333333333333,
-       "avgTris": 404085.8888888889,
+       "avgDraw": 102.72222222222223,
+       "avgTris": 407038,
        "res": 1.25,
        "fb": "487×1055",
        "hwScaling": 0.8,
@@ -1054,12 +1054,12 @@
       {
        "id": "res1",
        "label": "解析度 1x",
-       "avgFps": 2.9237391374969546,
-       "low1Fps": 2.44439012466334,
-       "minFps": 2.44439012466334,
-       "stutters": 18,
-       "avgDraw": 105.5,
-       "avgTris": 410284.1111111111,
+       "avgFps": 3.886036855991665,
+       "low1Fps": 3.2711808963040636,
+       "minFps": 3.2711808963040636,
+       "stutters": 19,
+       "avgDraw": 102.36842105263158,
+       "avgTris": 405593,
        "res": 1,
        "fb": "390×844",
        "hwScaling": 1,
@@ -1156,7 +1156,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 40372,
+     "loadMs": 30208,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -1320,8 +1320,8 @@
     },
     "perf": {
      "arrival": {
-      "drawCalls": 110,
-      "triangles": 389483,
+      "drawCalls": 99,
+      "triangles": 385124,
       "casters": {
        "active": 35,
        "total": 67,
@@ -1329,8 +1329,8 @@
       }
      },
      "spawn": {
-      "drawCalls": 115,
-      "triangles": 424480,
+      "drawCalls": 104,
+      "triangles": 420121,
       "casters": {
        "active": 60,
        "total": 67,
@@ -1347,8 +1347,8 @@
       }
      },
      "east": {
-      "drawCalls": 106,
-      "triangles": 380158,
+      "drawCalls": 95,
+      "triangles": 375799,
       "casters": {
        "active": 35,
        "total": 67,
@@ -1358,8 +1358,8 @@
     },
     "breakdown": {
      "arrival": {
-      "activeMeshes": 106,
-      "activeTriangles": 389483,
+      "activeMeshes": 93,
+      "activeTriangles": 385124,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -1382,7 +1382,7 @@
         "triangles": 199965
        },
        "__root__": {
-        "meshes": 16,
+        "meshes": 14,
         "triangles": 0
        },
        "Env": {
@@ -1429,10 +1429,6 @@
         "meshes": 7,
         "triangles": 10507
        },
-       "洛恩": {
-        "meshes": 11,
-        "triangles": 4359
-       },
        "NPC": {
         "meshes": 1,
         "triangles": 2394
@@ -1440,8 +1436,8 @@
       }
      },
      "spawn": {
-      "activeMeshes": 95,
-      "activeTriangles": 424480,
+      "activeMeshes": 82,
+      "activeTriangles": 420121,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -1456,7 +1452,7 @@
         "triangles": 199965
        },
        "__root__": {
-        "meshes": 16,
+        "meshes": 14,
         "triangles": 0
        },
        "Env": {
@@ -1495,10 +1491,6 @@
         "meshes": 4,
         "triangles": 9955
        },
-       "洛恩": {
-        "meshes": 11,
-        "triangles": 4359
-       },
        "NPC": {
         "meshes": 1,
         "triangles": 2635
@@ -1506,8 +1498,8 @@
       }
      },
      "plaza_north": {
-      "activeMeshes": 93,
-      "activeTriangles": 416409,
+      "activeMeshes": 98,
+      "activeTriangles": 426519,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -1569,6 +1561,10 @@
         "meshes": 7,
         "triangles": 10507
        },
+       "洛恩": {
+        "meshes": 5,
+        "triangles": 10110
+       },
        "NPC": {
         "meshes": 1,
         "triangles": 2394
@@ -1576,8 +1572,8 @@
       }
      },
      "east": {
-      "activeMeshes": 99,
-      "activeTriangles": 380158,
+      "activeMeshes": 86,
+      "activeTriangles": 375799,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -1592,7 +1588,7 @@
         "triangles": 199965
        },
        "__root__": {
-        "meshes": 18,
+        "meshes": 16,
         "triangles": 0
        },
        "Env": {
@@ -1634,10 +1630,6 @@
        "Portal": {
         "meshes": 4,
         "triangles": 9955
-       },
-       "洛恩": {
-        "meshes": 11,
-        "triangles": 4359
        },
        "NPC": {
         "meshes": 1,
@@ -1813,24 +1805,24 @@
       "duplicates": []
      }
     },
-    "avgTriangles": 402633,
+    "avgTriangles": 399363,
     "triangleSplit": {
-     "total": 402633,
-     "scene": 200800,
+     "total": 399363,
+     "scene": 197530,
      "character": 199965,
      "pet": 1868,
      "perView": {
       "arrival": {
-       "total": 389483,
+       "total": 385124,
        "character": 199965,
        "pet": 1868,
-       "draws": 110
+       "draws": 99
       },
       "spawn": {
-       "total": 424480,
+       "total": 420121,
        "character": 199965,
        "pet": 1868,
-       "draws": 115
+       "draws": 104
       },
       "plaza_north": {
        "total": 416409,
@@ -1839,15 +1831,15 @@
        "draws": 107
       },
       "east": {
-       "total": 380158,
+       "total": 375799,
        "character": 199965,
        "pet": 1868,
-       "draws": 106
+       "draws": 95
       }
      }
     },
     "totalWithCharacter": {
-     "avg": 402633,
+     "avg": 399363,
      "budget": 250000,
      "over": true
     },
@@ -2045,7 +2037,7 @@
       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
      }
     ],
-    "fpsSoftware": 123,
+    "fpsSoftware": 118,
     "lod": {
      "near": {
       "anim": "Idle",
@@ -2089,12 +2081,12 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -23.5,
+      "minRawGapCm": -23.7,
       "minGapCm": 2,
-      "corrections": 59,
+      "corrections": 63,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      },
-     "loadMs": 4191
+     "loadMs": 2786
     },
     "characterActions": {
      "attackButton": "Attack",
@@ -2107,8 +2099,8 @@
     },
     "pet": {
      "still": {
-      "horizontal": 0.36436975953692763,
-      "height": 0.8324605548362052
+      "horizontal": 0.3677345188986811,
+      "height": 0.8433460325274615
      },
      "pet": {
       "id": "bird4",
@@ -2116,9 +2108,9 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -27,
-      "minGapCm": 1.2,
-      "corrections": 5,
+      "minRawGapCm": -27.6,
+      "minGapCm": 2,
+      "corrections": 3,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      }
     },
@@ -2127,7 +2119,7 @@
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": 0.023129625245928764
+       "y": -0.05954330414533615
       },
       {
        "name": "Portal_fx",
@@ -2137,14 +2129,14 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": 0.0044679902493953705
+       "y": 0.02748952805995941
       }
      ],
      "a2": [
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": -0.0219348706305027
+       "y": -0.02649354189634323
       },
       {
        "name": "Portal_fx",
@@ -2154,7 +2146,7 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": 0.04205947369337082
+       "y": -0.027730179950594902
       }
      ]
     },
@@ -2204,12 +2196,12 @@
      {
       "id": "base",
       "label": "目前基準",
-      "avgFps": 2.2055850314295617,
-      "low1Fps": 1.8695083193115327,
-      "minFps": 1.8695083193115327,
+      "avgFps": 2.8800921629491927,
+      "low1Fps": 2.43546030199687,
+      "minFps": 2.43546030199687,
       "stutters": 18,
-      "avgDraw": 104.83333333333333,
-      "avgTris": 404085.8888888889,
+      "avgDraw": 102.72222222222223,
+      "avgTris": 407038,
       "res": 1.25,
       "fb": "487×1055",
       "hwScaling": 0.8,
@@ -2224,12 +2216,12 @@
      {
       "id": "res1",
       "label": "解析度 1x",
-      "avgFps": 2.9237391374969546,
-      "low1Fps": 2.44439012466334,
-      "minFps": 2.44439012466334,
-      "stutters": 18,
-      "avgDraw": 105.5,
-      "avgTris": 410284.1111111111,
+      "avgFps": 3.886036855991665,
+      "low1Fps": 3.2711808963040636,
+      "minFps": 3.2711808963040636,
+      "stutters": 19,
+      "avgDraw": 102.36842105263158,
+      "avgTris": 405593,
       "res": 1,
       "fb": "390×844",
       "hwScaling": 1,
@@ -2248,7 +2240,7 @@
      "bad": []
     }
    },
-   "ok": false
+   "ok": true
   },
   {
    "browser": "chromium",
@@ -2598,9 +2590,9 @@
        "triangles": 36293
       },
       "plaza_north": {
-       "active": 27,
+       "active": 15,
        "total": 64,
-       "triangles": 40217
+       "triangles": 37364
       },
       "east": {
        "active": 10,
@@ -2612,8 +2604,8 @@
     "村莊場景平均每幀三角面 ≤ 100000（不含玩家角色與寵物；含陰影貼圖繪製）": {
      "ok": true,
      "detail": {
-      "total": 119363,
-      "scene": 77540,
+      "total": 118661,
+      "scene": 76838,
       "character": 39955,
       "pet": 1868,
       "perView": {
@@ -2630,16 +2622,16 @@
         "draws": 87
        },
        "plaza_north": {
-        "total": 130907,
+        "total": 128054,
         "character": 39955,
         "pet": 1868,
-        "draws": 89
+        "draws": 83
        },
        "east": {
-        "total": 108648,
+        "total": 108692,
         "character": 39955,
         "pet": 1868,
-        "draws": 80
+        "draws": 83
        }
       }
      }
@@ -2648,17 +2640,17 @@
      "ok": true,
      "detail": [
       "星願物語 Stage 6.4 星芽村 測試報告",
-      "時間 2026/11/26 09:12:17",
+      "時間 2026/11/26 09:41:04",
       "網址參數 ?map=village&art=full&quality=medium&g=female",
       "裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
-      "模式 Lite 中畫質：畫質 中畫質（來源：網址指定）、模型 Lite／載入 141 ms",
+      "模式 Lite 中畫質：畫質 中畫質（來源：網址指定）、模型 Lite／載入 118 ms",
       "陰影（實際）：一般柔化陰影 PCF 1024｜陰影貼圖 1024×1024，PCF，取樣品質 中",
       "解析度（實際）：要求上限 1.25x、實際 1x、framebuffer 390×844、Hardware Scaling 1、裝置 DPR 2｜動態解析度 已介入（第 2 級／1.25→1x）",
       "抗鋸齒（實際）：MSAA 要求 2x、後製管線 2x、渲染目標 無法讀取x、裝置上限 4x → 實際生效 2x｜HDR 關、後製管線 開",
       "村莊 V1.3 佔位網格 5、三角形 17190、文字標籤 13；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）",
       "碰撞 圓形 40、矩形 10；鏡頭避障 開",
-      "目前畫面 Draw Calls 72、三角形 104965",
-      "全村整合 art=full：loaded，載入 24687 ms"
+      "目前畫面 Draw Calls 83、三角形 108692",
+      "全村整合 art=full：loaded，載入 18947 ms"
      ]
     },
     "繪製次數 ≤ 120（全村整合、medium 畫質、任何位置）": {
@@ -2683,17 +2675,17 @@
        }
       },
       "plaza_north": {
-       "drawCalls": 89,
-       "triangles": 130907,
+       "drawCalls": 83,
+       "triangles": 128054,
        "casters": {
-        "active": 27,
+        "active": 15,
         "total": 64,
-        "triangles": 40217
+        "triangles": 37364
        }
       },
       "east": {
-       "drawCalls": 80,
-       "triangles": 108648,
+       "drawCalls": 83,
+       "triangles": 108692,
        "casters": {
         "active": 10,
         "total": 64,
@@ -3159,21 +3151,21 @@
     "寵物在角色耳朵旁（停著時水平距離 0.15～0.6 m、高度在頭部附近 0.6～1.3 m）": {
      "ok": true,
      "detail": {
-      "earDist": 0.3682190674819404,
-      "earUp": 0.8548749743540489
+      "earDist": 0.3654844807829955,
+      "earUp": 0.8464332001678585
      }
     },
     "寵物不貼住、不穿透角色：跑步與快速轉身後，與頭部／身體的最小間距 ≥ 2 cm（含 B 端間距保護）": {
-     "ok": false,
+     "ok": true,
      "detail": {
       "id": "bird4",
       "label": "鳥・完成體",
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -27.9,
-      "minGapCm": 0.2,
-      "corrections": 5,
+      "minRawGapCm": -26.5,
+      "minGapCm": 2,
+      "corrections": 3,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      }
     },
@@ -3182,7 +3174,7 @@
      "detail": [
       "  寵物商人洛恩：網格 11、三角形 5573",
       "玩家角色：Claude A 正式初心者 C1.0-B5b（c10b5b）｜novice_c10b5b_female_lite.glb（女、Lite）｜三角面 39955、網格 27（可繪製 26、骨架網格 26）、骨骼 17｜動作 Attack／Death／Hurt／Idle／Jump／Run｜陰影 柔和腳底陰影（A 預設）｜本幀 Draw Calls：主畫面 26、陰影貼圖 0｜來源 Claude A feature/render-stage7-world@1c858d10／art-novice-c10b5b（唯讀，未修改）",
-      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 0.2 cm（修正前 -27.9 cm，間距保護修正 5 次）"
+      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 2 cm（修正前 -26.5 cm，間距保護修正 3 次）"
      ]
     },
     "星願之泉星晶動畫（旋轉＋上下浮動）持續播放": {
@@ -3192,7 +3184,7 @@
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": -0.055259719491004944
+        "y": 0.0260457880795002
        },
        {
         "name": "Portal_fx",
@@ -3202,14 +3194,14 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": -0.016869843006134033
+        "y": 0.029284978285431862
        }
       ],
       "a2": [
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": -0.045897047966718674
+        "y": 0.058824896812438965
        },
        {
         "name": "Portal_fx",
@@ -3219,7 +3211,7 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": 0.04084021598100662
+        "y": -0.0402078852057457
        }
       ]
      }
@@ -3282,12 +3274,12 @@
       {
        "id": "base",
        "label": "目前基準",
-       "avgFps": 3.520278657847412,
-       "low1Fps": 3.003905076598319,
-       "minFps": 3.003905076598319,
-       "stutters": 19,
-       "avgDraw": 81.47368421052632,
-       "avgTris": 118110.31578947368,
+       "avgFps": 4.685749210553122,
+       "low1Fps": 4.012841091491652,
+       "minFps": 4.012841091491652,
+       "stutters": 23,
+       "avgDraw": 86.04347826086956,
+       "avgTris": 120959,
        "res": 1.25,
        "fb": "487×1055",
        "hwScaling": 0.8,
@@ -3302,12 +3294,12 @@
       {
        "id": "res1",
        "label": "解析度 1x",
-       "avgFps": 4.8224095274037255,
-       "low1Fps": 3.4118048447617957,
-       "minFps": 3.4118048447617957,
-       "stutters": 23,
-       "avgDraw": 81.6086956521739,
-       "avgTris": 117272.47826086957,
+       "avgFps": 6.602347027878879,
+       "low1Fps": 5.35045478865637,
+       "minFps": 5.35045478865637,
+       "stutters": 31,
+       "avgDraw": 85.93548387096774,
+       "avgTris": 120395.09677419355,
        "res": 1,
        "fb": "390×844",
        "hwScaling": 1,
@@ -3392,7 +3384,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 24687,
+     "loadMs": 18947,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -3574,17 +3566,17 @@
       }
      },
      "plaza_north": {
-      "drawCalls": 89,
-      "triangles": 130907,
+      "drawCalls": 83,
+      "triangles": 128054,
       "casters": {
-       "active": 27,
+       "active": 15,
        "total": 64,
-       "triangles": 40217
+       "triangles": 37364
       }
      },
      "east": {
-      "drawCalls": 80,
-      "triangles": 108648,
+      "drawCalls": 83,
+      "triangles": 108692,
       "casters": {
        "active": 10,
        "total": 64,
@@ -3735,7 +3727,7 @@
      },
      "plaza_north": {
       "activeMeshes": 87,
-      "activeTriangles": 130907,
+      "activeTriangles": 128054,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -3804,8 +3796,8 @@
       }
      },
      "east": {
-      "activeMeshes": 89,
-      "activeTriangles": 108648,
+      "activeMeshes": 94,
+      "activeTriangles": 108692,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -3820,7 +3812,7 @@
         "triangles": 39955
        },
        "__root__": {
-        "meshes": 16,
+        "meshes": 18,
         "triangles": 0
        },
        "Env": {
@@ -3864,8 +3856,8 @@
         "triangles": 4477
        },
        "洛恩": {
-        "meshes": 8,
-        "triangles": 3683
+        "meshes": 11,
+        "triangles": 3727
        },
        "NPC": {
         "meshes": 1,
@@ -4041,10 +4033,10 @@
       "duplicates": []
      }
     },
-    "avgTriangles": 119363,
+    "avgTriangles": 118661,
     "triangleSplit": {
-     "total": 119363,
-     "scene": 77540,
+     "total": 118661,
+     "scene": 76838,
      "character": 39955,
      "pet": 1868,
      "perView": {
@@ -4061,21 +4053,21 @@
        "draws": 87
       },
       "plaza_north": {
-       "total": 130907,
+       "total": 128054,
        "character": 39955,
        "pet": 1868,
-       "draws": 89
+       "draws": 83
       },
       "east": {
-       "total": 108648,
+       "total": 108692,
        "character": 39955,
        "pet": 1868,
-       "draws": 80
+       "draws": 83
       }
      }
     },
     "totalWithCharacter": {
-     "avg": 119363,
+     "avg": 118661,
      "budget": 100000,
      "over": true
     },
@@ -4273,7 +4265,7 @@
       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
      }
     ],
-    "fpsSoftware": 96,
+    "fpsSoftware": 92,
     "lod": {
      "near": {
       "anim": "Idle",
@@ -4317,12 +4309,12 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -23.2,
+      "minRawGapCm": -23.4,
       "minGapCm": 2,
-      "corrections": 56,
+      "corrections": 55,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      },
-     "loadMs": 2121
+     "loadMs": 1632
     },
     "characterActions": {
      "attackButton": "Attack",
@@ -4335,8 +4327,8 @@
     },
     "pet": {
      "still": {
-      "horizontal": 0.3682190674819404,
-      "height": 0.8548749743540489
+      "horizontal": 0.3654844807829955,
+      "height": 0.8464332001678585
      },
      "pet": {
       "id": "bird4",
@@ -4344,9 +4336,9 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -27.9,
-      "minGapCm": 0.2,
-      "corrections": 5,
+      "minRawGapCm": -26.5,
+      "minGapCm": 2,
+      "corrections": 3,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      }
     },
@@ -4355,7 +4347,7 @@
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": -0.055259719491004944
+       "y": 0.0260457880795002
       },
       {
        "name": "Portal_fx",
@@ -4365,14 +4357,14 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": -0.016869843006134033
+       "y": 0.029284978285431862
       }
      ],
      "a2": [
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": -0.045897047966718674
+       "y": 0.058824896812438965
       },
       {
        "name": "Portal_fx",
@@ -4382,7 +4374,7 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": 0.04084021598100662
+       "y": -0.0402078852057457
       }
      ]
     },
@@ -4432,12 +4424,12 @@
      {
       "id": "base",
       "label": "目前基準",
-      "avgFps": 3.520278657847412,
-      "low1Fps": 3.003905076598319,
-      "minFps": 3.003905076598319,
-      "stutters": 19,
-      "avgDraw": 81.47368421052632,
-      "avgTris": 118110.31578947368,
+      "avgFps": 4.685749210553122,
+      "low1Fps": 4.012841091491652,
+      "minFps": 4.012841091491652,
+      "stutters": 23,
+      "avgDraw": 86.04347826086956,
+      "avgTris": 120959,
       "res": 1.25,
       "fb": "487×1055",
       "hwScaling": 0.8,
@@ -4452,12 +4444,12 @@
      {
       "id": "res1",
       "label": "解析度 1x",
-      "avgFps": 4.8224095274037255,
-      "low1Fps": 3.4118048447617957,
-      "minFps": 3.4118048447617957,
-      "stutters": 23,
-      "avgDraw": 81.6086956521739,
-      "avgTris": 117272.47826086957,
+      "avgFps": 6.602347027878879,
+      "low1Fps": 5.35045478865637,
+      "minFps": 5.35045478865637,
+      "stutters": 31,
+      "avgDraw": 85.93548387096774,
+      "avgTris": 120395.09677419355,
       "res": 1,
       "fb": "390×844",
       "hwScaling": 1,
@@ -4476,7 +4468,7 @@
      "bad": []
     }
    },
-   "ok": false
+   "ok": true
   },
   {
    "browser": "chromium",
@@ -4814,16 +4806,16 @@
     "村莊場景平均每幀三角面 ≤ 100000（不含玩家角色與寵物；含陰影貼圖繪製）": {
      "ok": true,
      "detail": {
-      "total": 93579,
-      "scene": 51330,
+      "total": 94372,
+      "scene": 52123,
       "character": 40381,
       "pet": 1868,
       "perView": {
        "arrival": {
-        "total": 98100,
+        "total": 101272,
         "character": 40381,
         "pet": 1868,
-        "draws": 73
+        "draws": 77
        },
        "spawn": {
         "total": 92371,
@@ -4850,25 +4842,25 @@
      "ok": true,
      "detail": [
       "星願物語 Stage 6.4 星芽村 測試報告",
-      "時間 2026/11/26 09:16:32",
+      "時間 2026/11/26 09:44:21",
       "網址參數 ?map=village&art=full&quality=low&g=male",
       "裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
-      "模式 Lite 低畫質：畫質 低畫質（來源：網址指定）、模型 Lite／載入 139 ms",
+      "模式 Lite 低畫質：畫質 低畫質（來源：網址指定）、模型 Lite／載入 103 ms",
       "陰影（實際）：柔和腳底陰影（不使用陰影貼圖）｜陰影貼圖 不使用陰影貼圖",
       "解析度（實際）：要求上限 1x、實際 1x、framebuffer 390×844、Hardware Scaling 1、裝置 DPR 2｜動態解析度 未介入（階梯 1x）",
       "抗鋸齒（實際）：MSAA 要求 1x、沒有後製管線、畫布 MSAA 關、裝置上限 4x → 實際生效 1x｜HDR 關、後製管線 關",
       "村莊 V1.3 佔位網格 5、三角形 17190、文字標籤 13；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）",
       "碰撞 圓形 40、矩形 10；鏡頭避障 開",
       "目前畫面 Draw Calls 76、三角形 92707",
-      "全村整合 art=full：loaded，載入 19176 ms"
+      "全村整合 art=full：loaded，載入 14328 ms"
      ]
     },
     "繪製次數 ≤ 100（全村整合、low 畫質、任何位置）": {
      "ok": true,
      "detail": {
       "arrival": {
-       "drawCalls": 73,
-       "triangles": 98100,
+       "drawCalls": 77,
+       "triangles": 101272,
        "casters": {
         "active": 0,
         "total": 0,
@@ -4907,10 +4899,10 @@
     "移動規則：一般行走走上石階到高台（不跳躍）": {
      "ok": true,
      "detail": {
-      "x": -6.123233995736774e-16,
+      "x": -5.510910596163096e-16,
       "y": 2,
-      "z": 25.000000000000124,
-      "yaw": -6.123233995732532e-17
+      "z": 24.00000000000011,
+      "yaw": -6.123233995667142e-17
      }
     },
     "NPC 互動：9 位 NPC 都能靠近後點擊對話（名稱、職責）": {
@@ -5361,21 +5353,21 @@
     "寵物在角色耳朵旁（停著時水平距離 0.15～0.6 m、高度在頭部附近 0.6～1.3 m）": {
      "ok": true,
      "detail": {
-      "earDist": 0.3645268713512205,
-      "earUp": 0.8274692987522401
+      "earDist": 0.37192432477812115,
+      "earUp": 0.8354499072757853
      }
     },
     "寵物不貼住、不穿透角色：跑步與快速轉身後，與頭部／身體的最小間距 ≥ 2 cm（含 B 端間距保護）": {
-     "ok": false,
+     "ok": true,
      "detail": {
       "id": "bird4",
       "label": "鳥・完成體",
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -27.6,
-      "minGapCm": 1.5,
-      "corrections": 5,
+      "minRawGapCm": -27.7,
+      "minGapCm": 2,
+      "corrections": 3,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      }
     },
@@ -5384,7 +5376,7 @@
      "detail": [
       "  寵物商人洛恩：網格 11、三角形 5573",
       "玩家角色：Claude A 正式初心者 C1.0-B5b（c10b5b）｜novice_c10b5b_male_lite.glb（男、Lite）｜三角面 40381、網格 27（可繪製 26、骨架網格 26）、骨骼 17｜動作 Attack／Death／Hurt／Idle／Jump／Run｜陰影 柔和腳底陰影（A 預設）｜本幀 Draw Calls：主畫面 26、陰影貼圖 0｜來源 Claude A feature/render-stage7-world@1c858d10／art-novice-c10b5b（唯讀，未修改）",
-      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 1.5 cm（修正前 -27.6 cm，間距保護修正 5 次）"
+      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 2 cm（修正前 -27.7 cm，間距保護修正 3 次）"
      ]
     },
     "星願之泉星晶動畫（旋轉＋上下浮動）持續播放": {
@@ -5394,7 +5386,7 @@
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": -0.0060476078651845455
+        "y": 0.05350275710225105
        },
        {
         "name": "Portal_fx",
@@ -5404,14 +5396,14 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": 0.038719262927770615
+        "y": -0.01972607895731926
        }
       ],
       "a2": [
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": 0.056326039135456085
+        "y": 0.02283780463039875
        },
        {
         "name": "Portal_fx",
@@ -5421,7 +5413,7 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": -0.031215859577059746
+        "y": -0.035378217697143555
        }
       ]
      }
@@ -5505,7 +5497,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 19176,
+     "loadMs": 14328,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -5669,8 +5661,8 @@
     },
     "perf": {
      "arrival": {
-      "drawCalls": 73,
-      "triangles": 98100,
+      "drawCalls": 77,
+      "triangles": 101272,
       "casters": {
        "active": 0,
        "total": 0,
@@ -5707,8 +5699,8 @@
     },
     "breakdown": {
      "arrival": {
-      "activeMeshes": 88,
-      "activeTriangles": 98100,
+      "activeMeshes": 91,
+      "activeTriangles": 100726,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -5781,6 +5773,10 @@
        "Portal": {
         "meshes": 6,
         "triangles": 4819
+       },
+       "洛恩": {
+        "meshes": 3,
+        "triangles": 2626
        },
        "NPC": {
         "meshes": 1,
@@ -6169,18 +6165,18 @@
       "duplicates": []
      }
     },
-    "avgTriangles": 93579,
+    "avgTriangles": 94372,
     "triangleSplit": {
-     "total": 93579,
-     "scene": 51330,
+     "total": 94372,
+     "scene": 52123,
      "character": 40381,
      "pet": 1868,
      "perView": {
       "arrival": {
-       "total": 98100,
+       "total": 101272,
        "character": 40381,
        "pet": 1868,
-       "draws": 73
+       "draws": 77
       },
       "spawn": {
        "total": 92371,
@@ -6203,7 +6199,7 @@
      }
     },
     "totalWithCharacter": {
-     "avg": 93579,
+     "avg": 94372,
      "budget": 100000,
      "over": false
     },
@@ -6401,7 +6397,7 @@
       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
      }
     ],
-    "fpsSoftware": 74,
+    "fpsSoftware": 76,
     "lod": {
      "near": {
       "anim": "Idle",
@@ -6445,12 +6441,12 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -22.3,
+      "minRawGapCm": -23.5,
       "minGapCm": 2,
-      "corrections": 52,
+      "corrections": 53,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      },
-     "loadMs": 1343
+     "loadMs": 1015
     },
     "characterActions": {
      "attackButton": "Attack",
@@ -6463,8 +6459,8 @@
     },
     "pet": {
      "still": {
-      "horizontal": 0.3645268713512205,
-      "height": 0.8274692987522401
+      "horizontal": 0.37192432477812115,
+      "height": 0.8354499072757853
      },
      "pet": {
       "id": "bird4",
@@ -6472,9 +6468,9 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -27.6,
-      "minGapCm": 1.5,
-      "corrections": 5,
+      "minRawGapCm": -27.7,
+      "minGapCm": 2,
+      "corrections": 3,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      }
     },
@@ -6483,7 +6479,7 @@
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": -0.0060476078651845455
+       "y": 0.05350275710225105
       },
       {
        "name": "Portal_fx",
@@ -6493,14 +6489,14 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": 0.038719262927770615
+       "y": -0.01972607895731926
       }
      ],
      "a2": [
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": 0.056326039135456085
+       "y": 0.02283780463039875
       },
       {
        "name": "Portal_fx",
@@ -6510,7 +6506,7 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": -0.031215859577059746
+       "y": -0.035378217697143555
       }
      ]
     },
@@ -6562,7 +6558,7 @@
      "bad": []
     }
    },
-   "ok": false
+   "ok": true
   },
   {
    "browser": "chromium",
@@ -6917,17 +6913,17 @@
        "triangles": 107715
       },
       "east": {
-       "active": 35,
+       "active": 23,
        "total": 67,
-       "triangles": 66291
+       "triangles": 63438
       }
      }
     },
     "村莊場景平均每幀三角面 ≤ 250000（不含玩家角色與寵物；含陰影貼圖繪製）": {
      "ok": true,
      "detail": {
-      "total": 436196,
-      "scene": 234363,
+      "total": 435483,
+      "scene": 233650,
       "character": 199965,
       "pet": 1868,
       "perView": {
@@ -6950,10 +6946,10 @@
         "draws": 131
        },
        "east": {
-        "total": 435939,
+        "total": 433086,
         "character": 199965,
         "pet": 1868,
-        "draws": 146
+        "draws": 140
        }
       }
      }
@@ -6962,17 +6958,17 @@
      "ok": true,
      "detail": [
       "星願物語 Stage 6.4 星芽村 測試報告",
-      "時間 2026/11/26 09:20:11",
+      "時間 2026/11/26 09:47:09",
       "網址參數 ?map=village&art=full&quality=high&g=male",
       "裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
-      "模式 HQ（高畫質）：畫質 高畫質（來源：網址指定）、模型 HQ／載入 156 ms",
+      "模式 HQ（高畫質）：畫質 高畫質（來源：網址指定）、模型 HQ／載入 117 ms",
       "陰影（實際）：一般柔化陰影 PCF 1024｜陰影貼圖 1024×1024，PCF，取樣品質 中",
       "解析度（實際）：要求上限 1.25x、實際 1x、framebuffer 844×390、Hardware Scaling 1、裝置 DPR 2｜動態解析度 已介入（第 2 級／1.25→1x）",
       "抗鋸齒（實際）：MSAA 要求 4x、後製管線 4x、渲染目標 無法讀取x、裝置上限 4x → 實際生效 4x｜HDR 關、後製管線 開",
       "村莊 V1.3 佔位網格 5、三角形 24030、文字標籤 13；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）",
       "碰撞 圓形 40、矩形 10；鏡頭避障 開",
-      "目前畫面 Draw Calls 145、三角形 435851",
-      "全村整合 art=full：loaded，載入 31723 ms"
+      "目前畫面 Draw Calls 139、三角形 432998",
+      "全村整合 art=full：loaded，載入 24128 ms"
      ]
     },
     "繪製次數 ≤ 160（全村整合、high 畫質、任何位置）": {
@@ -7006,12 +7002,12 @@
        }
       },
       "east": {
-       "drawCalls": 146,
-       "triangles": 435939,
+       "drawCalls": 140,
+       "triangles": 433086,
        "casters": {
-        "active": 35,
+        "active": 23,
         "total": 67,
-        "triangles": 66291
+        "triangles": 63438
        }
       }
      }
@@ -7460,21 +7456,21 @@
     "寵物在角色耳朵旁（停著時水平距離 0.15～0.6 m、高度在頭部附近 0.6～1.3 m）": {
      "ok": true,
      "detail": {
-      "earDist": 0.36829103992979345,
-      "earUp": 0.8455018069784501
+      "earDist": 0.368454071278573,
+      "earUp": 0.8251550901893685
      }
     },
     "寵物不貼住、不穿透角色：跑步與快速轉身後，與頭部／身體的最小間距 ≥ 2 cm（含 B 端間距保護）": {
-     "ok": false,
+     "ok": true,
      "detail": {
       "id": "bird4",
       "label": "鳥・完成體",
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -26.9,
-      "minGapCm": 1.3,
-      "corrections": 6,
+      "minRawGapCm": -24.9,
+      "minGapCm": 2,
+      "corrections": 4,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      }
     },
@@ -7483,7 +7479,7 @@
      "detail": [
       "  寵物商人洛恩：網格 11、三角形 13596",
       "玩家角色：Claude A 正式初心者 C1.0-B5b（c10b5b）｜novice_c10b5b_male_hq.glb（男、HQ）｜三角面 199965、網格 27（可繪製 26、骨架網格 26）、骨骼 17｜動作 Attack／Death／Hurt／Idle／Jump／Run｜陰影 柔和腳底陰影（A 預設）｜本幀 Draw Calls：主畫面 26、陰影貼圖 0｜來源 Claude A feature/render-stage7-world@1c858d10／art-novice-c10b5b（唯讀，未修改）",
-      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 1.3 cm（修正前 -26.9 cm，間距保護修正 6 次）"
+      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 2 cm（修正前 -24.9 cm，間距保護修正 4 次）"
      ]
     },
     "星願之泉星晶動畫（旋轉＋上下浮動）持續播放": {
@@ -7493,7 +7489,7 @@
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": -0.0241262074559927
+        "y": -0.05771308392286301
        },
        {
         "name": "Portal_fx",
@@ -7503,14 +7499,14 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": -0.034468814730644226
+        "y": -0.04679780825972557
        }
       ],
       "a2": [
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": -0.05556310713291168
+        "y": -0.049417708069086075
        },
        {
         "name": "Portal_fx",
@@ -7520,7 +7516,7 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": -0.049751050770282745
+        "y": -0.00850666407495737
        }
       ]
      }
@@ -7601,7 +7597,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 31723,
+     "loadMs": 24128,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -7792,12 +7788,12 @@
       }
      },
      "east": {
-      "drawCalls": 146,
-      "triangles": 435939,
+      "drawCalls": 140,
+      "triangles": 433086,
       "casters": {
-       "active": 35,
+       "active": 23,
        "total": 67,
-       "triangles": 66291
+       "triangles": 63438
       }
      }
     },
@@ -7822,10 +7818,6 @@
         "meshes": 3,
         "triangles": 6
        },
-       "玩家角色（正式）": {
-        "meshes": 27,
-        "triangles": 199965
-       },
        "__root__": {
         "meshes": 26,
         "triangles": 0
@@ -7833,6 +7825,10 @@
        "Env": {
         "meshes": 2,
         "triangles": 13522
+       },
+       "玩家角色（正式）": {
+        "meshes": 27,
+        "triangles": 199965
        },
        "Plaza": {
         "meshes": 5,
@@ -7924,10 +7920,6 @@
         "meshes": 1,
         "triangles": 2
        },
-       "玩家角色（正式）": {
-        "meshes": 27,
-        "triangles": 199965
-       },
        "__root__": {
         "meshes": 24,
         "triangles": 0
@@ -7935,6 +7927,10 @@
        "Env": {
         "meshes": 2,
         "triangles": 13522
+       },
+       "玩家角色（正式）": {
+        "meshes": 27,
+        "triangles": 199965
        },
        "Plaza": {
         "meshes": 5,
@@ -8002,10 +7998,6 @@
         "meshes": 1,
         "triangles": 4802
        },
-       "玩家角色（正式）": {
-        "meshes": 27,
-        "triangles": 199965
-       },
        "__root__": {
         "meshes": 24,
         "triangles": 0
@@ -8013,6 +8005,10 @@
        "Env": {
         "meshes": 2,
         "triangles": 13522
+       },
+       "玩家角色（正式）": {
+        "meshes": 27,
+        "triangles": 199965
        },
        "Plaza": {
         "meshes": 5,
@@ -8070,7 +8066,7 @@
      },
      "east": {
       "activeMeshes": 149,
-      "activeTriangles": 435939,
+      "activeTriangles": 433086,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -8088,10 +8084,6 @@
         "meshes": 2,
         "triangles": 4
        },
-       "玩家角色（正式）": {
-        "meshes": 27,
-        "triangles": 199965
-       },
        "__root__": {
         "meshes": 28,
         "triangles": 0
@@ -8099,6 +8091,10 @@
        "Env": {
         "meshes": 2,
         "triangles": 13522
+       },
+       "玩家角色（正式）": {
+        "meshes": 27,
+        "triangles": 199965
        },
        "Plaza": {
         "meshes": 5,
@@ -8338,10 +8334,10 @@
       "duplicates": []
      }
     },
-    "avgTriangles": 436196,
+    "avgTriangles": 435483,
     "triangleSplit": {
-     "total": 436196,
-     "scene": 234363,
+     "total": 435483,
+     "scene": 233650,
      "character": 199965,
      "pet": 1868,
      "perView": {
@@ -8364,15 +8360,15 @@
        "draws": 131
       },
       "east": {
-       "total": 435939,
+       "total": 433086,
        "character": 199965,
        "pet": 1868,
-       "draws": 146
+       "draws": 140
       }
      }
     },
     "totalWithCharacter": {
-     "avg": 436196,
+     "avg": 435483,
      "budget": 250000,
      "over": true
     },
@@ -8570,7 +8566,7 @@
       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
      }
     ],
-    "fpsSoftware": 131,
+    "fpsSoftware": 138,
     "lod": {
      "near": {
       "anim": "Idle",
@@ -8614,12 +8610,12 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -23.2,
-      "minGapCm": 2.1,
-      "corrections": 54,
+      "minRawGapCm": -22.9,
+      "minGapCm": 2,
+      "corrections": 57,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      },
-     "loadMs": 3427
+     "loadMs": 2607
     },
     "characterActions": {
      "attackButton": "Attack",
@@ -8632,8 +8628,8 @@
     },
     "pet": {
      "still": {
-      "horizontal": 0.36829103992979345,
-      "height": 0.8455018069784501
+      "horizontal": 0.368454071278573,
+      "height": 0.8251550901893685
      },
      "pet": {
       "id": "bird4",
@@ -8641,9 +8637,9 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -26.9,
-      "minGapCm": 1.3,
-      "corrections": 6,
+      "minRawGapCm": -24.9,
+      "minGapCm": 2,
+      "corrections": 4,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      }
     },
@@ -8652,7 +8648,7 @@
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": -0.0241262074559927
+       "y": -0.05771308392286301
       },
       {
        "name": "Portal_fx",
@@ -8662,14 +8658,14 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": -0.034468814730644226
+       "y": -0.04679780825972557
       }
      ],
      "a2": [
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": -0.05556310713291168
+       "y": -0.049417708069086075
       },
       {
        "name": "Portal_fx",
@@ -8679,7 +8675,7 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": -0.049751050770282745
+       "y": -0.00850666407495737
       }
      ]
     },
@@ -8731,7 +8727,7 @@
      "bad": []
     }
    },
-   "ok": false
+   "ok": true
   },
   {
    "browser": "chromium",
@@ -9081,9 +9077,9 @@
        "triangles": 36293
       },
       "plaza_north": {
-       "active": 27,
+       "active": 15,
        "total": 64,
-       "triangles": 40217
+       "triangles": 37364
       },
       "east": {
        "active": 10,
@@ -9096,17 +9092,17 @@
      "ok": true,
      "detail": [
       "星願物語 Stage 6.4 星芽村 測試報告",
-      "時間 2026/11/26 09:25:00",
+      "時間 2026/11/26 09:50:50",
       "網址參數 ?map=village&art=full&quality=medium&g=female",
       "裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
-      "模式 Lite 中畫質：畫質 中畫質（來源：網址指定）、模型 Lite／載入 152 ms",
+      "模式 Lite 中畫質：畫質 中畫質（來源：網址指定）、模型 Lite／載入 111 ms",
       "陰影（實際）：一般柔化陰影 PCF 1024｜陰影貼圖 1024×1024，PCF，取樣品質 中",
       "解析度（實際）：要求上限 1.25x、實際 1x、framebuffer 844×390、Hardware Scaling 1、裝置 DPR 2｜動態解析度 已介入（第 2 級／1.25→1x）",
       "抗鋸齒（實際）：MSAA 要求 2x、後製管線 2x、渲染目標 無法讀取x、裝置上限 4x → 實際生效 2x｜HDR 關、後製管線 開",
       "村莊 V1.3 佔位網格 5、三角形 17190、文字標籤 13；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）",
       "碰撞 圓形 40、矩形 10；鏡頭避障 開",
       "目前畫面 Draw Calls 115、三角形 143753",
-      "全村整合 art=full：loaded，載入 19901 ms"
+      "全村整合 art=full：loaded，載入 15291 ms"
      ]
     },
     "繪製次數 ≤ 120（全村整合、medium 畫質、任何位置）": {
@@ -9131,12 +9127,12 @@
        }
       },
       "plaza_north": {
-       "drawCalls": 111,
-       "triangles": 144679,
+       "drawCalls": 105,
+       "triangles": 141826,
        "casters": {
-        "active": 27,
+        "active": 15,
         "total": 64,
-        "triangles": 40217
+        "triangles": 37364
        }
       },
       "east": {
@@ -9594,21 +9590,21 @@
     "寵物在角色耳朵旁（停著時水平距離 0.15～0.6 m、高度在頭部附近 0.6～1.3 m）": {
      "ok": true,
      "detail": {
-      "earDist": 0.3742024212218414,
-      "earUp": 0.8480874735434767
+      "earDist": 0.3635293640622527,
+      "earUp": 0.8369010057381427
      }
     },
     "寵物不貼住、不穿透角色：跑步與快速轉身後，與頭部／身體的最小間距 ≥ 2 cm（含 B 端間距保護）": {
-     "ok": false,
+     "ok": true,
      "detail": {
       "id": "bird4",
       "label": "鳥・完成體",
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -27,
-      "minGapCm": 1.4,
-      "corrections": 6,
+      "minRawGapCm": -26.8,
+      "minGapCm": 2,
+      "corrections": 3,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      }
     },
@@ -9617,7 +9613,7 @@
      "detail": [
       "  寵物商人洛恩：網格 11、三角形 5573",
       "玩家角色：Claude A 正式初心者 C1.0-B5b（c10b5b）｜novice_c10b5b_female_lite.glb（女、Lite）｜三角面 39955、網格 27（可繪製 26、骨架網格 26）、骨骼 17｜動作 Attack／Death／Hurt／Idle／Jump／Run｜陰影 柔和腳底陰影（A 預設）｜本幀 Draw Calls：主畫面 26、陰影貼圖 0｜來源 Claude A feature/render-stage7-world@1c858d10／art-novice-c10b5b（唯讀，未修改）",
-      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 1.4 cm（修正前 -27 cm，間距保護修正 6 次）"
+      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 2 cm（修正前 -26.8 cm，間距保護修正 3 次）"
      ]
     },
     "星願之泉星晶動畫（旋轉＋上下浮動）持續播放": {
@@ -9627,7 +9623,7 @@
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": -0.011789562180638313
+        "y": 0.03205560892820358
        },
        {
         "name": "Portal_fx",
@@ -9637,14 +9633,14 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": 0.02860381454229355
+        "y": -0.0472475104033947
        }
       ],
       "a2": [
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": 0.047082312405109406
+        "y": -0.04117704555392265
        },
        {
         "name": "Portal_fx",
@@ -9654,7 +9650,7 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": 0.04716702923178673
+        "y": -0.016869843006134033
        }
       ]
      }
@@ -9735,7 +9731,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 19901,
+     "loadMs": 15291,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -9917,12 +9913,12 @@
       }
      },
      "plaza_north": {
-      "drawCalls": 111,
-      "triangles": 144679,
+      "drawCalls": 105,
+      "triangles": 141826,
       "casters": {
-       "active": 27,
+       "active": 15,
        "total": 64,
-       "triangles": 40217
+       "triangles": 37364
       }
      },
      "east": {
@@ -10126,7 +10122,7 @@
      },
      "plaza_north": {
       "activeMeshes": 117,
-      "activeTriangles": 144679,
+      "activeTriangles": 141826,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -10476,10 +10472,10 @@
       "duplicates": []
      }
     },
-    "avgTriangles": 143105,
+    "avgTriangles": 142392,
     "triangleSplit": {
-     "total": 143105,
-     "scene": 101282,
+     "total": 142392,
+     "scene": 100569,
      "character": 39955,
      "pet": 1868,
      "perView": {
@@ -10496,10 +10492,10 @@
        "draws": 111
       },
       "plaza_north": {
-       "total": 144679,
+       "total": 141826,
        "character": 39955,
        "pet": 1868,
-       "draws": 111
+       "draws": 105
       },
       "east": {
        "total": 143801,
@@ -10510,11 +10506,11 @@
      }
     },
     "landscapeTrianglesInfo": {
-     "scene": 101282,
+     "scene": 100569,
      "budgetPortrait": 100000
     },
     "totalWithCharacter": {
-     "avg": 143105,
+     "avg": 142392,
      "budget": 100000,
      "over": true
     },
@@ -10712,7 +10708,7 @@
       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
      }
     ],
-    "fpsSoftware": 103,
+    "fpsSoftware": 113,
     "lod": {
      "near": {
       "anim": "Idle",
@@ -10758,10 +10754,10 @@
       "meshes": 6,
       "minRawGapCm": -23,
       "minGapCm": 2,
-      "corrections": 53,
+      "corrections": 55,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      },
-     "loadMs": 2203
+     "loadMs": 1773
     },
     "characterActions": {
      "attackButton": "Attack",
@@ -10774,8 +10770,8 @@
     },
     "pet": {
      "still": {
-      "horizontal": 0.3742024212218414,
-      "height": 0.8480874735434767
+      "horizontal": 0.3635293640622527,
+      "height": 0.8369010057381427
      },
      "pet": {
       "id": "bird4",
@@ -10783,9 +10779,9 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -27,
-      "minGapCm": 1.4,
-      "corrections": 6,
+      "minRawGapCm": -26.8,
+      "minGapCm": 2,
+      "corrections": 3,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      }
     },
@@ -10794,7 +10790,7 @@
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": -0.011789562180638313
+       "y": 0.03205560892820358
       },
       {
        "name": "Portal_fx",
@@ -10804,14 +10800,14 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": 0.02860381454229355
+       "y": -0.0472475104033947
       }
      ],
      "a2": [
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": 0.047082312405109406
+       "y": -0.04117704555392265
       },
       {
        "name": "Portal_fx",
@@ -10821,7 +10817,7 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": 0.04716702923178673
+       "y": -0.016869843006134033
       }
      ]
     },
@@ -10873,7 +10869,7 @@
      "bad": []
     }
    },
-   "ok": false
+   "ok": true
   },
   {
    "browser": "chromium",
@@ -11339,17 +11335,17 @@
      "ok": true,
      "detail": [
       "星願物語 Stage 6.4 星芽村 測試報告",
-      "時間 2026/11/26 09:28:13",
+      "時間 2026/11/26 09:53:23",
       "網址參數 ?map=village&art=full&quality=high&g=male",
       "裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15",
-      "模式 HQ（高畫質）：畫質 高畫質（來源：網址指定）、模型 HQ／載入 777 ms",
+      "模式 HQ（高畫質）：畫質 高畫質（來源：網址指定）、模型 HQ／載入 1505 ms",
       "陰影（實際）：一般柔化陰影 PCF 1024｜陰影貼圖 1024×1024，PCF，取樣品質 中",
       "解析度（實際）：要求上限 1.25x、實際 1x、framebuffer 390×844、Hardware Scaling 1、裝置 DPR 2｜動態解析度 已介入（第 2 級／1.25→1x）",
       "抗鋸齒（實際）：MSAA 要求 4x、後製管線 4x、渲染目標 無法讀取x、裝置上限 8x → 實際生效 4x｜HDR 關、後製管線 開",
       "村莊 V1.3 佔位網格 5、三角形 24030、文字標籤 13；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）",
       "碰撞 圓形 40、矩形 10；鏡頭避障 開",
       "目前畫面 Draw Calls 100、三角形 377305",
-      "全村整合 art=full：loaded，載入 1725 ms"
+      "全村整合 art=full：loaded，載入 1241 ms"
      ]
     },
     "繪製次數 ≤ 160（全村整合、high 畫質、任何位置）": {
@@ -11850,21 +11846,21 @@
     "寵物在角色耳朵旁（停著時水平距離 0.15～0.6 m、高度在頭部附近 0.6～1.3 m）": {
      "ok": true,
      "detail": {
-      "earDist": 0.36769723937660553,
-      "earUp": 0.8249724158069024
+      "earDist": 0.3755432326539827,
+      "earUp": 0.8189378553417597
      }
     },
     "寵物不貼住、不穿透角色：跑步與快速轉身後，與頭部／身體的最小間距 ≥ 2 cm（含 B 端間距保護）": {
-     "ok": false,
+     "ok": true,
      "detail": {
       "id": "bird4",
       "label": "鳥・完成體",
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -29.7,
-      "minGapCm": 1.6,
-      "corrections": 5,
+      "minRawGapCm": -27.8,
+      "minGapCm": 2,
+      "corrections": 4,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      }
     },
@@ -11873,7 +11869,7 @@
      "detail": [
       "  寵物商人洛恩：網格 11、三角形 13596",
       "玩家角色：Claude A 正式初心者 C1.0-B5b（c10b5b）｜novice_c10b5b_male_hq.glb（男、HQ）｜三角面 199965、網格 27（可繪製 26、骨架網格 26）、骨骼 17｜動作 Attack／Death／Hurt／Idle／Jump／Run｜陰影 柔和腳底陰影（A 預設）｜本幀 Draw Calls：主畫面 26、陰影貼圖 0｜來源 Claude A feature/render-stage7-world@1c858d10／art-novice-c10b5b（唯讀，未修改）",
-      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 1.6 cm（修正前 -29.7 cm，間距保護修正 5 次）"
+      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 2 cm（修正前 -27.8 cm，間距保護修正 4 次）"
      ]
     },
     "星願之泉星晶動畫（旋轉＋上下浮動）持續播放": {
@@ -11883,7 +11879,7 @@
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": -0.0023837473709136248
+        "y": -0.03745415434241295
        },
        {
         "name": "Portal_fx",
@@ -11893,14 +11889,14 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": 0.04977056756615639
+        "y": -0.046646542847156525
        }
       ],
       "a2": [
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": -0.058668605983257294
+        "y": 0.0496906116604805
        },
        {
         "name": "Portal_fx",
@@ -11910,7 +11906,7 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": 0.005321453791111708
+        "y": 0.0005438049556687474
        }
       ]
      }
@@ -12006,7 +12002,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 1725,
+     "loadMs": 1241,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -12891,7 +12887,7 @@
       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
      }
     ],
-    "fpsSoftware": 127,
+    "fpsSoftware": 125,
     "lod": {
      "near": {
       "anim": "Idle",
@@ -12936,11 +12932,11 @@
       "triangles": 1868,
       "meshes": 6,
       "minRawGapCm": -23.5,
-      "minGapCm": 2.1,
-      "corrections": 44,
+      "minGapCm": 2,
+      "corrections": 45,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      },
-     "loadMs": 659
+     "loadMs": 456
     },
     "characterActions": {
      "attackButton": "Attack",
@@ -12953,8 +12949,8 @@
     },
     "pet": {
      "still": {
-      "horizontal": 0.36769723937660553,
-      "height": 0.8249724158069024
+      "horizontal": 0.3755432326539827,
+      "height": 0.8189378553417597
      },
      "pet": {
       "id": "bird4",
@@ -12962,9 +12958,9 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -29.7,
-      "minGapCm": 1.6,
-      "corrections": 5,
+      "minRawGapCm": -27.8,
+      "minGapCm": 2,
+      "corrections": 4,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      }
     },
@@ -12973,7 +12969,7 @@
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": -0.0023837473709136248
+       "y": -0.03745415434241295
       },
       {
        "name": "Portal_fx",
@@ -12983,14 +12979,14 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": 0.04977056756615639
+       "y": -0.046646542847156525
       }
      ],
      "a2": [
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": -0.058668605983257294
+       "y": 0.0496906116604805
       },
       {
        "name": "Portal_fx",
@@ -13000,7 +12996,7 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": 0.005321453791111708
+       "y": 0.0005438049556687474
       }
      ]
     },
@@ -13052,7 +13048,7 @@
      "bad": []
     }
    },
-   "ok": false
+   "ok": true
   },
   {
    "browser": "webkit",
@@ -13416,8 +13412,8 @@
     "村莊場景平均每幀三角面 ≤ 100000（不含玩家角色與寵物；含陰影貼圖繪製）": {
      "ok": true,
      "detail": {
-      "total": 120940,
-      "scene": 79117,
+      "total": 120966,
+      "scene": 79143,
       "character": 39955,
       "pet": 1868,
       "perView": {
@@ -13434,10 +13430,10 @@
         "draws": 87
        },
        "plaza_north": {
-        "total": 131679,
+        "total": 131781,
         "character": 39955,
         "pet": 1868,
-        "draws": 92
+        "draws": 94
        },
        "east": {
         "total": 108692,
@@ -13452,17 +13448,17 @@
      "ok": true,
      "detail": [
       "星願物語 Stage 6.4 星芽村 測試報告",
-      "時間 2026/11/26 09:30:06",
+      "時間 2026/11/26 09:54:58",
       "網址參數 ?map=village&art=full&quality=medium&g=female",
       "裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15",
-      "模式 Lite 中畫質：畫質 中畫質（來源：網址指定）、模型 Lite／載入 318 ms",
+      "模式 Lite 中畫質：畫質 中畫質（來源：網址指定）、模型 Lite／載入 274 ms",
       "陰影（實際）：一般柔化陰影 PCF 1024｜陰影貼圖 1024×1024，PCF，取樣品質 中",
       "解析度（實際）：要求上限 1.25x、實際 1x、framebuffer 390×844、Hardware Scaling 1、裝置 DPR 2｜動態解析度 已介入（第 2 級／1.25→1x）",
       "抗鋸齒（實際）：MSAA 要求 2x、後製管線 2x、渲染目標 無法讀取x、裝置上限 8x → 實際生效 2x｜HDR 關、後製管線 開",
       "村莊 V1.3 佔位網格 5、三角形 17190、文字標籤 13；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）",
       "碰撞 圓形 40、矩形 10；鏡頭避障 開",
       "目前畫面 Draw Calls 83、三角形 108692",
-      "全村整合 art=full：loaded，載入 3772 ms"
+      "全村整合 art=full：loaded，載入 3072 ms"
      ]
     },
     "繪製次數 ≤ 120（全村整合、medium 畫質、任何位置）": {
@@ -13487,8 +13483,8 @@
        }
       },
       "plaza_north": {
-       "drawCalls": 92,
-       "triangles": 131679,
+       "drawCalls": 94,
+       "triangles": 131781,
        "casters": {
         "active": 15,
         "total": 64,
@@ -13509,10 +13505,10 @@
     "移動規則：一般行走走上石階到高台（不跳躍）": {
      "ok": true,
      "detail": {
-      "x": -5.569081319122585e-16,
+      "x": -5.933413741868917e-16,
       "y": 2,
-      "z": 24.094999999999985,
-      "yaw": -6.123233995683403e-17
+      "z": 24.690000000000033,
+      "yaw": -6.123233995726681e-17
      }
     },
     "NPC 互動：9 位 NPC 都能靠近後點擊對話（名稱、職責）": {
@@ -13930,8 +13926,8 @@
      "detail": {
       "run": [
        "Run",
-       5.00000000000001,
-       2.0746887966805017
+       4.999999999999974,
+       2.074688796680487
       ],
       "idle": "Idle"
      }
@@ -13963,21 +13959,21 @@
     "寵物在角色耳朵旁（停著時水平距離 0.15～0.6 m、高度在頭部附近 0.6～1.3 m）": {
      "ok": true,
      "detail": {
-      "earDist": 0.3634116574359887,
-      "earUp": 0.8431926357066039
+      "earDist": 0.3686981857105478,
+      "earUp": 0.8383471999169425
      }
     },
     "寵物不貼住、不穿透角色：跑步與快速轉身後，與頭部／身體的最小間距 ≥ 2 cm（含 B 端間距保護）": {
-     "ok": false,
+     "ok": true,
      "detail": {
       "id": "bird4",
       "label": "鳥・完成體",
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -25.7,
-      "minGapCm": 1.8,
-      "corrections": 6,
+      "minRawGapCm": -29.2,
+      "minGapCm": 2,
+      "corrections": 5,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      }
     },
@@ -13986,7 +13982,7 @@
      "detail": [
       "  寵物商人洛恩：網格 11、三角形 5573",
       "玩家角色：Claude A 正式初心者 C1.0-B5b（c10b5b）｜novice_c10b5b_female_lite.glb（女、Lite）｜三角面 39955、網格 27（可繪製 26、骨架網格 26）、骨骼 17｜動作 Attack／Death／Hurt／Idle／Jump／Run｜陰影 柔和腳底陰影（A 預設）｜本幀 Draw Calls：主畫面 26、陰影貼圖 0｜來源 Claude A feature/render-stage7-world@1c858d10／art-novice-c10b5b（唯讀，未修改）",
-      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 1.8 cm（修正前 -25.7 cm，間距保護修正 6 次）"
+      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 2 cm（修正前 -29.2 cm，間距保護修正 5 次）"
      ]
     },
     "星願之泉星晶動畫（旋轉＋上下浮動）持續播放": {
@@ -13996,7 +13992,7 @@
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": 0.05587945505976677
+        "y": 0.05932876095175743
        },
        {
         "name": "Portal_fx",
@@ -14006,14 +14002,14 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": -0.04993278533220291
+        "y": -0.03788689523935318
        }
       ],
       "a2": [
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": -0.0037678938824683428
+        "y": -0.028159430250525475
        },
        {
         "name": "Portal_fx",
@@ -14023,7 +14019,7 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": 0.03763855621218681
+        "y": -0.0012475241674110293
        }
       ]
      }
@@ -14107,7 +14103,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 3772,
+     "loadMs": 3072,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -14289,8 +14285,8 @@
       }
      },
      "plaza_north": {
-      "drawCalls": 92,
-      "triangles": 131679,
+      "drawCalls": 94,
+      "triangles": 131781,
       "casters": {
        "active": 15,
        "total": 64,
@@ -14453,8 +14449,8 @@
       }
      },
      "plaza_north": {
-      "activeMeshes": 98,
-      "activeTriangles": 131679,
+      "activeMeshes": 100,
+      "activeTriangles": 131781,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -14493,8 +14489,8 @@
         "triangles": 9232
        },
        "WishFountain": {
-        "meshes": 6,
-        "triangles": 10368
+        "meshes": 7,
+        "triangles": 10460
        },
        "Platform": {
         "meshes": 3,
@@ -14517,8 +14513,8 @@
         "triangles": 4819
        },
        "洛恩": {
-        "meshes": 10,
-        "triangles": 3717
+        "meshes": 11,
+        "triangles": 3727
        },
        "NPC": {
         "meshes": 1,
@@ -14764,10 +14760,10 @@
       "duplicates": []
      }
     },
-    "avgTriangles": 120940,
+    "avgTriangles": 120966,
     "triangleSplit": {
-     "total": 120940,
-     "scene": 79117,
+     "total": 120966,
+     "scene": 79143,
      "character": 39955,
      "pet": 1868,
      "perView": {
@@ -14784,10 +14780,10 @@
        "draws": 87
       },
       "plaza_north": {
-       "total": 131679,
+       "total": 131781,
        "character": 39955,
        "pet": 1868,
-       "draws": 92
+       "draws": 94
       },
       "east": {
        "total": 108692,
@@ -14798,7 +14794,7 @@
      }
     },
     "totalWithCharacter": {
-     "avg": 120940,
+     "avg": 120966,
      "budget": 100000,
      "over": true
     },
@@ -14996,7 +14992,7 @@
       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
      }
     ],
-    "fpsSoftware": 95,
+    "fpsSoftware": 94,
     "lod": {
      "near": {
       "anim": "Idle",
@@ -15040,12 +15036,12 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -23.2,
-      "minGapCm": 2.1,
-      "corrections": 21,
+      "minRawGapCm": -20.1,
+      "minGapCm": 2,
+      "corrections": 14,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      },
-     "loadMs": 306
+     "loadMs": 250
     },
     "characterActions": {
      "attackButton": "Attack",
@@ -15058,8 +15054,8 @@
     },
     "pet": {
      "still": {
-      "horizontal": 0.3634116574359887,
-      "height": 0.8431926357066039
+      "horizontal": 0.3686981857105478,
+      "height": 0.8383471999169425
      },
      "pet": {
       "id": "bird4",
@@ -15067,9 +15063,9 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -25.7,
-      "minGapCm": 1.8,
-      "corrections": 6,
+      "minRawGapCm": -29.2,
+      "minGapCm": 2,
+      "corrections": 5,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      }
     },
@@ -15078,7 +15074,7 @@
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": 0.05587945505976677
+       "y": 0.05932876095175743
       },
       {
        "name": "Portal_fx",
@@ -15088,14 +15084,14 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": -0.04993278533220291
+       "y": -0.03788689523935318
       }
      ],
      "a2": [
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": -0.0037678938824683428
+       "y": -0.028159430250525475
       },
       {
        "name": "Portal_fx",
@@ -15105,7 +15101,7 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": 0.03763855621218681
+       "y": -0.0012475241674110293
       }
      ]
     },
@@ -15157,7 +15153,7 @@
      "bad": []
     }
    },
-   "ok": false
+   "ok": true
   },
   {
    "browser": "webkit",
@@ -15495,8 +15491,8 @@
     "村莊場景平均每幀三角面 ≤ 100000（不含玩家角色與寵物；含陰影貼圖繪製）": {
      "ok": true,
      "detail": {
-      "total": 95442,
-      "scene": 53193,
+      "total": 95437,
+      "scene": 53188,
       "character": 40381,
       "pet": 1868,
       "perView": {
@@ -15519,10 +15515,10 @@
         "draws": 82
        },
        "east": {
-        "total": 92707,
+        "total": 92685,
         "character": 40381,
         "pet": 1868,
-        "draws": 76
+        "draws": 74
        }
       }
      }
@@ -15531,17 +15527,17 @@
      "ok": true,
      "detail": [
       "星願物語 Stage 6.4 星芽村 測試報告",
-      "時間 2026/11/26 09:31:17",
+      "時間 2026/11/26 09:55:57",
       "網址參數 ?map=village&art=full&quality=low&g=male",
       "裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15",
-      "模式 Lite 低畫質：畫質 低畫質（來源：網址指定）、模型 Lite／載入 276 ms",
+      "模式 Lite 低畫質：畫質 低畫質（來源：網址指定）、模型 Lite／載入 214 ms",
       "陰影（實際）：柔和腳底陰影（不使用陰影貼圖）｜陰影貼圖 不使用陰影貼圖",
       "解析度（實際）：要求上限 1x、實際 1x、framebuffer 390×844、Hardware Scaling 1、裝置 DPR 2｜動態解析度 未介入（階梯 1x）",
       "抗鋸齒（實際）：MSAA 要求 1x、沒有後製管線、畫布 MSAA 關、裝置上限 8x → 實際生效 1x｜HDR 關、後製管線 關",
       "村莊 V1.3 佔位網格 5、三角形 17190、文字標籤 13；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）",
       "碰撞 圓形 40、矩形 10；鏡頭避障 開",
       "目前畫面 Draw Calls 76、三角形 92707",
-      "全村整合 art=full：loaded，載入 4269 ms"
+      "全村整合 art=full：loaded，載入 3133 ms"
      ]
     },
     "繪製次數 ≤ 100（全村整合、low 畫質、任何位置）": {
@@ -15575,8 +15571,8 @@
        }
       },
       "east": {
-       "drawCalls": 76,
-       "triangles": 92707,
+       "drawCalls": 74,
+       "triangles": 92685,
        "casters": {
         "active": 0,
         "total": 0,
@@ -15588,10 +15584,10 @@
     "移動規則：一般行走走上石階到高台（不跳躍）": {
      "ok": true,
      "detail": {
-      "x": -5.630313659079956e-16,
+      "x": -5.765024806986172e-16,
       "y": 2,
-      "z": 24.19500000000002,
-      "yaw": -6.123233995696436e-17
+      "z": 24.414999999999996,
+      "yaw": -6.123233995714984e-17
      }
     },
     "NPC 互動：9 位 NPC 都能靠近後點擊對話（名稱、職責）": {
@@ -16009,8 +16005,8 @@
      "detail": {
       "run": [
        "Run",
-       5.000000000000004,
-       2.2123893805309756
+       4.999999999999996,
+       2.2123893805309716
       ],
       "idle": "Idle"
      }
@@ -16042,8 +16038,8 @@
     "寵物在角色耳朵旁（停著時水平距離 0.15～0.6 m、高度在頭部附近 0.6～1.3 m）": {
      "ok": true,
      "detail": {
-      "earDist": 0.36871677995590485,
-      "earUp": 0.8306193682466242
+      "earDist": 0.36535138862241884,
+      "earUp": 0.8304408008993351
      }
     },
     "寵物不貼住、不穿透角色：跑步與快速轉身後，與頭部／身體的最小間距 ≥ 2 cm（含 B 端間距保護）": {
@@ -16054,8 +16050,8 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -24.5,
-      "minGapCm": 2.1,
+      "minRawGapCm": -23.4,
+      "minGapCm": 2,
       "corrections": 6,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      }
@@ -16065,7 +16061,7 @@
      "detail": [
       "  寵物商人洛恩：網格 11、三角形 5573",
       "玩家角色：Claude A 正式初心者 C1.0-B5b（c10b5b）｜novice_c10b5b_male_lite.glb（男、Lite）｜三角面 40381、網格 27（可繪製 26、骨架網格 26）、骨骼 17｜動作 Attack／Death／Hurt／Idle／Jump／Run｜陰影 柔和腳底陰影（A 預設）｜本幀 Draw Calls：主畫面 26、陰影貼圖 0｜來源 Claude A feature/render-stage7-world@1c858d10／art-novice-c10b5b（唯讀，未修改）",
-      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 2.1 cm（修正前 -24.5 cm，間距保護修正 6 次）"
+      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 2 cm（修正前 -23.4 cm，間距保護修正 6 次）"
      ]
     },
     "星願之泉星晶動畫（旋轉＋上下浮動）持續播放": {
@@ -16075,7 +16071,7 @@
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": 0.059894610196352005
+        "y": 0.050559550523757935
        },
        {
         "name": "Portal_fx",
@@ -16085,14 +16081,14 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": -0.03814023733139038
+        "y": 0.03728467598557472
        }
       ],
       "a2": [
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": -0.019699225202202797
+        "y": 0.01660381443798542
        },
        {
         "name": "Portal_fx",
@@ -16102,7 +16098,7 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": 0.00239143380895257
+        "y": -0.04884485527873039
        }
       ]
      }
@@ -16149,7 +16145,7 @@
       },
       {
        "id": "smith",
-       "radius": 3.12,
+       "radius": 3.13,
        "desired": 9
       },
       {
@@ -16186,7 +16182,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 4269,
+     "loadMs": 3133,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -16377,8 +16373,8 @@
       }
      },
      "east": {
-      "drawCalls": 76,
-      "triangles": 92707,
+      "drawCalls": 74,
+      "triangles": 92685,
       "casters": {
        "active": 0,
        "total": 0,
@@ -16618,8 +16614,8 @@
       }
      },
      "east": {
-      "activeMeshes": 95,
-      "activeTriangles": 92707,
+      "activeMeshes": 91,
+      "activeTriangles": 92685,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -16638,7 +16634,7 @@
         "triangles": 40381
        },
        "__root__": {
-        "meshes": 18,
+        "meshes": 16,
         "triangles": 0
        },
        "Env": {
@@ -16682,8 +16678,8 @@
         "triangles": 4477
        },
        "洛恩": {
-        "meshes": 11,
-        "triangles": 3727
+        "meshes": 9,
+        "triangles": 3705
        },
        "NPC": {
         "meshes": 1,
@@ -16858,10 +16854,10 @@
       "duplicates": []
      }
     },
-    "avgTriangles": 95442,
+    "avgTriangles": 95437,
     "triangleSplit": {
-     "total": 95442,
-     "scene": 53193,
+     "total": 95437,
+     "scene": 53188,
      "character": 40381,
      "pet": 1868,
      "perView": {
@@ -16884,15 +16880,15 @@
        "draws": 82
       },
       "east": {
-       "total": 92707,
+       "total": 92685,
        "character": 40381,
        "pet": 1868,
-       "draws": 76
+       "draws": 74
       }
      }
     },
     "totalWithCharacter": {
-     "avg": 95442,
+     "avg": 95437,
      "budget": 100000,
      "over": false
     },
@@ -17134,12 +17130,12 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -20.6,
-      "minGapCm": 2.1,
-      "corrections": 15,
+      "minRawGapCm": -15.4,
+      "minGapCm": 2,
+      "corrections": 13,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      },
-     "loadMs": 278
+     "loadMs": 217
     },
     "characterActions": {
      "attackButton": "Attack",
@@ -17152,8 +17148,8 @@
     },
     "pet": {
      "still": {
-      "horizontal": 0.36871677995590485,
-      "height": 0.8306193682466242
+      "horizontal": 0.36535138862241884,
+      "height": 0.8304408008993351
      },
      "pet": {
       "id": "bird4",
@@ -17161,8 +17157,8 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -24.5,
-      "minGapCm": 2.1,
+      "minRawGapCm": -23.4,
+      "minGapCm": 2,
       "corrections": 6,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      }
@@ -17172,7 +17168,7 @@
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": 0.059894610196352005
+       "y": 0.050559550523757935
       },
       {
        "name": "Portal_fx",
@@ -17182,14 +17178,14 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": -0.03814023733139038
+       "y": 0.03728467598557472
       }
      ],
      "a2": [
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": -0.019699225202202797
+       "y": 0.01660381443798542
       },
       {
        "name": "Portal_fx",
@@ -17199,7 +17195,7 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": 0.00239143380895257
+       "y": -0.04884485527873039
       }
      ]
     },
@@ -17236,7 +17232,7 @@
      },
      {
       "id": "smith",
-      "radius": 3.12,
+      "radius": 3.13,
       "desired": 9
      },
      {
@@ -17254,5 +17250,5 @@
    "ok": true
   }
  ],
- "finishedAt": "2026-11-26T09:32:04.906Z"
+ "finishedAt": "2026-11-26T09:56:37.013Z"
 }
