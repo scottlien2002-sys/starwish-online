@@ -97,10 +97,11 @@ for (const name of browsers) {
 
       // ---------- 4. 南門 → 星芽原野 ----------
       await V(() => window.__starwishWorld.teleport(0, -41.5, Math.PI));
-      await wait(800);
+      // 互動目標在下一次畫面更新時才判定（CI 軟體繪圖很慢）
+      await page.waitForFunction(() => window.__starwishWorld.info().interact?.target === "portal:south", null, { timeout: 30000 }).catch(() => {});
       const tgt = await V(() => window.__starwishWorld.info().interact?.target);
       const act = await V(() => window.__starwishWorld.activate());
-      await wait(300);
+      await page.waitForFunction(() => !!document.querySelector('.vi-dlg button[data-a="go"]'), null, { timeout: 15000 }).catch(() => {});
       const dlg = await V(() => window.__starwishWorld.info().interact?.dialog ?? "");
       console.log(`  · [${name} ${g}] 傳送門：target=${tgt} activate=${act} dialog=${dlg.slice(0, 60)}`);
       const nav = page.waitForNavigation({ timeout: 60000 }).catch(() => null);
