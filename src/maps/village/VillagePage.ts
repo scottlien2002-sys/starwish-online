@@ -836,7 +836,7 @@ class VillagePage {
       } else lines.push(`玩家角色：${this.charStatus === "off" ? "簡易測試角色（&char=simple）" : `正式角色 ${this.charStatus}`}`);
       if (this.look66) {
         const fs = this.foliage?.stats;
-        lines.push(`美術：Stage 6.6 全村升級（物件細節貼圖／草地／光影 曝光 1.0、對比 1.12／雲朵天空／NPC 專屬五官＋眨眼＋職業小動作）｜草叢 ${fs?.tufts ?? 0}、小花 ${fs?.flowers ?? 0}（共 ${fs?.triangles ?? 0} 面；分 ${fs?.sectors ?? 0} 個扇區、${fs?.drawCalls ?? 0} 個網格，只畫看得到的扇區）｜外圍樹林分 ${ENV_SECTORS} 個扇區｜&look=65 可切回 Stage 6.5 外觀比較`);
+        lines.push(`美術：Stage 6.6 全村升級（物件細節貼圖／草地／光影 曝光 1.0、對比 1.12／雲朵天空／NPC 專屬五官＋眨眼＋職業小動作）｜草叢 ${fs?.tufts ?? 0}、小花 ${fs?.flowers ?? 0}（${fs?.triangles ?? 0} 面、${fs?.drawCalls ?? 0} 次繪製）｜外圍樹林${this.lite ? "不分區" : `分 ${ENV_SECTORS} 個扇區（畫面外不繪製）`}｜&look=65 可切回 Stage 6.5 外觀比較`);
       } else lines.push("美術：Stage 6.5 外觀（&look=65）");
       const ri = this.resourceInfo();
       lines.push(`模型與貼圖 ${ri.files} 個：網路下載 ${ri.network} 個（${ri.networkMB} MB）、瀏覽器快取 ${ri.cached} 個${ri.unknown ? `、無法判斷 ${ri.unknown} 個` : ""}｜重複請求：${ri.duplicates.length ? ri.duplicates.join("、") : "無"}｜載入時間${ri.network === 0 && ri.cached > 0 ? "（全部來自快取，不能當作首次載入時間）" : ri.cached > 0 ? "（部分來自快取）" : "（首次下載）"}`);

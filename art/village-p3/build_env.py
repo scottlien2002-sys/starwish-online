@@ -98,7 +98,7 @@ def build(lod):
                 x, z = G.pol(a0 + (a1 - a0) * (0.3 + 0.4 * j), 51.2 + rng.uniform(-0.3, 0.3))
                 G.blob(props, (x, z, 1.24), 0.09, 0.09, 0.05, rng.choice(C["flower"]))
     # ---- 外圍樹林 ----
-    count = 120 if hq else 64
+    count = 100 if hq else 64  # Stage 6.6：HQ 120→100（橫向鏡頭看得到整圈樹林）
     placed = []
     tries = 0
     while len(placed) < count and tries < 5000:

@@ -2,7 +2,7 @@ import type { AbstractMesh, Scene } from "@babylonjs/core";
 import { villageProps } from "./villageMaterials.ts";
 import { splitBySector } from "./sectorSplit.ts";
 
-/** Stage 6.6：外圍樹林與樹籬切成 6 個扇區（畫面外的扇區不繪製；三角面總數不變） */
+/** Stage 6.6：高畫質的外圍樹林與樹籬切成 6 個扇區（直向鏡頭畫面外的扇區不繪製；三角面總數不變）。中／低畫質樹林面數小，不切 */
 export const ENV_SECTORS = 6;
 
 /**
@@ -17,7 +17,7 @@ export interface EnvP3 {
   setEnabled(on: boolean): void;
 }
 
-export function setupEnvP3(scene: Scene, meshes: AbstractMesh[], opt: { includeTerrain: boolean }): EnvP3 {
+export function setupEnvP3(scene: Scene, meshes: AbstractMesh[], opt: { includeTerrain: boolean; sectors?: number }): EnvP3 {
   const mat = villageProps(scene);
   const byMesh: Record<string, number> = {};
   const used: AbstractMesh[] = [];
@@ -33,11 +33,11 @@ export function setupEnvP3(scene: Scene, meshes: AbstractMesh[], opt: { includeT
     m.receiveShadows = k !== "far";
     m.hasVertexAlpha = false;
     byMesh[k] = Math.round(m.getTotalIndices() / 3);
-    if (k === "props") used.push(...splitBySector(scene, m, ENV_SECTORS, "Env_props"));
+    if (k === "props" && (opt.sectors ?? 1) > 1) used.push(...splitBySector(scene, m, opt.sectors ?? 1, "Env_props"));
     else used.push(m);
   }
   return {
-    stats: { meshes: used.length, triangles: Object.values(byMesh).reduce((a, b) => a + b, 0), byMesh, materials: 1, sectors: ENV_SECTORS },
+    stats: { meshes: used.length, triangles: Object.values(byMesh).reduce((a, b) => a + b, 0), byMesh, materials: 1, sectors: opt.sectors ?? 1 },
     meshes: used,
     setEnabled(on) {
       for (const m of used) m.setEnabled(on);

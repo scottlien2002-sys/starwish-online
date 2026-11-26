@@ -1,7 +1,7 @@
 import "@babylonjs/loaders/glTF";
 import { type AbstractMesh, type AnimationGroup, type Node, type Scene, SceneLoader, type ShadowGenerator, type TransformNode } from "@babylonjs/core";
 import { setupBuildingP3 } from "./BuildingP3.ts";
-import { setupEnvP3 } from "./EnvP3.ts";
+import { ENV_SECTORS, setupEnvP3 } from "./EnvP3.ts";
 import { setupFountainP3 } from "./FountainP3.ts";
 import { setupKnightP3 } from "./KnightP3.ts";
 import { setupMageP3 } from "./MageP3.ts";
@@ -76,7 +76,7 @@ export async function loadVillageArtFull(scene: Scene, lite: boolean, shadows: S
 
   await step("env", async () => {
     const r = await load(`env_${q}.glb`);
-    const env = setupEnvP3(scene, r.meshes, { includeTerrain: false });
+    const env = setupEnvP3(scene, r.meshes, { includeTerrain: false, sectors: lite ? 1 : ENV_SECTORS });
     statics.push(...env.meshes);
     stat("環境", [...env.meshes]);
   });
