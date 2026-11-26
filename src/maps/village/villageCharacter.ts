@@ -9,7 +9,7 @@ import { PetFollower, type PetLook } from "../../pets/PetFollower.ts";
  * - 動作：待機／跑步（依實際速度）＋攻擊、受傷、死亡、復活；跳躍只保留給技能（不提供一般移動的跳躍按鈕）
  * - 角色陰影：與 A 的 Stage 7 村莊相同，預設柔和腳底陰影（&charshadow=realtime 才加入即時陰影貼圖）
  * - 金屬反射：與 A 的 Stage 7 村莊相同（天空球反射探針，只渲染一次）
- * - 寵物與角色的間距檢查（B 端保護）：寵物中心與頭部（球）、身體（膠囊）保持「半徑和＋2 cm」以上；
+ * - 寵物與角色的間距檢查（B 端保護）：寵物與頭部（球）、身體（膠囊）表面保持 2 cm 以上（沿水平方向往外推）；
  *   若 A 的跟隨平滑在快速轉身時把寵物帶進頭部，會把它推回外側並記錄次數（報告列出，回報給 A）
  */
 export const NOVICE_VERSION_B65 = "c10b5b";
@@ -115,7 +115,7 @@ export class VillageCharacter {
     return h;
   }
 
-  /** 寵物不貼住、不穿透角色：頭部球＋身體膠囊外保持間距（B 端保護，不修改 A 的 PetFollower）；兩個形狀交替檢查最多 4 次 */
+  /** 寵物不貼住、不穿透角色：頭部球＋身體膠囊外保持間距（B 端保護，不修改 A 的 PetFollower） */
   private keepPetClear(yaw: number): void {
     if (!this.follower.visible) return;
     const petR = this.follower.size * 0.5;
@@ -137,13 +137,32 @@ export class VillageCharacter {
     const minGap = (): number => Math.min(...shapes().map((x) => x.gap));
     this.minRawGap = Math.min(this.minRawGap, minGap());
     let moved = false;
-    for (let k = 0; k < 4; k++) {
-      const bad = shapes().filter((x) => x.gap < MARGIN - 1e-4).sort((a, b) => a.gap - b.gap)[0];
-      if (!bad) break;
-      let dir = bad.dir;
-      if (dir.lengthSquared() < 1e-8) dir = new Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
-      dir = dir.normalize();
-      pp.copyFrom(bad.center.add(dir.scale(bad.need + 1e-3)));
+    if (minGap() < MARGIN - 1e-4) {
+      // 沿「角色中心軸 → 寵物」的水平方向往外推，二分搜尋最小距離，讓頭部與身體同時保持間距（不會在脖子交界來回推）
+      let hx = pp.x - base.x;
+      let hz = pp.z - base.z;
+      let r0 = Math.hypot(hx, hz);
+      if (r0 < 1e-4) {
+        hx = Math.cos(yaw);
+        hz = -Math.sin(yaw);
+        r0 = 0;
+      } else {
+        hx /= r0;
+        hz /= r0;
+      }
+      const y = pp.y;
+      const at = (r: number): void => {
+        pp.set(base.x + hx * r, y, base.z + hz * r);
+      };
+      let lo = r0;
+      let hi = r0 + 1.2;
+      for (let k = 0; k < 18; k++) {
+        const mid = (lo + hi) / 2;
+        at(mid);
+        if (minGap() >= MARGIN) hi = mid;
+        else lo = mid;
+      }
+      at(hi);
       moved = true;
     }
     if (moved) {
