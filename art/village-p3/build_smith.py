@@ -59,7 +59,7 @@ def build(lod):
             k += 1
     # ---- 二樓：半木構（暖白灰泥＋深色木架），往前挑出遮住店面 ----
     G.box(props, F, -5.85, 5.85, 0.3, 9.85, 3.6, 3.78, C["timber"])  # 樓板梁
-    G.box(stone, F, -5.75, 5.75, 0.42, 9.75, 3.78, 6.2, C["plaster"])
+    G.box(props, F, -5.75, 5.75, 0.42, 9.75, 3.78, 6.2, C["plaster"])  # Stage 6.6：灰泥牆改用物件材質（灰泥細節），不再套用砌石貼圖
     y_f = 0.4
     beams = [(-5.75, 3.78, -5.75, 6.2), (5.75, 3.78, 5.75, 6.2), (-5.75, 6.12, 5.75, 6.12), (-5.75, 3.86, 5.75, 3.86)]
     for x in (-3.6, -1.4, 1.4, 3.6):
@@ -84,14 +84,14 @@ def build(lod):
     A.gable_roof(roof, F, -6.0, 6.0, 0.05, 9.95, 6.05, 9.3, C["roof"], C["roof_d"], ridge_along="x", thick=0.18)
     for sx in (-1, 1):  # 兩側山牆（屋脊沿 x），朝外
         x = sx * 5.75
-        tri = [stone.vert(F(x, 0.42, 6.2), C["plaster"]), stone.vert(F(x, 9.75, 6.2), C["plaster"]), stone.vert(F(x, 5.0, 9.15), C["plaster"])]
-        stone.face(tri, G.sub(F(sx, 0, 0), F(0, 0, 0)))
+        tri = [props.vert(F(x, 0.42, 6.2), C["plaster"]), props.vert(F(x, 9.75, 6.2), C["plaster"]), props.vert(F(x, 5.0, 9.15), C["plaster"])]
+        props.face(tri, G.sub(F(sx, 0, 0), F(0, 0, 0)))
     G.tube(gm, [F(-6.0, 5.0, 9.33), F(6.0, 5.0, 9.33)], 0.05, 5 if hq else 3, gcol)
     # 老虎窗（前坡中間）
     dy = 2.4
-    G.box(stone, F, -1.0, 1.0, dy, dy + 1.2, 7.0, 8.2, C["plaster"])
+    G.box(props, F, -1.0, 1.0, dy, dy + 1.2, 7.0, 8.2, C["plaster"])
     A.gable_roof(roof, F, -1.2, 1.2, dy - 0.15, dy + 1.6, 8.05, 8.75, C["roof"], C["roof_d"], ridge_along="y", thick=0.08)
-    A.gable_wall(stone, F, -1.0, 1.0, dy, 8.2, 8.62, C["plaster"])
+    A.gable_wall(props, F, -1.0, 1.0, dy, 8.2, 8.62, C["plaster"])
     Fw = G.frame(*F(0, dy - 0.01, 0)[:2], BEARING, FLOOR)
     A.window_box(stone, props, gm, gcol, Fw, 0.7, 7.25, 0.8, glass=C["glass"], arch=True, hq=hq)
     # ---- 粗石大煙囪（右後）＋發光餘燼 ----

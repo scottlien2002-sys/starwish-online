@@ -283,9 +283,9 @@ function tuftMesh(scene: Scene, name: string): Mesh {
   const blades = 6;
   for (let i = 0; i < blades; i++) {
     const a = (i / blades) * Math.PI * 2 + hash(i) * 0.6;
-    const lean = 0.35 + hash(i + 7) * 0.3;
-    const h = 0.18 + hash(i + 3) * 0.14;
-    const w = 0.035;
+    const lean = 0.25 + hash(i + 7) * 0.25;
+    const h = 0.12 + hash(i + 3) * 0.1;
+    const w = 0.045;
     const ox = Math.cos(a) * 0.05;
     const oz = Math.sin(a) * 0.05;
     const px = -Math.sin(a) * w;
@@ -294,8 +294,9 @@ function tuftMesh(scene: Scene, name: string): Mesh {
     const tz = oz + Math.sin(a) * h * lean;
     const base = pos.length / 3;
     pos.push(ox - px, 0, oz - pz, ox + px, 0, oz + pz, tx, h, tz);
-    const dark = [0.26, 0.43, 0.2];
-    const tip = hash(i + 11) > 0.5 ? [0.62, 0.8, 0.4] : [0.55, 0.74, 0.34];
+    // 與草地貼圖同色系（根部略暗、尖端受光），遠看融入草地、近看有立體草葉
+    const dark = [0.4, 0.6, 0.27];
+    const tip = hash(i + 11) > 0.5 ? [0.7, 0.86, 0.46] : [0.62, 0.8, 0.4];
     col.push(...dark, 1, ...dark, 1, ...tip, 1);
     nrm.push(0, 1, 0, 0, 1, 0, 0, 1, 0);
     idx.push(base, base + 1, base + 2);
@@ -359,7 +360,7 @@ export function buildFoliage66(scene: Scene, tier: GraphicsTier, receiveShadows:
   mat.specularColor = Color3.Black();
   mat.backFaceCulling = false;
   mat.twoSidedLighting = true;
-  mat.emissiveColor = new Color3(0.04, 0.05, 0.03);
+  mat.emissiveColor = new Color3(0.08, 0.1, 0.05);
   const tuft = tuftMesh(scene, "VP66_tufts");
   const flower = flowerMesh(scene, "VP66_flowers");
   const fmat = mat.clone("VP66_flowerMat");

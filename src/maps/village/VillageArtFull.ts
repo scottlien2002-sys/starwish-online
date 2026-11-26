@@ -113,7 +113,7 @@ export async function loadVillageArtFull(scene: Scene, lite: boolean, shadows: S
   });
   for (const [file, prefix, label, casters] of [
     ["sword", "Sword", "劍士軍團", undefined],
-    ["smith", "Smith", "鐵匠鋪", undefined],
+    ["smith", "Smith", "鐵匠鋪", ["stone", "roof", "props"]], // Stage 6.6：二樓灰泥牆在 props，需要投影
     ["warehouse", "Ware", "倉庫", ["stone", "roof", "props"]],
     ["board", "Board", "委託佈告欄", ["stone", "roof", "props"]],
     ["church", "Church", "祭司教堂", undefined],
