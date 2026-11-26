@@ -25,6 +25,16 @@ BOOTS = {"boot_l", "boot_r"}
 HEAD_SCALE = 0.92  # 與洛恩相同：頭部以頸部為支點略縮小（村民是成年人）
 HEAD_PIVOT = np.array([0.0, 0.02, 0.6])
 HEAD_BONE = "head"
+# 單一材質：臉部貼圖縮到 1024 並在底部加 32 px 白色條；身體／服裝的 UV 全部指向白色條 → 整個 NPC 只要 1 個網格、1 次繪製
+ATLAS = 1024
+STRIP = 32
+WHITE_UV = (0.5, STRIP / 2 / ATLAS)
+
+
+def face_uv(uv):
+    out = np.asarray(uv, np.float32).copy()
+    out[:, 1] = STRIP / ATLAS + out[:, 1] * (ATLAS - STRIP) / ATLAS
+    return out
 GOLD = np.array([0.95, 0.76, 0.34])
 DEFAULT = {"cloth": (0.8, 0.8, 0.8), "metal": (0.8, 0.82, 0.86), "trim": tuple(GOLD), "leather": (0.42, 0.27, 0.16), "wood": (0.48, 0.32, 0.2), "dark": (0.2, 0.18, 0.22),
            "glow": (0.8, 0.75, 1.0), "band": (0.8, 0.2, 0.2)}
@@ -63,7 +73,11 @@ def recolor_face(src, dst, iris, makeup=False):
     out = np.where(blue[..., None], col, im)
     if makeup:
         out = clown_paint(out, blue)
-    Image.fromarray((np.clip(out, 0, 1) * 255).astype(np.uint8)).save(dst)
+    face = Image.fromarray((np.clip(out, 0, 1) * 255).astype(np.uint8)).resize((ATLAS, ATLAS - STRIP), Image.LANCZOS)
+    atlas = Image.new("RGB", (ATLAS, ATLAS), (255, 255, 255))
+    atlas.paste(face, (0, 0))
+    atlas.save(dst)
+    atlas.resize((ATLAS // 2, ATLAS // 2), Image.LANCZOS).save(str(dst).replace(".png", "_lite.png"))
     return int(blue.sum())
 
 
@@ -115,6 +129,7 @@ def export_one(npc_id, a_out, out):
         if it["name"] in BOOTS and "boot" in npc["colors"]:
             c = tint(c, npc["colors"]["boot"])
         data[key + "__c"] = c.astype(np.float32)
+        data[key + "__uv"] = face_uv(a[k + "__uv"]) if k + "__uv" in a else np.tile(np.array(WHITE_UV, np.float32), (len(V), 1))
         info.append({**it, "key": key, "bind": None, "source": f"A:C1.0-B4 {g}（唯讀）"})
         i += 1
     for p in npc["parts"]:
@@ -141,6 +156,7 @@ def export_one(npc_id, a_out, out):
         data[key + "__q"] = Q.astype(np.int32)
         data[key + "__n"] = N.astype(np.float32)
         data[key + "__c"] = np.clip(col, 0, 1).astype(np.float32)
+        data[key + "__uv"] = np.tile(np.array(WHITE_UV, np.float32), (len(V), 1))
         # 頭部零件、其他零件一律記錄綁定
         info.append({"key": key, "name": p.name, "group": p.group, "palette": p.name, "step": p.step, "verts": len(V), "quads": len(Q), "textured": False,
                      "bind": bind, "source": f"B:NPC {npc_id}"})

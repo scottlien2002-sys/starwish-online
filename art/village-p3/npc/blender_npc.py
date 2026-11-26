@@ -4,7 +4,7 @@
 
 - 骨架／蒙皮／動作沿用洛恩 V2.1 的做法（17 根骨頭、依零件綁定骨頭、距離加權最多 3 根）；
   關節位置依性別取 A 的男／女初心者基礎網格的建模關節（json 內的 joints）。不修改 A 的任何檔案
-- 材質合併：HQ＝臉（貼圖）／身體（頂點色）／金屬／發光 最多 4 個網格；Lite＝臉／身體（含金屬）／發光
+- 單一材質：臉部貼圖（底部白色條）× 頂點色 → 每位 NPC 合併成 1 個網格（HQ 貼圖 1024、Lite 512）
 - 輸出：npc_<id>_{hq,lite}.glb、npc_<id>_<front|left45|side|back|head|talk|turn>.png、npc_report.json
 """
 import json
@@ -69,20 +69,14 @@ def make_material(name, surface, tex=None, glow=False):
 
 
 def mat_class(it, lod):
-    if it.get("textured"):
-        return "face"
-    g = it["group"]
-    if g == "glow":
-        return "glow"
-    if g == "metal" and lod == "hq":
-        return "metal"
+    # 單一材質（臉部貼圖＋白色條；頂點色決定每個零件的顏色）→ 每位 NPC 1 個網格、1 次繪製
     return "body"
 
 
 def load(nid, lod):
     d = np.load(os.path.join(PARTS, f"npc_{nid}_parts.npz"))
     meta = json.load(open(os.path.join(PARTS, f"npc_{nid}_parts.json")))
-    tex = os.path.join(PARTS, f"npc_{nid}_face.png")
+    tex = os.path.join(PARTS, f"npc_{nid}_face{'_lite' if lod == 'lite' else ''}.png")
     objs, mats = [], {}
     for it in meta["parts"]:
         k = it["key"]
@@ -106,7 +100,7 @@ def load(nid, lod):
             ul.data.foreach_set("uv", d[k + "__uv"][q.ravel()].ravel().astype(np.float32))
         mk = mat_class(it, lod)
         if mk not in mats:
-            mats[mk] = make_material(f"NPC_{mk}", SURFACE[mk], tex if mk == "face" else None, glow=mk == "glow")
+            mats[mk] = make_material(f"NPC_{mk}", SURFACE[mk], tex)
         me.materials.append(mats[mk])
         ob = bpy.data.objects.new(it["name"], me)
         ob["bind"] = json.dumps(it.get("bind"))
