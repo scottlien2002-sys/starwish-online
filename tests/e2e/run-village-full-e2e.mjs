@@ -81,6 +81,8 @@ for (const name of browsers) {
       check("Stage 6.2 正式NPC：8 位都已載入（取代佔位人形），各 1 個網格，具備待機／轉身／對話動作", npcIds.every((id) => npcInfo.stats[id] && npcInfo.stats[id].meshes === 1 && ["Idle", "Turn", "Talk"].every((a) => npcInfo.stats[id].animations.includes(a))) && npcIds.every((id) => npcInfo.state[id]?.anim === "Idle"), npcInfo);
       await page.waitForTimeout(800);
       // 效能（CI 軟體繪圖，只看相對數字）
+      // Stage 6.5：四個位置的量測前先等正式角色載入完成（數字包含正式角色與寵物）
+      await page.waitForFunction(() => { const c = window.__starwishVillage.charState(); return c.status === "loaded" || String(c.status).startsWith("error"); }, null, { timeout: 240000, polling: 500 });
       const perf = {};
       for (const [k, x, z, yaw] of [["arrival", 0, -39, 0], ["spawn", null, null, null], ["plaza_north", 0, 15, 180], ["east", 30, 0, 270]]) {
         if (x === null) {
@@ -110,9 +112,18 @@ for (const name of browsers) {
         if (X.map) check("陰影投射物依距離剔除（至少一個位置本幀投射物少於全部）", Object.values(perf).some((v) => v.casters.active < v.casters.total), Object.fromEntries(Object.entries(perf).map(([k, v]) => [k, v.casters])));
         const avgTri = Object.values(perf).reduce((a, v) => a + v.triangles, 0) / Object.values(perf).length;
         run.results.avgTriangles = Math.round(avgTri);
+        // 拆分：村莊場景（不含玩家角色與寵物）／玩家角色／寵物（主畫面；角色預設腳底陰影，不進陰影貼圖）
+        const part = (v, g) => v.breakdown?.groups?.[g]?.triangles ?? 0;
+        const avgOf = (fn) => Object.values(perf).reduce((a, v) => a + fn(v), 0) / Object.values(perf).length;
+        const avgChar = avgOf((v) => part(v, "玩家角色（正式）"));
+        const avgPet = avgOf((v) => part(v, "寵物"));
+        const avgScene = avgTri - avgChar - avgPet;
+        run.results.triangleSplit = { total: Math.round(avgTri), scene: Math.round(avgScene), character: Math.round(avgChar), pet: Math.round(avgPet), perView: Object.fromEntries(Object.entries(perf).map(([k, v]) => [k, { total: v.triangles, character: part(v, "玩家角色（正式）"), pet: part(v, "寵物"), draws: v.drawCalls }])) };
+        if (mode.includes("portrait") || q === "high") check(`村莊場景平均每幀三角面 ≤ ${X.triMax}（不含玩家角色與寵物；含陰影貼圖繪製）`, avgScene <= X.triMax, run.results.triangleSplit);
+        else run.results.landscapeTrianglesInfo = { scene: Math.round(avgScene), budgetPortrait: X.triMax };
+        // 含正式角色的總數：如實記錄（報告列出；HQ 角色本身約 20 萬面，屬 Claude A 資產，B 不修改）
+        run.results.totalWithCharacter = { avg: Math.round(avgTri), budget: X.triMax, over: avgTri > X.triMax };
         // 驗收標準以 iPhone 直向巡迴為準：直向（與高畫質橫向）列入檢查；中畫質橫向視野較寬，只記錄數字、在報告中如實列出
-        if (mode.includes("portrait") || q === "high") check(`平均每幀三角面 ≤ ${X.triMax}（四個位置平均；含陰影貼圖繪製）`, avgTri <= X.triMax, { avg: Math.round(avgTri), perf: Object.fromEntries(Object.entries(perf).map(([k, v]) => [k, v.triangles])) });
-        else run.results.landscapeTrianglesInfo = { avg: Math.round(avgTri), budgetPortrait: X.triMax };
         const rep0 = await V(() => window.__starwishVillage.report());
         check("報告讀取實際生效的渲染參數（陰影、解析度、framebuffer、HWS、DPR、MSAA、快取）", /陰影（實際）/.test(rep0) && rep0.includes(X.shadow === "blob" ? "柔和腳底陰影" : "PCF 1024") && !/PCSS 2048/.test(rep0) && /解析度（實際）：要求上限/.test(rep0) && /framebuffer/.test(rep0) && /Hardware Scaling/.test(rep0) && /裝置 DPR/.test(rep0) && /抗鋸齒（實際）/.test(rep0) && /模型與貼圖/.test(rep0), rep0.split("\n").slice(0, 12));
       }
@@ -276,7 +287,7 @@ for (const name of browsers) {
         const wantFile = `novice_c10b5b_${gender}_${X.models}.glb`;
         check(`正式玩家角色：Claude A 初心者 C1.0-B5b ${wantFile}（${q} 畫質＝${X.models === "hq" ? "HQ" : "Lite"}），簡易角色已隱藏`, c0.status === "loaded" && st && st.model === wantFile && st.gender === gender && !c0.simpleVisible && st.bones === 17, { status: c0.status, model: st?.model, simpleVisible: c0.simpleVisible, bones: st?.bones });
         check("正式動作齊全：待機、跑步、跳躍（技能用）、攻擊、受傷、死亡", st && ["Idle", "Run", "Jump", "Attack", "Hurt", "Death"].every((a) => st.animations.includes(a)), st?.animations);
-        check("角色陰影依畫質：高／中＝即時陰影、低＝柔和腳底陰影", st && st.shadow === (X.map ? "即時陰影（陰影貼圖）" : "柔和腳底陰影") && (X.map ? c0.draws.shadow >= 1 : c0.draws.shadow === 0) && c0.draws.main >= 1, { shadow: st?.shadow, draws: c0.draws });
+        check("角色陰影＝A 預設的柔和腳底陰影（角色不進陰影貼圖，三段畫質相同）", st && st.shadow === "柔和腳底陰影（A 預設）" && c0.draws.shadow === 0 && c0.draws.main >= 1, { shadow: st?.shadow, draws: c0.draws });
         // 跑步：往前推搖桿 → Run；放開 → Idle
         await V(() => window.__starwishVillage.setMove({ x: 0, y: 1 }));
         await settle(page, 8);

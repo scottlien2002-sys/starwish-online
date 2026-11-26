@@ -239,7 +239,8 @@ class VillagePage {
     this.player = new PlayerAvatar(scene, this.shadows);
     this.player.root.position.copyFrom(this.pos);
     this.charGender = params.get("g") === "female" ? "female" : "male";
-    this.vshadows.addFootSource({ pos: () => this.pos, radius: 0.42 });
+    // 正式角色載入後用 A 的角色腳底陰影；這裡只給簡易角色用
+    this.vshadows.addFootSource({ pos: () => (this.char ? null : this.pos), radius: 0.42 });
     this.camera = new ThirdPersonCamera(scene, this.pos, groundHeight, {
       keepPitch: true,
       // 全村整合：另外避開傳送門石拱與南門橫樑（頭頂以上的美術結構，不是碰撞物）
@@ -273,7 +274,7 @@ class VillagePage {
               lod: this.lite ? "lite" : "hq",
               baseUrl: `${import.meta.env.BASE_URL}models/`,
               shadows: this.shadows,
-              realtimeShadow: this.perfCfg.shadow !== "blob" && this.perfCfg.shadow !== "off",
+              shadowMode: params.get("charshadow") === "realtime" ? "realtime" : "blob",
               petId: params.get("pet") ?? undefined,
             }),
           )

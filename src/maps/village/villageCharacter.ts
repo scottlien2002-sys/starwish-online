@@ -7,7 +7,7 @@ import { PetFollower, type PetLook } from "../../pets/PetFollower.ts";
  * A 的檔案唯讀複製、未修改（見 src/characters/CLAUDE_A_SOURCES.json）；這裡只是 B 的村莊端接線：
  * - 高畫質＝HQ 角色、中／低畫質＝Lite 角色
  * - 動作：待機／跑步（依實際速度）＋攻擊、受傷、死亡、復活；跳躍只保留給技能（不提供一般移動的跳躍按鈕）
- * - 角色陰影：有陰影貼圖的畫質（高、中）加入即時陰影；低畫質用村莊的柔和腳底陰影
+ * - 角色陰影：與 A 的 Stage 7 村莊相同，預設柔和腳底陰影（&charshadow=realtime 才加入即時陰影貼圖）
  * - 金屬反射：與 A 的 Stage 7 村莊相同（天空球反射探針，只渲染一次）
  * - 寵物與角色的間距檢查（B 端保護）：寵物中心與頭部（球）、身體（膠囊）保持「半徑和＋2 cm」以上；
  *   若 A 的跟隨平滑在快速轉身時把寵物帶進頭部，會把它推回外側並記錄次數（報告列出，回報給 A）
@@ -42,7 +42,7 @@ export class VillageCharacter {
   readonly follower: PetFollower;
   readonly gender: NoviceGender;
   readonly lod: NoviceLod;
-  readonly shadowMode: "realtime" | "none";
+  readonly shadowMode: "realtime" | "blob";
   readonly loadMs: number;
   petId = "bird4";
   /** 寵物與角色的間距（m）：寵物表面到頭部／身體表面的最小距離（修正前、修正後） */
@@ -54,7 +54,7 @@ export class VillageCharacter {
   private readonly head = new Vector3();
   private readonly tmp = new Vector3();
 
-  private constructor(avatar: NoviceAvatar, follower: PetFollower, gender: NoviceGender, lod: NoviceLod, shadowMode: "realtime" | "none", loadMs: number) {
+  private constructor(avatar: NoviceAvatar, follower: PetFollower, gender: NoviceGender, lod: NoviceLod, shadowMode: "realtime" | "blob", loadMs: number) {
     this.avatar = avatar;
     this.follower = follower;
     this.gender = gender;
@@ -63,13 +63,13 @@ export class VillageCharacter {
     this.loadMs = loadMs;
   }
 
-  static async create(scene: Scene, opts: { gender: NoviceGender; lod: NoviceLod; baseUrl: string; shadows: ShadowGenerator | null; realtimeShadow: boolean; petId?: string }): Promise<VillageCharacter> {
+  static async create(scene: Scene, opts: { gender: NoviceGender; lod: NoviceLod; baseUrl: string; shadows: ShadowGenerator | null; shadowMode: "blob" | "realtime"; petId?: string }): Promise<VillageCharacter> {
     const t0 = performance.now();
     const avatar = await NoviceAvatar.load(scene, { gender: opts.gender, lod: opts.lod, baseUrl: opts.baseUrl, version: NOVICE_VERSION_B65 });
-    // 角色陰影：A 的 setupShadow("realtime") 會把角色加入陰影貼圖；低畫質不呼叫（用村莊的腳底陰影，避免兩層陰影）
-    const shadowMode = opts.realtimeShadow && opts.shadows ? "realtime" : "none";
-    if (shadowMode === "realtime") avatar.setupShadow("realtime", scene, opts.shadows);
-    for (const m of avatar.meshes) m.receiveShadows = shadowMode === "realtime";
+    // 角色陰影：預設與 A 的 Stage 7 村莊相同＝柔和腳底陰影（角色不進陰影貼圖，不必每幀重畫角色的陰影）；
+    // &charshadow=realtime 才把角色加入即時陰影貼圖（對照用）
+    const shadowMode = opts.shadowMode === "realtime" && opts.shadows ? "realtime" : "blob";
+    avatar.setupShadow(shadowMode, scene, opts.shadows);
     const sky = scene.getMeshByName("PH_skyDome");
     if (sky) {
       const probe = new ReflectionProbe("villageCharEnv", 128, scene, true, true);
@@ -115,7 +115,7 @@ export class VillageCharacter {
     return h;
   }
 
-  /** 寵物不貼住、不穿透角色：頭部球＋身體膠囊外保持間距（B 端保護，不修改 A 的 PetFollower） */
+  /** 寵物不貼住、不穿透角色：頭部球＋身體膠囊外保持間距（B 端保護，不修改 A 的 PetFollower）；兩個形狀交替檢查最多 4 次 */
   private keepPetClear(yaw: number): void {
     if (!this.follower.visible) return;
     const petR = this.follower.size * 0.5;
@@ -124,29 +124,34 @@ export class VillageCharacter {
     this.avatar.headAnchor(this.head);
     this.head.y -= 0.33;
     const base = this.avatar.root.position;
-    const gapOf = (q: Vector3): { gap: number; dir: Vector3; need: number; center: Vector3 } => {
-      // 頭
-      const dh = q.subtract(this.head);
-      const gh = dh.length() - HEAD_R - petR;
-      // 身體膠囊（腳上 0.1 m 到脖子 0.62 m）
-      const by = Math.min(Math.max(q.y, base.y + 0.1), base.y + 0.62);
-      const cb = this.tmp.set(base.x, by, base.z);
-      const db = q.subtract(cb);
-      const gb = db.length() - BODY_R - petR;
-      return gh <= gb ? { gap: gh, dir: dh, need: HEAD_R + petR + MARGIN, center: this.head.clone() } : { gap: gb, dir: db, need: BODY_R + petR + MARGIN, center: cb.clone() };
+    const shapes = (): { gap: number; dir: Vector3; need: number; center: Vector3 }[] => {
+      const dh = pp.subtract(this.head);
+      const by = Math.min(Math.max(pp.y, base.y + 0.1), base.y + 0.62);
+      const cb = new Vector3(base.x, by, base.z);
+      const db = pp.subtract(cb);
+      return [
+        { gap: dh.length() - HEAD_R - petR, dir: dh, need: HEAD_R + petR + MARGIN, center: this.head.clone() },
+        { gap: db.length() - BODY_R - petR, dir: db, need: BODY_R + petR + MARGIN, center: cb },
+      ];
     };
-    const g = gapOf(pp);
-    this.minRawGap = Math.min(this.minRawGap, g.gap);
-    if (g.gap < MARGIN) {
-      let dir = g.dir;
+    const minGap = (): number => Math.min(...shapes().map((x) => x.gap));
+    this.minRawGap = Math.min(this.minRawGap, minGap());
+    let moved = false;
+    for (let k = 0; k < 4; k++) {
+      const bad = shapes().filter((x) => x.gap < MARGIN - 1e-4).sort((a, b) => a.gap - b.gap)[0];
+      if (!bad) break;
+      let dir = bad.dir;
       if (dir.lengthSquared() < 1e-8) dir = new Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
-      dir.normalize();
-      pp.copyFrom(g.center.add(dir.scale(g.need)));
+      dir = dir.normalize();
+      pp.copyFrom(bad.center.add(dir.scale(bad.need + 1e-3)));
+      moved = true;
+    }
+    if (moved) {
       const parts = (this.follower as unknown as { parts: { root: TransformNode } | null }).parts;
       if (parts) parts.root.position.copyFrom(pp);
       this.corrections++;
     }
-    this.minGap = Math.min(this.minGap, gapOf(pp).gap);
+    this.minGap = Math.min(this.minGap, minGap());
   }
 
   petMeshes(): AbstractMesh[] {
@@ -188,7 +193,7 @@ export class VillageCharacter {
       bones: a.bones,
       animations: [...a.groups.keys()],
       state: a.state,
-      shadow: this.shadowMode === "realtime" ? "即時陰影（陰影貼圖）" : "柔和腳底陰影",
+      shadow: this.shadowMode === "realtime" ? "即時陰影（陰影貼圖）" : "柔和腳底陰影（A 預設）",
       loadMs: Math.round(this.loadMs),
       pet: {
         id: this.petId,
