@@ -1,13 +1,14 @@
 {
  "budget": {
-  "hq": 16000,
-  "lite": 5000
+  "hq": 10000,
+  "lite": 5000,
+  "far": 2000
  },
  "npcs": {
   "swordmaster": {
    "lods": {
     "hq": {
-     "triangles": 15788,
+     "triangles": 9544,
      "triangles_before_decimate": 1991992,
      "within_budget": true,
      "parts": 24,
@@ -36,12 +37,12 @@
        "fps": 30
       }
      ],
-     "bytes": 796976
+     "bytes": 559704
     },
     "lite": {
-     "triangles": 5258,
+     "triangles": 4666,
      "triangles_before_decimate": 1991992,
-     "within_budget": false,
+     "within_budget": true,
      "parts": 24,
      "meshes": 1,
      "mesh_names": [
@@ -68,7 +69,39 @@
        "fps": 30
       }
      ],
-     "bytes": 313936
+     "bytes": 291440
+    },
+    "far": {
+     "triangles": 1926,
+     "triangles_before_decimate": 1991992,
+     "within_budget": true,
+     "parts": 24,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_swordmaster_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      }
+     ],
+     "bytes": 187288
     }
    },
    "name": "劍士軍團教官・雷恩",
@@ -78,7 +111,7 @@
   "knight": {
    "lods": {
     "hq": {
-     "triangles": 15792,
+     "triangles": 9568,
      "triangles_before_decimate": 1942668,
      "within_budget": true,
      "parts": 23,
@@ -107,10 +140,42 @@
        "fps": 30
       }
      ],
-     "bytes": 777684
+     "bytes": 541168
     },
     "lite": {
-     "triangles": 6274,
+     "triangles": 4790,
+     "triangles_before_decimate": 1942668,
+     "within_budget": true,
+     "parts": 23,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_knight_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      }
+     ],
+     "bytes": 276776
+    },
+    "far": {
+     "triangles": 3630,
      "triangles_before_decimate": 1942668,
      "within_budget": false,
      "parts": 23,
@@ -139,7 +204,7 @@
        "fps": 30
       }
      ],
-     "bytes": 333176
+     "bytes": 232692
     }
    },
    "name": "騎士軍團團長・艾德溫",
@@ -149,7 +214,7 @@
   "smith": {
    "lods": {
     "hq": {
-     "triangles": 15688,
+     "triangles": 9534,
      "triangles_before_decimate": 1452884,
      "within_budget": true,
      "parts": 23,
@@ -178,10 +243,10 @@
        "fps": 30
       }
      ],
-     "bytes": 800876
+     "bytes": 567024
     },
     "lite": {
-     "triangles": 4902,
+     "triangles": 4628,
      "triangles_before_decimate": 1452884,
      "within_budget": true,
      "parts": 23,
@@ -210,7 +275,39 @@
        "fps": 30
       }
      ],
-     "bytes": 308276
+     "bytes": 297864
+    },
+    "far": {
+     "triangles": 1686,
+     "triangles_before_decimate": 1452884,
+     "within_budget": true,
+     "parts": 23,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_smith_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      }
+     ],
+     "bytes": 186056
     }
    },
    "name": "鐵匠師傅・巴爾克",
@@ -220,7 +317,7 @@
   "mage": {
    "lods": {
     "hq": {
-     "triangles": 15676,
+     "triangles": 9690,
      "triangles_before_decimate": 1954948,
      "within_budget": true,
      "parts": 21,
@@ -249,10 +346,42 @@
        "fps": 30
       }
      ],
-     "bytes": 796668
+     "bytes": 569200
     },
     "lite": {
-     "triangles": 5368,
+     "triangles": 4662,
+     "triangles_before_decimate": 1954948,
+     "within_budget": true,
+     "parts": 21,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_mage_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      }
+     ],
+     "bytes": 288448
+    },
+    "far": {
+     "triangles": 2636,
      "triangles_before_decimate": 1954948,
      "within_budget": false,
      "parts": 21,
@@ -281,7 +410,7 @@
        "fps": 30
       }
      ],
-     "bytes": 315280
+     "bytes": 211456
     }
    },
    "name": "法師軍團導師・瑟琳娜",
@@ -291,7 +420,7 @@
   "priest": {
    "lods": {
     "hq": {
-     "triangles": 15680,
+     "triangles": 9684,
      "triangles_before_decimate": 1955232,
      "within_budget": true,
      "parts": 19,
@@ -320,10 +449,42 @@
        "fps": 30
       }
      ],
-     "bytes": 794220
+     "bytes": 566364
     },
     "lite": {
-     "triangles": 5956,
+     "triangles": 4676,
+     "triangles_before_decimate": 1955232,
+     "within_budget": true,
+     "parts": 19,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_priest_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      }
+     ],
+     "bytes": 286376
+    },
+    "far": {
+     "triangles": 2862,
      "triangles_before_decimate": 1955232,
      "within_budget": false,
      "parts": 19,
@@ -352,7 +513,7 @@
        "fps": 30
       }
      ],
-     "bytes": 335020
+     "bytes": 217440
     }
    },
    "name": "祭司教堂導師・艾莉亞",
@@ -362,7 +523,7 @@
   "clown": {
    "lods": {
     "hq": {
-     "triangles": 15674,
+     "triangles": 9672,
      "triangles_before_decimate": 2034732,
      "within_budget": true,
      "parts": 25,
@@ -391,10 +552,42 @@
        "fps": 30
       }
      ],
-     "bytes": 792128
+     "bytes": 564048
     },
     "lite": {
-     "triangles": 5878,
+     "triangles": 4650,
+     "triangles_before_decimate": 2034732,
+     "within_budget": true,
+     "parts": 25,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_clown_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      }
+     ],
+     "bytes": 285456
+    },
+    "far": {
+     "triangles": 2862,
      "triangles_before_decimate": 2034732,
      "within_budget": false,
      "parts": 25,
@@ -423,7 +616,7 @@
        "fps": 30
       }
      ],
-     "bytes": 332124
+     "bytes": 217508
     }
    },
    "name": "小丑馬戲團團長・波波洛",
@@ -433,7 +626,7 @@
   "warehouse": {
    "lods": {
     "hq": {
-     "triangles": 15682,
+     "triangles": 9680,
      "triangles_before_decimate": 1680920,
      "within_budget": true,
      "parts": 19,
@@ -462,10 +655,42 @@
        "fps": 30
       }
      ],
-     "bytes": 797040
+     "bytes": 568964
     },
     "lite": {
-     "triangles": 5306,
+     "triangles": 4666,
+     "triangles_before_decimate": 1680920,
+     "within_budget": true,
+     "parts": 19,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_warehouse_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      }
+     ],
+     "bytes": 288744
+    },
+    "far": {
+     "triangles": 2582,
      "triangles_before_decimate": 1680920,
      "within_budget": false,
      "parts": 19,
@@ -494,7 +719,7 @@
        "fps": 30
       }
      ],
-     "bytes": 313068
+     "bytes": 209540
     }
    },
    "name": "倉庫管理員・米拉",
@@ -504,7 +729,7 @@
   "guild": {
    "lods": {
     "hq": {
-     "triangles": 15676,
+     "triangles": 9680,
      "triangles_before_decimate": 1566024,
      "within_budget": true,
      "parts": 23,
@@ -533,10 +758,10 @@
        "fps": 30
       }
      ],
-     "bytes": 785940
+     "bytes": 558088
     },
     "lite": {
-     "triangles": 4974,
+     "triangles": 4666,
      "triangles_before_decimate": 1566024,
      "within_budget": true,
      "parts": 23,
@@ -565,7 +790,39 @@
        "fps": 30
       }
      ],
-     "bytes": 296688
+     "bytes": 284984
+    },
+    "far": {
+     "triangles": 2400,
+     "triangles_before_decimate": 1566024,
+     "within_budget": false,
+     "parts": 23,
+     "meshes": 1,
+     "mesh_names": [
+      "npc_guild_body"
+     ],
+     "materials": [
+      "body"
+     ],
+     "bones": 17,
+     "actions": [
+      {
+       "name": "Idle",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Talk",
+       "frames": 72,
+       "fps": 30
+      },
+      {
+       "name": "Turn",
+       "frames": 24,
+       "fps": 30
+      }
+     ],
+     "bytes": 198868
     }
    },
    "name": "星願商會掌櫃・葛蘭特",
