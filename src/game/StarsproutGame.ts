@@ -474,7 +474,8 @@ class StarsproutGame {
   start(): void {
     this.engine.runRenderLoop(this.frame);
     const petNote = this.pets.enabled ? (this.pets.mode === "preview" ? "寵物：測試設定" : "寵物：正式設定") : this.pets.disabledReason;
-    this.hud.toast(`星芽原野整合測試：往東走到「星露草坪」打星露啵啵，撿掉落物、培育寵物（${petNote}）`, 4500);
+    if (this.ws) this.hud.toast("星芽原野：往東走到「星露草坪」打星露啵啵。回星芽村：走進營地的藍色傳送陣", 4000);
+    else this.hud.toast(`星芽原野整合測試：往東走到「星露草坪」打星露啵啵，撿掉落物、培育寵物（${petNote}）`, 4500);
   }
 
   private alphaBehind(yaw: number): number {
