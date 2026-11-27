@@ -93,6 +93,12 @@ const drive = (p, x, z) => p.page.evaluate(([x, z]) => {
 }, [x, z]).catch(() => {});
 const shot = (p, n) => p.page.screenshot({ path: join(outDir, `${TAG}${browserName}_${n}.png`) });
 
+/** 原野中記錄每位玩家走過的路（每 1.5 m 一點）：回營地時沿原路倒著走，不會卡在營地柵欄外 */
+const remember = (p, x, z) => {
+  const t = (p.trail ??= []);
+  const l = t[t.length - 1];
+  if (!l || Math.hypot(l.x - x, l.z - z) >= 1.5) t.push({ x, z });
+};
 /** 沿著路點開到目標（世界座標方向輸入，伺服器權威移動） */
 async function walk(p, pts, getPos, done, ms = 40000) {
   let i = 0;
@@ -108,6 +114,7 @@ async function walk(p, pts, getPos, done, ms = 40000) {
       await sleep(100);
       continue;
     }
+    if (p.recording) remember(p, pos[0], pos[1]);
     const w = pts[i];
     const dx = w.x - pos[0];
     const dz = w.z - pos[1];
@@ -283,6 +290,7 @@ try {
     return async () => {
       const m = await monOf(P, targetId).catch(() => null);
       if (!m) return;
+      remember(P, m.me[0], m.me[1]);
       const dx = m.x - m.me[0], dz = m.z - m.me[1];
       const d = Math.hypot(dx, dz);
       if (m.hp <= 0 || m.state === "death" || m.state === "dead") {
@@ -318,6 +326,11 @@ try {
     };
   };
   // 出手順序固定（避免一人先打死）：A 走到近戰距離 → B 先放魔法彈 → 伺服器接受 B 的技能後 A 才開始攻擊
+  for (const P of [A, B]) {
+    P.recording = true;
+    const i = await finfo(P);
+    P.trail = [{ x: -56, z: -64 }, { x: i.pos[0], z: i.pos[2] }];
+  }
   const fA = fighter(A, false, async () => ((await field(B).catch(() => null))?.skillsOk ?? 0) > 0, "A");
   // B 第一發之後要等 A 真的打出傷害（伺服器 hit 事件）才繼續，確保兩人都有貢獻
   const fB = fighter(B, true, async () => {
@@ -420,7 +433,9 @@ try {
 
   // ---------- 從原野營地傳送陣走回星芽村（B）；A 用倒地復活回村 ----------
   const toCamp = async (p) => {
-    await walk(p, [{ x: -56, z: -64 }, { x: -56, z: -68 }], async () => {
+    p.recording = false;
+    const back = [...(p.trail ?? [])].reverse();
+    await walk(p, [...back, { x: -56, z: -64 }, { x: -56, z: -68 }], async () => {
       const i = await finfo(p).catch(() => null);
       return i ? [i.pos[0], i.pos[2]] : null;
     }, async () => !(await p.page.evaluate(() => !!window.__starwishPlay?.ready).catch(() => false)), 300000);
