@@ -132,16 +132,13 @@ jobs:
             if curl -fsS "$URL/preview.json" | grep -q "${GITHUB_SHA}"; then echo "pages updated"; break; fi
             sleep 15
           done
-          mkdir -p test-results/mp-live
-          MP_E2E_SITE="$URL" node tests/e2e/run-mp-e2e.mjs dist chromium; code=$?
-          cp test-results/mp-e2e/mp-e2e-chromium.json test-results/mp-live/live-chromium.json || true
-          exit $code
+          # 公開網址是 https：瀏覽器只允許 wss://，所以測試伺服器用暫時自簽憑證（只在這台測試機上）
+          MP_E2E_SITE="$URL" MP_E2E_TLS=1 MP_E2E_TAG=live_ node tests/e2e/run-mp-e2e.mjs dist chromium
       - name: Push results branch
         if: always()
         run: |
           mkdir -p /tmp/res/game
           cp -r test-results/mp-e2e /tmp/res/game/ 2>/dev/null || true
-          cp -r test-results/mp-live /tmp/res/game/ 2>/dev/null || true
           (cd test-results 2>/dev/null && find . -maxdepth 3 -name '*.json' -not -path './mp-*' -exec cp --parents {} /tmp/res/game/ \;) || true
           cp /tmp/preview-meta.json /tmp/asset-remap.json /tmp/res/game/ 2>/dev/null || true
           echo "{\"job\":\"game\",\"commit\":\"${GITHUB_SHA}\",\"run\":\"${GITHUB_RUN_ID}\",\"mpChromium\":\"${{ steps.mpchromium.outcome }}\",\"mpWebkit\":\"${{ steps.mpwebkit.outcome }}\",\"world\":\"${{ steps.world.outcome }}\",\"deploy\":\"${{ steps.deploy.outcome }}\",\"live\":\"${{ steps.live.outcome }}\"}" > /tmp/res/game/meta.json

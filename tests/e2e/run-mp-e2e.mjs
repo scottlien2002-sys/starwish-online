@@ -3,8 +3,9 @@
 // 啟動真正的多人伺服器（multiplayer/server/main.ts）＋靜態網站，兩個獨立瀏覽器環境＝兩位玩家：
 //   星芽村互相看見（不同性別／髮色／武器）→ 移動同步（Idle／Run、朝向、無瞬移）→ 洛恩位置一致 → A、B 先後走入南門到星芽原野
 //   → 原野互相看見、攻擊／受擊／倒地動作同步 → 斷線重連 → 都走回村莊 → 重複登入被踢
-import { spawn } from "node:child_process";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { spawn, execFileSync } from "node:child_process";
+import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { loadPlaywright, serve } from "./static-server.mjs";
 
@@ -21,7 +22,16 @@ const check = (name, ok, detail) => {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const angErr = (a, b) => Math.abs(Math.atan2(Math.sin(a - b), Math.cos(a - b)));
 
-const srv = spawn(process.execPath, [resolve("multiplayer/server/main.ts")], { env: { ...process.env, PORT: String(PORT), MP_GRACE_MS: "20000" }, stdio: ["ignore", "pipe", "pipe"] });
+// MP_E2E_TLS=1：伺服器用暫時自簽憑證跑 WSS（測試 https 的 GitHub Pages 網址時，瀏覽器不允許 ws://）
+const TLS = process.env.MP_E2E_TLS === "1";
+const tlsEnv = {};
+if (TLS) {
+  const d = mkdtempSync(join(tmpdir(), "mp-tls-"));
+  execFileSync("openssl", ["req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "1", "-subj", "/CN=127.0.0.1", "-addext", "subjectAltName=IP:127.0.0.1,DNS:localhost", "-keyout", join(d, "key.pem"), "-out", join(d, "cert.pem")], { stdio: "ignore" });
+  Object.assign(tlsEnv, { MP_TLS_CERT: join(d, "cert.pem"), MP_TLS_KEY: join(d, "key.pem") });
+}
+const TAG = process.env.MP_E2E_TAG ?? "";
+const srv = spawn(process.execPath, [resolve("multiplayer/server/main.ts")], { env: { ...process.env, ...tlsEnv, PORT: String(PORT), MP_GRACE_MS: "20000" }, stdio: ["ignore", "pipe", "pipe"] });
 let srvLog = "";
 srv.stdout.on("data", (d) => (srvLog += d));
 srv.stderr.on("data", (d) => (srvLog += d));
@@ -34,10 +44,14 @@ const site = process.env.MP_E2E_SITE
     : await serve(dist);
 results.site = site.url;
 const pw = await loadPlaywright();
-const browser = await pw[browserName].launch();
-const metrics = async () => (await fetch(`http://127.0.0.1:${PORT}/metrics`)).json();
+const browser = await pw[browserName].launch(TLS && browserName === "chromium" ? { args: ["--ignore-certificate-errors"] } : {});
+const metrics = async () => {
+  if (!TLS) return (await fetch(`http://127.0.0.1:${PORT}/metrics`)).json();
+  const out = execFileSync("curl", ["-sk", `https://127.0.0.1:${PORT}/metrics`]).toString();
+  return JSON.parse(out);
+};
 
-const base = `${site.url}/?play=world&mp=1&lod=lite&quality=low&newgame=1&server=ws://127.0.0.1:${PORT}/ws`;
+const base = `${site.url}/?play=world&mp=1&lod=lite&quality=low&newgame=1&server=${TLS ? "wss" : "ws"}://127.0.0.1:${PORT}/ws`;
 const players = [];
 async function player(name, extra, mobile) {
   const ctx = await browser.newContext(mobile ? { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: browserName !== "firefox", hasTouch: true } : { viewport: { width: 960, height: 600 } });
@@ -65,7 +79,7 @@ const drive = (p, x, z) => p.page.evaluate(([x, z]) => {
   const mp = window.__mpWorld;
   if (mp) mp.driveOverride = x === 0 && z === 0 ? null : { x, z };
 }, [x, z]).catch(() => {});
-const shot = (p, n) => p.page.screenshot({ path: join(outDir, `${browserName}_${n}.png`) });
+const shot = (p, n) => p.page.screenshot({ path: join(outDir, `${TAG}${browserName}_${n}.png`) });
 
 /** 沿著路點開到目標（世界座標方向輸入，伺服器權威移動） */
 async function walk(p, pts, getPos, done, ms = 40000) {
@@ -224,6 +238,9 @@ try {
   });
   let sawAttack = false;
   let localAttack = false;
+  let bestD = Infinity;
+  let stuckSince = Date.now();
+  let side = 1;
   const atkLog = [];
   const tAtk = Date.now();
   while (Date.now() - tAtk < 300000 && !sawAttack) {
@@ -235,6 +252,19 @@ try {
       const dx = t.x - i.pos[0];
       const dz = t.z - i.pos[2];
       const l = Math.hypot(dx, dz);
+      if (t.d < bestD - 0.3) {
+        bestD = t.d;
+        stuckSince = Date.now();
+      }
+      if (Date.now() - stuckSince > 2500) {
+        // 被柵欄或道具擋住：往側邊繞 1.5 秒（一般移動，伺服器判定）
+        await drive(A, (-dz / l) * side, (dx / l) * side);
+        await sleep(1500);
+        side = -side;
+        stuckSince = Date.now();
+        bestD = Infinity;
+        continue;
+      }
       await drive(A, dx / l, dz / l);
       await sleep(80);
       continue;
@@ -362,7 +392,7 @@ try {
   results.passed = results.checks.filter((c) => c.ok).length;
   results.total = results.checks.length;
   results.serverLogTail = srvLog.split("\n").slice(-30);
-  writeFileSync(join(outDir, `mp-e2e-${browserName}.json`), JSON.stringify(results, null, 2));
+  writeFileSync(join(outDir, `${TAG}mp-e2e-${browserName}.json`), JSON.stringify(results, null, 2));
   console.log(`${results.passed}/${results.total} passed (${browserName})`);
   process.exit(results.passed === results.total && results.total > 0 ? 0 : 1);
 }

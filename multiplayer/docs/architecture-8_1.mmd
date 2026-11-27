@@ -1,0 +1,31 @@
+flowchart LR
+  subgraph Pages["GitHub Pages（只放前端）"]
+    PV["/preview-mp81/<br/>正式 3D 遊戲＋多人入口<br/>?play=world&mp=1"]
+    RE["asset-remap.json<br/>相同模型改讀其他預覽資料夾<br/>（不重複發布）"]
+  end
+  subgraph Client["iPhone Safari（正式 3D 遊戲）"]
+    direction TB
+    VG["VillageGame／StarsproutGame<br/>（Claude A 7.2＋Claude B 6.7）"]
+    MW["MpWorld（多人接點）<br/>輸入 → NetClient 預測＋校正<br/>遠端角色 NoviceAvatar 模組化<br/>名牌・診斷列"]
+    NC["NetClient<br/>60 Hz 固定步長<br/>插值 100 ms・自動重連"]
+    LS["本機暫存（mp81: 前綴）<br/>不影響單機存檔"]
+    VG <--> MW --> NC
+    VG --> LS
+  end
+  subgraph Render["Render 免費 Web Service（HTTPS／WSS）"]
+    direction TB
+    GW["WSS 閘道<br/>來源・限速・格式・協定 v2"]
+    SES["工作階段<br/>憑證雜湊・角色鎖・30 秒保留"]
+    ROOM["權威房間 20 Hz<br/>village-n／starsprout-n<br/>時間預算移動・碰撞稽核<br/>傳送陣・倒地／復活<br/>洛恩巡邏時鐘（N009）"]
+    GW --> SES --> ROOM
+  end
+  subgraph DB["Render 免費 PostgreSQL（realm=test）"]
+    PG[("characters（UUID、外觀、位置、version、lock_epoch）<br/>session_tokens・items（UUID）<br/>request_ledger・gold_ledger")]
+  end
+  SH["共用純邏輯（唯讀引用）<br/>村莊碰撞・原野地形／碰撞<br/>傳送陣・TUNING 5 m/s・parseAppearance・洛恩巡邏"]
+  PV --> Client
+  NC -- "in（方向＋步數）／act（動作外觀）／roan／cmd" --> GW
+  ROOM -- "snap（ack＋差異＋外觀＋洛恩）／map" --> NC
+  SES --> PG
+  ROOM -.-> SH
+  NC -.-> SH
