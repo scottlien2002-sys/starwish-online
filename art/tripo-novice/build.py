@@ -739,6 +739,29 @@ def export(objs, path, anim, jpeg):
     )
 
 
+def measure_run(arm):
+    """跑步動畫的地面速度：支撐腳（腳尖最低時）往後移動的速度（公尺／秒，播放倍率 1）"""
+    sc = bpy.context.scene
+    arm.animation_data.action = bpy.data.actions["Run"]
+    n = int(RUN_T * FPS)
+    pos = {"L": [], "R": []}
+    for f in range(1, n + 2):
+        sc.frame_set(f)
+        for S in ("L", "R"):
+            pb = arm.pose.bones[f"toe.{S}"]
+            pos[S].append(arm.matrix_world @ pb.head)
+    speeds = []
+    for S in ("L", "R"):
+        P = pos[S]
+        zmin = min(p.z for p in P)
+        for i in range(len(P) - 1):
+            if P[i].z < zmin + 0.015 and P[i + 1].z < zmin + 0.015:
+                speeds.append((P[i + 1].y - P[i].y) * FPS)  # 前方 −Y → 支撐腳往後 = +Y
+    arm.animation_data.action = None
+    speeds = sorted(speeds)
+    return round(float(speeds[len(speeds) // 2]), 3) if speeds else None
+
+
 def tri_count(o):
     return sum(len(p.vertices) - 2 for p in o.data.polygons)
 
@@ -777,6 +800,11 @@ def main():
             rep["anim_preview"].extend(render_views(arm, os.path.join(prev, f"{g}_Attack_Staff_{f:02d}"), "Attack_Staff", f, views=("q34",), size=300))
         for o in sword:
             o.hide_render = False
+        rep["run_ground_speed_mps"] = measure_run(arm)
+        arm["starwishCharacter"] = json.dumps({"version": "tripo-novice-v1", "gender": g, "heightM": HEIGHT_M, "runGroundSpeed": rep["run_ground_speed_mps"], "attack": {"seconds": 0.5, "hit": 0.2}, "clips": list(rep["clips"].keys())})
+        for p in arm.pose.bones:
+            p.rotation_quaternion = Quaternion()
+            p.location = Vector()
         arm.animation_data.action = None
         bpy.context.scene.frame_set(1)
         # 輸出 HQ → Lite
