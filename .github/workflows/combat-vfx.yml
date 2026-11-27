@@ -6,6 +6,10 @@ name: Combat VFX Lab (Claude C)
 on:
   push:
     branches: ["feature/combat-vfx-*"]
+
+env:
+  # Stage 1 保留原網址；Stage 2 起用自己的資料夾，不覆蓋 Stage 1 預覽
+  PREVIEW_DIR: ${{ github.ref_name == 'feature/combat-vfx-stage1' && 'preview-combat-vfx' || 'preview-combat-vfx-s2' }}
   workflow_dispatch:
 
 permissions:
@@ -61,11 +65,11 @@ jobs:
         continue-on-error: true
         run: node tests/e2e/run-combat-vfx-e2e.mjs dist chromium,webkit 2>&1 | tee test-results/combat-vfx/e2e.txt; exit ${PIPESTATUS[0]}
 
-      - name: Deploy preview /preview-combat-vfx/ (own folder only)
+      - name: Deploy preview (own folder only)
         id: deploy
         if: steps.build.outcome == 'success' && steps.typecheck.outcome == 'success'
         run: |
-          DIR=preview-combat-vfx
+          DIR="$PREVIEW_DIR"
           # 預覽只放這頁需要的檔案：C1.0-B5b 男女、M004～M007、動作檔（其他舊版模型不放，控制 Pages 容量）
           find dist/models -maxdepth 1 -type f -name '*.glb' ! -name 'novice_c10b5b_*' -delete
           find dist/models -mindepth 1 -maxdepth 1 -type d ! -name monsters -exec rm -rf {} +
@@ -97,7 +101,7 @@ jobs:
         if: steps.deploy.outcome == 'success'
         continue-on-error: true
         run: |
-          URL="https://${{ github.repository_owner }}.github.io/${GITHUB_REPOSITORY#*/}/preview-combat-vfx"
+          URL="https://${{ github.repository_owner }}.github.io/${GITHUB_REPOSITORY#*/}/${PREVIEW_DIR}"
           for i in $(seq 1 60); do
             C=$(curl -fsSL "$URL/preview.json?t=$(date +%s)" 2>/dev/null | sed -n 's/.*"commit":"\([0-9a-f]*\)".*/\1/p')
             if [ "$C" = "$GITHUB_SHA" ]; then echo "public preview.json = $C (after ${i}0 s)"; break; fi
