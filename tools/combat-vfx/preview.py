@@ -4,7 +4,8 @@ sys.path.insert(0, os.environ.get('STARWISH_RIG', '/home/claude/m004'))  # starw
 from PIL import Image
 from starwish_rig.raster import render, grid
 from glbio import load, acc, Skel, qrot, qmul
-import novice_skills as NS
+NS = __import__(os.environ.get("SKILLS_MOD", "novice_skills"))
+MODELS = NS.MODELS
 
 def mat_from(q, t):
     x, y, z, w = q

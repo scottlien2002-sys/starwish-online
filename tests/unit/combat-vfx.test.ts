@@ -65,7 +65,7 @@ test("時間軸：命中事件只觸發一次、依序觸發，攻速 160 時命
     const want = tl.hitTimesReal();
     // 命中格對齊：每次命中最多讓後面的事件晚 1 格（像極短的頓幀）
     for (let i = 0; i < 3; i++) assert.ok(fired[i].real - want[i].t >= -1e-9 && fired[i].real - want[i].t <= (i + 1) / 60 + 1e-9, `${aspd}: ${fired[i].real} vs ${want[i].t}`);
-    assert.ok(Math.abs(tl.realDuration - 1.45 / rate) < 1e-9);
+    assert.ok(Math.abs(tl.realDuration - a.clips[s.clip].duration / rate) < 1e-9);
   }
 });
 
@@ -143,4 +143,78 @@ test("多人特效預算：其他玩家的 critical（命中閃光）也受份�
   for (let i = 0; i < 40; i++) if (b.request({ owner: "other", priority: "critical", particles: 10, distance: 3 }).allowed) ok++;
   assert.ok(ok <= cap, `remote critical granted ${ok} > ${cap}`);
   for (let i = 0; i < 40; i++) assert.ok(b.request({ owner: "self", priority: "critical", particles: 10 }).allowed);
+});
+
+// ---------------------------------------------------------------- Stage 2
+import { ArenaTerrain } from "../../src/combat-vfx/core/terrain.ts";
+import { behaviourForLevel, elementForLevel, wantsTarget, onDamaged } from "../../src/combat-vfx/core/monsterRules.ts";
+import { CLASS_VFX } from "../../src/combat-vfx/core/classes.ts";
+
+test("Stage 2 動作檔 V2：版本 2.0，命中標記沒變（動畫、特效、傷害同步的時間來源）", () => {
+  for (const g of ["male", "female"]) {
+    const a = JSON.parse(readFileSync(root + `novice_combat_${g}.json`, "utf8")) as { version?: string; clips: Record<string, { marks: Record<string, number | number[]> }> };
+    assert.equal(a.version, "2.0");
+    assert.deepEqual(a.clips["Skill_TripleSlash"]!.marks["hit1"], 0.17);
+    assert.deepEqual(a.clips["Skill_TripleSlash"]!.marks["hit3"], 0.92);
+    assert.deepEqual(a.clips["Skill_LeapSlam"]!.marks["hit"], 0.8);
+    assert.deepEqual(a.clips["Skill_ChargeBurst"]!.marks["hit"], 1.22);
+  }
+});
+
+test("地形：技能根運動不能穿過岩石或場地邊界（跳躍也不行）", () => {
+  const t = new ArenaTerrain(10, [{ x: 0, z: 3, r: 1 }]);
+  assert.equal(t.canStand(0, 3, 0.3), false);
+  assert.equal(t.canStand(0, 0, 0.3), true);
+  // 往前 6 m 會穿過 (0,3) 的岩石：停在岩石前
+  const p = t.clampMove({ x: 0, z: 0 }, { x: 0, z: 6 }, 0.3);
+  assert.ok(p.z < 3 - 1 - 0.3 + 0.03 && p.z > 1.5, `stopped at ${p.z}`);
+  // 端點在岩石後面、中間穿過：同樣被擋
+  const q = t.clampMove({ x: 0, z: 0 }, { x: 0, z: 5 }, 0.3);
+  assert.ok(q.z < 1.72, `jump-through blocked ${q.z}`);
+  // 邊界
+  const r = t.clampMove({ x: 0, z: 0 }, { x: 20, z: 0 }, 0.3);
+  assert.ok(r.x <= 9.7 + 1e-6 && r.x > 9.5);
+  // 沒擋到就走到底
+  assert.deepEqual(t.clampMove({ x: 0, z: 0 }, { x: 2, z: 0 }, 0.3), { x: 2, z: 0 });
+});
+
+test("怪物規則：Lv1～4 被動、Lv5 以上主動；Lv1～10 無屬性；被動怪被打才反擊", () => {
+  for (let lv = 1; lv <= 10; lv++) {
+    assert.equal(behaviourForLevel(lv), lv <= 4 ? "passive" : "aggressive");
+    assert.equal(elementForLevel(lv), "neutral");
+  }
+  const ag = { angry: 0 };
+  assert.equal(wantsTarget(3, 1.0, ag, 4.5), false, "被動怪：靠近不攻擊");
+  onDamaged(ag);
+  assert.equal(wantsTarget(3, 1.0, ag, 4.5), true, "被打之後反擊");
+  assert.equal(wantsTarget(5, 4.0, { angry: 0 }, 4.5), true, "主動怪：進入警戒範圍");
+  assert.equal(wantsTarget(5, 6.0, { angry: 0 }, 4.5), false);
+});
+
+test("六大職業共用架構：六個職業都有動畫分類、特效家族、展示組合，且只用已存在的特效鍵值", () => {
+  const ids = CLASS_VFX.map((c) => c.id).sort();
+  assert.deepEqual(ids, ["blacksmith", "clown", "knight", "mage", "priest", "swordsman"]);
+  for (const c of CLASS_VFX) {
+    assert.ok(c.animCategories.length >= 3, c.id);
+    assert.ok(c.fxFamilies.length >= 2, c.id);
+    assert.ok(c.demo.length >= 1, c.id);
+    for (const s of c.demoSkills) assert.ok(skillById(s), `${c.id} → ${s}`);
+  }
+});
+
+test("其他玩家用的合併模型（remote LOD）：2 個網格、17 關節、動畫與 Lite 相同", () => {
+  const glb = (f: string) => {
+    const b = readFileSync(new URL(`../../public/models/${f}`, import.meta.url));
+    const jl = b.readUInt32LE(12);
+    return JSON.parse(b.subarray(20, 20 + jl).toString("utf8")) as { meshes: unknown[]; skins: { joints: number[] }[]; animations: { name: string }[]; nodes: { name?: string }[] };
+  };
+  for (const g of ["male", "female"]) {
+    const lite = glb(`novice_c10b5b_${g}_lite.glb`);
+    const rem = glb(`novice_c10b5b_${g}_remote.glb`);
+    assert.equal(lite.meshes.length, 26);
+    assert.equal(rem.meshes.length, 2);
+    assert.equal(rem.skins[0]!.joints.length, 17);
+    assert.deepEqual(rem.skins[0]!.joints.map((i) => rem.nodes[i]!.name), lite.skins[0]!.joints.map((i) => lite.nodes[i]!.name));
+    assert.deepEqual(rem.animations.map((a) => a.name), lite.animations.map((a) => a.name));
+  }
 });

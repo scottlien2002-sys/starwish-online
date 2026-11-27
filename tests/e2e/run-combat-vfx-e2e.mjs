@@ -27,11 +27,15 @@ for (const name of browsers) {
     { id: "male-medium", url: "?lab=combat&q=medium&g=male&mute=1" },
     { id: "female-high", url: "?lab=combat&q=high&g=female&mute=1" },
     { id: "low-multi8", url: "?lab=combat&q=low&g=male&mute=1&multi=8" },
+    { id: "meadow-high", url: "?lab=combat&q=high&g=female&mute=1&env=meadow" },
+    { id: "rules", url: "?lab=combat&q=low&g=male&mute=1" },
+    { id: "perf", url: "?lab=combat&q=medium&g=male&mute=1" },
     // 固定步長：每 1/30 秒截一張，得到真正 30 fps 的展示畫面序列（CI 沒 GPU，即時播放只有 3～5 FPS 看不出特效）
-    { id: "showcase", url: "?lab=combat&q=high&g=male&mute=1&manual=1" },
-    { id: "showcase-f", url: "?lab=combat&q=high&g=female&mute=1&manual=1" },
+    { id: "showcase", url: "?lab=combat&q=high&g=male&mute=1&manual=1&ai=0" },
+    { id: "showcase-meadow", url: "?lab=combat&q=high&g=female&mute=1&manual=1&ai=0&env=meadow" },
   ]) {
-    if (tcase.id.startsWith("showcase") && (remote || name !== "chromium")) continue;
+    if ((tcase.id.startsWith("showcase") || tcase.id === "perf") && (remote || name !== "chromium")) continue;
+    if (!onlyCases.length && name === "webkit" && (tcase.id === "meadow-high" || tcase.id === "rules")) continue;
     if (onlyCases.length && !onlyCases.includes(tcase.id)) continue;
     if (!onlyCases.length && name === "webkit" && tcase.id === "female-high") continue; // WebKit 跑兩組即可（時間）
     const run = { browser: name, case: tcase.id, checks: {}, errors: [], results: {} };
@@ -52,14 +56,14 @@ for (const name of browsers) {
       await sleep(1500);
       let st = await page.evaluate(() => window.__cvfx.stats());
       run.results.loaded = st;
-      check("載入：4 隻骨骼動畫怪物（M004～M007）且檔案檢查通過", st.monsters.length === 4 && st.monsters.every((m) => m.check?.ok), st.monsters.map((m) => ({ l: m.label, ok: m.check?.ok, e: m.check?.errors })));
+      check("載入：6 隻骨骼動畫怪物（M002～M007）且檔案檢查通過", st.monsters.length === 6 && st.monsters.every((m) => m.check?.ok), st.monsters.map((m) => ({ l: m.label, ok: m.check?.ok, e: m.check?.errors })));
       check("載入：初心者 C1.0-B5b（非 Tripo 組裝）", st.triangles > 5000, { triangles: st.triangles, gender: st.gender });
       await shot("00_loaded");
 
       if (tcase.id.startsWith("showcase")) {
         const dir = `${outDir}${tcase.id}/`;
         mkdirSync(dir, { recursive: true });
-        const list = tcase.id === "showcase" ? SKILLS : ["triple_slash", "whirlwind", "charge_burst"];
+        const list = SKILLS;
         let fi = 0;
         const frameShot = () => page.screenshot({ path: `${dir}f${String(fi++).padStart(4, "0")}.jpg`, type: "jpeg", quality: 82 });
         const seq = [];
@@ -93,7 +97,89 @@ for (const name of browsers) {
           check(`展示 ${sk}：固定步長下命中結算`, ok && recs.length > 0, recs.length);
           check(`展示 ${sk}：固定步長下命中格動作時間＝時間軸`, recs.every((r) => r.kind === "projectile" || Math.abs(r.animT - r.clipT) <= 1 / 60 + 0.002), recs.map((r) => [r.hit, r.clipT, r.animT]));
         }
+        // 六大職業特效展示（只有畫面）：站在場中央，每個職業 1.6 秒
+        if (tcase.id === "showcase") {
+          const cdir = `${outDir}${tcase.id}-classes/`;
+          mkdirSync(cdir, { recursive: true });
+          let ci = 0;
+          await page.evaluate(() => { window.__cvfx.moveTo(-1.0, 1.5); window.__cvfx.setYaw(0.6); window.__cvfx.view(1.2, 5.6); });
+          for (const cls of await page.evaluate(() => window.__cvfx.classes)) {
+            const ok = await page.evaluate((c) => window.__cvfx.classDemo(c), cls);
+            check(`職業特效展示 ${cls}`, ok, null);
+            for (let k = 0; k < 48; k++) {
+              await page.evaluate(() => window.__cvfx.advance(1 / 30));
+              await page.screenshot({ path: `${cdir}f${String(ci++).padStart(4, "0")}.jpg`, type: "jpeg", quality: 82 });
+            }
+          }
+        }
         run.results.showcase = seq;
+      } else if (tcase.id === "rules") {
+        // 1) 被動怪（M002 Lv3）：玩家靠近 3 秒不會攻擊；被打之後反擊
+        const pm = st.monsters.find((m) => m.level <= 4);
+        await page.evaluate((m) => { window.__cvfx.moveTo(m.pos[0] * 0.72, m.pos[1] * 0.72); }, pm);
+        await sleep(3500);
+        let s2 = await page.evaluate(() => window.__cvfx.stats());
+        const p0 = s2.monsters.find((m) => m.idx === pm.idx);
+        check("規則：Lv1～4 被動怪，玩家靠近不主動攻擊", p0.behaviour === "passive" && p0.state !== "attack" && p0.angry === 0, p0);
+        await page.evaluate((i) => window.__cvfx.targetMonster(i), pm.idx);
+        await page.evaluate(() => window.__cvfx.cast("triple_slash"));
+        await page.waitForFunction(() => !window.__cvfx.busy(), null, { timeout: 30000 }).catch(() => {});
+        let retaliated = false;
+        for (let k = 0; k < 40 && !retaliated; k++) {
+          await sleep(250);
+          s2 = await page.evaluate(() => window.__cvfx.stats());
+          const m = s2.monsters.find((x) => x.idx === pm.idx);
+          retaliated = m.angry > 0 && (m.state === "attack" || m.moving || m.state === "dead");
+        }
+        check("規則：被動怪被打之後反擊（仇恨狀態、追擊或攻擊）", retaliated, s2.monsters.find((x) => x.idx === pm.idx));
+        // 2) 主動怪（Lv5 以上）：玩家進入警戒範圍就追擊
+        const am = s2.monsters.find((m) => m.level >= 5 && m.level < 10 && m.state !== "dead");
+        await page.evaluate((m) => { window.__cvfx.moveTo(m.home[0] * 0.55, m.home[1] * 0.55); }, am);
+        let chased = false;
+        for (let k = 0; k < 40 && !chased; k++) {
+          await sleep(250);
+          const s3 = await page.evaluate(() => window.__cvfx.stats());
+          const m = s3.monsters.find((x) => x.idx === am.idx);
+          chased = m.moving || m.state === "attack";
+        }
+        check("規則：Lv5 以上主動怪，玩家進入警戒範圍就追擊／攻擊", chased, am.label);
+        // 3) 地形：面向岩石施放跳斬（前進 1.2 m），會停在岩石前、不穿過
+        await page.evaluate(() => window.__cvfx.setMonsterAI(false));
+        const rock = await page.evaluate(() => window.__cvfx.rocks[0]);
+        const sx = rock.x - (rock.r + 0.9), sz = rock.z;
+        await page.evaluate(([x, z]) => { window.__cvfx.moveTo(x, z); }, [sx, sz]);
+        await sleep(300);
+        await page.evaluate(() => window.__cvfx.setYaw(Math.PI / 2));
+        // 用目前朝向施放（+X 指向岩石），不自動轉向怪物
+        await page.evaluate(() => window.__cvfx.castNoFace("leap_slam"));
+        await page.waitForFunction(() => !window.__cvfx.busy(), null, { timeout: 30000 }).catch(() => {});
+        const after = await page.evaluate(() => ({ p: window.__cvfx.stats().player, b: window.__cvfx.blocked() }));
+        const dist = Math.hypot(after.p.x - rock.x, after.p.z - rock.z);
+        check("規則：技能不能穿越不可通行地形（跳斬被岩石擋下）", after.b === true && dist >= rock.r + 0.3 - 0.02, { after, rock, dist });
+        await page.evaluate(() => window.__cvfx.setMonsterAI(true));
+      } else if (tcase.id === "perf") {
+        // 效能比較：Stage 2（remote 合併模型＋簡化武器＋其他玩家特效簡化）vs &perf=legacy（Stage 1 做法）
+        const matrix = [];
+        for (const mode of ["stage2", "legacy"]) {
+          if (mode === "legacy") {
+            await page.goto(`${server.url}/?lab=combat&q=medium&g=male&mute=1&perf=legacy`, { waitUntil: "load" });
+            await page.waitForFunction(() => window.__cvfx?.ready === true, null, { timeout: 300000 });
+          }
+          for (const n of [1, 4, 8, 16]) {
+            await page.evaluate((k) => window.__cvfx.setMulti(k - 1), n);
+            await page.evaluate(() => window.__cvfx.setAuto(true));
+            await sleep(9000);
+            const snap = await page.evaluate(() => window.__cvfx.perfSnapshot());
+            matrix.push({ mode, players: n, ...snap });
+            await shot(`perf_${mode}_${n}`);
+          }
+          await page.evaluate(() => window.__cvfx.setAuto(false));
+          await page.evaluate(() => window.__cvfx.setMulti(0));
+        }
+        run.results.perfMatrix = matrix;
+        const s16 = matrix.find((m) => m.mode === "stage2" && m.players === 16);
+        const l16 = matrix.find((m) => m.mode === "legacy" && m.players === 16);
+        check("效能：16 人時 Stage 2 的 Draw Call 比 Stage 1 做法少一半以上", s16 && l16 && s16.draws < l16.draws * 0.5, { stage2: s16?.draws, legacy: l16?.draws });
       } else if (tcase.id !== "low-multi8") {
         // 逐一施放 6 個技能
         for (const [i, sk] of SKILLS.entries()) {

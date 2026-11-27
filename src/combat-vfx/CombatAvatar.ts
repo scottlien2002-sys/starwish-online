@@ -27,7 +27,8 @@ import type { WeaponKind } from "./core/skills.ts";
 import { fxTexture } from "./fx/textures.ts";
 
 export type Gender = "male" | "female";
-export type Lod = "hq" | "lite";
+/** hq／lite：自己的角色；remote：其他玩家（2 個 draw call 的合併版，見 tools/combat-vfx/make_remote_lod.py） */
+export type Lod = "hq" | "lite" | "remote";
 
 export interface CombatClipData {
   duration: number;
@@ -88,6 +89,21 @@ export function loadCombatAnims(baseUrl: string, g: Gender): Promise<CombatAnimF
 
 let seq = 0;
 
+const blobMats = new Map<number, StandardMaterial>();
+function blobMaterial(scene: Scene): StandardMaterial {
+  const hit = blobMats.get(scene.uid as unknown as number);
+  if (hit) return hit;
+  const bm = new StandardMaterial("cblobMat", scene);
+  bm.diffuseTexture = fxTexture(scene, "glowDisc", 64);
+  bm.useAlphaFromDiffuseTexture = true;
+  bm.diffuseColor = new Color3(0, 0, 0);
+  bm.disableLighting = true;
+  bm.alpha = 0.55;
+  bm.zOffset = -2;
+  blobMats.set(scene.uid as unknown as number, bm);
+  return bm;
+}
+
 export class CombatAvatar {
   readonly id = ++seq;
   readonly root: TransformNode;
@@ -109,7 +125,9 @@ export class CombatAvatar {
   /** 面向（Babylon rotation.y） */
   yaw = 0;
 
-  private constructor(scene: Scene, container: AssetContainer, anims: CombatAnimFile, gender: Gender) {
+  readonly lod: Lod;
+  private constructor(scene: Scene, container: AssetContainer, anims: CombatAnimFile, gender: Gender, lod: Lod) {
+    this.lod = lod;
     this.gender = gender;
     this.anims = anims;
     this.root = new TransformNode(`cavatar_${this.id}`, scene);
@@ -134,8 +152,9 @@ export class CombatAvatar {
     for (const [name, clip] of Object.entries(anims.clips)) this.skills.set(name, this.buildGroup(scene, name, clip));
     // 武器
     const hand = this.nodes.get(anims.weaponAttach.bone);
-    this.sword = buildSword(scene, String(this.id));
-    this.staff = buildStaff(scene, String(this.id));
+    const simple = lod === "remote";
+    this.sword = buildSword(scene, String(this.id), simple);
+    this.staff = buildStaff(scene, String(this.id), simple);
     if (hand) {
       attachWeapon(this.sword, hand, anims.weaponAttach.bladeDir, anims.weaponAttach.edgeUp);
       attachWeapon(this.staff, hand, anims.weaponAttach.bladeDir, anims.weaponAttach.edgeUp);
@@ -143,14 +162,7 @@ export class CombatAvatar {
     setWeaponVisible(this.staff, false);
     // 腳下柔邊陰影（1 個 draw call）
     this.blob = MeshBuilder.CreateGround(`cblob_${this.id}`, { width: 0.9, height: 0.75 }, scene);
-    const bm = new StandardMaterial(`cblobMat_${this.id}`, scene);
-    bm.diffuseTexture = fxTexture(scene, "glowDisc", 64);
-    bm.useAlphaFromDiffuseTexture = true;
-    bm.diffuseColor = new Color3(0, 0, 0);
-    bm.disableLighting = true;
-    bm.alpha = 0.55;
-    bm.zOffset = -2;
-    this.blob.material = bm;
+    this.blob.material = blobMaterial(scene);
     this.blob.isPickable = false;
     this.blob.parent = this.root;
     this.blob.position.y = 0.01;
@@ -159,7 +171,7 @@ export class CombatAvatar {
 
   static async create(scene: Scene, baseUrl: string, g: Gender, lod: Lod): Promise<CombatAvatar> {
     const [c, a] = await Promise.all([loadNoviceContainer(scene, baseUrl, g, lod), loadCombatAnims(baseUrl, g)]);
-    return new CombatAvatar(scene, c, a, g);
+    return new CombatAvatar(scene, c, a, g, lod);
   }
 
   private buildGroup(scene: Scene, name: string, clip: CombatClipData): AnimationGroup {
@@ -281,7 +293,8 @@ export class CombatAvatar {
 
   dispose(): void {
     for (const g of [...this.base.values(), ...this.skills.values()]) g.dispose();
-    for (const w of [this.sword, this.staff]) w.root.dispose(false, true);
-    this.root.dispose(false, true);
+    // 材質是共用的（GLB 容器、武器、陰影），只釋放網格與節點
+    for (const w of [this.sword, this.staff]) w.root.dispose(false, false);
+    this.root.dispose(false, false);
   }
 }

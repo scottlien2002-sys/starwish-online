@@ -10,6 +10,38 @@ const STD_CLIPS: Record<RigClipKey, string> = { idle: "Idle", move: "Move", run:
 // M005～M007：數值全部取自 Claude C 的交付報告與整合說明（2026-11-27）。GLB 根節點 extras 有值時以 GLB 為準。
 const RIG_COMMON = { fades: { normal: 0.15, locomotion: 0.12, urgent: 0.05 }, deathHold: 1.2, deathFade: 0.6 } as const;
 
+/** M002 苔角獸 Rig V1.0（Lv.3～4，四足被動；26 關節；碰撞半徑依地圖文件 0.6 m；Claude C 2026-11-27 Stage 2 交付） */
+export const M002_MOSS_HORN_BEAST: RiggedMonsterSpec = Object.freeze({
+  modelId: "m002_moss_horn_beast_v10",
+  monsterId: "moss_horn_beast",
+  label: "M002 苔角獸 Rig V1.0",
+  files: { hq: "monsters/m002/M002_MossHornBeast_Rig_V1_HQ.glb", lite: "monsters/m002/M002_MossHornBeast_Rig_V1_Lite.glb" },
+  clips: STD_CLIPS,
+  expect: { joints: 26, durations: { idle: 2.8, move: 0.64, run: 0.44, attack: 1.3, hurt: 0.45, death: 0.8, respawn: 0.7 } },
+  locomotion: { moveNativeMps: 0.3, runNativeMps: 0.95, runThresholdMps: 0.62, hysteresisMps: 0.06, stopMps: 0.05, ratioMin: 0.6, ratioMax: 1.5 },
+  attackHitTime: 0.55,
+  ...RIG_COMMON,
+  bodyRadius: 0.6,
+  hpBarHeight: 1.4,
+  heightM: 1.2,
+});
+
+/** M003 雲絨鳥 Rig V1.0（Lv.5～6，鳥類主動；19 關節；懸浮 0.30 m，碰撞與 AI 位置在地面；碰撞半徑 0.5 m） */
+export const M003_CLOUD_FLUFF_BIRD: RiggedMonsterSpec = Object.freeze({
+  modelId: "m003_cloud_fluff_bird_v10",
+  monsterId: "cloud_fluff_bird",
+  label: "M003 雲絨鳥 Rig V1.0",
+  files: { hq: "monsters/m003/M003_CloudFluffBird_Rig_V1_HQ.glb", lite: "monsters/m003/M003_CloudFluffBird_Rig_V1_Lite.glb" },
+  clips: STD_CLIPS,
+  expect: { joints: 19, durations: { idle: 1.25, move: 0.8, run: 0.5, attack: 1.1, hurt: 0.45, death: 1.0, respawn: 0.9 } },
+  locomotion: { moveNativeMps: 0.8, runNativeMps: 2.0, runThresholdMps: 1.4, hysteresisMps: 0.1, stopMps: 0.05, ratioMin: 0.6, ratioMax: 1.5 },
+  attackHitTime: 0.52,
+  ...RIG_COMMON,
+  bodyRadius: 0.5,
+  hpBarHeight: 1.55,
+  heightM: 1.0,
+});
+
 /** M005 星雲咩咩 Rig V1.0（Lv.8，四足主動；26 關節） */
 export const M005_NEBULA_SHEEP: RiggedMonsterSpec = Object.freeze({
   modelId: "m005_nebula_sheep_v10",
@@ -61,6 +93,8 @@ export const M007_CROWN_HAMMER_RABBIT: RiggedMonsterSpec = Object.freeze({
 
 
 export const LAB_MONSTERS: readonly { spec: RiggedMonsterSpec; hp: number; level: number; boss?: boolean }[] = [
+  { spec: M002_MOSS_HORN_BEAST, hp: 600, level: 3 },
+  { spec: M003_CLOUD_FLUFF_BIRD, hp: 750, level: 5 },
   { spec: M004_WINDFEATHER_FOX, hp: 900, level: 7 },
   { spec: M005_NEBULA_SHEEP, hp: 1100, level: 8 },
   { spec: M006_CARROT_KING, hp: 1800, level: 9 },

@@ -12,7 +12,11 @@ export type At = number | string;
 export type FxKey =
   | "slashArc" | "slashArcRise" | "slashArcBig" | "swordWave" | "whirlRing" | "magicCircle" | "magicCircleBig" | "chargeAura"
   | "gatherMotes" | "magicBolt" | "meteor" | "shockwave" | "areaBlast" | "starBurst" | "hitFlash" | "hitSpark" | "critBurst"
-  | "dustRing" | "boltImpact" | "groundGlow";
+  | "dustRing" | "boltImpact" | "groundGlow"
+  // V2（Stage 2）：命中環、星光碎片、碎石、地裂、蓄力收束環、釋放閃光、光柱
+  | "hitRing" | "starShards" | "debris" | "groundCrack" | "chargeRings" | "chargeFlash" | "lightPillar"
+  // 六職業共用架構預留（展示方向，非正式技能）：騎士光盾／盾擊／突刺、鐵匠鍛造火花、祭司治療／增益、小丑道具
+  | "lightShield" | "shieldBash" | "thrustLine" | "forgeSparks" | "healAura" | "buffOrbit" | "propBurst";
 export type SfxKey = "swish" | "swishHeavy" | "hit" | "hitHeavy" | "crit" | "cast" | "bolt" | "magicHit" | "explosion" | "charge" | "release" | "jump" | "land" | "whirl";
 export type Palette = "steel" | "azure" | "star" | "gold" | "rose";
 
@@ -91,6 +95,8 @@ export const SKILLS: readonly SkillDef[] = Object.freeze([
       { kind: "fx", at: "circle", fx: "magicCircle", anchor: "self", duration: 1.05 }, { kind: "sfx", at: "circle", sfx: "cast" },
       { kind: "fx", at: "gather.0", fx: "gatherMotes", anchor: "weapon", duration: 0.45 },
       { kind: "sfx", at: "release", sfx: "bolt" },
+      { kind: "fx", at: "release", fx: "hitFlash", anchor: "weapon", scale: 0.9 },
+      { kind: "fx", at: "release", fx: "lightPillar", anchor: "self", scale: 0.45, duration: 0.5 },
       { kind: "projectile", at: "release", fx: "magicBolt", from: "weapon", speed: 11, maxRange: 12, homing: true,
         hit: H("bolt", 1.3, { type: "circle", radius: 1.1, center: "target" }, ["hitFlash", "boltImpact", "hitSpark"], "magicHit", 0.16, 40) },
     ],
@@ -104,6 +110,7 @@ export const SKILLS: readonly SkillDef[] = Object.freeze([
       { kind: "fx", at: "hit", fx: "shockwave", anchor: "front", forward: 0.5, scale: 1.2 },
       { kind: "fx", at: "hit", fx: "dustRing", anchor: "front", forward: 0.5, scale: 1.3 },
       { kind: "fx", at: "hit", fx: "starBurst", anchor: "front", forward: 0.5 },
+      { kind: "fx", at: "hit", fx: "groundCrack", anchor: "front", forward: 0.55, scale: 1.0 },
       { kind: "hit", at: "hit", hit: H("slam", 2.0, { type: "circle", radius: 2.6, center: "self" }, ["hitFlash", "hitSpark"], "hitHeavy", 0.55, 90) },
       { kind: "sfx", at: "land", sfx: "land" },
     ],
@@ -128,7 +135,7 @@ export const SKILLS: readonly SkillDef[] = Object.freeze([
       { kind: "fx", at: 0.1, fx: "gatherMotes", anchor: "weapon", duration: 0.6, palette: "star" },
       { kind: "sfx", at: "release", sfx: "release" },
       { kind: "projectile", at: "release", fx: "meteor", from: "sky", speed: 16, maxRange: 30, homing: true, palette: "star",
-        hit: H("meteor", 2.4, { type: "circle", radius: 3.0, center: "target" }, ["hitFlash", "areaBlast", "shockwave", "starBurst", "dustRing"], "explosion", 0.45, 70) },
+        hit: H("meteor", 2.4, { type: "circle", radius: 3.0, center: "target" }, ["hitFlash", "areaBlast", "shockwave", "starBurst", "dustRing", "groundCrack", "lightPillar"], "explosion", 0.45, 70) },
     ],
   },
   {
@@ -139,9 +146,11 @@ export const SKILLS: readonly SkillDef[] = Object.freeze([
       { kind: "fx", at: "charge.0", fx: "groundGlow", anchor: "self", duration: 1.15, palette: "rose" },
       { kind: "shake", at: 0.7, amount: 0.08 }, { kind: "shake", at: 0.95, amount: 0.12 },
       { kind: "trail", from: "trail.0", to: "trail.1", palette: "rose" }, { kind: "sfx", at: "release", sfx: "swishHeavy" },
+      { kind: "fx", at: "release", fx: "chargeFlash", anchor: "front", forward: 0.2, scale: 0.8, palette: "rose" },
       { kind: "fx", at: "hit", fx: "slashArcBig", anchor: "front", forward: 0.7, scale: 1.5, palette: "rose" },
       { kind: "fx", at: "hit", fx: "areaBlast", anchor: "front", forward: 1.4, scale: 1.0, palette: "rose" },
       { kind: "fx", at: "hit", fx: "shockwave", anchor: "front", forward: 1.0, scale: 1.4, palette: "rose" },
+      { kind: "fx", at: "hit", fx: "groundCrack", anchor: "front", forward: 1.1, scale: 1.2, palette: "rose" },
       { kind: "hit", at: "hit", hit: H("burst", 3.0, { type: "cone", radius: 3.2, angleDeg: 160 }, ["hitFlash", "hitSpark", "starBurst"], "hitHeavy", 0.75, 120, { forceCrit: true }) },
     ],
   },
