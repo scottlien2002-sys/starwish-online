@@ -1,0 +1,1127 @@
+{
+ "tool": "art/tripo-novice/build.py",
+ "blender": "4.2.3 LTS",
+ "genders": {
+  "male": {
+   "fit": {
+    "hair": {
+     "scale": [
+      0.42,
+      0.42,
+      0.42
+     ],
+     "offset": [
+      0.004,
+      0.0,
+      0.355
+     ]
+    },
+    "top": {
+     "scale": [
+      0.423,
+      0.423,
+      0.423
+     ],
+     "offset": [
+      0.007,
+      0.0,
+      0.06
+     ]
+    },
+    "bottom": {
+     "scale": [
+      0.384,
+      0.384,
+      0.384
+     ],
+     "offset": [
+      -0.006,
+      0.0,
+      -0.246
+     ]
+    },
+    "boots": {
+     "L": {
+      "scale": 0.2656,
+      "offset": [
+       0.0228,
+       0.0358,
+       -0.3911
+      ]
+     },
+     "R": {
+      "scale": 0.2647,
+      "offset": [
+       0.0229,
+       -0.0368,
+       -0.3914
+      ]
+     }
+    }
+   },
+   "landmarks_src_units": {
+    "root": [
+     0.0144,
+     0.0,
+     -0.4898
+    ],
+    "hips": [
+     0.015,
+     0.0,
+     -0.0747
+    ],
+    "spine": [
+     0.0214,
+     0.0,
+     -0.0012
+    ],
+    "chest": [
+     0.0252,
+     0.0,
+     0.0967
+    ],
+    "neck": [
+     0.0296,
+     0.0,
+     0.2069
+    ],
+    "head": [
+     0.0368,
+     0.0,
+     0.2363
+    ],
+    "head_end": [
+     0.0368,
+     0.0,
+     0.4898
+    ],
+    "shoulder.L": [
+     0.0252,
+     0.0343,
+     0.1555
+    ],
+    "upperarm.L": [
+     -0.0073,
+     0.0904,
+     0.1559
+    ],
+    "forearm.L": [
+     0.0145,
+     0.1753,
+     0.0426
+    ],
+    "hand.L": [
+     0.0285,
+     0.2297,
+     -0.0301
+    ],
+    "hand_end.L": [
+     0.0393,
+     0.2718,
+     -0.0863
+    ],
+    "thigh.L": [
+     0.0185,
+     0.0591,
+     -0.109
+    ],
+    "shin.L": [
+     -0.0209,
+     0.0816,
+     -0.2675
+    ],
+    "foot.L": [
+     -0.0112,
+     0.0945,
+     -0.4261
+    ],
+    "toe.L": [
+     0.0723,
+     0.0945,
+     -0.4702
+    ],
+    "toe_end.L": [
+     0.1234,
+     0.0945,
+     -0.4702
+    ],
+    "shoulder.R": [
+     0.0252,
+     -0.0343,
+     0.1555
+    ],
+    "upperarm.R": [
+     -0.0068,
+     -0.0922,
+     0.1561
+    ],
+    "forearm.R": [
+     0.015,
+     -0.1756,
+     0.042
+    ],
+    "hand.R": [
+     0.029,
+     -0.229,
+     -0.0312
+    ],
+    "hand_end.R": [
+     0.0398,
+     -0.2704,
+     -0.0879
+    ],
+    "thigh.R": [
+     -0.0012,
+     -0.0587,
+     -0.109
+    ],
+    "shin.R": [
+     -0.0174,
+     -0.0816,
+     -0.2675
+    ],
+    "foot.R": [
+     -0.0114,
+     -0.0947,
+     -0.4261
+    ],
+    "toe.R": [
+     0.0721,
+     -0.0947,
+     -0.4702
+    ],
+    "toe_end.R": [
+     0.1232,
+     -0.0947,
+     -0.4702
+    ]
+   },
+   "sleeve_delta_deg": {
+    "L": 33.0,
+    "R": 30.1
+   },
+   "weights_body": {
+    "hips": 499,
+    "spine": 1092,
+    "chest": 81,
+    "neck": 156,
+    "head": 1221,
+    "shoulder.L": 214,
+    "upperarm.L": 442,
+    "forearm.L": 372,
+    "hand.L": 326,
+    "thigh.L": 434,
+    "shin.L": 191,
+    "foot.L": 239,
+    "toe.L": 244,
+    "shoulder.R": 146,
+    "upperarm.R": 404,
+    "forearm.R": 344,
+    "hand.R": 288,
+    "thigh.R": 345,
+    "shin.R": 193,
+    "foot.R": 276,
+    "toe.R": 283
+   },
+   "weights_top": {
+    "hips": 437,
+    "spine": 1792,
+    "chest": 1240,
+    "neck": 692,
+    "shoulder.L": 680,
+    "upperarm.L": 1021,
+    "forearm.L": 810,
+    "hand.L": 605,
+    "shoulder.R": 871,
+    "upperarm.R": 1134,
+    "forearm.R": 774,
+    "hand.R": 605
+   },
+   "weapons": {
+    "sword": {
+     "length_m": 0.56,
+     "scale": 0.435,
+     "grip": [
+      -0.316,
+      -0.0432,
+      0.5526
+     ],
+     "tip_dir": [
+      0.087,
+      -0.988,
+      0.125
+     ]
+    },
+    "staff": {
+     "length_m": 1.02,
+     "scale": 0.7741,
+     "grip": [
+      -0.316,
+      -0.0432,
+      0.5526
+     ],
+     "tip_dir": [
+      -0.656,
+      -0.491,
+      0.573
+     ]
+    }
+   },
+   "clips": {
+    "Idle": {
+     "seconds": 2.0,
+     "loop": true
+    },
+    "Run": {
+     "seconds": 0.6,
+     "loop": true
+    },
+    "Jump": {
+     "seconds": 0.7,
+     "loop": false
+    },
+    "Attack_Sword": {
+     "seconds": 0.5,
+     "loop": false
+    },
+    "Attack_Staff": {
+     "seconds": 0.5,
+     "loop": false
+    },
+    "Hurt": {
+     "seconds": 0.4,
+     "loop": false
+    },
+    "Death": {
+     "seconds": 1.0,
+     "loop": false
+    }
+   },
+   "joints_final_m": {
+    "root": [
+     0.0,
+     -0.0184,
+     0.0
+    ],
+    "hips": [
+     0.0,
+     -0.0192,
+     0.5297
+    ],
+    "spine": [
+     0.0,
+     -0.0273,
+     0.6234
+    ],
+    "chest": [
+     0.0,
+     -0.0322,
+     0.7484
+    ],
+    "neck": [
+     0.0,
+     -0.0377,
+     0.889
+    ],
+    "head": [
+     0.0,
+     -0.047,
+     0.9265
+    ],
+    "head_end": [
+     0.0,
+     -0.047,
+     1.25
+    ],
+    "shoulder.L": [
+     0.0438,
+     -0.0322,
+     0.8234
+    ],
+    "upperarm.L": [
+     0.1154,
+     0.0093,
+     0.8239
+    ],
+    "forearm.L": [
+     0.2236,
+     -0.0185,
+     0.6794
+    ],
+    "hand.L": [
+     0.2931,
+     -0.0364,
+     0.5866
+    ],
+    "hand_end.L": [
+     0.3469,
+     -0.0502,
+     0.5148
+    ],
+    "thigh.L": [
+     0.0754,
+     -0.0236,
+     0.4859
+    ],
+    "shin.L": [
+     0.1041,
+     0.0267,
+     0.2836
+    ],
+    "foot.L": [
+     0.1205,
+     0.0142,
+     0.0812
+    ],
+    "toe.L": [
+     0.1205,
+     -0.0922,
+     0.025
+    ],
+    "toe_end.L": [
+     0.1205,
+     -0.1575,
+     0.025
+    ],
+    "shoulder.R": [
+     -0.0438,
+     -0.0322,
+     0.8234
+    ],
+    "upperarm.R": [
+     -0.1177,
+     0.0087,
+     0.8242
+    ],
+    "forearm.R": [
+     -0.224,
+     -0.0191,
+     0.6786
+    ],
+    "hand.R": [
+     -0.2923,
+     -0.037,
+     0.5851
+    ],
+    "hand_end.R": [
+     -0.3451,
+     -0.0508,
+     0.5128
+    ],
+    "thigh.R": [
+     -0.075,
+     0.0015,
+     0.4859
+    ],
+    "shin.R": [
+     -0.1042,
+     0.0223,
+     0.2836
+    ],
+    "foot.R": [
+     -0.1209,
+     0.0146,
+     0.0812
+    ],
+    "toe.R": [
+     -0.1209,
+     -0.092,
+     0.025
+    ],
+    "toe_end.R": [
+     -0.1209,
+     -0.1573,
+     0.025
+    ]
+   },
+   "parts": {},
+   "preview": [
+    "male_rest_front.png",
+    "male_rest_side.png",
+    "male_rest_back.png",
+    "male_rest_q34.png"
+   ],
+   "anim_preview": [
+    "male_Idle_01_q34.png",
+    "male_Idle_16_q34.png",
+    "male_Run_01_q34.png",
+    "male_Run_05_q34.png",
+    "male_Run_10_q34.png",
+    "male_Run_14_q34.png",
+    "male_Attack_Sword_05_q34.png",
+    "male_Attack_Sword_07_q34.png",
+    "male_Attack_Sword_09_q34.png",
+    "male_Attack_Sword_13_q34.png",
+    "male_Hurt_03_q34.png",
+    "male_Death_31_q34.png",
+    "male_Jump_10_q34.png",
+    "male_Attack_Staff_05_q34.png",
+    "male_Attack_Staff_07_q34.png",
+    "male_Attack_Staff_09_q34.png"
+   ],
+   "files": {
+    "novice72_male_body_hq.glb": {
+     "bytes": 566624,
+     "tris": 7154,
+     "meshes": [
+      "Body_Core",
+      "Body_Covered"
+     ]
+    },
+    "novice72_male_hair01_hq.glb": {
+     "bytes": 472748,
+     "tris": 6755,
+     "meshes": [
+      "Male_Hair_01_V1"
+     ]
+    },
+    "novice72_male_top_hq.glb": {
+     "bytes": 500876,
+     "tris": 6589,
+     "meshes": [
+      "Male_Novice_Top_V1"
+     ]
+    },
+    "novice72_male_bottom_hq.glb": {
+     "bytes": 372496,
+     "tris": 6783,
+     "meshes": [
+      "Male_Novice_Pants_V1"
+     ]
+    },
+    "novice72_male_boots_hq.glb": {
+     "bytes": 442272,
+     "tris": 6735,
+     "meshes": [
+      "Male_Novice_Boots_V1"
+     ]
+    },
+    "novice72_male_sword_hq.glb": {
+     "bytes": 475548,
+     "tris": 6881,
+     "meshes": [
+      "Novice_ShortSword_V1"
+     ]
+    },
+    "novice72_male_staff_hq.glb": {
+     "bytes": 537484,
+     "tris": 7165,
+     "meshes": [
+      "Novice_Weapon_Staff"
+     ]
+    },
+    "novice72_male_body_lite.glb": {
+     "bytes": 374580,
+     "tris": 3575,
+     "meshes": [
+      "Body_Core",
+      "Body_Covered"
+     ]
+    },
+    "novice72_male_hair01_lite.glb": {
+     "bytes": 264736,
+     "tris": 3376,
+     "meshes": [
+      "Male_Hair_01_V1"
+     ]
+    },
+    "novice72_male_top_lite.glb": {
+     "bytes": 263980,
+     "tris": 3294,
+     "meshes": [
+      "Male_Novice_Top_V1"
+     ]
+    },
+    "novice72_male_bottom_lite.glb": {
+     "bytes": 204888,
+     "tris": 3391,
+     "meshes": [
+      "Male_Novice_Pants_V1"
+     ]
+    },
+    "novice72_male_boots_lite.glb": {
+     "bytes": 232240,
+     "tris": 3367,
+     "meshes": [
+      "Male_Novice_Boots_V1"
+     ]
+    },
+    "novice72_male_sword_lite.glb": {
+     "bytes": 249352,
+     "tris": 3440,
+     "meshes": [
+      "Novice_ShortSword_V1"
+     ]
+    },
+    "novice72_male_staff_lite.glb": {
+     "bytes": 282188,
+     "tris": 3581,
+     "meshes": [
+      "Novice_Weapon_Staff"
+     ]
+    }
+   }
+  },
+  "female": {
+   "fit": {
+    "hair": {
+     "scale": [
+      0.54,
+      0.54,
+      0.54
+     ],
+     "offset": [
+      -0.008,
+      -0.03,
+      0.325
+     ]
+    },
+    "top": {
+     "scale": [
+      0.421,
+      0.421,
+      0.421
+     ],
+     "offset": [
+      0.02,
+      0.0,
+      0.014
+     ]
+    },
+    "bottom": {
+     "scale": [
+      0.5562,
+      0.5562,
+      0.4063
+     ],
+     "offset": [
+      0.028,
+      -0.0002,
+      -0.259
+     ]
+    },
+    "boots": {
+     "L": {
+      "scale": 0.2056,
+      "offset": [
+       0.0343,
+       0.0075,
+       -0.404
+      ]
+     },
+     "R": {
+      "scale": 0.2036,
+      "offset": [
+       0.0341,
+       -0.0087,
+       -0.4049
+      ]
+     }
+    }
+   },
+   "landmarks_src_units": {
+    "root": [
+     0.0285,
+     0.0,
+     -0.4898
+    ],
+    "hips": [
+     0.0286,
+     0.0,
+     -0.0976
+    ],
+    "spine": [
+     0.0174,
+     0.0,
+     -0.0241
+    ],
+    "chest": [
+     0.043,
+     0.0,
+     0.0738
+    ],
+    "neck": [
+     0.0415,
+     0.0,
+     0.2071
+    ],
+    "head": [
+     0.0453,
+     0.0,
+     0.2365
+    ],
+    "head_end": [
+     0.0453,
+     0.0,
+     0.4901
+    ],
+    "shoulder.L": [
+     0.043,
+     0.0343,
+     0.1326
+    ],
+    "upperarm.L": [
+     0.0029,
+     0.089,
+     0.1196
+    ],
+    "forearm.L": [
+     0.009,
+     0.1584,
+     0.0312
+    ],
+    "hand.L": [
+     0.0128,
+     0.202,
+     -0.0244
+    ],
+    "hand_end.L": [
+     0.0157,
+     0.2358,
+     -0.0675
+    ],
+    "thigh.L": [
+     0.0269,
+     0.0489,
+     -0.1319
+    ],
+    "shin.L": [
+     0.0075,
+     0.0628,
+     -0.279
+    ],
+    "foot.L": [
+     0.0043,
+     0.0568,
+     -0.4261
+    ],
+    "toe.L": [
+     0.0725,
+     0.0568,
+     -0.4702
+    ],
+    "toe_end.L": [
+     0.1143,
+     0.0568,
+     -0.4702
+    ],
+    "shoulder.R": [
+     0.043,
+     -0.0343,
+     0.1326
+    ],
+    "upperarm.R": [
+     0.0072,
+     -0.0875,
+     0.1166
+    ],
+    "forearm.R": [
+     0.0111,
+     -0.1579,
+     0.0296
+    ],
+    "hand.R": [
+     0.0136,
+     -0.2022,
+     -0.0251
+    ],
+    "hand_end.R": [
+     0.0155,
+     -0.2365,
+     -0.0675
+    ],
+    "thigh.R": [
+     0.026,
+     -0.0501,
+     -0.1319
+    ],
+    "shin.R": [
+     0.01,
+     -0.0625,
+     -0.279
+    ],
+    "foot.R": [
+     -0.0,
+     -0.0581,
+     -0.4261
+    ],
+    "toe.R": [
+     0.0704,
+     -0.0581,
+     -0.4702
+    ],
+    "toe_end.R": [
+     0.1135,
+     -0.0581,
+     -0.4702
+    ]
+   },
+   "sleeve_delta_deg": {
+    "L": 36.8,
+    "R": 35.5
+   },
+   "weights_body": {
+    "hips": 728,
+    "spine": 994,
+    "chest": 436,
+    "neck": 435,
+    "head": 1549,
+    "shoulder.L": 520,
+    "upperarm.L": 197,
+    "forearm.L": 328,
+    "hand.L": 151,
+    "thigh.L": 506,
+    "shin.L": 279,
+    "foot.L": 257,
+    "toe.L": 224,
+    "shoulder.R": 448,
+    "upperarm.R": 265,
+    "forearm.R": 316,
+    "hand.R": 161,
+    "thigh.R": 388,
+    "shin.R": 259,
+    "foot.R": 209,
+    "toe.R": 182
+   },
+   "weights_top": {
+    "hips": 1838,
+    "spine": 1174,
+    "chest": 766,
+    "neck": 148,
+    "shoulder.L": 516,
+    "upperarm.L": 1030,
+    "forearm.L": 773,
+    "hand.L": 876,
+    "shoulder.R": 460,
+    "upperarm.R": 800,
+    "forearm.R": 985,
+    "hand.R": 959
+   },
+   "weapons": {
+    "sword": {
+     "length_m": 0.56,
+     "scale": 0.435,
+     "grip": [
+      -0.2777,
+      -0.0185,
+      0.5684
+     ],
+     "tip_dir": [
+      -0.106,
+      -0.986,
+      0.131
+     ]
+    },
+    "staff": {
+     "length_m": 1.02,
+     "scale": 0.7741,
+     "grip": [
+      -0.2777,
+      -0.0185,
+      0.5684
+     ],
+     "tip_dir": [
+      -0.72,
+      -0.35,
+      0.599
+     ]
+    }
+   },
+   "clips": {
+    "Idle": {
+     "seconds": 2.0,
+     "loop": true
+    },
+    "Run": {
+     "seconds": 0.6,
+     "loop": true
+    },
+    "Jump": {
+     "seconds": 0.7,
+     "loop": false
+    },
+    "Attack_Sword": {
+     "seconds": 0.5,
+     "loop": false
+    },
+    "Attack_Staff": {
+     "seconds": 0.5,
+     "loop": false
+    },
+    "Hurt": {
+     "seconds": 0.4,
+     "loop": false
+    },
+    "Death": {
+     "seconds": 1.0,
+     "loop": false
+    }
+   },
+   "joints_final_m": {
+    "root": [
+     0.0,
+     -0.0364,
+     0.0
+    ],
+    "hips": [
+     0.0,
+     -0.0365,
+     0.5003
+    ],
+    "spine": [
+     0.0,
+     -0.0222,
+     0.594
+    ],
+    "chest": [
+     0.0,
+     -0.0548,
+     0.719
+    ],
+    "neck": [
+     0.0,
+     -0.053,
+     0.889
+    ],
+    "head": [
+     0.0,
+     -0.0577,
+     0.9265
+    ],
+    "head_end": [
+     0.0,
+     -0.0577,
+     1.25
+    ],
+    "shoulder.L": [
+     0.0438,
+     -0.0548,
+     0.794
+    ],
+    "upperarm.L": [
+     0.1135,
+     -0.0037,
+     0.7774
+    ],
+    "forearm.L": [
+     0.2021,
+     -0.0114,
+     0.6646
+    ],
+    "hand.L": [
+     0.2578,
+     -0.0163,
+     0.5937
+    ],
+    "hand_end.L": [
+     0.3009,
+     -0.0201,
+     0.5388
+    ],
+    "thigh.L": [
+     0.0624,
+     -0.0343,
+     0.4565
+    ],
+    "shin.L": [
+     0.0801,
+     -0.0095,
+     0.2689
+    ],
+    "foot.L": [
+     0.0725,
+     -0.0055,
+     0.0813
+    ],
+    "toe.L": [
+     0.0725,
+     -0.0925,
+     0.025
+    ],
+    "toe_end.L": [
+     0.0725,
+     -0.1458,
+     0.025
+    ],
+    "shoulder.R": [
+     -0.0438,
+     -0.0548,
+     0.794
+    ],
+    "upperarm.R": [
+     -0.1116,
+     -0.0091,
+     0.7736
+    ],
+    "forearm.R": [
+     -0.2015,
+     -0.0142,
+     0.6626
+    ],
+    "hand.R": [
+     -0.258,
+     -0.0174,
+     0.5927
+    ],
+    "hand_end.R": [
+     -0.3017,
+     -0.0198,
+     0.5387
+    ],
+    "thigh.R": [
+     -0.0639,
+     -0.0332,
+     0.4565
+    ],
+    "shin.R": [
+     -0.0797,
+     -0.0127,
+     0.2689
+    ],
+    "foot.R": [
+     -0.0741,
+     0.0,
+     0.0813
+    ],
+    "toe.R": [
+     -0.0741,
+     -0.0898,
+     0.025
+    ],
+    "toe_end.R": [
+     -0.0741,
+     -0.1448,
+     0.025
+    ]
+   },
+   "parts": {},
+   "preview": [
+    "female_rest_front.png",
+    "female_rest_side.png",
+    "female_rest_back.png",
+    "female_rest_q34.png"
+   ],
+   "anim_preview": [
+    "female_Idle_01_q34.png",
+    "female_Idle_16_q34.png",
+    "female_Run_01_q34.png",
+    "female_Run_05_q34.png",
+    "female_Run_10_q34.png",
+    "female_Run_14_q34.png",
+    "female_Attack_Sword_05_q34.png",
+    "female_Attack_Sword_07_q34.png",
+    "female_Attack_Sword_09_q34.png",
+    "female_Attack_Sword_13_q34.png",
+    "female_Hurt_03_q34.png",
+    "female_Death_31_q34.png",
+    "female_Jump_10_q34.png",
+    "female_Attack_Staff_05_q34.png",
+    "female_Attack_Staff_07_q34.png",
+    "female_Attack_Staff_09_q34.png"
+   ],
+   "files": {
+    "novice72_female_body_hq.glb": {
+     "bytes": 568216,
+     "tris": 6991,
+     "meshes": [
+      "Body_Core",
+      "Body_Covered"
+     ]
+    },
+    "novice72_female_hair01_hq.glb": {
+     "bytes": 539108,
+     "tris": 7011,
+     "meshes": [
+      "Novice_Female_Hair_01"
+     ]
+    },
+    "novice72_female_top_hq.glb": {
+     "bytes": 510328,
+     "tris": 6791,
+     "meshes": [
+      "Novice_Female_Top"
+     ]
+    },
+    "novice72_female_bottom_hq.glb": {
+     "bytes": 398768,
+     "tris": 7142,
+     "meshes": [
+      "Novice_Female_Leggings"
+     ]
+    },
+    "novice72_female_boots_hq.glb": {
+     "bytes": 490064,
+     "tris": 6679,
+     "meshes": [
+      "Novice_Female_Boots"
+     ]
+    },
+    "novice72_female_sword_hq.glb": {
+     "bytes": 475124,
+     "tris": 6881,
+     "meshes": [
+      "Novice_ShortSword_V1"
+     ]
+    },
+    "novice72_female_staff_hq.glb": {
+     "bytes": 537060,
+     "tris": 7165,
+     "meshes": [
+      "Novice_Weapon_Staff"
+     ]
+    },
+    "novice72_female_body_lite.glb": {
+     "bytes": 381044,
+     "tris": 3494,
+     "meshes": [
+      "Body_Core",
+      "Body_Covered"
+     ]
+    },
+    "novice72_female_hair01_lite.glb": {
+     "bytes": 291308,
+     "tris": 3504,
+     "meshes": [
+      "Novice_Female_Hair_01"
+     ]
+    },
+    "novice72_female_top_lite.glb": {
+     "bytes": 266232,
+     "tris": 3395,
+     "meshes": [
+      "Novice_Female_Top"
+     ]
+    },
+    "novice72_female_bottom_lite.glb": {
+     "bytes": 222420,
+     "tris": 3570,
+     "meshes": [
+      "Novice_Female_Leggings"
+     ]
+    },
+    "novice72_female_boots_lite.glb": {
+     "bytes": 260660,
+     "tris": 3339,
+     "meshes": [
+      "Novice_Female_Boots"
+     ]
+    },
+    "novice72_female_sword_lite.glb": {
+     "bytes": 248928,
+     "tris": 3440,
+     "meshes": [
+      "Novice_ShortSword_V1"
+     ]
+    },
+    "novice72_female_staff_lite.glb": {
+     "bytes": 281764,
+     "tris": 3581,
+     "meshes": [
+      "Novice_Weapon_Staff"
+     ]
+    }
+   }
+  }
+ },
+ "seconds": 23.1
+}
