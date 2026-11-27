@@ -338,6 +338,8 @@ def build_gender(g):
 
     # ---- 減面（HQ）----
     for key, o in parts.items():
+        if key == "hair":
+            continue  # 頭髮不減面：減面會拉壞 UV 接縫（頭頂出現膚色貼圖）
         if o.data.polygons and LOD["hq"]["ratio"] < 1:
             m = o.modifiers.new("dec", "DECIMATE")
             m.ratio = LOD["hq"]["ratio"]
@@ -609,8 +611,8 @@ def make_clips(arm, JF, g):
         t = T * i / 8
         ph = 2 * math.pi * t / T
         sw = math.sin(ph)
-        kneeL = max(0, -math.cos(ph)) * 55 + 8
-        kneeR = max(0, math.cos(ph)) * 55 + 8
+        kneeL = max(0, math.cos(ph)) * 55 + 8  # 往前擺（騰空）時彎膝，支撐時伸直往後推
+        kneeR = max(0, -math.cos(ph)) * 55 + 8
         bob = abs(math.sin(ph)) * 0.025 - 0.012
         run.append((t, merge(arms_down, {
             "spine": [(X, 8)], "chest": [(X, 4), (Z, 6 * sw)], "head": [(X, -8)],
