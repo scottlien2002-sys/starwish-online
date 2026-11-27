@@ -1,0 +1,46 @@
+flowchart LR
+  subgraph Client["客戶端（iPhone Safari／瀏覽器）"]
+    direction TB
+    IN["輸入<br/>搖桿／鍵盤 → 世界方向"]
+    PRED["客戶端預測<br/>每 1/60 s 一步 stepMove<br/>（與伺服器同一函式）"]
+    REC["伺服器校正<br/>從權威位置重播未確認輸入<br/>誤差平滑消化"]
+    INT["遠端玩家插值<br/>伺服器時間 − 100 ms"]
+    DIAG["診斷 HUD<br/>RTT／封包量／人數／FPS"]
+    VIEW["畫面<br/>Stage 8.0：2D 測試頁<br/>Stage 8.1：3D 角色（AvatarSync）"]
+    IN --> PRED --> VIEW
+    REC --> PRED
+    INT --> VIEW
+  end
+
+  subgraph Server["多人伺服器（Node.js 22 + TypeScript + ws）"]
+    direction TB
+    GW["HTTP(S)／WS(S) 閘道<br/>來源檢查・限速・格式檢查・協定版本"]
+    SES["工作階段<br/>憑證（雜湊）・角色鎖・30 秒斷線保留"]
+    RM["房間管理／地圖分流<br/>village-1、village-2…、starsprout-1"]
+    ROOM["權威房間 20 Hz<br/>時間預算 → 移動 → 合法區域稽核<br/>→ 傳送陣 → 差異快照"]
+    SYS["房間系統（預留）<br/>戰鬥・怪物 AI・掉落・寵物"]
+    LED["RequestLedger<br/>重複請求防護"]
+    MET["/metrics・/health"]
+    GW --> SES --> RM --> ROOM
+    ROOM --> SYS
+    GW --> LED --> SYS
+  end
+
+  subgraph Shared["共用程式（唯讀引用 Stage 7.1）"]
+    MAP["地圖權威<br/>村莊 moveVillage／standable<br/>原野 resolveMove＋碰撞<br/>傳送陣 worldPortals"]
+    TUN["TUNING<br/>速度 5 m/s・轉身"]
+  end
+
+  subgraph DB["資料庫"]
+    MEM["MemoryStore（本機原型）"]
+    PG[("PostgreSQL 16（結構已實測）<br/>characters・items(UUID)<br/>request_ledger・gold_ledger<br/>version／lock_epoch")]
+  end
+
+  PRED -- "in：方向＋步數（不送位置）" --> GW
+  ROOM -- "snap：ack＋自己＋有變動的玩家" --> REC
+  ROOM -- "snap" --> INT
+  PRED -.-> MAP
+  ROOM -.-> MAP
+  MAP -.-> TUN
+  SES --> MEM
+  MEM -. "Stage 8.1 替換" .-> PG

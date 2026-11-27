@@ -1,0 +1,508 @@
+/**
+ * Stage 8.0 多人連線伺服器：HTTP(S) + WebSocket(WSS)。
+ * - /health、/metrics（診斷）、/mp/（本機雙人測試頁）
+ * - 每 50 ms 一個 tick（20 Hz）：處理輸入 → 移動 → 傳送陣 → 快照
+ * - 斷線保留角色 30 秒，期間內用憑證重新連線直接接回並完整重新同步
+ * - 同一角色只允許一個連線（新連線登入時踢掉舊連線）
+ */
+import { createServer as createHttp, type IncomingMessage, type ServerResponse, type Server } from "node:http";
+import { createServer as createHttps } from "node:https";
+import { readFileSync, existsSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import { WebSocketServer, type WebSocket } from "ws";
+import { MAX_MESSAGE_BYTES, MOVE_SPEED, PROTOCOL_VERSION, RECONNECT_GRACE_MS, ROOM_CAPACITY, SNAPSHOT_HZ, STEP, TICK_HZ } from "../shared/constants.ts";
+import type { ClientMsg, Gender, HelloMsg, MapId, ServerMsg } from "../shared/protocol.ts";
+import { getMap } from "../shared/maps.ts";
+import { Room, ServerPlayer } from "./Room.ts";
+import { TokenBucket, originAllowed, parseClientMsg, protocolOk, sanitizeName } from "./security.ts";
+import { RequestLedger } from "./RequestLedger.ts";
+import { MemoryStore, type CharacterStore } from "./persistence/Store.ts";
+import { createEmoteSystem, type RoomSystem } from "./extensions.ts";
+
+export interface ServerOptions {
+  port: number;
+  host: string;
+  tls?: { cert: string; key: string };
+  dev: boolean;
+  graceMs: number;
+  roomCapacity: number;
+  maxPlayers: number;
+  allowedOrigins: string[];
+  store?: CharacterStore;
+  log?: (msg: string) => void;
+}
+
+interface Conn {
+  id: number;
+  ws: WebSocket;
+  ip: string;
+  bucket: TokenBucket;
+  cmdBucket: TokenBucket;
+  violations: number;
+  player: ServerPlayer | null;
+  helloPending: boolean;
+}
+
+interface Live {
+  player: ServerPlayer;
+  room: Room;
+  conn: Conn | null;
+  graceTimer: ReturnType<typeof setTimeout> | null;
+}
+
+const PROTO_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "proto");
+const STATIC: Record<string, string> = {
+  "/mp/": "index.html",
+  "/mp/index.html": "index.html",
+  "/mp/proto.js": "dist/proto.js",
+};
+const MIME: Record<string, string> = { html: "text/html; charset=utf-8", js: "text/javascript; charset=utf-8" };
+
+export class GameServer {
+  readonly opts: ServerOptions;
+  readonly store: CharacterStore;
+  readonly ledger = new RequestLedger();
+  private http!: Server;
+  private wss!: WebSocketServer;
+  private readonly rooms = new Map<string, Room>();
+  private readonly live = new Map<string, Live>();
+  private readonly conns = new Set<Conn>();
+  private nextConn = 1;
+  private nextPid = 1;
+  private tickTimer: ReturnType<typeof setInterval> | null = null;
+  private persistTimer: ReturnType<typeof setInterval> | null = null;
+  private lastTick = 0;
+  readonly startedAt = Date.now();
+  readonly systems: RoomSystem[] = [createEmoteSystem()];
+  readonly stats = {
+    ticks: 0,
+    tickMsSum: 0,
+    tickMsMax: 0,
+    bytesIn: 0,
+    bytesOut: 0,
+    msgsIn: 0,
+    msgsOut: 0,
+    badMessages: 0,
+    rateLimited: 0,
+    kicked: 0,
+    replaced: 0,
+    resumed: 0,
+    graceExpired: 0,
+    transfers: 0,
+    persistOk: 0,
+    persistConflict: 0,
+    snapshotsSkippedBackpressure: 0,
+    rejectedOrigin: 0,
+    rejectedProtocol: 0,
+  };
+  private rate = { at: Date.now(), bytesIn: 0, bytesOut: 0, msgsIn: 0, msgsOut: 0, perSec: { bytesIn: 0, bytesOut: 0, msgsIn: 0, msgsOut: 0 } };
+  private tickWindow: number[] = [];
+
+  constructor(opts: ServerOptions) {
+    this.opts = opts;
+    this.store = opts.store ?? new MemoryStore();
+  }
+
+  private log(m: string): void {
+    this.opts.log?.(m);
+  }
+
+  get port(): number {
+    const a = this.http.address();
+    return typeof a === "object" && a ? a.port : this.opts.port;
+  }
+
+  async start(): Promise<void> {
+    // 先建立兩張地圖的權威資料（原野地形約 0.3 秒），避免第一位玩家進入時卡頓
+    getMap("village");
+    getMap("starsprout");
+    const handler = (req: IncomingMessage, res: ServerResponse): void => this.onHttp(req, res);
+    this.http = this.opts.tls ? createHttps({ cert: this.opts.tls.cert, key: this.opts.tls.key }, handler) : createHttp(handler);
+    this.wss = new WebSocketServer({
+      server: this.http,
+      path: "/ws",
+      maxPayload: MAX_MESSAGE_BYTES,
+      perMessageDeflate: false,
+      verifyClient: (info: { origin?: string; req: IncomingMessage }) => {
+        const ok = originAllowed(info.origin || undefined, this.opts.allowedOrigins);
+        if (!ok) this.stats.rejectedOrigin++;
+        return ok;
+      },
+    });
+    this.wss.on("connection", (ws: WebSocket, req: IncomingMessage) => this.onConnection(ws, req));
+    await new Promise<void>((resolve) => this.http.listen(this.opts.port, this.opts.host, resolve));
+    this.lastTick = performance.now();
+    this.tickTimer = setInterval(() => this.tick(), 1000 / TICK_HZ);
+    this.persistTimer = setInterval(() => void this.persistAll(false), 5000);
+    this.log(`Starwish MP server listening on ${this.opts.tls ? "https/wss" : "http/ws"}://${this.opts.host}:${this.port}`);
+  }
+
+  async stop(): Promise<void> {
+    if (this.tickTimer) clearInterval(this.tickTimer);
+    if (this.persistTimer) clearInterval(this.persistTimer);
+    for (const l of this.live.values()) if (l.graceTimer) clearTimeout(l.graceTimer);
+    await this.persistAll(true);
+    for (const c of this.conns) c.ws.terminate();
+    await new Promise<void>((r) => this.wss.close(() => r()));
+    await new Promise<void>((r) => this.http.close(() => r()));
+  }
+
+  // ---------------- HTTP ----------------
+  private onHttp(req: IncomingMessage, res: ServerResponse): void {
+    const url = (req.url ?? "/").split("?")[0]!;
+    if (url === "/health") return this.json(res, { ok: true, proto: PROTOCOL_VERSION });
+    if (url === "/metrics") return this.json(res, this.metrics());
+    if (url === "/mp") {
+      res.writeHead(302, { location: "/mp/" });
+      res.end();
+      return;
+    }
+    const f = STATIC[url];
+    if (f) {
+      const p = join(PROTO_DIR, f);
+      if (existsSync(p)) {
+        res.writeHead(200, { "content-type": MIME[f.split(".").pop()!] ?? "application/octet-stream", "cache-control": "no-store" });
+        res.end(readFileSync(p));
+        return;
+      }
+    }
+    res.writeHead(404, { "content-type": "text/plain" });
+    res.end("not found");
+  }
+
+  private json(res: ServerResponse, body: unknown): void {
+    res.writeHead(200, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "access-control-allow-origin": "*" });
+    res.end(JSON.stringify(body));
+  }
+
+  metrics(): Record<string, unknown> {
+    const tw = this.tickWindow;
+    return {
+      uptimeS: Math.round((Date.now() - this.startedAt) / 1000),
+      proto: PROTOCOL_VERSION,
+      tickHz: TICK_HZ,
+      connections: this.conns.size,
+      players: this.live.size,
+      rooms: [...this.rooms.values()].map((r) => ({ key: r.key, map: r.map, players: r.size, connected: [...r.players()].filter((p) => p.connected).length, tick: r.tick })),
+      tick: { count: this.stats.ticks, avgMs: tw.length ? +(tw.reduce((a, b) => a + b, 0) / tw.length).toFixed(3) : 0, maxMs: tw.length ? +Math.max(...tw).toFixed(3) : 0 },
+      netPerSec: this.rate.perSec,
+      totals: { ...this.stats },
+      ledgerEntries: this.ledger.size,
+      players_detail: [...this.live.values()].map((l) => ({ pid: l.player.pid, name: l.player.name, room: l.room.key, connected: l.player.connected, queue: l.player.queue.length, ack: l.player.ack, ...l.player.counters })),
+    };
+  }
+
+  // ---------------- 房間與分流 ----------------
+  /** 地圖分流：同地圖找還有空位的頻道，都滿了就開新頻道（village-1、village-2…） */
+  pickRoom(map: MapId): Room {
+    for (const r of this.rooms.values()) if (r.map === map && r.size < r.capacity) return r;
+    let n = 1;
+    while (this.rooms.has(`${map}-${n}`)) n++;
+    const r = new Room(`${map}-${n}`, map, this.opts.roomCapacity);
+    r.systems.push(...this.systems);
+    this.rooms.set(r.key, r);
+    return r;
+  }
+
+  private spawnPoint(map: MapId, x: number | null, z: number | null, yaw: number): { x: number; z: number; yaw: number } {
+    const m = getMap(map);
+    if (x !== null && z !== null && m.legal(x, z)) return { x, z, yaw };
+    for (let i = 0; i < 24; i++) {
+      const s = m.spawn(this.nextPid + i);
+      if (m.legal(s.x, s.z)) return s;
+    }
+    return m.spawn(0);
+  }
+
+  // ---------------- WebSocket ----------------
+  private onConnection(ws: WebSocket, req: IncomingMessage): void {
+    const now = Date.now();
+    const c: Conn = { id: this.nextConn++, ws, ip: req.socket.remoteAddress ?? "?", bucket: new TokenBucket(120, 240, now), cmdBucket: new TokenBucket(10, 20, now), violations: 0, player: null, helloPending: false };
+    this.conns.add(c);
+    const helloTimeout = setTimeout(() => {
+      if (!c.player) this.close(c, 4001, "hello timeout");
+    }, 5000);
+    ws.on("message", (data: Buffer, isBinary: boolean) => {
+      this.stats.bytesIn += data.length;
+      this.rate.bytesIn += data.length;
+      this.stats.msgsIn++;
+      this.rate.msgsIn++;
+      if (!c.bucket.take(Date.now())) {
+        this.stats.rateLimited++;
+        return this.violation(c);
+      }
+      const m = isBinary ? null : parseClientMsg(data.toString("utf8"));
+      if (!m) {
+        this.stats.badMessages++;
+        return this.violation(c);
+      }
+      this.onMessage(c, m).catch((e: unknown) => this.log(`message error: ${String(e)}`));
+    });
+    ws.on("close", () => {
+      clearTimeout(helloTimeout);
+      this.conns.delete(c);
+      this.onClose(c);
+    });
+    ws.on("error", () => {});
+  }
+
+  private violation(c: Conn): void {
+    c.violations++;
+    if (c.violations > 50) {
+      this.stats.kicked++;
+      this.sendTo(c, { t: "err", code: "bad_msg", msg: "too many invalid messages" });
+      this.close(c, 4002, "violations");
+    }
+  }
+
+  private close(c: Conn, code: number, reason: string): void {
+    try {
+      c.ws.close(code, reason);
+    } catch {
+      /* 已關閉 */
+    }
+  }
+
+  private sendTo(c: Conn, m: ServerMsg): void {
+    if (c.ws.readyState !== 1) return;
+    const s = JSON.stringify(m);
+    c.ws.send(s);
+    const b = Buffer.byteLength(s);
+    this.stats.bytesOut += b;
+    this.rate.bytesOut += b;
+    this.stats.msgsOut++;
+    this.rate.msgsOut++;
+  }
+
+  private async onMessage(c: Conn, m: ClientMsg): Promise<void> {
+    if (m.t === "hello") {
+      if (c.player || c.helloPending) return this.violation(c);
+      c.helloPending = true;
+      return this.onHello(c, m);
+    }
+    const p = c.player;
+    if (!p) return this.violation(c);
+    switch (m.t) {
+      case "in":
+        p.enqueue(m);
+        return;
+      case "ping":
+        this.sendTo(c, { t: "pong", c: m.c, s: Date.now() });
+        return;
+      case "resync":
+        p.needFull = true;
+        return;
+      case "cmd": {
+        if (!c.cmdBucket.take(Date.now())) {
+          this.stats.rateLimited++;
+          return this.sendTo(c, { t: "res", id: m.id, ok: false, err: "rate" });
+        }
+        const live = this.live.get(p.characterId);
+        if (!live) return;
+        const sys = live.room.systems.find((s) => s.commands.includes(m.k));
+        const now = Date.now();
+        const r = this.ledger.run(p.characterId, m.id, now, () => {
+          if (!sys?.onCommand) return { ok: false, err: "unknown_cmd" };
+          const out = sys.onCommand(m.k, m.p, { room: live.room, player: p, requestId: m.id, now });
+          return out.ok ? { ok: true, data: out.data } : { ok: false, err: out.err };
+        });
+        this.sendTo(c, { t: "res", id: m.id, ok: r.entry.ok, ...(r.entry.data !== undefined ? { data: r.entry.data } : {}), ...(r.entry.err ? { err: r.entry.err } : {}), ...(r.dup ? { dup: 1 as const } : {}) });
+        return;
+      }
+    }
+  }
+
+  private async onHello(c: Conn, m: HelloMsg): Promise<void> {
+    if (!protocolOk(m.v)) {
+      this.stats.rejectedProtocol++;
+      this.sendTo(c, { t: "err", code: "proto", msg: `protocol ${m.v} != ${PROTOCOL_VERSION}，請重新整理頁面` });
+      return this.close(c, 4000, "protocol");
+    }
+    const now = Date.now();
+    let rec = m.resume ? await this.store.findByToken(m.resume) : null;
+    let token = m.resume ?? "";
+    let resumed = false;
+    if (!rec) {
+      if (this.live.size >= this.opts.maxPlayers) {
+        this.sendTo(c, { t: "err", code: "full", msg: "伺服器人數已滿" });
+        return this.close(c, 4003, "full");
+      }
+      const gender: Gender = m.gender === "female" ? "female" : "male";
+      const created = await this.store.createGuest(sanitizeName(m.name, this.nextPid + 1000), gender, now);
+      rec = created.character;
+      token = created.token;
+    }
+    if (c.ws.readyState !== 1) return;
+    const lockEpoch = await this.store.acquireLock(rec.id);
+    let live = this.live.get(rec.id);
+    if (live) {
+      // 同一角色已在線上或在保留期間：接回原本的角色
+      resumed = true;
+      this.stats.resumed++;
+      if (live.graceTimer) clearTimeout(live.graceTimer);
+      live.graceTimer = null;
+      const old = live.conn;
+      if (old && old !== c) {
+        this.stats.replaced++;
+        old.player = null;
+        this.sendTo(old, { t: "err", code: "replaced", msg: "此角色已在其他裝置登入" });
+        this.close(old, 4004, "replaced");
+      }
+      live.conn = c;
+      // 重新連線：清空尚未處理的輸入，客戶端會重送序號大於 ack 的所有輸入（不遺失、不重複）
+      live.player.queue.length = 0;
+      live.player.nextSeq = live.player.ack + 1;
+      live.player.connected = true;
+      live.player.needFull = true;
+      live.player.lockEpoch = lockEpoch;
+    } else {
+      const map: MapId = this.opts.dev && m.devMap ? m.devMap : rec.map;
+      const sp = this.opts.dev && m.devMap && m.devMap !== rec.map ? this.spawnPoint(map, null, null, 0) : this.spawnPoint(map, rec.x, rec.z, rec.yaw);
+      const player = new ServerPlayer({ pid: this.nextPid++, characterId: rec.id, name: rec.name, gender: rec.gender, x: sp.x, z: sp.z, yaw: sp.yaw, version: rec.version, lockEpoch });
+      const room = this.pickRoom(map);
+      room.add(player);
+      live = { player, room, conn: c, graceTimer: null };
+      this.live.set(rec.id, live);
+      player.persistDirty = true;
+    }
+    const p = live.player;
+    c.player = p;
+    p.send = (msg) => {
+      if (live!.conn !== c) return;
+      if (msg.t === "snap" && c.ws.bufferedAmount > 512 * 1024) {
+        // 對方網路塞住：先跳過，之後補送完整狀態
+        this.stats.snapshotsSkippedBackpressure++;
+        p.needFull = true;
+        return;
+      }
+      this.sendTo(c, msg);
+    };
+    this.sendTo(c, {
+      t: "welcome",
+      v: PROTOCOL_VERSION,
+      pid: p.pid,
+      cid: rec.id,
+      token,
+      map: live.room.map,
+      room: live.room.key,
+      resumed,
+      tick: live.room.tick,
+      st: now,
+      e: p.epoch,
+      ack: p.ack,
+      me: p.me(),
+      cfg: { step: STEP, tickHz: TICK_HZ, snapHz: SNAPSHOT_HZ, speed: MOVE_SPEED, graceMs: this.opts.graceMs },
+    });
+    this.log(`${resumed ? "resume" : "join"} pid=${p.pid} ${p.name} room=${live.room.key}`);
+  }
+
+  private onClose(c: Conn): void {
+    const p = c.player;
+    if (!p) return;
+    const live = this.live.get(p.characterId);
+    if (!live || live.conn !== c) return;
+    live.conn = null;
+    p.connected = false;
+    p.disconnectedAt = Date.now();
+    void this.persist(live);
+    live.graceTimer = setTimeout(() => {
+      // 保留時間到：角色離開房間（位置已存檔，下次用憑證登入從存檔位置出生）
+      this.stats.graceExpired++;
+      live.room.remove(p.pid);
+      this.live.delete(p.characterId);
+      void this.persist(live, true);
+    }, this.opts.graceMs);
+    this.log(`disconnect pid=${p.pid} (grace ${this.opts.graceMs} ms)`);
+  }
+
+  // ---------------- tick ----------------
+  private tick(): void {
+    const t0 = performance.now();
+    const dt = Math.min(0.25, (t0 - this.lastTick) / 1000);
+    this.lastTick = t0;
+    const now = Date.now();
+    for (const room of this.rooms.values()) {
+      const transfers = room.step(dt, now);
+      for (const tr of transfers) this.transfer(tr.player, room, tr.to);
+    }
+    for (const room of this.rooms.values()) room.broadcast(now);
+    const ms = performance.now() - t0;
+    this.stats.ticks++;
+    this.stats.tickMsSum += ms;
+    this.stats.tickMsMax = Math.max(this.stats.tickMsMax, ms);
+    this.tickWindow.push(ms);
+    if (this.tickWindow.length > TICK_HZ * 5) this.tickWindow.shift();
+    if (now - this.rate.at >= 1000) {
+      const s = (now - this.rate.at) / 1000;
+      this.rate.perSec = { bytesIn: Math.round(this.rate.bytesIn / s), bytesOut: Math.round(this.rate.bytesOut / s), msgsIn: Math.round(this.rate.msgsIn / s), msgsOut: Math.round(this.rate.msgsOut / s) };
+      this.rate.bytesIn = this.rate.bytesOut = this.rate.msgsIn = this.rate.msgsOut = 0;
+      this.rate.at = now;
+    }
+  }
+
+  /** 伺服器決定的換地圖：離開舊房間 → 放到目的地 → 通知客戶端（地圖世代 +1，舊輸入作廢） */
+  private transfer(p: ServerPlayer, from: Room, to: { map: MapId; x: number; z: number; yaw: number }): void {
+    const live = this.live.get(p.characterId);
+    if (!live) return;
+    from.remove(p.pid);
+    p.queue.length = 0;
+    p.epoch++;
+    p.nextSeq = p.ack + 1;
+    const sp = this.spawnPoint(to.map, to.x, to.z, to.yaw);
+    p.state.x = sp.x;
+    p.state.z = sp.z;
+    p.state.yaw = sp.yaw;
+    p.state.speed = 0;
+    const room = this.pickRoom(to.map);
+    room.add(p);
+    live.room = room;
+    p.persistDirty = true;
+    this.stats.transfers++;
+    p.send({ t: "map", map: room.map, room: room.key, e: p.epoch, ack: p.ack, me: p.me() });
+    void this.persist(live);
+  }
+
+  // ---------------- 存檔 ----------------
+  private async persist(live: Live, force = false): Promise<void> {
+    const p = live.player;
+    if (!p.persistDirty && !force) return;
+    p.persistDirty = false;
+    const r = await this.store.savePosition(p.characterId, p.version, p.lockEpoch, { map: live.room.map, x: p.x, z: p.z, yaw: p.yaw }, Date.now());
+    if (r.ok) {
+      p.version = r.version;
+      this.stats.persistOk++;
+    } else {
+      this.stats.persistConflict++;
+      this.log(`persist rejected pid=${p.pid}: ${r.reason}`);
+    }
+  }
+
+  private async persistAll(force: boolean): Promise<void> {
+    for (const l of this.live.values()) await this.persist(l, force);
+  }
+
+  // 測試用
+  roomOf(characterId: string): Room | undefined {
+    return this.live.get(characterId)?.room;
+  }
+  playerOf(characterId: string): ServerPlayer | undefined {
+    return this.live.get(characterId)?.player;
+  }
+}
+
+export function optionsFromEnv(env: NodeJS.ProcessEnv): ServerOptions {
+  const cert = env.MP_TLS_CERT;
+  const key = env.MP_TLS_KEY;
+  return {
+    port: Number(env.PORT ?? 2567),
+    host: env.HOST ?? "127.0.0.1",
+    tls: cert && key ? { cert: readFileSync(cert, "utf8"), key: readFileSync(key, "utf8") } : undefined,
+    dev: env.MP_DEV === "1",
+    graceMs: Number(env.MP_GRACE_MS ?? RECONNECT_GRACE_MS),
+    roomCapacity: Number(env.MP_ROOM_CAPACITY ?? ROOM_CAPACITY),
+    maxPlayers: Number(env.MP_MAX_PLAYERS ?? 200),
+    allowedOrigins: (env.MP_ALLOWED_ORIGINS ?? "https://scottlien2002-sys.github.io").split(",").map((s) => s.trim()).filter(Boolean),
+    log: (m) => console.log(`[${new Date().toISOString()}] ${m}`),
+  };
+}

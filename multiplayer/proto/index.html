@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <title>星願物語 Stage 8.0 多人連線測試（俯視偵錯）</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #1a1d2e; color: #fff; font-family: -apple-system, "PingFang TC", sans-serif; overflow: hidden; }
+      #view { position: fixed; inset: 0; width: 100vw; height: 100dvh; touch-action: none; }
+      #hud { position: fixed; left: max(8px, env(safe-area-inset-left)); top: max(8px, env(safe-area-inset-top)); white-space: pre; font: 12px/1.45 ui-monospace, Menlo, monospace; background: rgba(0,0,0,.55); padding: 8px 10px; border-radius: 8px; pointer-events: none; max-width: calc(100vw - 24px); overflow: hidden; }
+      #bar { position: fixed; right: max(8px, env(safe-area-inset-right)); bottom: max(10px, env(safe-area-inset-bottom)); display: flex; gap: 8px; }
+      button { font-size: 14px; padding: 10px 14px; border-radius: 10px; border: 0; background: #3a4a8a; color: #fff; }
+      #tag { position: fixed; left: 8px; bottom: max(14px, env(safe-area-inset-bottom)); font-size: 11px; opacity: .7; }
+    </style>
+  </head>
+  <body>
+    <canvas id="view"></canvas>
+    <div id="hud">連線中…</div>
+    <div id="tag">Stage 8.0 本機原型 · 非正式畫面</div>
+    <div id="bar"><button id="wave">揮手指令</button><button id="drop">斷線測試</button></div>
+    <script type="module" src="./proto.js"></script>
+  </body>
+</html>
