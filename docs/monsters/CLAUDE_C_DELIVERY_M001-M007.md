@@ -1,51 +1,88 @@
-# Claude C → Claude A：怪物骨骼動畫資產交付（M001～M007 狀態）
+# Claude C → Claude A：M001～M007 怪物資產完整交付清單（Stage 2）
 
-日期：2026-11-27　分支：`assets/monster-rigs-m004-m007`（從 `backup/stage72-batch1` ad2fe53 開出，只加資產，不改程式）
+日期：2026-11-27
+分支：`assets/monster-rigs-m002-m007`（從 `assets/monster-rigs-m004-m007` 438c66a 接續，只加資產與文件，不改程式）
+同樣的檔案也在 `feature/combat-vfx-stage2`（戰鬥展示頁使用中）。
 
-## 1. 七隻怪物狀態
+## 1. 七隻怪物總表
 
-| 編號 | 怪物 | 狀態 | 檔案 |
-|---|---|---|---|
-| M001 | 星露啵啵 | 已在遊戲內（V3.8R，程式動畫，Claude A 原有） | 不需要 GLB 骨骼交付 |
-| M002 | 苔角獸 | **尚未綁骨**：只有使用者上傳的 Tripo 自動綁骨（只有 walk）原檔，Claude C 沒有接過這隻的骨架任務 | 無 |
-| M003 | 雲絨鳥 | **尚未綁骨**：只有未綁骨原檔，Claude C 沒有接過這隻的骨架任務 | 無 |
-| M004 | 風羽狐 | Rig V1.1 交付 | `public/models/monsters/m004/` |
-| M005 | 星雲咩咩 | Rig V1.0 交付 | `public/models/monsters/m005/` |
-| M006 | 胡蘿蔔大王 | Rig V1.0 交付 | `public/models/monsters/m006/` |
-| M007 | 王冠重錘兔 | Rig V1.0 交付 | `public/models/monsters/m007/` |
+| 編號 | 怪物 | 等級 | 行為 | 檔案 | 狀態 |
+|---|---|---|---|---|---|
+| M001 | 星露啵啵 | 1～2 | 被動 | `public/models/bobo_v38r_{high,medium,low}.glb`（已在 main 遊戲中） | ✅ 已驗收；程式動畫（果凍材質＋姿勢函式），不是骨骼動畫，**沿用不重做** |
+| M002 | 苔角獸 | 3～4 | 被動 | `public/models/monsters/m002/M002_MossHornBeast_Rig_V1_{HQ,Lite}.glb` | 🆕 Stage 2 新交付（候選版，待視覺驗收） |
+| M003 | 雲絨鳥 | 5～6 | 主動 | `public/models/monsters/m003/M003_CloudFluffBird_Rig_V1_{HQ,Lite}.glb` | 🆕 Stage 2 新交付（候選版，待視覺驗收） |
+| M004 | 風羽狐 V1.1 | 7 | 主動 | `public/models/monsters/m004/M004_WindfeatherFox_Rig_V1_1_{HQ,Lite}.glb` | ✅ 已交付（438c66a） |
+| M005 | 星雲咩咩 | 8 | 主動 | `public/models/monsters/m005/M005_NebulaSheep_Rig_V1_{HQ,Lite}.glb` | ✅ 已交付 |
+| M006 | 胡蘿蔔大王 | 9 精英 | 主動 | `public/models/monsters/m006/M006_CarrotKing_Rig_V1_{HQ,Lite}.glb` | ✅ 已交付 |
+| M007 | 王冠重錘兔 | 10 Boss | 主動 | `public/models/monsters/m007/M007_CrownHammerRabbit_Rig_V1_{HQ,Lite}.glb` | ✅ 已交付 |
 
-M002、M003 需要另外開骨架任務；這次沒有用其他怪物的骨架或模型代替。
+全部 Lv1～10 怪物無屬性。M002、M003 都依使用者上傳、Claude A 存檔在 `assets/monster-originals` 的原始模型製作，造型、比例、貼圖完全沒有改；專案內找不到這兩隻的設定圖，尺寸依地圖文件的怪物尺寸表。
 
-## 2. 檔名與規格（與 `src/monsters/rigged/riggedSpec.ts` 登記的路徑、關節數、動畫時長、命中時間一致）
+## 2. 統一規格（Stage 2）
 
-| 檔案 | 大小 | SHA-256 |
-|---|---|---|
-| m004/M004_WindfeatherFox_Rig_V1_1_HQ.glb | 3.98 MB | a4c2bc809df32d8b… |
-| m004/M004_WindfeatherFox_Rig_V1_1_Lite.glb | 0.83 MB | a879b98cf589ed23… |
-| m005/M005_NebulaSheep_Rig_V1_HQ.glb | 3.51 MB | f9a4296f93de282e… |
-| m005/M005_NebulaSheep_Rig_V1_Lite.glb | 0.71 MB | 62b3b1c6aa3a4bea… |
-| m006/M006_CarrotKing_Rig_V1_HQ.glb | 3.89 MB | 641ce4a1458886bb… |
-| m006/M006_CarrotKing_Rig_V1_Lite.glb | 0.79 MB | 6ea02bfe5b30ed16… |
-| m007/M007_CrownHammerRabbit_Rig_V1_HQ.glb | 4.01 MB | f259e0e4729acf2a… |
-| m007/M007_CrownHammerRabbit_Rig_V1_Lite.glb | 0.83 MB | 2d99d11171db8166… |
+**共同規則（M002～M007 骨骼動畫怪物）**
+- 座標：公尺、+Y 上、glTF +Z 前；原點在地面、身體（四足為四腳）中心。
+- 每隻 7 組動畫，名稱統一：`Idle`、`Move`（巡邏）、`Run`（追擊）、`Attack`、`Hurt`、`Death`、`Respawn`。
+- Move／Run 都是原地動畫：位移由遊戲 AI 決定，播放速率 = 實際速度 ÷ 原生速度（建議限制 0.6～1.5 倍）。
+- Death 停在最後一格；Respawn 的最後一格 = Idle 第 0 格（可無縫接 Idle）。
+- 每個動畫對全部關節打 key、只動骨骼 → 同一個 GLB 可以多隻獨立播放。
+- HQ／Lite：同骨架（同名同序）、同動畫名稱、同命中時間；Lite 量化頂點與動畫、縮小貼圖。
+- 碰撞與 AI 位置一律在地面（M003 懸浮 0.30 m 只是畫面，判定仍貼地）。
 
-| 怪物 | 關節 | Idle／Move／Run／Attack／Hurt／Death／Respawn（秒） | 命中 | Move／Run 原生速度 |
+| 編號 | 總高 m | 碰撞半徑 m | 關節 | Idle | Move | Run | Attack（命中） | Hurt | Death | Respawn | Move／Run 原生速度 m/s | 切換門檻 m/s |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| M001 | 1.10 | 0.5 | —（程式動畫） | 2.6 週期 | 跳步 0.62 | — | 0.95（0.50） | 程式 | 程式 | 淡入 0.4 | 跳步 0.3 m／步 | — |
+| M002 | 1.20 | 0.6 | 26 | 2.8 | 0.64 | 0.44 | 1.30（**0.55**） | 0.45 | 0.80 | 0.70 | 0.30／0.95 | 0.62 |
+| M003 | 1.00（懸浮 0.30） | 0.5 | 19 | 1.25 | 0.80 | 0.50 | 1.10（**0.52**） | 0.45 | 1.00 | 0.90 | 0.80／2.0 | 1.4 |
+| M004 | 1.10 | 0.55（地圖文件）／0.45（目前 riggedSpec） | 32 | 2.0 | 0.80 | 0.38 | 1.20（0.50） | 0.45 | 0.70 | 0.50 | 0.60／2.4 | 1.2 |
+| M005 | 1.15 | 0.6（地圖文件）／0.5（目前展示頁） | 26 | 2.4 | 0.60 | 0.42 | 1.20（0.50） | 0.45 | 0.75 | 0.60 | 0.45／1.5 | 0.85 |
+| M006 | 1.65 | 0.75 | 26 | 2.4 | 0.90 | 0.50 | 1.30（0.55） | 0.50 | 0.90 | 0.70 | 0.35／1.0 | 0.68 |
+| M007 | 2.70 | 1.3 | 29 | 2.8 | 1.10 | 0.62 | 2.00（1.05） | 0.60 | 1.60 | 1.10 | 0.55／1.5 | 1.02 |
+
+- 命中時間是動畫秒數；動畫 speedRatio ≠ 1 時 ÷ speedRatio。
+- **碰撞半徑請 A 決定採用哪一組**：表中 M004、M005 的程式設定與地圖文件不同，我沒有改 A 的檔案。建議統一用地圖文件的值。
+
+**死亡重生介面（RiggedMonsterVisual，A 已實作）**
+1. 血量歸零 → `onStateEnter("death")`：播 Death，停在最後一格。
+2. 停留 `deathHold` 秒 → 淡出 `deathFade` 秒（`applyPose({ opacity })`）。
+3. 移回出生點、補滿血 → `onStateEnter("respawn")`：播 Respawn。展示頁同時在腳下放魔法陣＋光柱。
+4. Respawn 播完 → `onStateEnter("idle")`。
+被動／主動規則見 `src/combat-vfx/core/monsterRules.ts`（Lv1～4 被動，被打才反擊；Lv5 以上主動）。
+
+## 3. M002、M003 新檔案
+
+| 檔案 | 大小 | SHA-256（前 16 碼） | 三角面 | 關節 |
 |---|---|---|---|---|
-| M004 | 32 | 2.0／0.8／0.38／1.2／0.45／0.7／0.5 | 0.50 s | 0.6／2.4 m/s |
-| M005 | 26 | 2.4／0.6／0.42／1.2／0.45／0.75／0.6 | 0.50 s | 0.45／1.5 m/s |
-| M006 | 26 | 2.4／0.9／0.5／1.3／0.5／0.9／0.7 | 0.55 s | 0.35／1.0 m/s |
-| M007 | 29 | 2.8／1.1／0.62／2.0／0.6／1.6／1.1 | 1.05 s | 0.55／1.5 m/s |
+| M002_MossHornBeast_Rig_V1_HQ.glb | 2.64 MB | 868afa858f61784b | 9,756 | 26 |
+| M002_MossHornBeast_Rig_V1_Lite.glb | 0.75 MB | a6c836347d8c5bb0 | 9,756 | 26 |
+| M003_CloudFluffBird_Rig_V1_HQ.glb | 3.56 MB | d65048abbcbbf68d | 9,754 | 19 |
+| M003_CloudFluffBird_Rig_V1_Lite.glb | 0.69 MB | 22acc871d71d7558 | 9,754 | 19 |
 
-- GLB 根節點 `extras.monster` 帶有上表數值（`applyExtras` 會讀）。
-- `public/models/monsters/manifest.json` 已列入 8 個檔案，`stage72.test.ts` 的清單測試在本機通過。
+**M002 苔角獸**（四足、被動）
+- 原始檔：Tripo 自動綁骨版（只用它的綁定姿勢網格；Tripo 的 28 骨架和走路動作都沒有用）。
+- 原始模型四隻腳排成一個偏轉約 20° 的長方形；依 M005 的做法以四腳校正身體朝向，頭部保持原模型的角度（約往右 20°），沒有修改造型。
+- 骨架 26 關節（四足專用：骨盆、脊椎、胸、頸、頭、雙耳、尾 2 節、四肢各 4 節）。
+- 剛性部位：臉、兩支棕色種莢角、頭頂藤蔓與葉芽、頭上的花 → 100% 頭骨；背上小白花 → 只跟身體；蹄 → 蹄骨。
+- 攻擊：低頭刨地 → 前衝 → 角往上挑（命中 0.55 s）。
+- 檢查：結構 0 錯誤 0 警告；綁定姿勢與原檔差 0.0 mm（HQ）／0.01 mm（Lite）；HQ 與 Lite 最大差 0.09 mm；IK 夾限 0 次；Respawn 結尾＝Idle 第 0 格。
+- 已知：Move／Run 時蹄緣有小三角面拉伸（距離遠時看不出），請以實際畫面為準。
 
-## 3. Claude A 合併方式
-```
-git checkout assets/monster-rigs-m004-m007 -- public/models/monsters/m004 public/models/monsters/m005 public/models/monsters/m006 public/models/monsters/m007
-# 再把 manifest.json 的 8 行加進你分支上的清單
-```
-- 這個分支名稱不是 `feature/**`，推送不會觸發 CI，也不會部署 GitHub Pages。
-- 各怪物的報告與 Babylon 整合說明在專案文件：`Starwish_M004_*`、`Starwish_M005_*`、`Starwish_M006_*`、`Starwish_M007_*`。
+**M003 雲絨鳥**（鳥類、主動）
+- 原始檔：Tripo＋gltfpack 原始模型（沒有骨架）。
+- 骨架 19 關節（Body 帶懸浮高度、Chest、Head、頭頂捲羽 2 節、雙翅各 3 節、尾羽 3 節、雙腳各 2 節）。
+- 全部動作都懸浮 0.30 m（地圖文件 0.2～0.4 m）；Death 會掉到地上側躺，Respawn 從地面拍翅飛回懸浮。
+- 翅膀：下拍快、上拍慢，翅尖相位落後；攻擊為「後仰蓄勢 → 俯衝啄擊（命中 0.52 s）→ 回彈」。
+- 剛性部位：臉、喙、頭上的花與葉、腳 → 0% 拉伸。
+- 檢查：結構 0 錯誤 0 警告；綁定差 0.0／0.009 mm；HQ 與 Lite 最大差 0.05 mm；所有動作最低點 ≥ 0（不穿地）；Idle／Move／Run 循環接縫 0。
+- 已知：翅根拍動時，翅膀和身體絨毛交界的羽毛會拉伸；距離遠時不明顯，請以實際畫面為準。
 
-## 4. 未驗證
-- Babylon.js 9 實際載入、Khronos glTF-Validator、iPhone 實機：都還沒做（Claude C 環境沒有）。Combat VFX Lab 的 CI 會在 Chromium／WebKit 實際載入這四隻，結果寫在該報告。
+## 4. 整合（給 Claude A）
+1. 把本分支的 `public/models/monsters/m002/`、`m003/` 與 `manifest.json` 帶進你的工作分支（只有資產，沒有程式改動）。
+2. 規格：`feature/combat-vfx-stage2` 的 `src/combat-vfx/lab/monsterSpecs.ts` 有 `M002_MOSS_HORN_BEAST`、`M003_CLOUD_FLUFF_BIRD`，格式和你的 `RiggedMonsterSpec` 相同，可以直接搬到 `riggedSpec.ts`。
+3. 出生區：M002 苔葉林緣、M003 微風花丘（依地圖文件）。
+4. 驗證：`?lab=rigged` 或戰鬥展示頁會檢查關節數與 7 組動畫長度（不符會列出錯誤）。
+
+## 5. 未驗證
+- iPhone Safari 實機：FPS、記憶體、觸控（**未驗證**）。
+- Khronos glTF-Validator（環境沒有網路與 validator；用自製讀檔器檢查）。
+- M002、M003 的動作節奏與造型細節：程式化製作，請以你的視覺驗收為準。
