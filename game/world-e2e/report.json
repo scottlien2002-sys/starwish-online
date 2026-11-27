@@ -1,0 +1,3207 @@
+{
+  "startedAt": "2026-11-27T11:48:31.543Z",
+  "runs": [
+    {
+      "browser": "chromium",
+      "label": "male",
+      "checks": {
+        "新存檔在星芽村出生（性別、測試設定、起始金幣 100）": {
+          "ok": true,
+          "detail": {
+            "map": "village",
+            "gender": "male",
+            "gold": 100,
+            "mode": "test"
+          }
+        },
+        "星芽村：一般移動沒有跳躍按鈕": {
+          "ok": true,
+          "detail": false
+        },
+        "Stage 7.2 新版初心者：身體＋髮型、上衣、下身、靴子、武器分開的模組（共用身體骨架）": {
+          "ok": true,
+          "detail": {
+            "modular": true,
+            "weapon": "sword",
+            "bones": 23,
+            "triangles": 43526,
+            "parts": [
+              {
+                "kind": "hair",
+                "file": "novice72_male_hair01_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "top",
+                "file": "novice72_male_top_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "bottom",
+                "file": "novice72_male_bottom_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "boots",
+                "file": "novice72_male_boots_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "weapon",
+                "file": "novice72_male_sword_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              }
+            ],
+            "clips": [
+              "Death",
+              "Hurt",
+              "Idle",
+              "Jump",
+              "Run",
+              "Attack"
+            ],
+            "attackClips": [
+              "staff",
+              "sword"
+            ]
+          }
+        },
+        "Stage 7.2 新版初心者：Idle／Run／Attack／Hurt／Death／Jump 動作齊全，短劍與法杖各有攻擊動作": {
+          "ok": true,
+          "detail": {
+            "clips": [
+              "Death",
+              "Hurt",
+              "Idle",
+              "Jump",
+              "Run",
+              "Attack"
+            ],
+            "attackClips": [
+              "staff",
+              "sword"
+            ]
+          }
+        },
+        "Stage 7.2：存檔有等級、經驗、外觀（髮型、髮色、武器）": {
+          "ok": true,
+          "detail": {
+            "level": 1,
+            "exp": 0,
+            "appearance": {
+              "hair": "hair01",
+              "hairColor": null,
+              "weapon": "sword"
+            }
+          }
+        },
+        "洛恩鑑定：收 20 金幣（測試設定），重送同一請求不重複扣款": {
+          "ok": true,
+          "detail": {
+            "quote": {
+              "fee": 20,
+              "test": true
+            },
+            "r1": true,
+            "r2": true,
+            "gold": 80,
+            "ledger": 1,
+            "appraised": true
+          }
+        },
+        "商會：本機服務（serverBacked=false，不是真正的多人交易）": {
+          "ok": true,
+          "detail": false
+        },
+        "商會：買飼料扣 10 金幣，重送不重複扣款": {
+          "ok": true,
+          "detail": {
+            "serverBacked": false,
+            "b1": true,
+            "b2": true,
+            "feed": 1,
+            "listed": true,
+            "lockedAfterList": true,
+            "dup": false,
+            "ownBuy": false,
+            "cancelled": true,
+            "lockedAfterCancel": false,
+            "sold": true,
+            "goldBeforeSell": 70,
+            "gold": 82,
+            "stillInBag": false
+          }
+        },
+        "商會：掛賣鎖定物品、不能重複掛賣、不能買自己的、取消後解鎖": {
+          "ok": true,
+          "detail": {
+            "serverBacked": false,
+            "b1": true,
+            "b2": true,
+            "feed": 1,
+            "listed": true,
+            "lockedAfterList": true,
+            "dup": false,
+            "ownBuy": false,
+            "cancelled": true,
+            "lockedAfterCancel": false,
+            "sold": true,
+            "goldBeforeSell": 70,
+            "gold": 82,
+            "stillInBag": false
+          }
+        },
+        "商會：賣給 NPC 入帳 12（40×0.3），重送不重複入帳、物品移出背包": {
+          "ok": true,
+          "detail": {
+            "serverBacked": false,
+            "b1": true,
+            "b2": true,
+            "feed": 1,
+            "listed": true,
+            "lockedAfterList": true,
+            "dup": false,
+            "ownBuy": false,
+            "cancelled": true,
+            "lockedAfterCancel": false,
+            "sold": true,
+            "goldBeforeSell": 70,
+            "gold": 82,
+            "stillInBag": false
+          }
+        },
+        "背包按鈕開啟背包視窗，右上角 X 在畫面內、沒有被遮住、至少 40 px": {
+          "ok": true,
+          "detail": {
+            "ui": "bag",
+            "x1": {
+              "ok": true,
+              "inView": true,
+              "size": [
+                44,
+                44
+              ],
+              "onTop": true,
+              "panelBottom": 325.75,
+              "vh": 393,
+              "vw": 852,
+              "outX": 0,
+              "scrollable": "fits",
+              "bodyTouch": "pan-y"
+            }
+          }
+        },
+        "點 X 立即關閉背包視窗": {
+          "ok": true,
+          "detail": "closed"
+        },
+        "寵物子畫面：點寵物進入詳細、返回鍵回到寵物列表": {
+          "ok": true,
+          "detail": {
+            "petId": 1,
+            "uiDetail": "pet:1",
+            "uiBack": "pet"
+          }
+        },
+        "直向 iPhone：寵物視窗 X 在畫面內、沒有被遮住，按鈕不超出左右邊界，內容區可捲動（touch-action pan-y）": {
+          "ok": true,
+          "detail": {
+            "ok": true,
+            "inView": true,
+            "size": [
+              44,
+              44
+            ],
+            "onTop": true,
+            "panelBottom": 316.0625,
+            "vh": 852,
+            "vw": 393,
+            "outX": 0,
+            "scrollable": "fits",
+            "bodyTouch": "pan-y"
+          }
+        },
+        "直向 iPhone：「選單」按鈕與「畫質」按鈕不重疊": {
+          "ok": true,
+          "detail": {
+            "overlap": false,
+            "menu": [
+              317,
+              160,
+              64,
+              40
+            ],
+            "quality": [
+              285,
+              108,
+              96,
+              44
+            ]
+          }
+        },
+        "寵物跟在頭部側邊：與頭部外緣保持 15～25 cm 可見間距（大小不變）": {
+          "ok": true,
+          "detail": {
+            "panel": "closed",
+            "gap": 0.19975177206685577,
+            "hw": 0.3137267231941223,
+            "size": 0.075,
+            "eq": 1
+          }
+        },
+        "星芽村：抵達點在南方傳送陣外、傳送陣已啟用、沒有觸發": {
+          "ok": true,
+          "detail": {
+            "armed": true,
+            "fired": false,
+            "dist": 31.5,
+            "triggerR": 2.6
+          }
+        },
+        "南方傳送陣：踩進去直接傳送，沒有出現確認視窗或傳送按鈕": {
+          "ok": true,
+          "detail": {
+            "dlgSeen": false
+          }
+        },
+        "南方傳送陣 → 星芽原野新手營地（抵達在營地傳送陣外側）": {
+          "ok": true,
+          "detail": {
+            "pos": [
+              -56,
+              2,
+              -64
+            ],
+            "portal": {
+              "armed": true,
+              "fired": false,
+              "dist": 4,
+              "triggerR": 1.6,
+              "built": true,
+              "meshes": 3
+            }
+          }
+        },
+        "營地傳送陣：已建立（魔法陣＋符文＋光柱）、抵達後啟用但不會自動觸發（不會兩張地圖無限往返）": {
+          "ok": true,
+          "detail": {
+            "armed": true,
+            "fired": false,
+            "dist": 4,
+            "triggerR": 1.6,
+            "built": true,
+            "meshes": 3
+          }
+        },
+        "切換地圖：金幣、背包、模型性別保留": {
+          "ok": true,
+          "detail": {
+            "gold": 82,
+            "goldBeforeField": 82,
+            "bag": 1,
+            "bagBeforeField": 1
+          }
+        },
+        "星芽原野：一般移動沒有跳躍按鈕": {
+          "ok": true,
+          "detail": false
+        },
+        "Stage 7.2：原野也用新版初心者（同一套模組、同一把武器）": {
+          "ok": true,
+          "detail": {
+            "modular": true,
+            "weapon": "sword",
+            "bones": 23,
+            "triangles": 43526,
+            "parts": [
+              {
+                "kind": "hair",
+                "file": "novice72_male_hair01_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "top",
+                "file": "novice72_male_top_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "bottom",
+                "file": "novice72_male_bottom_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "boots",
+                "file": "novice72_male_boots_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "weapon",
+                "file": "novice72_male_sword_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              }
+            ],
+            "clips": [
+              "Death",
+              "Hurt",
+              "Idle",
+              "Jump",
+              "Run",
+              "Attack"
+            ],
+            "attackClips": [
+              "staff",
+              "sword"
+            ]
+          }
+        },
+        "切換地圖後寵物仍裝備、在頭部側邊 15～25 cm": {
+          "ok": true,
+          "detail": {
+            "gap": 0.20013229992580336,
+            "pets": [
+              {
+                "id": 1,
+                "stage": 1,
+                "life": "alive",
+                "satiety": 98.76523333333333
+              }
+            ]
+          }
+        },
+        "原野：擊倒怪物、掉落金幣（測試設定 3–8）並撿起入帳": {
+          "ok": true,
+          "detail": {
+            "kills": 2,
+            "picked": 2,
+            "goldDropped": 12,
+            "goldPicked": 12,
+            "gold": 94,
+            "claimed": 4
+          }
+        },
+        "Stage 7.2：擊敗怪物得到經驗（測試設定），存進角色存檔": {
+          "ok": true,
+          "detail": {
+            "expGained": 24,
+            "level": 1,
+            "exp": 24
+          }
+        },
+        "掉落物唯一編號：每個撿起的掉落只入帳一次": {
+          "ok": true,
+          "detail": {
+            "drops": 2,
+            "claimed": 4
+          }
+        },
+        "營地傳送陣：踩進去直接回到星芽村南門內側（南方傳送陣外、沒有再被傳回原野）": {
+          "ok": true,
+          "detail": {
+            "pos": [
+              0,
+              0,
+              -39
+            ],
+            "portal": {
+              "armed": true,
+              "fired": false,
+              "dist": 5,
+              "triggerR": 2.6
+            }
+          }
+        },
+        "Stage 7.2 返回村莊：等級、經驗、外觀、武器保留": {
+          "ok": true,
+          "detail": {
+            "village": {
+              "level": 1,
+              "exp": 24,
+              "appearance": {
+                "hair": "hair01",
+                "hairColor": null,
+                "weapon": "sword"
+              }
+            },
+            "field": {
+              "level": 1,
+              "exp": 24,
+              "appearance": {
+                "hair": "hair01",
+                "hairColor": null,
+                "weapon": "sword"
+              }
+            }
+          }
+        },
+        "返回村莊：金幣、背包、物品數量保留": {
+          "ok": true,
+          "detail": {
+            "vi": 94,
+            "field": 94
+          }
+        },
+        "戰死：生命歸零後倒地並播死亡動作（不是整個角色僵硬往後倒）": {
+          "ok": true,
+          "detail": {
+            "state": "Death",
+            "deathClip": true,
+            "states": [
+              "Idle",
+              "Death",
+              "Death",
+              "Death",
+              "Death",
+              "Death"
+            ]
+          }
+        },
+        "戰死 → 在星芽村復活（死亡次數 +1、滿血、金幣不變）": {
+          "ok": true,
+          "detail": {
+            "pos": [
+              6.2,
+              0,
+              10.8
+            ],
+            "deaths": 1,
+            "hp": null,
+            "gold": 94
+          }
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "chromium_male_village_start.png",
+        "chromium_male_panel_portrait.png",
+        "chromium_male_village_pet.png",
+        "chromium_male_field_arrive.png",
+        "chromium_male_field_fight.png",
+        "chromium_male_field_portal.png",
+        "chromium_male_village_back.png",
+        "chromium_male_field_down.png",
+        "chromium_male_village_respawn.png"
+      ],
+      "results": {
+        "start": {
+          "map": "village",
+          "gender": "male",
+          "file": "novice72_male_body_hq.glb",
+          "avatarModel": {
+            "modular": true,
+            "weapon": "sword",
+            "bones": 23,
+            "triangles": 43526,
+            "parts": [
+              {
+                "kind": "hair",
+                "file": "novice72_male_hair01_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "top",
+                "file": "novice72_male_top_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "bottom",
+                "file": "novice72_male_bottom_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "boots",
+                "file": "novice72_male_boots_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "weapon",
+                "file": "novice72_male_sword_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              }
+            ],
+            "clips": [
+              "Death",
+              "Hurt",
+              "Idle",
+              "Jump",
+              "Run",
+              "Attack"
+            ],
+            "attackClips": [
+              "staff",
+              "sword"
+            ]
+          },
+          "state": "Idle",
+          "pos": [
+            0,
+            0,
+            -12.5
+          ],
+          "gold": 100,
+          "hp": null,
+          "items": {
+            "seed": 0,
+            "egg": 0,
+            "birdEgg": 0,
+            "monsterMaterial": 0,
+            "shopFeed": 0
+          },
+          "bag": [],
+          "pets": [],
+          "equipped": null,
+          "followerVisible": false,
+          "followerSize": 0,
+          "ledger": [],
+          "deaths": 0,
+          "level": 1,
+          "exp": 0,
+          "appearance": {
+            "hair": "hair01",
+            "hairColor": null,
+            "weapon": "sword"
+          },
+          "art": "載入 npc_guild_hq.glb",
+          "interact": {
+            "target": null,
+            "talking": false,
+            "dialog": "",
+            "panelOpen": false,
+            "appraisalOpen": false,
+            "merchantPaused": false
+          },
+          "portal": {
+            "armed": true,
+            "fired": false,
+            "dist": 31.5,
+            "triggerR": 2.6
+          },
+          "panel": "closed",
+          "petGap": null,
+          "headHalfWidth": 0.3137267231941223,
+          "quality": {
+            "lod": "hq",
+            "render": "auto",
+            "scale": 1
+          },
+          "mode": "test",
+          "render": {
+            "drawCalls": 60,
+            "contextLost": 0,
+            "charShadow": "blob"
+          },
+          "mp": null,
+          "jumpButtonVisible": false
+        },
+        "appraisal": {
+          "quote": {
+            "fee": 20,
+            "test": true
+          },
+          "r1": true,
+          "r2": true,
+          "gold": 80,
+          "ledger": 1,
+          "appraised": true
+        },
+        "guild": {
+          "serverBacked": false,
+          "b1": true,
+          "b2": true,
+          "feed": 1,
+          "listed": true,
+          "lockedAfterList": true,
+          "dup": false,
+          "ownBuy": false,
+          "cancelled": true,
+          "lockedAfterCancel": false,
+          "sold": true,
+          "goldBeforeSell": 70,
+          "gold": 82,
+          "stillInBag": false
+        },
+        "panelLandscape": {
+          "ok": true,
+          "inView": true,
+          "size": [
+            44,
+            44
+          ],
+          "onTop": true,
+          "panelBottom": 325.75,
+          "vh": 393,
+          "vw": 852,
+          "outX": 0,
+          "scrollable": "fits",
+          "bodyTouch": "pan-y"
+        },
+        "petDetailTries": 1,
+        "panelPortrait": {
+          "ok": true,
+          "inView": true,
+          "size": [
+            44,
+            44
+          ],
+          "onTop": true,
+          "panelBottom": 316.0625,
+          "vh": 852,
+          "vw": 393,
+          "outX": 0,
+          "scrollable": "fits",
+          "bodyTouch": "pan-y"
+        },
+        "petGap": {
+          "panel": "closed",
+          "gap": 0.19975177206685577,
+          "hw": 0.3137267231941223,
+          "size": 0.075,
+          "eq": 1
+        },
+        "fieldArrive": {
+          "fi": {
+            "map": "starsprout",
+            "gold": 82,
+            "deaths": 0,
+            "level": 1,
+            "exp": 0,
+            "expGained": 0,
+            "appearance": {
+              "hair": "hair01",
+              "hairColor": null,
+              "weapon": "sword"
+            },
+            "hp": 100,
+            "down": false,
+            "deathClip": true,
+            "state": "Idle",
+            "portal": {
+              "armed": true,
+              "fired": false,
+              "dist": 4,
+              "triggerR": 1.6,
+              "built": true,
+              "meshes": 3
+            },
+            "panel": "closed",
+            "petGap": 0.20013229992580336,
+            "headHalfWidth": 0.3137267231941223,
+            "goldDropped": 0,
+            "goldPicked": 0,
+            "goldOnGround": 0,
+            "jumpButton": false,
+            "claimed": 0,
+            "ledger": [
+              {
+                "seq": 1,
+                "requestId": "appraise:e2e-ap-1",
+                "kind": "appraisal",
+                "amount": -20,
+                "balanceAfter": 80,
+                "ref": "item:1",
+                "at": 1795780172926
+              },
+              {
+                "seq": 2,
+                "requestId": "e2e-buy-1",
+                "kind": "shopBuy",
+                "amount": -10,
+                "balanceAfter": 70,
+                "ref": "shop:feed×1",
+                "at": 1795780173262
+              },
+              {
+                "seq": 3,
+                "requestId": "e2e-sell-1",
+                "kind": "shopSell",
+                "amount": 12,
+                "balanceAfter": 82,
+                "ref": "item:2",
+                "at": 1795780173264
+              }
+            ],
+            "bag": 1,
+            "items": {
+              "seed": 1,
+              "egg": 0,
+              "birdEgg": 0,
+              "monsterMaterial": 0,
+              "shopFeed": 1
+            },
+            "pets": [
+              {
+                "id": 1,
+                "stage": 1,
+                "life": "alive",
+                "satiety": 98.76523333333333
+              }
+            ],
+            "followerSize": 0.075,
+            "loot": []
+          },
+          "pos": [
+            -56,
+            2,
+            -64
+          ]
+        },
+        "fight": {
+          "kills": 2,
+          "picked": 2,
+          "goldDropped": 12,
+          "goldPicked": 12,
+          "gold": 94,
+          "claimed": 4
+        },
+        "backVillage": {
+          "gold": 94,
+          "pos": [
+            0,
+            0,
+            -39
+          ],
+          "bag": 2
+        },
+        "death": {
+          "state": "Death",
+          "deathClip": true,
+          "states": [
+            "Idle",
+            "Death",
+            "Death",
+            "Death",
+            "Death",
+            "Death"
+          ]
+        },
+        "respawn": {
+          "pos": [
+            6.2,
+            0,
+            10.8
+          ],
+          "deaths": 1,
+          "hp": null,
+          "gold": 94
+        }
+      },
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "label": "female",
+      "checks": {
+        "新存檔在星芽村出生（性別、測試設定、起始金幣 100）": {
+          "ok": true,
+          "detail": {
+            "map": "village",
+            "gender": "female",
+            "gold": 100,
+            "mode": "test"
+          }
+        },
+        "星芽村：一般移動沒有跳躍按鈕": {
+          "ok": true,
+          "detail": false
+        },
+        "Stage 7.2 新版初心者：身體＋髮型、上衣、下身、靴子、武器分開的模組（共用身體骨架）": {
+          "ok": true,
+          "detail": {
+            "modular": true,
+            "weapon": "sword",
+            "bones": 23,
+            "triangles": 44222,
+            "parts": [
+              {
+                "kind": "hair",
+                "file": "novice72_female_hair01_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "top",
+                "file": "novice72_female_top_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "bottom",
+                "file": "novice72_female_bottom_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "boots",
+                "file": "novice72_female_boots_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "weapon",
+                "file": "novice72_female_sword_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              }
+            ],
+            "clips": [
+              "Death",
+              "Hurt",
+              "Idle",
+              "Jump",
+              "Run",
+              "Attack"
+            ],
+            "attackClips": [
+              "staff",
+              "sword"
+            ]
+          }
+        },
+        "Stage 7.2 新版初心者：Idle／Run／Attack／Hurt／Death／Jump 動作齊全，短劍與法杖各有攻擊動作": {
+          "ok": true,
+          "detail": {
+            "clips": [
+              "Death",
+              "Hurt",
+              "Idle",
+              "Jump",
+              "Run",
+              "Attack"
+            ],
+            "attackClips": [
+              "staff",
+              "sword"
+            ]
+          }
+        },
+        "Stage 7.2：存檔有等級、經驗、外觀（髮型、髮色、武器）": {
+          "ok": true,
+          "detail": {
+            "level": 1,
+            "exp": 0,
+            "appearance": {
+              "hair": "hair01",
+              "hairColor": null,
+              "weapon": "sword"
+            }
+          }
+        },
+        "洛恩鑑定：收 20 金幣（測試設定），重送同一請求不重複扣款": {
+          "ok": true,
+          "detail": {
+            "quote": {
+              "fee": 20,
+              "test": true
+            },
+            "r1": true,
+            "r2": true,
+            "gold": 80,
+            "ledger": 1,
+            "appraised": true
+          }
+        },
+        "商會：本機服務（serverBacked=false，不是真正的多人交易）": {
+          "ok": true,
+          "detail": false
+        },
+        "商會：買飼料扣 10 金幣，重送不重複扣款": {
+          "ok": true,
+          "detail": {
+            "serverBacked": false,
+            "b1": true,
+            "b2": true,
+            "feed": 1,
+            "listed": true,
+            "lockedAfterList": true,
+            "dup": false,
+            "ownBuy": false,
+            "cancelled": true,
+            "lockedAfterCancel": false,
+            "sold": true,
+            "goldBeforeSell": 70,
+            "gold": 82,
+            "stillInBag": false
+          }
+        },
+        "商會：掛賣鎖定物品、不能重複掛賣、不能買自己的、取消後解鎖": {
+          "ok": true,
+          "detail": {
+            "serverBacked": false,
+            "b1": true,
+            "b2": true,
+            "feed": 1,
+            "listed": true,
+            "lockedAfterList": true,
+            "dup": false,
+            "ownBuy": false,
+            "cancelled": true,
+            "lockedAfterCancel": false,
+            "sold": true,
+            "goldBeforeSell": 70,
+            "gold": 82,
+            "stillInBag": false
+          }
+        },
+        "商會：賣給 NPC 入帳 12（40×0.3），重送不重複入帳、物品移出背包": {
+          "ok": true,
+          "detail": {
+            "serverBacked": false,
+            "b1": true,
+            "b2": true,
+            "feed": 1,
+            "listed": true,
+            "lockedAfterList": true,
+            "dup": false,
+            "ownBuy": false,
+            "cancelled": true,
+            "lockedAfterCancel": false,
+            "sold": true,
+            "goldBeforeSell": 70,
+            "gold": 82,
+            "stillInBag": false
+          }
+        },
+        "背包按鈕開啟背包視窗，右上角 X 在畫面內、沒有被遮住、至少 40 px": {
+          "ok": true,
+          "detail": {
+            "ui": "bag",
+            "x1": {
+              "ok": true,
+              "inView": true,
+              "size": [
+                44,
+                44
+              ],
+              "onTop": true,
+              "panelBottom": 325.75,
+              "vh": 393,
+              "vw": 852,
+              "outX": 0,
+              "scrollable": "fits",
+              "bodyTouch": "pan-y"
+            }
+          }
+        },
+        "點 X 立即關閉背包視窗": {
+          "ok": true,
+          "detail": "closed"
+        },
+        "寵物子畫面：點寵物進入詳細、返回鍵回到寵物列表": {
+          "ok": true,
+          "detail": {
+            "petId": 1,
+            "uiDetail": "pet:1",
+            "uiBack": "pet"
+          }
+        },
+        "直向 iPhone：寵物視窗 X 在畫面內、沒有被遮住，按鈕不超出左右邊界，內容區可捲動（touch-action pan-y）": {
+          "ok": true,
+          "detail": {
+            "ok": true,
+            "inView": true,
+            "size": [
+              44,
+              44
+            ],
+            "onTop": true,
+            "panelBottom": 316.0625,
+            "vh": 852,
+            "vw": 393,
+            "outX": 0,
+            "scrollable": "fits",
+            "bodyTouch": "pan-y"
+          }
+        },
+        "直向 iPhone：「選單」按鈕與「畫質」按鈕不重疊": {
+          "ok": true,
+          "detail": {
+            "overlap": false,
+            "menu": [
+              317,
+              160,
+              64,
+              40
+            ],
+            "quality": [
+              285,
+              108,
+              96,
+              44
+            ]
+          }
+        },
+        "寵物跟在頭部側邊：與頭部外緣保持 15～25 cm 可見間距（大小不變）": {
+          "ok": true,
+          "detail": {
+            "panel": "closed",
+            "gap": 0.19988668712202415,
+            "hw": 0.2677813768386841,
+            "size": 0.075,
+            "eq": 1
+          }
+        },
+        "星芽村：抵達點在南方傳送陣外、傳送陣已啟用、沒有觸發": {
+          "ok": true,
+          "detail": {
+            "armed": true,
+            "fired": false,
+            "dist": 31.5,
+            "triggerR": 2.6
+          }
+        },
+        "南方傳送陣：踩進去直接傳送，沒有出現確認視窗或傳送按鈕": {
+          "ok": true,
+          "detail": {
+            "dlgSeen": false
+          }
+        },
+        "南方傳送陣 → 星芽原野新手營地（抵達在營地傳送陣外側）": {
+          "ok": true,
+          "detail": {
+            "pos": [
+              -56,
+              2,
+              -64
+            ],
+            "portal": {
+              "armed": true,
+              "fired": false,
+              "dist": 4,
+              "triggerR": 1.6,
+              "built": true,
+              "meshes": 3
+            }
+          }
+        },
+        "營地傳送陣：已建立（魔法陣＋符文＋光柱）、抵達後啟用但不會自動觸發（不會兩張地圖無限往返）": {
+          "ok": true,
+          "detail": {
+            "armed": true,
+            "fired": false,
+            "dist": 4,
+            "triggerR": 1.6,
+            "built": true,
+            "meshes": 3
+          }
+        },
+        "切換地圖：金幣、背包、模型性別保留": {
+          "ok": true,
+          "detail": {
+            "gold": 82,
+            "goldBeforeField": 82,
+            "bag": 1,
+            "bagBeforeField": 1
+          }
+        },
+        "星芽原野：一般移動沒有跳躍按鈕": {
+          "ok": true,
+          "detail": false
+        },
+        "Stage 7.2：原野也用新版初心者（同一套模組、同一把武器）": {
+          "ok": true,
+          "detail": {
+            "modular": true,
+            "weapon": "sword",
+            "bones": 23,
+            "triangles": 44222,
+            "parts": [
+              {
+                "kind": "hair",
+                "file": "novice72_female_hair01_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "top",
+                "file": "novice72_female_top_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "bottom",
+                "file": "novice72_female_bottom_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "boots",
+                "file": "novice72_female_boots_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "weapon",
+                "file": "novice72_female_sword_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              }
+            ],
+            "clips": [
+              "Death",
+              "Hurt",
+              "Idle",
+              "Jump",
+              "Run",
+              "Attack"
+            ],
+            "attackClips": [
+              "staff",
+              "sword"
+            ]
+          }
+        },
+        "切換地圖後寵物仍裝備、在頭部側邊 15～25 cm": {
+          "ok": true,
+          "detail": {
+            "gap": 0.20025838097910406,
+            "pets": [
+              {
+                "id": 1,
+                "stage": 1,
+                "life": "alive",
+                "satiety": 98.75176666666667
+              }
+            ]
+          }
+        },
+        "原野：擊倒怪物、掉落金幣（測試設定 3–8）並撿起入帳": {
+          "ok": true,
+          "detail": {
+            "kills": 2,
+            "picked": 2,
+            "goldDropped": 12,
+            "goldPicked": 12,
+            "gold": 94,
+            "claimed": 4
+          }
+        },
+        "Stage 7.2：擊敗怪物得到經驗（測試設定），存進角色存檔": {
+          "ok": true,
+          "detail": {
+            "expGained": 24,
+            "level": 1,
+            "exp": 24
+          }
+        },
+        "掉落物唯一編號：每個撿起的掉落只入帳一次": {
+          "ok": true,
+          "detail": {
+            "drops": 2,
+            "claimed": 4
+          }
+        },
+        "營地傳送陣：踩進去直接回到星芽村南門內側（南方傳送陣外、沒有再被傳回原野）": {
+          "ok": true,
+          "detail": {
+            "pos": [
+              0,
+              0,
+              -39
+            ],
+            "portal": {
+              "armed": true,
+              "fired": false,
+              "dist": 5,
+              "triggerR": 2.6
+            }
+          }
+        },
+        "Stage 7.2 返回村莊：等級、經驗、外觀、武器保留": {
+          "ok": true,
+          "detail": {
+            "village": {
+              "level": 1,
+              "exp": 24,
+              "appearance": {
+                "hair": "hair01",
+                "hairColor": null,
+                "weapon": "sword"
+              }
+            },
+            "field": {
+              "level": 1,
+              "exp": 24,
+              "appearance": {
+                "hair": "hair01",
+                "hairColor": null,
+                "weapon": "sword"
+              }
+            }
+          }
+        },
+        "返回村莊：金幣、背包、物品數量保留": {
+          "ok": true,
+          "detail": {
+            "vi": 94,
+            "field": 94
+          }
+        },
+        "戰死：生命歸零後倒地並播死亡動作（不是整個角色僵硬往後倒）": {
+          "ok": true,
+          "detail": {
+            "state": "Death",
+            "deathClip": true,
+            "states": [
+              "Idle",
+              "Death",
+              "Death",
+              "Death",
+              "Death",
+              "Death"
+            ]
+          }
+        },
+        "戰死 → 在星芽村復活（死亡次數 +1、滿血、金幣不變）": {
+          "ok": true,
+          "detail": {
+            "pos": [
+              6.2,
+              0,
+              10.8
+            ],
+            "deaths": 1,
+            "hp": null,
+            "gold": 94
+          }
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "chromium_female_village_start.png",
+        "chromium_female_panel_portrait.png",
+        "chromium_female_village_pet.png",
+        "chromium_female_field_arrive.png",
+        "chromium_female_field_fight.png",
+        "chromium_female_field_portal.png",
+        "chromium_female_village_back.png",
+        "chromium_female_field_down.png",
+        "chromium_female_village_respawn.png"
+      ],
+      "results": {
+        "start": {
+          "map": "village",
+          "gender": "female",
+          "file": "novice72_female_body_hq.glb",
+          "avatarModel": {
+            "modular": true,
+            "weapon": "sword",
+            "bones": 23,
+            "triangles": 44222,
+            "parts": [
+              {
+                "kind": "hair",
+                "file": "novice72_female_hair01_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "top",
+                "file": "novice72_female_top_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "bottom",
+                "file": "novice72_female_bottom_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "boots",
+                "file": "novice72_female_boots_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "weapon",
+                "file": "novice72_female_sword_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              }
+            ],
+            "clips": [
+              "Death",
+              "Hurt",
+              "Idle",
+              "Jump",
+              "Run",
+              "Attack"
+            ],
+            "attackClips": [
+              "staff",
+              "sword"
+            ]
+          },
+          "state": "Idle",
+          "pos": [
+            0,
+            0,
+            -12.5
+          ],
+          "gold": 100,
+          "hp": null,
+          "items": {
+            "seed": 0,
+            "egg": 0,
+            "birdEgg": 0,
+            "monsterMaterial": 0,
+            "shopFeed": 0
+          },
+          "bag": [],
+          "pets": [],
+          "equipped": null,
+          "followerVisible": false,
+          "followerSize": 0,
+          "ledger": [],
+          "deaths": 0,
+          "level": 1,
+          "exp": 0,
+          "appearance": {
+            "hair": "hair01",
+            "hairColor": null,
+            "weapon": "sword"
+          },
+          "art": "載入 npc_guild_hq.glb",
+          "interact": {
+            "target": null,
+            "talking": false,
+            "dialog": "",
+            "panelOpen": false,
+            "appraisalOpen": false,
+            "merchantPaused": false
+          },
+          "portal": {
+            "armed": true,
+            "fired": false,
+            "dist": 31.5,
+            "triggerR": 2.6
+          },
+          "panel": "closed",
+          "petGap": null,
+          "headHalfWidth": 0.2677813768386841,
+          "quality": {
+            "lod": "hq",
+            "render": "auto",
+            "scale": 1
+          },
+          "mode": "test",
+          "render": {
+            "drawCalls": 60,
+            "contextLost": 0,
+            "charShadow": "blob"
+          },
+          "mp": null,
+          "jumpButtonVisible": false
+        },
+        "appraisal": {
+          "quote": {
+            "fee": 20,
+            "test": true
+          },
+          "r1": true,
+          "r2": true,
+          "gold": 80,
+          "ledger": 1,
+          "appraised": true
+        },
+        "guild": {
+          "serverBacked": false,
+          "b1": true,
+          "b2": true,
+          "feed": 1,
+          "listed": true,
+          "lockedAfterList": true,
+          "dup": false,
+          "ownBuy": false,
+          "cancelled": true,
+          "lockedAfterCancel": false,
+          "sold": true,
+          "goldBeforeSell": 70,
+          "gold": 82,
+          "stillInBag": false
+        },
+        "panelLandscape": {
+          "ok": true,
+          "inView": true,
+          "size": [
+            44,
+            44
+          ],
+          "onTop": true,
+          "panelBottom": 325.75,
+          "vh": 393,
+          "vw": 852,
+          "outX": 0,
+          "scrollable": "fits",
+          "bodyTouch": "pan-y"
+        },
+        "petDetailTries": 1,
+        "panelPortrait": {
+          "ok": true,
+          "inView": true,
+          "size": [
+            44,
+            44
+          ],
+          "onTop": true,
+          "panelBottom": 316.0625,
+          "vh": 852,
+          "vw": 393,
+          "outX": 0,
+          "scrollable": "fits",
+          "bodyTouch": "pan-y"
+        },
+        "petGap": {
+          "panel": "closed",
+          "gap": 0.19988668712202415,
+          "hw": 0.2677813768386841,
+          "size": 0.075,
+          "eq": 1
+        },
+        "fieldArrive": {
+          "fi": {
+            "map": "starsprout",
+            "gold": 82,
+            "deaths": 0,
+            "level": 1,
+            "exp": 0,
+            "expGained": 0,
+            "appearance": {
+              "hair": "hair01",
+              "hairColor": null,
+              "weapon": "sword"
+            },
+            "hp": 100,
+            "down": false,
+            "deathClip": true,
+            "state": "Idle",
+            "portal": {
+              "armed": true,
+              "fired": false,
+              "dist": 4,
+              "triggerR": 1.6,
+              "built": true,
+              "meshes": 3
+            },
+            "panel": "closed",
+            "petGap": 0.20025838097910406,
+            "headHalfWidth": 0.2677813768386841,
+            "goldDropped": 0,
+            "goldPicked": 0,
+            "goldOnGround": 0,
+            "jumpButton": false,
+            "claimed": 0,
+            "ledger": [
+              {
+                "seq": 1,
+                "requestId": "appraise:e2e-ap-1",
+                "kind": "appraisal",
+                "amount": -20,
+                "balanceAfter": 80,
+                "ref": "item:1",
+                "at": 1795780416776
+              },
+              {
+                "seq": 2,
+                "requestId": "e2e-buy-1",
+                "kind": "shopBuy",
+                "amount": -10,
+                "balanceAfter": 70,
+                "ref": "shop:feed×1",
+                "at": 1795780417129
+              },
+              {
+                "seq": 3,
+                "requestId": "e2e-sell-1",
+                "kind": "shopSell",
+                "amount": 12,
+                "balanceAfter": 82,
+                "ref": "item:2",
+                "at": 1795780417130
+              }
+            ],
+            "bag": 1,
+            "items": {
+              "seed": 1,
+              "egg": 0,
+              "birdEgg": 0,
+              "monsterMaterial": 0,
+              "shopFeed": 1
+            },
+            "pets": [
+              {
+                "id": 1,
+                "stage": 1,
+                "life": "alive",
+                "satiety": 98.75176666666667
+              }
+            ],
+            "followerSize": 0.075,
+            "loot": []
+          },
+          "pos": [
+            -56,
+            2,
+            -64
+          ]
+        },
+        "fight": {
+          "kills": 2,
+          "picked": 2,
+          "goldDropped": 12,
+          "goldPicked": 12,
+          "gold": 94,
+          "claimed": 4
+        },
+        "backVillage": {
+          "gold": 94,
+          "pos": [
+            0,
+            0,
+            -39
+          ],
+          "bag": 2
+        },
+        "death": {
+          "state": "Death",
+          "deathClip": true,
+          "states": [
+            "Idle",
+            "Death",
+            "Death",
+            "Death",
+            "Death",
+            "Death"
+          ]
+        },
+        "respawn": {
+          "pos": [
+            6.2,
+            0,
+            10.8
+          ],
+          "deaths": 1,
+          "hp": null,
+          "gold": 94
+        }
+      },
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "label": "male",
+      "checks": {
+        "新存檔在星芽村出生（性別、測試設定、起始金幣 100）": {
+          "ok": true,
+          "detail": {
+            "map": "village",
+            "gender": "male",
+            "gold": 100,
+            "mode": "test"
+          }
+        },
+        "星芽村：一般移動沒有跳躍按鈕": {
+          "ok": true,
+          "detail": false
+        },
+        "Stage 7.2 新版初心者：身體＋髮型、上衣、下身、靴子、武器分開的模組（共用身體骨架）": {
+          "ok": true,
+          "detail": {
+            "modular": true,
+            "weapon": "sword",
+            "bones": 23,
+            "triangles": 43526,
+            "parts": [
+              {
+                "kind": "hair",
+                "file": "novice72_male_hair01_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "top",
+                "file": "novice72_male_top_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "bottom",
+                "file": "novice72_male_bottom_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "boots",
+                "file": "novice72_male_boots_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "weapon",
+                "file": "novice72_male_sword_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              }
+            ],
+            "clips": [
+              "Death",
+              "Hurt",
+              "Idle",
+              "Jump",
+              "Run",
+              "Attack"
+            ],
+            "attackClips": [
+              "staff",
+              "sword"
+            ]
+          }
+        },
+        "Stage 7.2 新版初心者：Idle／Run／Attack／Hurt／Death／Jump 動作齊全，短劍與法杖各有攻擊動作": {
+          "ok": true,
+          "detail": {
+            "clips": [
+              "Death",
+              "Hurt",
+              "Idle",
+              "Jump",
+              "Run",
+              "Attack"
+            ],
+            "attackClips": [
+              "staff",
+              "sword"
+            ]
+          }
+        },
+        "Stage 7.2：存檔有等級、經驗、外觀（髮型、髮色、武器）": {
+          "ok": true,
+          "detail": {
+            "level": 1,
+            "exp": 0,
+            "appearance": {
+              "hair": "hair01",
+              "hairColor": null,
+              "weapon": "sword"
+            }
+          }
+        },
+        "洛恩鑑定：收 20 金幣（測試設定），重送同一請求不重複扣款": {
+          "ok": true,
+          "detail": {
+            "quote": {
+              "fee": 20,
+              "test": true
+            },
+            "r1": true,
+            "r2": true,
+            "gold": 80,
+            "ledger": 1,
+            "appraised": true
+          }
+        },
+        "商會：本機服務（serverBacked=false，不是真正的多人交易）": {
+          "ok": true,
+          "detail": false
+        },
+        "商會：買飼料扣 10 金幣，重送不重複扣款": {
+          "ok": true,
+          "detail": {
+            "serverBacked": false,
+            "b1": true,
+            "b2": true,
+            "feed": 1,
+            "listed": true,
+            "lockedAfterList": true,
+            "dup": false,
+            "ownBuy": false,
+            "cancelled": true,
+            "lockedAfterCancel": false,
+            "sold": true,
+            "goldBeforeSell": 70,
+            "gold": 82,
+            "stillInBag": false
+          }
+        },
+        "商會：掛賣鎖定物品、不能重複掛賣、不能買自己的、取消後解鎖": {
+          "ok": true,
+          "detail": {
+            "serverBacked": false,
+            "b1": true,
+            "b2": true,
+            "feed": 1,
+            "listed": true,
+            "lockedAfterList": true,
+            "dup": false,
+            "ownBuy": false,
+            "cancelled": true,
+            "lockedAfterCancel": false,
+            "sold": true,
+            "goldBeforeSell": 70,
+            "gold": 82,
+            "stillInBag": false
+          }
+        },
+        "商會：賣給 NPC 入帳 12（40×0.3），重送不重複入帳、物品移出背包": {
+          "ok": true,
+          "detail": {
+            "serverBacked": false,
+            "b1": true,
+            "b2": true,
+            "feed": 1,
+            "listed": true,
+            "lockedAfterList": true,
+            "dup": false,
+            "ownBuy": false,
+            "cancelled": true,
+            "lockedAfterCancel": false,
+            "sold": true,
+            "goldBeforeSell": 70,
+            "gold": 82,
+            "stillInBag": false
+          }
+        },
+        "背包按鈕開啟背包視窗，右上角 X 在畫面內、沒有被遮住、至少 40 px": {
+          "ok": true,
+          "detail": {
+            "ui": "bag",
+            "x1": {
+              "ok": true,
+              "inView": true,
+              "size": [
+                44,
+                44
+              ],
+              "onTop": true,
+              "panelBottom": 325.75,
+              "vh": 393,
+              "vw": 852,
+              "outX": 0,
+              "scrollable": "fits",
+              "bodyTouch": "pan-y"
+            }
+          }
+        },
+        "點 X 立即關閉背包視窗": {
+          "ok": true,
+          "detail": "closed"
+        },
+        "寵物子畫面：點寵物進入詳細、返回鍵回到寵物列表": {
+          "ok": true,
+          "detail": {
+            "petId": 1,
+            "uiDetail": "pet:1",
+            "uiBack": "pet"
+          }
+        },
+        "直向 iPhone：寵物視窗 X 在畫面內、沒有被遮住，按鈕不超出左右邊界，內容區可捲動（touch-action pan-y）": {
+          "ok": true,
+          "detail": {
+            "ok": true,
+            "inView": true,
+            "size": [
+              44,
+              44
+            ],
+            "onTop": true,
+            "panelBottom": 316.0625,
+            "vh": 852,
+            "vw": 393,
+            "outX": 0,
+            "scrollable": "fits",
+            "bodyTouch": "pan-y"
+          }
+        },
+        "直向 iPhone：「選單」按鈕與「畫質」按鈕不重疊": {
+          "ok": true,
+          "detail": {
+            "overlap": false,
+            "menu": [
+              317,
+              160,
+              64,
+              40
+            ],
+            "quality": [
+              285,
+              108,
+              96,
+              44
+            ]
+          }
+        },
+        "寵物跟在頭部側邊：與頭部外緣保持 15～25 cm 可見間距（大小不變）": {
+          "ok": true,
+          "detail": {
+            "panel": "closed",
+            "gap": 0.19980224737931315,
+            "hw": 0.3137267231941223,
+            "size": 0.075,
+            "eq": 1
+          }
+        },
+        "星芽村：抵達點在南方傳送陣外、傳送陣已啟用、沒有觸發": {
+          "ok": true,
+          "detail": {
+            "armed": true,
+            "fired": false,
+            "dist": 31.5,
+            "triggerR": 2.6
+          }
+        },
+        "南方傳送陣：踩進去直接傳送，沒有出現確認視窗或傳送按鈕": {
+          "ok": true,
+          "detail": {
+            "dlgSeen": false
+          }
+        },
+        "南方傳送陣 → 星芽原野新手營地（抵達在營地傳送陣外側）": {
+          "ok": true,
+          "detail": {
+            "pos": [
+              -56,
+              2,
+              -64
+            ],
+            "portal": {
+              "armed": true,
+              "fired": false,
+              "dist": 4,
+              "triggerR": 1.6,
+              "built": true,
+              "meshes": 3
+            }
+          }
+        },
+        "營地傳送陣：已建立（魔法陣＋符文＋光柱）、抵達後啟用但不會自動觸發（不會兩張地圖無限往返）": {
+          "ok": true,
+          "detail": {
+            "armed": true,
+            "fired": false,
+            "dist": 4,
+            "triggerR": 1.6,
+            "built": true,
+            "meshes": 3
+          }
+        },
+        "切換地圖：金幣、背包、模型性別保留": {
+          "ok": true,
+          "detail": {
+            "gold": 82,
+            "goldBeforeField": 82,
+            "bag": 1,
+            "bagBeforeField": 1
+          }
+        },
+        "星芽原野：一般移動沒有跳躍按鈕": {
+          "ok": true,
+          "detail": false
+        },
+        "Stage 7.2：原野也用新版初心者（同一套模組、同一把武器）": {
+          "ok": true,
+          "detail": {
+            "modular": true,
+            "weapon": "sword",
+            "bones": 23,
+            "triangles": 43526,
+            "parts": [
+              {
+                "kind": "hair",
+                "file": "novice72_male_hair01_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "top",
+                "file": "novice72_male_top_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "bottom",
+                "file": "novice72_male_bottom_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "boots",
+                "file": "novice72_male_boots_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "weapon",
+                "file": "novice72_male_sword_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              }
+            ],
+            "clips": [
+              "Death",
+              "Hurt",
+              "Idle",
+              "Jump",
+              "Run",
+              "Attack"
+            ],
+            "attackClips": [
+              "staff",
+              "sword"
+            ]
+          }
+        },
+        "切換地圖後寵物仍裝備、在頭部側邊 15～25 cm": {
+          "ok": true,
+          "detail": {
+            "gap": 0.20008084725921024,
+            "pets": [
+              {
+                "id": 1,
+                "stage": 1,
+                "life": "alive",
+                "satiety": 99.4092
+              }
+            ]
+          }
+        },
+        "原野：擊倒怪物、掉落金幣（測試設定 3–8）並撿起入帳": {
+          "ok": true,
+          "detail": {
+            "kills": 2,
+            "picked": 2,
+            "goldDropped": 12,
+            "goldPicked": 12,
+            "gold": 94,
+            "claimed": 4
+          }
+        },
+        "Stage 7.2：擊敗怪物得到經驗（測試設定），存進角色存檔": {
+          "ok": true,
+          "detail": {
+            "expGained": 24,
+            "level": 1,
+            "exp": 24
+          }
+        },
+        "掉落物唯一編號：每個撿起的掉落只入帳一次": {
+          "ok": true,
+          "detail": {
+            "drops": 2,
+            "claimed": 4
+          }
+        },
+        "營地傳送陣：踩進去直接回到星芽村南門內側（南方傳送陣外、沒有再被傳回原野）": {
+          "ok": true,
+          "detail": {
+            "pos": [
+              0,
+              0,
+              -39
+            ],
+            "portal": {
+              "armed": true,
+              "fired": false,
+              "dist": 5,
+              "triggerR": 2.6
+            }
+          }
+        },
+        "Stage 7.2 返回村莊：等級、經驗、外觀、武器保留": {
+          "ok": true,
+          "detail": {
+            "village": {
+              "level": 1,
+              "exp": 24,
+              "appearance": {
+                "hair": "hair01",
+                "hairColor": null,
+                "weapon": "sword"
+              }
+            },
+            "field": {
+              "level": 1,
+              "exp": 24,
+              "appearance": {
+                "hair": "hair01",
+                "hairColor": null,
+                "weapon": "sword"
+              }
+            }
+          }
+        },
+        "返回村莊：金幣、背包、物品數量保留": {
+          "ok": true,
+          "detail": {
+            "vi": 94,
+            "field": 94
+          }
+        },
+        "戰死：生命歸零後倒地並播死亡動作（不是整個角色僵硬往後倒）": {
+          "ok": true,
+          "detail": {
+            "state": "Death",
+            "deathClip": true,
+            "states": [
+              "Idle",
+              "Death",
+              "Death",
+              "Death",
+              "Death",
+              "Death"
+            ]
+          }
+        },
+        "戰死 → 在星芽村復活（死亡次數 +1、滿血、金幣不變）": {
+          "ok": true,
+          "detail": {
+            "pos": [
+              6.2,
+              0,
+              10.8
+            ],
+            "deaths": 1,
+            "hp": null,
+            "gold": 94
+          }
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "webkit_male_village_start.png",
+        "webkit_male_panel_portrait.png",
+        "webkit_male_village_pet.png",
+        "webkit_male_field_arrive.png",
+        "webkit_male_field_fight.png",
+        "webkit_male_field_portal.png",
+        "webkit_male_village_back.png",
+        "webkit_male_field_down.png",
+        "webkit_male_village_respawn.png"
+      ],
+      "results": {
+        "start": {
+          "map": "village",
+          "gender": "male",
+          "file": "novice72_male_body_hq.glb",
+          "avatarModel": {
+            "modular": true,
+            "weapon": "sword",
+            "bones": 23,
+            "triangles": 43526,
+            "parts": [
+              {
+                "kind": "hair",
+                "file": "novice72_male_hair01_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "top",
+                "file": "novice72_male_top_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "bottom",
+                "file": "novice72_male_bottom_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "boots",
+                "file": "novice72_male_boots_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "weapon",
+                "file": "novice72_male_sword_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              }
+            ],
+            "clips": [
+              "Death",
+              "Hurt",
+              "Idle",
+              "Jump",
+              "Run",
+              "Attack"
+            ],
+            "attackClips": [
+              "staff",
+              "sword"
+            ]
+          },
+          "state": "Idle",
+          "pos": [
+            0,
+            0,
+            -12.5
+          ],
+          "gold": 100,
+          "hp": null,
+          "items": {
+            "seed": 0,
+            "egg": 0,
+            "birdEgg": 0,
+            "monsterMaterial": 0,
+            "shopFeed": 0
+          },
+          "bag": [],
+          "pets": [],
+          "equipped": null,
+          "followerVisible": false,
+          "followerSize": 0,
+          "ledger": [],
+          "deaths": 0,
+          "level": 1,
+          "exp": 0,
+          "appearance": {
+            "hair": "hair01",
+            "hairColor": null,
+            "weapon": "sword"
+          },
+          "art": "loaded",
+          "interact": {
+            "target": null,
+            "talking": false,
+            "dialog": "",
+            "panelOpen": false,
+            "appraisalOpen": false,
+            "merchantPaused": false
+          },
+          "portal": {
+            "armed": true,
+            "fired": false,
+            "dist": 31.5,
+            "triggerR": 2.6
+          },
+          "panel": "closed",
+          "petGap": null,
+          "headHalfWidth": 0.3137267231941223,
+          "quality": {
+            "lod": "hq",
+            "render": "auto",
+            "scale": 0.6666666666666666
+          },
+          "mode": "test",
+          "render": {
+            "drawCalls": 60,
+            "contextLost": 0,
+            "charShadow": "blob"
+          },
+          "mp": null,
+          "jumpButtonVisible": false
+        },
+        "appraisal": {
+          "quote": {
+            "fee": 20,
+            "test": true
+          },
+          "r1": true,
+          "r2": true,
+          "gold": 80,
+          "ledger": 1,
+          "appraised": true
+        },
+        "guild": {
+          "serverBacked": false,
+          "b1": true,
+          "b2": true,
+          "feed": 1,
+          "listed": true,
+          "lockedAfterList": true,
+          "dup": false,
+          "ownBuy": false,
+          "cancelled": true,
+          "lockedAfterCancel": false,
+          "sold": true,
+          "goldBeforeSell": 70,
+          "gold": 82,
+          "stillInBag": false
+        },
+        "panelLandscape": {
+          "ok": true,
+          "inView": true,
+          "size": [
+            44,
+            44
+          ],
+          "onTop": true,
+          "panelBottom": 325.75,
+          "vh": 393,
+          "vw": 852,
+          "outX": 0,
+          "scrollable": "fits",
+          "bodyTouch": "pan-y"
+        },
+        "petDetailTries": 1,
+        "panelPortrait": {
+          "ok": true,
+          "inView": true,
+          "size": [
+            44,
+            44
+          ],
+          "onTop": true,
+          "panelBottom": 316.0625,
+          "vh": 852,
+          "vw": 393,
+          "outX": 0,
+          "scrollable": "fits",
+          "bodyTouch": "pan-y"
+        },
+        "petGap": {
+          "panel": "closed",
+          "gap": 0.19980224737931315,
+          "hw": 0.3137267231941223,
+          "size": 0.075,
+          "eq": 1
+        },
+        "fieldArrive": {
+          "fi": {
+            "map": "starsprout",
+            "gold": 82,
+            "deaths": 0,
+            "level": 1,
+            "exp": 0,
+            "expGained": 0,
+            "appearance": {
+              "hair": "hair01",
+              "hairColor": null,
+              "weapon": "sword"
+            },
+            "hp": 100,
+            "down": false,
+            "deathClip": true,
+            "state": "Idle",
+            "portal": {
+              "armed": true,
+              "fired": false,
+              "dist": 4,
+              "triggerR": 1.6,
+              "built": true,
+              "meshes": 3
+            },
+            "panel": "closed",
+            "petGap": 0.20008084725921024,
+            "headHalfWidth": 0.3137267231941223,
+            "goldDropped": 0,
+            "goldPicked": 0,
+            "goldOnGround": 0,
+            "jumpButton": false,
+            "claimed": 0,
+            "ledger": [
+              {
+                "seq": 1,
+                "requestId": "appraise:e2e-ap-1",
+                "kind": "appraisal",
+                "amount": -20,
+                "balanceAfter": 80,
+                "ref": "item:1",
+                "at": 1795780607233
+              },
+              {
+                "seq": 2,
+                "requestId": "e2e-buy-1",
+                "kind": "shopBuy",
+                "amount": -10,
+                "balanceAfter": 70,
+                "ref": "shop:feed×1",
+                "at": 1795780607240
+              },
+              {
+                "seq": 3,
+                "requestId": "e2e-sell-1",
+                "kind": "shopSell",
+                "amount": 12,
+                "balanceAfter": 82,
+                "ref": "item:2",
+                "at": 1795780607242
+              }
+            ],
+            "bag": 1,
+            "items": {
+              "seed": 1,
+              "egg": 0,
+              "birdEgg": 0,
+              "monsterMaterial": 0,
+              "shopFeed": 1
+            },
+            "pets": [
+              {
+                "id": 1,
+                "stage": 1,
+                "life": "alive",
+                "satiety": 99.4092
+              }
+            ],
+            "followerSize": 0.075,
+            "loot": []
+          },
+          "pos": [
+            -56,
+            2,
+            -64
+          ]
+        },
+        "fight": {
+          "kills": 2,
+          "picked": 2,
+          "goldDropped": 12,
+          "goldPicked": 12,
+          "gold": 94,
+          "claimed": 4
+        },
+        "backVillage": {
+          "gold": 94,
+          "pos": [
+            0,
+            0,
+            -39
+          ],
+          "bag": 2
+        },
+        "death": {
+          "state": "Death",
+          "deathClip": true,
+          "states": [
+            "Idle",
+            "Death",
+            "Death",
+            "Death",
+            "Death",
+            "Death"
+          ]
+        },
+        "respawn": {
+          "pos": [
+            6.2,
+            0,
+            10.8
+          ],
+          "deaths": 1,
+          "hp": null,
+          "gold": 94
+        }
+      },
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "label": "female",
+      "checks": {
+        "新存檔在星芽村出生（性別、測試設定、起始金幣 100）": {
+          "ok": true,
+          "detail": {
+            "map": "village",
+            "gender": "female",
+            "gold": 100,
+            "mode": "test"
+          }
+        },
+        "星芽村：一般移動沒有跳躍按鈕": {
+          "ok": true,
+          "detail": false
+        },
+        "Stage 7.2 新版初心者：身體＋髮型、上衣、下身、靴子、武器分開的模組（共用身體骨架）": {
+          "ok": true,
+          "detail": {
+            "modular": true,
+            "weapon": "sword",
+            "bones": 23,
+            "triangles": 44222,
+            "parts": [
+              {
+                "kind": "hair",
+                "file": "novice72_female_hair01_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "top",
+                "file": "novice72_female_top_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "bottom",
+                "file": "novice72_female_bottom_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "boots",
+                "file": "novice72_female_boots_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "weapon",
+                "file": "novice72_female_sword_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              }
+            ],
+            "clips": [
+              "Death",
+              "Hurt",
+              "Idle",
+              "Jump",
+              "Run",
+              "Attack"
+            ],
+            "attackClips": [
+              "staff",
+              "sword"
+            ]
+          }
+        },
+        "Stage 7.2 新版初心者：Idle／Run／Attack／Hurt／Death／Jump 動作齊全，短劍與法杖各有攻擊動作": {
+          "ok": true,
+          "detail": {
+            "clips": [
+              "Death",
+              "Hurt",
+              "Idle",
+              "Jump",
+              "Run",
+              "Attack"
+            ],
+            "attackClips": [
+              "staff",
+              "sword"
+            ]
+          }
+        },
+        "Stage 7.2：存檔有等級、經驗、外觀（髮型、髮色、武器）": {
+          "ok": true,
+          "detail": {
+            "level": 1,
+            "exp": 0,
+            "appearance": {
+              "hair": "hair01",
+              "hairColor": null,
+              "weapon": "sword"
+            }
+          }
+        },
+        "洛恩鑑定：收 20 金幣（測試設定），重送同一請求不重複扣款": {
+          "ok": true,
+          "detail": {
+            "quote": {
+              "fee": 20,
+              "test": true
+            },
+            "r1": true,
+            "r2": true,
+            "gold": 80,
+            "ledger": 1,
+            "appraised": true
+          }
+        },
+        "商會：本機服務（serverBacked=false，不是真正的多人交易）": {
+          "ok": true,
+          "detail": false
+        },
+        "商會：買飼料扣 10 金幣，重送不重複扣款": {
+          "ok": true,
+          "detail": {
+            "serverBacked": false,
+            "b1": true,
+            "b2": true,
+            "feed": 1,
+            "listed": true,
+            "lockedAfterList": true,
+            "dup": false,
+            "ownBuy": false,
+            "cancelled": true,
+            "lockedAfterCancel": false,
+            "sold": true,
+            "goldBeforeSell": 70,
+            "gold": 82,
+            "stillInBag": false
+          }
+        },
+        "商會：掛賣鎖定物品、不能重複掛賣、不能買自己的、取消後解鎖": {
+          "ok": true,
+          "detail": {
+            "serverBacked": false,
+            "b1": true,
+            "b2": true,
+            "feed": 1,
+            "listed": true,
+            "lockedAfterList": true,
+            "dup": false,
+            "ownBuy": false,
+            "cancelled": true,
+            "lockedAfterCancel": false,
+            "sold": true,
+            "goldBeforeSell": 70,
+            "gold": 82,
+            "stillInBag": false
+          }
+        },
+        "商會：賣給 NPC 入帳 12（40×0.3），重送不重複入帳、物品移出背包": {
+          "ok": true,
+          "detail": {
+            "serverBacked": false,
+            "b1": true,
+            "b2": true,
+            "feed": 1,
+            "listed": true,
+            "lockedAfterList": true,
+            "dup": false,
+            "ownBuy": false,
+            "cancelled": true,
+            "lockedAfterCancel": false,
+            "sold": true,
+            "goldBeforeSell": 70,
+            "gold": 82,
+            "stillInBag": false
+          }
+        },
+        "背包按鈕開啟背包視窗，右上角 X 在畫面內、沒有被遮住、至少 40 px": {
+          "ok": true,
+          "detail": {
+            "ui": "bag",
+            "x1": {
+              "ok": true,
+              "inView": true,
+              "size": [
+                44,
+                44
+              ],
+              "onTop": true,
+              "panelBottom": 325.75,
+              "vh": 393,
+              "vw": 852,
+              "outX": 0,
+              "scrollable": "fits",
+              "bodyTouch": "pan-y"
+            }
+          }
+        },
+        "點 X 立即關閉背包視窗": {
+          "ok": true,
+          "detail": "closed"
+        },
+        "寵物子畫面：點寵物進入詳細、返回鍵回到寵物列表": {
+          "ok": true,
+          "detail": {
+            "petId": 1,
+            "uiDetail": "pet:1",
+            "uiBack": "pet"
+          }
+        },
+        "直向 iPhone：寵物視窗 X 在畫面內、沒有被遮住，按鈕不超出左右邊界，內容區可捲動（touch-action pan-y）": {
+          "ok": true,
+          "detail": {
+            "ok": true,
+            "inView": true,
+            "size": [
+              44,
+              44
+            ],
+            "onTop": true,
+            "panelBottom": 316.0625,
+            "vh": 852,
+            "vw": 393,
+            "outX": 0,
+            "scrollable": "fits",
+            "bodyTouch": "pan-y"
+          }
+        },
+        "直向 iPhone：「選單」按鈕與「畫質」按鈕不重疊": {
+          "ok": true,
+          "detail": {
+            "overlap": false,
+            "menu": [
+              317,
+              160,
+              64,
+              40
+            ],
+            "quality": [
+              285,
+              108,
+              96,
+              44
+            ]
+          }
+        },
+        "寵物跟在頭部側邊：與頭部外緣保持 15～25 cm 可見間距（大小不變）": {
+          "ok": true,
+          "detail": {
+            "panel": "closed",
+            "gap": 0.19977072797075243,
+            "hw": 0.2677813768386841,
+            "size": 0.075,
+            "eq": 1
+          }
+        },
+        "星芽村：抵達點在南方傳送陣外、傳送陣已啟用、沒有觸發": {
+          "ok": true,
+          "detail": {
+            "armed": true,
+            "fired": false,
+            "dist": 31.5,
+            "triggerR": 2.6
+          }
+        },
+        "南方傳送陣：踩進去直接傳送，沒有出現確認視窗或傳送按鈕": {
+          "ok": true,
+          "detail": {
+            "dlgSeen": false
+          }
+        },
+        "南方傳送陣 → 星芽原野新手營地（抵達在營地傳送陣外側）": {
+          "ok": true,
+          "detail": {
+            "pos": [
+              -56,
+              2,
+              -64
+            ],
+            "portal": {
+              "armed": true,
+              "fired": false,
+              "dist": 4,
+              "triggerR": 1.6,
+              "built": true,
+              "meshes": 3
+            }
+          }
+        },
+        "營地傳送陣：已建立（魔法陣＋符文＋光柱）、抵達後啟用但不會自動觸發（不會兩張地圖無限往返）": {
+          "ok": true,
+          "detail": {
+            "armed": true,
+            "fired": false,
+            "dist": 4,
+            "triggerR": 1.6,
+            "built": true,
+            "meshes": 3
+          }
+        },
+        "切換地圖：金幣、背包、模型性別保留": {
+          "ok": true,
+          "detail": {
+            "gold": 82,
+            "goldBeforeField": 82,
+            "bag": 1,
+            "bagBeforeField": 1
+          }
+        },
+        "星芽原野：一般移動沒有跳躍按鈕": {
+          "ok": true,
+          "detail": false
+        },
+        "Stage 7.2：原野也用新版初心者（同一套模組、同一把武器）": {
+          "ok": true,
+          "detail": {
+            "modular": true,
+            "weapon": "sword",
+            "bones": 23,
+            "triangles": 44222,
+            "parts": [
+              {
+                "kind": "hair",
+                "file": "novice72_female_hair01_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "top",
+                "file": "novice72_female_top_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "bottom",
+                "file": "novice72_female_bottom_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "boots",
+                "file": "novice72_female_boots_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "weapon",
+                "file": "novice72_female_sword_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              }
+            ],
+            "clips": [
+              "Death",
+              "Hurt",
+              "Idle",
+              "Jump",
+              "Run",
+              "Attack"
+            ],
+            "attackClips": [
+              "staff",
+              "sword"
+            ]
+          }
+        },
+        "切換地圖後寵物仍裝備、在頭部側邊 15～25 cm": {
+          "ok": true,
+          "detail": {
+            "gap": 0.19975128577759502,
+            "pets": [
+              {
+                "id": 1,
+                "stage": 1,
+                "life": "alive",
+                "satiety": 99.45266666666669
+              }
+            ]
+          }
+        },
+        "原野：擊倒怪物、掉落金幣（測試設定 3–8）並撿起入帳": {
+          "ok": true,
+          "detail": {
+            "kills": 2,
+            "picked": 2,
+            "goldDropped": 12,
+            "goldPicked": 12,
+            "gold": 94,
+            "claimed": 4
+          }
+        },
+        "Stage 7.2：擊敗怪物得到經驗（測試設定），存進角色存檔": {
+          "ok": true,
+          "detail": {
+            "expGained": 24,
+            "level": 1,
+            "exp": 24
+          }
+        },
+        "掉落物唯一編號：每個撿起的掉落只入帳一次": {
+          "ok": true,
+          "detail": {
+            "drops": 2,
+            "claimed": 4
+          }
+        },
+        "營地傳送陣：踩進去直接回到星芽村南門內側（南方傳送陣外、沒有再被傳回原野）": {
+          "ok": true,
+          "detail": {
+            "pos": [
+              0,
+              0,
+              -39
+            ],
+            "portal": {
+              "armed": true,
+              "fired": false,
+              "dist": 5,
+              "triggerR": 2.6
+            }
+          }
+        },
+        "Stage 7.2 返回村莊：等級、經驗、外觀、武器保留": {
+          "ok": true,
+          "detail": {
+            "village": {
+              "level": 1,
+              "exp": 24,
+              "appearance": {
+                "hair": "hair01",
+                "hairColor": null,
+                "weapon": "sword"
+              }
+            },
+            "field": {
+              "level": 1,
+              "exp": 24,
+              "appearance": {
+                "hair": "hair01",
+                "hairColor": null,
+                "weapon": "sword"
+              }
+            }
+          }
+        },
+        "返回村莊：金幣、背包、物品數量保留": {
+          "ok": true,
+          "detail": {
+            "vi": 94,
+            "field": 94
+          }
+        },
+        "戰死：生命歸零後倒地並播死亡動作（不是整個角色僵硬往後倒）": {
+          "ok": true,
+          "detail": {
+            "state": "Death",
+            "deathClip": true,
+            "states": [
+              "Idle",
+              "Death",
+              "Death",
+              "Death",
+              "Death",
+              "Death"
+            ]
+          }
+        },
+        "戰死 → 在星芽村復活（死亡次數 +1、滿血、金幣不變）": {
+          "ok": true,
+          "detail": {
+            "pos": [
+              6.2,
+              0,
+              10.8
+            ],
+            "deaths": 1,
+            "hp": null,
+            "gold": 94
+          }
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "webkit_female_village_start.png",
+        "webkit_female_panel_portrait.png",
+        "webkit_female_village_pet.png",
+        "webkit_female_field_arrive.png",
+        "webkit_female_field_fight.png",
+        "webkit_female_field_portal.png",
+        "webkit_female_village_back.png",
+        "webkit_female_field_down.png",
+        "webkit_female_village_respawn.png"
+      ],
+      "results": {
+        "start": {
+          "map": "village",
+          "gender": "female",
+          "file": "novice72_female_body_hq.glb",
+          "avatarModel": {
+            "modular": true,
+            "weapon": "sword",
+            "bones": 23,
+            "triangles": 44222,
+            "parts": [
+              {
+                "kind": "hair",
+                "file": "novice72_female_hair01_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "top",
+                "file": "novice72_female_top_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "bottom",
+                "file": "novice72_female_bottom_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "boots",
+                "file": "novice72_female_boots_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              },
+              {
+                "kind": "weapon",
+                "file": "novice72_female_sword_hq.glb",
+                "meshes": 1,
+                "remapped": false
+              }
+            ],
+            "clips": [
+              "Death",
+              "Hurt",
+              "Idle",
+              "Jump",
+              "Run",
+              "Attack"
+            ],
+            "attackClips": [
+              "staff",
+              "sword"
+            ]
+          },
+          "state": "Idle",
+          "pos": [
+            0,
+            0,
+            -12.5
+          ],
+          "gold": 100,
+          "hp": null,
+          "items": {
+            "seed": 0,
+            "egg": 0,
+            "birdEgg": 0,
+            "monsterMaterial": 0,
+            "shopFeed": 0
+          },
+          "bag": [],
+          "pets": [],
+          "equipped": null,
+          "followerVisible": false,
+          "followerSize": 0,
+          "ledger": [],
+          "deaths": 0,
+          "level": 1,
+          "exp": 0,
+          "appearance": {
+            "hair": "hair01",
+            "hairColor": null,
+            "weapon": "sword"
+          },
+          "art": "loaded",
+          "interact": {
+            "target": null,
+            "talking": false,
+            "dialog": "",
+            "panelOpen": false,
+            "appraisalOpen": false,
+            "merchantPaused": false
+          },
+          "portal": {
+            "armed": true,
+            "fired": false,
+            "dist": 31.5,
+            "triggerR": 2.6
+          },
+          "panel": "closed",
+          "petGap": null,
+          "headHalfWidth": 0.2677813768386841,
+          "quality": {
+            "lod": "hq",
+            "render": "auto",
+            "scale": 0.6666666666666666
+          },
+          "mode": "test",
+          "render": {
+            "drawCalls": 60,
+            "contextLost": 0,
+            "charShadow": "blob"
+          },
+          "mp": null,
+          "jumpButtonVisible": false
+        },
+        "appraisal": {
+          "quote": {
+            "fee": 20,
+            "test": true
+          },
+          "r1": true,
+          "r2": true,
+          "gold": 80,
+          "ledger": 1,
+          "appraised": true
+        },
+        "guild": {
+          "serverBacked": false,
+          "b1": true,
+          "b2": true,
+          "feed": 1,
+          "listed": true,
+          "lockedAfterList": true,
+          "dup": false,
+          "ownBuy": false,
+          "cancelled": true,
+          "lockedAfterCancel": false,
+          "sold": true,
+          "goldBeforeSell": 70,
+          "gold": 82,
+          "stillInBag": false
+        },
+        "panelLandscape": {
+          "ok": true,
+          "inView": true,
+          "size": [
+            44,
+            44
+          ],
+          "onTop": true,
+          "panelBottom": 325.75,
+          "vh": 393,
+          "vw": 852,
+          "outX": 0,
+          "scrollable": "fits",
+          "bodyTouch": "pan-y"
+        },
+        "petDetailTries": 1,
+        "panelPortrait": {
+          "ok": true,
+          "inView": true,
+          "size": [
+            44,
+            44
+          ],
+          "onTop": true,
+          "panelBottom": 316.0625,
+          "vh": 852,
+          "vw": 393,
+          "outX": 0,
+          "scrollable": "fits",
+          "bodyTouch": "pan-y"
+        },
+        "petGap": {
+          "panel": "closed",
+          "gap": 0.19977072797075243,
+          "hw": 0.2677813768386841,
+          "size": 0.075,
+          "eq": 1
+        },
+        "fieldArrive": {
+          "fi": {
+            "map": "starsprout",
+            "gold": 82,
+            "deaths": 0,
+            "level": 1,
+            "exp": 0,
+            "expGained": 0,
+            "appearance": {
+              "hair": "hair01",
+              "hairColor": null,
+              "weapon": "sword"
+            },
+            "hp": 100,
+            "down": false,
+            "deathClip": true,
+            "state": "Idle",
+            "portal": {
+              "armed": true,
+              "fired": false,
+              "dist": 4,
+              "triggerR": 1.6,
+              "built": true,
+              "meshes": 3
+            },
+            "panel": "closed",
+            "petGap": 0.19975128577759502,
+            "headHalfWidth": 0.2677813768386841,
+            "goldDropped": 0,
+            "goldPicked": 0,
+            "goldOnGround": 0,
+            "jumpButton": false,
+            "claimed": 0,
+            "ledger": [
+              {
+                "seq": 1,
+                "requestId": "appraise:e2e-ap-1",
+                "kind": "appraisal",
+                "amount": -20,
+                "balanceAfter": 80,
+                "ref": "item:1",
+                "at": 1795780700852
+              },
+              {
+                "seq": 2,
+                "requestId": "e2e-buy-1",
+                "kind": "shopBuy",
+                "amount": -10,
+                "balanceAfter": 70,
+                "ref": "shop:feed×1",
+                "at": 1795780700856
+              },
+              {
+                "seq": 3,
+                "requestId": "e2e-sell-1",
+                "kind": "shopSell",
+                "amount": 12,
+                "balanceAfter": 82,
+                "ref": "item:2",
+                "at": 1795780700857
+              }
+            ],
+            "bag": 1,
+            "items": {
+              "seed": 1,
+              "egg": 0,
+              "birdEgg": 0,
+              "monsterMaterial": 0,
+              "shopFeed": 1
+            },
+            "pets": [
+              {
+                "id": 1,
+                "stage": 1,
+                "life": "alive",
+                "satiety": 99.45266666666669
+              }
+            ],
+            "followerSize": 0.075,
+            "loot": []
+          },
+          "pos": [
+            -56,
+            2,
+            -64
+          ]
+        },
+        "fight": {
+          "kills": 2,
+          "picked": 2,
+          "goldDropped": 12,
+          "goldPicked": 12,
+          "gold": 94,
+          "claimed": 4
+        },
+        "backVillage": {
+          "gold": 94,
+          "pos": [
+            0,
+            0,
+            -39
+          ],
+          "bag": 2
+        },
+        "death": {
+          "state": "Death",
+          "deathClip": true,
+          "states": [
+            "Idle",
+            "Death",
+            "Death",
+            "Death",
+            "Death",
+            "Death"
+          ]
+        },
+        "respawn": {
+          "pos": [
+            6.2,
+            0,
+            10.8
+          ],
+          "deaths": 1,
+          "hp": null,
+          "gold": 94
+        }
+      },
+      "ok": true
+    }
+  ],
+  "finishedAt": "2026-11-27T11:59:42.950Z",
+  "ok": true
+}
