@@ -1,0 +1,579 @@
+{
+  "startedAt": "2026-11-27T20:21:08.884Z",
+  "browser": "chromium",
+  "benchSeconds": 60,
+  "note": "CI 軟體繪製，不是 iPhone；只比較相對變化",
+  "runs": [
+    {
+      "label": "A_stage73",
+      "url": "(預設)",
+      "ok": false,
+      "bench": {
+        "seconds": 61.4,
+        "avgFps": 1.2539450413801874,
+        "low1Fps": 0.8590327291469976,
+        "minFps": 0.8590327291469976,
+        "avgDraw": 147.06493506493507,
+        "kills": 3,
+        "contextLost": 0,
+        "first30": 1.1826505169168309,
+        "last30": 1.3252317499022683,
+        "quality": "high",
+        "gender": "male",
+        "lod": "hq",
+        "charShadow": "blob"
+      },
+      "info": {
+        "monsters": 27,
+        "tiers": null,
+        "rig": [
+          {
+            "id": "star_dew_bobo#1",
+            "kind": "star_dew_bobo",
+            "level": 1,
+            "aggressive": false,
+            "provoked": false,
+            "state": "move",
+            "mode": "patrol",
+            "hp": 60,
+            "maxHp": 60,
+            "x": -20.52462763954347,
+            "z": -48.82463643338221,
+            "speed": 1.6,
+            "attacks": {
+              "started": 0,
+              "resolved": 0,
+              "cancelled": 0,
+              "duplicatesBlocked": 0,
+              "lastResolvedId": null,
+              "lastCancelledId": null
+            }
+          },
+          {
+            "id": "star_dew_bobo#2",
+            "kind": "star_dew_bobo",
+            "level": 1,
+            "aggressive": false,
+            "provoked": false,
+            "state": "move",
+            "mode": "patrol",
+            "hp": 60,
+            "maxHp": 60,
+            "x": -24.391975572432294,
+            "z": -41.73095096123231,
+            "speed": 1.6,
+            "attacks": {
+              "started": 0,
+              "resolved": 0,
+              "cancelled": 0,
+              "duplicatesBlocked": 0,
+              "lastResolvedId": null,
+              "lastCancelledId": null
+            }
+          },
+          {
+            "id": "star_dew_bobo#3",
+            "kind": "star_dew_bobo",
+            "level": 1,
+            "aggressive": false,
+            "provoked": true,
+            "state": "dead",
+            "mode": "dead",
+            "hp": 0,
+            "maxHp": 60,
+            "x": -28.3279877245721,
+            "z": -48.764009201667655,
+            "speed": 0,
+            "attacks": {
+              "started": 1,
+              "resolved": 1,
+              "cancelled": 0,
+              "duplicatesBlocked": 0,
+              "lastResolvedId": 1,
+              "lastCancelledId": null
+            }
+          }
+        ]
+      },
+      "session": null,
+      "errors": [
+        "console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    },
+    {
+      "label": "B_stage74_off",
+      "url": "&mlod=0&shadowq=original",
+      "ok": false,
+      "bench": {
+        "seconds": 60.3,
+        "avgFps": 1.3106072922853336,
+        "low1Fps": 1.2099213551119177,
+        "minFps": 1.2099213551119177,
+        "avgDraw": 144.68354430379748,
+        "kills": 3,
+        "contextLost": 0,
+        "first30": 1.278168875604671,
+        "last30": 1.3426862895355591,
+        "quality": "high",
+        "gender": "male",
+        "lod": "hq",
+        "charShadow": "blob"
+      },
+      "info": {
+        "monsters": 27,
+        "tiers": {
+          "on": false,
+          "near": 0,
+          "mid": 0,
+          "far": 0,
+          "hidden": 0,
+          "offscreen": 0
+        },
+        "rig": [
+          {
+            "id": "star_dew_bobo#1",
+            "kind": "star_dew_bobo",
+            "level": 1,
+            "aggressive": false,
+            "provoked": false,
+            "state": "move",
+            "mode": "patrol",
+            "hp": 60,
+            "maxHp": 60,
+            "x": -20.356255252370648,
+            "z": -49.274136977584014,
+            "speed": 1.6,
+            "attacks": {
+              "started": 0,
+              "resolved": 0,
+              "cancelled": 0,
+              "duplicatesBlocked": 0,
+              "lastResolvedId": null,
+              "lastCancelledId": null
+            },
+            "tier": null,
+            "stride": 1,
+            "visualUpdates": 85
+          },
+          {
+            "id": "star_dew_bobo#2",
+            "kind": "star_dew_bobo",
+            "level": 1,
+            "aggressive": false,
+            "provoked": false,
+            "state": "move",
+            "mode": "patrol",
+            "hp": 60,
+            "maxHp": 60,
+            "x": -23.958139875702464,
+            "z": -41.936344700774065,
+            "speed": 1.6,
+            "attacks": {
+              "started": 0,
+              "resolved": 0,
+              "cancelled": 0,
+              "duplicatesBlocked": 0,
+              "lastResolvedId": null,
+              "lastCancelledId": null
+            },
+            "tier": null,
+            "stride": 1,
+            "visualUpdates": 85
+          },
+          {
+            "id": "star_dew_bobo#3",
+            "kind": "star_dew_bobo",
+            "level": 1,
+            "aggressive": false,
+            "provoked": true,
+            "state": "dead",
+            "mode": "dead",
+            "hp": 0,
+            "maxHp": 60,
+            "x": -28.462895658862827,
+            "z": -48.94407821417511,
+            "speed": 0,
+            "attacks": {
+              "started": 1,
+              "resolved": 1,
+              "cancelled": 0,
+              "duplicatesBlocked": 0,
+              "lastResolvedId": 1,
+              "lastCancelledId": null
+            },
+            "tier": null,
+            "stride": 1,
+            "visualUpdates": 85
+          }
+        ]
+      },
+      "session": {
+        "seconds": 64,
+        "frames": 83,
+        "avgFps": 1.3,
+        "low1": 0.9,
+        "minFps": 0.9,
+        "hitches": 83,
+        "pixelRatio": 1,
+        "quality": "high",
+        "model": "HQ",
+        "map": "星芽原野",
+        "hitchRule": "卡頓＝單幀超過 50 ms（低於 20 FPS）；另列 >33 ms、>100 ms",
+        "frames33": 83,
+        "frames100": 83,
+        "drawCalls": {
+          "avg": 145,
+          "max": 167
+        },
+        "triangles": {
+          "avgK": 979,
+          "maxK": 1010
+        },
+        "cpuMs": {
+          "frame": 6.68,
+          "render": 2.14,
+          "animations": 1.13,
+          "activeMeshes": 1.17,
+          "renderTargets": 0.39
+        },
+        "memory": {
+          "jsHeapMB": 129.5,
+          "meshes": 303,
+          "materials": 100,
+          "textures": 119,
+          "textureMB": 307,
+          "skeletons": 22,
+          "animationGroups": 153,
+          "particleSystems": 3
+        },
+        "extra": {
+          "monsterDetail": "關閉（&mlod=0）",
+          "monsters": 27,
+          "shadow": "PCSS 2048（取樣 高）",
+          "shadowCasters": 31,
+          "fx": {
+            "hitFx": 9,
+            "numbers": 11,
+            "hurt": 2,
+            "respawnFx": 0,
+            "particles": 0
+          }
+        }
+      },
+      "errors": [
+        "console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    },
+    {
+      "label": "C_stage74",
+      "url": "(預設)",
+      "ok": false,
+      "bench": {
+        "seconds": 60.8,
+        "avgFps": 1.5454222619720923,
+        "low1Fps": 1.3715539706487887,
+        "minFps": 1.3715539706487887,
+        "avgDraw": 121.81914893617021,
+        "kills": 3,
+        "contextLost": 0,
+        "first30": 1.5087903437418,
+        "last30": 1.5822367553598304,
+        "quality": "high",
+        "gender": "male",
+        "lod": "hq",
+        "charShadow": "blob"
+      },
+      "info": {
+        "monsters": 27,
+        "tiers": {
+          "on": true,
+          "near": 4,
+          "mid": 0,
+          "far": 0,
+          "hidden": 0,
+          "offscreen": 23
+        },
+        "rig": [
+          {
+            "id": "star_dew_bobo#1",
+            "kind": "star_dew_bobo",
+            "level": 1,
+            "aggressive": false,
+            "provoked": true,
+            "state": "attack",
+            "mode": "attack",
+            "hp": 20,
+            "maxHp": 60,
+            "x": -20.67904591660388,
+            "z": -50.04982789660788,
+            "speed": 0,
+            "attacks": {
+              "started": 1,
+              "resolved": 1,
+              "cancelled": 0,
+              "duplicatesBlocked": 0,
+              "lastResolvedId": 1,
+              "lastCancelledId": null
+            },
+            "tier": "near",
+            "stride": 1,
+            "visualUpdates": 98
+          },
+          {
+            "id": "star_dew_bobo#2",
+            "kind": "star_dew_bobo",
+            "level": 1,
+            "aggressive": false,
+            "provoked": false,
+            "state": "idle",
+            "mode": "idle",
+            "hp": 60,
+            "maxHp": 60,
+            "x": -22.222797088783146,
+            "z": -42.757919658941084,
+            "speed": 0,
+            "attacks": {
+              "started": 0,
+              "resolved": 0,
+              "cancelled": 0,
+              "duplicatesBlocked": 0,
+              "lastResolvedId": null,
+              "lastCancelledId": null
+            },
+            "tier": "near",
+            "stride": 1,
+            "visualUpdates": 98
+          },
+          {
+            "id": "star_dew_bobo#3",
+            "kind": "star_dew_bobo",
+            "level": 1,
+            "aggressive": false,
+            "provoked": true,
+            "state": "dead",
+            "mode": "dead",
+            "hp": 0,
+            "maxHp": 60,
+            "x": -28.512526484401864,
+            "z": -48.87162304971345,
+            "speed": 0,
+            "attacks": {
+              "started": 1,
+              "resolved": 1,
+              "cancelled": 0,
+              "duplicatesBlocked": 0,
+              "lastResolvedId": 1,
+              "lastCancelledId": null
+            },
+            "tier": "offscreen",
+            "stride": 2,
+            "visualUpdates": 92
+          }
+        ]
+      },
+      "session": {
+        "seconds": 63.8,
+        "frames": 98,
+        "avgFps": 1.5,
+        "low1": 1.3,
+        "minFps": 1.3,
+        "hitches": 98,
+        "pixelRatio": 1,
+        "quality": "high",
+        "model": "HQ",
+        "map": "星芽原野",
+        "hitchRule": "卡頓＝單幀超過 50 ms（低於 20 FPS）；另列 >33 ms、>100 ms",
+        "frames33": 98,
+        "frames100": 98,
+        "drawCalls": {
+          "avg": 122,
+          "max": 146
+        },
+        "triangles": {
+          "avgK": 762,
+          "maxK": 806
+        },
+        "cpuMs": {
+          "frame": 5.25,
+          "render": 2.27,
+          "animations": 0.23,
+          "activeMeshes": 1.26,
+          "renderTargets": 0.39
+        },
+        "memory": {
+          "jsHeapMB": 124.8,
+          "meshes": 305,
+          "materials": 99,
+          "textures": 119,
+          "textureMB": 307,
+          "skeletons": 22,
+          "animationGroups": 153,
+          "particleSystems": 3
+        },
+        "extra": {
+          "monsterDetail": {
+            "near": 4,
+            "mid": 0,
+            "far": 0,
+            "hidden": 0,
+            "offscreen": 23
+          },
+          "monsters": 27,
+          "shadow": "PCSS 2048（取樣 中）",
+          "shadowCasters": 10,
+          "fx": {
+            "hitFx": 12,
+            "numbers": 16,
+            "hurt": 4,
+            "respawnFx": 0,
+            "particles": 0
+          }
+        }
+      },
+      "errors": [
+        "console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    }
+  ],
+  "soak": {
+    "seconds": 180,
+    "ok": false,
+    "samples": [
+      {
+        "t": 0.8,
+        "mem": {
+          "jsHeapMB": 131.9,
+          "meshes": 303,
+          "materials": 98,
+          "textures": 119,
+          "textureMB": 307,
+          "skeletons": 22,
+          "animationGroups": 153,
+          "particleSystems": 3
+        },
+        "kills": 0,
+        "monsters": 27
+      },
+      {
+        "t": 31.5,
+        "mem": {
+          "jsHeapMB": 161.3,
+          "meshes": 303,
+          "materials": 99,
+          "textures": 119,
+          "textureMB": 307,
+          "skeletons": 22,
+          "animationGroups": 153,
+          "particleSystems": 3
+        },
+        "kills": 2,
+        "monsters": 27
+      },
+      {
+        "t": 61.9,
+        "mem": {
+          "jsHeapMB": 141.2,
+          "meshes": 303,
+          "materials": 99,
+          "textures": 119,
+          "textureMB": 307,
+          "skeletons": 22,
+          "animationGroups": 153,
+          "particleSystems": 3
+        },
+        "kills": 3,
+        "monsters": 27
+      },
+      {
+        "t": 91.9,
+        "mem": {
+          "jsHeapMB": 128,
+          "meshes": 303,
+          "materials": 100,
+          "textures": 119,
+          "textureMB": 307,
+          "skeletons": 22,
+          "animationGroups": 153,
+          "particleSystems": 3
+        },
+        "kills": 5,
+        "monsters": 27
+      },
+      {
+        "t": 122.1,
+        "mem": {
+          "jsHeapMB": 124.3,
+          "meshes": 303,
+          "materials": 99,
+          "textures": 119,
+          "textureMB": 307,
+          "skeletons": 22,
+          "animationGroups": 153,
+          "particleSystems": 3
+        },
+        "kills": 7,
+        "monsters": 27
+      },
+      {
+        "t": 152.2,
+        "mem": {
+          "jsHeapMB": 126.6,
+          "meshes": 303,
+          "materials": 99,
+          "textures": 119,
+          "textureMB": 307,
+          "skeletons": 22,
+          "animationGroups": 153,
+          "particleSystems": 3
+        },
+        "kills": 8,
+        "monsters": 27
+      },
+      {
+        "t": 183.6,
+        "mem": {
+          "jsHeapMB": 130.2,
+          "meshes": 304,
+          "materials": 99,
+          "textures": 119,
+          "textureMB": 307,
+          "skeletons": 22,
+          "animationGroups": 153,
+          "particleSystems": 3
+        },
+        "kills": 10,
+        "monsters": 27
+      }
+    ],
+    "bench": {
+      "seconds": 180.5,
+      "avgFps": 1.584432233113194,
+      "low1Fps": 1.4509576320369975,
+      "minFps": 1.208897485493128,
+      "avgDraw": 109.3951048951049,
+      "kills": 10,
+      "contextLost": 0,
+      "first30": 1.5138700112223868,
+      "last30": 1.5894934483066963,
+      "quality": "high",
+      "gender": "male",
+      "lod": "hq",
+      "charShadow": "blob"
+    },
+    "growth": {
+      "meshes": 1,
+      "materials": 0,
+      "textures": 0
+    },
+    "errors": [
+      "console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ]
+  },
+  "delta": {
+    "avgFps": 0.3,
+    "low1Fps": 0.5,
+    "avgDraw": -25,
+    "ratio": 1.23
+  },
+  "finishedAt": "2026-11-27T20:28:15.443Z"
+}
