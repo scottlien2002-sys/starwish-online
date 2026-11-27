@@ -40,3 +40,7 @@
 | preview-village-starsprout | feature/render-village-starsprout | f7349612ae25dc34540716be8f56a8d576e668fa | 214M |
 
 - 2026-11-27：移除 /preview-stage72-monsters/（Stage 7.2 第一批；已併入 /preview-stage72-world/。原始碼：feature/render-stage72-monsters、backup/stage72-batch1）
+
+- 2026-11-27：移除 /preview-village-char65/（使用者核准：B 只留最新及必要驗收版本；保留 npc67、art66；原始碼分支保留）
+
+- 2026-11-27：移除 /preview-village-final64/（使用者核准：B 只留最新及必要驗收版本；保留 npc67、art66；原始碼分支保留）
