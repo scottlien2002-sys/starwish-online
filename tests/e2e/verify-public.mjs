@@ -35,7 +35,7 @@ console.log(`公開網址已更新：${JSON.stringify(live)}（等待 ${Math.rou
 let fails = 0;
 const html = await (await fetch(`${base}?t=${Date.now()}`, { cache: "no-store" })).text();
 const assets = [...html.matchAll(/(?:src|href)="(\.\/assets\/[^"]+)"/g)].map((m) => m[1]);
-const urls = [...assets.map((a) => new URL(a, base).href), `${base}models/novice72/manifest.json`, ...["male", "female"].flatMap((g) => ["body", "hair01", "top", "bottom", "boots", "sword", "staff"].flatMap((s) => ["hq", "lite"].map((l) => `${base}models/novice72/novice72_${g}_${s}_${l}.glb`))), `${base}models/village-p3/portals_hq.glb`, `${base}models/village-p3/portals_lite.glb`];
+const urls = [...assets.map((a) => new URL(a, base).href), ...["male", "female"].flatMap((g) => ["hq", "lite"].map((l) => `${base}models/novice_c10b5b_${g}_${l}.glb`)), `${base}models/village-p3/portals_hq.glb`, `${base}models/village-p3/portals_lite.glb`];
 for (const u of urls) {
   const r = await fetch(u, { method: "GET", cache: "no-store" });
   if (!r.ok) {
@@ -58,9 +58,9 @@ for (const [name, vp] of [["webkit", { width: 393, height: 852 }], ["chromium", 
     await page.waitForFunction(() => window.__starwishWorld?.ready === true && !!window.__starwishWorld.info().interact && /^(loaded|部分|error)/.test(window.__starwishWorld.info().art), null, { timeout: 300000 });
     const i = await page.evaluate(() => window.__starwishWorld.info());
     const am = i.avatarModel;
-    const ok = i.map === "village" && i.art === "loaded" && errs.length === 0 && bad.length === 0 && am?.modular === true && am.parts.length === 5;
+    const ok = i.map === "village" && i.art === "loaded" && errs.length === 0 && bad.length === 0 && am?.modular === false && /^novice_c10b5b_/.test(i.file) && (i.npcs?.ids.length ?? 0) >= 7 && i.npcs?.board && i.npcs?.merchant;
     if (!ok) fails++;
-    console.log(`${ok ? "✓" : "✗"} ${name} ${vp.width}×${vp.height}：星芽村載入、美術 ${i.art}、新版初心者 ${am?.modular ? `模組 ${am.parts.length} 個、骨骼 ${am.bones}、三角形 ${am.triangles}` : "沒有載入"}、錯誤 ${errs.length}、失敗請求 ${bad.length}`);
+    console.log(`${ok ? "✓" : "✗"} ${name} ${vp.width}×${vp.height}：星芽村載入、美術 ${i.art}、角色 ${i.file}（骨骼 ${am?.bones}、三角形 ${am?.triangles}）、NPC ${i.npcs?.ids.length}＋洛恩 ${i.npcs?.merchant}＋佈告欄 ${i.npcs?.board}、錯誤 ${errs.length}、失敗請求 ${bad.length}`);
     for (const e of [...errs, ...bad]) console.log(`   ! ${e}`);
   } catch (e) {
     fails++;
@@ -98,7 +98,7 @@ for (const [name, vp] of [["webkit", { width: 393, height: 852 }], ["chromium", 
       for (let k = 0; k < 6; k++) {
         await page.evaluate(() => {
           const api = window.__starwishPlay;
-          const i = api.world.info();
+          const i = api.info();
           const m = i.monsters.find((x) => x.state !== "death" && x.hp > 0);
           if (m && Math.hypot(m.x - i.pos[0], m.z - i.pos[2]) > 1.2) api.teleport(m.x + 0.9, m.z);
           else api.press("attack");
@@ -124,7 +124,7 @@ if (process.env.SHOTS_DIR) {
     await page.waitForFunction(() => window.__starwishWorld?.ready === true && !!window.__starwishWorld.info().interact, null, { timeout: 300000 });
     await page.waitForTimeout(3000);
     const i = await page.evaluate(() => window.__starwishWorld.info());
-    console.log(`女生 HQ：新版 ${i.avatarModel?.modular}、模組 ${i.avatarModel?.parts.length}、三角形 ${i.avatarModel?.triangles}`);
+    console.log(`女生 HQ：角色 ${i.file}、三角形 ${i.avatarModel?.triangles}`);
     await page.screenshot({ path: `${process.env.SHOTS_DIR}/8_village_female_hq.png` });
   } catch (e) {
     console.log(`女生截圖失敗：${e.message}`);
