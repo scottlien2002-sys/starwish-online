@@ -1,0 +1,1 @@
+import{Ot as e,kt as t}from"./index-nOwSdxqM.js";var n=class{constructor(){this.supportCascades=!1}loadCubeData(){throw`.env not supported in Cube.`}loadData(n,r,i){let a=new Uint8Array(n.buffer,n.byteOffset,n.byteLength),o=e(a);i(o.width,o.height,r.generateMipMaps,!1,()=>{t(r,a)})}};export{n as _TGATextureLoader};
