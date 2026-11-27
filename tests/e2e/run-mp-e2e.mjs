@@ -44,7 +44,11 @@ const site = process.env.MP_E2E_SITE
     : await serve(dist);
 results.site = site.url;
 const pw = await loadPlaywright();
-const browser = await pw[browserName].launch(TLS && browserName === "chromium" ? { args: ["--ignore-certificate-errors"] } : {});
+// 測試公開網址時，測試伺服器在這台測試機（127.0.0.1）：Chromium 預設禁止公開網站連到本機（Local Network Access），測試時關閉此檢查。
+// 實際 iPhone 連的是公開的 Render 網址，不受這個限制。
+const browser = await pw[browserName].launch(
+  TLS && browserName === "chromium" ? { args: ["--ignore-certificate-errors", "--disable-features=LocalNetworkAccessChecks,BlockInsecurePrivateNetworkRequests,PrivateNetworkAccessSendPreflights,PrivateNetworkAccessRespectPreflightResults"] } : {},
+);
 const metrics = async () => {
   if (!TLS) return (await fetch(`http://127.0.0.1:${PORT}/metrics`)).json();
   const out = execFileSync("curl", ["-sk", `https://127.0.0.1:${PORT}/metrics`]).toString();
