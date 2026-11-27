@@ -38,3 +38,5 @@
 | preview-village-p3 | feature/render-village-p3 | d854b7c61b92e39e65cb585325600562838f3c00 | 219M |
 | preview-village-perf63 | feature/render-village-perf63 | c5cd8c1c2d48e3b0ea849ad9eb4ea1101181b2ef | 257M |
 | preview-village-starsprout | feature/render-village-starsprout | f7349612ae25dc34540716be8f56a8d576e668fa | 214M |
+
+- 2026-11-27：移除 /preview-stage72-monsters/（Stage 7.2 第一批；已併入 /preview-stage72-world/。原始碼：feature/render-stage72-monsters、backup/stage72-batch1）
