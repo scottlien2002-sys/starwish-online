@@ -119,6 +119,29 @@ export class VfxSystem {
     }
   }
 
+  /** 材質 alpha 不讓它剛好是 0（淡入第一格是 0 時，Babylon 會把這個網格當成看不見而不畫） */
+  private floorAlpha(f: MeshFx): void {
+    if (f.mat.alpha < 0.004) f.mat.alpha = 0.004;
+    if (f.extraMat && f.extraMat.alpha < 0.004) f.extraMat.alpha = 0.004;
+  }
+
+  /** 除錯：目前作用中的網格特效狀態（E2E 用） */
+  debugActive(): { key: string; enabled: boolean; visible: boolean; pos: number[]; scale: number; alpha: number; inActive: boolean; ready: boolean }[] {
+    const act = this.scene.getActiveMeshes();
+    const set = new Set<unknown>();
+    for (let i = 0; i < act.length; i++) set.add(act.data[i]);
+    return this.active.map((f) => ({
+      key: f.key,
+      enabled: f.mesh.isEnabled(),
+      visible: f.mesh.isVisible,
+      pos: [f.mesh.position.x, f.mesh.position.y, f.mesh.position.z].map((v) => Math.round(v * 100) / 100),
+      scale: Math.round(f.mesh.scaling.x * 100) / 100,
+      alpha: Math.round(f.mat.alpha * 1000) / 1000,
+      inActive: set.has(f.mesh),
+      ready: f.mesh.isReady(true),
+    }));
+  }
+
   private glowAdd(m: Mesh): void {
     if (this.glow) this.glow.addIncludedOnlyMesh(m);
   }
@@ -172,6 +195,7 @@ export class VfxSystem {
     f.handle = handle;
     f.tick = tick;
     tick(f, 0, 0);
+    this.floorAlpha(f);
     this.active.push(f);
   }
 
@@ -664,6 +688,7 @@ export class VfxSystem {
       if (f.follow) f.mesh.position.copyFrom(f.follow.getAbsolutePosition()).addInPlace(f.offset);
       if (f.extra && f.follow) f.extra.position.copyFrom(f.mesh.position);
       f.tick(f, u, dt);
+      this.floorAlpha(f);
       if (u >= 1) {
         f.mesh.setEnabled(false);
         f.extra?.setEnabled(false);

@@ -867,6 +867,7 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
       aspd = v;
     },
     perf,
+    debugFx: () => vfx.debugActive(),
     stats: () => ({
       tier,
       gender,

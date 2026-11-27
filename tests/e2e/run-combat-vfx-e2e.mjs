@@ -76,9 +76,11 @@ for (const name of browsers) {
           const n0 = await page.evaluate(() => window.__cvfx.sync.length);
           const ok = await page.evaluate((id) => window.__cvfx.cast(id), sk);
           const start = fi;
+          const dbg = [];
           for (let k = 0; k < 150; k++) {
             await page.evaluate(() => window.__cvfx.advance(1 / 30));
             await frameShot();
+            if (k % 6 === 3) dbg.push({ k, fx: await page.evaluate(() => window.__cvfx.debugFx()) });
             const busy = await page.evaluate(() => window.__cvfx.busy());
             if (!busy && k > 20) break;
           }
@@ -87,7 +89,7 @@ for (const name of browsers) {
             await frameShot();
           }
           const recs = await page.evaluate((n) => window.__cvfx.sync.slice(n), n0);
-          seq.push({ skill: sk, cast: ok, frames: [start, fi - 1], hits: recs.length });
+          seq.push({ skill: sk, cast: ok, frames: [start, fi - 1], hits: recs.length, dbg });
           check(`展示 ${sk}：固定步長下命中結算`, ok && recs.length > 0, recs.length);
           check(`展示 ${sk}：固定步長下命中格動作時間＝時間軸`, recs.every((r) => r.kind === "projectile" || Math.abs(r.animT - r.clipT) <= 1 / 60 + 0.002), recs.map((r) => [r.hit, r.clipT, r.animT]));
         }
