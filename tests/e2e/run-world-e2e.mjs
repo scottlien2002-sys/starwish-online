@@ -246,10 +246,10 @@ for (const name of browsers) {
       await shot("field_arrive");
       // ---------- Stage 7.3：七種怪物 ----------
       const fm = fp.fieldMonsters ?? [];
-      const kinds = {};
-      for (const m of fp.monsters) kinds[m.kind] = (kinds[m.kind] ?? 0) + 1;
-      run.results.fieldMonsters = { fm, kinds };
-      check("Stage 7.3 七種怪物：M002～M007 都是 Claude C 的正式模型（已交付、Lite），依原本 7 區出現；星露啵啵沿用", fm.length === 6 && fm.every((x) => x.delivered && x.count > 0 && /Lite/.test(x.status)) && kinds.star_dew_bobo === 6 && kinds.moss_horn_beast === 5 && kinds.cloud_fluff_bird === 5 && kinds.windfeather_fox === 4 && kinds.nebula_sheep === 4 && kinds.carrot_king === 2 && kinds.crown_hammer_rabbit === 1 && !kinds.rig_contract_fixture, { fm, kinds });
+      const mk = {};
+      for (const m of fp.monsters) mk[m.kind] = (mk[m.kind] ?? 0) + 1;
+      run.results.fieldMonsters = { fm, kinds: mk };
+      check("Stage 7.3 七種怪物：M002～M007 都是 Claude C 的正式模型（已交付、Lite），依原本 7 區出現；星露啵啵沿用", fm.length === 6 && fm.every((x) => x.delivered && x.count > 0 && /Lite/.test(x.status)) && mk.star_dew_bobo === 6 && mk.moss_horn_beast === 5 && mk.cloud_fluff_bird === 5 && mk.windfeather_fox === 4 && mk.nebula_sheep === 4 && mk.carrot_king === 2 && mk.crown_hammer_rabbit === 1 && !mk.rig_contract_fixture, { fm, kinds: mk });
       const lv = Object.fromEntries(fp.monsters.map((m) => [m.kind, { level: m.level, aggressive: m.aggressive }]));
       check("Stage 7.3：Lv.1～4 被動（星露啵啵、苔角獸）、Lv.5 以上主動（雲絨鳥～王冠重錘兔）", lv.star_dew_bobo?.aggressive === false && lv.moss_horn_beast?.aggressive === false && ["cloud_fluff_bird", "windfeather_fox", "nebula_sheep", "carrot_king", "crown_hammer_rabbit"].every((k) => lv[k]?.aggressive === true), lv);
       if (g === "male" && name === "webkit") {
