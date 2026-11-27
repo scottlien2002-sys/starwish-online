@@ -9,16 +9,18 @@ if [ ! -x "$PGBIN/initdb" ]; then echo "::error::PostgreSQL server binaries not 
 echo "using $PGBIN"
 tmp="$(mktemp -d /tmp/starwish-pg.XXXX)"
 chown postgres "$tmp"; chmod 755 "$tmp"
-as_pg() { runuser -u postgres -- "$@"; }
+as_pg() { (cd "$tmp" && runuser -u postgres -- "$@"); }
+# postgres 帳號可能無法讀取專案資料夾（CI 的 /home/runner 是 750），先複製到暫存資料夾
+cp "$here/schema.sql" "$tmp/schema.sql"; chmod 644 "$tmp/schema.sql"
 if ! out=$(cd "$tmp" && as_pg "$PGBIN/initdb" -D "$tmp/data" -A trust -U postgres 2>&1); then echo "::error::initdb failed: $(echo "$out" | tail -5 | tr '\n' ' ')"; exit 1; fi
 if ! (cd "$tmp" && as_pg "$PGBIN/pg_ctl" -D "$tmp/data" -o "-k $tmp -p 55432 -c listen_addresses=''" -l "$tmp/log" start -w >/dev/null); then echo "::error::pg_ctl start failed: $(tail -5 "$tmp/log" | tr '\n' ' ')"; exit 1; fi
-PSQL=(runuser -u postgres -- psql -h "$tmp" -p 55432 -U postgres -v ON_ERROR_STOP=1 -X -q -t -A)
+PSQL=(as_pg psql -h "$tmp" -p 55432 -U postgres -v ON_ERROR_STOP=1 -X -q -t -A)
 "${PSQL[@]}" -c "CREATE DATABASE starwish" >/dev/null
 DB=("${PSQL[@]}" -d starwish)
 pass=0; fail=0
 check() { if [ "$2" == "$3" ]; then echo "PASS $1"; pass=$((pass+1)); else echo "FAIL $1 (expected '$3', got '$2')"; echo "::error::DB check failed: $1 expected '$3' got '$2'"; fail=$((fail+1)); fi; }
 
-"${DB[@]}" -f "$here/schema.sql" >/dev/null && check "schema.sql 套用成功" ok ok
+if "${DB[@]}" -f "$tmp/schema.sql" >/dev/null 2>"$tmp/schema_err"; then check "schema.sql 套用成功" ok ok; else check "schema.sql 套用成功" "$(tr '\n' ' ' < "$tmp/schema_err" | head -c 300)" ok; fi
 
 A=$("${DB[@]}" -c "INSERT INTO characters(name, gender) VALUES ('阿星','male') RETURNING id")
 B=$("${DB[@]}" -c "INSERT INTO characters(name, gender) VALUES ('小願','female') RETURNING id")
