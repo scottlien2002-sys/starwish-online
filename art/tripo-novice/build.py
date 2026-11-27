@@ -35,7 +35,7 @@ FIT = {
     "male": {
         "body": "Male_Base_V1",
         "sleeve_zmin": -0.12,  # 袖子量測範圍（避開衣襬）
-        "hair": {"src": "Male_Hair_01_V1", "s": 0.44, "t": [0.0, 0.0, 0.365]},
+        "hair": {"src": "Male_Hair_01_V1", "s": 0.47, "t": [-0.012, 0.0, 0.352]},
         "top": {"src": "Male_Novice_Top_V1", "s": 0.423, "t": [0.007, 0.0, 0.060]},
         "bottom": {"src": "Male_Novice_Pants_V1", "s": 0.384, "t": [-0.006, 0.0, -0.246]},
         "boots": {"src": "Male_Novice_Boots_V1", "foot_scale": 1.12},
@@ -44,7 +44,7 @@ FIT = {
         "body": "CHR_Female_Base",
         "sleeve_zmin": -0.10,  # 袖子量測範圍（避開裙襬）
         # 女生髮型原檔面向 −X（與身體相反）→ 先轉 180°
-        "hair": {"src": "Novice_Female_Hair_01", "s": 0.46, "t": [-0.015, 0.0, 0.345], "flip": True},
+        "hair": {"src": "Novice_Female_Hair_01", "s": 0.50, "t": [-0.02, 0.0, 0.33], "flip": True},
         "top": {"src": "Novice_Female_Top", "s": 0.421, "t": [0.02, 0.0, 0.014]},
         "bottom": {"src": "Novice_Female_Leggings", "box": {"z": [-0.458, -0.06], "yhalf": 0.106, "xc": 0.028}},
         "boots": {"src": "Novice_Female_Boots", "foot_scale": 1.12},
@@ -409,7 +409,7 @@ def build_gender(g):
         P = verts_np(o)
         c = P.mean(0)
         _, _, vt = np.linalg.svd(P - c)
-        ax = vt[0]
+        ax = vt[0] if vt[0][2] > 0 else -vt[0]  # 主軸方向固定（量測時 z 分量為正）
         pr = (P - c) @ ax
         L = pr.max() - pr.min()
         s = wc["length_m"] / L
@@ -754,8 +754,14 @@ def main():
         for o in objs.values():
             if o.name == "Body_Covered":
                 o.hide_render = True
+        for o in objs.values():
+            if "Staff" in o.name:
+                o.hide_render = True
         rep["preview"] = render_views(arm, os.path.join(prev, f"{g}_rest"))
         rep["preview"] += render_views(arm, os.path.join(prev, f"{g}_idle"), "Idle", 1)
+        for o in objs.values():
+            if "Staff" in o.name:
+                o.hide_render = False
         staff = [o for n, o in objs.items() if "Staff" in n]
         sword = [o for n, o in objs.items() if "Sword" in n]
         for o in staff:
