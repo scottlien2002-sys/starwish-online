@@ -34,13 +34,23 @@ for f in sorted(os.listdir(SRC)):
     c = (mn + mx) / 2
     size = max(mx - mn)
     name = f[:-4]
+    import numpy as np
+    os.makedirs(os.path.join(OUT, "geo"), exist_ok=True)
+    V, F, off = [], [], 0
+    for o in objs:
+        M = o.matrix_world
+        V += [tuple(M @ v.co) for v in o.data.vertices]
+        o.data.calc_loop_triangles()
+        F += [tuple(off + i for i in t.vertices) for t in o.data.loop_triangles]
+        off += len(o.data.vertices)
+    np.savez_compressed(os.path.join(OUT, "geo", name + ".npz"), v=np.array(V, dtype=np.float32), f=np.array(F, dtype=np.int32))
     info[name] = {"min": list(mn), "max": list(mx), "verts": sum(len(o.data.vertices) for o in objs), "tris": sum(len(p.vertices) - 2 for o in objs for p in o.data.polygons), "objects": [o.name for o in objs]}
     cam = bpy.data.cameras.new("cam"); cam.type = "ORTHO"; cam.ortho_scale = size * 1.15
     co = bpy.data.objects.new("cam", cam); sc.collection.objects.link(co); sc.camera = co
     for v, d in VIEWS.items():
         dv = Vector(d)
         co.location = c + dv * (size * 3)
-        co.rotation_euler = (c - co.location).to_track_quat("-Z", "Z" if abs(dv.z) < 0.9 else "Y").to_euler()
+        co.rotation_euler = (c - co.location).to_track_quat("-Z", "Y").to_euler()
         sc.render.filepath = os.path.join(OUT, f"{name}_{v}.png")
         bpy.ops.render.render(write_still=True)
     print("inspected", name, info[name]["min"], info[name]["max"])
