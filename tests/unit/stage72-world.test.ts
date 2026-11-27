@@ -71,38 +71,9 @@ test("Stage 7.2：M004～M007 出生區對應原本的 7 區配置；每種都�
   assert.ok(!names.includes("焰尾狐"));
 });
 
-// ---------------- 新版初心者 GLB（Tripo 模組化） ----------------
-import { readFileSync, existsSync } from "node:fs";
-import { modularFile } from "../../src/characters/novice72.ts";
-
-function glbJson(path: string): any {
-  const b = readFileSync(path);
-  const n = b.readUInt32LE(12);
-  return JSON.parse(b.subarray(20, 20 + n).toString("utf8"));
-}
-
-test("新版初心者：manifest 列出的檔案都存在；男女 × HQ/Lite × 7 個模組", () => {
-  const dir = "public/models/novice72";
-  const m = JSON.parse(readFileSync(`${dir}/manifest.json`, "utf8"));
-  for (const f of m.files) assert.ok(existsSync(`${dir}/${f}`), f);
-  for (const g of ["male", "female"] as const)
-    for (const lod of ["hq", "lite"] as const)
-      for (const slot of ["body", "hair01", "top", "bottom", "boots", "sword", "staff"]) assert.ok(m.files.includes(modularFile(g, slot, lod)), `${g} ${slot} ${lod}`);
-});
-
-test("新版初心者：每個零件的骨架與身體同名同序（換裝重新綁定用）；身體含 7 組動畫；零件沒有動畫", () => {
-  const dir = "public/models/novice72";
-  for (const g of ["male", "female"] as const)
-    for (const lod of ["hq", "lite"] as const) {
-      const body = glbJson(`${dir}/${modularFile(g, "body", lod)}`);
-      const names = (j: any) => j.skins[0].joints.map((i: number) => j.nodes[i].name);
-      const bn = names(body);
-      assert.ok(bn.includes("head") && bn.includes("hand.R") && bn.includes("weapon.R"));
-      assert.deepEqual(body.animations.map((a: any) => a.name).sort(), ["Attack_Staff", "Attack_Sword", "Death", "Hurt", "Idle", "Jump", "Run"]);
-      for (const slot of ["hair01", "top", "bottom", "boots", "sword", "staff"]) {
-        const p = glbJson(`${dir}/${modularFile(g, slot, lod)}`);
-        assert.deepEqual(names(p), bn, `${g} ${slot} ${lod}`);
-        assert.equal((p.animations ?? []).length, 0);
-      }
-    }
+// 新版 Tripo 初心者：美術驗收不通過（2026-11-27），GLB 封存在 art-tripo-novice／backup/stage72-world-tripo-novice，不部署
+import { existsSync } from "node:fs";
+test("封存的 Tripo 新版初心者 GLB 不放在 public（預覽只部署已驗收的 C1.0-B5b）", () => {
+  assert.equal(existsSync("public/models/novice72"), false);
+  for (const g of ["male", "female"]) for (const l of ["hq", "lite"]) assert.ok(existsSync(`public/models/novice_c10b5b_${g}_${l}.glb`), `${g} ${l}`);
 });
