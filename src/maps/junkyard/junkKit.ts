@@ -367,38 +367,36 @@ export const JUNK_TYPES: readonly JunkType[] = ["can", "crate", "barrel", "tire"
 /** 建立一種小垃圾的來源網格（已合併、有頂點色；材質由呼叫端決定） */
 export function junkSource(scene: Scene, mats: JunkMaterials, type: JunkType, lite: boolean): Mesh {
   const k = new Kit(scene, mats, `jy_src_${type}`);
-  const t = lite ? 8 : 12;
+  // 低面數：每件約 20～110 面（遠看靠輪廓與配色；近看有顆粒貼圖）
+  const t = lite ? 6 : 8;
   switch (type) {
     case "can": {
       k.cyl(0.7, 0.7, 1.0, 0, 0.5, 0, PAL.steel, "paint", t);
       k.cyl(0.72, 0.72, 0.38, 0, 0.52, 0, PAL.red, "paint", t);
-      k.cyl(0.6, 0.7, 0.08, 0, 1.03, 0, PAL.iron, "paint", t);
       break;
     }
     case "crate": {
       k.box(1, 1, 1, 0, 0.5, 0, PAL.wood);
-      for (const y of [0.06, 0.94]) for (const s of [-1, 1]) k.box(1.04, 0.12, 0.12, 0, y, s * 0.46, PAL.woodDark);
-      k.box(0.14, 1.04, 1.04, -0.45, 0.5, 0, PAL.woodDark);
-      k.box(0.14, 1.04, 1.04, 0.45, 0.5, 0, PAL.woodDark);
+      k.box(1.04, 0.14, 1.04, 0, 0.12, 0, PAL.woodDark);
+      k.box(1.04, 0.14, 1.04, 0, 0.88, 0, PAL.woodDark);
       break;
     }
     case "barrel": {
-      k.cyl(0.8, 0.8, 1.15, 0, 0.575, 0, PAL.teal, "paint", t);
-      for (const y of [0.18, 0.575, 0.97]) k.cyl(0.84, 0.84, 0.08, 0, y, 0, PAL.ironDark, "paint", t);
+      k.cyl(0.8, 0.8, 1.15, 0, 0.575, 0, PAL.teal, "paint", t + 2);
+      k.cyl(0.84, 0.84, 0.1, 0, 0.3, 0, PAL.ironDark, "paint", t + 2);
+      k.cyl(0.84, 0.84, 0.1, 0, 0.85, 0, PAL.ironDark, "paint", t + 2);
       break;
     }
     case "tire": {
-      k.torus(1.05, 0.34, 0, 0.17, 0, PAL.black, "paint", lite ? 8 : 10);
-      k.cyl(0.5, 0.5, 0.2, 0, 0.17, 0, PAL.iron, "paint", 8);
+      k.torus(1.05, 0.34, 0, 0.17, 0, PAL.black, "paint", lite ? 6 : 8);
       break;
     }
     case "gear": {
-      const teeth = lite ? 8 : 10;
-      k.cyl(1.2, 1.2, 0.22, 0, 0.11, 0, PAL.rust, "paint", lite ? 12 : 16);
-      k.cyl(0.4, 0.4, 0.3, 0, 0.15, 0, PAL.iron, "paint", 8);
+      const teeth = lite ? 6 : 8;
+      k.cyl(1.2, 1.2, 0.22, 0, 0.11, 0, PAL.rust, "paint", lite ? 8 : 12);
       for (let i = 0; i < teeth; i++) {
         const a = (i / teeth) * Math.PI * 2;
-        k.box(0.22, 0.2, 0.22, Math.cos(a) * 0.66, 0.1, Math.sin(a) * 0.66, PAL.rustDark, "paint", [0, -a, 0]);
+        k.box(0.24, 0.2, 0.24, Math.cos(a) * 0.66, 0.1, Math.sin(a) * 0.66, PAL.rustDark, "paint", [0, -a, 0]);
       }
       break;
     }
@@ -410,12 +408,10 @@ export function junkSource(scene: Scene, mats: JunkMaterials, type: JunkType, li
     case "tv": {
       k.box(1.0, 0.8, 0.8, 0, 0.4, 0, PAL.cream);
       k.box(0.78, 0.6, 0.04, 0, 0.42, 0.41, PAL.tealDark);
-      k.box(0.08, 0.3, 0.08, 0.25, 0.95, 0, PAL.iron, "paint", [0, 0, 0.5]);
       break;
     }
     case "pipe": {
       k.cyl(0.5, 0.5, 2.2, 0, 0.25, 0, PAL.iron, "paint", t, [0, 0, Math.PI / 2]);
-      k.cyl(0.62, 0.62, 0.16, 1.05, 0.25, 0, PAL.rust, "paint", t, [0, 0, Math.PI / 2]);
       break;
     }
     case "rock": {
@@ -426,9 +422,7 @@ export function junkSource(scene: Scene, mats: JunkMaterials, type: JunkType, li
       break;
     }
     case "spring": {
-      // 彈簧：疊 4 個薄環（圓柱環，比圓環省面）
-      for (let i = 0; i < 4; i++) k.cyl(0.5, 0.5, 0.07, 0, 0.08 + i * 0.16, 0, PAL.steel, "paint", lite ? 6 : 8, [0.12 * (i % 2 ? 1 : -1), 0, 0]);
-      k.cyl(0.12, 0.12, 0.62, 0.22, 0.32, 0, PAL.ironDark, "paint", 5);
+      for (let i = 0; i < 3; i++) k.cyl(0.5, 0.5, 0.07, 0, 0.1 + i * 0.2, 0, PAL.steel, "paint", 6, [0.12 * (i % 2 ? 1 : -1), 0, 0]);
       break;
     }
   }

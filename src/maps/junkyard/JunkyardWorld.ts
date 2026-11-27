@@ -176,7 +176,8 @@ export class JunkyardWorld {
 
   // ---------------- 地形 ----------------
   private buildTerrain(): void {
-    const step = this.tier === "high" ? 1.25 : this.tier === "medium" ? 1.6667 : 2.5;
+    // 格距：高 1.5625 m（每塊 32 格）、中 2 m（25 格）、低 2.5 m（20 格）
+    const step = this.tier === "high" ? 1.5625 : this.tier === "medium" ? 2 : 2.5;
     const per = Math.round(CHUNK / step);
     const nC = Math.round((MAP_HALF * 2) / CHUNK);
     for (let cj = 0; cj < nC; cj++) {
@@ -218,12 +219,13 @@ export class JunkyardWorld {
             const b = a + 1;
             const c = a + nv;
             const d = c + 1;
+            // Babylon（左手座標）正面＝從上方看順時針：a→b→c、b→d→c（法線朝上）
             idx[p++] = a;
-            idx[p++] = c;
-            idx[p++] = b;
             idx[p++] = b;
             idx[p++] = c;
+            idx[p++] = b;
             idx[p++] = d;
+            idx[p++] = c;
           }
         }
         const vd = new VertexData();
@@ -251,7 +253,7 @@ export class JunkyardWorld {
     const meshes: Mesh[] = [];
     for (const b of BASINS) {
       if (b.pts.length === 1) {
-        const d = MeshBuilder.CreateDisc("jy_pond", { radius: b.r + 1.2, tessellation: 40 }, this.scene);
+        const d = MeshBuilder.CreateDisc("jy_pond", { radius: b.r + 1.2, tessellation: 40, sideOrientation: Mesh.DOUBLESIDE }, this.scene);
         d.rotation.x = Math.PI / 2;
         d.position.set(b.pts[0]!.x, b.water, b.pts[0]!.z);
         d.bakeCurrentTransformIntoVertices();
@@ -836,7 +838,7 @@ export class JunkyardWorld {
           pts.push(new Vector3(x, Math.max(a.y + (b.y - a.y) * t, groundHeight(x, z) + 3.4), z));
         }
       }
-      const tube = MeshBuilder.CreateTube("jy_part", { path: pts, radius: p.r, tessellation: this.lite ? 6 : 10 }, this.scene);
+      const tube = MeshBuilder.CreateTube("jy_part", { path: pts, radius: p.r, tessellation: this.lite ? 6 : 8 }, this.scene);
       kp.add(tube, PAL.ironDark, "metal");
       // 發光能源條：管線上緣露出的一條細管
       const glow = MeshBuilder.CreateTube("jy_part", { path: pts.map((q) => q.add(new Vector3(0, p.r * 0.62, 0))), radius: p.r * 0.42, tessellation: 6 }, this.scene);

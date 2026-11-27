@@ -125,6 +125,7 @@ for (const name of browsers) {
       await settle(page, 3);
       await V(() => window.__starwishJunkyard.teleport(0, -133.5, Math.PI));
       await settle(page, 4);
+      await page.waitForTimeout(900); // 傳送在觸發後 0.35 秒執行（先顯示「傳送到 星芽原野…」）
       const p1 = await V(() => window.__starwishJunkyard.portal());
       await V(() => window.__starwishJunkyard.teleport(0, -124, Math.PI));
       await settle(page, 3);
