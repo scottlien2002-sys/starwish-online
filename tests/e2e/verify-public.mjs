@@ -91,23 +91,39 @@ for (const [name, vp] of [["webkit", { width: 393, height: 852 }], ["chromium", 
       await page.evaluate(() => window.__starwishPlay.teleport(-56, -65.2));
       await page.waitForTimeout(1500);
       await page.screenshot({ path: `${dir}/4_field_portal_near.png` });
-      // 星露草坪：新版角色打星露啵啵（被動怪物，先打才反擊）
+      // Stage 7.3：七種怪物所在區域（站在區域外緣）
+      const zones = [["01_bobo", -24, -60], ["02_moss_horn_beast", -62, -39], ["03_cloud_fluff_bird", 14, -19], ["04_windfeather_fox", 52, 16], ["05_nebula_sheep", -44, 37], ["06_carrot_king", -12, 28], ["07_crown_hammer_rabbit", 0, 57]];
+      for (const [label, x, z] of zones) {
+        await page.evaluate(([x, z]) => { window.__starwishPlay.teleport(x, z); window.__starwishPlay.heal(); }, [x, z]);
+        await page.waitForTimeout(3000);
+        await page.screenshot({ path: `${dir}/6_zone_${label}.png` });
+      }
+      const pi = await page.evaluate(() => window.__starwishPlay.info());
+      const kinds = {};
+      for (const m of pi.monsters) kinds[m.kind] = (kinds[m.kind] ?? 0) + 1;
+      const zok = JSON.stringify(kinds) && kinds.moss_horn_beast === 5 && kinds.cloud_fluff_bird === 5 && kinds.windfeather_fox === 4 && kinds.nebula_sheep === 4 && kinds.carrot_king === 2 && kinds.crown_hammer_rabbit === 1 && kinds.star_dew_bobo === 6;
+      if (!zok) fails++;
+      console.log(`${zok ? "✓" : "✗"} 七種怪物：${JSON.stringify(kinds)}｜${pi.fieldMonsters.map((x) => x.status).join("／")}`);
+      // 星露草坪：普通攻擊打星露啵啵（被動怪物，先打才反擊）
       await page.evaluate(() => window.__starwishPlay.teleport(-22, -52));
-      await page.waitForTimeout(2000);
-      await page.screenshot({ path: `${dir}/6_field_bobo_zone.png` });
-      for (let k = 0; k < 6; k++) {
+      await page.waitForTimeout(1500);
+      for (let k = 0; k < 60; k++) {
         await page.evaluate(() => {
           const api = window.__starwishPlay;
           const i = api.info();
-          const m = i.monsters.find((x) => x.state !== "death" && x.hp > 0);
+          if (i.hp < 40) api.heal();
+          const m = i.monsters.find((x) => x.kind === "star_dew_bobo" && x.state !== "death" && x.state !== "dead" && x.hp > 0);
           if (m && Math.hypot(m.x - i.pos[0], m.z - i.pos[2]) > 1.2) api.teleport(m.x + 0.9, m.z);
           else api.press("attack");
         });
-        await page.waitForTimeout(260);
-        if (k === 2) await page.screenshot({ path: `${dir}/7_field_attack.png` });
+        await page.waitForTimeout(250);
+        if (k === 4) await page.screenshot({ path: `${dir}/7_field_attack_fx.png` });
       }
       const fi = await page.evaluate(() => window.__starwishPlay.world.info());
-      console.log(`原野：等級 ${fi.level}、經驗 ${fi.exp}（本次 +${fi.expGained}）、原野怪物 ${JSON.stringify(fi.fieldMonsters?.map((x) => `${x.zone}:${x.delivered ? x.count : "未交付"}`))}`);
+      const cfx = (await page.evaluate(() => window.__starwishPlay.info())).combatFx;
+      const fok = !!cfx && cfx.hitFx > 0 && cfx.damageShown > 0;
+      if (!fok) fails++;
+      console.log(`${fok ? "✓" : "✗"} 戰鬥：特效 ${JSON.stringify(cfx)}｜等級 ${fi.level}、經驗 ${fi.exp}（本次 +${fi.expGained}）`);
     } catch (e) {
       console.log(`截圖流程失敗：${e.message}`);
     }
@@ -124,7 +140,7 @@ if (process.env.SHOTS_DIR) {
     await page.waitForFunction(() => window.__starwishWorld?.ready === true && !!window.__starwishWorld.info().interact, null, { timeout: 300000 });
     await page.waitForTimeout(3000);
     const i = await page.evaluate(() => window.__starwishWorld.info());
-    console.log(`女生 HQ：角色 ${i.file}、三角形 ${i.avatarModel?.triangles}`);
+    console.log(`女生 HQ：角色 ${i.file}、三角形 ${i.avatarModel?.triangles}、NPC ${i.npcs?.ids.length}`);
     await page.screenshot({ path: `${process.env.SHOTS_DIR}/8_village_female_hq.png` });
   } catch (e) {
     console.log(`女生截圖失敗：${e.message}`);

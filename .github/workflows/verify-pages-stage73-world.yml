@@ -1,12 +1,12 @@
-name: Verify public GitHub Pages (Stage 7.2 world integration, read-only)
-# 只從公開網址讀取：不建置、不部署、不改 gh-pages。截圖推到每次執行各自的新分支 results/stage72w-verify-<run id>（一般 push，不 force）。
+name: Verify public GitHub Pages (Stage 7.3 world, read-only)
+# 只從公開網址讀取：不建置、不部署、不改 gh-pages。截圖推到每次執行各自的新分支 results/stage73-verify-<run id>（一般 push，不 force）。
 on:
   push:
-    branches: [verify/pages-stage72-world]
+    branches: [verify/pages-stage73-world]
 permissions:
   contents: write
 concurrency:
-  group: verify-pages-stage72-world
+  group: verify-pages-stage73-world
   cancel-in-progress: true
 jobs:
   verify:
@@ -22,13 +22,13 @@ jobs:
       - name: Verify public URL
         run: |
           mkdir -p /tmp/shots
-          SHOTS_DIR=/tmp/shots node tests/e2e/verify-public.mjs "https://scottlien2002-sys.github.io/starwish-online/preview-stage72-world/" "$(cat verify-target.txt)" 25
+          SHOTS_DIR=/tmp/shots node tests/e2e/verify-public.mjs "https://scottlien2002-sys.github.io/starwish-online/preview-stage73-world/" "$(cat verify-target.txt)" 25
       - name: Push screenshots to results branch
         if: always()
         run: |
           cd /tmp/shots && ls -la
-          git init -q && git checkout -q -b "results/stage72w-verify-${GITHUB_RUN_ID}"
+          git init -q && git checkout -q -b "results/stage73-verify-${GITHUB_RUN_ID}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A && git commit -qm "Stage 7.2 public URL screenshots ${GITHUB_SHA::7}" || exit 0
-          git push -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" "results/stage72w-verify-${GITHUB_RUN_ID}"
+          git push -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" "results/stage73-verify-${GITHUB_RUN_ID}"
