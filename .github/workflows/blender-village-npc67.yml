@@ -1,0 +1,64 @@
+name: Blender — Village Stage 6.7 Tripo NPC decimation (Lite / far)
+
+# Stage 6.7（Claude B）：使用者提供的 Tripo NPC 模型（art/village-npc67/source，原檔不修改）。
+# 這裡只把已轉正方向、縮放的靜態網格（art/village-npc67/mesh/*.obj）減面成 Lite／遠距；
+# 骨架、權重、動作與 GLB 由 art/village-npc67 的 Python 建置流程產生。
+# 結果推到 art-village-npc67-dec 分支（一般 push，不 force；不影響遊戲網站與 main）。
+on:
+  workflow_dispatch:
+  push:
+    branches: ["feature/render-village-npc67"]
+    paths:
+      - "art/village-npc67/mesh/*.obj"
+      - "art/village-npc67/decimate.py"
+      - ".github/workflows/blender-village-npc67.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: blender-village-npc67
+  cancel-in-progress: false
+
+env:
+  BLENDER_VERSION: "4.2.3"
+  BLENDER_SERIES: "4.2"
+
+jobs:
+  decimate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - name: System libraries for Blender (headless)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libsm6 libxkbcommon0 >/dev/null
+      - name: Download Blender ${{ env.BLENDER_VERSION }} (official, free)
+        run: |
+          URL="https://download.blender.org/release/Blender${BLENDER_SERIES}/blender-${BLENDER_VERSION}-linux-x64.tar.xz"
+          curl -fsSL --retry 5 --retry-delay 10 "$URL" -o /tmp/blender.tar.xz || curl -fsSL --retry 5 "https://mirrors.ocf.berkeley.edu/blender/release/Blender${BLENDER_SERIES}/blender-${BLENDER_VERSION}-linux-x64.tar.xz" -o /tmp/blender.tar.xz
+          mkdir -p /opt/blender && tar -xf /tmp/blender.tar.xz -C /opt/blender --strip-components=1
+      - name: Decimate
+        run: |
+          mkdir -p out
+          /opt/blender/blender -b --factory-startup -noaudio -P art/village-npc67/decimate.py -- art/village-npc67/mesh out 2>&1 | tee out/decimate.log | grep -E "DEC|Error|Traceback" || true
+          ls -la out
+          test -f out/merchant_lite.obj && test -f out/board_lite.obj && test -f out/knight_far.obj
+      - name: Push results to art-village-npc67-dec (normal push, no force)
+        if: always()
+        run: |
+          echo "{\"commit\":\"${GITHUB_SHA}\",\"blender\":\"${BLENDER_VERSION}\",\"builtAt\":\"$(date -u +%FT%TZ)\"}" > out/build.json
+          REPO="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads "$REPO" art-village-npc67-dec >/dev/null 2>&1; then
+            git clone -q --depth 1 --branch art-village-npc67-dec "$REPO" /tmp/artdec
+          else
+            mkdir -p /tmp/artdec && cd /tmp/artdec && git init -q -b art-village-npc67-dec && git remote add origin "$REPO" && cd -
+          fi
+          rsync -a --delete --exclude .git out/ /tmp/artdec/
+          cd /tmp/artdec
+          git add -A
+          git commit -qm "Village npc67 decimation ${GITHUB_SHA::7}" || echo "no changes"
+          git push -q origin HEAD:art-village-npc67-dec

@@ -438,9 +438,10 @@ class StarsproutGame {
   async init(): Promise<void> {
     const scene = this.scene;
     // ---------- 角色 ----------
-    // Stage 7.2：新版初心者（Tripo 模組化：髮型、衣服、靴子、武器分開）；檔案沒交付或 &nv72=0 → 上一版
+    // 角色模型：已驗收的初心者 C1.0-B5b（Stage 7.2 新版 Tripo 美術驗收不通過，已封存）。
+    // 模組化換裝載入程式保留；只有網址加 &nv72=1 且封存的檔案有部署時才會使用（正式預覽不部署那些檔案）
     const modelsUrl = `${import.meta.env.BASE_URL}models/`;
-    const useNew = this.params.get("nv72") !== "0" && (await modularAvailable(modelsUrl, this.gender, this.lod));
+    const useNew = this.params.get("nv72") === "1" && (await modularAvailable(modelsUrl, this.gender, this.lod));
     this.avatar = useNew
       ? await NoviceAvatar.loadModular(scene, { gender: this.gender, lod: this.lod, baseUrl: modelsUrl, appearance: this.ws?.save.character.appearance ?? defaultAppearance() })
       : await NoviceAvatar.load(scene, { gender: this.gender, lod: this.lod, baseUrl: `${import.meta.env.BASE_URL}models/`, version: this.version });

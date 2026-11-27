@@ -183,8 +183,8 @@ export class PerfOverlay {
       this.last = this.read();
       const s = this.last;
       this.text.innerHTML = this.labels
-        ? `FPS ${Math.round(s.fps)}｜平均 ${Math.round(this.avgFps(5))}<br>Draw ${s.drawCalls}｜${Math.round(this.scene.getActiveIndices() / 3000)}k<br>${s.pixelRatio}x${this.resolutionLocked ? "🔒" : ""}｜模型 ${this.labels.model}`
-        : `FPS ${Math.round(s.fps)}<br>Draw ${s.drawCalls}<br>Tri ${(this.scene.getActiveIndices() / 3000).toFixed(1)}k<br>Mesh ${s.activeMeshes}<br>${s.pixelRatio}x`;
+        ? `FPS ${Math.round(s.fps)}｜平均 ${Math.round(this.avgFps(5))}<br>Draw ${s.drawCalls}｜${Math.round(this.scene.getActiveIndices() / 3000)}k<br>${Math.round(this.actualPixelRatio * 100) / 100}x${this.resolutionLocked ? "🔒" : ""}｜模型 ${this.labels.model}`
+        : `FPS ${Math.round(s.fps)}<br>Draw ${s.drawCalls}<br>Tri ${(this.scene.getActiveIndices() / 3000).toFixed(1)}k<br>Mesh ${s.activeMeshes}<br>${Math.round(this.actualPixelRatio * 100) / 100}x${this.resolutionLocked ? "🔒" : ""}`;
     }
   }
 

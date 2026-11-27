@@ -55,8 +55,13 @@ for (const name of browsers) {
       // ---------- Stage 7.2：新版初心者（Tripo 模組化） ----------
       const am = vi.avatarModel;
       const kinds = new Set((am?.parts ?? []).map((p) => p.kind));
-      check("Stage 7.2 新版初心者：身體＋髮型、上衣、下身、靴子、武器分開的模組（共用身體骨架）", !!am && am.modular && ["hair", "top", "bottom", "boots", "weapon"].every((k) => kinds.has(k)) && am.parts.every((p) => p.meshes >= 1), am);
-      check("Stage 7.2 新版初心者：Idle／Run／Attack／Hurt／Death／Jump 動作齊全，短劍與法杖各有攻擊動作", !!am && ["Idle", "Run", "Attack", "Hurt", "Death", "Jump"].every((c) => am.clips.includes(c)) && am.attackClips.includes("sword") && am.attackClips.includes("staff"), am && { clips: am.clips, attackClips: am.attackClips });
+      void kinds;
+      const villageFile = vi.file;
+      // Stage 6.7（Claude B）NPC：等 NPC 全部載入（美術在背景載入）
+      const vn = await V(() => window.__starwishWorld.info().npcs);
+      check("村莊 NPC（Claude B Stage 6.7）：七位 NPC＋洛恩＋N008 委託佈告欄已載入", !!vn && vn.ids.length >= 7 && vn.merchant && vn.board, vn);
+      check("角色模型：使用已驗收的初心者 C1.0-B5b（不是封存的 Tripo 新版）", !!am && am.modular === false && /^novice_c10b5b_(male|female)_(hq|lite)\.glb$/.test(vi.file), { file: vi.file, modular: am?.modular });
+      check("角色動作：Idle／Run／Attack／Hurt／Death 齊全；Jump 只給技能（一般移動沒有跳躍鍵）", !!am && ["Idle", "Run", "Attack", "Hurt", "Death", "Jump"].every((c) => am.clips.includes(c)) && vi.jumpButtonVisible === false, am && { clips: am.clips });
       check("Stage 7.2：存檔有等級、經驗、外觀（髮型、髮色、武器）", vi.level === 1 && vi.exp === 0 && vi.appearance?.hair === "hair01" && vi.appearance?.weapon === "sword", { level: vi.level, exp: vi.exp, appearance: vi.appearance });
       await shot("village_start");
 
@@ -236,7 +241,7 @@ for (const name of browsers) {
       check("營地傳送陣：已建立（魔法陣＋符文＋光柱）、抵達後啟用但不會自動觸發（不會兩張地圖無限往返）", fi2.map === "starsprout" && fi2.portal.built && fi2.portal.meshes >= 3 && fi2.portal.armed && !fi2.portal.fired, fi2.portal);
       check("切換地圖：金幣、背包、模型性別保留", fi.gold === goldBeforeField && fi.bag === bagBeforeField - 0 && fp.gender === g, { gold: fi.gold, goldBeforeField, bag: fi.bag, bagBeforeField });
       check("星芽原野：一般移動沒有跳躍按鈕", fi.jumpButton === false, fi.jumpButton);
-      check("Stage 7.2：原野也用新版初心者（同一套模組、同一把武器）", fp.avatarModel?.modular === true && fp.avatarModel.weapon === am?.weapon && fp.avatarModel.parts.length === am?.parts.length, fp.avatarModel);
+      check("原野與村莊用同一個角色模型（C1.0-B5b，沒有變回其他版本）", fp.avatarModel?.modular === false && fp.file === vi.file, { village: vi.file, field: fp.file });
       check("切換地圖後寵物仍裝備、在頭部側邊 15～25 cm", fi.pets.length >= 1 && fi.petGap >= 0.15 && fi.petGap <= 0.25, { gap: fi.petGap, pets: fi.pets });
       await shot("field_arrive");
 
@@ -296,7 +301,7 @@ for (const name of browsers) {
       vi = await V(() => window.__starwishWorld.info());
       run.results.backVillage = { gold: vi.gold, pos: vi.pos, bag: vi.bag.length };
       check("營地傳送陣：踩進去直接回到星芽村南門內側（南方傳送陣外、沒有再被傳回原野）", vi.map === "village" && Math.hypot(vi.pos[0] - 0, vi.pos[2] + 39) < 1.5 && vi.portal.armed && !vi.portal.fired, { pos: vi.pos, portal: vi.portal });
-      check("Stage 7.2 返回村莊：等級、經驗、外觀、武器保留", vi.level === beforeBack.level && vi.exp === beforeBack.exp && JSON.stringify(vi.appearance) === JSON.stringify(beforeBack.appearance) && vi.avatarModel?.weapon === am?.weapon, { village: { level: vi.level, exp: vi.exp, appearance: vi.appearance }, field: { level: beforeBack.level, exp: beforeBack.exp, appearance: beforeBack.appearance } });
+      check("Stage 7.2 返回村莊：等級、經驗、外觀、武器保留", vi.level === beforeBack.level && vi.exp === beforeBack.exp && JSON.stringify(vi.appearance) === JSON.stringify(beforeBack.appearance) && vi.file === villageFile && vi.avatarModel?.modular === false, { village: { level: vi.level, exp: vi.exp, appearance: vi.appearance }, field: { level: beforeBack.level, exp: beforeBack.exp, appearance: beforeBack.appearance } });
       check("返回村莊：金幣、背包、物品數量保留", vi.gold === beforeBack.gold && vi.bag.length === beforeBack.bag && vi.items.monsterMaterial === beforeBack.items.monsterMaterial, { vi: vi.gold, field: beforeBack.gold });
       await shot("village_back");
 

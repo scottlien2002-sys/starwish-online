@@ -19,6 +19,7 @@ OUT = os.path.abspath(args.get("--out", "out"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import vp3_arch as A  # noqa: E402
 import vp3_geo as G  # noqa: E402
+import vp3_detail66 as D66  # noqa: E402  （Stage 6.6 壁燈、花盆）
 
 BEARING, FRONT, W, D, TOP, FLOOR = 240.0, 24.0, 12.0, 10.0, 11.0, 0.0
 OX, OZ = G.pol(BEARING, FRONT)
@@ -26,7 +27,7 @@ F, local, EX, EY = A.local_fn(OX, OZ, BEARING, FLOOR)
 _t = math.radians(BEARING)
 FORGE = {"x": 22.5 * math.sin(_t) + 3.5 * math.cos(_t), "z": 22.5 * math.cos(_t) - 3.5 * math.sin(_t), "w": 2.4, "d": 2.0, "h": 2.2}
 FF, flocal, _, _ = A.local_fn(FORGE["x"], FORGE["z"], BEARING, 0.0)  # 原點＝鍛造台中心
-BUDGET = {"hq": 18000, "lite": 8000}
+BUDGET = {"hq": 18700, "lite": 8350}  # Stage 6.6：＋壁燈與花盆
 C = {
     "roof": (0.80, 0.44, 0.32), "roof_d": (0.64, 0.34, 0.25),
     "plaster": (0.98, 0.95, 0.88), "timber": (0.42, 0.27, 0.16),
@@ -58,7 +59,7 @@ def build(lod):
             k += 1
     # ---- 二樓：半木構（暖白灰泥＋深色木架），往前挑出遮住店面 ----
     G.box(props, F, -5.85, 5.85, 0.3, 9.85, 3.6, 3.78, C["timber"])  # 樓板梁
-    G.box(stone, F, -5.75, 5.75, 0.42, 9.75, 3.78, 6.2, C["plaster"])
+    G.box(props, F, -5.75, 5.75, 0.42, 9.75, 3.78, 6.2, C["plaster"])  # Stage 6.6：灰泥牆改用物件材質（灰泥細節），不再套用砌石貼圖
     y_f = 0.4
     beams = [(-5.75, 3.78, -5.75, 6.2), (5.75, 3.78, 5.75, 6.2), (-5.75, 6.12, 5.75, 6.12), (-5.75, 3.86, 5.75, 3.86)]
     for x in (-3.6, -1.4, 1.4, 3.6):
@@ -83,14 +84,14 @@ def build(lod):
     A.gable_roof(roof, F, -6.0, 6.0, 0.05, 9.95, 6.05, 9.3, C["roof"], C["roof_d"], ridge_along="x", thick=0.18)
     for sx in (-1, 1):  # 兩側山牆（屋脊沿 x），朝外
         x = sx * 5.75
-        tri = [stone.vert(F(x, 0.42, 6.2), C["plaster"]), stone.vert(F(x, 9.75, 6.2), C["plaster"]), stone.vert(F(x, 5.0, 9.15), C["plaster"])]
-        stone.face(tri, G.sub(F(sx, 0, 0), F(0, 0, 0)))
+        tri = [props.vert(F(x, 0.42, 6.2), C["plaster"]), props.vert(F(x, 9.75, 6.2), C["plaster"]), props.vert(F(x, 5.0, 9.15), C["plaster"])]
+        props.face(tri, G.sub(F(sx, 0, 0), F(0, 0, 0)))
     G.tube(gm, [F(-6.0, 5.0, 9.33), F(6.0, 5.0, 9.33)], 0.05, 5 if hq else 3, gcol)
     # 老虎窗（前坡中間）
     dy = 2.4
-    G.box(stone, F, -1.0, 1.0, dy, dy + 1.2, 7.0, 8.2, C["plaster"])
+    G.box(props, F, -1.0, 1.0, dy, dy + 1.2, 7.0, 8.2, C["plaster"])
     A.gable_roof(roof, F, -1.2, 1.2, dy - 0.15, dy + 1.6, 8.05, 8.75, C["roof"], C["roof_d"], ridge_along="y", thick=0.08)
-    A.gable_wall(stone, F, -1.0, 1.0, dy, 8.2, 8.62, C["plaster"])
+    A.gable_wall(props, F, -1.0, 1.0, dy, 8.2, 8.62, C["plaster"])
     Fw = G.frame(*F(0, dy - 0.01, 0)[:2], BEARING, FLOOR)
     A.window_box(stone, props, gm, gcol, Fw, 0.7, 7.25, 0.8, glass=C["glass"], arch=True, hq=hq)
     # ---- 粗石大煙囪（右後）＋發光餘燼 ----
@@ -199,6 +200,7 @@ def build(lod):
     Fbw = G.frame(b[0], b[1], BEARING + 90, 0.0)
     A.vextrude(props, Fbw, [(-0.22, 0.3), (0.22, 0.38), (0.22, 0.52), (-0.22, 0.6)], -0.16, 0.32, (0.5, 0.32, 0.2))
     G.box(props, Fbw, -0.36, -0.22, -0.04, 0.04, 0.42, 0.48, A.WOOD)
+    D66.decorate66("smith", locals(), F, lod)
     return {k: v for k, v in (("stone", stone), ("roof", roof), ("gold", gold), ("props", props), ("glow", glow)) if v.f}
 
 

@@ -24,13 +24,14 @@ args = dict(zip(argv[::2], argv[1::2]))
 OUT = os.path.abspath(args.get("--out", "out"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import vp3_geo as G  # noqa: E402
+import vp3_detail66 as D66  # noqa: E402  （Stage 6.6 壁燈、花盆）
 
 # ---------------- V1.3 法師軍團 ----------------
 BEARING, FRONT, W, D, TOP, FLOOR = 26.0, 27.0, 13.0, 13.0, 20.0, 2.0
 OX, OZ = G.pol(BEARING, FRONT)  # 正面中心（地面）
 F = G.frame(OX, OZ, BEARING, FLOOR)  # 區域座標：x 右（從廣場看）、y 往建築內、h 高（離高台面）
 FACE = BEARING + 180  # 正面朝向（噴泉）
-BUDGET = {"hq": 26000, "lite": 10000}
+BUDGET = {"hq": 26700, "lite": 10350}  # Stage 6.6：＋壁燈與花盆
 LOD = {
     "hq": dict(tower=32, roof=32, turret=16, small=10, col=6, ring=40, win=True, mullion=True, ridges=True, back_windows=True),
     "lite": dict(tower=14, roof=14, turret=8, small=6, col=4, ring=20, win=True, mullion=False, ridges=False, back_windows=False),
@@ -452,6 +453,7 @@ def build(lod):
     for lx, ly, h, rr in ((3.55, 4.5, 10.6, 0.3), (-3.75, 9.7, 11.9, 0.28), (0.3, 11.95, 9.3, 0.27)):
         bipyramid(glow, F(lx, ly, h), rr, rr * 1.7, rr * 1.4, 6, (C["crystal_top"], C["crystal_mid"], C["crystal_bot"]))
         ring3d(gm, F(lx, ly, h), rr * 1.9, FACE + lx * 20, 20, 16 if not lite else 10, 0.018 if not lite else 0.03, 4 if not lite else 3, gcol)
+    D66.decorate66("mage", locals(), F, lod)
     return {k: v for k, v in (("stone", stone), ("roof", roof), ("gold", gold), ("props", props), ("glow", glow)) if v.f}
 
 

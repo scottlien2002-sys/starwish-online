@@ -16,13 +16,6 @@ import { npcProfile, type VillageNpcs } from "./NpcP3.ts";
  * - 洛恩：停止巡走並面向玩家 → 商人選單 →「寵物鑑定」開啟星靈鑑定視窗（預覽版使用明確標示的測試資料）
  * - 傳送門：南門開放（確認後前往星芽原野）、北東西休眠（顯示未開放）；不新增出口
  */
-/** 與 Claude A Stage 7.1（feature/render-stage71-world）的 InteractOptions 同名同義的欄位 */
-export interface InteractOpts {
-  avatarUrl: string;
-  goToMap: (map: "starsprout") => void;
-  /** Stage 7.1／6.7：已開放的傳送陣由頁面端「踩入自動傳送」處理（PortalTrigger），這裡不顯示互動按鈕與確認視窗 */
-  autoPortals?: boolean;
-}
 
 type Target = { kind: "npc"; npc: NpcSpot } | { kind: "merchant" } | { kind: "portal"; portal: PortalDef };
 
@@ -352,3 +345,6 @@ export class VillageInteract {
   /** 互動距離（給說明與測試） */
   static readonly MERCHANT_R = PET_MERCHANT.interactR;
 }
+
+/** Claude B Stage 6.7 使用的名稱（同一個型別） */
+export type InteractOpts = InteractOptions;
