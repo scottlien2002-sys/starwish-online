@@ -135,3 +135,12 @@ test("傷害結算：同一次施放、同一段、同一目標只結算一次�
   const b = r.resolve({ skillId: s.id, hit, attackerId: "p", targetId: "m1", castId: 7 }, 1000);
   assert.equal(b.damage, 0);
 });
+
+test("多人特效預算：其他玩家的 critical（命中閃光）也受份額限制，自己的 critical 不受限", () => {
+  const b = new VfxBudget(VFX_QUALITY.low);
+  const cap = Math.floor(VFX_QUALITY.low.maxActiveEffects * 0.45);
+  let ok = 0;
+  for (let i = 0; i < 40; i++) if (b.request({ owner: "other", priority: "critical", particles: 10, distance: 3 }).allowed) ok++;
+  assert.ok(ok <= cap, `remote critical granted ${ok} > ${cap}`);
+  for (let i = 0; i < 40; i++) assert.ok(b.request({ owner: "self", priority: "critical", particles: 10 }).allowed);
+});

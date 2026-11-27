@@ -78,7 +78,8 @@ export class VfxBudget {
     const q = this.q;
     const P = this.policy;
     const remote = r.owner !== "self";
-    if (r.priority !== "critical") {
+    // critical（命中閃光等）只對自己的角色免檢查；其他玩家的 critical 一樣受份額／上限限制
+    if (r.priority !== "critical" || remote) {
       if (remote && (r.distance ?? 0) > P.cullDistance) return this.deny("distance");
       const fill = this.live.size / q.maxActiveEffects;
       if (this.live.size >= q.maxActiveEffects && remote) return this.deny("effect-cap");
@@ -91,7 +92,7 @@ export class VfxBudget {
     if (want > room) {
       if (room <= 0 && r.priority === "secondary") return this.deny("particle-cap");
       const s = Math.max(0, room) / Math.max(1, want);
-      if (remote && s < 0.15 && r.priority !== "critical") return this.deny("particle-cap");
+      if (remote && s < 0.15) return this.deny("particle-cap");
       scale *= Math.max(0.15, s);
       this.stats.scaled++;
     }

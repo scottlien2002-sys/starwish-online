@@ -105,7 +105,7 @@ export class VfxSystem {
     this.budget.setQuality(this.q);
     if (this.q.glow && !this.glow) {
       this.glow = new GlowLayer("fxGlow", this.scene, { mainTextureRatio: this.q.glowTextureRatio, blurKernelSize: tier === "high" ? 32 : 16 });
-      this.glow.intensity = 0.85;
+      this.glow.intensity = 0.6;
       for (const list of this.meshPool.values()) for (const f of list) this.glowAdd(f.mesh);
       for (const f of this.active) this.glowAdd(f.mesh);
     } else if (!this.q.glow && this.glow) {
@@ -503,11 +503,11 @@ export class VfxSystem {
         this.startMesh(f, 0.55, g.handle, (ff, u) => {
           const e = 1 - (1 - u) * (1 - u);
           ff.mesh.scaling.setAll(ff.baseScale * (0.25 + 0.75 * e));
-          ff.mat.alpha = 0.55 * (1 - u) * (1 - u);
+          ff.mat.alpha = 0.4 * (1 - u) * (1 - u);
           if (ff.extra) {
             ff.extra.position.copyFrom(ff.mesh.position);
             ff.extra.scaling.setAll(ff.baseScale * 1.4 * (0.5 + 0.8 * Math.sqrt(u)));
-            ff.extraMat!.alpha = Math.max(0, 1 - u * 2.2);
+            ff.extraMat!.alpha = 0.8 * Math.max(0, 1 - u * 2.4);
           }
         });
         this.burst("blastStars", at.add(new Vector3(0, 0.6 * sc, 0)), { ...common, count: 90, tex: "star", pal, life: [0.5, 0.95], size: [0.08, 0.2], power: [3, 7],
