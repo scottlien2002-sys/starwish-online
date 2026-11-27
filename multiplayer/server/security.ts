@@ -57,6 +57,7 @@ export function parseClientMsg(raw: string): ClientMsg | null {
       if (o.gender !== undefined && o.gender !== "male" && o.gender !== "female") return null;
       if (o.resume !== undefined && (typeof o.resume !== "string" || o.resume.length > 128)) return null;
       if (o.devMap !== undefined && !isMapId(o.devMap)) return null;
+      if (o.ap !== undefined && (typeof o.ap !== "object" || o.ap === null || JSON.stringify(o.ap).length > 200)) return null;
       return o as unknown as ClientMsg;
     case "in":
       if (!isInt(o.e, 0, 1_000_000) || !isInt(o.s, 1, Number.MAX_SAFE_INTEGER) || !validRuns(o.d)) return null;
@@ -69,6 +70,13 @@ export function parseClientMsg(raw: string): ClientMsg | null {
       return o as unknown as ClientMsg;
     case "resync":
       return { t: "resync" };
+    case "roan":
+      if (o.h !== 0 && o.h !== 1) return null;
+      return { t: "roan", h: o.h };
+    case "act":
+      if (o.k !== "attack" && o.k !== "hurt" && o.k !== "death") return null;
+      if (o.y !== undefined && !isInt(o.y, -3142, 3142)) return null;
+      return o as unknown as ClientMsg;
     default:
       return null;
   }

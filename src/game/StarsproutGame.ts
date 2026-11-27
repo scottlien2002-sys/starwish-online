@@ -62,6 +62,7 @@ import { riggedAssetAvailable, RiggedMonsterVisual } from "../monsters/rigged/Ri
 import { NOVICE_VERSION } from "./noviceVersion.ts";
 import { FIELD_CAMP_ARRIVAL } from "../maps/village/mapLinks.ts";
 import { PortalTrigger } from "./portalTrigger.ts";
+import { registerStarsprout } from "../../multiplayer/shared/maps.ts";
 import { FIELD_CAMP_PORTAL } from "./worldPortals.ts";
 import { buildCampPortal, type CampPortal } from "./CampPortal.ts";
 import { RESPAWN_SLOTS } from "../maps/village/layout.ts";
@@ -322,6 +323,8 @@ class StarsproutGame {
     this.veg = buildVegetationView(scene, layout, this.lod, contactShadows);
     colliders = colliders.concat(layout.colliders);
     this.colliders = colliders;
+    // Stage 8.1：多人模式的移動預測直接沿用這份地形與碰撞（與伺服器相同的 MAP_COLLIDERS＋道具＋植被）
+    if (ws?.mp) registerStarsprout(this.terrain, colliders);
     this.camObs = new CameraObstacleQuery(cameraObstaclesFrom(colliders, (x, z) => this.terrain.surface(x, z)), TUNING.camera.maxDistance);
     this.world.setLabels(false);
 
@@ -511,6 +514,16 @@ class StarsproutGame {
       });
     }
     this.installApi();
+    const mp = this.ws?.mp;
+    if (mp) {
+      mp.attach(scene, this.lod, (x, z) => this.terrain.surface(x, z), () => this.perf.avgFps(2));
+      mp.onMap((map, me) => {
+        if (map === "starsprout" || !this.ws) return;
+        this.leaving = true;
+        this.ws.travelTo({ map, x: me.x, z: me.z, yaw: me.yaw }, this.combat.isDown ? null : this.combat.hp);
+      });
+      this.hud.toast("多人測試：怪物與戰鬥是這台裝置的單機行為（多人權威戰鬥在 Stage 8.2）", 4000);
+    }
     await scene.whenReadyAsync();
     const auto = this.params.get("autoplay");
     if (auto === "fight") {
@@ -547,7 +560,16 @@ class StarsproutGame {
     const speed01 = Math.min(1, l);
     const attacking = this.avatar.state === "Attack";
     this.curSpeed = 0;
-    if (speed01 > 0.05 && !attacking && !down) {
+    const mp = this.ws?.mp;
+    if (mp) {
+      // Stage 8.1：移動交給多人連線（攻擊中、倒地時不移動，與單機規則相同）
+      const go = speed01 > 0.05 && !attacking && !down;
+      const st = mp.step(dt, go ? mx * speed01 : 0, go ? mz * speed01 : 0);
+      this.pos.x = st.x;
+      this.pos.z = st.z;
+      if (!attacking) this.yaw = st.yaw;
+      this.curSpeed = st.speed;
+    } else if (speed01 > 0.05 && !attacking && !down) {
       const sp = TUNING.player.moveSpeed * speed01;
       const nx = this.pos.x + mx * sp * dt;
       const nz = this.pos.z + mz * sp * dt;
@@ -582,6 +604,7 @@ class StarsproutGame {
     this.updateLoot(dt);
     this.follower.update(dt, this.avatar.petAnchor(this.earTmp), this.yaw, this.avatar.headHalfWidth);
     if (this.ws) this.worldFrame(dt);
+    mp?.update(dt);
     this.world.update(dt, this.pos.x, this.pos.z);
     this.veg?.update(this.pos.x, this.pos.z, false);
     this.props?.update(this.pos.x, this.pos.z, false, dt);
@@ -611,6 +634,9 @@ class StarsproutGame {
     if (r.ok) {
       this.attackTargetId = r.targetId;
       this.pending.attack = true;
+      // Stage 8.1：讓其他玩家看到攻擊動作（朝向目標）；傷害仍在本機（Stage 8.2 改伺服器判定）
+      const tg = this.monsters.find((x) => x.instance.instanceId === r.targetId)?.instance.currentPosition;
+      this.ws?.mp?.act("attack", tg ? Math.atan2(tg.x - this.pos.x, tg.z - this.pos.z) : this.yaw);
       return true;
     }
     if (fromPlayer && r.reason === "no-target") this.hud.toast("攻擊範圍內沒有怪物，請再靠近一點", 1000);
@@ -661,7 +687,10 @@ class StarsproutGame {
     if (hit) this.onHit(hit);
     if (this.ws) {
       // Stage 7：生命歸零 → 死亡動作 → 約 3 秒後在星芽村星願之泉復活（存檔：死亡次數、滿血）
-      if (this.combat.isDown && this.downAt === null) this.downAt = this.now;
+      if (this.combat.isDown && this.downAt === null) {
+        this.downAt = this.now;
+        this.ws.mp?.act("death");
+      }
       if (this.downAt !== null && this.now - this.downAt >= 3 && !this.leaving) this.respawnInVillage();
     } else if (this.combat.update(this.now)) {
       // 倒地 2 秒後在營地復活（測試規則）
@@ -678,7 +707,10 @@ class StarsproutGame {
         const dmg = this.combat.monsterImpact(this.now, m.instance, this.pos.x, this.pos.z);
         if (dmg > 0) {
           // 普通攻擊不打斷移動、攻擊（已定案規則）：站著不動時才播受傷動作
-          if (this.curSpeed < 0.05 && this.avatar.state !== "Attack") this.pending.hurt = true;
+          if (this.curSpeed < 0.05 && this.avatar.state !== "Attack") {
+            this.pending.hurt = true;
+            this.ws?.mp?.act("hurt");
+          }
           this.hud.toast(this.combat.isDown ? (this.ws ? "你倒下了…" : "你倒下了…（測試規則：2 秒後在營地復活）") : `受到${m.instance.definition.name}攻擊 -${dmg}`, 900);
         }
       }
@@ -834,7 +866,7 @@ class StarsproutGame {
   }
 
   private toVillage(): void {
-    if (!this.ws || this.leaving || this.ws.leaving) return;
+    if (!this.ws || this.leaving || this.ws.leaving || this.ws.mp) return;
     this.leaving = true;
     this.ws.travelTo({ ...FIELD_CAMP_PORTAL.to }, this.combat.hp);
   }
@@ -842,6 +874,12 @@ class StarsproutGame {
   private respawnInVillage(): void {
     if (!this.ws || this.leaving) return;
     this.leaving = true;
+    if (this.ws.mp) {
+      // 多人模式：請伺服器送回星芽村（伺服器確認倒地才接受）；收到換地圖通知後切換
+      this.ws.save.character.deaths += 1;
+      this.ws.mp.respawn();
+      return;
+    }
     this.ws.save.character.deaths += 1;
     const slot = RESPAWN_SLOTS[this.ws.save.character.deaths % RESPAWN_SLOTS.length]!;
     this.ws.travelTo({ map: "village", x: slot.x, z: slot.z, yaw: slot.yaw }, null);
@@ -850,7 +888,8 @@ class StarsproutGame {
   private worldFrame(dt: number): void {
     this.campPortal?.update(dt);
     // 踩進營地傳送陣 → 直接回星芽村（先存檔；倒地時不觸發；只觸發一次）
-    if (!this.combat.isDown && this.portal.update(this.pos.x, this.pos.z)) this.toVillage();
+    // 多人模式：傳送陣由伺服器判定
+    if (!this.ws?.mp && !this.combat.isDown && this.portal.update(this.pos.x, this.pos.z)) this.toVillage();
     this.rememberT += dt;
     if (this.rememberT >= 5 && !this.combat.isDown) {
       this.rememberT = 0;
@@ -1177,6 +1216,7 @@ class StarsproutGame {
           drops: self.dropCount,
           picked: self.picked,
           loot: self.loot.drops.length,
+          mp: self.ws?.mp ? { state: self.ws.mp.client.state, pid: self.ws.mp.client.pid, room: self.ws.mp.client.room, down: self.ws.mp.client.down, stats: { ...self.ws.mp.client.stats }, server: { ...self.ws.mp.client.server }, remotes: self.ws.mp.remoteInfo() } : null,
           monsters: self.monsters.map((m) => {
             const v = m.visual instanceof RiggedMonsterVisual ? m.visual : null;
             return {

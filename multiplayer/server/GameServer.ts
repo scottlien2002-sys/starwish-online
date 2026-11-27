@@ -13,6 +13,8 @@ import { fileURLToPath } from "node:url";
 import { WebSocketServer, type WebSocket } from "ws";
 import { MAX_MESSAGE_BYTES, MOVE_SPEED, PROTOCOL_VERSION, RECONNECT_GRACE_MS, ROOM_CAPACITY, SNAPSHOT_HZ, STEP, TICK_HZ } from "../shared/constants.ts";
 import type { ClientMsg, Gender, HelloMsg, MapId, ServerMsg } from "../shared/protocol.ts";
+import { parseAppearance } from "../../src/core/gameSave.ts";
+import { RESPAWN_SLOTS } from "../../src/maps/village/layout.ts";
 import { getMap } from "../shared/maps.ts";
 import { Room, ServerPlayer } from "./Room.ts";
 import { TokenBucket, originAllowed, parseClientMsg, protocolOk, sanitizeName } from "./security.ts";
@@ -95,6 +97,7 @@ export class GameServer {
     snapshotsSkippedBackpressure: 0,
     rejectedOrigin: 0,
     rejectedProtocol: 0,
+    roanRejected: 0,
   };
   private rate = { at: Date.now(), bytesIn: 0, bytesOut: 0, msgsIn: 0, msgsOut: 0, perSec: { bytesIn: 0, bytesOut: 0, msgsIn: 0, msgsOut: 0 } };
   private tickWindow: number[] = [];
@@ -138,12 +141,18 @@ export class GameServer {
     this.log(`Starwish MP server listening on ${this.opts.tls ? "https/wss" : "http/ws"}://${this.opts.host}:${this.port}`);
   }
 
+  private stopping = false;
+  private readonly inflight = new Set<Promise<void>>();
+
   async stop(): Promise<void> {
+    this.stopping = true;
     if (this.tickTimer) clearInterval(this.tickTimer);
     if (this.persistTimer) clearInterval(this.persistTimer);
     for (const l of this.live.values()) if (l.graceTimer) clearTimeout(l.graceTimer);
-    await this.persistAll(true);
     for (const c of this.conns) c.ws.terminate();
+    await Promise.allSettled([...this.inflight]);
+    for (const l of this.live.values()) await this.persistNow(l, true);
+    await this.store.close();
     await new Promise<void>((r) => this.wss.close(() => r()));
     await new Promise<void>((r) => this.http.close(() => r()));
   }
@@ -183,6 +192,7 @@ export class GameServer {
       proto: PROTOCOL_VERSION,
       tickHz: TICK_HZ,
       connections: this.conns.size,
+      store: { kind: this.store.kind, realm: this.store.realm },
       players: this.live.size,
       rooms: [...this.rooms.values()].map((r) => ({ key: r.key, map: r.map, players: r.size, connected: [...r.players()].filter((p) => p.connected).length, tick: r.tick })),
       tick: { count: this.stats.ticks, avgMs: tw.length ? +(tw.reduce((a, b) => a + b, 0) / tw.length).toFixed(3) : 0, maxMs: tw.length ? +Math.max(...tw).toFixed(3) : 0 },
@@ -293,6 +303,18 @@ export class GameServer {
       case "resync":
         p.needFull = true;
         return;
+      case "roan": {
+        const live = this.live.get(p.characterId);
+        if (live && !live.room.roanHold(p, m.h === 1, Date.now())) this.stats.roanRejected++;
+        return;
+      }
+      case "act":
+        if (!c.cmdBucket.take(Date.now())) {
+          this.stats.rateLimited++;
+          return;
+        }
+        p.applyAct(m.k, m.y, performance.now() / 1000);
+        return;
       case "cmd": {
         if (!c.cmdBucket.take(Date.now())) {
           this.stats.rateLimited++;
@@ -303,6 +325,8 @@ export class GameServer {
         const sys = live.room.systems.find((s) => s.commands.includes(m.k));
         const now = Date.now();
         const r = this.ledger.run(p.characterId, m.id, now, () => {
+          if (m.k === "respawn") return this.respawn(p, live);
+          if (m.k === "appearance") return this.changeAppearance(p, live, m.p);
           if (!sys?.onCommand) return { ok: false, err: "unknown_cmd" };
           const out = sys.onCommand(m.k, m.p, { room: live.room, player: p, requestId: m.id, now });
           return out.ok ? { ok: true, data: out.data } : { ok: false, err: out.err };
@@ -329,7 +353,8 @@ export class GameServer {
         return this.close(c, 4003, "full");
       }
       const gender: Gender = m.gender === "female" ? "female" : "male";
-      const created = await this.store.createGuest(sanitizeName(m.name, this.nextPid + 1000), gender, now);
+      // 外觀只是造型（不影響數值）：用單機版同一個 parseAppearance 驗證，不合法值回到預設
+      const created = await this.store.createGuest(sanitizeName(m.name, this.nextPid + 1000), gender, parseAppearance(m.ap), now);
       rec = created.character;
       token = created.token;
     }
@@ -359,7 +384,7 @@ export class GameServer {
     } else {
       const map: MapId = this.opts.dev && m.devMap ? m.devMap : rec.map;
       const sp = this.opts.dev && m.devMap && m.devMap !== rec.map ? this.spawnPoint(map, null, null, 0) : this.spawnPoint(map, rec.x, rec.z, rec.yaw);
-      const player = new ServerPlayer({ pid: this.nextPid++, characterId: rec.id, name: rec.name, gender: rec.gender, x: sp.x, z: sp.z, yaw: sp.yaw, version: rec.version, lockEpoch });
+      const player = new ServerPlayer({ pid: this.nextPid++, characterId: rec.id, name: rec.name, gender: rec.gender, appearance: rec.appearance, x: sp.x, z: sp.z, yaw: sp.yaw, version: rec.version, lockEpoch });
       const room = this.pickRoom(map);
       room.add(player);
       live = { player, room, conn: c, graceTimer: null };
@@ -387,6 +412,10 @@ export class GameServer {
       map: live.room.map,
       room: live.room.key,
       resumed,
+      g: p.gender,
+      ap: { ...p.appearance },
+      name: p.name,
+      realm: this.store.realm,
       tick: live.room.tick,
       st: now,
       e: p.epoch,
@@ -463,8 +492,38 @@ export class GameServer {
     void this.persist(live);
   }
 
+  /** 倒地後回星芽村星願之泉（只有倒地中可以使用；Stage 8.2 起倒地由伺服器戰鬥判定） */
+  private respawn(p: ServerPlayer, live: Live): { ok: boolean; data?: unknown; err?: string } {
+    if (!p.down) return { ok: false, err: "not_down" };
+    this.respawnCount = (this.respawnCount + 1) % RESPAWN_SLOTS.length;
+    const slot = RESPAWN_SLOTS[this.respawnCount]!;
+    p.down = false;
+    this.transfer(p, live.room, { map: "village", x: slot.x, z: slot.z, yaw: slot.yaw });
+    return { ok: true, data: { map: "village" } };
+  }
+  private respawnCount = 0;
+
+  /** 換外觀（髮型、髮色、武器）：只是造型，驗證後存檔並通知同房間玩家 */
+  private changeAppearance(p: ServerPlayer, live: Live, payload: unknown): { ok: boolean; data?: unknown; err?: string } {
+    if (!payload || typeof payload !== "object" || JSON.stringify(payload).length > 200) return { ok: false, err: "bad_appearance" };
+    p.appearance = parseAppearance(payload);
+    live.room.metaChanged(p);
+    const pr = this.store.saveAppearance(p.characterId, p.lockEpoch, p.appearance).then(() => {}, () => void this.stats.persistConflict++);
+    this.inflight.add(pr);
+    void pr.finally(() => this.inflight.delete(pr));
+    return { ok: true, data: { ap: p.appearance } };
+  }
+
   // ---------------- 存檔 ----------------
-  private async persist(live: Live, force = false): Promise<void> {
+  private persist(live: Live, force = false): Promise<void> {
+    if (this.stopping) return Promise.resolve();
+    const pr = this.persistNow(live, force).catch((e: unknown) => this.log(`persist error: ${String(e)}`));
+    this.inflight.add(pr);
+    void pr.finally(() => this.inflight.delete(pr));
+    return pr;
+  }
+
+  private async persistNow(live: Live, force = false): Promise<void> {
     const p = live.player;
     if (!p.persistDirty && !force) return;
     p.persistDirty = false;
@@ -491,12 +550,14 @@ export class GameServer {
   }
 }
 
-export function optionsFromEnv(env: NodeJS.ProcessEnv): ServerOptions {
+export function optionsFromEnv(env: NodeJS.ProcessEnv, store?: CharacterStore): ServerOptions {
   const cert = env.MP_TLS_CERT;
   const key = env.MP_TLS_KEY;
   return {
     port: Number(env.PORT ?? 2567),
-    host: env.HOST ?? "127.0.0.1",
+    // Render 等主機會設定 PORT 並要求監聽 0.0.0.0
+    host: env.HOST ?? (env.RENDER ? "0.0.0.0" : "127.0.0.1"),
+    store,
     tls: cert && key ? { cert: readFileSync(cert, "utf8"), key: readFileSync(key, "utf8") } : undefined,
     dev: env.MP_DEV === "1",
     graceMs: Number(env.MP_GRACE_MS ?? RECONNECT_GRACE_MS),

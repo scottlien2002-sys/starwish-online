@@ -20,6 +20,25 @@ import { expToNext, gainExp } from "../core/progression.ts";
 
 export type ConfigMode = "test" | "official";
 
+/** Stage 8.1：多人模式的本機資料（寵物、背包等介面暫存）放在獨立的鍵，不會改到單機存檔 */
+function prefixedStorage(base: Storage, prefix: string): Storage {
+  return {
+    get length() {
+      return base.length;
+    },
+    clear: () => {
+      for (let i = base.length - 1; i >= 0; i--) {
+        const k = base.key(i);
+        if (k && k.startsWith(prefix)) base.removeItem(k);
+      }
+    },
+    getItem: (k: string) => base.getItem(prefix + k),
+    key: (i: number) => base.key(i),
+    removeItem: (k: string) => base.removeItem(prefix + k),
+    setItem: (k: string, v: string) => base.setItem(prefix + k, v),
+  };
+}
+
 export class WorldSession {
   readonly save: GameSave;
   readonly pets: PetManager;
@@ -34,11 +53,14 @@ export class WorldSession {
   private saveTimer: number | null = null;
   /** 已經開始切換地圖 */
   leaving = false;
+  /** Stage 8.1：多人連線（?mp=1）；單機模式為 null */
+  mp: import("../net/MpWorld.ts").MpWorld | null = null;
 
   constructor(params: URLSearchParams) {
     this.storage = (() => {
       try {
-        return window.localStorage;
+        const ls = window.localStorage;
+        return params.get("mp") === "1" ? prefixedStorage(ls, "mp81:") : ls;
       } catch {
         return null;
       }

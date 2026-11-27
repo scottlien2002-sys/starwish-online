@@ -1,10 +1,12 @@
 {
   "name": "starwish-multiplayer",
   "private": true,
-  "version": "0.8.0",
-  "description": "星願物語 Stage 8.0 多人連線原型（伺服器＋客戶端網路層），與單機版完全分開",
+  "version": "0.8.1",
+  "description": "星願物語 Stage 8.1 多人連線伺服器（ws＋PostgreSQL）與客戶端網路層；與單機版分開",
   "type": "module",
-  "engines": { "node": ">=22.18" },
+  "engines": {
+    "node": ">=22.18"
+  },
   "scripts": {
     "build:proto": "node build-proto.mjs",
     "start": "node server/main.ts",
@@ -14,10 +16,12 @@
     "test:integration": "node --test --test-concurrency=1 tests/integration.test.ts",
     "test:browser": "node build-proto.mjs && node tests/browser-two-players.mjs",
     "test:wss": "bash tests/wss-check.sh",
-    "test:db": "bash db/test-db.sh"
+    "test:db": "bash db/test-db.sh",
+    "test:pg": "bash db/test-db.sh"
   },
   "dependencies": {
-    "ws": "^8.18.0"
+    "ws": "^8.18.0",
+    "postgres": "3.4.7"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

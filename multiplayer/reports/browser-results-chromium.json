@@ -56,7 +56,7 @@
       "ok": true,
       "detail": {
         "pid": 1,
-        "resync": 510
+        "resync": 547
       }
     },
     {
@@ -82,10 +82,10 @@
       "name": "診斷資訊有數值（RTT、封包量、FPS、人數）",
       "ok": true,
       "detail": {
-        "fps": 60,
-        "snaps": 20,
-        "down": 1819,
-        "rtt": 3,
+        "fps": 43,
+        "snaps": 19,
+        "down": 2347,
+        "rtt": 4,
         "players": 2
       }
     },
@@ -95,9 +95,9 @@
       "detail": {
         "players": 2,
         "tick": {
-          "count": 136,
-          "avgMs": 0.333,
-          "maxMs": 1.476
+          "count": 155,
+          "avgMs": 0.742,
+          "maxMs": 12.923
         }
       }
     },
@@ -115,14 +115,14 @@
       "map": "village",
       "room": "village-1",
       "pid": 1,
-      "rttMs": 3,
-      "rttAvgMs": 3,
-      "jitterMs": 0,
-      "bytesUpPerSec": 35,
-      "bytesDownPerSec": 1819,
+      "rttMs": 4,
+      "rttAvgMs": 13,
+      "jitterMs": 11,
+      "bytesUpPerSec": 34,
+      "bytesDownPerSec": 2347,
       "msgsUpPerSec": 1,
-      "msgsDownPerSec": 21,
-      "snapsPerSec": 20,
+      "msgsDownPerSec": 20,
+      "snapsPerSec": 19,
       "players": 2,
       "pendingInputs": 0,
       "corrections": 0,
@@ -131,24 +131,24 @@
       "snapCorrections": 0,
       "reconnects": 0,
       "lastResyncMs": 0,
-      "serverTick": 131,
-      "fps": 60,
+      "serverTick": 139,
+      "fps": 43,
       "totalBytesUp": 165,
-      "totalBytesDown": 4507
+      "totalBytesDown": 5876
     },
     "B": {
       "state": "online",
       "map": "village",
       "room": "village-1",
       "pid": 2,
-      "rttMs": 4,
-      "rttAvgMs": 5,
-      "jitterMs": 3,
-      "bytesUpPerSec": 393,
-      "bytesDownPerSec": 1669,
-      "msgsUpPerSec": 10,
-      "msgsDownPerSec": 21,
-      "snapsPerSec": 20,
+      "rttMs": 5,
+      "rttAvgMs": 10,
+      "jitterMs": 16,
+      "bytesUpPerSec": 354,
+      "bytesDownPerSec": 1915,
+      "msgsUpPerSec": 9,
+      "msgsDownPerSec": 18,
+      "snapsPerSec": 17,
       "players": 2,
       "pendingInputs": 0,
       "corrections": 0,
@@ -157,17 +157,21 @@
       "snapCorrections": 0,
       "reconnects": 0,
       "lastResyncMs": 0,
-      "serverTick": 131,
-      "fps": 60,
-      "totalBytesUp": 1002,
-      "totalBytesDown": 11892
+      "serverTick": 139,
+      "fps": 38,
+      "totalBytesUp": 776,
+      "totalBytesDown": 16789
     }
   },
   "serverMetrics": {
-    "uptimeS": 8,
-    "proto": 1,
+    "uptimeS": 10,
+    "proto": 2,
     "tickHz": 20,
     "connections": 2,
+    "store": {
+      "kind": "memory",
+      "realm": "test"
+    },
     "players": 2,
     "rooms": [
       {
@@ -175,28 +179,28 @@
         "map": "village",
         "players": 2,
         "connected": 2,
-        "tick": 131
+        "tick": 140
       }
     ],
     "tick": {
-      "count": 136,
-      "avgMs": 0.333,
-      "maxMs": 1.476
+      "count": 155,
+      "avgMs": 0.742,
+      "maxMs": 12.923
     },
     "netPerSec": {
-      "bytesIn": 426,
-      "bytesOut": 3590,
-      "msgsIn": 11,
-      "msgsOut": 42
+      "bytesIn": 260,
+      "bytesOut": 4303,
+      "msgsIn": 7,
+      "msgsOut": 39
     },
     "totals": {
-      "ticks": 136,
-      "tickMsSum": 47.155313999993496,
-      "tickMsMax": 1.6092020000000957,
-      "bytesIn": 2406,
-      "bytesOut": 23571,
-      "msgsIn": 60,
-      "msgsOut": 266,
+      "ticks": 155,
+      "tickMsSum": 90.74364299999752,
+      "tickMsMax": 12.922746999998708,
+      "bytesIn": 2141,
+      "bytesOut": 33434,
+      "msgsIn": 54,
+      "msgsOut": 285,
       "badMessages": 0,
       "rateLimited": 0,
       "kicked": 0,
@@ -208,7 +212,8 @@
       "persistConflict": 0,
       "snapshotsSkippedBackpressure": 0,
       "rejectedOrigin": 0,
-      "rejectedProtocol": 0
+      "rejectedProtocol": 0,
+      "roanRejected": 0
     },
     "ledgerEntries": 0,
     "players_detail": [
@@ -225,7 +230,10 @@
         "duplicateSteps": 0,
         "seqGaps": 0,
         "illegalPositions": 0,
-        "speedViolations": 0
+        "speedViolations": 0,
+        "actsAccepted": 0,
+        "actsRejected": 0,
+        "stepsWhileDown": 0
       },
       {
         "pid": 2,
@@ -233,14 +241,17 @@
         "room": "village-1",
         "connected": true,
         "queue": 0,
-        "ack": 64,
-        "stepsApplied": 64,
+        "ack": 67,
+        "stepsApplied": 67,
         "stepsDropped": 0,
         "staleEpochInputs": 0,
         "duplicateSteps": 0,
         "seqGaps": 0,
         "illegalPositions": 0,
-        "speedViolations": 0
+        "speedViolations": 0,
+        "actsAccepted": 0,
+        "actsRejected": 0,
+        "stepsWhileDown": 0
       }
     ]
   },

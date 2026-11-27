@@ -13,7 +13,7 @@ as_pg() { (cd "$tmp" && runuser -u postgres -- "$@"); }
 # postgres 帳號可能無法讀取專案資料夾（CI 的 /home/runner 是 750），先複製到暫存資料夾
 cp "$here/schema.sql" "$tmp/schema.sql"; chmod 644 "$tmp/schema.sql"
 if ! out=$(cd "$tmp" && as_pg "$PGBIN/initdb" -D "$tmp/data" -A trust -U postgres 2>&1); then echo "::error::initdb failed: $(echo "$out" | tail -5 | tr '\n' ' ')"; exit 1; fi
-if ! (cd "$tmp" && as_pg "$PGBIN/pg_ctl" -D "$tmp/data" -o "-k $tmp -p 55432 -c listen_addresses=''" -l "$tmp/log" start -w >/dev/null); then echo "::error::pg_ctl start failed: $(tail -5 "$tmp/log" | tr '\n' ' ')"; exit 1; fi
+if ! (cd "$tmp" && as_pg "$PGBIN/pg_ctl" -D "$tmp/data" -o "-k $tmp -p 55432 -c listen_addresses=127.0.0.1" -l "$tmp/log" start -w >/dev/null); then echo "::error::pg_ctl start failed: $(tail -5 "$tmp/log" | tr '\n' ' ')"; exit 1; fi
 PSQL=(as_pg psql -h "$tmp" -p 55432 -U postgres -v ON_ERROR_STOP=1 -X -q -t -A)
 "${PSQL[@]}" -c "CREATE DATABASE starwish" >/dev/null
 DB=("${PSQL[@]}" -d starwish)
@@ -63,6 +63,14 @@ check "並行 20 筆轉移同一道具：成功筆數" "$ok" 1
 check "道具異動紀錄只有 1 筆" "$("${DB[@]}" -c "SELECT count(*) FROM item_events WHERE item_uid='$J'")" 1
 check "20 筆請求都有寫入 request_ledger" "$("${DB[@]}" -c "SELECT count(*) FROM request_ledger WHERE request_id LIKE 'req-race-%'")" 20
 
+# Stage 8.1：多人伺服器實際接 PostgreSQL（重啟保留、資料區分開、背包、工作階段鎖）
+"${PSQL[@]}" -c "CREATE DATABASE starwish_mp" >/dev/null
+if DATABASE_URL="postgres://postgres@127.0.0.1:55432/starwish_mp" node --test --test-concurrency=1 "$here/../tests/pg.test.ts" > "$tmp/pg-node.txt" 2>&1; then
+  check "多人伺服器 PostgreSQL 接入測試（tests/pg.test.ts）" ok ok
+else
+  check "多人伺服器 PostgreSQL 接入測試（tests/pg.test.ts）" "$(grep -E '^not ok|error' "$tmp/pg-node.txt" | head -3 | tr '\n' ' ')" ok
+fi
+grep -E "^# (pass|fail)" "$tmp/pg-node.txt" || tail -20 "$tmp/pg-node.txt"
 as_pg "$PGBIN/pg_ctl" -D "$tmp/data" stop -m fast >/dev/null
 rm -rf "$tmp"
 echo "$pass passed, $fail failed"

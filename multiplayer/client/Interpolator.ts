@@ -13,6 +13,8 @@ export interface Sample {
   anim: number;
   speed: number;
   link: number;
+  act?: number;
+  actSeq?: number;
 }
 
 export interface Pose {

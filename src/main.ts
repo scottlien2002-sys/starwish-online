@@ -44,7 +44,15 @@ function main(): void {
       document.body.classList.add("map-mode");
       void import("./game/worldSession.ts")
         .then(async (ws) => {
-          const world = new ws.WorldSession(new URLSearchParams(location.search));
+          const params = new URLSearchParams(location.search);
+          const world = new ws.WorldSession(params);
+          // Stage 8.1：多人模式（?mp=1）— 先連線，地圖與位置以伺服器為準
+          if (params.get("mp") === "1") {
+            const mpm = await import("./net/mpBoot.ts");
+            await mpm.bootMultiplayer(world, hudRoot, params, (s) => {
+              if (status) status.textContent = s;
+            });
+          }
           if (world.save.character.map === "starsprout") {
             const m = await import("./game/StarsproutGame.ts");
             await m.startStarsproutGame(canvas, hudRoot, world);

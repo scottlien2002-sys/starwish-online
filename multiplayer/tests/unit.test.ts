@@ -178,7 +178,7 @@ test("重複請求防護：同 requestId 只執行一次", () => {
 
 test("存檔版本控制與工作階段鎖", async () => {
   const s = new MemoryStore();
-  const { character, token } = await s.createGuest("a", "male", 0);
+  const { character, token } = await s.createGuest("a", "male", { hair: "hair01", hairColor: null, weapon: "sword" }, 0);
   assert.equal((await s.findByToken(token))?.id, character.id);
   assert.equal(await s.findByToken("nope"), null);
   const e1 = await s.acquireLock(character.id);
@@ -224,7 +224,7 @@ test("AvatarSync（Stage 8.1 遊戲整合介面）：建立、套姿勢、切動
     dispose: () => log.push(`dispose ${p.id}`),
   }));
   const m = getMap("village");
-  const base = { name: "a", gender: "male" as const, yaw: 0, speed: 5, link: 1 };
+  const base = { name: "a", gender: "male" as const, ap: { hair: "hair01", hairColor: null, weapon: "sword" as const }, act: 0, actSeq: 0, yaw: 0, speed: 5, link: 1 };
   sync.sync([{ id: 7, x: 0, z: -39, anim: 1, ...base }], m);
   sync.sync([{ id: 7, x: 0, z: -38, anim: 1, ...base }], m);
   sync.sync([{ id: 7, x: 0, z: -38, anim: 0, ...base, link: 0 }], m);
@@ -232,4 +232,62 @@ test("AvatarSync（Stage 8.1 遊戲整合介面）：建立、套姿勢、切動
   assert.deepEqual(log.filter((l) => !l.startsWith("pose")), ["anim 7 Run", "link 7 true", "anim 7 Idle", "link 7 false", "dispose 7"]);
   assert.equal(log.filter((l) => l.startsWith("pose")).length, 3);
   assert.equal(sync.count, 0);
+});
+
+test("Stage 8.1 動作事件：限速、倒地後不能移動也不能再送動作", () => {
+  const p = mkPlayer(0, -39);
+  assert.equal(p.applyAct("attack", 1571, 10), true);
+  assert.equal(p.act, ANIM.Attack);
+  assert.equal(p.actSeq, 1);
+  assert.equal(Math.round(p.yaw * 1000), 1571);
+  assert.equal(p.applyAct("attack", undefined, 10.1), false, "too fast");
+  assert.equal(p.applyAct("attack", undefined, 10.3), true);
+  assert.equal(p.applyAct("hurt", undefined, 10.4), true);
+  assert.equal(p.act, ANIM.Hurt);
+  assert.equal(p.applyAct("death", undefined, 11), true);
+  assert.equal(p.tuple()[4], ANIM.Death, "tuple shows death");
+  assert.equal(p.applyAct("attack", undefined, 20), false, "no attacks while down");
+  p.enqueue({ t: "in", e: 0, s: 1, d: [[0, 127, 5]] });
+  assert.equal(p.queue.length, 0, "no movement while down");
+  assert.equal(p.counters.stepsWhileDown, 1);
+  assert.equal(p.ack, 5, "sequence still advances");
+});
+
+test("Stage 8.1 外觀：用單機版 parseAppearance 驗證，不合法值回到預設", async () => {
+  const { parseAppearance } = await import("../../src/core/gameSave.ts");
+  assert.deepEqual(parseAppearance({ hair: "hair99", hairColor: "red", weapon: "bazooka" }), { hair: "hair01", hairColor: null, weapon: "sword" });
+  assert.deepEqual(parseAppearance({ hair: "hair02", hairColor: "#C0408A", weapon: "staff" }), { hair: "hair02", hairColor: "#c0408a", weapon: "staff" });
+  assert.equal(parseClientMsg(JSON.stringify({ t: "act", k: "fly" })), null);
+  assert.equal(parseClientMsg(JSON.stringify({ t: "act", k: "attack", y: 99999 })), null);
+  assert.ok(parseClientMsg(JSON.stringify({ t: "act", k: "attack", y: -3141 })));
+  assert.equal(parseClientMsg(JSON.stringify({ t: "roan", h: 2 })), null);
+});
+
+test("Stage 8.1 N009 洛恩：伺服器時間巡邏、只有站在旁邊的玩家可以讓他停下", async () => {
+  const { petMerchantPose } = await import("../../src/maps/village/petMerchant.ts");
+  const room = new Room("v", "village", 10);
+  const now = 1_800_000_000_000;
+  const pose = petMerchantPose(room.roan!.patrolTime(now / 1000));
+  const near = mkPlayer(pose.x + 1, pose.z, 1);
+  const far = mkPlayer(0, -39, 2);
+  room.add(near);
+  room.add(far);
+  assert.equal(room.roanHold(far, true, now), false, "far player rejected");
+  assert.equal(room.roanState(now)![1], 0);
+  assert.equal(room.roanHold(near, true, now), true);
+  const s1 = room.roanState(now + 2000)!;
+  assert.equal(s1[1], 1, "paused");
+  assert.ok(Math.abs(s1[2] / 100 - near.x) < 0.02, "faces the talking player");
+  const t1 = room.roanState(now + 4000)![0];
+  assert.equal(t1, s1[0], "patrol time frozen while paused");
+  room.remove(near.pid);
+  const s2 = room.roanState(now + 5000)!;
+  assert.equal(s2[1], 0, "leaving releases");
+  // 心跳逾時（10 秒）也會自動恢復巡邏
+  const pose2 = petMerchantPose(room.roan!.patrolTime((now + 6000) / 1000));
+  const near2 = mkPlayer(pose2.x + 1, pose2.z, 3);
+  room.add(near2);
+  assert.equal(room.roanHold(near2, true, now + 6000), true);
+  assert.equal(room.roanState(now + 7000)![1], 1);
+  assert.equal(room.roanState(now + 17_500)![1], 0, "hold timeout");
 });

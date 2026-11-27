@@ -55,10 +55,9 @@ function villageAuthority(): MapAuthority {
   };
 }
 
-function starsproutAuthority(): MapAuthority {
-  const terrain = new StarsproutTerrain();
-  const veg = buildVegetation(terrain, VEG_HQ, undefined, propExclusions());
-  const colliders: Collider[] = [...MAP_COLLIDERS, ...propColliders(), ...veg.colliders];
+function starsproutAuthority(given?: { terrain: StarsproutTerrain; colliders: readonly Collider[] }): MapAuthority {
+  const terrain = given?.terrain ?? new StarsproutTerrain();
+  const colliders: readonly Collider[] = given?.colliders ?? [...MAP_COLLIDERS, ...propColliders(), ...buildVegetation(terrain, VEG_HQ, undefined, propExclusions()).colliders];
   const p = FIELD_CAMP_PORTAL;
   const insideCollider = (x: number, z: number): boolean => {
     const q = pushOutOfColliders(x, z, PLAYER_RADIUS * 0.9, colliders);
@@ -90,6 +89,14 @@ export function getMap(id: MapId): MapAuthority {
     cache.set(id, m);
   }
   return m;
+}
+
+/**
+ * 遊戲端已經建好原野地形與碰撞時直接沿用（不重算一次，省記憶體與載入時間）。
+ * 碰撞必須是 MAP_COLLIDERS＋道具＋植被（HQ 與 Lite 植被碰撞相同，已有測試）。
+ */
+export function registerStarsprout(terrain: StarsproutTerrain, colliders: readonly Collider[]): void {
+  cache.set("starsprout", starsproutAuthority({ terrain, colliders }));
 }
 
 export const MAP_IDS: readonly MapId[] = ["village", "starsprout"];

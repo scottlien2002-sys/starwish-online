@@ -8,7 +8,7 @@
  * 斷線：自動重連（0.5→1→2→4→8 秒），帶憑證接回原角色，收到完整快照即完成重新同步，未送達的輸入會重送
  */
 import { INPUT_SEND_MS, INTERP_DELAY_MS, MAX_STEPS_PER_MSG, MOVE_DEADZONE, PROTOCOL_VERSION, SNAP_CORRECTION_M, STEP } from "../shared/constants.ts";
-import { ANIM, fromCm, fromMrad, quantizeDir, type Gender, type MapId, type PlayerMeta, type ServerMsg, type SnapMsg } from "../shared/protocol.ts";
+import { ANIM, fromCm, fromMrad, quantizeDir, type ActKind, type AppearanceWire, type Gender, type MapId, type PlayerMeta, type ServerMsg, type SnapMsg } from "../shared/protocol.ts";
 import { getMap, type MapAuthority } from "../shared/maps.ts";
 import { runLength, stepMove, type MoveState } from "../shared/sim.ts";
 import { Interpolator, type Pose } from "./Interpolator.ts";
@@ -20,6 +20,8 @@ export interface NetClientOptions {
   name?: string;
   gender?: Gender;
   devMap?: MapId;
+  /** 新角色外觀（只在伺服器建立角色時採用） */
+  ap?: AppearanceWire;
   /** 測試用：人為延遲（單程，毫秒）與抖動 */
   lagMs?: number;
   jitterMs?: number;
@@ -42,6 +44,10 @@ export interface RemotePlayer extends Pose {
   id: number;
   name: string;
   gender: Gender;
+  ap: AppearanceWire;
+  /** 單次動作（Attack／Hurt）代碼與序號：序號改變＝播放一次 */
+  act: number;
+  actSeq: number;
 }
 
 export interface NetStats {
@@ -89,6 +95,14 @@ export class NetClient {
   token: string | null;
   pid = 0;
   characterId = "";
+  gender: Gender = "male";
+  appearance: AppearanceWire = { hair: "hair01", hairColor: null, weapon: "sword" };
+  name = "";
+  realm = "";
+  /** 伺服器說目前倒地中 */
+  down = false;
+  /** 洛恩巡邏狀態（伺服器）：巡邏時間 秒（於 at 伺服器毫秒）、暫停中、面向目標 */
+  roan: { patrolT: number; at: number; paused: boolean; tx: number; tz: number } | null = null;
   map: MapAuthority | null = null;
   room = "";
   private epoch = 0;
@@ -135,7 +149,7 @@ export class NetClient {
     const ws = new WS(this.opts.url);
     this.ws = ws;
     ws.onopen = () => {
-      this.sendRaw({ t: "hello", v: PROTOCOL_VERSION, name: this.opts.name, gender: this.opts.gender, ...(this.token ? { resume: this.token } : {}), ...(this.opts.devMap ? { devMap: this.opts.devMap } : {}) });
+      this.sendRaw({ t: "hello", v: PROTOCOL_VERSION, name: this.opts.name, gender: this.opts.gender, ...(this.opts.ap ? { ap: this.opts.ap } : {}), ...(this.token ? { resume: this.token } : {}), ...(this.opts.devMap ? { devMap: this.opts.devMap } : {}) });
     };
     ws.onmessage = (ev: MessageEvent) => {
       const s = typeof ev.data === "string" ? ev.data : String(ev.data);
@@ -278,7 +292,8 @@ export class NetClient {
     for (const [id, buf] of this.remoteBuf) {
       const pose = buf.sample(rt);
       const m = this.metas.get(id);
-      if (pose && m) out.push({ id, name: m.n, gender: m.g, ...pose });
+      const lt = buf.latest;
+      if (pose && m) out.push({ id, name: m.n, gender: m.g, ap: m.ap, ...pose, act: lt?.act ?? 0, actSeq: lt?.actSeq ?? 0 });
     }
     return out;
   }
@@ -288,6 +303,30 @@ export class NetClient {
     const id = requestId ?? `${this.pid.toString(36)}_${Date.now().toString(36)}_${(this.reqCounter++).toString(36)}`.padEnd(8, "0");
     this.sendRaw({ t: "cmd", id, k: kind, p: payload });
     return id;
+  }
+
+  /** 動作事件（攻擊／受擊／倒地）：只用於讓其他玩家看到動畫 */
+  act(k: ActKind, yaw?: number): void {
+    if (this.state !== "online") return;
+    const y = yaw === undefined ? undefined : Math.round(Math.atan2(Math.sin(yaw), Math.cos(yaw)) * 1000);
+    this.sendRaw({ t: "act", k, ...(y !== undefined ? { y } : {}) });
+  }
+
+  /** 估計的伺服器時間（毫秒）：洛恩巡邏等「依伺服器時間決定」的畫面用 */
+  serverNow(): number {
+    const off = this.clockOff.length ? Math.max(...this.clockOff) : 0;
+    return this.now() + off;
+  }
+
+  /** 洛恩目前的巡邏時間（秒）：伺服器狀態＋經過時間（暫停中不前進） */
+  roanPatrolTime(): number | null {
+    const r = this.roan;
+    if (!r) return null;
+    return r.paused ? r.patrolT : r.patrolT + (this.serverNow() - r.at) / 1000;
+  }
+
+  roanHold(hold: boolean): void {
+    if (this.state === "online") this.sendRaw({ t: "roan", h: hold ? 1 : 0 });
   }
 
   requestResync(): void {
@@ -302,6 +341,10 @@ export class NetClient {
         this.token = m.token;
         this.pid = m.pid;
         this.characterId = m.cid;
+        this.gender = m.g;
+        this.appearance = m.ap;
+        this.name = m.name;
+        this.realm = m.realm;
         this.epoch = m.e;
         this.setMap(m.map, m.room);
         // 伺服器已處理到 m.ack：更早的輸入丟掉，之後的全部重送
@@ -325,6 +368,7 @@ export class NetClient {
       case "snap":
         return this.onSnap(m);
       case "map": {
+        this.roan = null;
         this.epoch = m.e;
         this.pending = [];
         this.seq = m.ack;
@@ -402,6 +446,8 @@ export class NetClient {
     this.clockOff.push(m.st - recv);
     if (this.clockOff.length > 40) this.clockOff.shift();
     this.applyAuthoritative(m.me, m.ack, false);
+    this.down = m.me[3] === ANIM.Death;
+    if (m.roan) this.roan = { patrolT: m.roan[0] / 1000, at: m.st, paused: m.roan[1] === 1, tx: fromCm(m.roan[2]), tz: fromCm(m.roan[3]) };
     if (m.full) {
       this.metas.clear();
       const keep = new Set(m.p.map((t) => t[0]));
@@ -421,7 +467,7 @@ export class NetClient {
         b = new Interpolator();
         this.remoteBuf.set(t[0], b);
       }
-      b.push({ t: m.st, x: fromCm(t[1]), z: fromCm(t[2]), yaw: fromMrad(t[3]), anim: t[4], speed: t[5] / 100, link: t[6] });
+      b.push({ t: m.st, x: fromCm(t[1]), z: fromCm(t[2]), yaw: fromMrad(t[3]), anim: t[4], speed: t[5] / 100, link: t[6], act: t[7], actSeq: t[8] });
     }
     // 沒有變動的玩家：在這個時間點補一筆相同資料，插值才不會把「停下→起跑」拉成慢動作
     for (const [id, b] of this.remoteBuf) {

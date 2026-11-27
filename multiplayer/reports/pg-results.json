@@ -1,0 +1,74 @@
+{
+  "restart": {
+    "characterId": "cd834079-8767-4f88-aa7c-5e7ef1d42706",
+    "before": {
+      "x": 12.06,
+      "z": 10.8
+    },
+    "after": {
+      "x": 12.06,
+      "z": 10.8
+    },
+    "appearance": {
+      "hair": "hair01",
+      "hairColor": "#c0408a",
+      "weapon": "staff"
+    },
+    "gender": "female",
+    "version": 2,
+    "welcomeAp": {
+      "hair": "hair01",
+      "hairColor": "#c0408a",
+      "weapon": "staff"
+    },
+    "welcomeGender": "female"
+  },
+  "realm": {
+    "testCharacters": 2,
+    "prodCharacters": 0,
+    "prodSeesTestToken": false,
+    "prodGetTestCharacter": false
+  },
+  "inventory": {
+    "uid": "6691174f-5502-4bdd-bc25-ca57da1d061a",
+    "g1": {
+      "ok": true,
+      "item": {
+        "uid": "6691174f-5502-4bdd-bc25-ca57da1d061a",
+        "defId": "seed",
+        "qty": 1,
+        "state": "owned",
+        "version": 1
+      }
+    },
+    "g2dup": true,
+    "wrongVersion": {
+      "ok": false,
+      "err": "version_conflict"
+    },
+    "consume": {
+      "ok": true
+    },
+    "consumeAgain": {
+      "ok": false,
+      "err": "not_owner"
+    },
+    "after": []
+  },
+  "lock": {
+    "w1": {
+      "ok": true,
+      "version": 2
+    },
+    "stale": {
+      "ok": false,
+      "reason": "stale_lock",
+      "current": 2
+    },
+    "conflict": {
+      "ok": false,
+      "reason": "conflict",
+      "current": 2
+    }
+  }
+}

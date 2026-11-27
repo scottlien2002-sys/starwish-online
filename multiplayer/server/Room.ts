@@ -8,10 +8,11 @@
  *   4. 產生快照：只送有變動的玩家；新加入或要求重新同步的玩家送完整狀態
  */
 import { INPUT_BUDGET_MAX_S, INPUT_QUEUE_MAX_STEPS, MOVE_SPEED, STEP } from "../shared/constants.ts";
-import { ANIM, toCm, toMrad, type AnimCode, type Gender, type InputMsg, type MapId, type PlayerMeta, type PlayerTuple, type ServerMsg } from "../shared/protocol.ts";
+import { ANIM, toCm, toMrad, type ActKind, type AnimCode, type AppearanceWire, type Gender, type InputMsg, type MapId, type PlayerMeta, type PlayerTuple, type ServerMsg } from "../shared/protocol.ts";
 import { getMap, type MapAuthority, type PortalRule } from "../shared/maps.ts";
 import { stepMove, type MoveState } from "../shared/sim.ts";
 import type { PlayerView, RoomSystem, RoomView } from "./extensions.ts";
+import { PetMerchantPatrolClock, petMerchantPose, PET_MERCHANT } from "../../src/maps/village/petMerchant.ts";
 
 export interface PlayerCounters {
   stepsApplied: number;
@@ -21,14 +22,26 @@ export interface PlayerCounters {
   seqGaps: number;
   illegalPositions: number;
   speedViolations: number;
+  actsAccepted: number;
+  actsRejected: number;
+  stepsWhileDown: number;
 }
+
+/** 動作事件的最短間隔（秒）：防止洗封包；不影響任何數值 */
+export const ACT_MIN_INTERVAL: Record<ActKind, number> = { attack: 0.25, hurt: 0.15, death: 1 };
 
 export class ServerPlayer implements PlayerView {
   readonly pid: number;
   readonly characterId: string;
   readonly name: string;
   readonly gender: Gender;
+  appearance: AppearanceWire;
   readonly state: MoveState;
+  /** 倒地中（Stage 8.2 前由客戶端回報，只影響顯示與移動；復活只能透過伺服器的 respawn） */
+  down = false;
+  act = 0;
+  actSeq = 0;
+  readonly lastAct: Record<ActKind, number> = { attack: -1e9, hurt: -1e9, death: -1e9 };
   /** 資料庫版本（樂觀鎖） */
   version: number;
   lockEpoch: number;
@@ -46,14 +59,15 @@ export class ServerPlayer implements PlayerView {
   persistDirty = false;
   lastSent: PlayerTuple | null = null;
   readonly portalArmed = new Map<string, boolean>();
-  readonly counters: PlayerCounters = { stepsApplied: 0, stepsDropped: 0, staleEpochInputs: 0, duplicateSteps: 0, seqGaps: 0, illegalPositions: 0, speedViolations: 0 };
+  readonly counters: PlayerCounters = { stepsApplied: 0, stepsDropped: 0, staleEpochInputs: 0, duplicateSteps: 0, seqGaps: 0, illegalPositions: 0, speedViolations: 0, actsAccepted: 0, actsRejected: 0, stepsWhileDown: 0 };
   send: (m: ServerMsg) => void = () => {};
 
-  constructor(o: { pid: number; characterId: string; name: string; gender: Gender; x: number; z: number; yaw: number; version: number; lockEpoch: number }) {
+  constructor(o: { pid: number; characterId: string; name: string; gender: Gender; appearance?: AppearanceWire; x: number; z: number; yaw: number; version: number; lockEpoch: number }) {
     this.pid = o.pid;
     this.characterId = o.characterId;
     this.name = o.name;
     this.gender = o.gender;
+    this.appearance = o.appearance ?? { hair: "hair01", hairColor: null, weapon: "sword" };
     this.state = { x: o.x, z: o.z, yaw: o.yaw, speed: 0, anim: ANIM.Idle };
     this.version = o.version;
     this.lockEpoch = o.lockEpoch;
@@ -71,18 +85,54 @@ export class ServerPlayer implements PlayerView {
 
   tuple(): PlayerTuple {
     const s = this.state;
-    return [this.pid, toCm(s.x), toCm(s.z), toMrad(s.yaw), s.anim, Math.round(s.speed * 100), this.connected ? 1 : 0];
+    const anim = this.down ? ANIM.Death : s.anim;
+    return [this.pid, toCm(s.x), toCm(s.z), toMrad(s.yaw), anim, this.down ? 0 : Math.round(s.speed * 100), this.connected ? 1 : 0, this.act, this.actSeq];
   }
   meta(): PlayerMeta {
-    return { id: this.pid, n: this.name, g: this.gender };
+    return { id: this.pid, n: this.name, g: this.gender, ap: { ...this.appearance } };
   }
   me(): [number, number, number, number] {
     const s = this.state;
-    return [toCm(s.x), toCm(s.z), toMrad(s.yaw), s.anim];
+    return [toCm(s.x), toCm(s.z), toMrad(s.yaw), this.down ? ANIM.Death : s.anim];
+  }
+
+  /** 動作事件（外觀同步）。回傳是否接受 */
+  applyAct(k: ActKind, yawMrad: number | undefined, nowS: number): boolean {
+    const ok = (() => {
+      if (nowS - this.lastAct[k] < ACT_MIN_INTERVAL[k]) return false;
+      if (this.down) return false;
+      return true;
+    })();
+    if (!ok) {
+      this.counters.actsRejected++;
+      return false;
+    }
+    this.lastAct[k] = nowS;
+    this.counters.actsAccepted++;
+    if (yawMrad !== undefined && Number.isInteger(yawMrad) && Math.abs(yawMrad) <= 3142) this.state.yaw = yawMrad / 1000;
+    if (k === "death") {
+      this.down = true;
+      this.queue.length = 0;
+      this.state.speed = 0;
+      this.state.anim = ANIM.Idle as AnimCode;
+      return true;
+    }
+    this.act = k === "attack" ? ANIM.Attack : ANIM.Hurt;
+    this.actSeq++;
+    return true;
   }
 
   /** 收到輸入封包：依序號排入佇列（重複的略過、舊地圖世代的丟棄） */
   enqueue(m: InputMsg): void {
+    if (this.down) {
+      // 倒地時不能移動：輸入直接丟棄，但序號照算（重送不會在復活後補走）
+      this.counters.stepsWhileDown++;
+      let n = 0;
+      for (const r of m.d) n += r[2];
+      this.nextSeq = Math.max(this.nextSeq, m.s + n);
+      this.ack = this.nextSeq - 1;
+      return;
+    }
     if (m.e !== this.epoch) {
       this.counters.staleEpochInputs++;
       return;
@@ -126,12 +176,41 @@ export class Room implements RoomView {
   private readonly gone: number[] = [];
   private readonly added: ServerPlayer[] = [];
   readonly systems: RoomSystem[] = [];
+  /** N009 洛恩：巡邏由伺服器時間決定，所有玩家看到同一個位置；有人對話時停下（多人模式有逾時與連續暫停上限） */
+  readonly roan: PetMerchantPatrolClock | null;
+  roanRejected = 0;
 
   constructor(key: string, map: MapId, capacity: number) {
     this.key = key;
     this.map = map;
     this.auth = getMap(map);
     this.capacity = capacity;
+    this.roan = map === "village" ? new PetMerchantPatrolClock({ shared: true, holdTimeoutSec: 10, maxPauseSec: 90, cooldownSec: 20 }) : null;
+  }
+
+  /** 玩家開始／結束和洛恩對話。只有站在洛恩互動距離內才接受（伺服器用自己的玩家位置判定） */
+  roanHold(p: ServerPlayer, hold: boolean, nowMs: number): boolean {
+    if (!this.roan) return false;
+    const t = nowMs / 1000;
+    if (!hold) {
+      this.roan.release(p.characterId, t);
+      return true;
+    }
+    const m = petMerchantPose(this.roan.patrolTime(t));
+    if (Math.hypot(m.x - p.x, m.z - p.z) > PET_MERCHANT.interactR + 1.5) {
+      this.roanRejected++;
+      return false;
+    }
+    this.roan.hold(p.characterId, t, p.x, p.z);
+    return true;
+  }
+
+  roanState(nowMs: number): [number, number, number, number] | undefined {
+    if (!this.roan) return undefined;
+    const t = nowMs / 1000;
+    const paused = this.roan.paused(t);
+    const tgt = paused ? this.roan.talkTarget(t) : null;
+    return [Math.round(this.roan.patrolTime(t) * 1000), paused ? 1 : 0, tgt ? toCm(tgt.x) : 0, tgt ? toCm(tgt.z) : 0];
   }
 
   get size(): number {
@@ -159,10 +238,16 @@ export class Room implements RoomView {
     if (!p) return undefined;
     this.byPid.delete(pid);
     this.gone.push(pid);
+    this.roan?.release(p.characterId, Date.now() / 1000);
     const ai = this.added.indexOf(p);
     if (ai >= 0) this.added.splice(ai, 1);
     for (const s of this.systems) s.onPlayerLeave?.(this, p);
     return p;
+  }
+
+  /** 外觀改變：下一次快照把新的 meta 送給同房間玩家 */
+  metaChanged(p: ServerPlayer): void {
+    if (this.byPid.has(p.pid) && !this.added.includes(p)) this.added.push(p);
   }
 
   /** 推進一個 tick；回傳本 tick 需要換地圖的玩家 */
@@ -244,6 +329,7 @@ export class Room implements RoomView {
     const gone = this.gone.splice(0);
     this.added.length = 0;
     const metaAll = [...this.byPid.values()].map((p) => p.meta());
+    const roan = this.roanState(now);
     for (const p of this.byPid.values()) {
       if (!p.connected) continue;
       const full = p.needFull;
@@ -259,6 +345,7 @@ export class Room implements RoomView {
         ...(add.length ? { add } : {}),
         ...(gone.length && !full ? { gone } : {}),
         ...(full ? { full: 1 as const } : {}),
+        ...(roan ? { roan } : {}),
       });
       p.needFull = false;
     }

@@ -1,0 +1,33 @@
+# 星願物語 Stage 8.1 多人測試伺服器（Claude D）— Render Blueprint（只用免費方案）
+# 使用方式：Render Dashboard → New → Blueprint → 選這個 GitHub repo、分支 integration/multiplayer-stage8-1
+# - 網址 https://<服務名>.onrender.com，WSS：wss://<服務名>.onrender.com/ws（Render 自動提供 HTTPS 憑證）
+# - 免費方案：閒置 15 分鐘休眠，下次連線喚醒約 1 分鐘；每月 750 小時；免費 PostgreSQL 1 GB、建立 30 天後到期
+# - 資料區固定 test（MP_REALM=test）：測試帳號不會混進未來正式玩家資料（正式版另建資料庫）
+services:
+  - type: web
+    name: starwish-mp-test
+    runtime: node
+    plan: free
+    branch: integration/multiplayer-stage8-1
+    autoDeploy: true
+    buildCommand: cd multiplayer && npm install --omit=dev --no-audit --no-fund
+    startCommand: node multiplayer/server/main.ts
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: MP_REALM
+        value: test
+      - key: MP_ALLOWED_ORIGINS
+        value: https://scottlien2002-sys.github.io
+      - key: MP_PG_SSL
+        value: prefer
+      - key: DATABASE_URL
+        fromDatabase:
+          name: starwish-mp-test-db
+          property: connectionString
+databases:
+  - name: starwish-mp-test-db
+    plan: free
+    databaseName: starwish_test
+    user: starwish_test

@@ -1,22 +1,24 @@
 name: Multiplayer Stage 8 (Claude D)
 
-# 只在 Claude D 的多人連線分支、且只有 multiplayer/** 變動時執行。
-# 不部署、不寫入 gh-pages、不碰其他分支；concurrency 依分支名稱分開，不會取消其他人的 CI。
+# 只在 Claude D 的多人連線分支執行（feature/multiplayer-**、integration/multiplayer-**）。
+# - server：伺服器／網路層測試（型別、單元、整合、WSS、PostgreSQL、2D 雙人頁）
+# - game：正式 3D 遊戲（單機回歸＋3D 雙人 E2E，Chromium＋WebKit）→ 部署多人測試預覽到 gh-pages 的 /preview-mp81/（只替換自己的資料夾）
+# - 測試結果推到 results/mp81-* 分支（JSON＋截圖），方便查看
+# concurrency 依分支分開，不會取消其他人的 CI；不碰 main。
 on:
   push:
-    branches: ["feature/multiplayer-**"]
-    paths: ["multiplayer/**", ".github/workflows/multiplayer-stage8.yml"]
+    branches: ["feature/multiplayer-**", "integration/multiplayer-**"]
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: multiplayer-stage8-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  multiplayer:
+  server:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     defaults:
@@ -27,7 +29,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-      - name: Install (ws, typescript, esbuild, playwright)
+      - name: Install (ws, postgres, typescript, esbuild, playwright)
         run: npm install --no-audit --no-fund
       - name: Typecheck
         run: npm run typecheck
@@ -37,20 +39,116 @@ jobs:
         run: npm run test:integration
       - name: WSS test (self-signed TLS)
         run: npm run test:wss
-      - name: PostgreSQL schema / atomicity test
-        id: db
-        continue-on-error: true
-        run: sudo bash db/test-db.sh
+      - name: PostgreSQL schema / atomicity / server restart persistence
+        run: sudo env "PATH=$PATH" bash db/test-db.sh
       - name: Install browsers
         run: npx playwright install --with-deps chromium webkit
-      - name: Two-player browser test (Chromium)
+      - name: Two-player 2D test page (Chromium)
         run: npm run test:browser
-      - name: Two-player browser test (WebKit / Safari engine)
+      - name: Two-player 2D test page (WebKit)
         run: MP_BROWSER=webkit node tests/browser-two-players.mjs
-      - name: Upload reports
+      - name: Push results branch
         if: always()
-        uses: actions/upload-artifact@v4
+        run: |
+          mkdir -p /tmp/res/server && cp -r reports/. /tmp/res/server/ 2>/dev/null || true
+          echo "{\"job\":\"server\",\"commit\":\"${GITHUB_SHA}\",\"run\":\"${GITHUB_RUN_ID}\"}" > /tmp/res/server/meta.json
+          cd /tmp/res
+          git init -q -b r && git config user.name "github-actions[bot]" && git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -qm "mp81 server results ${GITHUB_SHA::7}"
+          git push -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" "HEAD:refs/heads/results/mp81-server-${GITHUB_RUN_ID}"
+
+  game:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
-          name: multiplayer-stage8-reports
-          path: multiplayer/reports/
-          retention-days: 14
+          node-version: 22
+      - name: Install game + server dependencies
+        run: |
+          npm ci --no-audit --no-fund
+          (cd multiplayer && npm install --omit=dev --no-audit --no-fund)
+      - name: Typecheck (game, includes multiplayer client)
+        run: npm run typecheck
+      - name: Unit tests (game)
+        run: npm test
+      - name: Build
+        env:
+          VITE_MP_SERVER: ${{ vars.MP_SERVER_URL }}
+        run: npm run build
+      - name: Install browsers
+        run: npx playwright install --with-deps chromium webkit
+      - name: 3D two-player E2E (Chromium)
+        id: mpchromium
+        continue-on-error: true
+        run: node tests/e2e/run-mp-e2e.mjs dist chromium
+      - name: 3D two-player E2E (WebKit / Safari engine)
+        id: mpwebkit
+        continue-on-error: true
+        run: node tests/e2e/run-mp-e2e.mjs dist webkit
+      - name: Single-player regression (Stage 7.1 world E2E, Chromium + WebKit)
+        id: world
+        continue-on-error: true
+        run: node tests/e2e/run-world-e2e.mjs dist chromium,webkit
+      - name: Deploy multiplayer preview (own folder /preview-mp81/ only)
+        id: deploy
+        if: github.ref_name == 'integration/multiplayer-stage8-1' && steps.mpchromium.outcome == 'success'
+        run: |
+          DIR=preview-mp81
+          for attempt in 1 2 3 4 5; do
+            rm -rf /tmp/pages
+            git clone -q --depth 1 -b gh-pages "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" /tmp/pages
+            rm -rf "/tmp/pages/$DIR" && mkdir -p "/tmp/pages/$DIR"
+            cp -r dist/. "/tmp/pages/$DIR/"
+            # 預覽不使用的舊版角色／怪物模型（與其他預覽相同的清理規則）
+            (cd "/tmp/pages/$DIR/models" && rm -f novice_c10b_*.glb novice_c10b1_*.glb novice_c10b2_*.glb novice_c10b3_*.glb novice_c10b4_*.glb novice_c10b5_*.glb novice_c10b5a_*.glb novice_male_v1_*.glb novice_female_v1_*.glb bobo_v3_*.glb bobo_v31_*.glb bobo_v33_*.glb bobo_v34_*.glb bobo_v35_*.glb bobo_v36_*.glb bobo_v37_*.glb bobo_v38_*.glb village-p3/*_s62.glb village-p3/p30_sample_*.glb) || true
+            # 不重複發布：與其他預覽內容完全相同的模型／貼圖改為引用
+            node tools/mp-asset-remap.mjs /tmp/pages "$DIR"
+            TOTAL=$(du -sm --exclude=.git /tmp/pages | cut -f1)
+            echo "預覽資料夾 $(du -sm "/tmp/pages/$DIR" | cut -f1) MB；發布後 gh-pages 合計 ${TOTAL} MB"
+            if [ "$TOTAL" -gt 1100 ]; then echo "::error::gh-pages 合計 ${TOTAL} MB 超過 1100 MB，取消發布"; exit 1; fi
+            if [ "$TOTAL" -gt 1000 ]; then echo "::warning::gh-pages 合計 ${TOTAL} MB 超過 1 GB 建議值"; fi
+            echo "{\"branch\":\"${GITHUB_REF_NAME}\",\"commit\":\"${GITHUB_SHA}\",\"path\":\"/$DIR/\",\"builtAt\":\"$(date -u +%FT%TZ)\",\"ghPagesTotalMB\":${TOTAL},\"previewMB\":$(du -sm "/tmp/pages/$DIR" | cut -f1)}" > "/tmp/pages/$DIR/preview.json"
+            cp "/tmp/pages/$DIR/preview.json" /tmp/preview-meta.json
+            cp "/tmp/pages/$DIR/asset-remap.json" /tmp/asset-remap.json
+            cd /tmp/pages
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -qm "Preview /$DIR/ ${GITHUB_REF_NAME} ${GITHUB_SHA::7}"
+            if git push -q origin gh-pages; then echo "deployed /$DIR/"; exit 0; fi
+            cd - >/dev/null
+            echo "push rejected (another deploy in progress), retry $attempt"; sleep $((attempt * 5))
+          done
+          exit 1
+      - name: Verify published preview (Chromium, live GitHub Pages URL + test server on the runner)
+        id: live
+        if: steps.deploy.outcome == 'success'
+        continue-on-error: true
+        run: |
+          URL="https://scottlien2002-sys.github.io/starwish-online/preview-mp81"
+          for i in $(seq 1 40); do
+            if curl -fsS "$URL/preview.json" | grep -q "${GITHUB_SHA}"; then echo "pages updated"; break; fi
+            sleep 15
+          done
+          mkdir -p test-results/mp-live
+          MP_E2E_SITE="$URL" node tests/e2e/run-mp-e2e.mjs dist chromium; code=$?
+          cp test-results/mp-e2e/mp-e2e-chromium.json test-results/mp-live/live-chromium.json || true
+          exit $code
+      - name: Push results branch
+        if: always()
+        run: |
+          mkdir -p /tmp/res/game
+          cp -r test-results/mp-e2e /tmp/res/game/ 2>/dev/null || true
+          cp -r test-results/mp-live /tmp/res/game/ 2>/dev/null || true
+          (cd test-results 2>/dev/null && find . -maxdepth 3 -name '*.json' -not -path './mp-*' -exec cp --parents {} /tmp/res/game/ \;) || true
+          cp /tmp/preview-meta.json /tmp/asset-remap.json /tmp/res/game/ 2>/dev/null || true
+          echo "{\"job\":\"game\",\"commit\":\"${GITHUB_SHA}\",\"run\":\"${GITHUB_RUN_ID}\",\"mpChromium\":\"${{ steps.mpchromium.outcome }}\",\"mpWebkit\":\"${{ steps.mpwebkit.outcome }}\",\"world\":\"${{ steps.world.outcome }}\",\"deploy\":\"${{ steps.deploy.outcome }}\",\"live\":\"${{ steps.live.outcome }}\"}" > /tmp/res/game/meta.json
+          cd /tmp/res
+          git init -q -b r && git config user.name "github-actions[bot]" && git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -qm "mp81 game results ${GITHUB_SHA::7}"
+          git push -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" "HEAD:refs/heads/results/mp81-game-${GITHUB_RUN_ID}"
+      - name: Fail if tests failed
+        if: steps.mpchromium.outcome != 'success' || steps.mpwebkit.outcome != 'success' || steps.world.outcome != 'success'
+        run: exit 1

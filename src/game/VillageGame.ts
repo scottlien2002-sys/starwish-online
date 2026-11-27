@@ -218,6 +218,14 @@ class VillageGame {
     this.avatar.setAttackSpeed(w.pets.characterStats({ ...FIELD_TEST.baseStats }).attackSpeed);
     this.syncFollower();
     this.installApi();
+    // Stage 8.1：多人連線（?mp=1）。伺服器決定換地圖；遠端玩家用同一套模組化初心者
+    const mp = w.mp;
+    if (mp) {
+      mp.attach(scene, this.lod, groundHeight, () => this.perf.avgFps(2));
+      mp.onMap((map, me) => {
+        if (map !== "village") this.w.travelTo({ map, x: me.x, z: me.z, yaw: me.yaw }, this.hp());
+      });
+    }
     // 正式美術、NPC、洛恩、商會（Claude B 全村整合）
     void import("../maps/village/VillageArtFull.ts")
       .then((m) => m.loadVillageArtFull(scene, this.lod === "lite", this.quality.shadows.filter === "contact" ? this.shadows : null, (msg) => (this.artStatus = msg)))
@@ -232,6 +240,8 @@ class VillageGame {
           autoPortals: true,
         });
         this.interact.npcs = full.npcs;
+        // N009：多人模式時洛恩的巡邏／停下由伺服器決定（所有玩家看到同一個位置）
+        w.mp?.bindRoan(full.merchant);
         // 洛恩的其他服務（飼料、進化、復活、培育指南）：接在角色存檔與金幣上
         const { connectPetMerchantService } = await import("../maps/village/petMerchant.ts");
         const { createWorldPetMerchantService } = await import("../economy/worldPetMerchant.ts");
@@ -267,7 +277,8 @@ class VillageGame {
   }
 
   private toField(): void {
-    if (this.w.leaving) return;
+    // 多人模式：只有伺服器的換地圖通知可以切換地圖
+    if (this.w.leaving || this.w.mp) return;
     this.w.travelTo({ ...FIELD_CAMP_ARRIVAL }, this.hp());
   }
 
@@ -300,7 +311,15 @@ class VillageGame {
     const s = l > 1 ? 1 / l : 1;
     const speed01 = Math.min(1, l);
     this.curSpeed = 0;
-    if (speed01 > 0.05) {
+    const mp = this.w.mp;
+    if (mp) {
+      // Stage 8.1：移動交給多人連線（客戶端預測＋伺服器校正；速度與碰撞由伺服器以自己的時間計算）
+      const st = mp.step(dt, speed01 > 0.05 ? v.x * s * speed01 : 0, speed01 > 0.05 ? v.z * s * speed01 : 0);
+      this.pos.x = st.x;
+      this.pos.z = st.z;
+      this.yaw = st.yaw;
+      this.curSpeed = st.speed;
+    } else if (speed01 > 0.05) {
       const step = WALK_SPEED * speed01 * dt;
       const r = moveVillage(this.pos.x, this.pos.z, this.pos.x + v.x * s * step, this.pos.z + v.z * s * step);
       this.curSpeed = Math.hypot(r.x - this.pos.x, r.z - this.pos.z) / Math.max(dt, 1e-4);
@@ -309,7 +328,8 @@ class VillageGame {
       this.yaw = turnTowards(this.yaw, v.x, v.z, TUNING.player.turnSharpness, dt);
     }
     // Stage 7.1：踩進已開放的南方傳送陣 → 直接傳送（先存檔；只觸發一次）
-    if (this.portal.update(this.pos.x, this.pos.z)) this.toField();
+    // 多人模式：傳送陣由伺服器判定（收到換地圖通知才切換）
+    if (!mp && this.portal.update(this.pos.x, this.pos.z)) this.toField();
     const gy = groundHeight(this.pos.x, this.pos.z);
     this.pos.y = gy;
     this.avatar.update(dt, { speed: this.curSpeed }, gy);
@@ -320,6 +340,7 @@ class VillageGame {
     this.world.update(dt, this.pos.x, this.pos.z);
     this.interact?.update(performance.now() / 1000, this.pos.x, this.pos.z);
     this.follower.update(dt, this.avatar.petAnchor(this.earTmp), this.yaw, this.avatar.headHalfWidth);
+    mp?.update(dt);
     this.scene.render();
     this.perf.update(dt);
     this.petTick += dt;
@@ -378,6 +399,7 @@ class VillageGame {
         quality: { lod: self.lod, render: self.params.get("quality") ?? "auto", scale: self.engine.getHardwareScalingLevel() },
         mode: self.w.mode,
         render: { drawCalls: self.perf.drawCalls, contextLost: self.contextLost, charShadow: self.charShadow },
+        mp: self.w.mp ? { state: self.w.mp.client.state, pid: self.w.mp.client.pid, room: self.w.mp.client.room, stats: { ...self.w.mp.client.stats }, server: { ...self.w.mp.client.server }, remotes: self.w.mp.remoteInfo(), roan: self.w.mp.client.roan, roanPatrol: self.w.mp.client.roanPatrolTime(), merchantPose: self.interact?.merchantPose ? { x: self.interact.merchantPose.x, z: self.interact.merchantPose.z, paused: self.interact.merchantPose.paused } : null } : null,
         jumpButtonVisible: (self.hudRoot.querySelector<HTMLButtonElement>(".skill-3")?.style.display ?? "") !== "none" && /跳/.test(self.hudRoot.textContent ?? ""),
       }),
       teleport: (x: number, z: number, yaw?: number) => {

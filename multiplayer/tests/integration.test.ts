@@ -374,3 +374,34 @@ test("地圖分流：房間滿了自動開第二個頻道", async () => {
     await srv.stop();
   }
 });
+
+test("Stage 8.1：倒地前不能要求復活傳送；倒地後 respawn 由伺服器送回星芽村", async () => {
+  const srv = await startServer();
+  const a = new Bot(srv, { name: "down", devMap: "starsprout" });
+  try {
+    await a.online();
+    assert.equal(a.c.map?.id, "starsprout");
+    a.c.command("respawn", undefined, "respawn-early-001");
+    await a.until(() => a.events.some((e) => e.type === "cmd"), 2000, "cmd result");
+    const early = a.events.find((e) => e.type === "cmd") as { ok: boolean; err?: string };
+    assert.equal(early.ok, false);
+    assert.equal(early.err, "not_down");
+    a.c.act("death");
+    await a.until(() => a.c.down, 2000, "server says down");
+    a.dir = { x: 1, z: 0 };
+    await sleep(400);
+    const p = srv.playerOf(a.c.characterId)!;
+    const x0 = p.x;
+    await sleep(300);
+    assert.equal(p.x, x0, "cannot move while down");
+    a.dir = { x: 0, z: 0 };
+    a.c.command("respawn");
+    await a.until(() => a.c.map?.id === "village", 3000, "back in village");
+    await sleep(200);
+    assert.equal(a.c.down, false);
+    results.respawn = { early, room: a.c.room, pos: [srv.playerOf(a.c.characterId)!.x, srv.playerOf(a.c.characterId)!.z] };
+  } finally {
+    a.stop();
+    await srv.stop();
+  }
+});
