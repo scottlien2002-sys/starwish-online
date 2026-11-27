@@ -120,6 +120,37 @@ export class PerfOverlay {
     this.sessCpu = { frame: 0, render: 0, anim: 0, active: 0, rtt: 0, n: 0 };
   }
 
+  /** Stage 7.4：找瓶頸用——畫面中三角面最多的物件、最大的貼圖（只在按「複製報告」或測試時計算） */
+  heavy(n = 12): { meshes: { name: string; triK: number; instances: number; skinned: boolean }[]; textures: { name: string; size: string; mb: number }[] } {
+    const agg = new Map<string, { tri: number; inst: number; skinned: boolean }>();
+    const act = this.scene.getActiveMeshes();
+    for (let i = 0; i < act.length; i++) {
+      const m = act.data[i]!;
+      const tri = m.getTotalIndices() / 3;
+      const key = (m.name || "?").replace(/[_.]?\d+$/, "");
+      const inst = (m as { instances?: unknown[] }).instances?.length ?? 0;
+      const thin = (m as { thinInstanceCount?: number }).thinInstanceCount ?? 0;
+      const mult = 1 + inst + (thin > 0 ? thin - 1 : 0);
+      const a = agg.get(key) ?? { tri: 0, inst: 0, skinned: !!m.skeleton };
+      a.tri += tri * mult;
+      a.inst += mult;
+      agg.set(key, a);
+    }
+    const meshes = [...agg.entries()]
+      .sort((a, b) => b[1].tri - a[1].tri)
+      .slice(0, n)
+      .map(([name, a]) => ({ name, triK: Math.round(a.tri / 100) / 10, instances: a.inst, skinned: a.skinned }));
+    const textures = this.scene.textures
+      .map((t) => {
+        const sz = t.getSize?.();
+        const w = sz?.width ?? 0, h = sz?.height ?? 0;
+        return { name: (t.name || "?").split("/").pop()!.slice(0, 60), size: `${w}x${h}`, mb: Math.round(((w * h * 4 * 1.33) / 1048576) * 10) / 10 };
+      })
+      .sort((a, b) => b.mb - a.mb)
+      .slice(0, n);
+    return { meshes, textures };
+  }
+
   /** Stage 7.4：記憶體與資源（iOS Safari 不提供 JS 記憶體數值 → null；資源數可以判斷有沒有洩漏） */
   memory(): { jsHeapMB: number | null; meshes: number; materials: number; textures: number; textureMB: number; skeletons: number; animationGroups: number; particleSystems: number } {
     const pm = (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory;
@@ -160,6 +191,7 @@ export class PerfOverlay {
     cpuMs: { frame: number; render: number; animations: number; activeMeshes: number; renderTargets: number };
     memory: ReturnType<PerfOverlay["memory"]>;
     extra: Record<string, unknown> | null;
+    heavy: ReturnType<PerfOverlay["heavy"]>;
   } {
     const sorted = [...this.sessFrameMs].sort((a, b) => b - a);
     const worst1 = sorted.slice(0, Math.max(1, Math.floor(sorted.length / 100)));
@@ -187,6 +219,7 @@ export class PerfOverlay {
       })(),
       memory: this.memory(),
       extra: this.extra ? this.extra() : null,
+      heavy: this.heavy(),
     };
   }
 

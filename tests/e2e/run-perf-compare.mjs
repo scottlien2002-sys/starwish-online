@@ -42,6 +42,8 @@ async function openField(base, extra, label) {
     s.character.z = null;
     localStorage.setItem(k, JSON.stringify(s));
   });
+  // 只計算原野遊戲頁面的錯誤（前面自己開的空白頁 404 不算）
+  errors.length = 0;
   await page.goto(`${base}/?play=world&seed=11&quality=high${extra}`, { waitUntil: "load" });
   await page.waitForFunction(() => window.__starwishPlay?.ready === true && !!window.__starwishPlay.world, null, { timeout: 180000 });
   await page.waitForFunction(() => window.__starwishPlay.info().monsters.length >= 20, null, { timeout: 120000 }).catch(() => {});
