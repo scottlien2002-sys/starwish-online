@@ -92,7 +92,8 @@ export const FORGE = (() => {
 })();
 
 /** 每日委託佈告欄 */
-export const BOARD = { ...polar(158, 19.5), w: 4, d: 0.8, rot: (158 * Math.PI) / 180 } as const;
+// Stage 6.7：N008 Tripo 佈告欄（寬 3.2 m、石座深約 1.25 m）→ 碰撞箱改為 3.4 × 1.3 m（位置、方向不變；離環形廣場外緣 r 18 仍有距離）
+export const BOARD = { ...polar(158, 19.5), w: 3.4, d: 1.3, rot: (158 * Math.PI) / 180 } as const;
 
 /** 四座傳送門（V1.3）：只有南方開放（往星芽原野）；北、東、西未開放，不設目的地 */
 export interface PortalDef {

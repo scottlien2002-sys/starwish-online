@@ -107,8 +107,21 @@ export class PetAppraisalWindow {
   private animatedFor: string | null = null;
   private svc: PetAppraisalService;
 
+  /** Stage 6.4：頭像只下載一次（轉成 blob 網址）；WebKit 每次重建介面時不會再重新請求同一張圖 */
+  private avaSrc: string | null = null;
+
   constructor(opt: AppraisalWindowOptions = {}) {
     this.opt = opt;
+    if (opt.avatarUrl && typeof fetch === "function" && typeof URL.createObjectURL === "function") {
+      fetch(opt.avatarUrl)
+        .then((r) => (r.ok ? r.blob() : Promise.reject(new Error(String(r.status)))))
+        .then((b) => {
+          this.avaSrc = URL.createObjectURL(b);
+        })
+        .catch(() => {
+          this.avaSrc = null;
+        });
+    }
     this.svc = (opt.service ?? petAppraisalService)();
     if (!styled) {
       const st = document.createElement("style");
@@ -180,7 +193,7 @@ export class PetAppraisalWindow {
     const s = this.state;
     const it = selected(s);
     const name = this.opt.name ?? "星靈培育師・洛恩";
-    const ava = this.opt.avatarUrl ? `style="background-image:url('${this.opt.avatarUrl}')"` : "";
+    const ava = this.avaSrc ? `style="background-image:url('${this.avaSrc}')"` : "";
     const fxOn = s.phase === "appraising";
     const sparks = fxOn
       ? Array.from({ length: 14 }, (_, i) => {
@@ -202,7 +215,7 @@ export class PetAppraisalWindow {
           : `<div class="pa-hint" style="padding:8px 0;text-align:left">${s.phase === "error" ? s.message : "放入物品並開始鑑定後，結果會顯示在這裡。"}</div>`;
     const btnText = s.phase === "appraising" ? "鑑定中…" : it?.appraised ? "已鑑定" : "開始鑑定";
     this.el.innerHTML = `<div class="pa-stars"></div>
-      <div class="pa-head"><div class="pa-ava" ${ava}>${this.opt.avatarUrl ? "" : "洛"}</div>
+      <div class="pa-head"><div class="pa-ava" ${ava}>${this.avaSrc ? "" : "洛"}</div>
         <div class="pa-title"><div class="pa-name">${name}</div><div class="pa-sub">✦ 星靈鑑定</div></div>
         <button type="button" class="pa-x" data-act="close" aria-label="關閉">×</button></div>
       <div class="pa-say">${s.phase === "error" ? s.message : s.message}</div>

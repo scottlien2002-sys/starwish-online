@@ -1,0 +1,6 @@
+{
+  "note": "Stage 8.1 多人整合分支的來源（唯讀取用；沒有修改 Claude A／B 的分支）",
+  "claudeA": { "branch": "feature/render-stage72-world", "commit": "6e4c143223f2b16648ffbd5c1f4c39a52e6503fc", "use": "整合基準（Stage 7.2 世界整合：Tripo 模組化男女初心者、星芽村／星芽原野、M004～M007 骨骼怪物接口）" },
+  "claudeB": { "branch": "feature/render-village-npc67", "commit": "3446bf459d5e5d390ebd8b301627681080267619", "use": "Stage 6.7 Tripo 正式 NPC（七位＋洛恩）、N008 委託佈告欄、洛恩巡邏（N009）、村莊美術模組與模型",
+    "files": ["src/maps/village/{EnvP3,NpcP3,PetAppraisalWindow,PetMerchantV2,VillageArtFull,VillageWorld,layout,sectorSplit,tripoFill,villageArt66,villageMaterials,villagePerf,villageShadows,shotCam}.ts", "src/render/graphicsTiers.ts", "src/maps/village/VillageInteract.ts（與 A 的改動三方合併）", "src/render/PerfOverlay.ts（三方合併）", "public/models/village-p3/**", "public/models/village-npc67/**", "tests/unit/village-perf.test.ts", "tests/unit/village67.test.ts"] }
+}

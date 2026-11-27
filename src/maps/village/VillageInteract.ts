@@ -1,4 +1,4 @@
-import type { Scene } from "@babylonjs/core";
+import type { AbstractMesh, Scene } from "@babylonjs/core";
 import { PointerEventTypes } from "@babylonjs/core";
 import { NPC_SPOTS, type NpcSpot, PORTALS, type PortalDef } from "./layout.ts";
 import { canTalkToPetMerchant, PET_MERCHANT } from "./petMerchant.ts";
@@ -16,6 +16,14 @@ import { npcProfile, type VillageNpcs } from "./NpcP3.ts";
  * - 洛恩：停止巡走並面向玩家 → 商人選單 →「寵物鑑定」開啟星靈鑑定視窗（預覽版使用明確標示的測試資料）
  * - 傳送門：南門開放（確認後前往星芽原野）、北東西休眠（顯示未開放）；不新增出口
  */
+/** 與 Claude A Stage 7.1（feature/render-stage71-world）的 InteractOptions 同名同義的欄位 */
+export interface InteractOpts {
+  avatarUrl: string;
+  goToMap: (map: "starsprout") => void;
+  /** Stage 7.1／6.7：已開放的傳送陣由頁面端「踩入自動傳送」處理（PortalTrigger），這裡不顯示互動按鈕與確認視窗 */
+  autoPortals?: boolean;
+}
+
 type Target = { kind: "npc"; npc: NpcSpot } | { kind: "merchant" } | { kind: "portal"; portal: PortalDef };
 
 export interface InteractOptions {
@@ -60,13 +68,20 @@ export class VillageInteract {
 
   private readonly merchant: PetMerchantV2 | null;
   private readonly opts: InteractOptions;
+  /** Stage 6.7：委託佈告欄網格（直接點擊開啟委託介面） */
+  boardMeshes: readonly AbstractMesh[] = [];
+  /** Stage 6.7：洛恩最近一格的姿勢（動作、Walk 播放速度；測試與截圖用） */
+  merchantPose: ReturnType<PetMerchantV2["update"]> | null = null;
   /** Stage 6.2：正式 NPC（對話時轉身面向玩家並播放對話動作） */
   npcs: VillageNpcs | null = null;
   /** 正在對話的 NPC（spot id）；對話框／商會視窗關閉後自動清除 */
   private npcTalk: string | null = null;
   private lastNow: number | null = null;
 
+  private readonly scene: Scene;
+
   constructor(scene: Scene, merchant: PetMerchantV2 | null, opts: InteractOptions) {
+    this.scene = scene;
     this.merchant = merchant;
     this.opts = opts;
     const st = document.createElement("style");
@@ -110,6 +125,41 @@ export class VillageInteract {
     }
   }
 
+  /** Stage 6.7：委託佈告欄（N008 取消人物 NPC）：點擊佈告欄或按互動按鈕都會開啟委託介面 */
+  openQuestBoard(): string {
+    this.npcTalk = "board";
+    this.say(
+      "委託佈告欄",
+      `<div style="margin:4px 0 6px">今天貼出的委託：</div>
+       <div style="opacity:.85">・每日委託、討伐與採集委託由任務系統提供（Claude A 任務系統接入後顯示）。</div>
+       <div style="opacity:.85">・目前為預覽版，委託清單尚未開放。</div>`,
+      "每日委託",
+    );
+    this.log.push({ t: this.now, what: "board:open" });
+    return "board";
+  }
+
+  /** 測試與點擊共用：在佈告欄前（互動距離內）開啟委託介面 */
+  openQuestBoardIfNear(): string {
+    const spot = NPC_SPOTS.find((n) => n.id === "board");
+    if (spot && Math.hypot(spot.x - this.px, spot.z - this.pz) <= spot.interactR + 0.5) return this.openQuestBoard();
+    this.say("委託佈告欄", "再靠近一點就能查看委託（站到佈告欄前方）。");
+    return "too-far";
+  }
+
+  private boardTapHooked = false;
+  /** 點擊佈告欄（在 3.5 公尺內才開啟；太遠時提示靠近） */
+  hookBoardTap(): void {
+    if (this.boardTapHooked) return;
+    this.boardTapHooked = true;
+    this.scene.onPointerObservable.add((pi) => {
+      if (pi.type !== PointerEventTypes.POINTERTAP || this.busy || !this.boardMeshes.length) return;
+      const hit = this.scene.pick(this.scene.pointerX, this.scene.pointerY, (m) => this.boardMeshes.includes(m));
+      if (!hit?.hit) return;
+      this.openQuestBoardIfNear();
+    });
+  }
+
   get busy(): boolean {
     return this.talking || !this.dlg.hidden || this.panel.isOpen || this.appraisal.isOpen || this.guild.isOpen;
   }
@@ -122,11 +172,11 @@ export class VillageInteract {
     this.px = px;
     this.pz = pz;
     if (this.npcTalk && this.dlg.hidden && !this.guild.isOpen) this.npcTalk = null;
-    this.npcs?.update(now, dt, this.npcTalk, px, pz);
+    this.npcs?.update(now, dt, this.npcTalk, px, pz, this.scene.activeCamera);
     if (this.merchant) {
       // 對話中：每幀送出心跳（玩家位置），讓洛恩停下並面向玩家；關閉後釋放
       if (this.talking) this.merchant.clock.hold("player", now, px, pz);
-      this.merchant.update(now);
+      this.merchantPose = this.merchant.update(now, undefined, this.scene.activeCamera);
     }
     if (this.busy) {
       this.btn.hidden = true;
@@ -138,7 +188,12 @@ export class VillageInteract {
       return;
     }
     this.btn.hidden = false;
-    this.btn.textContent = this.target.kind === "portal" ? `✦ ${this.target.portal.name}` : `💬 ${this.target.kind === "merchant" ? "星靈培育師・洛恩" : this.target.npc.name.replace("（鍛造台旁）", "")}`;
+    this.btn.textContent =
+      this.target.kind === "portal"
+        ? `✦ ${this.target.portal.name}`
+        : this.target.kind === "npc" && this.target.npc.id === "board"
+          ? "📜 委託佈告欄"
+          : `💬 ${this.target.kind === "merchant" ? "星靈培育師・洛恩" : this.target.npc.name.replace("（鍛造台旁）", "")}`;
   }
 
   private findTarget(): Target | null {
@@ -165,6 +220,7 @@ export class VillageInteract {
       this.talkMerchant();
       return "merchant";
     }
+    if (t.kind === "npc" && t.npc.id === "board") return this.openQuestBoard();
     if (t.kind === "npc" && t.npc.id === "guild") {
       this.npcTalk = "guild";
       void this.guild.open();
