@@ -12,6 +12,8 @@ import { NetClient, type NetEvent, type RemotePlayer } from "../../multiplayer/c
 import { ANIM } from "../../multiplayer/shared/protocol.ts";
 import type { ActKind, AppearanceWire, Gender, MapId } from "../../multiplayer/shared/protocol.ts";
 import { NoviceAvatar, type NoviceLod } from "../characters/NoviceAvatar.ts";
+import { NOVICE_VERSION } from "../game/noviceVersion.ts";
+import { applyNoviceLook, type AppliedLook } from "./mpAppearance.ts";
 
 const TOKEN_KEY = "starwish.mp81.token";
 const SERVER_KEY = "starwish.mp81.server";
@@ -63,6 +65,7 @@ interface RemoteView {
   id: number;
   key: string;
   avatar: NoviceAvatar | null;
+  look: AppliedLook | null;
   loading: boolean;
   label: HTMLDivElement;
   lastActSeq: number;
@@ -90,6 +93,7 @@ export class MpWorld {
   private ground: (x: number, z: number) => number = () => 0;
   private readonly remotes = new Map<number, RemoteView>();
   private mapHandler: ((map: MapId, me: { x: number; z: number; yaw: number }) => void) | null = null;
+  private cmdHandler: ((id: string, ok: boolean, err?: string) => void) | null = null;
   private fpsFn: () => number = () => 0;
   private barTimer = 0;
   private roanHeld = false;
@@ -183,7 +187,24 @@ export class MpWorld {
     this.mapHandler = fn;
   }
 
+  /** 指令結果（攻擊、技能、撿取…）轉給遊戲畫面 */
+  onCommand(fn: (id: string, ok: boolean, err?: string) => void): void {
+    this.cmdHandler = fn;
+  }
+
+  /** 其他玩家目前畫面上的位置（技能特效錨點用） */
+  remotePose(pid: number): { x: number; z: number; yaw: number } | null {
+    const v = this.remotes.get(pid);
+    if (v?.avatar) return { x: v.avatar.root.position.x, z: v.avatar.root.position.z, yaw: v.avatar.root.rotation.y };
+    const r = this.client.remotes().find((x) => x.id === pid);
+    return r ? { x: r.x, z: r.z, yaw: r.yaw } : null;
+  }
+
   private onEvent(e: NetEvent): void {
+    if (e.type === "cmd") {
+      this.cmdHandler?.(e.id, e.ok, e.err);
+      return;
+    }
     if (e.type === "map") {
       for (const r of this.remotes.values()) this.disposeRemote(r);
       this.remotes.clear();
@@ -283,13 +304,21 @@ export class MpWorld {
     label.className = "mp-name";
     label.textContent = r.name;
     this.hudRoot.appendChild(label);
-    const v: RemoteView = { id: r.id, key, avatar: null, loading: true, label, lastActSeq: r.actSeq, lastX: r.x, lastZ: r.z, speed: 0, link: r.link, dead: false };
-    void NoviceAvatar.loadModular(this.scene!, { gender: r.gender, lod: this.lod, baseUrl: this.baseUrl, appearance: r.ap })
-      .then((a) => {
+    const v: RemoteView = { id: r.id, key, avatar: null, look: null, loading: true, label, lastActSeq: r.actSeq, lastX: r.x, lastZ: r.z, speed: 0, link: r.link, dead: false };
+    // Stage 8.2：其他玩家用已驗收的 C1.0-B5b（優先 Lite），外觀（髮色、武器）與本人同一套
+    void NoviceAvatar.load(this.scene!, { gender: r.gender, lod: "lite", baseUrl: this.baseUrl, version: NOVICE_VERSION })
+      .then(async (a) => {
         if (!this.remotes.has(r.id) || this.remotes.get(r.id) !== v) {
           a.dispose();
           return;
         }
+        const look = await applyNoviceLook(this.scene!, a, r.gender, r.ap);
+        if (this.remotes.get(r.id) !== v) {
+          look.dispose();
+          a.dispose();
+          return;
+        }
+        v.look = look;
         a.setupShadow("blob", this.scene!, null);
         a.root.position.set(r.x, this.ground(r.x, r.z), r.z);
         a.root.rotation.y = r.yaw;
@@ -355,13 +384,15 @@ export class MpWorld {
   }
 
   private disposeRemote(v: RemoteView): void {
+    v.look?.dispose();
+    v.look = null;
     v.avatar?.dispose();
     v.avatar = null;
     v.label.remove();
   }
 
   /** 測試用：遠端玩家畫面狀態 */
-  remoteInfo(): { id: number; name: string; loaded: boolean; state: string | null; pos: [number, number] | null; yaw: number | null; link: number; parts: number; hairColor: string | null; gender: string }[] {
+  remoteInfo(): { id: number; name: string; loaded: boolean; state: string | null; pos: [number, number] | null; yaw: number | null; link: number; parts: number; file: string | null; weapon: string | null; hairTinted: number; hairColor: string | null; gender: string }[] {
     const list = this.client.remotes();
     return [...this.remotes.values()].map((v) => {
       const r = list.find((x) => x.id === v.id);
@@ -374,6 +405,9 @@ export class MpWorld {
         yaw: v.avatar ? v.avatar.root.rotation.y : null,
         link: v.link,
         parts: v.avatar?.parts.length ?? 0,
+        file: v.avatar?.file ?? null,
+        weapon: v.look?.weapon?.kind ?? null,
+        hairTinted: v.look?.hairTinted ?? 0,
         hairColor: r?.ap.hairColor ?? null,
         gender: r?.gender ?? "",
       };
@@ -387,13 +421,15 @@ export class MpWorld {
     const state = s.state === "online" ? "線上" : s.state === "reconnecting" ? "重新連線中" : s.state === "connecting" ? "連線中" : "離線";
     this.bar.textContent = `${dot} 多人 ${state}｜同場 ${s.players} 人｜延遲 ${s.rttMs} ms｜FPS ${s.fps}`;
     this.detail.innerHTML = [
-      `<b>多人連線診斷（Stage 8.1 測試）</b>`,
+      `<b>多人連線診斷（Stage 8.2 測試）</b>`,
       `房間 ${s.room}（${this.client.realm === "test" ? "測試資料區" : this.client.realm}）・玩家#${s.pid}`,
       `RTT ${s.rttMs} ms（平均 ${s.rttAvgMs}）・抖動 ${s.jitterMs} ms`,
       `下載 ${(s.bytesDownPerSec / 1024).toFixed(1)} KB/s（${s.msgsDownPerSec} 包/秒）・上傳 ${(s.bytesUpPerSec / 1024).toFixed(2)} KB/s（${s.msgsUpPerSec} 包/秒）`,
       `快照 ${s.snapsPerSec}/秒・待確認輸入 ${s.pendingInputs}`,
       `位置校正 ${s.corrections} 次（最大 ${s.maxCorrectionCm} cm）・重連 ${s.reconnects} 次`,
-      `<span class="mp-warn">怪物與戰鬥目前是各自裝置的單機行為（多人權威戰鬥：Stage 8.2）</span>`,
+      ...(this.client.self ? [`Lv.${this.client.self.level}・經驗 ${this.client.self.exp}/${this.client.self.expNext}・金幣 ${this.client.self.gold}・HP ${this.client.self.hp}/${this.client.self.maxHp}`] : []),
+      ...(this.client.inventory ? [`背包 ${this.client.inventory.items.filter((i) => i.location === "bag").length} 件・倉庫 ${this.client.inventory.items.filter((i) => i.location === "storage").length} 件`] : []),
+      `<span class="mp-warn">戰鬥、經驗、金幣、掉落由伺服器判定（數值為測試設定）</span>`,
     ].join("<br>");
   }
 

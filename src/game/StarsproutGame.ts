@@ -60,6 +60,8 @@ import { defaultAppearance } from "../core/gameSave.ts";
 import { FIELD_RIGGED_SPAWNS } from "../monsters/rigged/riggedSpec.ts";
 import { riggedAssetAvailable, RiggedMonsterVisual } from "../monsters/rigged/RiggedMonsterVisual.ts";
 import { NOVICE_VERSION } from "./noviceVersion.ts";
+import { MpFieldCombat } from "../net/MpFieldCombat.ts";
+import { applyNoviceLook, type AppliedLook } from "../net/mpAppearance.ts";
 import { FIELD_CAMP_ARRIVAL } from "../maps/village/mapLinks.ts";
 import { PortalTrigger } from "./portalTrigger.ts";
 import { registerStarsprout } from "../../multiplayer/shared/maps.ts";
@@ -119,7 +121,7 @@ export interface PlayApi {
     render: { p3: boolean; pipeline: boolean; charShadow: CharShadowMode; drawCalls: number; fps: number; contextLost: number };
   };
   setMove(x: number, y: number): void;
-  press(a: "attack" | "jump"): void;
+  press(a: "attack" | "jump" | "skill"): void;
   teleport(x: number, z: number): void;
   toZone01(): void;
   /** 測試用：玩家生命回滿（解除倒地以外的狀態不變） */
@@ -183,6 +185,14 @@ class StarsproutGame {
   private readonly ws: WorldSession | null;
   private wpanel: WorldPanel | null = null;
   private downAt: number | null = null;
+  /** Stage 8.2：多人模式的伺服器權威戰鬥（單機為 null） */
+  private mpField: MpFieldCombat | null = null;
+  private look: AppliedLook | null = null;
+  /** 倒地：多人模式以伺服器為準 */
+  private get isDownNow(): boolean {
+    const c = this.mpField?.client;
+    return c ? !!c.self?.down || c.down : this.combat.isDown;
+  }
   private leaving = false;
   private goldDropped = 0;
   private goldPicked = 0;
@@ -353,7 +363,12 @@ class StarsproutGame {
         if (hide) b.style.display = "none";
       }
     };
-    if (ws) {
+    if (ws?.mp) {
+      // Stage 8.2：多人模式第三顆按鈕＝展示技能（Claude C 的技術展示技能，不是正式職業技能）
+      relabel(".skill-1", "背包");
+      relabel(".skill-2", "寵物");
+      relabel(".skill-3", "技能");
+    } else if (ws) {
       // Stage 7：一般移動沒有跳躍按鈕（企劃規則）；跳躍動畫保留給技能
       relabel(".skill-1", "背包");
       relabel(".skill-2", "寵物");
@@ -365,6 +380,7 @@ class StarsproutGame {
     }
     this.hud.events.on("skillPressed", ({ slot }) => {
       if (slot === "attack") this.tryAttack(true);
+      else if (ws?.mp && slot === "skill3") this.mpField?.skill(ws.save.character.appearance.weapon);
       else if (ws) {
         if (slot === "skill1") this.wpanel?.open("bag");
         else if (slot === "skill2") this.wpanel?.open("pet");
@@ -446,6 +462,8 @@ class StarsproutGame {
       ? await NoviceAvatar.loadModular(scene, { gender: this.gender, lod: this.lod, baseUrl: modelsUrl, appearance: this.ws?.save.character.appearance ?? defaultAppearance() })
       : await NoviceAvatar.load(scene, { gender: this.gender, lod: this.lod, baseUrl: `${import.meta.env.BASE_URL}models/`, version: this.version });
     this.avatar.setupShadow(this.charShadow, scene, this.shadows);
+    // Stage 8.2：多人模式套用伺服器保存的外觀（髮色、武器）；與其他玩家看到的一致
+    if (this.ws?.mp && !useNew) this.look = await applyNoviceLook(scene, this.avatar, this.gender, this.ws.save.character.appearance);
     const sky = scene.getMeshByName("PH_skyDome");
     if (sky) {
       const probe = new ReflectionProbe("playEnv", 128, scene, true, true);
@@ -462,7 +480,7 @@ class StarsproutGame {
     const registry = registerBabylonVisuals(createMonsterRegistry({ legacyAggressive: !this.ws }), { scene, shadows: this.shadows, quality });
     const factory = new MonsterFactory(registry);
     this.monsters = zoneSpawnPoints(ZONE01.x, ZONE01.z, ZONE01.r, FIELD_TEST.boboCount).map((p) =>
-      factory.create("star_dew_bobo", { x: p.x, y: this.terrain.surface(p.x, p.z), z: p.z }, { modelId: BOBO_MODEL_IDS.v38r, animationProfileId: BOBO_PROFILE_IDS.v38r }),
+      factory.create("star_dew_bobo", { x: p.x, y: this.terrain.surface(p.x, p.z), z: p.z }, { modelId: BOBO_MODEL_IDS.v38r, animationProfileId: BOBO_PROFILE_IDS.v38r, ...(this.ws?.mp ? { ai: false } : {}) }),
     );
     // ---------- Stage 7.2：骨骼動畫怪物（M004～M007；GLB 列在 models/monsters/manifest.json 才會出現，沒交付的區域保持空的） ----------
     // &rigfixture=1（只供自動測試）：風羽狐檔案還沒交付時，用灰色方塊的接口測試替身驗證 AI、命中與重生（只放羽風高地）
@@ -480,7 +498,7 @@ class StarsproutGame {
       if (id) {
         const pts = zoneSpawnPoints(zone.x, zone.z, zone.r * (zone.cap === 1 ? 0 : 0.75), zone.cap ?? 1);
         for (const p of pts) {
-          this.monsters.push(rigFactory.create(id, { x: p.x, y: this.terrain.surface(p.x, p.z), z: p.z }, { brain: { seed: Math.round(p.x * 31 + p.z * 17) } }));
+          this.monsters.push(rigFactory.create(id, { x: p.x, y: this.terrain.surface(p.x, p.z), z: p.z }, { brain: { seed: Math.round(p.x * 31 + p.z * 17) }, ...(this.ws?.mp ? { ai: false } : {}) }));
           count++;
         }
       }
@@ -521,9 +539,32 @@ class StarsproutGame {
       mp.onMap((map, me) => {
         if (map === "starsprout" || !this.ws) return;
         this.leaving = true;
-        this.ws.travelTo({ map, x: me.x, z: me.z, yaw: me.yaw }, this.combat.isDown ? null : this.combat.hp);
+        this.ws.travelTo({ map, x: me.x, z: me.z, yaw: me.yaw }, this.isDownNow ? null : this.combat.hp);
       });
-      this.hud.toast("多人測試：怪物與戰鬥是這台裝置的單機行為（多人權威戰鬥在 Stage 8.2）", 4000);
+      this.mpField = new MpFieldCombat(
+        mp.client,
+        {
+          scene,
+          hudRoot: this.hudRoot,
+          surface: (x, z) => this.terrain.surface(x, z),
+          monsters: this.monsters,
+          me: () => ({ x: this.pos.x, z: this.pos.z, yaw: this.yaw }),
+          remotePose: (pid) => mp.remotePose(pid),
+          playAttack: (id) => {
+            this.attackTargetId = id;
+            this.pending.attack = true;
+          },
+          playHurt: () => {
+            if (this.curSpeed < 0.05 && this.avatar.state !== "Attack") this.pending.hurt = true;
+          },
+          toast: (m, ms) => this.hud.toast(m, ms),
+          weapon: () => this.look?.weapon ?? null,
+          lite: this.lod === "lite",
+        },
+        this.gender,
+      );
+      mp.onCommand((id, ok, err) => this.mpField?.onCommandResult(id, ok, err));
+      this.hud.toast("多人戰鬥（Stage 8.2 測試）：怪物、傷害、經驗、掉落都由伺服器判定", 4000);
     }
     await scene.whenReadyAsync();
     const auto = this.params.get("autoplay");
@@ -551,7 +592,7 @@ class StarsproutGame {
     this.now += dt;
     this.keyboard.update();
     if (this.autoFight) this.autoDrive();
-    const down = this.combat.isDown;
+    const down = this.isDownNow;
     const m = down ? { x: 0, y: 0 } : this.input.getMove();
     const w = inputToWorld(m.x, m.y, this.camera.forwardYaw);
     const l = Math.hypot(w.x, w.z);
@@ -630,6 +671,8 @@ class StarsproutGame {
   // ---------------- 戰鬥 ----------------
   private tryAttack(fromPlayer: boolean): boolean {
     if (this.avatar.state === "Attack") return false;
+    // 多人：只送攻擊請求，傷害由伺服器判定
+    if (this.mpField) return this.mpField.attack(this.combat.tuning ? 2.5 : 2.5);
     const t = this.avatar.getAttackTiming();
     const r = this.combat.startAttack(this.now, this.pos.x, this.pos.z, this.monsters.map((m) => m.instance), t.hitAt - 1e-6);
     if (r.ok) {
@@ -684,6 +727,7 @@ class StarsproutGame {
   }
 
   private updateMonsters(dt: number): void {
+    if (this.mpField) return this.updateMonstersMp(dt);
     const hit = this.combat.resolvePending(this.now, this.pos.x, this.pos.z, this.monsters.map((m) => m.instance));
     if (hit) this.onHit(hit);
     if (this.ws) {
@@ -731,6 +775,36 @@ class StarsproutGame {
     this.hud.setLevel(pg.level);
   }
 
+  /** 多人模式：怪物、血量、經驗、金幣全部照伺服器 */
+  private updateMonstersMp(dt: number): void {
+    const f = this.mpField!;
+    f.update(dt, this.now);
+    const self = f.client.self;
+    if (self) {
+      this.combat.hp = self.hp;
+      this.hud.setBars({ hp: self.hp, maxHp: self.maxHp, mp: 40, maxMp: 40, exp: self.exp, expToNext: self.expNext });
+      this.hud.setLevel(self.level);
+    }
+    const down = this.isDownNow;
+    if (down && this.downAt === null) this.downAt = this.now;
+    if (!down) this.downAt = null;
+    if (this.downAt !== null && this.now - this.downAt >= 3 && !this.leaving) this.respawnInVillage();
+    let locked: MonsterController | null = null;
+    let bd = 2.5 + 0.4;
+    for (const m of this.monsters) {
+      if (!m.instance.isAlive) continue;
+      const q = m.instance.currentPosition;
+      const d = Math.hypot(q.x - this.pos.x, q.z - this.pos.z) - (m.instance.definition.bodyRadius ?? 0);
+      if (d < bd) [bd, locked] = [d, m];
+    }
+    if (locked) {
+      const p = locked.instance.currentPosition;
+      this.lockRing.position.set(p.x, this.terrain.surface(p.x, p.z) + 0.03, p.z);
+      this.lockRing.rotation.y += dt * 1.5;
+    }
+    this.lockRing.setEnabled(locked !== null);
+  }
+
   // ---------------- 掉落物 ----------------
   private spawnLootMesh(d: LootDrop, gold = false): void {
     const egg = d.item === "egg" || d.item === "birdEgg";
@@ -761,6 +835,7 @@ class StarsproutGame {
   }
 
   private updateLoot(dt: number): void {
+    if (this.mpField) return; // 多人：掉落物由伺服器管理（MpFieldCombat）
     const t = this.now;
     for (const d of this.loot.drops) {
       const m = this.lootMeshes.get(d.id);
@@ -768,7 +843,7 @@ class StarsproutGame {
       m.rotation.y += dt * 1.6;
       m.position.y = this.terrain.surface(d.x, d.z) + 0.25 + Math.sin((t - d.born) * 3 + d.id) * 0.05;
     }
-    if (this.combat.isDown) return;
+    if (this.isDownNow) return;
     const { picked, expired } = this.loot.update(t, this.pos.x, this.pos.z);
     for (const d of [...picked, ...expired]) {
       this.lootMeshes.get(d.id)?.dispose();
@@ -890,9 +965,9 @@ class StarsproutGame {
     this.campPortal?.update(dt);
     // 踩進營地傳送陣 → 直接回星芽村（先存檔；倒地時不觸發；只觸發一次）
     // 多人模式：傳送陣由伺服器判定
-    if (!this.ws?.mp && !this.combat.isDown && this.portal.update(this.pos.x, this.pos.z)) this.toVillage();
+    if (!this.ws?.mp && !this.isDownNow && this.portal.update(this.pos.x, this.pos.z)) this.toVillage();
     this.rememberT += dt;
-    if (this.rememberT >= 5 && !this.combat.isDown) {
+    if (this.rememberT >= 5 && !this.isDownNow) {
       this.rememberT = 0;
       this.ws!.remember("starsprout", this.pos.x, this.pos.z, this.yaw, this.combat.hp);
     }
@@ -1217,7 +1292,7 @@ class StarsproutGame {
           drops: self.dropCount,
           picked: self.picked,
           loot: self.loot.drops.length,
-          mp: self.ws?.mp ? { state: self.ws.mp.client.state, pid: self.ws.mp.client.pid, room: self.ws.mp.client.room, down: self.ws.mp.client.down, stats: { ...self.ws.mp.client.stats }, server: { ...self.ws.mp.client.server }, remotes: self.ws.mp.remoteInfo() } : null,
+          mp: self.ws?.mp ? { state: self.ws.mp.client.state, pid: self.ws.mp.client.pid, room: self.ws.mp.client.room, down: self.ws.mp.client.down, stats: { ...self.ws.mp.client.stats }, server: { ...self.ws.mp.client.server }, remotes: self.ws.mp.remoteInfo(), field: self.mpField?.info() ?? null, look: self.look ? { weapon: self.look.weapon?.kind ?? null, hairTinted: self.look.hairTinted } : null } : null,
           monsters: self.monsters.map((m) => {
             const v = m.visual instanceof RiggedMonsterVisual ? m.visual : null;
             return {
@@ -1253,7 +1328,7 @@ class StarsproutGame {
         };
       },
       setMove: (x, y) => (self.input.moveOverride = x === 0 && y === 0 ? null : { x, y }),
-      press: (a) => (a === "attack" ? void self.tryAttack(false) : (self.pending.jump = true)),
+      press: (a) => (a === "attack" ? void self.tryAttack(false) : a === "skill" ? void self.mpField?.skill(self.ws?.save.character.appearance.weapon ?? "sword") : (self.pending.jump = true)),
       teleport: (x, z) => self.teleport(x, z),
       toZone01: () => self.toZone01(),
       heal: () => {

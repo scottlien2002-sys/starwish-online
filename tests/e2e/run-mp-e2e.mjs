@@ -1,4 +1,5 @@
-// Stage 8.1｜正式 3D 遊戲雙人連線 E2E（Claude D）
+// Stage 8.1／8.2｜正式 3D 遊戲雙人連線 E2E（Claude D）
+// Stage 8.2：原野改為伺服器權威戰鬥 → 兩人合作打同一隻怪（血量、死亡、重生、經驗、掉落都由伺服器）；錄兩位玩家畫面（MP_E2E_VIDEO=1）
 // node tests/e2e/run-mp-e2e.mjs dist chromium|webkit
 // 啟動真正的多人伺服器（multiplayer/server/main.ts）＋靜態網站，兩個獨立瀏覽器環境＝兩位玩家：
 //   星芽村互相看見（不同性別／髮色／武器）→ 移動同步（Idle／Run、朝向、無瞬移）→ 洛恩位置一致 → A、B 先後走入南門到星芽原野
@@ -31,6 +32,7 @@ if (TLS) {
   Object.assign(tlsEnv, { MP_TLS_CERT: join(d, "cert.pem"), MP_TLS_KEY: join(d, "key.pem") });
 }
 const TAG = process.env.MP_E2E_TAG ?? "";
+const VIDEO = process.env.MP_E2E_VIDEO === "1";
 const srv = spawn(process.execPath, [resolve("multiplayer/server/main.ts")], { env: { ...process.env, ...tlsEnv, PORT: String(PORT), MP_GRACE_MS: "20000" }, stdio: ["ignore", "pipe", "pipe"] });
 let srvLog = "";
 srv.stdout.on("data", (d) => (srvLog += d));
@@ -57,14 +59,20 @@ const metrics = async () => {
 
 const base = `${site.url}/?play=world&mp=1&lod=lite&quality=low&newgame=1&server=${TLS ? "wss" : "ws"}://127.0.0.1:${PORT}/ws`;
 const players = [];
+let videoT0 = 0;
+const mark = (k) => ((results.videoMarks ??= {})[k] = +((Date.now() - videoT0) / 1000).toFixed(1));
 async function player(name, extra, mobile) {
-  const ctx = await browser.newContext(mobile ? { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: browserName !== "firefox", hasTouch: true } : { viewport: { width: 960, height: 600 } });
+  if (!videoT0) videoT0 = Date.now();
+  const vsize = mobile ? { width: 390, height: 844 } : { width: 960, height: 600 };
+  const video = VIDEO ? { recordVideo: { dir: join(outDir, "video", name === "阿星" ? "A" : name === "小願" ? "B" : "C"), size: vsize } } : {};
+  const ctx = await browser.newContext(mobile ? { viewport: vsize, deviceScaleFactor: 2, isMobile: browserName !== "firefox", hasTouch: true, ...video } : { viewport: vsize, ...video });
   const page = await ctx.newPage();
   page.on("pageerror", (e) => results.consoleErrors.push(`${name}: ${e.message}`));
   page.on("response", (r) => {
     const u = r.url();
     if (r.status() >= 400 && !/favicon/.test(u)) results.http404.push(`${r.status()} ${u}`);
-    if (/\/preview-(?!mp81)[a-z0-9-]+\/models\//.test(u)) results.remappedLoads++;
+    if (/\/preview-(?!mp8[12])[a-z0-9-]+\/models\//.test(u)) results.remappedLoads++;
+    if (/\/shared-assets\/v\d+\//.test(u)) results.sharedAssetLoads = (results.sharedAssetLoads ?? 0) + 1;
   });
   page.on("console", (m) => {
     if (m.type() === "error" && !/favicon|404/.test(m.text())) results.consoleErrors.push(`${name}: ${m.text()}`);
@@ -129,9 +137,11 @@ try {
   check("兩位玩家進入同一個星芽村房間", a.mp.room === b.mp.room && a.mp.room.startsWith("village"), { room: a.mp.room });
   const bSeesA = b.mp.remotes.find((r) => r.id === a.mp.pid);
   const aSeesB = a.mp.remotes.find((r) => r.id === b.mp.pid);
-  check("A 看見 B 的 3D 角色（女、粉紅髮色、法杖；模組化零件）", aSeesB?.loaded && aSeesB.gender === "female" && aSeesB.hairColor === "#c0408a" && aSeesB.parts >= 5, aSeesB);
-  check("B 看見 A 的 3D 角色（男、深棕髮色、短劍）", bSeesA?.loaded && bSeesA.gender === "male" && bSeesA.hairColor === "#3a2a1a" && bSeesA.parts >= 5, bSeesA);
-  check("本地角色外觀以伺服器資料建立（B 是女性、法杖）", b.gender === "female" && b.avatarModel.weapon === "staff", { gender: b.gender, weapon: b.avatarModel.weapon });
+  const okB5b = (r) => !!r?.loaded && /c10b5b/.test(r.file ?? "") && /lite/i.test(r.file ?? "") && !r.parts;
+  check("A 看見 B 的 3D 角色（C1.0-B5b Lite、女、粉紅髮色已套用、法杖）", okB5b(aSeesB) && aSeesB.gender === "female" && aSeesB.hairColor === "#c0408a" && aSeesB.hairTinted >= 1 && aSeesB.weapon === "staff", aSeesB);
+  check("B 看見 A 的 3D 角色（C1.0-B5b Lite、男、深棕髮色已套用、短劍）", okB5b(bSeesA) && bSeesA.gender === "male" && bSeesA.hairColor === "#3a2a1a" && bSeesA.hairTinted >= 1 && bSeesA.weapon === "sword", bSeesA);
+  const bAp = await B.page.evaluate(() => window.__mpWorld.client.appearance);
+  check("本地角色外觀以伺服器資料建立（B 是女性、法杖；不是 Tripo 零件）", b.gender === "female" && bAp.weapon === "staff" && !b.avatarModel.modular && b.avatarModel.parts.length === 0, { gender: b.gender, ap: bAp, modular: b.avatarModel.modular });
   check("一般移動沒有跳躍按鈕", a.jumpButtonVisible === false && b.jumpButtonVisible === false);
   await A.page.waitForFunction(() => (() => { const a = window.__starwishWorld.info().art; return a === "loaded" || /^(error|部分)/.test(a); })(), null, { timeout: 400000 }).catch(() => {});
   const art = (await vinfo(A)).art;
@@ -220,7 +230,7 @@ try {
   await sleep(800);
   b = await vinfo(B);
   check("留在村莊的 B 看不到已到原野的 A（不同地圖互不可見）", !b.mp.remotes.some((r) => r.id === a.mp.pid), { remotes: b.mp.remotes.map((r) => r.id) });
-  check("換地圖後 A 外觀與角色保留（同一玩家、同一外觀）", fa.mp.pid === a.mp.pid && fa.avatarModel.weapon === "sword", { pid: fa.mp.pid, weapon: fa.avatarModel.weapon });
+  check("換地圖後 A 外觀與角色保留（同一玩家、髮色與短劍套用）", fa.mp.pid === a.mp.pid && fa.mp.look?.weapon === "sword" && fa.mp.look?.hairTinted >= 1 && !fa.avatarModel.modular, { pid: fa.mp.pid, look: fa.mp.look });
   await toSouth(B);
   await waitField(B);
   // 原野互相看見
@@ -233,77 +243,139 @@ try {
   check("A、B 都在星芽原野，互相看見", fa.mp.room === fb.mp.room && fa.mp.remotes.some((r) => r.id === fb.mp.pid && r.loaded) && fb.mp.remotes.some((r) => r.id === fa.mp.pid && r.loaded), { room: fa.mp.room });
   await shot(B, "03_field_B_sees_A_iphone");
 
-  // ---------- 原野：A 打星露啵啵（真的攻擊流程）→ B 看到 Attack ----------
-  const target = () => A.page.evaluate(() => {
+  // ---------- 原野：A、B 合作打同一隻怪（伺服器權威）----------
+  const field = (P) => P.page.evaluate(() => window.__starwishPlay.info().mp.field);
+  const monOf = (P, id) => P.page.evaluate((id) => {
     const i = window.__starwishPlay.info();
-    const al = i.monsters.filter((m) => m.state !== "dead" && m.hp > 0);
+    const m = i.monsters.find((x) => x.id === id);
+    return m ? { x: m.x, z: m.z, hp: m.hp, maxHp: m.maxHp, state: m.state, me: [i.pos[0], i.pos[2]] } : null;
+  }, id);
+  // 目標：離營地最近、還活著的星露啵啵（被動怪物，Lv.1）
+  const targetId = await A.page.evaluate(() => {
+    const i = window.__starwishPlay.info();
+    const al = i.monsters.filter((m) => m.kind === "star_dew_bobo" && m.hp > 0);
     al.sort((p, q) => Math.hypot(p.x - i.pos[0], p.z - i.pos[2]) - Math.hypot(q.x - i.pos[0], q.z - i.pos[2]));
-    return al[0] ? { x: al[0].x, z: al[0].z, d: Math.hypot(al[0].x - i.pos[0], al[0].z - i.pos[2]) } : null;
+    return al[0]?.id ?? null;
   });
-  let sawAttack = false;
-  let localAttack = false;
-  let bestD = Infinity;
-  let stuckSince = Date.now();
-  let side = 1;
-  const atkLog = [];
-  const tAtk = Date.now();
-  while (Date.now() - tAtk < 300000 && !sawAttack) {
-    const t = await target().catch(() => null);
-    if (!t) break;
-    // 不要誤踩營地傳送陣（-56, -68）：太靠近就先往東北離開
-    const me = await finfo(A).catch(() => null);
-    if (!me) break;
-    if (Math.hypot(me.pos[0] + 56, me.pos[2] + 68) < 4.5) {
-      await drive(A, 0.7, 0.7);
-      await sleep(800);
-      continue;
-    }
-    if (atkLog.length < 400) atkLog.push(+t.d.toFixed(2));
-    if (t.d > 1.8) {
-      const i = me;
-      const dx = t.x - i.pos[0];
-      const dz = t.z - i.pos[2];
-      const l = Math.hypot(dx, dz);
-      if (t.d < bestD - 0.3) {
-        bestD = t.d;
-        stuckSince = Date.now();
+  results.samples.coop = { targetId };
+  /** 一位玩家朝目標走；夠近就按攻擊（法杖玩家用技能「魔法彈」，射程 9 m） */
+  const fighter = (P, useSkill, gate = async () => true) => {
+    let best = Infinity, stuck = Date.now(), side = 1, presses = 0;
+    return async () => {
+      const m = await monOf(P, targetId).catch(() => null);
+      if (!m) return;
+      const dx = m.x - m.me[0], dz = m.z - m.me[1];
+      const d = Math.hypot(dx, dz);
+      if (m.hp <= 0 || m.state === "death" || m.state === "dead") {
+        await drive(P, 0, 0);
+        return;
       }
-      if (Date.now() - stuckSince > 2500) {
-        // 被柵欄或道具擋住：往側邊繞 1.5 秒（一般移動，伺服器判定）
-        await drive(A, (-dz / l) * side, (dx / l) * side);
-        await sleep(1500);
-        side = -side;
-        stuckSince = Date.now();
-        bestD = Infinity;
-        continue;
+      if (Math.hypot(m.me[0] + 56, m.me[1] + 68) < 4.5) {
+        await drive(P, 0.7, 0.7);
+        return;
       }
-      await drive(A, dx / l, dz / l);
-      await sleep(80);
-      continue;
+      const reach = useSkill ? 6 : 1.7;
+      if (d > reach) {
+        if (d < best - 0.3) {
+          best = d;
+          stuck = Date.now();
+        }
+        if (Date.now() - stuck > 2500) {
+          await drive(P, (-dz / d) * side, (dx / d) * side);
+          await sleep(900);
+          side = -side;
+          stuck = Date.now();
+          best = Infinity;
+          return;
+        }
+        await drive(P, dx / d, dz / d);
+        return;
+      }
+      await drive(P, 0, 0);
+      if (!(await gate())) return; // 合作測試：等隊友先出手，確保兩人都有造成傷害
+      presses++;
+      await P.page.evaluate((sk) => window.__starwishPlay.press(sk && Math.random() < 0.6 ? "skill" : "attack"), useSkill);
+    };
+  };
+  const fA = fighter(A, false);
+  const fB = fighter(B, true, async () => ((await field(A).catch(() => null))?.hitsShown ?? 0) > 0);
+  const hpSamples = [];
+  const tFight = Date.now();
+  mark("fightApproach");
+  let shotFight = false;
+  while (Date.now() - tFight < 300000) {
+    await Promise.all([fA(), fB()]);
+    const [ma2, mb2] = await Promise.all([monOf(A, targetId).catch(() => null), monOf(B, targetId).catch(() => null)]);
+    if (ma2 && mb2) hpSamples.push([ma2.hp, mb2.hp, ma2.state, mb2.state]);
+    if (!shotFight && ma2 && ma2.hp < ma2.maxHp) {
+      mark("firstHit");
+      await sleep(250);
+      await shot(A, "04_field_coop_A");
+      await shot(B, "04_field_coop_B_iphone");
+      shotFight = true;
     }
-    await drive(A, 0, 0);
-    await A.page.evaluate(() => window.__starwishPlay.press("attack"));
-    if ((await finfo(A).catch(() => null))?.state === "Attack") localAttack = true;
-    for (let k = 0; k < 8 && !sawAttack; k++) {
-      await sleep(60);
-      const r = await B.page.evaluate((pid) => window.__mpWorld.remoteInfo().find((x) => x.id === pid), fa.mp.pid);
-      if (r?.state === "Attack") sawAttack = true;
-    }
+    if (ma2 && mb2 && ma2.hp === 0 && mb2.hp === 0) break;
+    await sleep(120);
   }
+  mark("fightEnd");
   await drive(A, 0, 0);
-  results.samples.attack = { localAttack, distances: atkLog.slice(-20), seconds: (Date.now() - tAtk) / 1000 };
-  check("A 在原野實際攻擊怪物，B 看到 A 的 Attack 動畫", sawAttack, results.samples.attack);
-  if (sawAttack) await shot(B, "04_field_B_sees_A_attack");
-  // Hurt／Death 動作同步（由網路動作事件；真實怪物攻擊時機不固定 → 直接送事件驗證同步管線）
-  await A.page.evaluate(() => window.__mpWorld.act("hurt"));
-  let sawHurt = false;
-  for (let k = 0; k < 20 && !sawHurt; k++) {
-    await sleep(60);
-    const r = await B.page.evaluate((pid) => window.__mpWorld.remoteInfo().find((x) => x.id === pid), fa.mp.pid);
-    if (r?.state === "Hurt") sawHurt = true;
+  await drive(B, 0, 0);
+  await sleep(600);
+  const [mA, mB, fldA, fldB] = await Promise.all([monOf(A, targetId), monOf(B, targetId), field(A), field(B)]);
+  const same = hpSamples.filter((x) => x[0] === x[1]).length;
+  results.samples.coop = { targetId, seconds: (Date.now() - tFight) / 1000, samples: hpSamples.length, sameHpRatio: +(same / Math.max(1, hpSamples.length)).toFixed(3), hpTrailA: hpSamples.slice(-12).map((x) => x[0]), A: fldA, B: { ...fldB, monsterHp: undefined } };
+  check("A、B 合作把同一隻怪打倒（兩邊都看到 HP 0、死亡）", mA?.hp === 0 && mB?.hp === 0 && ["death", "dead"].includes(mA.state) && ["death", "dead"].includes(mB.state), { mA, mB });
+  check("戰鬥中兩邊看到的怪物 HP 一致（同一份伺服器狀態；≥ 85% 取樣相同）", same / Math.max(1, hpSamples.length) >= 0.85, { same, total: hpSamples.length });
+  check("A 的攻擊與 B 的技能都被伺服器接受（B 法杖用魔法彈）", fldA.attacksOk > 0 && (fldB.skillsOk > 0 || fldB.attacksOk > 0), { A: { sent: fldA.attacksSent, ok: fldA.attacksOk, rej: fldA.attacksRejected }, B: { skills: fldB.skillsOk, atk: fldB.attacksOk, last: fldB.lastReject } });
+  check("傷害數字顯示伺服器結果（兩邊都有命中特效）", fldA.hitsShown > 0 && fldB.hitsShown > 0, { A: fldA.hitsShown, B: fldB.hitsShown });
+  check("其他玩家的技能特效依伺服器施放事件播放（A 看到 B 的施放）", fldA.remoteCastsShown > 0, { remoteCasts: fldA.remoteCastsShown, vfx: fldA.vfx });
+  check("兩人都拿到經驗（伺服器結算，擊殺只結算一次）", fldA.self?.exp > 0 && fldB.self?.exp > 0, { A: fldA.self, B: fldB.self });
+  await shot(A, "05_field_coop_kill_A");
+  // ---------- 掉落物：伺服器產生（UUID、歸屬＝傷害最高者）；歸屬者靠近自動撿（伺服器判定） ----------
+  const m0 = await metrics();
+  const cb0 = (m0.combat ?? [])[0] ?? {};
+  const pidA = fa.mp.pid;
+  const tL = Date.now();
+  while (Date.now() - tL < 40000) {
+    const left = await A.page.evaluate(() => [...window.__mpWorld.client.loot.values()].map((l) => ({ uid: l.uid, x: l.x, z: l.z, o: l.ownerPid })));
+    if (!left.length) break;
+    const l = left[0];
+    const P = l.o === pidA ? A : B;
+    await walk(P, [{ x: l.x, z: l.z }], async () => {
+      const i = await finfo(P).catch(() => null);
+      return i ? [i.pos[0], i.pos[2]] : null;
+    }, async () => !(await P.page.evaluate((u) => window.__mpWorld.client.loot.has(u), l.uid).catch(() => false)), 20000);
+    await sleep(400);
   }
-  check("Hurt 動作同步（B 看到 A 受擊動畫）", sawHurt);
-
+  await sleep(600);
+  const m1 = await metrics();
+  const cb1 = (m1.combat ?? [])[0] ?? {};
+  const [lA, lB] = await Promise.all([field(A), field(B)]);
+  const leftA = await A.page.evaluate(() => window.__mpWorld.client.loot.size);
+  const leftB = await B.page.evaluate(() => window.__mpWorld.client.loot.size);
+  results.samples.loot = { spawned: cb1.lootSpawned, picked: cb1.lootPicked, rejected: cb1.lootPickRejected, killsSettled: cb1.killsSettled, duplicateKillsBlocked: cb1.duplicateKillsBlocked, picksOk: { A: lA.picksOk, B: lB.picksOk }, gold: { A: lA.self?.gold, B: lB.self?.gold }, leftA, leftB, before: { spawned: cb0.lootSpawned, picked: cb0.lootPicked } };
+  check("掉落物由伺服器產生、撿取後兩邊畫面都消失（每件只入帳一次）", cb1.lootSpawned >= 1 && cb1.lootPicked === cb1.lootSpawned && lA.picksOk + lB.picksOk === cb1.lootPicked && leftA === 0 && leftB === 0, results.samples.loot);
+  check("擊殺只結算一次（伺服器沒有重複結算）", cb1.killsSettled >= 1 && cb1.duplicateKillsBlocked === 0, { killsSettled: cb1.killsSettled, dup: cb1.duplicateKillsBlocked });
+  check("撿到的金幣由伺服器入帳（起始 100 金幣以上）", (lA.self?.gold ?? 0) + (lB.self?.gold ?? 0) > 200, results.samples.loot.gold);
+  mark("lootDone");
+  // ---------- 重生同步 ----------
+  const tR = Date.now();
+  let rA2 = null, rB2 = null;
+  while (Date.now() - tR < 40000) {
+    [rA2, rB2] = await Promise.all([monOf(A, targetId).catch(() => null), monOf(B, targetId).catch(() => null)]);
+    if (rA2 && rB2 && rA2.hp === rA2.maxHp && rB2.hp === rB2.maxHp && rA2.state !== "dead" && rB2.state !== "dead") break;
+    await sleep(300);
+  }
+  mark("respawned");
+  check("怪物重生同步（兩邊都看到滿血、位置一致 < 0.5 m）", rA2?.hp === rA2?.maxHp && rB2?.hp === rB2?.maxHp && Math.hypot(rA2.x - rB2.x, rA2.z - rB2.z) < 0.5, { secs: (Date.now() - tR) / 1000, rA2, rB2 });
+  const mHits = fldA.monsterHitsTaken + fldB.monsterHitsTaken;
+  results.samples.monsterAttacks = { A: fldA.monsterHitsTaken, B: fldB.monsterHitsTaken };
+  check("客戶端不能自行宣告倒地（原野的 act 由伺服器忽略）", await (async () => {
+    await A.page.evaluate(() => window.__mpWorld.act("death"));
+    await sleep(600);
+    return (await A.page.evaluate(() => window.__mpWorld.client.down)) === false;
+  })());
+  void mHits;
   // ---------- 斷線重連（B） ----------
   await B.page.evaluate(() => window.__mpWorld.client.dropConnection());
   let sawOff = false;
@@ -320,17 +392,6 @@ try {
   const back = fa.mp.remotes.find((r) => r.id === fb.mp.pid);
   check("B 自動重連、同一角色、A 看到 B 恢復", back?.link === 1 && fb.mp.stats.reconnects >= 1, { reconnects: fb.mp.stats.reconnects, resyncMs: fb.mp.stats.lastResyncMs });
 
-  // ---------- Death 同步與倒地後回村（A；伺服器確認倒地才接受 respawn） ----------
-  await A.page.evaluate(() => window.__mpWorld.act("death"));
-  let sawDeath = false;
-  for (let k = 0; k < 40 && !sawDeath; k++) {
-    await sleep(80);
-    const r = await B.page.evaluate((pid) => window.__mpWorld.remoteInfo().find((x) => x.id === pid), fa.mp.pid);
-    if (r?.state === "Death") sawDeath = true;
-  }
-  check("Death 動作同步（B 看到 A 倒地）", sawDeath);
-  await shot(B, "05_field_B_sees_A_down");
-
   // ---------- 從原野營地傳送陣走回星芽村（B）；A 用倒地復活回村 ----------
   const toCamp = async (p) => {
     await walk(p, [{ x: -56, z: -64 }, { x: -56, z: -68 }], async () => {
@@ -338,9 +399,10 @@ try {
       return i ? [i.pos[0], i.pos[2]] : null;
     }, async () => !(await p.page.evaluate(() => !!window.__starwishPlay?.ready).catch(() => false)), 300000);
   };
+  const keepA = (await field(A)).self;
   await toCamp(B);
   await waitVillage(B);
-  await A.page.evaluate(() => window.__mpWorld.respawn());
+  await toCamp(A);
   await waitVillage(A);
   await sleep(500);
   for (const p of [A, B]) await p.page.waitForFunction(() => !!window.__mpWorld, null, { timeout: 10000 });
@@ -351,7 +413,9 @@ try {
     a = await vinfo(A);
     b = await vinfo(B);
   }
-  check("B 走入原野營地傳送陣回到星芽村、A 倒地後在星芽村復活", a.mp.room.startsWith("village") && b.mp.room.startsWith("village"), { a: a.mp.room, b: b.mp.room });
+  check("A、B 走入原野營地傳送陣回到星芽村", a.mp.room.startsWith("village") && b.mp.room.startsWith("village"), { a: a.mp.room, b: b.mp.room });
+  const selfA = await A.page.evaluate(() => window.__mpWorld.client.self);
+  check("回村後等級／經驗／金幣沿用（伺服器保存）", !!selfA && selfA.level === keepA.level && selfA.exp === keepA.exp && selfA.gold === keepA.gold, { field: keepA, village: selfA });
   check("回到村莊後再次互相看見", a.mp.remotes.some((r) => r.id === b.mp.pid && r.loaded) && b.mp.remotes.some((r) => r.id === a.mp.pid && r.loaded));
   await shot(A, "06_village_back_A_sees_B");
 
@@ -398,6 +462,7 @@ try {
     }
   }
 } finally {
+  for (const p of players) await p.ctx.close().catch(() => {});
   await browser.close();
   site.close?.();
   srv.kill("SIGTERM");
