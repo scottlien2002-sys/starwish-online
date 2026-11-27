@@ -19,7 +19,7 @@ jobs:
       - name: Pack type definitions only
         run: |
           mkdir -p /tmp/pack
-          find node_modules/@babylonjs node_modules/typescript node_modules/vite node_modules/@types -type f \( -name "*.d.ts" -o -name "package.json" -o -name "*.d.mts" -o -name "*.d.cts" \) 2>/dev/null > /tmp/list.txt
+          find node_modules/@babylonjs node_modules/typescript node_modules/vite node_modules/@types -type f \( -name "*.d.ts" -o -name "package.json" -o -name "*.d.mts" -o -name "*.d.cts" \) 2>/dev/null > /tmp/list.txt || true
           find node_modules/typescript/lib -type f >> /tmp/list.txt
           find node_modules/typescript/bin -type f >> /tmp/list.txt
           tar czf /tmp/pack/types.tgz -T /tmp/list.txt
