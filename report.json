@@ -1,5 +1,5 @@
 {
- "startedAt": "2026-11-27T10:09:02.194Z",
+ "startedAt": "2026-11-27T10:53:59.010Z",
  "note": "CI 軟體繪圖：FPS 不代表 iPhone 實機",
  "runs": [
   {
@@ -140,7 +140,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 37.1
+        "nextAct": 23.9
        },
        "knight": {
         "anim": "Idle",
@@ -149,7 +149,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 27.2
+        "nextAct": 34.5
        },
        "smith": {
         "anim": "Idle",
@@ -158,7 +158,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 25.1
+        "nextAct": 27.1
        },
        "mage": {
         "anim": "Idle",
@@ -167,7 +167,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 39.7
+        "nextAct": 27.8
        },
        "church": {
         "anim": "Idle",
@@ -176,7 +176,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 32.1
+        "nextAct": 24.8
        },
        "circus": {
         "anim": "Idle",
@@ -185,7 +185,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 30
+        "nextAct": 36.7
        },
        "warehouse": {
         "anim": "Idle",
@@ -194,7 +194,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 26.7
+        "nextAct": 38.1
        },
        "guild": {
         "anim": "Idle",
@@ -203,7 +203,7 @@
         "lod": 1,
         "paused": false,
         "blinkTargets": 1,
-        "nextAct": 25.8
+        "nextAct": 39.1
        }
       }
      }
@@ -239,7 +239,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 37.1
+       "nextAct": 23.9
       },
       "knight": {
        "model": "npc_knight67_hq",
@@ -252,7 +252,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 27.2
+       "nextAct": 34.5
       },
       "smith": {
        "model": "npc_smith67_hq",
@@ -265,7 +265,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 25.1
+       "nextAct": 27.1
       },
       "mage": {
        "model": "npc_mage67_hq",
@@ -278,7 +278,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 39.7
+       "nextAct": 27.8
       },
       "church": {
        "model": "npc_priest67_hq",
@@ -291,7 +291,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 32.1
+       "nextAct": 24.8
       },
       "circus": {
        "model": "npc_clown67_hq",
@@ -304,7 +304,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 30
+       "nextAct": 36.7
       },
       "warehouse": {
        "model": "npc_warehouse67_hq",
@@ -317,7 +317,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 26.7
+       "nextAct": 38.1
       },
       "guild": {
        "model": "npc_guild",
@@ -330,7 +330,7 @@
         "Turn"
        ],
        "blink": 1,
-       "nextAct": 25.8
+       "nextAct": 39.1
       }
      }
     },
@@ -347,20 +347,35 @@
       "guild": 1
      }
     },
-    "Stage 6.7 洛恩巡走：播放 Walk，播放速度跟隨實際移動速度（巡走 0.6 m/s≈1 倍；起步、停下時較慢；範圍 0.25～1.25 倍）": {
+    "Stage 6.7 洛恩巡走：播放 Walk，播放速度跟隨實際移動速度（巡走 0.6 m/s≈1 倍；起步、停下時較慢；穩定步行 0.25～1.25 倍）": {
      "ok": true,
      "detail": {
-      "x": -10.06174486422216,
-      "z": -3.924447768450872,
-      "yaw": -0.3718877562630969,
-      "walking": true,
-      "station": -1,
-      "bearing": 248.69240111353474,
-      "anim": "Walk",
-      "facing": -0.3718877562630969,
-      "lod": 1,
-      "paused": false,
-      "walkRate": 0.4507862430963921
+      "start": {
+       "x": -10.080029327023478,
+       "z": -3.8772424177947142,
+       "yaw": -0.36720045674521645,
+       "walking": true,
+       "station": -1,
+       "bearing": 248.9609635932229,
+       "anim": "Walk",
+       "facing": -0.36720045674521645,
+       "lod": 1,
+       "paused": false,
+       "walkRate": 0.5117860321019966
+      },
+      "steady": {
+       "x": -10.443102320873221,
+       "z": -2.753473064290325,
+       "yaw": -0.2577972450961738,
+       "walking": true,
+       "station": -1,
+       "bearing": 255.22930588588963,
+       "anim": "Walk",
+       "facing": -0.2577972450961738,
+       "lod": 1,
+       "paused": true,
+       "walkRate": 0.9999269412435787
+      }
      }
     },
     "Stage 6.7 洛恩：N009 Tripo 模型（背光補光 0.3）（Idle／Walk／Talk／Turn）＋原本的小寵物；委託佈告欄 N008 模型可點擊": {
@@ -596,8 +611,8 @@
     "村莊場景平均每幀三角面 ≤ 250000（不含玩家角色與寵物；含陰影貼圖繪製）": {
      "ok": true,
      "detail": {
-      "total": 414881,
-      "scene": 213048,
+      "total": 414787,
+      "scene": 212954,
       "character": 199965,
       "pet": 1868,
       "perView": {
@@ -614,16 +629,16 @@
         "draws": 106
        },
        "plaza_north": {
-        "total": 438896,
+        "total": 438788,
         "character": 199965,
         "pet": 1868,
-        "draws": 108
+        "draws": 107
        },
        "east": {
-        "total": 387847,
+        "total": 387579,
         "character": 199965,
         "pet": 1868,
-        "draws": 95
+        "draws": 94
        }
       }
      }
@@ -632,17 +647,17 @@
      "ok": true,
      "detail": [
       "星願物語 Stage 6.4 星芽村 測試報告",
-      "時間 2026/11/27 10:10:36",
+      "時間 2026/11/27 10:55:28",
       "網址參數 ?map=village&art=full&quality=high&g=male",
       "裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
-      "模式 HQ（高畫質）：畫質 高畫質（來源：網址指定）、模型 HQ／載入 177 ms",
+      "模式 HQ（高畫質）：畫質 高畫質（來源：網址指定）、模型 HQ／載入 167 ms",
       "陰影（實際）：一般柔化陰影 PCF 1024｜陰影貼圖 1024×1024，PCF，取樣品質 中",
       "解析度（實際）：要求上限 1.25x、實際 1x、framebuffer 390×844、Hardware Scaling 1、裝置 DPR 2｜動態解析度 已介入（第 2 級／1.25→1x）",
       "抗鋸齒（實際）：MSAA 要求 4x、後製管線 4x、渲染目標 無法讀取x、裝置上限 4x → 實際生效 4x｜HDR 關、後製管線 開",
       "村莊 V1.3 佔位網格 5、三角形 15512、文字標籤 13；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）",
       "碰撞 圓形 40、矩形 10；鏡頭避障 開",
       "目前畫面 Draw Calls 96、三角形 387869",
-      "全村整合 art=full：loaded，載入 27411 ms"
+      "全村整合 art=full：loaded，載入 25344 ms"
      ]
     },
     "繪製次數 ≤ 160（全村整合、high 畫質、任何位置）": {
@@ -667,8 +682,8 @@
        }
       },
       "plaza_north": {
-       "drawCalls": 108,
-       "triangles": 438896,
+       "drawCalls": 107,
+       "triangles": 438788,
        "casters": {
         "active": 35,
         "total": 56,
@@ -676,8 +691,8 @@
        }
       },
       "east": {
-       "drawCalls": 95,
-       "triangles": 387847,
+       "drawCalls": 94,
+       "triangles": 387579,
        "casters": {
         "active": 23,
         "total": 56,
@@ -736,7 +751,7 @@
        "what": "npc:circus",
        "dialog": "小丑馬戲團團長・波波洛小丑轉職「歡迎光臨！笑容也是一種了不起的力量喔～」想成為小",
        "talkAnim": "Talk",
-       "afterAnim": "Act"
+       "afterAnim": "Idle"
       },
       {
        "id": "warehouse",
@@ -805,7 +820,7 @@
       {
        "id": "circus",
        "talk": "Talk",
-       "after": "Act"
+       "after": "Idle"
       },
       {
        "id": "warehouse",
@@ -995,7 +1010,7 @@
        "triggerR": 2.6,
        "log": [
         {
-         "t": 228.74720000000002,
+         "t": 212.81560000000005,
          "map": "starsprout",
          "x": 5.3884459162483544e-15,
          "z": -42.5
@@ -1009,7 +1024,7 @@
        "triggerR": 2.6,
        "log": [
         {
-         "t": 228.74720000000002,
+         "t": 212.81560000000005,
          "map": "starsprout",
          "x": 5.3884459162483544e-15,
          "z": -42.5
@@ -1117,7 +1132,7 @@
        "lod": 0,
        "paused": false,
        "blinkTargets": 0,
-       "nextAct": 21.1
+       "nextAct": 27.5
       },
       "far": {
        "anim": "Idle",
@@ -1126,7 +1141,7 @@
        "lod": 1,
        "paused": true,
        "blinkTargets": 0,
-       "nextAct": 20.5
+       "nextAct": 26.9
       }
      }
     },
@@ -1199,8 +1214,8 @@
     "寵物在角色耳朵旁（停著時水平距離 0.15～0.6 m、高度在頭部附近 0.6～1.3 m）": {
      "ok": true,
      "detail": {
-      "earDist": 0.3638755442343865,
-      "earUp": 0.8193823970503546
+      "earDist": 0.3705795693749477,
+      "earUp": 0.8241846792231818
      }
     },
     "寵物不貼住、不穿透角色：跑步與快速轉身後，與頭部／身體的最小間距 ≥ 2 cm（含 B 端間距保護）": {
@@ -1232,7 +1247,7 @@
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": 0.05996336415410042
+        "y": -0.043632954359054565
        },
        {
         "name": "Portal_fx",
@@ -1242,14 +1257,14 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": 0.021843383088707924
+        "y": -0.03348133713006973
        }
       ],
       "a2": [
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": 0.044507693499326706
+        "y": -0.05954330414533615
        },
        {
         "name": "Portal_fx",
@@ -1259,7 +1274,7 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": -0.022102665156126022
+        "y": 0.015076353214681149
        }
       ]
      }
@@ -1322,12 +1337,12 @@
       {
        "id": "base",
        "label": "目前基準",
-       "avgFps": 2.062942673115267,
-       "low1Fps": 1.702127659574468,
-       "minFps": 1.702127659574468,
+       "avgFps": 2.2701761908965867,
+       "low1Fps": 1.8621973929236497,
+       "minFps": 1.8621973929236497,
        "stutters": 18,
-       "avgDraw": 98.11111111111111,
-       "avgTris": 408003.3888888889,
+       "avgDraw": 97.88888888888889,
+       "avgTris": 405760.72222222225,
        "res": 1.25,
        "fb": "487×1055",
        "hwScaling": 0.8,
@@ -1342,12 +1357,12 @@
       {
        "id": "res1",
        "label": "解析度 1x",
-       "avgFps": 2.8042624789680106,
-       "low1Fps": 2.4660912453760786,
-       "minFps": 2.4660912453760786,
+       "avgFps": 2.9584826271325677,
+       "low1Fps": 2.5246149962132263,
+       "minFps": 2.5246149962132263,
        "stutters": 18,
-       "avgDraw": 98.44444444444444,
-       "avgTris": 413855.5,
+       "avgDraw": 98.05555555555556,
+       "avgTris": 407052.3888888889,
        "res": 1,
        "fb": "390×844",
        "hwScaling": 1,
@@ -1444,7 +1459,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 27411,
+     "loadMs": 25344,
      "parts": {
       "環境": {
        "meshes": 7,
@@ -1662,17 +1677,32 @@
      }
     },
     "merchantWalk": {
-     "x": -10.06174486422216,
-     "z": -3.924447768450872,
-     "yaw": -0.3718877562630969,
-     "walking": true,
-     "station": -1,
-     "bearing": 248.69240111353474,
-     "anim": "Walk",
-     "facing": -0.3718877562630969,
-     "lod": 1,
-     "paused": false,
-     "walkRate": 0.4507862430963921
+     "start": {
+      "x": -10.080029327023478,
+      "z": -3.8772424177947142,
+      "yaw": -0.36720045674521645,
+      "walking": true,
+      "station": -1,
+      "bearing": 248.9609635932229,
+      "anim": "Walk",
+      "facing": -0.36720045674521645,
+      "lod": 1,
+      "paused": false,
+      "walkRate": 0.5117860321019966
+     },
+     "steady": {
+      "x": -10.443102320873221,
+      "z": -2.753473064290325,
+      "yaw": -0.2577972450961738,
+      "walking": true,
+      "station": -1,
+      "bearing": 255.22930588588963,
+      "anim": "Walk",
+      "facing": -0.2577972450961738,
+      "lod": 1,
+      "paused": true,
+      "walkRate": 0.9999269412435787
+     }
     },
     "perf": {
      "arrival": {
@@ -1694,8 +1724,8 @@
       }
      },
      "plaza_north": {
-      "drawCalls": 108,
-      "triangles": 438896,
+      "drawCalls": 107,
+      "triangles": 438788,
       "casters": {
        "active": 35,
        "total": 56,
@@ -1703,8 +1733,8 @@
       }
      },
      "east": {
-      "drawCalls": 95,
-      "triangles": 387847,
+      "drawCalls": 94,
+      "triangles": 387579,
       "casters": {
        "active": 23,
        "total": 56,
@@ -1749,10 +1779,6 @@
         "meshes": 27,
         "triangles": 199965
        },
-       "Plaza": {
-        "meshes": 5,
-        "triangles": 26438
-       },
        "charBlob": {
         "meshes": 1,
         "triangles": 2
@@ -1760,6 +1786,10 @@
        "寵物": {
         "meshes": 6,
         "triangles": 1868
+       },
+       "Plaza": {
+        "meshes": 5,
+        "triangles": 26438
        },
        "WishFountain": {
         "meshes": 6,
@@ -1827,10 +1857,6 @@
         "meshes": 27,
         "triangles": 199965
        },
-       "Plaza": {
-        "meshes": 5,
-        "triangles": 26438
-       },
        "charBlob": {
         "meshes": 1,
         "triangles": 2
@@ -1838,6 +1864,10 @@
        "寵物": {
         "meshes": 6,
         "triangles": 1868
+       },
+       "Plaza": {
+        "meshes": 5,
+        "triangles": 26438
        },
        "WishFountain": {
         "meshes": 7,
@@ -1905,10 +1935,6 @@
         "meshes": 27,
         "triangles": 199965
        },
-       "Plaza": {
-        "meshes": 5,
-        "triangles": 26438
-       },
        "charBlob": {
         "meshes": 1,
         "triangles": 2
@@ -1916,6 +1942,10 @@
        "寵物": {
         "meshes": 6,
         "triangles": 1868
+       },
+       "Plaza": {
+        "meshes": 5,
+        "triangles": 26438
        },
        "WishFountain": {
         "meshes": 7,
@@ -1956,8 +1986,8 @@
       }
      },
      "east": {
-      "activeMeshes": 95,
-      "activeTriangles": 387869,
+      "activeMeshes": 91,
+      "activeTriangles": 387579,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -1972,7 +2002,7 @@
         "triangles": 17
        },
        "__root__": {
-        "meshes": 17,
+        "meshes": 15,
         "triangles": 0
        },
        "Env": {
@@ -1983,10 +2013,6 @@
         "meshes": 27,
         "triangles": 199965
        },
-       "Plaza": {
-        "meshes": 5,
-        "triangles": 26438
-       },
        "charBlob": {
         "meshes": 1,
         "triangles": 2
@@ -1994,6 +2020,10 @@
        "寵物": {
         "meshes": 6,
         "triangles": 1868
+       },
+       "Plaza": {
+        "meshes": 5,
+        "triangles": 26438
        },
        "WishFountain": {
         "meshes": 6,
@@ -2022,10 +2052,6 @@
        "pet": {
         "meshes": 1,
         "triangles": 2000
-       },
-       "洛恩": {
-        "meshes": 2,
-        "triangles": 290
        },
        "NPC": {
         "meshes": 1,
@@ -2219,10 +2245,10 @@
       "duplicates": []
      }
     },
-    "avgTriangles": 414881,
+    "avgTriangles": 414787,
     "triangleSplit": {
-     "total": 414881,
-     "scene": 213048,
+     "total": 414787,
+     "scene": 212954,
      "character": 199965,
      "pet": 1868,
      "perView": {
@@ -2239,21 +2265,21 @@
        "draws": 106
       },
       "plaza_north": {
-       "total": 438896,
+       "total": 438788,
        "character": 199965,
        "pet": 1868,
-       "draws": 108
+       "draws": 107
       },
       "east": {
-       "total": 387847,
+       "total": 387579,
        "character": 199965,
        "pet": 1868,
-       "draws": 95
+       "draws": 94
       }
      }
     },
     "totalWithCharacter": {
-     "avg": 414881,
+     "avg": 414787,
      "budget": 250000,
      "over": true
     },
@@ -2296,7 +2322,7 @@
       "what": "npc:circus",
       "dialog": "小丑馬戲團團長・波波洛小丑轉職「歡迎光臨！笑容也是一種了不起的力量喔～」想成為小",
       "talkAnim": "Talk",
-      "afterAnim": "Act"
+      "afterAnim": "Idle"
      },
      {
       "id": "warehouse",
@@ -2452,7 +2478,7 @@
       "triggerR": 2.6,
       "log": [
        {
-        "t": 228.74720000000002,
+        "t": 212.81560000000005,
         "map": "starsprout",
         "x": 5.3884459162483544e-15,
         "z": -42.5
@@ -2466,7 +2492,7 @@
       "triggerR": 2.6,
       "log": [
        {
-        "t": 228.74720000000002,
+        "t": 212.81560000000005,
         "map": "starsprout",
         "x": 5.3884459162483544e-15,
         "z": -42.5
@@ -2506,7 +2532,7 @@
       "lod": 0,
       "paused": false,
       "blinkTargets": 0,
-      "nextAct": 21.1
+      "nextAct": 27.5
      },
      "far": {
       "anim": "Idle",
@@ -2515,7 +2541,7 @@
       "lod": 1,
       "paused": true,
       "blinkTargets": 0,
-      "nextAct": 20.5
+      "nextAct": 26.9
      }
     },
     "character": {
@@ -2545,12 +2571,12 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -23.8,
+      "minRawGapCm": -22.8,
       "minGapCm": 2,
       "corrections": 56,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      },
-     "loadMs": 2407
+     "loadMs": 1849
     },
     "characterActions": {
      "attackButton": "Attack",
@@ -2563,8 +2589,8 @@
     },
     "pet": {
      "still": {
-      "horizontal": 0.3638755442343865,
-      "height": 0.8193823970503546
+      "horizontal": 0.3705795693749477,
+      "height": 0.8241846792231818
      },
      "pet": {
       "id": "bird4",
@@ -2583,7 +2609,7 @@
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": 0.05996336415410042
+       "y": -0.043632954359054565
       },
       {
        "name": "Portal_fx",
@@ -2593,14 +2619,14 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": 0.021843383088707924
+       "y": -0.03348133713006973
       }
      ],
      "a2": [
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": 0.044507693499326706
+       "y": -0.05954330414533615
       },
       {
        "name": "Portal_fx",
@@ -2610,7 +2636,7 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": -0.022102665156126022
+       "y": 0.015076353214681149
       }
      ]
     },
@@ -2660,12 +2686,12 @@
      {
       "id": "base",
       "label": "目前基準",
-      "avgFps": 2.062942673115267,
-      "low1Fps": 1.702127659574468,
-      "minFps": 1.702127659574468,
+      "avgFps": 2.2701761908965867,
+      "low1Fps": 1.8621973929236497,
+      "minFps": 1.8621973929236497,
       "stutters": 18,
-      "avgDraw": 98.11111111111111,
-      "avgTris": 408003.3888888889,
+      "avgDraw": 97.88888888888889,
+      "avgTris": 405760.72222222225,
       "res": 1.25,
       "fb": "487×1055",
       "hwScaling": 0.8,
@@ -2680,12 +2706,12 @@
      {
       "id": "res1",
       "label": "解析度 1x",
-      "avgFps": 2.8042624789680106,
-      "low1Fps": 2.4660912453760786,
-      "minFps": 2.4660912453760786,
+      "avgFps": 2.9584826271325677,
+      "low1Fps": 2.5246149962132263,
+      "minFps": 2.5246149962132263,
       "stutters": 18,
-      "avgDraw": 98.44444444444444,
-      "avgTris": 413855.5,
+      "avgDraw": 98.05555555555556,
+      "avgTris": 407052.3888888889,
       "res": 1,
       "fb": "390×844",
       "hwScaling": 1,
@@ -2844,7 +2870,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 22.4
+        "nextAct": 29.1
        },
        "knight": {
         "anim": "Idle",
@@ -2853,7 +2879,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 26.5
+        "nextAct": 26.2
        },
        "smith": {
         "anim": "Idle",
@@ -2862,7 +2888,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 23.4
+        "nextAct": 23
        },
        "mage": {
         "anim": "Idle",
@@ -2871,7 +2897,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 31.2
+        "nextAct": 35.8
        },
        "church": {
         "anim": "Idle",
@@ -2880,7 +2906,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 39.8
+        "nextAct": 31.8
        },
        "circus": {
         "anim": "Idle",
@@ -2889,7 +2915,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 23.8
+        "nextAct": 39.9
        },
        "warehouse": {
         "anim": "Idle",
@@ -2898,7 +2924,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 32.6
+        "nextAct": 36.4
        },
        "guild": {
         "anim": "Idle",
@@ -2907,7 +2933,7 @@
         "lod": 1,
         "paused": false,
         "blinkTargets": 1,
-        "nextAct": 23.4
+        "nextAct": 25.3
        }
       }
      }
@@ -2943,7 +2969,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 22.4
+       "nextAct": 29.1
       },
       "knight": {
        "model": "npc_knight67_lite",
@@ -2956,7 +2982,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 26.5
+       "nextAct": 26.2
       },
       "smith": {
        "model": "npc_smith67_lite",
@@ -2969,7 +2995,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 23.4
+       "nextAct": 23
       },
       "mage": {
        "model": "npc_mage67_lite",
@@ -2982,7 +3008,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 31.2
+       "nextAct": 35.8
       },
       "church": {
        "model": "npc_priest67_lite",
@@ -2995,7 +3021,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 39.8
+       "nextAct": 31.8
       },
       "circus": {
        "model": "npc_clown67_lite",
@@ -3008,7 +3034,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 23.8
+       "nextAct": 39.9
       },
       "warehouse": {
        "model": "npc_warehouse67_lite",
@@ -3021,7 +3047,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 32.6
+       "nextAct": 36.4
       },
       "guild": {
        "model": "npc_guild",
@@ -3034,7 +3060,7 @@
         "Turn"
        ],
        "blink": 1,
-       "nextAct": 23.4
+       "nextAct": 25.3
       }
      }
     },
@@ -3051,20 +3077,35 @@
       "guild": 1
      }
     },
-    "Stage 6.7 洛恩巡走：播放 Walk，播放速度跟隨實際移動速度（巡走 0.6 m/s≈1 倍；起步、停下時較慢；範圍 0.25～1.25 倍）": {
+    "Stage 6.7 洛恩巡走：播放 Walk，播放速度跟隨實際移動速度（巡走 0.6 m/s≈1 倍；起步、停下時較慢；穩定步行 0.25～1.25 倍）": {
      "ok": true,
      "detail": {
-      "x": -9.393220384803463,
-      "z": -5.329860298592516,
-      "yaw": -0.5161157636146909,
-      "walking": true,
-      "station": -1,
-      "bearing": 240.42874500470657,
-      "anim": "Walk",
-      "facing": -0.5161157636146909,
-      "lod": 1,
-      "paused": false,
-      "walkRate": 0.9999937381951957
+      "start": {
+       "x": -9.027417728485828,
+       "z": -5.9283833509161505,
+       "yaw": -0.5810768747258053,
+       "walking": true,
+       "station": -1,
+       "bearing": 236.7067475055593,
+       "anim": "Walk",
+       "facing": -0.5810768747258053,
+       "lod": 1,
+       "paused": false,
+       "walkRate": 0.9999944135678857
+      },
+      "steady": {
+       "x": -9.668736728466158,
+       "z": -4.812019334500803,
+       "yaw": -0.46179672091762497,
+       "walking": true,
+       "station": -1,
+       "bearing": 243.5409968984394,
+       "anim": "Walk",
+       "facing": -0.46179672091762497,
+       "lod": 1,
+       "paused": false,
+       "walkRate": 0.9944576154711499
+      }
      }
     },
     "Stage 6.7 洛恩：N009 Tripo 模型（背光補光 0.3）（Idle／Walk／Talk／Turn）＋原本的小寵物；委託佈告欄 N008 模型可點擊": {
@@ -3300,8 +3341,8 @@
     "村莊場景平均每幀三角面 ≤ 100000（不含玩家角色與寵物；含陰影貼圖繪製）": {
      "ok": true,
      "detail": {
-      "total": 132788,
-      "scene": 90965,
+      "total": 132765,
+      "scene": 90942,
       "character": 39955,
       "pet": 1868,
       "perView": {
@@ -3318,10 +3359,10 @@
         "draws": 84
        },
        "plaza_north": {
-        "total": 142190,
+        "total": 142098,
         "character": 39955,
         "pet": 1868,
-        "draws": 83
+        "draws": 82
        },
        "east": {
         "total": 120030,
@@ -3336,17 +3377,17 @@
      "ok": true,
      "detail": [
       "星願物語 Stage 6.4 星芽村 測試報告",
-      "時間 2026/11/27 10:17:53",
+      "時間 2026/11/27 11:02:12",
       "網址參數 ?map=village&art=full&quality=medium&g=female",
       "裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
-      "模式 Lite 中畫質：畫質 中畫質（來源：網址指定）、模型 Lite／載入 160 ms",
+      "模式 Lite 中畫質：畫質 中畫質（來源：網址指定）、模型 Lite／載入 153 ms",
       "陰影（實際）：一般柔化陰影 PCF 1024｜陰影貼圖 1024×1024，PCF，取樣品質 中",
       "解析度（實際）：要求上限 1.25x、實際 1x、framebuffer 390×844、Hardware Scaling 1、裝置 DPR 2｜動態解析度 已介入（第 2 級／1.25→1x）",
       "抗鋸齒（實際）：MSAA 要求 2x、後製管線 2x、渲染目標 無法讀取x、裝置上限 4x → 實際生效 2x｜HDR 關、後製管線 開",
       "村莊 V1.3 佔位網格 5、三角形 12648、文字標籤 13；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）",
       "碰撞 圓形 40、矩形 10；鏡頭避障 開",
       "目前畫面 Draw Calls 77、三角形 120030",
-      "全村整合 art=full：loaded，載入 16684 ms"
+      "全村整合 art=full：loaded，載入 15590 ms"
      ]
     },
     "繪製次數 ≤ 120（全村整合、medium 畫質、任何位置）": {
@@ -3371,8 +3412,8 @@
        }
       },
       "plaza_north": {
-       "drawCalls": 83,
-       "triangles": 142190,
+       "drawCalls": 82,
+       "triangles": 142098,
        "casters": {
         "active": 17,
         "total": 53,
@@ -3393,10 +3434,10 @@
     "移動規則：一般行走走上石階到高台（不跳躍）": {
      "ok": true,
      "detail": {
-      "x": -5.817072295949935e-16,
+      "x": -6.123233995736774e-16,
       "y": 2,
-      "z": 24.500000000000117,
-      "yaw": -6.123233995719597e-17
+      "z": 25.000000000000124,
+      "yaw": -6.123233995732532e-17
      }
     },
     "NPC 互動：9 個互動點都能靠近後按下（NPC 對話：名稱、職責；佈告欄：委託介面）": {
@@ -3699,7 +3740,7 @@
        "triggerR": 2.6,
        "log": [
         {
-         "t": 119.242,
+         "t": 114.77929999999994,
          "map": "starsprout",
          "x": 5.3884459162483544e-15,
          "z": -42.5
@@ -3713,7 +3754,7 @@
        "triggerR": 2.6,
        "log": [
         {
-         "t": 119.242,
+         "t": 114.77929999999994,
          "map": "starsprout",
          "x": 5.3884459162483544e-15,
          "z": -42.5
@@ -3821,7 +3862,7 @@
        "lod": 0,
        "paused": false,
        "blinkTargets": 0,
-       "nextAct": 25.5
+       "nextAct": 20.6
       },
       "far": {
        "anim": "Idle",
@@ -3830,7 +3871,7 @@
        "lod": 1,
        "paused": true,
        "blinkTargets": 0,
-       "nextAct": 24.9
+       "nextAct": 20
       }
      }
     },
@@ -3903,8 +3944,8 @@
     "寵物在角色耳朵旁（停著時水平距離 0.15～0.6 m、高度在頭部附近 0.6～1.3 m）": {
      "ok": true,
      "detail": {
-      "earDist": 0.3678314626063344,
-      "earUp": 0.8557930815797323
+      "earDist": 0.3677063156535286,
+      "earUp": 0.8578954546207256
      }
     },
     "寵物不貼住、不穿透角色：跑步與快速轉身後，與頭部／身體的最小間距 ≥ 2 cm（含 B 端間距保護）": {
@@ -3915,7 +3956,7 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -28.6,
+      "minRawGapCm": -27.7,
       "minGapCm": 2,
       "corrections": 3,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
@@ -3926,7 +3967,7 @@
      "detail": [
       "  寵物商人洛恩：網格 1、三角形 5000",
       "玩家角色：Claude A 正式初心者 C1.0-B5b（c10b5b）｜novice_c10b5b_female_lite.glb（女、Lite）｜三角面 39955、網格 27（可繪製 26、骨架網格 26）、骨骼 17｜動作 Attack／Death／Hurt／Idle／Jump／Run｜陰影 柔和腳底陰影（A 預設）｜本幀 Draw Calls：主畫面 26、陰影貼圖 0｜來源 Claude A feature/render-stage7-world@1c858d10／art-novice-c10b5b（唯讀，未修改）",
-      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 2 cm（修正前 -28.6 cm，間距保護修正 3 次）"
+      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 2 cm（修正前 -27.7 cm，間距保護修正 3 次）"
      ]
     },
     "星願之泉星晶動畫（旋轉＋上下浮動）持續播放": {
@@ -3936,7 +3977,7 @@
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": 0.056927189230918884
+        "y": 0.002361725317314267
        },
        {
         "name": "Portal_fx",
@@ -3946,14 +3987,14 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": 0.036756206303834915
+        "y": 0.034291476011276245
        }
       ],
       "a2": [
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": 0.00892904493957758
+        "y": -0.05235973000526428
        },
        {
         "name": "Portal_fx",
@@ -3963,7 +4004,7 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": 0.04249361529946327
+        "y": -0.025889134034514427
        }
       ]
      }
@@ -4026,12 +4067,12 @@
       {
        "id": "base",
        "label": "目前基準",
-       "avgFps": 3.1195100727338643,
-       "low1Fps": 2.2148394241417497,
-       "minFps": 2.2148394241417497,
-       "stutters": 19,
-       "avgDraw": 81,
-       "avgTris": 134915.63157894736,
+       "avgFps": 3.3912355401484318,
+       "low1Fps": 2.4881811395868176,
+       "minFps": 2.4881811395868176,
+       "stutters": 18,
+       "avgDraw": 80.38888888888889,
+       "avgTris": 133844.33333333334,
        "res": 1.25,
        "fb": "487×1055",
        "hwScaling": 0.8,
@@ -4046,12 +4087,12 @@
       {
        "id": "res1",
        "label": "解析度 1x",
-       "avgFps": 4.712838199695949,
-       "low1Fps": 4.048582995951417,
-       "minFps": 4.048582995951417,
-       "stutters": 22,
-       "avgDraw": 81.31818181818181,
-       "avgTris": 136676.63636363635,
+       "avgFps": 4.964493082086789,
+       "low1Fps": 4.235493434983505,
+       "minFps": 4.235493434983505,
+       "stutters": 23,
+       "avgDraw": 80.43478260869566,
+       "avgTris": 133297.78260869565,
        "res": 1,
        "fb": "390×844",
        "hwScaling": 1,
@@ -4136,7 +4177,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 16684,
+     "loadMs": 15590,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -4354,17 +4395,32 @@
      }
     },
     "merchantWalk": {
-     "x": -9.393220384803463,
-     "z": -5.329860298592516,
-     "yaw": -0.5161157636146909,
-     "walking": true,
-     "station": -1,
-     "bearing": 240.42874500470657,
-     "anim": "Walk",
-     "facing": -0.5161157636146909,
-     "lod": 1,
-     "paused": false,
-     "walkRate": 0.9999937381951957
+     "start": {
+      "x": -9.027417728485828,
+      "z": -5.9283833509161505,
+      "yaw": -0.5810768747258053,
+      "walking": true,
+      "station": -1,
+      "bearing": 236.7067475055593,
+      "anim": "Walk",
+      "facing": -0.5810768747258053,
+      "lod": 1,
+      "paused": false,
+      "walkRate": 0.9999944135678857
+     },
+     "steady": {
+      "x": -9.668736728466158,
+      "z": -4.812019334500803,
+      "yaw": -0.46179672091762497,
+      "walking": true,
+      "station": -1,
+      "bearing": 243.5409968984394,
+      "anim": "Walk",
+      "facing": -0.46179672091762497,
+      "lod": 1,
+      "paused": false,
+      "walkRate": 0.9944576154711499
+     }
     },
     "perf": {
      "arrival": {
@@ -4386,8 +4442,8 @@
       }
      },
      "plaza_north": {
-      "drawCalls": 83,
-      "triangles": 142190,
+      "drawCalls": 82,
+      "triangles": 142098,
       "casters": {
        "active": 17,
        "total": 53,
@@ -4558,8 +4614,8 @@
       }
      },
      "plaza_north": {
-      "activeMeshes": 86,
-      "activeTriangles": 142190,
+      "activeMeshes": 85,
+      "activeTriangles": 142098,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -4602,8 +4658,8 @@
         "triangles": 9232
        },
        "WishFountain": {
-        "meshes": 7,
-        "triangles": 10460
+        "meshes": 6,
+        "triangles": 10368
        },
        "Platform": {
         "meshes": 3,
@@ -4895,10 +4951,10 @@
       "duplicates": []
      }
     },
-    "avgTriangles": 132788,
+    "avgTriangles": 132765,
     "triangleSplit": {
-     "total": 132788,
-     "scene": 90965,
+     "total": 132765,
+     "scene": 90942,
      "character": 39955,
      "pet": 1868,
      "perView": {
@@ -4915,10 +4971,10 @@
        "draws": 84
       },
       "plaza_north": {
-       "total": 142190,
+       "total": 142098,
        "character": 39955,
        "pet": 1868,
-       "draws": 83
+       "draws": 82
       },
       "east": {
        "total": 120030,
@@ -4929,7 +4985,7 @@
      }
     },
     "totalWithCharacter": {
-     "avg": 132788,
+     "avg": 132765,
      "budget": 100000,
      "over": true
     },
@@ -5128,7 +5184,7 @@
       "triggerR": 2.6,
       "log": [
        {
-        "t": 119.242,
+        "t": 114.77929999999994,
         "map": "starsprout",
         "x": 5.3884459162483544e-15,
         "z": -42.5
@@ -5142,7 +5198,7 @@
       "triggerR": 2.6,
       "log": [
        {
-        "t": 119.242,
+        "t": 114.77929999999994,
         "map": "starsprout",
         "x": 5.3884459162483544e-15,
         "z": -42.5
@@ -5173,7 +5229,7 @@
       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
      }
     ],
-    "fpsSoftware": 83,
+    "fpsSoftware": 80,
     "lod": {
      "near": {
       "anim": "Act",
@@ -5182,7 +5238,7 @@
       "lod": 0,
       "paused": false,
       "blinkTargets": 0,
-      "nextAct": 25.5
+      "nextAct": 20.6
      },
      "far": {
       "anim": "Idle",
@@ -5191,7 +5247,7 @@
       "lod": 1,
       "paused": true,
       "blinkTargets": 0,
-      "nextAct": 24.9
+      "nextAct": 20
      }
     },
     "character": {
@@ -5221,12 +5277,12 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -22.6,
+      "minRawGapCm": -23.4,
       "minGapCm": 2,
-      "corrections": 58,
+      "corrections": 55,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      },
-     "loadMs": 966
+     "loadMs": 913
     },
     "characterActions": {
      "attackButton": "Attack",
@@ -5239,8 +5295,8 @@
     },
     "pet": {
      "still": {
-      "horizontal": 0.3678314626063344,
-      "height": 0.8557930815797323
+      "horizontal": 0.3677063156535286,
+      "height": 0.8578954546207256
      },
      "pet": {
       "id": "bird4",
@@ -5248,7 +5304,7 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -28.6,
+      "minRawGapCm": -27.7,
       "minGapCm": 2,
       "corrections": 3,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
@@ -5259,7 +5315,7 @@
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": 0.056927189230918884
+       "y": 0.002361725317314267
       },
       {
        "name": "Portal_fx",
@@ -5269,14 +5325,14 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": 0.036756206303834915
+       "y": 0.034291476011276245
       }
      ],
      "a2": [
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": 0.00892904493957758
+       "y": -0.05235973000526428
       },
       {
        "name": "Portal_fx",
@@ -5286,7 +5342,7 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": 0.04249361529946327
+       "y": -0.025889134034514427
       }
      ]
     },
@@ -5336,12 +5392,12 @@
      {
       "id": "base",
       "label": "目前基準",
-      "avgFps": 3.1195100727338643,
-      "low1Fps": 2.2148394241417497,
-      "minFps": 2.2148394241417497,
-      "stutters": 19,
-      "avgDraw": 81,
-      "avgTris": 134915.63157894736,
+      "avgFps": 3.3912355401484318,
+      "low1Fps": 2.4881811395868176,
+      "minFps": 2.4881811395868176,
+      "stutters": 18,
+      "avgDraw": 80.38888888888889,
+      "avgTris": 133844.33333333334,
       "res": 1.25,
       "fb": "487×1055",
       "hwScaling": 0.8,
@@ -5356,12 +5412,12 @@
      {
       "id": "res1",
       "label": "解析度 1x",
-      "avgFps": 4.712838199695949,
-      "low1Fps": 4.048582995951417,
-      "minFps": 4.048582995951417,
-      "stutters": 22,
-      "avgDraw": 81.31818181818181,
-      "avgTris": 136676.63636363635,
+      "avgFps": 4.964493082086789,
+      "low1Fps": 4.235493434983505,
+      "minFps": 4.235493434983505,
+      "stutters": 23,
+      "avgDraw": 80.43478260869566,
+      "avgTris": 133297.78260869565,
       "res": 1,
       "fb": "390×844",
       "hwScaling": 1,
@@ -5520,7 +5576,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 33.4
+        "nextAct": 35.7
        },
        "knight": {
         "anim": "Idle",
@@ -5529,7 +5585,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 23.4
+        "nextAct": 30
        },
        "smith": {
         "anim": "Idle",
@@ -5538,7 +5594,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 22.7
+        "nextAct": 32.9
        },
        "mage": {
         "anim": "Idle",
@@ -5547,7 +5603,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 32
+        "nextAct": 31.8
        },
        "church": {
         "anim": "Idle",
@@ -5556,7 +5612,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 27.8
+        "nextAct": 25.1
        },
        "circus": {
         "anim": "Idle",
@@ -5565,7 +5621,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 39.2
+        "nextAct": 37.6
        },
        "warehouse": {
         "anim": "Idle",
@@ -5574,7 +5630,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 39.8
+        "nextAct": 36.6
        },
        "guild": {
         "anim": "Idle",
@@ -5583,7 +5639,7 @@
         "lod": 1,
         "paused": false,
         "blinkTargets": 1,
-        "nextAct": 33.2
+        "nextAct": 22.4
        }
       }
      }
@@ -5619,7 +5675,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 33.4
+       "nextAct": 35.7
       },
       "knight": {
        "model": "npc_knight67_lite",
@@ -5632,7 +5688,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 23.4
+       "nextAct": 30
       },
       "smith": {
        "model": "npc_smith67_lite",
@@ -5645,7 +5701,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 22.7
+       "nextAct": 32.9
       },
       "mage": {
        "model": "npc_mage67_lite",
@@ -5658,7 +5714,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 32
+       "nextAct": 31.8
       },
       "church": {
        "model": "npc_priest67_lite",
@@ -5671,7 +5727,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 27.8
+       "nextAct": 25.1
       },
       "circus": {
        "model": "npc_clown67_lite",
@@ -5684,7 +5740,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 39.2
+       "nextAct": 37.6
       },
       "warehouse": {
        "model": "npc_warehouse67_lite",
@@ -5697,7 +5753,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 39.8
+       "nextAct": 36.6
       },
       "guild": {
        "model": "npc_guild",
@@ -5710,7 +5766,7 @@
         "Turn"
        ],
        "blink": 1,
-       "nextAct": 33.2
+       "nextAct": 22.4
       }
      }
     },
@@ -5727,20 +5783,35 @@
       "guild": 1
      }
     },
-    "Stage 6.7 洛恩巡走：播放 Walk，播放速度跟隨實際移動速度（巡走 0.6 m/s≈1 倍；起步、停下時較慢；範圍 0.25～1.25 倍）": {
+    "Stage 6.7 洛恩巡走：播放 Walk，播放速度跟隨實際移動速度（巡走 0.6 m/s≈1 倍；起步、停下時較慢；穩定步行 0.25～1.25 倍）": {
      "ok": true,
      "detail": {
-      "x": -7.216197919156312,
-      "z": -8.035327472577837,
-      "yaw": -0.8390546525035748,
-      "walking": true,
-      "station": -1,
-      "bearing": 221.92570963072922,
-      "anim": "Walk",
-      "facing": -0.8390546525035748,
-      "lod": 1,
-      "paused": false,
-      "walkRate": 0.9999966455544894
+      "start": {
+       "x": -6.589977420574791,
+       "z": -8.556412659304975,
+       "yaw": -0.9145046525035798,
+       "walking": true,
+       "station": -1,
+       "bearing": 217.60274306646693,
+       "anim": "Walk",
+       "facing": -0.9145046525035798,
+       "lod": 1,
+       "paused": false,
+       "walkRate": 0.999997167570602
+      },
+      "steady": {
+       "x": -7.544042136654939,
+       "z": -7.728352233197889,
+       "yaw": -0.7974657636146929,
+       "walking": true,
+       "station": -1,
+       "bearing": 224.3085774387007,
+       "anim": "Walk",
+       "facing": -0.7974657636146929,
+       "lod": 1,
+       "paused": false,
+       "walkRate": 0.999997139313285
+      }
      }
     },
     "Stage 6.7 洛恩：N009 Tripo 模型（背光補光 0.3）（Idle／Walk／Talk／Turn）＋原本的小寵物；委託佈告欄 N008 模型可點擊": {
@@ -5986,17 +6057,17 @@
      "ok": true,
      "detail": [
       "星願物語 Stage 6.4 星芽村 測試報告",
-      "時間 2026/11/27 10:22:14",
+      "時間 2026/11/27 11:06:20",
       "網址參數 ?map=village&art=full&quality=low&g=male",
       "裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
-      "模式 Lite 低畫質：畫質 低畫質（來源：網址指定）、模型 Lite／載入 162 ms",
+      "模式 Lite 低畫質：畫質 低畫質（來源：網址指定）、模型 Lite／載入 134 ms",
       "陰影（實際）：柔和腳底陰影（不使用陰影貼圖）｜陰影貼圖 不使用陰影貼圖",
       "解析度（實際）：要求上限 1x、實際 1x、framebuffer 390×844、Hardware Scaling 1、裝置 DPR 2｜動態解析度 未介入（階梯 1x）",
       "抗鋸齒（實際）：MSAA 要求 1x、沒有後製管線、畫布 MSAA 關、裝置上限 4x → 實際生效 1x｜HDR 關、後製管線 關",
       "村莊 V1.3 佔位網格 5、三角形 12648、文字標籤 13；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）",
       "碰撞 圓形 40、矩形 10；鏡頭避障 開",
       "目前畫面 Draw Calls 70、三角形 99956",
-      "全村整合 art=full：loaded，載入 11671 ms"
+      "全村整合 art=full：loaded，載入 10628 ms"
      ]
     },
     "繪製次數 ≤ 100（全村整合、low 畫質、任何位置）": {
@@ -6349,7 +6420,7 @@
        "triggerR": 2.6,
        "log": [
         {
-         "t": 89.3018999999999,
+         "t": 85.07709999999997,
          "map": "starsprout",
          "x": 5.3884459162483544e-15,
          "z": -42.5
@@ -6363,7 +6434,7 @@
        "triggerR": 2.6,
        "log": [
         {
-         "t": 89.3018999999999,
+         "t": 85.07709999999997,
          "map": "starsprout",
          "x": 5.3884459162483544e-15,
          "z": -42.5
@@ -6471,7 +6542,7 @@
        "lod": 0,
        "paused": false,
        "blinkTargets": 0,
-       "nextAct": 26.2
+       "nextAct": 16.2
       },
       "far": {
        "anim": "Idle",
@@ -6480,7 +6551,7 @@
        "lod": 1,
        "paused": true,
        "blinkTargets": 0,
-       "nextAct": 25.6
+       "nextAct": 15.6
       }
      }
     },
@@ -6553,8 +6624,8 @@
     "寵物在角色耳朵旁（停著時水平距離 0.15～0.6 m、高度在頭部附近 0.6～1.3 m）": {
      "ok": true,
      "detail": {
-      "earDist": 0.3635983698353446,
-      "earUp": 0.8348832872212661
+      "earDist": 0.3666864684647754,
+      "earUp": 0.8426926026630142
      }
     },
     "寵物不貼住、不穿透角色：跑步與快速轉身後，與頭部／身體的最小間距 ≥ 2 cm（含 B 端間距保護）": {
@@ -6565,7 +6636,7 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -26.9,
+      "minRawGapCm": -27.4,
       "minGapCm": 2,
       "corrections": 3,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
@@ -6576,7 +6647,7 @@
      "detail": [
       "  寵物商人洛恩：網格 1、三角形 5000",
       "玩家角色：Claude A 正式初心者 C1.0-B5b（c10b5b）｜novice_c10b5b_male_lite.glb（男、Lite）｜三角面 40381、網格 27（可繪製 26、骨架網格 26）、骨骼 17｜動作 Attack／Death／Hurt／Idle／Jump／Run｜陰影 柔和腳底陰影（A 預設）｜本幀 Draw Calls：主畫面 26、陰影貼圖 0｜來源 Claude A feature/render-stage7-world@1c858d10／art-novice-c10b5b（唯讀，未修改）",
-      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 2 cm（修正前 -26.9 cm，間距保護修正 3 次）"
+      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 2 cm（修正前 -27.4 cm，間距保護修正 3 次）"
      ]
     },
     "星願之泉星晶動畫（旋轉＋上下浮動）持續播放": {
@@ -6586,7 +6657,7 @@
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": -0.053224366158246994
+        "y": 0.03182210400700569
        },
        {
         "name": "Portal_fx",
@@ -6596,14 +6667,14 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": -0.04999547079205513
+        "y": 0.019132573157548904
        }
       ],
       "a2": [
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": 0.013622274622321129
+        "y": 0.05482834205031395
        },
        {
         "name": "Portal_fx",
@@ -6613,7 +6684,7 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": 0.0001332233805442229
+        "y": 0.04359155148267746
        }
       ]
      }
@@ -6697,7 +6768,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 11671,
+     "loadMs": 10628,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -6915,17 +6986,32 @@
      }
     },
     "merchantWalk": {
-     "x": -7.216197919156312,
-     "z": -8.035327472577837,
-     "yaw": -0.8390546525035748,
-     "walking": true,
-     "station": -1,
-     "bearing": 221.92570963072922,
-     "anim": "Walk",
-     "facing": -0.8390546525035748,
-     "lod": 1,
-     "paused": false,
-     "walkRate": 0.9999966455544894
+     "start": {
+      "x": -6.589977420574791,
+      "z": -8.556412659304975,
+      "yaw": -0.9145046525035798,
+      "walking": true,
+      "station": -1,
+      "bearing": 217.60274306646693,
+      "anim": "Walk",
+      "facing": -0.9145046525035798,
+      "lod": 1,
+      "paused": false,
+      "walkRate": 0.999997167570602
+     },
+     "steady": {
+      "x": -7.544042136654939,
+      "z": -7.728352233197889,
+      "yaw": -0.7974657636146929,
+      "walking": true,
+      "station": -1,
+      "bearing": 224.3085774387007,
+      "anim": "Walk",
+      "facing": -0.7974657636146929,
+      "lod": 1,
+      "paused": false,
+      "walkRate": 0.999997139313285
+     }
     },
     "perf": {
      "arrival": {
@@ -7704,7 +7790,7 @@
       "triggerR": 2.6,
       "log": [
        {
-        "t": 89.3018999999999,
+        "t": 85.07709999999997,
         "map": "starsprout",
         "x": 5.3884459162483544e-15,
         "z": -42.5
@@ -7718,7 +7804,7 @@
       "triggerR": 2.6,
       "log": [
        {
-        "t": 89.3018999999999,
+        "t": 85.07709999999997,
         "map": "starsprout",
         "x": 5.3884459162483544e-15,
         "z": -42.5
@@ -7758,7 +7844,7 @@
       "lod": 0,
       "paused": false,
       "blinkTargets": 0,
-      "nextAct": 26.2
+      "nextAct": 16.2
      },
      "far": {
       "anim": "Idle",
@@ -7767,7 +7853,7 @@
       "lod": 1,
       "paused": true,
       "blinkTargets": 0,
-      "nextAct": 25.6
+      "nextAct": 15.6
      }
     },
     "character": {
@@ -7797,12 +7883,12 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -22.7,
+      "minRawGapCm": -23.3,
       "minGapCm": 2,
       "corrections": 52,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      },
-     "loadMs": 599
+     "loadMs": 534
     },
     "characterActions": {
      "attackButton": "Attack",
@@ -7815,8 +7901,8 @@
     },
     "pet": {
      "still": {
-      "horizontal": 0.3635983698353446,
-      "height": 0.8348832872212661
+      "horizontal": 0.3666864684647754,
+      "height": 0.8426926026630142
      },
      "pet": {
       "id": "bird4",
@@ -7824,7 +7910,7 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -26.9,
+      "minRawGapCm": -27.4,
       "minGapCm": 2,
       "corrections": 3,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
@@ -7835,7 +7921,7 @@
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": -0.053224366158246994
+       "y": 0.03182210400700569
       },
       {
        "name": "Portal_fx",
@@ -7845,14 +7931,14 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": -0.04999547079205513
+       "y": 0.019132573157548904
       }
      ],
      "a2": [
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": 0.013622274622321129
+       "y": 0.05482834205031395
       },
       {
        "name": "Portal_fx",
@@ -7862,7 +7948,7 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": 0.0001332233805442229
+       "y": 0.04359155148267746
       }
      ]
     },
@@ -8054,7 +8140,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 39
+        "nextAct": 35.5
        },
        "knight": {
         "anim": "Idle",
@@ -8063,7 +8149,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 29.2
+        "nextAct": 31.6
        },
        "smith": {
         "anim": "Idle",
@@ -8072,7 +8158,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 36.6
+        "nextAct": 29.1
        },
        "mage": {
         "anim": "Idle",
@@ -8081,7 +8167,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 28.4
+        "nextAct": 26.2
        },
        "church": {
         "anim": "Idle",
@@ -8090,7 +8176,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 29.5
+        "nextAct": 39.4
        },
        "circus": {
         "anim": "Idle",
@@ -8099,7 +8185,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 29.6
+        "nextAct": 32.4
        },
        "warehouse": {
         "anim": "Idle",
@@ -8108,7 +8194,7 @@
         "lod": 1,
         "paused": false,
         "blinkTargets": 0,
-        "nextAct": 25.9
+        "nextAct": 26.2
        },
        "guild": {
         "anim": "Idle",
@@ -8117,7 +8203,7 @@
         "lod": 1,
         "paused": false,
         "blinkTargets": 1,
-        "nextAct": 31
+        "nextAct": 35.7
        }
       }
      }
@@ -8153,7 +8239,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 39
+       "nextAct": 35.5
       },
       "knight": {
        "model": "npc_knight67_hq",
@@ -8166,7 +8252,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 29.2
+       "nextAct": 31.6
       },
       "smith": {
        "model": "npc_smith67_hq",
@@ -8179,7 +8265,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 36.6
+       "nextAct": 29.1
       },
       "mage": {
        "model": "npc_mage67_hq",
@@ -8192,7 +8278,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 28.4
+       "nextAct": 26.2
       },
       "church": {
        "model": "npc_priest67_hq",
@@ -8205,7 +8291,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 29.5
+       "nextAct": 39.4
       },
       "circus": {
        "model": "npc_clown67_hq",
@@ -8218,7 +8304,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 29.6
+       "nextAct": 32.4
       },
       "warehouse": {
        "model": "npc_warehouse67_hq",
@@ -8231,7 +8317,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 25.9
+       "nextAct": 26.2
       },
       "guild": {
        "model": "npc_guild",
@@ -8244,7 +8330,7 @@
         "Turn"
        ],
        "blink": 1,
-       "nextAct": 31
+       "nextAct": 35.7
       }
      }
     },
@@ -8261,20 +8347,35 @@
       "guild": 1
      }
     },
-    "Stage 6.7 洛恩巡走：播放 Walk，播放速度跟隨實際移動速度（巡走 0.6 m/s≈1 倍；起步、停下時較慢；範圍 0.25～1.25 倍）": {
+    "Stage 6.7 洛恩巡走：播放 Walk，播放速度跟隨實際移動速度（巡走 0.6 m/s≈1 倍；起步、停下時較慢；穩定步行 0.25～1.25 倍）": {
      "ok": true,
      "detail": {
-      "x": -10.072683382906257,
-      "z": -3.8962866254581625,
-      "yaw": -0.36909044567808474,
-      "walking": true,
-      "station": -1,
-      "bearing": 248.85267520404318,
-      "anim": "Walk",
-      "facing": -0.36909044567808474,
-      "lod": 1,
-      "paused": false,
-      "walkRate": 0.48819558212094183
+      "start": {
+       "x": -10.02689668187182,
+       "z": -4.012647870305579,
+       "yaw": -0.380668791547895,
+       "walking": true,
+       "station": -1,
+       "bearing": 248.18928485196034,
+       "anim": "Walk",
+       "facing": -0.380668791547895,
+       "lod": 1,
+       "paused": false,
+       "walkRate": 0.32735664814522486
+      },
+      "steady": {
+       "x": -10.358820857018834,
+       "z": -3.055295477067906,
+       "yaw": -0.28681391176283383,
+       "walking": true,
+       "station": -1,
+       "bearing": 253.56677335035204,
+       "anim": "Walk",
+       "facing": -0.28681391176283383,
+       "lod": 1,
+       "paused": false,
+       "walkRate": 0.9983371046245056
+      }
      }
     },
     "Stage 6.7 洛恩：N009 Tripo 模型（背光補光 0.3）（Idle／Walk／Talk／Turn）＋原本的小寵物；委託佈告欄 N008 模型可點擊": {
@@ -8510,8 +8611,8 @@
     "村莊場景平均每幀三角面 ≤ 250000（不含玩家角色與寵物；含陰影貼圖繪製）": {
      "ok": true,
      "detail": {
-      "total": 448629,
-      "scene": 246796,
+      "total": 448634,
+      "scene": 246801,
       "character": 199965,
       "pet": 1868,
       "perView": {
@@ -8528,16 +8629,16 @@
         "draws": 121
        },
        "plaza_north": {
-        "total": 456234,
+        "total": 456342,
         "character": 199965,
         "pet": 1868,
-        "draws": 122
+        "draws": 123
        },
        "east": {
-        "total": 446431,
+        "total": 446343,
         "character": 199965,
         "pet": 1868,
-        "draws": 134
+        "draws": 133
        }
       }
      }
@@ -8546,17 +8647,17 @@
      "ok": true,
      "detail": [
       "星願物語 Stage 6.4 星芽村 測試報告",
-      "時間 2026/11/27 10:25:54",
+      "時間 2026/11/27 11:09:55",
       "網址參數 ?map=village&art=full&quality=high&g=male",
       "裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
-      "模式 HQ（高畫質）：畫質 高畫質（來源：網址指定）、模型 HQ／載入 163 ms",
+      "模式 HQ（高畫質）：畫質 高畫質（來源：網址指定）、模型 HQ／載入 158 ms",
       "陰影（實際）：一般柔化陰影 PCF 1024｜陰影貼圖 1024×1024，PCF，取樣品質 中",
       "解析度（實際）：要求上限 1.25x、實際 1x、framebuffer 844×390、Hardware Scaling 1、裝置 DPR 2｜動態解析度 已介入（第 2 級／1.25→1x）",
       "抗鋸齒（實際）：MSAA 要求 4x、後製管線 4x、渲染目標 無法讀取x、裝置上限 4x → 實際生效 4x｜HDR 關、後製管線 開",
       "村莊 V1.3 佔位網格 5、三角形 15512、文字標籤 13；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）",
       "碰撞 圓形 40、矩形 10；鏡頭避障 開",
-      "目前畫面 Draw Calls 133、三角形 446343",
-      "全村整合 art=full：loaded，載入 22902 ms"
+      "目前畫面 Draw Calls 134、三角形 446431",
+      "全村整合 art=full：loaded，載入 21878 ms"
      ]
     },
     "繪製次數 ≤ 160（全村整合、high 畫質、任何位置）": {
@@ -8581,8 +8682,8 @@
        }
       },
       "plaza_north": {
-       "drawCalls": 122,
-       "triangles": 456234,
+       "drawCalls": 123,
+       "triangles": 456342,
        "casters": {
         "active": 35,
         "total": 56,
@@ -8590,8 +8691,8 @@
        }
       },
       "east": {
-       "drawCalls": 134,
-       "triangles": 446431,
+       "drawCalls": 133,
+       "triangles": 446343,
        "casters": {
         "active": 23,
         "total": 56,
@@ -8903,7 +9004,7 @@
        "triggerR": 2.6,
        "log": [
         {
-         "t": 173.90930000000006,
+         "t": 167.37269999999995,
          "map": "starsprout",
          "x": 5.3884459162483544e-15,
          "z": -42.5
@@ -8917,7 +9018,7 @@
        "triggerR": 2.6,
        "log": [
         {
-         "t": 173.90930000000006,
+         "t": 167.37269999999995,
          "map": "starsprout",
          "x": 5.3884459162483544e-15,
          "z": -42.5
@@ -9018,7 +9119,7 @@
        "lod": 0,
        "paused": false,
        "blinkTargets": 0,
-       "nextAct": 19.6
+       "nextAct": 15.4
       },
       "far": {
        "anim": "Idle",
@@ -9027,7 +9128,7 @@
        "lod": 1,
        "paused": true,
        "blinkTargets": 0,
-       "nextAct": 19
+       "nextAct": 14.8
       }
      }
     },
@@ -9100,8 +9201,8 @@
     "寵物在角色耳朵旁（停著時水平距離 0.15～0.6 m、高度在頭部附近 0.6～1.3 m）": {
      "ok": true,
      "detail": {
-      "earDist": 0.3669340881980353,
-      "earUp": 0.8356472335180756
+      "earDist": 0.37279894797052415,
+      "earUp": 0.8459073273503672
      }
     },
     "寵物不貼住、不穿透角色：跑步與快速轉身後，與頭部／身體的最小間距 ≥ 2 cm（含 B 端間距保護）": {
@@ -9112,7 +9213,7 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -26.3,
+      "minRawGapCm": -28,
       "minGapCm": 2,
       "corrections": 3,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
@@ -9123,7 +9224,7 @@
      "detail": [
       "  寵物商人洛恩：網格 1、三角形 9602",
       "玩家角色：Claude A 正式初心者 C1.0-B5b（c10b5b）｜novice_c10b5b_male_hq.glb（男、HQ）｜三角面 199965、網格 27（可繪製 26、骨架網格 26）、骨骼 17｜動作 Attack／Death／Hurt／Idle／Jump／Run｜陰影 柔和腳底陰影（A 預設）｜本幀 Draw Calls：主畫面 26、陰影貼圖 0｜來源 Claude A feature/render-stage7-world@1c858d10／art-novice-c10b5b（唯讀，未修改）",
-      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 2 cm（修正前 -26.3 cm，間距保護修正 3 次）"
+      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 2 cm（修正前 -28 cm，間距保護修正 3 次）"
      ]
     },
     "星願之泉星晶動畫（旋轉＋上下浮動）持續播放": {
@@ -9133,7 +9234,7 @@
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": 0.0015710376901552081
+        "y": -0.05916544049978256
        },
        {
         "name": "Portal_fx",
@@ -9143,14 +9244,14 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": 0.045200005173683167
+        "y": 0.015849662944674492
        }
       ],
       "a2": [
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": -0.040625929832458496
+        "y": -0.049417708069086075
        },
        {
         "name": "Portal_fx",
@@ -9160,7 +9261,7 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": 0.04461822658777237
+        "y": -0.02771170064806938
        }
       ]
      }
@@ -9241,7 +9342,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 22902,
+     "loadMs": 21878,
      "parts": {
       "環境": {
        "meshes": 7,
@@ -9459,17 +9560,32 @@
      }
     },
     "merchantWalk": {
-     "x": -10.072683382906257,
-     "z": -3.8962866254581625,
-     "yaw": -0.36909044567808474,
-     "walking": true,
-     "station": -1,
-     "bearing": 248.85267520404318,
-     "anim": "Walk",
-     "facing": -0.36909044567808474,
-     "lod": 1,
-     "paused": false,
-     "walkRate": 0.48819558212094183
+     "start": {
+      "x": -10.02689668187182,
+      "z": -4.012647870305579,
+      "yaw": -0.380668791547895,
+      "walking": true,
+      "station": -1,
+      "bearing": 248.18928485196034,
+      "anim": "Walk",
+      "facing": -0.380668791547895,
+      "lod": 1,
+      "paused": false,
+      "walkRate": 0.32735664814522486
+     },
+     "steady": {
+      "x": -10.358820857018834,
+      "z": -3.055295477067906,
+      "yaw": -0.28681391176283383,
+      "walking": true,
+      "station": -1,
+      "bearing": 253.56677335035204,
+      "anim": "Walk",
+      "facing": -0.28681391176283383,
+      "lod": 1,
+      "paused": false,
+      "walkRate": 0.9983371046245056
+     }
     },
     "perf": {
      "arrival": {
@@ -9491,8 +9607,8 @@
       }
      },
      "plaza_north": {
-      "drawCalls": 122,
-      "triangles": 456234,
+      "drawCalls": 123,
+      "triangles": 456342,
       "casters": {
        "active": 35,
        "total": 56,
@@ -9500,8 +9616,8 @@
       }
      },
      "east": {
-      "drawCalls": 134,
-      "triangles": 446431,
+      "drawCalls": 133,
+      "triangles": 446343,
       "casters": {
        "active": 23,
        "total": 56,
@@ -9715,8 +9831,8 @@
       }
      },
      "plaza_north": {
-      "activeMeshes": 119,
-      "activeTriangles": 456234,
+      "activeMeshes": 120,
+      "activeTriangles": 456342,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -9759,8 +9875,8 @@
         "triangles": 1868
        },
        "WishFountain": {
-        "meshes": 6,
-        "triangles": 25536
+        "meshes": 7,
+        "triangles": 25644
        },
        "Platform": {
         "meshes": 4,
@@ -9805,8 +9921,8 @@
       }
      },
      "east": {
-      "activeMeshes": 144,
-      "activeTriangles": 446431,
+      "activeMeshes": 143,
+      "activeTriangles": 446343,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -9897,8 +10013,8 @@
         "triangles": 4999
        },
        "Portal": {
-        "meshes": 7,
-        "triangles": 10507
+        "meshes": 6,
+        "triangles": 10419
        },
        "pet": {
         "meshes": 1,
@@ -10100,10 +10216,10 @@
       "duplicates": []
      }
     },
-    "avgTriangles": 448629,
+    "avgTriangles": 448634,
     "triangleSplit": {
-     "total": 448629,
-     "scene": 246796,
+     "total": 448634,
+     "scene": 246801,
      "character": 199965,
      "pet": 1868,
      "perView": {
@@ -10120,21 +10236,21 @@
        "draws": 121
       },
       "plaza_north": {
-       "total": 456234,
+       "total": 456342,
        "character": 199965,
        "pet": 1868,
-       "draws": 122
+       "draws": 123
       },
       "east": {
-       "total": 446431,
+       "total": 446343,
        "character": 199965,
        "pet": 1868,
-       "draws": 134
+       "draws": 133
       }
      }
     },
     "totalWithCharacter": {
-     "avg": 448629,
+     "avg": 448634,
      "budget": 250000,
      "over": true
     },
@@ -10333,7 +10449,7 @@
       "triggerR": 2.6,
       "log": [
        {
-        "t": 173.90930000000006,
+        "t": 167.37269999999995,
         "map": "starsprout",
         "x": 5.3884459162483544e-15,
         "z": -42.5
@@ -10347,7 +10463,7 @@
       "triggerR": 2.6,
       "log": [
        {
-        "t": 173.90930000000006,
+        "t": 167.37269999999995,
         "map": "starsprout",
         "x": 5.3884459162483544e-15,
         "z": -42.5
@@ -10387,7 +10503,7 @@
       "lod": 0,
       "paused": false,
       "blinkTargets": 0,
-      "nextAct": 19.6
+      "nextAct": 15.4
      },
      "far": {
       "anim": "Idle",
@@ -10396,7 +10512,7 @@
       "lod": 1,
       "paused": true,
       "blinkTargets": 0,
-      "nextAct": 19
+      "nextAct": 14.8
      }
     },
     "character": {
@@ -10426,12 +10542,12 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -22.9,
+      "minRawGapCm": -23.3,
       "minGapCm": 2,
-      "corrections": 58,
+      "corrections": 53,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      },
-     "loadMs": 2601
+     "loadMs": 2492
     },
     "characterActions": {
      "attackButton": "Attack",
@@ -10444,8 +10560,8 @@
     },
     "pet": {
      "still": {
-      "horizontal": 0.3669340881980353,
-      "height": 0.8356472335180756
+      "horizontal": 0.37279894797052415,
+      "height": 0.8459073273503672
      },
      "pet": {
       "id": "bird4",
@@ -10453,7 +10569,7 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -26.3,
+      "minRawGapCm": -28,
       "minGapCm": 2,
       "corrections": 3,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
@@ -10464,7 +10580,7 @@
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": 0.0015710376901552081
+       "y": -0.05916544049978256
       },
       {
        "name": "Portal_fx",
@@ -10474,14 +10590,14 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": 0.045200005173683167
+       "y": 0.015849662944674492
       }
      ],
      "a2": [
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": -0.040625929832458496
+       "y": -0.049417708069086075
       },
       {
        "name": "Portal_fx",
@@ -10491,7 +10607,7 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": 0.04461822658777237
+       "y": -0.02771170064806938
       }
      ]
     },
@@ -10683,7 +10799,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 36.4
+        "nextAct": 29.1
        },
        "knight": {
         "anim": "Idle",
@@ -10692,7 +10808,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 22.1
+        "nextAct": 25.6
        },
        "smith": {
         "anim": "Idle",
@@ -10701,7 +10817,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 30.2
+        "nextAct": 31.2
        },
        "mage": {
         "anim": "Idle",
@@ -10710,7 +10826,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 27
+        "nextAct": 25.8
        },
        "church": {
         "anim": "Idle",
@@ -10719,7 +10835,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 36.7
+        "nextAct": 28.1
        },
        "circus": {
         "anim": "Idle",
@@ -10728,7 +10844,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 30.5
+        "nextAct": 34.4
        },
        "warehouse": {
         "anim": "Idle",
@@ -10737,7 +10853,7 @@
         "lod": 1,
         "paused": false,
         "blinkTargets": 0,
-        "nextAct": 25.8
+        "nextAct": 28.6
        },
        "guild": {
         "anim": "Idle",
@@ -10746,7 +10862,7 @@
         "lod": 1,
         "paused": false,
         "blinkTargets": 1,
-        "nextAct": 30.3
+        "nextAct": 23.2
        }
       }
      }
@@ -10782,7 +10898,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 36.4
+       "nextAct": 29.1
       },
       "knight": {
        "model": "npc_knight67_lite",
@@ -10795,7 +10911,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 22.1
+       "nextAct": 25.6
       },
       "smith": {
        "model": "npc_smith67_lite",
@@ -10808,7 +10924,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 30.2
+       "nextAct": 31.2
       },
       "mage": {
        "model": "npc_mage67_lite",
@@ -10821,7 +10937,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 27
+       "nextAct": 25.8
       },
       "church": {
        "model": "npc_priest67_lite",
@@ -10834,7 +10950,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 36.7
+       "nextAct": 28.1
       },
       "circus": {
        "model": "npc_clown67_lite",
@@ -10847,7 +10963,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 30.5
+       "nextAct": 34.4
       },
       "warehouse": {
        "model": "npc_warehouse67_lite",
@@ -10860,7 +10976,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 25.8
+       "nextAct": 28.6
       },
       "guild": {
        "model": "npc_guild",
@@ -10873,7 +10989,7 @@
         "Turn"
        ],
        "blink": 1,
-       "nextAct": 30.3
+       "nextAct": 23.2
       }
      }
     },
@@ -10890,20 +11006,35 @@
       "guild": 1
      }
     },
-    "Stage 6.7 洛恩巡走：播放 Walk，播放速度跟隨實際移動速度（巡走 0.6 m/s≈1 倍；起步、停下時較慢；範圍 0.25～1.25 倍）": {
+    "Stage 6.7 洛恩巡走：播放 Walk，播放速度跟隨實際移動速度（巡走 0.6 m/s≈1 倍；起步、停下時較慢；穩定步行 0.25～1.25 倍）": {
      "ok": true,
      "detail": {
-      "x": -8.425826502972825,
-      "z": -6.756141483258085,
-      "yaw": -0.6758602080591427,
-      "walking": true,
-      "station": -1,
-      "bearing": 231.27606253737736,
-      "anim": "Walk",
-      "facing": -0.6758602080591427,
-      "lod": 1,
-      "paused": false,
-      "walkRate": 0.9999949273703855
+      "start": {
+       "x": -8.021468173588854,
+       "z": -7.231600676205864,
+       "yaw": -0.7336602080591381,
+       "walking": true,
+       "station": -1,
+       "bearing": 227.96436648152155,
+       "anim": "Walk",
+       "facing": -0.7336602080591381,
+       "lod": 1,
+       "paused": false,
+       "walkRate": 0.999994492829607
+      },
+      "steady": {
+       "x": -8.821920371966934,
+       "z": -6.230065886543643,
+       "yaw": -0.6148768747258002,
+       "walking": true,
+       "station": -1,
+       "bearing": 234.7701501580175,
+       "anim": "Walk",
+       "facing": -0.6148768747258002,
+       "lod": 1,
+       "paused": false,
+       "walkRate": 0.9999950382227445
+      }
      }
     },
     "Stage 6.7 洛恩：N009 Tripo 模型（背光補光 0.3）（Idle／Walk／Talk／Turn）＋原本的小寵物；委託佈告欄 N008 模型可點擊": {
@@ -11140,17 +11271,17 @@
      "ok": true,
      "detail": [
       "星願物語 Stage 6.4 星芽村 測試報告",
-      "時間 2026/11/27 10:30:52",
+      "時間 2026/11/27 11:14:40",
       "網址參數 ?map=village&art=full&quality=medium&g=female",
       "裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
-      "模式 Lite 中畫質：畫質 中畫質（來源：網址指定）、模型 Lite／載入 158 ms",
+      "模式 Lite 中畫質：畫質 中畫質（來源：網址指定）、模型 Lite／載入 155 ms",
       "陰影（實際）：一般柔化陰影 PCF 1024｜陰影貼圖 1024×1024，PCF，取樣品質 中",
       "解析度（實際）：要求上限 1.25x、實際 1x、framebuffer 844×390、Hardware Scaling 1、裝置 DPR 2｜動態解析度 已介入（第 2 級／1.25→1x）",
       "抗鋸齒（實際）：MSAA 要求 2x、後製管線 2x、渲染目標 無法讀取x、裝置上限 4x → 實際生效 2x｜HDR 關、後製管線 開",
       "村莊 V1.3 佔位網格 5、三角形 12648、文字標籤 13；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）",
       "碰撞 圓形 40、矩形 10；鏡頭避障 開",
-      "目前畫面 Draw Calls 107、三角形 149173",
-      "全村整合 art=full：loaded，載入 14016 ms"
+      "目前畫面 Draw Calls 106、三角形 149125",
+      "全村整合 art=full：loaded，載入 13091 ms"
      ]
     },
     "繪製次數 ≤ 120（全村整合、medium 畫質、任何位置）": {
@@ -11175,8 +11306,8 @@
        }
       },
       "plaza_north": {
-       "drawCalls": 97,
-       "triangles": 153574,
+       "drawCalls": 96,
+       "triangles": 153482,
        "casters": {
         "active": 17,
         "total": 53,
@@ -11197,10 +11328,10 @@
     "移動規則：一般行走走上石階到高台（不跳躍）": {
      "ok": true,
      "detail": {
-      "x": -5.817072295949935e-16,
+      "x": -6.123233995736774e-16,
       "y": 2,
-      "z": 24.500000000000117,
-      "yaw": -6.123233995719597e-17
+      "z": 25.000000000000124,
+      "yaw": -6.123233995732532e-17
      }
     },
     "NPC 互動：9 個互動點都能靠近後按下（NPC 對話：名稱、職責；佈告欄：委託介面）": {
@@ -11252,7 +11383,7 @@
        "what": "npc:warehouse",
        "dialog": "倉庫管理員・米拉倉庫「要寄放東西嗎？每一件我都會好好記在帳本上。」要寄放物品嗎？",
        "talkAnim": "Talk",
-       "afterAnim": "Idle"
+       "afterAnim": "Act"
       },
       {
        "id": "smith",
@@ -11318,7 +11449,7 @@
       {
        "id": "warehouse",
        "talk": "Talk",
-       "after": "Idle"
+       "after": "Act"
       },
       {
        "id": "smith",
@@ -11497,7 +11628,7 @@
        "triggerR": 2.6,
        "log": [
         {
-         "t": 105.231,
+         "t": 103.46389999999991,
          "map": "starsprout",
          "x": 5.3884459162483544e-15,
          "z": -42.5
@@ -11511,7 +11642,7 @@
        "triggerR": 2.6,
        "log": [
         {
-         "t": 105.231,
+         "t": 103.46389999999991,
          "map": "starsprout",
          "x": 5.3884459162483544e-15,
          "z": -42.5
@@ -11612,7 +11743,7 @@
        "lod": 0,
        "paused": false,
        "blinkTargets": 0,
-       "nextAct": 26.2
+       "nextAct": 17.3
       },
       "far": {
        "anim": "Idle",
@@ -11621,7 +11752,7 @@
        "lod": 1,
        "paused": true,
        "blinkTargets": 0,
-       "nextAct": 25.6
+       "nextAct": 16.7
       }
      }
     },
@@ -11694,8 +11825,8 @@
     "寵物在角色耳朵旁（停著時水平距離 0.15～0.6 m、高度在頭部附近 0.6～1.3 m）": {
      "ok": true,
      "detail": {
-      "earDist": 0.3748567343482551,
-      "earUp": 0.8586253831356437
+      "earDist": 0.37457763129641397,
+      "earUp": 0.8485032702521527
      }
     },
     "寵物不貼住、不穿透角色：跑步與快速轉身後，與頭部／身體的最小間距 ≥ 2 cm（含 B 端間距保護）": {
@@ -11706,7 +11837,7 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -27,
+      "minRawGapCm": -27.5,
       "minGapCm": 2,
       "corrections": 3,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
@@ -11717,7 +11848,7 @@
      "detail": [
       "  寵物商人洛恩：網格 1、三角形 5000",
       "玩家角色：Claude A 正式初心者 C1.0-B5b（c10b5b）｜novice_c10b5b_female_lite.glb（女、Lite）｜三角面 39955、網格 27（可繪製 26、骨架網格 26）、骨骼 17｜動作 Attack／Death／Hurt／Idle／Jump／Run｜陰影 柔和腳底陰影（A 預設）｜本幀 Draw Calls：主畫面 26、陰影貼圖 0｜來源 Claude A feature/render-stage7-world@1c858d10／art-novice-c10b5b（唯讀，未修改）",
-      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 2 cm（修正前 -27 cm，間距保護修正 3 次）"
+      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 2 cm（修正前 -27.5 cm，間距保護修正 3 次）"
      ]
     },
     "星願之泉星晶動畫（旋轉＋上下浮動）持續播放": {
@@ -11727,7 +11858,7 @@
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": -0.05556310713291168
+        "y": -0.02434392273426056
        },
        {
         "name": "Portal_fx",
@@ -11737,14 +11868,14 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": 0.015849662944674492
+        "y": -0.0472475104033947
        }
       ],
       "a2": [
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": -0.045383520424366
+        "y": 0.037831079214811325
        },
        {
         "name": "Portal_fx",
@@ -11754,7 +11885,7 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": -0.04145350307226181
+        "y": -0.02840314619243145
        }
       ]
      }
@@ -11835,7 +11966,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 14016,
+     "loadMs": 13091,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -12053,17 +12184,32 @@
      }
     },
     "merchantWalk": {
-     "x": -8.425826502972825,
-     "z": -6.756141483258085,
-     "yaw": -0.6758602080591427,
-     "walking": true,
-     "station": -1,
-     "bearing": 231.27606253737736,
-     "anim": "Walk",
-     "facing": -0.6758602080591427,
-     "lod": 1,
-     "paused": false,
-     "walkRate": 0.9999949273703855
+     "start": {
+      "x": -8.021468173588854,
+      "z": -7.231600676205864,
+      "yaw": -0.7336602080591381,
+      "walking": true,
+      "station": -1,
+      "bearing": 227.96436648152155,
+      "anim": "Walk",
+      "facing": -0.7336602080591381,
+      "lod": 1,
+      "paused": false,
+      "walkRate": 0.999994492829607
+     },
+     "steady": {
+      "x": -8.821920371966934,
+      "z": -6.230065886543643,
+      "yaw": -0.6148768747258002,
+      "walking": true,
+      "station": -1,
+      "bearing": 234.7701501580175,
+      "anim": "Walk",
+      "facing": -0.6148768747258002,
+      "lod": 1,
+      "paused": false,
+      "walkRate": 0.9999950382227445
+     }
     },
     "perf": {
      "arrival": {
@@ -12085,8 +12231,8 @@
       }
      },
      "plaza_north": {
-      "drawCalls": 97,
-      "triangles": 153574,
+      "drawCalls": 96,
+      "triangles": 153482,
       "casters": {
        "active": 17,
        "total": 53,
@@ -12309,8 +12455,8 @@
       }
      },
      "plaza_north": {
-      "activeMeshes": 108,
-      "activeTriangles": 153574,
+      "activeMeshes": 107,
+      "activeTriangles": 153482,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -12353,8 +12499,8 @@
         "triangles": 9232
        },
        "WishFountain": {
-        "meshes": 7,
-        "triangles": 10460
+        "meshes": 6,
+        "triangles": 10368
        },
        "Platform": {
         "meshes": 3,
@@ -12694,10 +12840,10 @@
       "duplicates": []
      }
     },
-    "avgTriangles": 151997,
+    "avgTriangles": 151974,
     "triangleSplit": {
-     "total": 151997,
-     "scene": 110174,
+     "total": 151974,
+     "scene": 110151,
      "character": 39955,
      "pet": 1868,
      "perView": {
@@ -12714,10 +12860,10 @@
        "draws": 100
       },
       "plaza_north": {
-       "total": 153574,
+       "total": 153482,
        "character": 39955,
        "pet": 1868,
-       "draws": 97
+       "draws": 96
       },
       "east": {
        "total": 149173,
@@ -12728,11 +12874,11 @@
      }
     },
     "landscapeTrianglesInfo": {
-     "scene": 110174,
+     "scene": 110151,
      "budgetPortrait": 100000
     },
     "totalWithCharacter": {
-     "avg": 151997,
+     "avg": 151974,
      "budget": 100000,
      "over": true
     },
@@ -12783,7 +12929,7 @@
       "what": "npc:warehouse",
       "dialog": "倉庫管理員・米拉倉庫「要寄放東西嗎？每一件我都會好好記在帳本上。」要寄放物品嗎？",
       "talkAnim": "Talk",
-      "afterAnim": "Idle"
+      "afterAnim": "Act"
      },
      {
       "id": "smith",
@@ -12931,7 +13077,7 @@
       "triggerR": 2.6,
       "log": [
        {
-        "t": 105.231,
+        "t": 103.46389999999991,
         "map": "starsprout",
         "x": 5.3884459162483544e-15,
         "z": -42.5
@@ -12945,7 +13091,7 @@
       "triggerR": 2.6,
       "log": [
        {
-        "t": 105.231,
+        "t": 103.46389999999991,
         "map": "starsprout",
         "x": 5.3884459162483544e-15,
         "z": -42.5
@@ -12976,7 +13122,7 @@
       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
      }
     ],
-    "fpsSoftware": 90,
+    "fpsSoftware": 89,
     "lod": {
      "near": {
       "anim": "Act",
@@ -12985,7 +13131,7 @@
       "lod": 0,
       "paused": false,
       "blinkTargets": 0,
-      "nextAct": 26.2
+      "nextAct": 17.3
      },
      "far": {
       "anim": "Idle",
@@ -12994,7 +13140,7 @@
       "lod": 1,
       "paused": true,
       "blinkTargets": 0,
-      "nextAct": 25.6
+      "nextAct": 16.7
      }
     },
     "character": {
@@ -13024,12 +13170,12 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -22.9,
+      "minRawGapCm": -23.1,
       "minGapCm": 2,
-      "corrections": 53,
+      "corrections": 47,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      },
-     "loadMs": 1009
+     "loadMs": 903
     },
     "characterActions": {
      "attackButton": "Attack",
@@ -13042,8 +13188,8 @@
     },
     "pet": {
      "still": {
-      "horizontal": 0.3748567343482551,
-      "height": 0.8586253831356437
+      "horizontal": 0.37457763129641397,
+      "height": 0.8485032702521527
      },
      "pet": {
       "id": "bird4",
@@ -13051,7 +13197,7 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -27,
+      "minRawGapCm": -27.5,
       "minGapCm": 2,
       "corrections": 3,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
@@ -13062,7 +13208,7 @@
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": -0.05556310713291168
+       "y": -0.02434392273426056
       },
       {
        "name": "Portal_fx",
@@ -13072,14 +13218,14 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": 0.015849662944674492
+       "y": -0.0472475104033947
       }
      ],
      "a2": [
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": -0.045383520424366
+       "y": 0.037831079214811325
       },
       {
        "name": "Portal_fx",
@@ -13089,7 +13235,7 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": -0.04145350307226181
+       "y": -0.02840314619243145
       }
      ]
     },
@@ -13347,7 +13493,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 29.5
+        "nextAct": 34.5
        },
        "knight": {
         "anim": "Idle",
@@ -13356,7 +13502,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 26
+        "nextAct": 26.7
        },
        "smith": {
         "anim": "Idle",
@@ -13365,7 +13511,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 32.7
+        "nextAct": 26.3
        },
        "mage": {
         "anim": "Idle",
@@ -13374,7 +13520,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 24.1
+        "nextAct": 26.2
        },
        "church": {
         "anim": "Idle",
@@ -13383,7 +13529,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 37.3
+        "nextAct": 34.1
        },
        "circus": {
         "anim": "Idle",
@@ -13392,7 +13538,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 24.4
+        "nextAct": 30.4
        },
        "warehouse": {
         "anim": "Idle",
@@ -13401,7 +13547,7 @@
         "lod": 1,
         "paused": false,
         "blinkTargets": 0,
-        "nextAct": 35.3
+        "nextAct": 32.8
        },
        "guild": {
         "anim": "Idle",
@@ -13410,7 +13556,7 @@
         "lod": 1,
         "paused": false,
         "blinkTargets": 1,
-        "nextAct": 22.6
+        "nextAct": 38.7
        }
       }
      }
@@ -13446,7 +13592,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 29.5
+       "nextAct": 34.5
       },
       "knight": {
        "model": "npc_knight67_hq",
@@ -13459,7 +13605,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 26
+       "nextAct": 26.7
       },
       "smith": {
        "model": "npc_smith67_hq",
@@ -13472,7 +13618,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 32.7
+       "nextAct": 26.3
       },
       "mage": {
        "model": "npc_mage67_hq",
@@ -13485,7 +13631,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 24.1
+       "nextAct": 26.2
       },
       "church": {
        "model": "npc_priest67_hq",
@@ -13498,7 +13644,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 37.3
+       "nextAct": 34.1
       },
       "circus": {
        "model": "npc_clown67_hq",
@@ -13511,7 +13657,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 24.4
+       "nextAct": 30.4
       },
       "warehouse": {
        "model": "npc_warehouse67_hq",
@@ -13524,7 +13670,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 35.3
+       "nextAct": 32.8
       },
       "guild": {
        "model": "npc_guild",
@@ -13537,7 +13683,7 @@
         "Turn"
        ],
        "blink": 1,
-       "nextAct": 22.6
+       "nextAct": 38.7
       }
      }
     },
@@ -13554,20 +13700,35 @@
       "guild": 1
      }
     },
-    "Stage 6.7 洛恩巡走：播放 Walk，播放速度跟隨實際移動速度（巡走 0.6 m/s≈1 倍；起步、停下時較慢；範圍 0.25～1.25 倍）": {
+    "Stage 6.7 洛恩巡走：播放 Walk，播放速度跟隨實際移動速度（巡走 0.6 m/s≈1 倍；起步、停下時較慢；穩定步行 0.25～1.25 倍）": {
      "ok": true,
      "detail": {
-      "x": -4.6045217689645765,
-      "z": -9.769256843748726,
-      "yaw": -1.1303484846795062,
-      "walking": true,
-      "station": -1,
-      "bearing": 205.23580244885625,
-      "anim": "Walk",
-      "facing": -1.1303484846795062,
-      "lod": 1,
-      "paused": false,
-      "walkRate": 0.7384357784718651
+      "start": {
+       "x": -4.38778359221727,
+       "z": -9.86850318679935,
+       "yaw": -1.1524212034295063,
+       "walking": true,
+       "station": -1,
+       "bearing": 203.97112882210206,
+       "anim": "Walk",
+       "facing": -1.1524212034295063,
+       "lod": 1,
+       "paused": false,
+       "walkRate": 0.524748652686366
+      },
+      "steady": {
+       "x": -5.354976605095611,
+       "z": -9.378924541698728,
+       "yaw": -1.0520046525035796,
+       "walking": true,
+       "station": -1,
+       "bearing": 209.72457338341815,
+       "anim": "Walk",
+       "facing": -1.0520046525035796,
+       "lod": 1,
+       "paused": false,
+       "walkRate": 0.9998713181735303
+      }
      }
     },
     "Stage 6.7 洛恩：N009 Tripo 模型（背光補光 0.3）（Idle／Walk／Talk／Turn）＋原本的小寵物；委託佈告欄 N008 模型可點擊": {
@@ -13839,17 +14000,17 @@
      "ok": true,
      "detail": [
       "星願物語 Stage 6.4 星芽村 測試報告",
-      "時間 2026/11/27 10:34:12",
+      "時間 2026/11/27 11:17:54",
       "網址參數 ?map=village&art=full&quality=high&g=male",
       "裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15",
-      "模式 HQ（高畫質）：畫質 高畫質（來源：網址指定）、模型 HQ／載入 1013 ms",
+      "模式 HQ（高畫質）：畫質 高畫質（來源：網址指定）、模型 HQ／載入 928 ms",
       "陰影（實際）：一般柔化陰影 PCF 1024｜陰影貼圖 1024×1024，PCF，取樣品質 中",
       "解析度（實際）：要求上限 1.25x、實際 1x、framebuffer 390×844、Hardware Scaling 1、裝置 DPR 2｜動態解析度 已介入（第 2 級／1.25→1x）",
       "抗鋸齒（實際）：MSAA 要求 4x、後製管線 4x、渲染目標 無法讀取x、裝置上限 8x → 實際生效 4x｜HDR 關、後製管線 開",
       "村莊 V1.3 佔位網格 5、三角形 15512、文字標籤 13；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）",
       "碰撞 圓形 40、矩形 10；鏡頭避障 開",
       "目前畫面 Draw Calls 95、三角形 385869",
-      "全村整合 art=full：loaded，載入 1290 ms"
+      "全村整合 art=full：loaded，載入 1220 ms"
      ]
     },
     "繪製次數 ≤ 160（全村整合、high 畫質、任何位置）": {
@@ -13967,7 +14128,7 @@
        "what": "npc:guild",
        "dialog": "星願商會選單",
        "talkAnim": "Talk",
-       "afterAnim": "Act"
+       "afterAnim": "Idle"
       },
       {
        "id": "board",
@@ -14027,7 +14188,7 @@
       {
        "id": "guild",
        "talk": "Talk",
-       "after": "Act"
+       "after": "Idle"
       },
       {
        "id": "board",
@@ -14202,7 +14363,7 @@
        "triggerR": 2.6,
        "log": [
         {
-         "t": 67.813,
+         "t": 65.745,
          "map": "starsprout",
          "x": 5.3884459162483544e-15,
          "z": -42.5
@@ -14216,7 +14377,7 @@
        "triggerR": 2.6,
        "log": [
         {
-         "t": 67.813,
+         "t": 65.745,
          "map": "starsprout",
          "x": 5.3884459162483544e-15,
          "z": -42.5
@@ -14324,7 +14485,7 @@
        "lod": 0,
        "paused": false,
        "blinkTargets": 0,
-       "nextAct": 20.2
+       "nextAct": 26.4
       },
       "far": {
        "anim": "Idle",
@@ -14333,7 +14494,7 @@
        "lod": 1,
        "paused": true,
        "blinkTargets": 0,
-       "nextAct": 19.8
+       "nextAct": 26
       }
      }
     },
@@ -14406,8 +14567,8 @@
     "寵物在角色耳朵旁（停著時水平距離 0.15～0.6 m、高度在頭部附近 0.6～1.3 m）": {
      "ok": true,
      "detail": {
-      "earDist": 0.37331054952464604,
-      "earUp": 0.8221394061312771
+      "earDist": 0.36926366706803293,
+      "earUp": 0.8212357938426075
      }
     },
     "寵物不貼住、不穿透角色：跑步與快速轉身後，與頭部／身體的最小間距 ≥ 2 cm（含 B 端間距保護）": {
@@ -14418,7 +14579,7 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -27.5,
+      "minRawGapCm": -27.6,
       "minGapCm": 2,
       "corrections": 4,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
@@ -14429,7 +14590,7 @@
      "detail": [
       "  寵物商人洛恩：網格 1、三角形 9602",
       "玩家角色：Claude A 正式初心者 C1.0-B5b（c10b5b）｜novice_c10b5b_male_hq.glb（男、HQ）｜三角面 199965、網格 27（可繪製 26、骨架網格 26）、骨骼 17｜動作 Attack／Death／Hurt／Idle／Jump／Run｜陰影 柔和腳底陰影（A 預設）｜本幀 Draw Calls：主畫面 26、陰影貼圖 0｜來源 Claude A feature/render-stage7-world@1c858d10／art-novice-c10b5b（唯讀，未修改）",
-      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 2 cm（修正前 -27.5 cm，間距保護修正 4 次）"
+      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 2 cm（修正前 -27.6 cm，間距保護修正 4 次）"
      ]
     },
     "星願之泉星晶動畫（旋轉＋上下浮動）持續播放": {
@@ -14439,7 +14600,7 @@
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": 0.03023601695895195
+        "y": 0.011534488759934902
        },
        {
         "name": "Portal_fx",
@@ -14449,14 +14610,14 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": -0.024766892194747925
+        "y": 0.03586140647530556
        }
       ],
       "a2": [
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": 0.0577070526778698
+        "y": -0.05667955428361893
        },
        {
         "name": "Portal_fx",
@@ -14466,7 +14627,7 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": 0.04316510260105133
+        "y": -0.03885936737060547
        }
       ]
      }
@@ -14562,7 +14723,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 1290,
+     "loadMs": 1220,
      "parts": {
       "環境": {
        "meshes": 7,
@@ -14780,17 +14941,32 @@
      }
     },
     "merchantWalk": {
-     "x": -4.6045217689645765,
-     "z": -9.769256843748726,
-     "yaw": -1.1303484846795062,
-     "walking": true,
-     "station": -1,
-     "bearing": 205.23580244885625,
-     "anim": "Walk",
-     "facing": -1.1303484846795062,
-     "lod": 1,
-     "paused": false,
-     "walkRate": 0.7384357784718651
+     "start": {
+      "x": -4.38778359221727,
+      "z": -9.86850318679935,
+      "yaw": -1.1524212034295063,
+      "walking": true,
+      "station": -1,
+      "bearing": 203.97112882210206,
+      "anim": "Walk",
+      "facing": -1.1524212034295063,
+      "lod": 1,
+      "paused": false,
+      "walkRate": 0.524748652686366
+     },
+     "steady": {
+      "x": -5.354976605095611,
+      "z": -9.378924541698728,
+      "yaw": -1.0520046525035796,
+      "walking": true,
+      "station": -1,
+      "bearing": 209.72457338341815,
+      "anim": "Walk",
+      "facing": -1.0520046525035796,
+      "lod": 1,
+      "paused": false,
+      "walkRate": 0.9998713181735303
+     }
     },
     "perf": {
      "arrival": {
@@ -15426,7 +15602,7 @@
       "what": "npc:guild",
       "dialog": "星願商會選單",
       "talkAnim": "Talk",
-      "afterAnim": "Act"
+      "afterAnim": "Idle"
      },
      {
       "id": "board",
@@ -15558,7 +15734,7 @@
       "triggerR": 2.6,
       "log": [
        {
-        "t": 67.813,
+        "t": 65.745,
         "map": "starsprout",
         "x": 5.3884459162483544e-15,
         "z": -42.5
@@ -15572,7 +15748,7 @@
       "triggerR": 2.6,
       "log": [
        {
-        "t": 67.813,
+        "t": 65.745,
         "map": "starsprout",
         "x": 5.3884459162483544e-15,
         "z": -42.5
@@ -15603,7 +15779,7 @@
       "dialog": "西方傳送門未開放這座傳送門目前處於休眠狀態，尚未開放。\n      關閉"
      }
     ],
-    "fpsSoftware": 112,
+    "fpsSoftware": 113,
     "lod": {
      "near": {
       "anim": "Act",
@@ -15612,7 +15788,7 @@
       "lod": 0,
       "paused": false,
       "blinkTargets": 0,
-      "nextAct": 20.2
+      "nextAct": 26.4
      },
      "far": {
       "anim": "Idle",
@@ -15621,7 +15797,7 @@
       "lod": 1,
       "paused": true,
       "blinkTargets": 0,
-      "nextAct": 19.8
+      "nextAct": 26
      }
     },
     "character": {
@@ -15651,12 +15827,12 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -22.8,
+      "minRawGapCm": -23.1,
       "minGapCm": 2,
-      "corrections": 42,
+      "corrections": 44,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      },
-     "loadMs": 578
+     "loadMs": 541
     },
     "characterActions": {
      "attackButton": "Attack",
@@ -15669,8 +15845,8 @@
     },
     "pet": {
      "still": {
-      "horizontal": 0.37331054952464604,
-      "height": 0.8221394061312771
+      "horizontal": 0.36926366706803293,
+      "height": 0.8212357938426075
      },
      "pet": {
       "id": "bird4",
@@ -15678,7 +15854,7 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -27.5,
+      "minRawGapCm": -27.6,
       "minGapCm": 2,
       "corrections": 4,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
@@ -15689,7 +15865,7 @@
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": 0.03023601695895195
+       "y": 0.011534488759934902
       },
       {
        "name": "Portal_fx",
@@ -15699,14 +15875,14 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": -0.024766892194747925
+       "y": 0.03586140647530556
       }
      ],
      "a2": [
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": 0.0577070526778698
+       "y": -0.05667955428361893
       },
       {
        "name": "Portal_fx",
@@ -15716,7 +15892,7 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": 0.04316510260105133
+       "y": -0.03885936737060547
       }
      ]
     },
@@ -15908,7 +16084,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 39.9
+        "nextAct": 37.4
        },
        "knight": {
         "anim": "Idle",
@@ -15917,7 +16093,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 26.3
+        "nextAct": 28.8
        },
        "smith": {
         "anim": "Idle",
@@ -15926,7 +16102,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 30.6
+        "nextAct": 32.4
        },
        "mage": {
         "anim": "Idle",
@@ -15935,7 +16111,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 24.7
+        "nextAct": 35.7
        },
        "church": {
         "anim": "Idle",
@@ -15944,7 +16120,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 25.4
+        "nextAct": 22.4
        },
        "circus": {
         "anim": "Idle",
@@ -15953,7 +16129,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 35.7
+        "nextAct": 29.4
        },
        "warehouse": {
         "anim": "Idle",
@@ -15962,7 +16138,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 26
+        "nextAct": 32.6
        },
        "guild": {
         "anim": "Idle",
@@ -15971,7 +16147,7 @@
         "lod": 1,
         "paused": false,
         "blinkTargets": 1,
-        "nextAct": 22.3
+        "nextAct": 39.3
        }
       }
      }
@@ -16007,7 +16183,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 39.9
+       "nextAct": 37.4
       },
       "knight": {
        "model": "npc_knight67_lite",
@@ -16020,7 +16196,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 26.3
+       "nextAct": 28.8
       },
       "smith": {
        "model": "npc_smith67_lite",
@@ -16033,7 +16209,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 30.6
+       "nextAct": 32.4
       },
       "mage": {
        "model": "npc_mage67_lite",
@@ -16046,7 +16222,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 24.7
+       "nextAct": 35.7
       },
       "church": {
        "model": "npc_priest67_lite",
@@ -16059,7 +16235,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 25.4
+       "nextAct": 22.4
       },
       "circus": {
        "model": "npc_clown67_lite",
@@ -16072,7 +16248,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 35.7
+       "nextAct": 29.4
       },
       "warehouse": {
        "model": "npc_warehouse67_lite",
@@ -16085,7 +16261,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 26
+       "nextAct": 32.6
       },
       "guild": {
        "model": "npc_guild",
@@ -16098,7 +16274,7 @@
         "Turn"
        ],
        "blink": 1,
-       "nextAct": 22.3
+       "nextAct": 39.3
       }
      }
     },
@@ -16115,20 +16291,35 @@
       "guild": 1
      }
     },
-    "Stage 6.7 洛恩巡走：播放 Walk，播放速度跟隨實際移動速度（巡走 0.6 m/s≈1 倍；起步、停下時較慢；範圍 0.25～1.25 倍）": {
-     "ok": false,
+    "Stage 6.7 洛恩巡走：播放 Walk，播放速度跟隨實際移動速度（巡走 0.6 m/s≈1 倍；起步、停下時較慢；穩定步行 0.25～1.25 倍）": {
+     "ok": true,
      "detail": {
-      "x": -4.132981069542964,
-      "z": -9.9778989511219,
-      "yaw": -1.1780972450961726,
-      "walking": true,
-      "station": -1,
-      "bearing": 202.5,
-      "anim": "Walk",
-      "facing": -1.1780972450961726,
-      "lod": 1,
-      "paused": false,
-      "walkRate": 0.2
+      "start": {
+       "x": -4.140897230380143,
+       "z": -9.974616289734161,
+       "yaw": -1.1773037450961723,
+       "walking": true,
+       "station": -1,
+       "bearing": 202.54546420104361,
+       "anim": "Walk",
+       "facing": -1.1773037450961723,
+       "lod": 1,
+       "paused": false,
+       "walkRate": 0.2
+      },
+      "steady": {
+       "x": -4.685151090215442,
+       "z": -9.730845762925908,
+       "yaw": -1.1220789013461732,
+       "walking": true,
+       "station": -1,
+       "bearing": 205.70961467218808,
+       "anim": "Walk",
+       "facing": -1.1220789013461732,
+       "lod": 1,
+       "paused": false,
+       "walkRate": 0.8119348252612407
+      }
      }
     },
     "Stage 6.7 洛恩：N009 Tripo 模型（背光補光 0.3）（Idle／Walk／Talk／Turn）＋原本的小寵物；委託佈告欄 N008 模型可點擊": {
@@ -16347,7 +16538,7 @@
       "spawn": {
        "active": 25,
        "total": 53,
-       "triangles": 43259
+       "triangles": 40259
       },
       "plaza_north": {
        "active": 15,
@@ -16364,8 +16555,8 @@
     "村莊場景平均每幀三角面 ≤ 100000（不含玩家角色與寵物；含陰影貼圖繪製）": {
      "ok": true,
      "detail": {
-      "total": 133610,
-      "scene": 91787,
+      "total": 132337,
+      "scene": 90514,
       "character": 39955,
       "pet": 1868,
       "perView": {
@@ -16376,16 +16567,16 @@
         "draws": 82
        },
        "spawn": {
-        "total": 148501,
+        "total": 145501,
         "character": 39955,
         "pet": 1868,
         "draws": 84
        },
        "plaza_north": {
-        "total": 142190,
+        "total": 140098,
         "character": 39955,
         "pet": 1868,
-        "draws": 83
+        "draws": 81
        },
        "east": {
         "total": 120030,
@@ -16400,17 +16591,17 @@
      "ok": true,
      "detail": [
       "星願物語 Stage 6.4 星芽村 測試報告",
-      "時間 2026/11/27 10:36:12",
+      "時間 2026/11/27 11:19:49",
       "網址參數 ?map=village&art=full&quality=medium&g=female",
       "裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15",
-      "模式 Lite 中畫質：畫質 中畫質（來源：網址指定）、模型 Lite／載入 408 ms",
+      "模式 Lite 中畫質：畫質 中畫質（來源：網址指定）、模型 Lite／載入 360 ms",
       "陰影（實際）：一般柔化陰影 PCF 1024｜陰影貼圖 1024×1024，PCF，取樣品質 中",
       "解析度（實際）：要求上限 1.25x、實際 1x、framebuffer 390×844、Hardware Scaling 1、裝置 DPR 2｜動態解析度 已介入（第 2 級／1.25→1x）",
       "抗鋸齒（實際）：MSAA 要求 2x、後製管線 2x、渲染目標 無法讀取x、裝置上限 8x → 實際生效 2x｜HDR 關、後製管線 開",
       "村莊 V1.3 佔位網格 5、三角形 12648、文字標籤 13；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）",
       "碰撞 圓形 40、矩形 10；鏡頭避障 開",
       "目前畫面 Draw Calls 77、三角形 120030",
-      "全村整合 art=full：loaded，載入 3611 ms"
+      "全村整合 art=full：loaded，載入 3317 ms"
      ]
     },
     "繪製次數 ≤ 120（全村整合、medium 畫質、任何位置）": {
@@ -16427,16 +16618,16 @@
       },
       "spawn": {
        "drawCalls": 84,
-       "triangles": 148501,
+       "triangles": 145501,
        "casters": {
         "active": 25,
         "total": 53,
-        "triangles": 43259
+        "triangles": 40259
        }
       },
       "plaza_north": {
-       "drawCalls": 83,
-       "triangles": 142190,
+       "drawCalls": 81,
+       "triangles": 140098,
        "casters": {
         "active": 15,
         "total": 53,
@@ -16457,10 +16648,10 @@
     "移動規則：一般行走走上石階到高台（不跳躍）": {
      "ok": true,
      "detail": {
-      "x": -5.743593488001087e-16,
+      "x": -5.615005574090613e-16,
       "y": 2,
-      "z": 24.380000000000017,
-      "yaw": -6.12323399571274e-17
+      "z": 24.16999999999997,
+      "yaw": -6.12323399569351e-17
      }
     },
     "NPC 互動：9 個互動點都能靠近後按下（NPC 對話：名稱、職責；佈告欄：委託介面）": {
@@ -16763,7 +16954,7 @@
        "triggerR": 2.6,
        "log": [
         {
-         "t": 38.978,
+         "t": 38.648,
          "map": "starsprout",
          "x": 5.3884459162483544e-15,
          "z": -42.5
@@ -16777,7 +16968,7 @@
        "triggerR": 2.6,
        "log": [
         {
-         "t": 38.978,
+         "t": 38.648,
          "map": "starsprout",
          "x": 5.3884459162483544e-15,
          "z": -42.5
@@ -16885,7 +17076,7 @@
        "lod": 0,
        "paused": false,
        "blinkTargets": 0,
-       "nextAct": 16.9
+       "nextAct": 21.5
       },
       "far": {
        "anim": "Idle",
@@ -16894,7 +17085,7 @@
        "lod": 1,
        "paused": true,
        "blinkTargets": 0,
-       "nextAct": 16.6
+       "nextAct": 21.2
       }
      }
     },
@@ -16934,8 +17125,8 @@
      "detail": {
       "run": [
        "Run",
-       4.999999999999982,
-       2.0746887966804906
+       5.000000000000034,
+       2.074688796680512
       ],
       "idle": "Idle"
      }
@@ -16967,8 +17158,8 @@
     "寵物在角色耳朵旁（停著時水平距離 0.15～0.6 m、高度在頭部附近 0.6～1.3 m）": {
      "ok": true,
      "detail": {
-      "earDist": 0.36762013539280947,
-      "earUp": 0.8456281608043119
+      "earDist": 0.36472728452087827,
+      "earUp": 0.8554693859389688
      }
     },
     "寵物不貼住、不穿透角色：跑步與快速轉身後，與頭部／身體的最小間距 ≥ 2 cm（含 B 端間距保護）": {
@@ -16979,9 +17170,9 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -26.3,
+      "minRawGapCm": -26.2,
       "minGapCm": 2,
-      "corrections": 4,
+      "corrections": 3,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      }
     },
@@ -16990,7 +17181,7 @@
      "detail": [
       "  寵物商人洛恩：網格 1、三角形 5000",
       "玩家角色：Claude A 正式初心者 C1.0-B5b（c10b5b）｜novice_c10b5b_female_lite.glb（女、Lite）｜三角面 39955、網格 27（可繪製 26、骨架網格 26）、骨骼 17｜動作 Attack／Death／Hurt／Idle／Jump／Run｜陰影 柔和腳底陰影（A 預設）｜本幀 Draw Calls：主畫面 26、陰影貼圖 0｜來源 Claude A feature/render-stage7-world@1c858d10／art-novice-c10b5b（唯讀，未修改）",
-      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 2 cm（修正前 -26.3 cm，間距保護修正 4 次）"
+      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 2 cm（修正前 -26.2 cm，間距保護修正 3 次）"
      ]
     },
     "星願之泉星晶動畫（旋轉＋上下浮動）持續播放": {
@@ -17000,7 +17191,7 @@
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": 0.0564594641327858
+        "y": 0.05823361128568649
        },
        {
         "name": "Portal_fx",
@@ -17010,14 +17201,14 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": -0.022823499515652657
+        "y": 0.004567439667880535
        }
       ],
       "a2": [
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": -0.0029780324548482895
+        "y": -0.039987772703170776
        },
        {
         "name": "Portal_fx",
@@ -17027,7 +17218,7 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": 0.04807646572589874
+        "y": 0.029015786945819855
        }
       ]
      }
@@ -17111,7 +17302,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 3611,
+     "loadMs": 3317,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -17329,17 +17520,32 @@
      }
     },
     "merchantWalk": {
-     "x": -4.132981069542964,
-     "z": -9.9778989511219,
-     "yaw": -1.1780972450961726,
-     "walking": true,
-     "station": -1,
-     "bearing": 202.5,
-     "anim": "Walk",
-     "facing": -1.1780972450961726,
-     "lod": 1,
-     "paused": false,
-     "walkRate": 0.2
+     "start": {
+      "x": -4.140897230380143,
+      "z": -9.974616289734161,
+      "yaw": -1.1773037450961723,
+      "walking": true,
+      "station": -1,
+      "bearing": 202.54546420104361,
+      "anim": "Walk",
+      "facing": -1.1773037450961723,
+      "lod": 1,
+      "paused": false,
+      "walkRate": 0.2
+     },
+     "steady": {
+      "x": -4.685151090215442,
+      "z": -9.730845762925908,
+      "yaw": -1.1220789013461732,
+      "walking": true,
+      "station": -1,
+      "bearing": 205.70961467218808,
+      "anim": "Walk",
+      "facing": -1.1220789013461732,
+      "lod": 1,
+      "paused": false,
+      "walkRate": 0.8119348252612407
+     }
     },
     "perf": {
      "arrival": {
@@ -17353,16 +17559,16 @@
      },
      "spawn": {
       "drawCalls": 84,
-      "triangles": 148501,
+      "triangles": 145501,
       "casters": {
        "active": 25,
        "total": 53,
-       "triangles": 43259
+       "triangles": 40259
       }
      },
      "plaza_north": {
-      "drawCalls": 83,
-      "triangles": 142190,
+      "drawCalls": 81,
+      "triangles": 140098,
       "casters": {
        "active": 15,
        "total": 53,
@@ -17472,7 +17678,7 @@
      },
      "spawn": {
       "activeMeshes": 78,
-      "activeTriangles": 148501,
+      "activeTriangles": 145501,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -17537,8 +17743,8 @@
       }
      },
      "plaza_north": {
-      "activeMeshes": 87,
-      "activeTriangles": 142190,
+      "activeMeshes": 85,
+      "activeTriangles": 140098,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -17581,8 +17787,8 @@
         "triangles": 9232
        },
        "WishFountain": {
-        "meshes": 7,
-        "triangles": 10460
+        "meshes": 6,
+        "triangles": 10368
        },
        "Platform": {
         "meshes": 3,
@@ -17603,10 +17809,6 @@
        "Portal": {
         "meshes": 6,
         "triangles": 4819
-       },
-       "pet": {
-        "meshes": 1,
-        "triangles": 2000
        },
        "NPC": {
         "meshes": 1,
@@ -17878,10 +18080,10 @@
       "duplicates": []
      }
     },
-    "avgTriangles": 133610,
+    "avgTriangles": 132337,
     "triangleSplit": {
-     "total": 133610,
-     "scene": 91787,
+     "total": 132337,
+     "scene": 90514,
      "character": 39955,
      "pet": 1868,
      "perView": {
@@ -17892,16 +18094,16 @@
        "draws": 82
       },
       "spawn": {
-       "total": 148501,
+       "total": 145501,
        "character": 39955,
        "pet": 1868,
        "draws": 84
       },
       "plaza_north": {
-       "total": 142190,
+       "total": 140098,
        "character": 39955,
        "pet": 1868,
-       "draws": 83
+       "draws": 81
       },
       "east": {
        "total": 120030,
@@ -17912,7 +18114,7 @@
      }
     },
     "totalWithCharacter": {
-     "avg": 133610,
+     "avg": 132337,
      "budget": 100000,
      "over": true
     },
@@ -18111,7 +18313,7 @@
       "triggerR": 2.6,
       "log": [
        {
-        "t": 38.978,
+        "t": 38.648,
         "map": "starsprout",
         "x": 5.3884459162483544e-15,
         "z": -42.5
@@ -18125,7 +18327,7 @@
       "triggerR": 2.6,
       "log": [
        {
-        "t": 38.978,
+        "t": 38.648,
         "map": "starsprout",
         "x": 5.3884459162483544e-15,
         "z": -42.5
@@ -18165,7 +18367,7 @@
       "lod": 0,
       "paused": false,
       "blinkTargets": 0,
-      "nextAct": 16.9
+      "nextAct": 21.5
      },
      "far": {
       "anim": "Idle",
@@ -18174,7 +18376,7 @@
       "lod": 1,
       "paused": true,
       "blinkTargets": 0,
-      "nextAct": 16.6
+      "nextAct": 21.2
      }
     },
     "character": {
@@ -18204,12 +18406,12 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -23,
+      "minRawGapCm": -22.7,
       "minGapCm": 2,
-      "corrections": 14,
+      "corrections": 11,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      },
-     "loadMs": 274
+     "loadMs": 284
     },
     "characterActions": {
      "attackButton": "Attack",
@@ -18222,8 +18424,8 @@
     },
     "pet": {
      "still": {
-      "horizontal": 0.36762013539280947,
-      "height": 0.8456281608043119
+      "horizontal": 0.36472728452087827,
+      "height": 0.8554693859389688
      },
      "pet": {
       "id": "bird4",
@@ -18231,9 +18433,9 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -26.3,
+      "minRawGapCm": -26.2,
       "minGapCm": 2,
-      "corrections": 4,
+      "corrections": 3,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      }
     },
@@ -18242,7 +18444,7 @@
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": 0.0564594641327858
+       "y": 0.05823361128568649
       },
       {
        "name": "Portal_fx",
@@ -18252,14 +18454,14 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": -0.022823499515652657
+       "y": 0.004567439667880535
       }
      ],
      "a2": [
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": -0.0029780324548482895
+       "y": -0.039987772703170776
       },
       {
        "name": "Portal_fx",
@@ -18269,7 +18471,7 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": 0.04807646572589874
+       "y": 0.029015786945819855
       }
      ]
     },
@@ -18321,7 +18523,7 @@
      "bad": []
     }
    },
-   "ok": false
+   "ok": true
   },
   {
    "browser": "webkit",
@@ -18461,7 +18663,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 24.5
+        "nextAct": 39.7
        },
        "knight": {
         "anim": "Idle",
@@ -18470,7 +18672,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 30.9
+        "nextAct": 32.6
        },
        "smith": {
         "anim": "Idle",
@@ -18479,7 +18681,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 33.1
+        "nextAct": 24.9
        },
        "mage": {
         "anim": "Idle",
@@ -18488,7 +18690,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 37.3
+        "nextAct": 23.1
        },
        "church": {
         "anim": "Idle",
@@ -18497,7 +18699,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 39.1
+        "nextAct": 33.7
        },
        "circus": {
         "anim": "Idle",
@@ -18506,7 +18708,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 38.8
+        "nextAct": 28.9
        },
        "warehouse": {
         "anim": "Idle",
@@ -18515,7 +18717,7 @@
         "lod": 1,
         "paused": true,
         "blinkTargets": 0,
-        "nextAct": 35.1
+        "nextAct": 32
        },
        "guild": {
         "anim": "Idle",
@@ -18524,7 +18726,7 @@
         "lod": 1,
         "paused": false,
         "blinkTargets": 1,
-        "nextAct": 37.8
+        "nextAct": 23.6
        }
       }
      }
@@ -18560,7 +18762,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 24.5
+       "nextAct": 39.7
       },
       "knight": {
        "model": "npc_knight67_lite",
@@ -18573,7 +18775,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 30.9
+       "nextAct": 32.6
       },
       "smith": {
        "model": "npc_smith67_lite",
@@ -18586,7 +18788,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 33.1
+       "nextAct": 24.9
       },
       "mage": {
        "model": "npc_mage67_lite",
@@ -18599,7 +18801,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 37.3
+       "nextAct": 23.1
       },
       "church": {
        "model": "npc_priest67_lite",
@@ -18612,7 +18814,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 39.1
+       "nextAct": 33.7
       },
       "circus": {
        "model": "npc_clown67_lite",
@@ -18625,7 +18827,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 38.8
+       "nextAct": 28.9
       },
       "warehouse": {
        "model": "npc_warehouse67_lite",
@@ -18638,7 +18840,7 @@
         "Act"
        ],
        "blink": 0,
-       "nextAct": 35.1
+       "nextAct": 32
       },
       "guild": {
        "model": "npc_guild",
@@ -18651,7 +18853,7 @@
         "Turn"
        ],
        "blink": 1,
-       "nextAct": 37.8
+       "nextAct": 23.6
       }
      }
     },
@@ -18668,20 +18870,35 @@
       "guild": 1
      }
     },
-    "Stage 6.7 洛恩巡走：播放 Walk，播放速度跟隨實際移動速度（巡走 0.6 m/s≈1 倍；起步、停下時較慢；範圍 0.25～1.25 倍）": {
-     "ok": false,
+    "Stage 6.7 洛恩巡走：播放 Walk，播放速度跟隨實際移動速度（巡走 0.6 m/s≈1 倍；起步、停下時較慢；穩定步行 0.25～1.25 倍）": {
+     "ok": true,
      "detail": {
-      "x": -4.132983667954016,
-      "z": -9.977897874824405,
-      "yaw": -1.1780969846795057,
-      "walking": true,
-      "station": -1,
-      "bearing": 202.50001492077593,
-      "anim": "Walk",
-      "facing": -1.1780969846795057,
-      "lod": 1,
-      "paused": false,
-      "walkRate": 0.2
+      "start": {
+       "x": -4.137740472639248,
+       "z": -9.975926211689979,
+       "yaw": -1.177620203429506,
+       "walking": true,
+       "station": -1,
+       "bearing": 202.52733247415188,
+       "anim": "Walk",
+       "facing": -1.177620203429506,
+       "lod": 1,
+       "paused": false,
+       "walkRate": 0.2
+      },
+      "steady": {
+       "x": -4.658666195562772,
+       "z": -9.743553216271808,
+       "yaw": -1.1247988700961724,
+       "walking": true,
+       "station": -1,
+       "bearing": 205.55377194240555,
+       "anim": "Walk",
+       "facing": -1.1247988700961724,
+       "lod": 1,
+       "paused": false,
+       "walkRate": 0.7909801366671877
+      }
      }
     },
     "Stage 6.7 洛恩：N009 Tripo 模型（背光補光 0.3）（Idle／Walk／Talk／Turn）＋原本的小寵物；委託佈告欄 N008 模型可點擊": {
@@ -18891,8 +19108,8 @@
     "村莊場景平均每幀三角面 ≤ 100000（不含玩家角色與寵物；含陰影貼圖繪製）": {
      "ok": true,
      "detail": {
-      "total": 101125,
-      "scene": 58876,
+      "total": 101102,
+      "scene": 58853,
       "character": 40381,
       "pet": 1868,
       "perView": {
@@ -18909,10 +19126,10 @@
         "draws": 65
        },
        "plaza_north": {
-        "total": 98478,
+        "total": 98386,
         "character": 40381,
         "pet": 1868,
-        "draws": 71
+        "draws": 70
        },
        "east": {
         "total": 99956,
@@ -18927,17 +19144,17 @@
      "ok": true,
      "detail": [
       "星願物語 Stage 6.4 星芽村 測試報告",
-      "時間 2026/11/27 10:37:28",
+      "時間 2026/11/27 11:21:02",
       "網址參數 ?map=village&art=full&quality=low&g=male",
       "裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15",
-      "模式 Lite 低畫質：畫質 低畫質（來源：網址指定）、模型 Lite／載入 353 ms",
+      "模式 Lite 低畫質：畫質 低畫質（來源：網址指定）、模型 Lite／載入 332 ms",
       "陰影（實際）：柔和腳底陰影（不使用陰影貼圖）｜陰影貼圖 不使用陰影貼圖",
       "解析度（實際）：要求上限 1x、實際 1x、framebuffer 390×844、Hardware Scaling 1、裝置 DPR 2｜動態解析度 未介入（階梯 1x）",
       "抗鋸齒（實際）：MSAA 要求 1x、沒有後製管線、畫布 MSAA 關、裝置上限 8x → 實際生效 1x｜HDR 關、後製管線 關",
       "村莊 V1.3 佔位網格 5、三角形 12648、文字標籤 13；建築 8、NPC 站位 9、出生／復活點 24、傳送門 4（開放 1）",
       "碰撞 圓形 40、矩形 10；鏡頭避障 開",
       "目前畫面 Draw Calls 70、三角形 99956",
-      "全村整合 art=full：loaded，載入 2950 ms"
+      "全村整合 art=full：loaded，載入 2621 ms"
      ]
     },
     "繪製次數 ≤ 100（全村整合、low 畫質、任何位置）": {
@@ -18958,12 +19175,12 @@
        "casters": {
         "active": 0,
         "total": 0,
-        "triangles": 62264
+        "triangles": 59264
        }
       },
       "plaza_north": {
-       "drawCalls": 71,
-       "triangles": 98478,
+       "drawCalls": 70,
+       "triangles": 98386,
        "casters": {
         "active": 0,
         "total": 0,
@@ -18984,10 +19201,10 @@
     "移動規則：一般行走走上石階到高台（不跳躍）": {
      "ok": true,
      "detail": {
-      "x": -5.967091528845477e-16,
+      "x": -5.507848979165221e-16,
       "y": 2,
-      "z": 24.74499999999999,
-      "yaw": -6.123233995728119e-17
+      "z": 23.99500000000005,
+      "yaw": -6.12323399566616e-17
      }
     },
     "NPC 互動：9 個互動點都能靠近後按下（NPC 對話：名稱、職責；佈告欄：委託介面）": {
@@ -19290,7 +19507,7 @@
        "triggerR": 2.6,
        "log": [
         {
-         "t": 34.511,
+         "t": 35.057,
          "map": "starsprout",
          "x": 5.3884459162483544e-15,
          "z": -42.5
@@ -19304,7 +19521,7 @@
        "triggerR": 2.6,
        "log": [
         {
-         "t": 34.511,
+         "t": 35.057,
          "map": "starsprout",
          "x": 5.3884459162483544e-15,
          "z": -42.5
@@ -19406,13 +19623,13 @@
      "ok": true,
      "detail": {
       "near": {
-       "anim": "Idle",
+       "anim": "Act",
        "facing": -2.6878070480712677,
        "home": -2.6878070480712677,
        "lod": 0,
        "paused": false,
        "blinkTargets": 0,
-       "nextAct": 0.1
+       "nextAct": 24.7
       },
       "far": {
        "anim": "Idle",
@@ -19421,7 +19638,7 @@
        "lod": 1,
        "paused": true,
        "blinkTargets": 0,
-       "nextAct": 25
+       "nextAct": 24.4
       }
      }
     },
@@ -19461,8 +19678,8 @@
      "detail": {
       "run": [
        "Run",
-       5.000000000000011,
-       2.2123893805309782
+       5.000000000000057,
+       2.2123893805309987
       ],
       "idle": "Idle"
      }
@@ -19494,8 +19711,8 @@
     "寵物在角色耳朵旁（停著時水平距離 0.15～0.6 m、高度在頭部附近 0.6～1.3 m）": {
      "ok": true,
      "detail": {
-      "earDist": 0.36288149293051647,
-      "earUp": 0.8329442732335207
+      "earDist": 0.36447609572474887,
+      "earUp": 0.8210879935011968
      }
     },
     "寵物不貼住、不穿透角色：跑步與快速轉身後，與頭部／身體的最小間距 ≥ 2 cm（含 B 端間距保護）": {
@@ -19506,9 +19723,9 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -24.1,
+      "minRawGapCm": -27.8,
       "minGapCm": 2,
-      "corrections": 4,
+      "corrections": 5,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      }
     },
@@ -19517,7 +19734,7 @@
      "detail": [
       "  寵物商人洛恩：網格 1、三角形 5000",
       "玩家角色：Claude A 正式初心者 C1.0-B5b（c10b5b）｜novice_c10b5b_male_lite.glb（男、Lite）｜三角面 40381、網格 27（可繪製 26、骨架網格 26）、骨骼 17｜動作 Attack／Death／Hurt／Idle／Jump／Run｜陰影 柔和腳底陰影（A 預設）｜本幀 Draw Calls：主畫面 26、陰影貼圖 0｜來源 Claude A feature/render-stage7-world@1c858d10／art-novice-c10b5b（唯讀，未修改）",
-      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 2 cm（修正前 -24.1 cm，間距保護修正 4 次）"
+      "寵物：鳥・完成體（A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供））｜高度 0.22 m、三角面 1868、網格 6｜本幀 Draw Calls：主畫面 6｜與角色頭部／身體最小間距 2 cm（修正前 -27.8 cm，間距保護修正 5 次）"
      ]
     },
     "星願之泉星晶動畫（旋轉＋上下浮動）持續播放": {
@@ -19527,7 +19744,7 @@
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": 0.059865523129701614
+        "y": 0.05986107140779495
        },
        {
         "name": "Portal_fx",
@@ -19537,14 +19754,14 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": -0.047608159482479095
+        "y": -0.04536333307623863
        }
       ],
       "a2": [
        {
         "name": "WishFountain_crystal",
         "ry": 0,
-        "y": -0.019450504332780838
+        "y": -0.012650716118514538
        },
        {
         "name": "Portal_fx",
@@ -19554,7 +19771,7 @@
        {
         "name": "Portal_rune",
         "ry": 0,
-        "y": 0.04375062510371208
+        "y": 0.043400030583143234
        }
       ]
      }
@@ -19638,7 +19855,7 @@
     "art": {
      "on": true,
      "status": "loaded",
-     "loadMs": 2950,
+     "loadMs": 2621,
      "parts": {
       "環境": {
        "meshes": 2,
@@ -19856,17 +20073,32 @@
      }
     },
     "merchantWalk": {
-     "x": -4.132983667954016,
-     "z": -9.977897874824405,
-     "yaw": -1.1780969846795057,
-     "walking": true,
-     "station": -1,
-     "bearing": 202.50001492077593,
-     "anim": "Walk",
-     "facing": -1.1780969846795057,
-     "lod": 1,
-     "paused": false,
-     "walkRate": 0.2
+     "start": {
+      "x": -4.137740472639248,
+      "z": -9.975926211689979,
+      "yaw": -1.177620203429506,
+      "walking": true,
+      "station": -1,
+      "bearing": 202.52733247415188,
+      "anim": "Walk",
+      "facing": -1.177620203429506,
+      "lod": 1,
+      "paused": false,
+      "walkRate": 0.2
+     },
+     "steady": {
+      "x": -4.658666195562772,
+      "z": -9.743553216271808,
+      "yaw": -1.1247988700961724,
+      "walking": true,
+      "station": -1,
+      "bearing": 205.55377194240555,
+      "anim": "Walk",
+      "facing": -1.1247988700961724,
+      "lod": 1,
+      "paused": false,
+      "walkRate": 0.7909801366671877
+     }
     },
     "perf": {
      "arrival": {
@@ -19884,12 +20116,12 @@
       "casters": {
        "active": 0,
        "total": 0,
-       "triangles": 62264
+       "triangles": 59264
       }
      },
      "plaza_north": {
-      "drawCalls": 71,
-      "triangles": 98478,
+      "drawCalls": 70,
+      "triangles": 98386,
       "casters": {
        "active": 0,
        "total": 0,
@@ -20072,8 +20304,8 @@
       }
      },
      "plaza_north": {
-      "activeMeshes": 88,
-      "activeTriangles": 98478,
+      "activeMeshes": 87,
+      "activeTriangles": 98386,
       "groups": {
        "Grey-box/系統 PH_skyDome": {
         "meshes": 1,
@@ -20120,8 +20352,8 @@
         "triangles": 1868
        },
        "WishFountain": {
-        "meshes": 7,
-        "triangles": 10460
+        "meshes": 6,
+        "triangles": 10368
        },
        "Platform": {
         "meshes": 3,
@@ -20420,10 +20652,10 @@
       "duplicates": []
      }
     },
-    "avgTriangles": 101125,
+    "avgTriangles": 101102,
     "triangleSplit": {
-     "total": 101125,
-     "scene": 58876,
+     "total": 101102,
+     "scene": 58853,
      "character": 40381,
      "pet": 1868,
      "perView": {
@@ -20440,10 +20672,10 @@
        "draws": 65
       },
       "plaza_north": {
-       "total": 98478,
+       "total": 98386,
        "character": 40381,
        "pet": 1868,
-       "draws": 71
+       "draws": 70
       },
       "east": {
        "total": 99956,
@@ -20454,7 +20686,7 @@
      }
     },
     "totalWithCharacter": {
-     "avg": 101125,
+     "avg": 101102,
      "budget": 100000,
      "over": true
     },
@@ -20653,7 +20885,7 @@
       "triggerR": 2.6,
       "log": [
        {
-        "t": 34.511,
+        "t": 35.057,
         "map": "starsprout",
         "x": 5.3884459162483544e-15,
         "z": -42.5
@@ -20667,7 +20899,7 @@
       "triggerR": 2.6,
       "log": [
        {
-        "t": 34.511,
+        "t": 35.057,
         "map": "starsprout",
         "x": 5.3884459162483544e-15,
         "z": -42.5
@@ -20701,13 +20933,13 @@
     "fpsSoftware": 69,
     "lod": {
      "near": {
-      "anim": "Idle",
+      "anim": "Act",
       "facing": -2.6878070480712677,
       "home": -2.6878070480712677,
       "lod": 0,
       "paused": false,
       "blinkTargets": 0,
-      "nextAct": 0.1
+      "nextAct": 24.7
      },
      "far": {
       "anim": "Idle",
@@ -20716,7 +20948,7 @@
       "lod": 1,
       "paused": true,
       "blinkTargets": 0,
-      "nextAct": 25
+      "nextAct": 24.4
      }
     },
     "character": {
@@ -20746,12 +20978,12 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -20.7,
+      "minRawGapCm": -22.1,
       "minGapCm": 2,
-      "corrections": 11,
+      "corrections": 7,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      },
-     "loadMs": 788
+     "loadMs": 630
     },
     "characterActions": {
      "attackButton": "Attack",
@@ -20764,8 +20996,8 @@
     },
     "pet": {
      "still": {
-      "horizontal": 0.36288149293051647,
-      "height": 0.8329442732335207
+      "horizontal": 0.36447609572474887,
+      "height": 0.8210879935011968
      },
      "pet": {
       "id": "bird4",
@@ -20773,9 +21005,9 @@
       "size": 0.22,
       "triangles": 1868,
       "meshes": 6,
-      "minRawGapCm": -24.1,
+      "minRawGapCm": -27.8,
       "minGapCm": 2,
-      "corrections": 4,
+      "corrections": 5,
       "model": "A 的 PetFollower 程式預留外觀（正式寵物模型尚未提供）"
      }
     },
@@ -20784,7 +21016,7 @@
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": 0.059865523129701614
+       "y": 0.05986107140779495
       },
       {
        "name": "Portal_fx",
@@ -20794,14 +21026,14 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": -0.047608159482479095
+       "y": -0.04536333307623863
       }
      ],
      "a2": [
       {
        "name": "WishFountain_crystal",
        "ry": 0,
-       "y": -0.019450504332780838
+       "y": -0.012650716118514538
       },
       {
        "name": "Portal_fx",
@@ -20811,7 +21043,7 @@
       {
        "name": "Portal_rune",
        "ry": 0,
-       "y": 0.04375062510371208
+       "y": 0.043400030583143234
       }
      ]
     },
@@ -20863,8 +21095,8 @@
      "bad": []
     }
    },
-   "ok": false
+   "ok": true
   }
  ],
- "finishedAt": "2026-11-27T10:38:17.851Z"
+ "finishedAt": "2026-11-27T11:21:48.780Z"
 }
