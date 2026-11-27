@@ -3,7 +3,7 @@
  * - 時間 t 是「動作片段時間」（秒，播放倍率 1）；實際秒數 = t / rate
  * - rate：受攻速影響的技能用 attackPlaybackRate(攻速)，攻速上限 160 → 最快 1.6 倍
  * - 打擊頓幀：hitstop(ms) 期間時鐘停住（動作、拖尾、後續事件都一起停），不影響已經飛出去的投射物
- * - 每個事件只觸發一次；一次 advance 跨過多個事件時依時間順序全部觸發
+ * - 每個事件只觸發一次；一次 advance 跨過多個事件時依時間順序觸發，但遇到命中事件時時鐘停在命中時間（命中那一格一定畫出命中姿勢）
  */
 import type { At, SkillDef, SkillEvent } from "./skills.ts";
 
@@ -91,6 +91,15 @@ export class SkillTimeline {
     for (let e = this.queue[this.nextIdx]; e && e.t <= this.t + 1e-9; e = this.queue[this.nextIdx]) {
       out.push(e);
       this.nextIdx++;
+      // 命中格對齊：時鐘停在命中時間（這一格畫出的就是命中姿勢），同一時間的其他事件一起觸發，之後的留到下一格
+      if (e.event.kind === "hit") {
+        this.t = e.t;
+        for (let n = this.queue[this.nextIdx]; n && Math.abs(n.t - e.t) < 1e-9; n = this.queue[this.nextIdx]) {
+          out.push(n);
+          this.nextIdx++;
+        }
+        break;
+      }
     }
     if (this.t >= this.clip.duration - 1e-9) this.done = true;
     return out;

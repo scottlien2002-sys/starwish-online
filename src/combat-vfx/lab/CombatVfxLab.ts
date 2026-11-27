@@ -192,9 +192,9 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
   }
 
   // ---------------------------------------------------------------- 鏡頭
-  const cam = new ArcRotateCamera("cam", -Math.PI / 2 - 0.35, 1.08, 8.5, new Vector3(0, 0.8, 0), scene);
+  const cam = new ArcRotateCamera("cam", -Math.PI / 2 - 0.45, 1.12, 6.2, new Vector3(0, 0.8, 0), scene);
   cam.attachControl(canvas, true);
-  cam.lowerRadiusLimit = 3.5;
+  cam.lowerRadiusLimit = 3;
   cam.upperRadiusLimit = 16;
   cam.lowerBetaLimit = 0.45;
   cam.upperBetaLimit = 1.42;
@@ -474,12 +474,16 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
   const updateCaster = (c: Caster, dt: number, moveDir: Vector3 | null): void => {
     const tl = c.tl;
     if (tl) {
-      for (const f of tl.advance(dt)) runEvent(c, f.event, f.t, f.end);
+      // 先把動作與根運動推到這一格，再處理事件：命中那一格的姿勢、特效位置、傷害數字一致
+      const fired = tl.advance(dt);
       c.av.setSkillTime(tl.t);
       const rm = tl.rootMotion();
       const f = facing(c.yaw0);
       c.pos.copyFrom(c.start).addInPlace(f.scale(rm.forward));
       c.av.yaw = c.yaw0 - rm.yaw;
+      c.av.root.rotation.y = c.av.yaw;
+      c.av.root.computeWorldMatrix(true);
+      for (const e of fired) runEvent(c, e.event, e.t, e.end);
       if (c.activeTrailEnd >= 0 && tl.t >= c.activeTrailEnd) {
         c.trail.stop();
         c.activeTrailEnd = -1;
@@ -688,11 +692,13 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
     const worst = arr.slice(0, k);
     const avgMs = n ? arr.reduce((a, b) => a + b, 0) / n : 0;
     const lowMs = worst.length ? worst.reduce((a, b) => a + b, 0) / worst.length : 0;
-    return { fps: fpsShown, avg10s: avgMs ? 1000 / avgMs : 0, low1: lowMs ? 1000 / lowMs : 0, draws: instr.drawCallsCounter.current, frames: n };
+    return { fps: fpsShown, avg10s: avgMs ? 1000 / avgMs : 0, low1: lowMs ? 1000 / lowMs : 0, draws: Math.round(instr.drawCallsCounter.lastSecAverage || instr.drawCallsCounter.current), frames: n };
   };
 
-  scene.onBeforeRenderObservable.add(() => {
-    const raw = engine.getDeltaTime() / 1000;
+  // &manual=1：固定步長（自動測試用；CI 沒有 GPU，用 1/60 秒一步算出真正 60 fps 的畫面序列）
+  const manual = qs.get("manual") === "1";
+  if (manual) scene.useConstantAnimationDeltaTime = true;
+  const frame = (raw: number): void => {
     const dt = Math.min(0.05, raw);
     realTime += dt;
     frameNo++;
@@ -774,9 +780,11 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
     );
     hud.setSkills(SKILLS.map((s) => Math.max(0, (player.cds.get(s.id) ?? 0) - realTime)), player.skill?.id ?? null);
     hud.setTarget(target ? `${target.label}　HP ${Math.ceil(target.hp)} / ${target.maxHp}` : "目標：無（自動選最近的怪物）", target ? target.hp / target.maxHp : 0);
-  });
-
-  engine.runRenderLoop(() => scene.render());
+  };
+  if (!manual) {
+    scene.onBeforeRenderObservable.add(() => frame(engine.getDeltaTime() / 1000));
+    engine.runRenderLoop(() => scene.render());
+  } else scene.render();
   window.addEventListener("resize", () => engine.resize());
 
   // 自動測試用介面
@@ -815,6 +823,17 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
     moveTo: (x: number, z: number) => {
       player.pos.set(x, 0, z);
     },
+    /** 固定步長前進 sec 秒（每步 1/60 秒並繪製一次；只在 &manual=1） */
+    advance: (sec: number) => {
+      const n = Math.max(1, Math.round(sec * 60));
+      for (let i = 0; i < n; i++) {
+        frame(1 / 60);
+        scene.render();
+      }
+      return realTime;
+    },
+    time: () => realTime,
+    manual,
     nearest: () => {
       const t = nearestTarget(player);
       return t ? { label: t.label, d: Vector3.Distance(t.pos, player.pos) - t.radius } : null;

@@ -63,7 +63,8 @@ test("時間軸：命中事件只觸發一次、依序觸發，攻速 160 時命
     }
     assert.deepEqual(fired.map((f) => f.id), ["s1", "s2", "s3"]);
     const want = tl.hitTimesReal();
-    for (let i = 0; i < 3; i++) assert.ok(Math.abs(fired[i].real - want[i].t) <= 1 / 60 + 1e-9, `${aspd}: ${fired[i].real} vs ${want[i].t}`);
+    // 命中格對齊：每次命中最多讓後面的事件晚 1 格（像極短的頓幀）
+    for (let i = 0; i < 3; i++) assert.ok(fired[i].real - want[i].t >= -1e-9 && fired[i].real - want[i].t <= (i + 1) / 60 + 1e-9, `${aspd}: ${fired[i].real} vs ${want[i].t}`);
     assert.ok(Math.abs(tl.realDuration - 1.45 / rate) < 1e-9);
   }
 });

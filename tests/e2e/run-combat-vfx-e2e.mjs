@@ -27,7 +27,11 @@ for (const name of browsers) {
     { id: "male-medium", url: "?lab=combat&q=medium&g=male&mute=1" },
     { id: "female-high", url: "?lab=combat&q=high&g=female&mute=1" },
     { id: "low-multi8", url: "?lab=combat&q=low&g=male&mute=1&multi=8" },
+    // 固定步長：每 1/30 秒截一張，得到真正 30 fps 的展示畫面序列（CI 沒 GPU，即時播放只有 3～5 FPS 看不出特效）
+    { id: "showcase", url: "?lab=combat&q=high&g=male&mute=1&manual=1" },
+    { id: "showcase-f", url: "?lab=combat&q=high&g=female&mute=1&manual=1" },
   ]) {
+    if (tcase.id.startsWith("showcase") && (remote || name !== "chromium")) continue;
     if (onlyCases.length && !onlyCases.includes(tcase.id)) continue;
     if (!onlyCases.length && name === "webkit" && tcase.id === "female-high") continue; // WebKit 跑兩組即可（時間）
     const run = { browser: name, case: tcase.id, checks: {}, errors: [], results: {} };
@@ -52,7 +56,42 @@ for (const name of browsers) {
       check("載入：初心者 C1.0-B5b（非 Tripo 組裝）", st.triangles > 5000, { triangles: st.triangles, gender: st.gender });
       await shot("00_loaded");
 
-      if (tcase.id !== "low-multi8") {
+      if (tcase.id.startsWith("showcase")) {
+        const dir = `${outDir}${tcase.id}/`;
+        mkdirSync(dir, { recursive: true });
+        const list = tcase.id === "showcase" ? SKILLS : ["triple_slash", "whirlwind", "charge_burst"];
+        let fi = 0;
+        const frameShot = () => page.screenshot({ path: `${dir}f${String(fi++).padStart(4, "0")}.jpg`, type: "jpeg", quality: 82 });
+        const seq = [];
+        for (const sk of list) {
+          await page.evaluate(() => {
+            const s = window.__cvfx.stats();
+            const m = s.monsters.find((x) => x.state === "idle") ?? s.monsters[0];
+            const dx = -m.pos[0], dz = -m.pos[1];
+            const L = Math.hypot(dx, dz) || 1;
+            window.__cvfx.moveTo(m.pos[0] + (dx / L) * 1.6, m.pos[1] + (dz / L) * 1.6);
+          });
+          await page.evaluate(() => window.__cvfx.advance(0.5));
+          const n0 = await page.evaluate(() => window.__cvfx.sync.length);
+          const ok = await page.evaluate((id) => window.__cvfx.cast(id), sk);
+          const start = fi;
+          for (let k = 0; k < 150; k++) {
+            await page.evaluate(() => window.__cvfx.advance(1 / 30));
+            await frameShot();
+            const busy = await page.evaluate(() => window.__cvfx.busy());
+            if (!busy && k > 20) break;
+          }
+          for (let k = 0; k < 18; k++) {
+            await page.evaluate(() => window.__cvfx.advance(1 / 30));
+            await frameShot();
+          }
+          const recs = await page.evaluate((n) => window.__cvfx.sync.slice(n), n0);
+          seq.push({ skill: sk, cast: ok, frames: [start, fi - 1], hits: recs.length });
+          check(`展示 ${sk}：固定步長下命中結算`, ok && recs.length > 0, recs.length);
+          check(`展示 ${sk}：固定步長下命中格動作時間＝時間軸`, recs.every((r) => r.kind === "projectile" || Math.abs(r.animT - r.clipT) <= 1 / 60 + 0.002), recs.map((r) => [r.hit, r.clipT, r.animT]));
+        }
+        run.results.showcase = seq;
+      } else if (tcase.id !== "low-multi8") {
         // 逐一施放 6 個技能
         for (const [i, sk] of SKILLS.entries()) {
           const n0 = await page.evaluate(() => window.__cvfx.sync.length);
@@ -126,7 +165,22 @@ for (const name of browsers) {
         await shot("multi8");
         check("多人模擬：8 位其他玩家同時施放", st.ghosts === 8, st.ghosts);
         check("多人預算：同時特效不超過上限、其他玩家的特效被限制", st.budget.active <= 18 + 2 && st.budget.denied > 0, st.budget);
-        check("多人：自己的技能仍然有命中結算與傷害數字", st.damageShown > 0, st.damageShown);
+        // CI 軟體繪圖下 FPS 很低，改成：關掉自動示範後自己站到怪物前施放一次，等它命中
+        await page.evaluate(() => window.__cvfx.setAuto(false));
+        await page.waitForFunction(() => !window.__cvfx.busy(), null, { timeout: 60000 }).catch(() => {});
+        const nm = await page.evaluate(() => window.__cvfx.sync.length);
+        await page.evaluate(() => {
+          const s = window.__cvfx.stats();
+          const m = s.monsters.find((x) => x.state === "idle") ?? s.monsters[0];
+          const dx = -m.pos[0], dz = -m.pos[1];
+          const L = Math.hypot(dx, dz) || 1;
+          window.__cvfx.moveTo(m.pos[0] + (dx / L) * 1.6, m.pos[1] + (dz / L) * 1.6);
+        });
+        await sleep(500);
+        await page.evaluate(() => window.__cvfx.cast("triple_slash"));
+        await page.waitForFunction((n) => window.__cvfx.sync.length > n, nm, { timeout: 90000 }).catch(() => {});
+        const recsM = await page.evaluate((n) => window.__cvfx.sync.slice(n), nm);
+        check("多人：自己的技能仍然有命中結算與傷害數字", recsM.length > 0 && recsM.every((r) => r.shownSameFrame), recsM.map((r) => ({ hit: r.hit, targets: r.targets, same: r.shownSameFrame })));
       }
       st = await page.evaluate(() => window.__cvfx.stats());
       const errs = await page.evaluate(() => window.__cvfx.errors);

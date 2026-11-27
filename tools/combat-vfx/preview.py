@@ -1,6 +1,6 @@
 """Render novice skill poses (python LBS + starwish_rig rasteriser) with a placeholder sword/staff line."""
-import sys, io, json, numpy as np
-sys.path.insert(0, '/home/claude/m004')
+import os, sys, io, json, numpy as np
+sys.path.insert(0, os.environ.get('STARWISH_RIG', '/home/claude/m004'))  # starwish_rig（Claude C 的骨架工具；只有預覽圖需要）
 from PIL import Image
 from starwish_rig.raster import render, grid
 from glbio import load, acc, Skel, qrot, qmul
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     ts = [float(x) for x in sys.argv[4].split(',')]
     views = [tuple(map(float, v.split(','))) for v in (sys.argv[5] if len(sys.argv) > 5 else '0.7,0.25,0.7;-1,0.1,0;0,0.2,1').split(';')]
     S = [s for s in NS.SKILLS if s['name'] == clipname][0]
-    m = Model(f'/home/claude/starwish-online/public/models/novice_c10b5b_{g}_lite.glb'); rig = NS.Rig(m.sk)
+    m = Model(os.path.join(MODELS, f'novice_c10b5b_{g}_lite.glb')); rig = NS.Rig(m.sk)
     wdir = np.array(json.loads(sys.argv[6])) if len(sys.argv) > 6 else None
     ims = []; labs = []
     for t in ts:

@@ -5,6 +5,7 @@ root-motion curve applied to the player node, so the clip itself never drifts.
 Baked per gender at 30 fps to local joint quaternions + hips translation, with named timing marks.
 usage: python3 novice_skills.py <out_dir>"""
 import json, sys, os
+MODELS = os.environ.get('NOVICE_MODELS', os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'public', 'models'))
 import numpy as np
 from glbio import Skel, qmul, qinv, qrot, qaxis, norm
 
@@ -261,7 +262,7 @@ def check(sk, S):
 if __name__ == '__main__':
     out = sys.argv[1]; os.makedirs(out, exist_ok=True)
     for g in ('male', 'female'):
-        sk = Skel(f'/home/claude/starwish-online/public/models/novice_c10b5b_{g}_lite.glb')
+        sk = Skel(os.path.join(MODELS, f'novice_c10b5b_{g}_lite.glb'))
         WR, WT = sk.fk(); k = sk.id['hand.R']
         D = np.array([-0.1, 0.25, 0.96]); D /= np.linalg.norm(D); E = Y - D * np.dot(Y, D); E /= np.linalg.norm(E)
         attach = dict(bone='hand.R', bladeDir=np.round(qrot(qinv(WR[k]), D), 4).tolist(), edgeUp=np.round(qrot(qinv(WR[k]), E), 4).tolist())
