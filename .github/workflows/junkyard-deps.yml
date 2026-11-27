@@ -15,7 +15,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm ci --ignore-scripts
+      - run: npm install --no-audit --no-fund --ignore-scripts
       - name: Pack type definitions only
         run: |
           mkdir -p /tmp/pack
