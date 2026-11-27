@@ -63,7 +63,11 @@ jobs:
         id: e2e
         if: steps.build.outcome == 'success'
         continue-on-error: true
-        run: node tests/e2e/run-combat-vfx-e2e.mjs dist chromium,webkit 2>&1 | tee test-results/combat-vfx/e2e.txt; exit ${PIPESTATUS[0]}
+        env:
+          # 除錯用：commit 訊息含 [perf-only] 時只跑效能案例（Chromium）
+          CVFX_CASES: ${{ contains(github.event.head_commit.message, '[perf-only]') && 'perf' || '' }}
+          CVFX_PERF_MODES: ${{ contains(github.event.head_commit.message, '[perf-only]') && 'stage3,stage3vis' || '' }}
+        run: node tests/e2e/run-combat-vfx-e2e.mjs dist ${{ contains(github.event.head_commit.message, '[perf-only]') && 'chromium' || 'chromium,webkit' }} 2>&1 | tee test-results/combat-vfx/e2e.txt; exit ${PIPESTATUS[0]}
 
       - name: Deploy preview (own folder only)
         id: deploy

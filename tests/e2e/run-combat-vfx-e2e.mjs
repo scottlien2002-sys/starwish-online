@@ -187,9 +187,12 @@ for (const name of browsers) {
         //   stage3＝合併模型＋遠距離減面版；stage2＝合併模型（不切遠距離）；legacy＝Stage 1 做法（lite 模型）
         //   static＝大家站著不放技能（只比模型）；active＝依序輪流放技能（含特效）
         const matrix = [];
-        for (const mode of ["stage3", "stage2", "legacy"]) {
+        const lodDebug = [];
+        const MODES = process.env.CVFX_PERF_MODES ? process.env.CVFX_PERF_MODES.split(",") : ["stage3", "stage2", "legacy"];
+        for (const mode of MODES) {
           if (mode !== "stage3") {
-            await page.goto(`${server.url}/?lab=combat&q=medium&g=male&mute=1&perf=${mode}`, { waitUntil: "load" });
+            const q = mode === "stage3vis" ? "lodMode=visible" : `perf=${mode}`;
+            await page.goto(`${server.url}/?lab=combat&q=medium&g=male&mute=1&${q}`, { waitUntil: "load" });
             await page.waitForFunction(() => window.__cvfx?.ready === true, null, { timeout: 300000 });
           }
           for (const n of [4, 8, 16, 32]) {
@@ -197,6 +200,7 @@ for (const name of browsers) {
             await sleep(3500);
             const st = await page.evaluate(() => window.__cvfx.perfSnapshot());
             matrix.push({ mode, players: n, phase: "static", scene: scn, ...st });
+            if (mode.startsWith("stage3") && n === 8) lodDebug.push({ mode, dbg: await page.evaluate(() => window.__cvfx.lodDebug()) });
             await shot(`perf_${mode}_${n}_static`);
             await page.evaluate((k) => window.__cvfx.perfScene(k, true), n);
             await sleep(9000);
@@ -207,6 +211,7 @@ for (const name of browsers) {
           await page.evaluate(() => window.__cvfx.perfSceneEnd());
         }
         run.results.perfMatrix = matrix;
+        run.results.lodDebug = lodDebug;
         const get = (mode, n, ph = "static") => matrix.find((m) => m.mode === mode && m.players === n && m.phase === ph);
         const s3 = get("stage3", 32), s2 = get("stage2", 32), l32 = get("legacy", 32);
         check("效能：比較條件一致（同人數時三種做法的可見人數相同）", [4, 8, 16, 32].every((n) => new Set(["stage3", "stage2", "legacy"].map((m) => get(m, n)?.visiblePlayers)).size === 1), Object.fromEntries([4, 8, 16, 32].map((n) => [n, ["stage3", "stage2", "legacy"].map((m) => get(m, n)?.visiblePlayers)])));

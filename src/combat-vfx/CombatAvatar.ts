@@ -192,11 +192,22 @@ export class CombatAvatar {
   setFar(on: boolean): boolean {
     if (!this.farMeshes.length || on === this.far) return false;
     this.far = on;
-    for (const m of this.nearMeshes) m.setEnabled(!on);
-    for (const m of this.farMeshes) m.setEnabled(on);
+    if (CombatAvatar.lodToggle === "visible") {
+      for (const m of this.nearMeshes) m.isVisible = !on;
+      for (const m of this.farMeshes) {
+        m.setEnabled(true);
+        m.isVisible = on;
+      }
+    } else {
+      for (const m of this.nearMeshes) m.setEnabled(!on);
+      for (const m of this.farMeshes) m.setEnabled(on);
+    }
     this.triangles = on ? this.farTriangles : this.nearTriangles;
     return true;
   }
+
+  /** 遠近切換方式（除錯用）：enable＝setEnabled；visible＝isVisible */
+  static lodToggle: "enable" | "visible" = "enable";
 
   static async create(scene: Scene, baseUrl: string, g: Gender, lod: Lod): Promise<CombatAvatar> {
     const [c, a] = await Promise.all([loadNoviceContainer(scene, baseUrl, g, lod), loadCombatAnims(baseUrl, g)]);

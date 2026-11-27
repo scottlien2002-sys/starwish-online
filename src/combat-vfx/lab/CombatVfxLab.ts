@@ -119,6 +119,7 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
   /** 遠距離版切換距離（鏡頭到角色，公尺；有緩衝避免來回閃） */
   const LOD_FAR_M = Number(qs.get("lodFar") ?? "14") || 14;
   const LOD_NEAR_M = LOD_FAR_M - 1;
+  if (qs.get("lodMode") === "visible") CombatAvatar.lodToggle = "visible";
   let monAI = qs.get("ai") !== "0";
 
   const engine = new Engine(canvas, true, { stencil: true, adaptToDeviceRatio: false, antialias: true, powerPreference: "high-performance" });
@@ -907,7 +908,7 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
   const lodCounts = () => {
     let visible = 0, near = 0, far = 0, ghostTris = 0;
     for (const g of ghosts) {
-      const m = g.av.meshes.find((x) => x.isEnabled() && !x.name.startsWith("face"));
+      const m = g.av.meshes.find((x) => x.isEnabled() && x.isVisible && !x.name.startsWith("face"));
       if (m && cam.isInFrustum(m)) visible++;
       if (g.av.far) far++;
       else near++;
@@ -1246,6 +1247,26 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
     perfScene,
     perfMode,
     /** 測試：結束固定效能場景，回到一般模式 */
+    /** 除錯：第一位遠距離其他玩家的網格狀態 */
+    lodDebug: () => {
+      const g = ghosts.find((x) => x.av.far) ?? ghosts[0];
+      if (!g) return null;
+      return {
+        toggle: CombatAvatar.lodToggle,
+        far: g.av.far,
+        meshes: g.av.meshes.map((m) => {
+          const bb = m.getBoundingInfo().boundingBox;
+          return {
+            name: m.name, enabled: m.isEnabled(), visible: m.isVisible, ready: m.isReady(), verts: m.getTotalVertices(), indices: m.getTotalIndices(),
+            subMeshes: m.subMeshes?.map((sm) => [sm.verticesStart, sm.verticesCount, sm.indexStart, sm.indexCount]),
+            inFrustum: cam.isInFrustum(m), active: scene.getActiveMeshes().data.includes(m),
+            bbMin: bb.minimumWorld.asArray().map((v) => +v.toFixed(2)), bbMax: bb.maximumWorld.asArray().map((v) => +v.toFixed(2)),
+            abs: m.getAbsolutePosition().asArray().map((v) => +v.toFixed(2)), parent: m.parent?.name ?? null,
+            skeleton: m.skeleton?.name ?? null, material: m.material?.name ?? null, visibility: m.visibility,
+          };
+        }),
+      };
+    },
     perfSceneEnd: async () => {
       perfFixed = false;
       perfCast = false;
