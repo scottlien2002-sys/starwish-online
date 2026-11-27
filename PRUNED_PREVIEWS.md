@@ -44,3 +44,5 @@
 - 2026-11-27：移除 /preview-village-char65/（使用者核准：B 只留最新及必要驗收版本；保留 npc67、art66；原始碼分支保留）
 
 - 2026-11-27：移除 /preview-village-final64/（使用者核准：B 只留最新及必要驗收版本；保留 npc67、art66；原始碼分支保留）
+
+- 2026-11-27：/preview-stage72-world/ 精簡為其他預覽仍引用的檔案（Stage 7.3 取代；原始碼 backup/stage72-world-final）

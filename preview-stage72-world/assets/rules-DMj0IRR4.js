@@ -1,1 +1,0 @@
-var e=Object.freeze({manualCombatOnly:!0,maxLevel:20,maxAttackSpeed:160,equipmentTierLevelStep:5,equipmentTierLevels:Object.freeze([5,10,15,20]),equipmentHasRarity:!1,maxAffixesPerEquipment:1,minEnhanceLevel:0,maxEnhanceLevel:10,separateEquipmentRecords:!0});function t(t){return Number.isFinite(t)?Math.max(0,Math.min(e.maxAttackSpeed,t)):0}export{t as n,e as t};
