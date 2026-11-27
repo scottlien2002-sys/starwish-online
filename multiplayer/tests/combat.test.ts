@@ -332,12 +332,13 @@ test("戰鬥中斷線重連：怪物血量、角色血量／經驗保留；重�
     const cb = room(srv, a).combat!;
     const nid = 8;
     placeNear(srv, a, nid, 1.0);
+    const resolved0 = cb.counters.hitsResolved;
     assert.equal((await cmd(a, "atk", { t: nid })).ok, true);
-    a.c.dropConnection(); // 命中前斷線：伺服器照樣在命中時間結算
+    a.c.dropConnection(); // 命中前斷線：伺服器照樣在命中時間結算（命中或揮空都算結算；測試設定命中率 95%）
     await sleep(500);
     const inst = cb.monster(nid)!.ctl.instance;
     const hpAfter = inst.currentHp;
-    assert.ok(hpAfter < inst.definition.maxHp, "斷線時已送出的攻擊照常結算");
+    assert.equal(cb.counters.hitsResolved, resolved0 + 1, "斷線時已送出的攻擊照常結算");
     const me = sp(srv, a);
     const keep = { hp: me.cs.hp, exp: me.cs.exp, level: me.cs.level, gold: me.cs.gold };
     await a.until(() => a.c.state === "online", 8000, "reconnected");
@@ -345,10 +346,14 @@ test("戰鬥中斷線重連：怪物血量、角色血量／經驗保留；重�
     await untilT(() => a.c.self?.hp === keep.hp, 2000, "self stats resynced");
     assert.equal(sp(srv, a), me, "同一個伺服器角色");
     assert.deepEqual({ hp: me.cs.hp, exp: me.cs.exp, level: me.cs.level, gold: me.cs.gold }, keep);
-    await sleep(Math.ceil(cb.tuning(me).attackInterval * 1000));
-    placeNear(srv, a, nid, 1.0);
-    const again = await cmd(a, "atk", { t: nid });
-    assert.equal(again.ok, true, String(again.err));
+    // 重連後繼續攻擊（遇到 5% 揮空就再打一次）
+    for (let k = 0; k < 6 && inst.currentHp >= hpAfter; k++) {
+      await sleep(Math.ceil(cb.tuning(me).attackInterval * 1000) + 20);
+      placeNear(srv, a, nid, 1.0);
+      const again = await cmd(a, "atk", { t: nid });
+      assert.equal(again.ok, true, String(again.err));
+      await sleep(400);
+    }
     await untilT(() => b.c.monsters().find((m) => m.nid === nid)!.hp < hpAfter, 2000, "watcher sees new damage");
     results.reconnectCombat = { hpAfterOfflineHit: hpAfter, resyncMs: a.c.stats.lastResyncMs, keep };
   } finally {
@@ -368,7 +373,14 @@ test("怪物攻擊由伺服器結算：被動怪物被打才反擊；生命歸�
     placeNear(srv, a, nid, 1.0);
     await sleep(2500);
     assert.equal(a.ev.filter((e) => e.k === "mh").length, 0, "被動怪物不會主動攻擊");
-    assert.equal((await cmd(a, "atk", { t: nid })).ok, true);
+    // 被動怪物「被打到」才反擊（Claude A 規則）：揮空（測試命中率 95%）就再打一次
+    const inst3 = cb.monster(nid)!.ctl.instance;
+    for (let k = 0; k < 6 && !inst3.provoked; k++) {
+      placeNear(srv, a, nid, 1.0);
+      assert.equal((await cmd(a, "atk", { t: nid })).ok, true);
+      await sleep(Math.ceil(cb.tuning(sp(srv, a)).attackInterval * 1000) + 50);
+    }
+    assert.ok(inst3.provoked, "被打到的被動怪物進入反擊");
     const p = sp(srv, a);
     p.cs.hp = 5; // 測試：讓角色快速倒地
     await untilT(() => a.ev.some((e) => e.k === "mh"), 8000, "monster retaliates");
@@ -520,11 +532,16 @@ for (const n of [4, 8, 16, 40]) {
           const b = bots[i]!;
           const nid = nids[i % nids.length]!;
           const m = cb.monster(nid)!;
+          if (room(srv, b)?.combat !== cb) continue; // 安全檢查：不在同一個原野房間的機器人不參加
           if (m.ctl.instance.isAlive && Math.random() < 0.5) {
             placeNear(srv, b, nid, 1.0, i);
             b.c.command("atk", { t: nid });
             sent++;
-          } else b.dir = { x: Math.cos(i + Date.now() / 900), z: Math.sin(i + Date.now() / 900) };
+          } else {
+            // 隨機走動但避開營地傳送陣（-56, -68）：往東偏
+            const a = i + Date.now() / 900;
+            b.dir = { x: 0.6 + 0.4 * Math.cos(a), z: 0.6 * Math.sin(a) };
+          }
         }
         await sleep(250);
       }
@@ -538,11 +555,14 @@ for (const n of [4, 8, 16, 40]) {
       for (let k = 0; k < 30 && mismatch !== 0; k++) {
         await sleep(100);
         mismatch = 0;
-        for (const b of bots) for (const rm of b.c.monsters()) if (rm.hp !== cb.monster(rm.nid)!.ctl.instance.currentHp) mismatch++;
+        for (const b of bots) b.dir = { x: 0, z: 0 };
+      for (const b of bots) if (room(srv, b)?.combat === cb) for (const rm of b.c.monsters()) if (rm.hp !== cb.monster(rm.nid)!.ctl.instance.currentHp) mismatch++;
       }
       assert.equal(mismatch, 0, "所有玩家看到的怪物血量與伺服器一致");
       assert.ok(m.tick.avgMs < 10, `tick 平均 ${m.tick.avgMs} ms`);
-      results[`load${n}`] = { players: n, seconds: +secs.toFixed(1), ticks: srv.stats.ticks - tick0, tickAvgMs: m.tick.avgMs, tickMaxMs: m.tick.maxMs, atkSent: sent, accepted: cb.counters.attacksAccepted, kills: cb.counters.killsSettled, downKBpsPerClientAvg: +avgKBs.toFixed(2), downKBpsPerClientMax: +Math.max(...downKBs).toFixed(2) };
+      const inField = bots.filter((b) => room(srv, b)?.combat === cb).length;
+      assert.equal(inField, n, "所有機器人都留在同一個原野房間");
+      results[`load${n}`] = { players: n, inField, seconds: +secs.toFixed(1), ticks: srv.stats.ticks - tick0, tickAvgMs: m.tick.avgMs, tickMaxMs: m.tick.maxMs, atkSent: sent, accepted: cb.counters.attacksAccepted, kills: cb.counters.killsSettled, downKBpsPerClientAvg: +avgKBs.toFixed(2), downKBpsPerClientMax: +Math.max(...downKBs).toFixed(2) };
     } finally {
       for (const b of bots) b.stop();
       await srv.stop();

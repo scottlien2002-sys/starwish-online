@@ -5,7 +5,7 @@
 import { TUNING } from "../../src/config/tuning.ts";
 
 /** 協定版本：客戶端與伺服器不同時，伺服器拒絕連線並要求重新整理 */
-export const PROTOCOL_VERSION = 2;
+export const PROTOCOL_VERSION = 3;
 
 /** 固定模擬步長：客戶端預測與伺服器重算使用完全相同的步長 */
 export const SIM_HZ = 60;

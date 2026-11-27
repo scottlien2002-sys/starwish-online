@@ -38,7 +38,11 @@ jobs:
       - name: Integration tests (real WebSocket server + bots)
         run: npm run test:integration
       - name: Stage 8.2 server-authoritative combat / loot / bag tests (incl. 4/8/16/40 load)
-        run: npm run test:combat
+        run: |
+          set -o pipefail
+          mkdir -p reports
+          node --test --test-reporter=tap --test-concurrency=1 tests/combat.test.ts | tee reports/combat-tap.txt
+          cp test-results/combat.json reports/combat-results.json
       - name: WSS test (self-signed TLS)
         run: npm run test:wss
       - name: PostgreSQL schema / atomicity / server restart persistence
