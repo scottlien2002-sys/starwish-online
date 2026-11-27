@@ -167,7 +167,8 @@ export class CrossFader {
     let others = 0;
     for (const [k, v] of this.w) if (k !== t) others += v;
     const remain = 1 - nt;
-    for (const [k, v] of [...this.w]) {
+    // Stage 7.4：不複製 Map（每隻每幀少一個陣列配置）；迭代中刪除目前項目是安全的
+    for (const [k, v] of this.w) {
       if (k === t) continue;
       const nv = others > 0 ? (v / others) * remain : 0;
       if (nv <= 1e-4) this.w.delete(k);
@@ -201,13 +202,45 @@ export const M004_WINDFEATHER_FOX: RiggedMonsterSpec = Object.freeze({
   fades: { normal: 0.15, locomotion: 0.12, urgent: 0.05 },
   deathHold: 1.2,
   deathFade: 0.6,
-  bodyRadius: 0.45,
+  bodyRadius: 0.55, // Stage 7.3 統一：地圖文件值（模型鼻尖到臀部半長約 0.56 m；舊值 0.45）
   hpBarHeight: 1.2,
   heightM: 1.07,
 });
 
 // M005～M007：數值全部取自 Claude C 的交付報告與整合說明（2026-11-27）。GLB 根節點 extras 有值時以 GLB 為準。
 const RIG_COMMON = { fades: { normal: 0.15, locomotion: 0.12, urgent: 0.05 }, deathHold: 1.2, deathFade: 0.6 } as const;
+
+/** M002 苔角獸 Rig V1.0（Lv.3～4，四足被動；26 關節；碰撞半徑依地圖文件 0.6 m；Claude C 2026-11-27 Stage 2 交付） */
+export const M002_MOSS_HORN_BEAST: RiggedMonsterSpec = Object.freeze({
+  modelId: "m002_moss_horn_beast_v10",
+  monsterId: "moss_horn_beast",
+  label: "M002 苔角獸 Rig V1.0",
+  files: { hq: "monsters/m002/M002_MossHornBeast_Rig_V1_HQ.glb", lite: "monsters/m002/M002_MossHornBeast_Rig_V1_Lite.glb" },
+  clips: STD_CLIPS,
+  expect: { joints: 26, durations: { idle: 2.8, move: 0.64, run: 0.44, attack: 1.3, hurt: 0.45, death: 0.8, respawn: 0.7 } },
+  locomotion: { moveNativeMps: 0.3, runNativeMps: 0.95, runThresholdMps: 0.62, hysteresisMps: 0.06, stopMps: 0.05, ratioMin: 0.6, ratioMax: 1.5 },
+  attackHitTime: 0.55,
+  ...RIG_COMMON,
+  bodyRadius: 0.6,
+  hpBarHeight: 1.4,
+  heightM: 1.2,
+});
+
+/** M003 雲絨鳥 Rig V1.0（Lv.5～6，鳥類主動；19 關節；懸浮 0.30 m，碰撞與 AI 位置在地面；碰撞半徑 0.5 m） */
+export const M003_CLOUD_FLUFF_BIRD: RiggedMonsterSpec = Object.freeze({
+  modelId: "m003_cloud_fluff_bird_v10",
+  monsterId: "cloud_fluff_bird",
+  label: "M003 雲絨鳥 Rig V1.0",
+  files: { hq: "monsters/m003/M003_CloudFluffBird_Rig_V1_HQ.glb", lite: "monsters/m003/M003_CloudFluffBird_Rig_V1_Lite.glb" },
+  clips: STD_CLIPS,
+  expect: { joints: 19, durations: { idle: 1.25, move: 0.8, run: 0.5, attack: 1.1, hurt: 0.45, death: 1.0, respawn: 0.9 } },
+  locomotion: { moveNativeMps: 0.8, runNativeMps: 2.0, runThresholdMps: 1.4, hysteresisMps: 0.1, stopMps: 0.05, ratioMin: 0.6, ratioMax: 1.5 },
+  attackHitTime: 0.52,
+  ...RIG_COMMON,
+  bodyRadius: 0.5,
+  hpBarHeight: 1.55,
+  heightM: 1.0,
+});
 
 /** M005 星雲咩咩 Rig V1.0（Lv.8，四足主動；26 關節） */
 export const M005_NEBULA_SHEEP: RiggedMonsterSpec = Object.freeze({
@@ -220,7 +253,7 @@ export const M005_NEBULA_SHEEP: RiggedMonsterSpec = Object.freeze({
   locomotion: { moveNativeMps: 0.45, runNativeMps: 1.5, runThresholdMps: 0.85, hysteresisMps: 0.08, stopMps: 0.05, ratioMin: 0.6, ratioMax: 1.5 },
   attackHitTime: 0.5,
   ...RIG_COMMON,
-  bodyRadius: 0.5,
+  bodyRadius: 0.6, // Stage 7.3 統一：地圖文件值（模型半寬 0.52、半長 0.77 m 之間；舊值 0.5）
   hpBarHeight: 1.3,
   heightM: 1.15,
 });
@@ -268,13 +301,15 @@ export const RIG_CONTRACT_FIXTURE: RiggedMonsterSpec = Object.freeze({
   fixture: true,
 });
 
-export const RIGGED_MONSTERS: readonly RiggedMonsterSpec[] = [M004_WINDFEATHER_FOX, M005_NEBULA_SHEEP, M006_CARROT_KING, M007_CROWN_HAMMER_RABBIT, RIG_CONTRACT_FIXTURE];
+export const RIGGED_MONSTERS: readonly RiggedMonsterSpec[] = [M002_MOSS_HORN_BEAST, M003_CLOUD_FLUFF_BIRD, M004_WINDFEATHER_FOX, M005_NEBULA_SHEEP, M006_CARROT_KING, M007_CROWN_HAMMER_RABBIT, RIG_CONTRACT_FIXTURE];
 
 /**
  * 星芽原野的骨骼動畫怪物出生區（區域編號對應 maps/starsprout/layout.ts 的 ZONES）。
  * 只有 GLB 已交付（列在 models/monsters/manifest.json）的怪物會出現；沒交付的區域保持空的，不放替代模型。
  */
 export const FIELD_RIGGED_SPAWNS: readonly { zoneId: string; spec: RiggedMonsterSpec }[] = [
+  { zoneId: "02", spec: M002_MOSS_HORN_BEAST },
+  { zoneId: "03", spec: M003_CLOUD_FLUFF_BIRD },
   { zoneId: "04", spec: M004_WINDFEATHER_FOX },
   { zoneId: "05", spec: M005_NEBULA_SHEEP },
   { zoneId: "06", spec: M006_CARROT_KING },

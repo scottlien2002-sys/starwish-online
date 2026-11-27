@@ -88,7 +88,9 @@ export class Hud {
   }
 
   setFps(fps: number): void {
-    this.fpsEl.textContent = `${Math.round(fps)} FPS`;
+    const t = `${Math.round(fps)} FPS`;
+    if (this.fpsEl.textContent === t) return;
+    this.fpsEl.textContent = t;
     this.fpsEl.classList.toggle("low", fps < 30);
   }
 
@@ -124,10 +126,16 @@ function barRefs(root: HTMLElement, kind: string): { fill: HTMLDivElement; text:
   };
 }
 
+/** Stage 7.4：數值沒變就不寫 DOM（原本每幀寫 6 次，觸發樣式重算） */
+const barLast = new WeakMap<HTMLDivElement, string>();
 function setBar(bar: { fill: HTMLDivElement; text: HTMLSpanElement }, value: number, max: number, percent = false): void {
   const ratio = max > 0 ? Math.max(0, Math.min(1, value / max)) : 0;
+  const text = percent ? `${(ratio * 100).toFixed(1)}%` : `${Math.round(value)}/${Math.round(max)}`;
+  const key = `${ratio.toFixed(4)}|${text}`;
+  if (barLast.get(bar.fill) === key) return;
+  barLast.set(bar.fill, key);
   bar.fill.style.transform = `scaleX(${ratio})`;
-  bar.text.textContent = percent ? `${(ratio * 100).toFixed(1)}%` : `${Math.round(value)}/${Math.round(max)}`;
+  bar.text.textContent = text;
 }
 
 function must<T>(v: T | null): T {

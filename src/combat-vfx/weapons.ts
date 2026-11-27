@@ -3,7 +3,7 @@
  * 不是正式裝備美術；正式武器 GLB 交付後，只要提供同樣的掛點（grip 原點、+Y 為刀身／杖身方向）就能替換。
  * 武器掛在 hand.R 節點：weaponAttach（動作檔內）給出手骨座標系中的刀身方向與刃面方向。
  */
-import { Color3, Mesh, MeshBuilder, Quaternion, type Scene, StandardMaterial, TransformNode, Vector3 } from "@babylonjs/core";
+import { Color3, Mesh, MeshBuilder, Quaternion, type Scene, StandardMaterial, TransformNode, Vector3, VertexBuffer } from "@babylonjs/core";
 import type { WeaponKind } from "./core/skills.ts";
 
 export interface WeaponRig {
@@ -17,8 +17,14 @@ export interface WeaponRig {
   focus: Mesh;
 }
 
+// 材質共用（Stage 2）：每個場景每種材質只建立一次，所有角色的武器共用 → 多人時材質數不隨人數增加
+const matCache = new Map<string, StandardMaterial>();
 function mat(scene: Scene, name: string, diffuse: Color3, spec: number, emissive = Color3.Black()): StandardMaterial {
-  const m = new StandardMaterial(name, scene);
+  const key = `${scene.uid}|${name.split("_")[0]}`;
+  const hit = matCache.get(key);
+  if (hit && !hit.getScene().isDisposed) return hit;
+  const m = new StandardMaterial(name.split("_")[0] ?? name, scene);
+  matCache.set(key, m);
   m.diffuseColor = diffuse;
   m.specularColor = new Color3(spec, spec, spec);
   m.specularPower = 64;
@@ -35,7 +41,38 @@ function marker(scene: Scene, name: string, parent: TransformNode, y: number): M
   return m;
 }
 
-export function buildSword(scene: Scene, id: string): WeaponRig {
+/**
+ * 其他玩家用的簡化武器：零件的材質顏色寫進頂點色，合併成 1 個網格、1 個共用材質 → 1 個 draw call（原本 6 個）。
+ */
+function simplify(scene: Scene, w: WeaponRig, name: string): WeaponRig {
+  for (const m of w.meshes) {
+    const sm = m.material as StandardMaterial | null;
+    const c = sm ? sm.diffuseColor.add(sm.emissiveColor.scale(0.8)) : new Color3(1, 1, 1);
+    const n = m.getTotalVertices();
+    const cols = new Float32Array(n * 4);
+    for (let i = 0; i < n; i++) cols.set([Math.min(1, c.r), Math.min(1, c.g), Math.min(1, c.b), 1], i * 4);
+    m.setVerticesData(VertexBuffer.ColorKind, cols, false);
+  }
+  const merged = Mesh.MergeMeshes(w.meshes, true, true, undefined, false, false);
+  if (!merged) return w;
+  merged.name = name;
+  merged.parent = w.root;
+  merged.isPickable = false;
+  merged.material = mat(scene, "remoteWeapon", new Color3(1, 1, 1), 0.3);
+  return { ...w, meshes: [merged] };
+}
+
+export function buildSword(scene: Scene, id: string, simple = false): WeaponRig {
+  const w = buildSwordFull(scene, id);
+  return simple ? simplify(scene, w, `swordSimple_${id}`) : w;
+}
+
+export function buildStaff(scene: Scene, id: string, simple = false): WeaponRig {
+  const w = buildStaffFull(scene, id);
+  return simple ? simplify(scene, w, `staffSimple_${id}`) : w;
+}
+
+function buildSwordFull(scene: Scene, id: string): WeaponRig {
   const root = new TransformNode(`sword_${id}`, scene);
   const blade = MeshBuilder.CreateCylinder(`swordBlade_${id}`, { height: 0.46, diameterTop: 0.0, diameterBottom: 0.075, tessellation: 4 }, scene);
   blade.scaling.z = 0.28;
@@ -67,7 +104,7 @@ export function buildSword(scene: Scene, id: string): WeaponRig {
   return { kind: "sword", root, meshes, base: marker(scene, `swordBase_${id}`, root, 0.1), tip: marker(scene, `swordTip_${id}`, root, 0.5), focus: marker(scene, `swordFocus_${id}`, root, 0.45) };
 }
 
-export function buildStaff(scene: Scene, id: string): WeaponRig {
+function buildStaffFull(scene: Scene, id: string): WeaponRig {
   const root = new TransformNode(`staff_${id}`, scene);
   const shaft = MeshBuilder.CreateCylinder(`staffShaft_${id}`, { height: 0.78, diameterTop: 0.026, diameterBottom: 0.02, tessellation: 8 }, scene);
   shaft.position.y = 0.16;

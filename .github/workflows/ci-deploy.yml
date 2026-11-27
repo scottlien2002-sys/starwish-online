@@ -3,7 +3,7 @@ name: CI & Deploy
 # 每次推送到 main：型別檢查 → 單元測試 → 建置 → 瀏覽器測試 → 部署到 gh-pages 分支（GitHub Pages）
 on:
   push:
-    branches: [main, "feature/**"]
+    branches: [main, "feature/**", "!feature/combat-vfx-*"] # combat-vfx 有自己的工作流程（combat-vfx.yml）
   workflow_dispatch:
 
 permissions:
@@ -80,6 +80,8 @@ jobs:
             cp -r dist/. "/tmp/pages/$DIR/"
             # 預覽不需要的舊版角色模型與比較用模型（正式頁面不使用；本機 dist 仍保留給後面的舊版測試）
             (cd "/tmp/pages/$DIR/models" 2>/dev/null && rm -f novice_c10b_*.glb novice_c10b1_*.glb novice_c10b2_*.glb novice_c10b3_*.glb novice_c10b4_*.glb novice_c10b5_*.glb village-p3/*_s62.glb village-p3/p30_sample_*.glb) || true
+            # Stage 7.4：與其他預覽內容完全相同的大型模型／貼圖不重複發布（遊戲開機時讀 asset-remap.json 改從那裡載入）
+            if [ "$DIR" = "preview-stage74-perf" ]; then node tools/preview-asset-remap.mjs /tmp/pages "$DIR"; fi
             # 容量檢查：GitHub Pages 建議 1 GB（之前 3.9 GB 時發布逾時；1.14 GB 時仍正常）。超過 1000 MB 警告，超過 1100 MB 不發布
             TOTAL=$(du -sm --exclude=.git /tmp/pages | cut -f1)
             echo "預覽資料夾 $(du -sm "/tmp/pages/$DIR" | cut -f1) MB；發布後 gh-pages 合計 ${TOTAL} MB"

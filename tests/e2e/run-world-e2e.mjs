@@ -244,6 +244,25 @@ for (const name of browsers) {
       check("原野與村莊用同一個角色模型（C1.0-B5b，沒有變回其他版本）", fp.avatarModel?.modular === false && fp.file === vi.file, { village: vi.file, field: fp.file });
       check("切換地圖後寵物仍裝備、在頭部側邊 15～25 cm", fi.pets.length >= 1 && fi.petGap >= 0.15 && fi.petGap <= 0.25, { gap: fi.petGap, pets: fi.pets });
       await shot("field_arrive");
+      // ---------- Stage 7.3：七種怪物 ----------
+      const fm = fp.fieldMonsters ?? [];
+      const mk = {};
+      for (const m of fp.monsters) mk[m.kind] = (mk[m.kind] ?? 0) + 1;
+      run.results.fieldMonsters = { fm, kinds: mk };
+      check("Stage 7.3 七種怪物：M002～M007 都是 Claude C 的正式模型（已交付、Lite），依原本 7 區出現；星露啵啵沿用", fm.length === 6 && fm.every((x) => x.delivered && x.count > 0 && /Lite/.test(x.status)) && mk.star_dew_bobo === 6 && mk.moss_horn_beast === 5 && mk.cloud_fluff_bird === 5 && mk.windfeather_fox === 4 && mk.nebula_sheep === 4 && mk.carrot_king === 2 && mk.crown_hammer_rabbit === 1 && !mk.rig_contract_fixture, { fm, kinds: mk });
+      const lv = Object.fromEntries(fp.monsters.map((m) => [m.kind, { level: m.level, aggressive: m.aggressive }]));
+      check("Stage 7.3：Lv.1～4 被動（星露啵啵、苔角獸）、Lv.5 以上主動（雲絨鳥～王冠重錘兔）", lv.star_dew_bobo?.aggressive === false && lv.moss_horn_beast?.aggressive === false && ["cloud_fluff_bird", "windfeather_fox", "nebula_sheep", "carrot_king", "crown_hammer_rabbit"].every((k) => lv[k]?.aggressive === true), lv);
+      if (g === "male" && name === "webkit") {
+        // 各區截圖（交付用）：站在區域外緣看怪物
+        const zones = [["01_bobo", -24, -60], ["02_moss_horn_beast", -62, -39], ["03_cloud_fluff_bird", 14, -19], ["04_windfeather_fox", 52, 16], ["05_nebula_sheep", -44, 37], ["06_carrot_king", -12, 28], ["07_crown_hammer_rabbit", 0, 57]];
+        for (const [label, x, z] of zones) {
+          await V(([x, z]) => { window.__starwishPlay.teleport(x, z); window.__starwishPlay.heal(); }, [x, z]);
+          await wait(2500);
+          await shot(`zone_${label}`);
+        }
+        await V(() => window.__starwishPlay.teleport(-56, -60));
+        await wait(1500);
+      }
 
       // ---------- 5. 打怪、金幣掉落、撿取 ----------
       const fight = await V(
@@ -277,8 +296,54 @@ for (const name of browsers) {
       const drops = fight.w.ledger.filter((l) => l.kind === "monsterDrop");
       check("原野：擊倒怪物、掉落金幣（測試設定 3–8）並撿起入帳", fight.kills >= 2 && fight.w.goldPicked > 0 && fight.w.gold === goldBeforeField + fight.w.goldPicked && drops.every((d) => d.amount >= 3 && d.amount <= 8), run.results.fight);
       const fw = fight.w;
+      const cfx = (await V(() => window.__starwishPlay.info())).combatFx;
+      check("Stage 7.3 戰鬥特效（Claude C VFX V2）：命中火花與傷害數字和命中同步出現", !!cfx && cfx.hitFx >= fight.kills && cfx.numbers >= cfx.hitFx && cfx.damageShown > 0, cfx);
       check("Stage 7.2：擊敗怪物得到經驗（測試設定），存進角色存檔", fw.expGained > 0 && (fw.level > 1 || fw.exp > 0), { expGained: fw.expGained, level: fw.level, exp: fw.exp });
       check("掉落物唯一編號：每個撿起的掉落只入帳一次", new Set(drops.map((d) => d.requestId)).size === drops.length && fight.w.claimed >= drops.length, { drops: drops.length, claimed: fight.w.claimed });
+      // ---------- Stage 7.4：持續普通攻擊 25 秒，怪物不會因受擊／擊退而永久無法反擊 ----------
+      const sustain = await V(
+        () =>
+          new Promise((res) => {
+            const api = window.__starwishPlay;
+            const i0 = api.info();
+            const tgt = i0.monsters.filter((m) => m.state !== "death" && m.hp > 0).sort((a, b) => Math.hypot(a.x - i0.pos[0], a.z - i0.pos[2]) - Math.hypot(b.x - i0.pos[0], b.z - i0.pos[2]))[0];
+            if (!tgt) return res({ error: "no target" });
+            api.setMonsterHp(tgt.id, 999999);
+            api.teleport(tgt.x + 1.0, tgt.z);
+            const hurt0 = i0.combatFx?.hurt ?? 0;
+            const kb0 = { done: i0.combatFx?.knockbacks ?? 0, skip: i0.combatFx?.knockSkipped ?? 0 };
+            const att0 = tgt.attacks?.resolved ?? 0;
+            // 以遊戲時間計算（CI 是軟體繪製、FPS 低；遊戲每幀最多前進 0.1 秒，實際時間會比遊戲時間長）
+            const g0 = i0.gameTime;
+            const w0 = performance.now();
+            let maxGap = 0;
+            let lastHurtAt = g0;
+            let lastHurt = hurt0;
+            let presses = 0;
+            const step = () => {
+              const i = api.info();
+              const m = i.monsters.find((x) => x.id === tgt.id);
+              if (i.hp < i.maxHp * 0.5) api.world.setHp(i.maxHp);
+              if (m && Math.hypot(m.x - i.pos[0], m.z - i.pos[2]) > 2.0) api.teleport(m.x + 1.0, m.z);
+              api.press("attack");
+              presses++;
+              const h = i.combatFx?.hurt ?? 0;
+              const now = i.gameTime;
+              if (h > lastHurt) {
+                maxGap = Math.max(maxGap, now - lastHurtAt);
+                lastHurtAt = now;
+                lastHurt = h;
+              }
+              if (now - g0 >= 25 || performance.now() - w0 > 360000) {
+                maxGap = Math.max(maxGap, now - lastHurtAt);
+                res({ kind: tgt.kind, gameSeconds: Math.round((now - g0) * 10) / 10, wallSeconds: Math.round((performance.now() - w0) / 100) / 10, presses, playerHits: i.hits ?? null, hurtTaken: h - hurt0, monsterAttacks: (m?.attacks?.resolved ?? 0) - att0, knockbacks: (i.combatFx?.knockbacks ?? 0) - kb0.done, knockSkipped: (i.combatFx?.knockSkipped ?? 0) - kb0.skip, maxGapSec: Math.round(maxGap * 10) / 10, alive: !!m && m.hp > 0 });
+              } else setTimeout(step, 120);
+            };
+            step();
+          }),
+      );
+      run.results.sustainedAttack = sustain;
+      check("Stage 7.4：玩家持續普攻（遊戲時間 25 秒；CI 太慢時至少 15 秒，怪物血量調高）：怪物仍多次反擊命中（≥ 4 次）、最長不出手間隔 < 8 秒；擊退有衰減（不會一直被推離）", !sustain.error && sustain.gameSeconds >= 15 && sustain.hurtTaken >= 4 && sustain.monsterAttacks >= 4 && sustain.maxGapSec < 8 && sustain.knockSkipped > sustain.knockbacks, sustain);
       await shot("field_fight");
 
       // ---------- 6. 走進營地傳送陣返回星芽村，存檔保留 ----------

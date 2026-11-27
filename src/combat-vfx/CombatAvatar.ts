@@ -27,7 +27,8 @@ import type { WeaponKind } from "./core/skills.ts";
 import { fxTexture } from "./fx/textures.ts";
 
 export type Gender = "male" | "female";
-export type Lod = "hq" | "lite";
+/** hq／lite：自己的角色；remote：其他玩家（2 個 draw call 的合併版，見 tools/combat-vfx/make_remote_lod.py） */
+export type Lod = "hq" | "lite" | "remote";
 
 export interface CombatClipData {
   duration: number;
@@ -88,6 +89,21 @@ export function loadCombatAnims(baseUrl: string, g: Gender): Promise<CombatAnimF
 
 let seq = 0;
 
+const blobMats = new Map<number, StandardMaterial>();
+function blobMaterial(scene: Scene): StandardMaterial {
+  const hit = blobMats.get(scene.uid as unknown as number);
+  if (hit) return hit;
+  const bm = new StandardMaterial("cblobMat", scene);
+  bm.diffuseTexture = fxTexture(scene, "glowDisc", 64);
+  bm.useAlphaFromDiffuseTexture = true;
+  bm.diffuseColor = new Color3(0, 0, 0);
+  bm.disableLighting = true;
+  bm.alpha = 0.55;
+  bm.zOffset = -2;
+  blobMats.set(scene.uid as unknown as number, bm);
+  return bm;
+}
+
 export class CombatAvatar {
   readonly id = ++seq;
   readonly root: TransformNode;
@@ -105,11 +121,21 @@ export class CombatAvatar {
   private fade = 0.12;
   private skillGroup: AnimationGroup | null = null;
   readonly blob: Mesh;
+  /** 目前在畫的三角面數（遠距離版切換後會變少） */
   triangles = 0;
+  /** remote：近距離版（與 Stage 2 相同）／遠距離版（頭髮減面，見 make_remote_lod.py）；hq／lite 兩者皆空 */
+  readonly nearMeshes: AbstractMesh[] = [];
+  readonly farMeshes: AbstractMesh[] = [];
+  nearTriangles = 0;
+  farTriangles = 0;
+  /** 目前是否顯示遠距離版 */
+  far = false;
   /** 面向（Babylon rotation.y） */
   yaw = 0;
 
-  private constructor(scene: Scene, container: AssetContainer, anims: CombatAnimFile, gender: Gender) {
+  readonly lod: Lod;
+  private constructor(scene: Scene, container: AssetContainer, anims: CombatAnimFile, gender: Gender, lod: Lod) {
+    this.lod = lod;
     this.gender = gender;
     this.anims = anims;
     this.root = new TransformNode(`cavatar_${this.id}`, scene);
@@ -119,8 +145,20 @@ export class CombatAvatar {
     for (const m of this.meshes) {
       m.isPickable = false;
       m.receiveShadows = false;
-      this.triangles += Math.round((m.getTotalIndices() || 0) / 3);
+      const tris = Math.round((m.getTotalIndices() || 0) / 3);
+      const nm = m.name.split("#")[0] ?? m.name;
+      if (!m.getTotalVertices()) continue;      // glTF 的 __root__ 等空節點：不能放進遠近清單（關掉 __root__ 會把整個角色一起關掉）
+      if (lod === "remote" && nm.endsWith("_far")) {
+        this.farMeshes.push(m);
+        this.farTriangles += tris;
+        m.setEnabled(false);
+      } else {
+        if (lod === "remote") this.nearMeshes.push(m);
+        this.nearTriangles += tris;
+      }
     }
+    // 舊版 remote 檔（只有近距離版）也能用：沒有遠距離版就永遠顯示近距離版
+    this.triangles = this.nearTriangles;
     for (const n of this.root.getChildTransformNodes(false)) {
       const nm = n.name.split("#")[0] ?? n.name;
       if (!this.nodes.has(nm)) this.nodes.set(nm, n);
@@ -134,8 +172,9 @@ export class CombatAvatar {
     for (const [name, clip] of Object.entries(anims.clips)) this.skills.set(name, this.buildGroup(scene, name, clip));
     // 武器
     const hand = this.nodes.get(anims.weaponAttach.bone);
-    this.sword = buildSword(scene, String(this.id));
-    this.staff = buildStaff(scene, String(this.id));
+    const simple = lod === "remote";
+    this.sword = buildSword(scene, String(this.id), simple);
+    this.staff = buildStaff(scene, String(this.id), simple);
     if (hand) {
       attachWeapon(this.sword, hand, anims.weaponAttach.bladeDir, anims.weaponAttach.edgeUp);
       attachWeapon(this.staff, hand, anims.weaponAttach.bladeDir, anims.weaponAttach.edgeUp);
@@ -143,23 +182,37 @@ export class CombatAvatar {
     setWeaponVisible(this.staff, false);
     // 腳下柔邊陰影（1 個 draw call）
     this.blob = MeshBuilder.CreateGround(`cblob_${this.id}`, { width: 0.9, height: 0.75 }, scene);
-    const bm = new StandardMaterial(`cblobMat_${this.id}`, scene);
-    bm.diffuseTexture = fxTexture(scene, "glowDisc", 64);
-    bm.useAlphaFromDiffuseTexture = true;
-    bm.diffuseColor = new Color3(0, 0, 0);
-    bm.disableLighting = true;
-    bm.alpha = 0.55;
-    bm.zOffset = -2;
-    this.blob.material = bm;
+    this.blob.material = blobMaterial(scene);
     this.blob.isPickable = false;
     this.blob.parent = this.root;
     this.blob.position.y = 0.01;
     this.play("Idle", true, 0);
   }
 
+  /** 遠近切換（只換角色本體；武器、陰影不變）。沒有遠距離版時不動作，回傳是否已切換 */
+  setFar(on: boolean): boolean {
+    if (!this.farMeshes.length || on === this.far) return false;
+    this.far = on;
+    if (CombatAvatar.lodToggle === "visible") {
+      for (const m of this.nearMeshes) m.isVisible = !on;
+      for (const m of this.farMeshes) {
+        m.setEnabled(true);
+        m.isVisible = on;
+      }
+    } else {
+      for (const m of this.nearMeshes) m.setEnabled(!on);
+      for (const m of this.farMeshes) m.setEnabled(on);
+    }
+    this.triangles = on ? this.farTriangles : this.nearTriangles;
+    return true;
+  }
+
+  /** 遠近切換方式（除錯用）：enable＝setEnabled；visible＝isVisible */
+  static lodToggle: "enable" | "visible" = "enable";
+
   static async create(scene: Scene, baseUrl: string, g: Gender, lod: Lod): Promise<CombatAvatar> {
     const [c, a] = await Promise.all([loadNoviceContainer(scene, baseUrl, g, lod), loadCombatAnims(baseUrl, g)]);
-    return new CombatAvatar(scene, c, a, g);
+    return new CombatAvatar(scene, c, a, g, lod);
   }
 
   private buildGroup(scene: Scene, name: string, clip: CombatClipData): AnimationGroup {
@@ -281,7 +334,8 @@ export class CombatAvatar {
 
   dispose(): void {
     for (const g of [...this.base.values(), ...this.skills.values()]) g.dispose();
-    for (const w of [this.sword, this.staff]) w.root.dispose(false, true);
-    this.root.dispose(false, true);
+    // 材質是共用的（GLB 容器、武器、陰影），只釋放網格與節點
+    for (const w of [this.sword, this.staff]) w.root.dispose(false, false);
+    this.root.dispose(false, false);
   }
 }

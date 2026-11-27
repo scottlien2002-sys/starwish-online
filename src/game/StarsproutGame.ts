@@ -5,10 +5,12 @@ import {
   HemisphericLight,
   type Mesh,
   MeshBuilder,
+  Frustum,
+  Plane,
   ReflectionProbe,
   RenderTargetTexture,
   Scene,
-  type ShadowGenerator,
+  ShadowGenerator,
   StandardMaterial,
   Vector3,
 } from "@babylonjs/core";
@@ -33,7 +35,7 @@ import { buildVegetationView, type VegetationView } from "../maps/starsprout/Sta
 import { propColliders, propExclusions } from "../maps/starsprout/props.ts";
 import { buildPropsView, type PropsView } from "../maps/starsprout/StarsproutProps.ts";
 import { CameraObstacleQuery, cameraObstaclesFrom } from "../maps/starsprout/cameraObstacles.ts";
-import { createMonsterRegistry, MonsterFactory, type MonsterController } from "../monsters/framework/index.ts";
+import { createMonsterRegistry, MonsterFactory, type MonsterController, type MonsterInstance } from "../monsters/framework/index.ts";
 import type { MonsterTarget } from "../monsters/framework/types.ts";
 import { registerBabylonVisuals } from "../monsters/babylon/registerVisuals.ts";
 import { BOBO_MODEL_IDS, BOBO_PROFILE_IDS } from "./boboVariant.ts";
@@ -55,6 +57,11 @@ import type { WorldSession } from "./worldSession.ts";
 import { WorldPanel } from "../ui/WorldPanel.ts";
 import { MODEL_LOD_LABEL, pickModelLod } from "./modelLod.ts";
 import { expToNext, gainExp } from "../core/progression.ts";
+import { FieldCombatFx } from "./fieldCombatFx.ts";
+import { contactShadowQuality, renderExperimentsFromSearch } from "../render/renderExperiments.ts";
+import { type DetailTier, detailFor, pickTier, sphereInFrustum } from "./monsterDetail.ts";
+import { FieldKnockback } from "./fieldKnockback.ts";
+import { FieldTerrainQuery } from "./fieldTerrainQuery.ts";
 import { isAggressive } from "../monsters/framework/types.ts";
 import { defaultAppearance } from "../core/gameSave.ts";
 import { FIELD_RIGGED_SPAWNS } from "../monsters/rigged/riggedSpec.ts";
@@ -109,6 +116,8 @@ export interface PlayApi {
     stats: CharacterStats;
     kills: number;
     hits: number;
+    /** 遊戲時間（秒；每幀最多前進 0.1 秒，低 FPS 時比實際時間慢） */
+    gameTime: number;
     drops: number;
     picked: number;
     loot: number;
@@ -117,6 +126,10 @@ export interface PlayApi {
     foxStatus: string;
     /** Stage 7.2：原野各區的骨骼動畫怪物（已交付／未交付） */
     fieldMonsters: { zone: string; zoneName: string; monster: string; delivered: boolean; count: number; status: string }[];
+    /** Stage 7.4：怪物距離分級（各等級隻數） */
+    monsterDetail: { on: boolean; near: number; mid: number; far: number; hidden: number; offscreen: number };
+    /** Stage 7.3：戰鬥特效計數 */
+    combatFx: { tier: string; hitFx: number; numbers: number; hurt: number; respawnFx: number; damageShown: number; knockbacks: number; knockSkipped: number } | null;
     pets: { enabled: boolean; mode: string; reason: string; items: Record<ItemId, number>; count: number; equipped: number | null; followerVisible: boolean; followerDist: number };
     render: { p3: boolean; pipeline: boolean; charShadow: CharShadowMode; drawCalls: number; fps: number; contextLost: number };
   };
@@ -126,6 +139,8 @@ export interface PlayApi {
   toZone01(): void;
   /** 測試用：玩家生命回滿（解除倒地以外的狀態不變） */
   heal(): void;
+  /** 測試用（Stage 7.4 持續普攻測試）：設定某隻怪物的血量（不改上限、不影響其他規則） */
+  setMonsterHp(id: string, hp: number): boolean;
   pet: {
     give(item: ItemId, n?: number): void;
     hatch(source: PetSourceId): number | null;
@@ -141,6 +156,7 @@ export interface PlayApi {
     hatchItem(itemId: string): number | null;
   };
   bench(seconds: number): Promise<BenchReport>;
+  perf: { session(): ReturnType<PerfOverlay["session"]>; reset(): void };
   /** Stage 7（?play=world）才有 */
   world?: { info(): Record<string, unknown>; toVillage(): void; setHp(hp: number): void };
 }
@@ -223,6 +239,23 @@ class StarsproutGame {
   private monsters: MonsterController[] = [];
   /** Stage 7.2：羽風高地的怪物狀態（畫面與測試顯示） */
   private foxStatus = "";
+  /** Stage 7.3：戰鬥特效（完整遊戲） */
+  private fx: FieldCombatFx | null = null;
+  private readonly alivePos: { x: number; y: number; z: number }[] = [];
+  private readonly sepPlayer = { x: 0, z: 0, minDist: 0.85 };
+  private _instances: MonsterInstance[] | null = null;
+  /** 怪物實例陣列（怪物清單建立後不變；每幀不重新 map） */
+  private get monsterInstances(): MonsterInstance[] {
+    if (!this._instances || this._instances.length !== this.monsters.length) this._instances = this.monsters.map((m) => m.instance);
+    return this._instances;
+  }
+  private knockbacks = 0;
+  private knockSkipped = 0;
+  private readonly kb = new FieldKnockback();
+  private get tq(): FieldTerrainQuery {
+    return (this._tq ??= new FieldTerrainQuery(this.terrain, this.colliders));
+  }
+  private _tq: FieldTerrainQuery | null = null;
   /** 沒有世界存檔（舊預覽）時的等級與經驗 */
   private readonly localProgress = { level: 1, exp: 0 };
   private expGained = 0;
@@ -305,6 +338,10 @@ class StarsproutGame {
     this.sun.shadowMaxZ = 90;
     this.shadows = createShadows(this.sun, this.quality);
     this.shadows.darkness = 0.35;
+    // Stage 7.4：高畫質柔和陰影改用 Stage 5.3 已驗收的 PCSS32（取樣品質中；陰影類型、柔和範圍、貼圖 2048、偏移、濃度都不變）。
+    // 原本原野沿用 PCSS64，和已驗收的遊戲設定不一致。&shadowq=original 可改回比較
+    const contactQ = contactShadowQuality(this.quality.shadows.filter, "v38r", renderExperimentsFromSearch(location.search));
+    if (contactQ && this.shadows.useContactHardeningShadow) this.shadows.filteringQuality = contactQ === "medium" ? ShadowGenerator.QUALITY_MEDIUM : ShadowGenerator.QUALITY_HIGH;
 
     this.pos.set(START.x, this.terrain.surface(START.x, START.z), START.z);
     this.yaw = Math.atan2(MAIN_ROUTE[1]!.x - START.x, MAIN_ROUTE[1]!.z - START.z);
@@ -484,7 +521,9 @@ class StarsproutGame {
     );
     // ---------- Stage 7.2：骨骼動畫怪物（M004～M007；GLB 列在 models/monsters/manifest.json 才會出現，沒交付的區域保持空的） ----------
     // &rigfixture=1（只供自動測試）：風羽狐檔案還沒交付時，用灰色方塊的接口測試替身驗證 AI、命中與重生（只放羽風高地）
-    const rigLod = this.ws ? pickModelLod(this.params) : this.lod;
+    // Stage 7.3 效能：原野同時有 6 種骨骼動畫怪物（21 隻）。HQ 每種 3 張 2048 貼圖，6 種約 18 張 → iPhone 記憶體風險高；
+    // 怪物一律用 Lite（貼圖 1024／512、量化頂點，外觀與動畫相同）。&monlod=hq 可切回 HQ 比較。
+    const rigLod = this.params.get("monlod") === "hq" ? "hq" : this.params.get("monlod") === "lite" ? "lite" : this.ws ? "lite" : this.lod;
     const rigReg = registerBabylonVisuals(createMonsterRegistry({ legacyAggressive: !this.ws }), { scene, shadows: this.shadows, quality, modelLod: rigLod });
     const rigFactory = new MonsterFactory(rigReg);
     for (const { zoneId, spec } of FIELD_RIGGED_SPAWNS) {
@@ -505,6 +544,15 @@ class StarsproutGame {
       this.fieldStatus.push({ zone: zoneId, zoneName: zone.name, monster: name, delivered: ok, count, status });
     }
     await Promise.all(this.monsters.map((m) => m.visual?.load() ?? Promise.resolve()));
+    // Stage 7.3：戰鬥特效（Claude C Combat VFX Stage 2）：命中火花、傷害數字、受傷紅框、重生光柱。完整遊戲才開；&fx=0 關閉（比較用）
+    if (this.ws && this.params.get("fx") !== "0") this.fx = new FieldCombatFx(scene, this.hudRoot, this.lod === "hq" ? "high" : "medium");
+    this.perf.setExtra(() => ({
+      monsterDetail: this.detailOn ? { ...this.tierCount } : "關閉（&mlod=0）",
+      monsters: this.monsters.length,
+      shadow: `${this.shadows.useContactHardeningShadow ? "PCSS" : "PCF"} ${this.quality.shadows.mapSize}（取樣 ${this.shadows.filteringQuality === ShadowGenerator.QUALITY_HIGH ? "高" : this.shadows.filteringQuality === ShadowGenerator.QUALITY_MEDIUM ? "中" : "低"}）`,
+      shadowCasters: this.shadows.getShadowMap()?.renderList?.length ?? 0,
+      fx: this.fx ? { ...this.fx.stats, particles: this.fx.vfx.stats.particles } : null,
+    }));
     this.lockRing = MeshBuilder.CreateTorus("PH_lockRing", { diameter: 1.1, thickness: 0.05, tessellation: 40 }, scene);
     const ringMat = new StandardMaterial("PH_lockRingMat", scene);
     ringMat.disableLighting = true;
@@ -643,6 +691,7 @@ class StarsproutGame {
     this.camera.update(dt, this.pos, this.input.consumeCamera());
     this.sun.position.copyFrom(this.pos).subtractInPlace(this.sun.direction.scale(45));
     this.updateMonsters(dt);
+    this.fx?.update(dt);
     this.updateLoot(dt);
     this.follower.update(dt, this.avatar.petAnchor(this.earTmp), this.yaw, this.avatar.headHalfWidth);
     if (this.ws) this.worldFrame(dt);
@@ -674,7 +723,7 @@ class StarsproutGame {
     // 多人：只送攻擊請求，傷害由伺服器判定
     if (this.mpField) return this.mpField.attack(this.combat.tuning ? 2.5 : 2.5);
     const t = this.avatar.getAttackTiming();
-    const r = this.combat.startAttack(this.now, this.pos.x, this.pos.z, this.monsters.map((m) => m.instance), t.hitAt - 1e-6);
+    const r = this.combat.startAttack(this.now, this.pos.x, this.pos.z, this.monsterInstances, t.hitAt - 1e-6);
     if (r.ok) {
       this.attackTargetId = r.targetId;
       this.pending.attack = true;
@@ -693,6 +742,24 @@ class StarsproutGame {
     const mc = this.monsters.find((x) => x.instance.instanceId === r.targetId);
     if (!mc) return;
     const i = mc.instance;
+    const ip = i.currentPosition;
+    this.fx?.playerHit(ip.x, this.terrain.surface(ip.x, ip.z), ip.z, i.definition.height ?? 1, r.damage, r.killed);
+    // Stage 7.3：普通攻擊的輕微擊退（Claude C 受擊反應 V2：0.12＋震動×0.75，普通攻擊震動 0.14 → 約 0.22 m；Boss ×0.25）。
+    // 用 FieldTerrainQuery：撞到岩石、溪流、地圖邊界就停在前面
+    if (this.ws && !r.killed && this.params.get("fx") !== "0") {
+      const dx = ip.x - this.pos.x;
+      const dz = ip.z - this.pos.z;
+      const d = Math.hypot(dx, dz) || 1;
+      // Stage 7.4：連擊衰減（第 1 下 100%、第 2 下 50%、之後 0；出手中不推）→ 持續普攻不會讓怪物一直被推出攻擊範圍
+      const k = this.kb.distance(i.instanceId, this.now, { attacking: i.currentState === "attack", boss: i.definition.rank === "boss" });
+      if (k > 0) {
+        const to = this.tq.clampMove({ x: ip.x, z: ip.z }, { x: ip.x + (dx / d) * k, z: ip.z + (dz / d) * k }, i.definition.bodyRadius ?? 0.5);
+        ip.x = to.x;
+        ip.z = to.z;
+        this.knockbacks++;
+      } else this.knockSkipped++;
+    }
+    if (r.killed) this.kb.reset(i.instanceId);
     if (r.killed) {
       this.kills++;
       const items = this.pets.onMonsterKilled(false); // 地上掉落物：撿起時才放進背包
@@ -721,14 +788,50 @@ class StarsproutGame {
         if (ups > 0) window.setTimeout(() => this.hud.toast(`升級！Lv.${this.ws ? this.ws.progress.level : this.localProgress.level}`, 1600), 1500);
       }
       this.hud.toast((items.length || gold ? `擊敗${i.definition.name}！掉落：${[...(gold ? [`${gold} 金幣`] : []), ...items.map((k) => ITEM_LABEL[k])].join("、")}` : `擊敗${i.definition.name}！`) + expMsg, 1400);
-    } else {
+    } else if (!this.fx) {
+      // 有戰鬥特效時傷害數字已經顯示在怪物頭上；每下都更新提示文字會多一次版面重排（Stage 7.4）
       this.hud.toast(`${i.definition.name} -${r.damage}（HP ${i.currentHp}/${i.definition.maxHp}）`, 800);
     }
   }
 
+  // ---------------- Stage 7.4：怪物距離分級（monsterDetail.ts） ----------------
+  private readonly planes = [0, 1, 2, 3, 4, 5].map(() => new Plane(0, 0, 0, 0));
+  private readonly tiers = new Map<MonsterController, DetailTier>();
+  /** 測試／效能面板用：各等級隻數 */
+  readonly tierCount: Record<DetailTier, number> = { near: 0, mid: 0, far: 0, hidden: 0, offscreen: 0 };
+  /** &mlod=0：關閉距離分級（優化前比較用） */
+  private get detailOn(): boolean {
+    return this.params.get("mlod") !== "0";
+  }
+
+  private updateMonsterDetail(): void {
+    if (!this.detailOn) return;
+    Frustum.GetPlanesToRef(this.scene.getTransformMatrix(), this.planes);
+    const tc = this.tierCount;
+    tc.near = tc.mid = tc.far = tc.hidden = tc.offscreen = 0;
+    for (const m of this.monsters) {
+      const p = m.instance.currentPosition;
+      const h = m.instance.definition.height ?? 1;
+      const dist = Math.hypot(p.x - this.pos.x, p.z - this.pos.z);
+      const inView = sphereInFrustum(this.planes, p.x, p.y + h * 0.5, p.z, Math.max(0.8, h * 0.75));
+      const tier = pickTier(dist, inView, this.tiers.get(m) ?? null);
+      this.tiers.set(m, tier);
+      tc[tier]++;
+      const d = detailFor(tier, dist);
+      m.visualStride = d.stride;
+      const v = m.visual;
+      if (v instanceof RiggedMonsterVisual) {
+        v.setAnimMode(d.anim);
+        v.setShadowCasting(d.shadow);
+        v.setRenderVisible(d.render);
+      }
+    }
+  }
+
   private updateMonsters(dt: number): void {
+    this.updateMonsterDetail();
     if (this.mpField) return this.updateMonstersMp(dt);
-    const hit = this.combat.resolvePending(this.now, this.pos.x, this.pos.z, this.monsters.map((m) => m.instance));
+    const hit = this.combat.resolvePending(this.now, this.pos.x, this.pos.z, this.monsterInstances);
     if (hit) this.onHit(hit);
     if (this.ws) {
       // Stage 7：生命歸零 → 死亡動作 → 約 3 秒後在星芽村星願之泉復活（存檔：死亡次數、滿血）
@@ -746,24 +849,29 @@ class StarsproutGame {
     for (const m of this.monsters) {
       const p = m.instance.currentPosition;
       p.y = this.terrain.surface(p.x, p.z);
+      const before = m.instance.currentState;
       const frame = m.update(dt, this.now, target);
+      if (before !== "respawn" && m.instance.currentState === "respawn") this.fx?.respawn(p.x, this.terrain.surface(p.x, p.z), p.z, Math.max(0.8, (m.instance.definition.bodyRadius ?? 0.5) * 1.6));
       p.y = this.terrain.surface(p.x, p.z);
       if (frame.effects.includes("attackImpact") && m.instance.claimAttackImpact() !== null) {
         const dmg = this.combat.monsterImpact(this.now, m.instance, this.pos.x, this.pos.z);
         if (dmg > 0) {
+          this.fx?.playerHurt(this.pos.x, this.pos.y, this.pos.z, dmg);
           // 普通攻擊不打斷移動、攻擊（已定案規則）：站著不動時才播受傷動作
-          if (this.curSpeed < 0.05 && this.avatar.state !== "Attack") {
-            this.pending.hurt = true;
-            this.ws?.mp?.act("hurt");
-          }
-          this.hud.toast(this.combat.isDown ? (this.ws ? "你倒下了…" : "你倒下了…（測試規則：2 秒後在營地復活）") : `受到${m.instance.definition.name}攻擊 -${dmg}`, 900);
+          if (this.curSpeed < 0.05 && this.avatar.state !== "Attack") this.pending.hurt = true;
+          if (this.combat.isDown || !this.fx) this.hud.toast(this.combat.isDown ? (this.ws ? "你倒下了…" : "你倒下了…（測試規則：2 秒後在營地復活）") : `受到${m.instance.definition.name}攻擊 -${dmg}`, 900);
         }
       }
     }
-    const alive = this.monsters.filter((m) => m.instance.isAlive).map((m) => m.instance.currentPosition);
-    separate(alive, 1.0, { x: this.pos.x, z: this.pos.z, minDist: 0.85 });
+    // Stage 7.4：重複使用陣列（每幀不配置新陣列）
+    const alive = this.alivePos;
+    alive.length = 0;
+    for (const m of this.monsters) if (m.instance.isAlive) alive.push(m.instance.currentPosition);
+    this.sepPlayer.x = this.pos.x;
+    this.sepPlayer.z = this.pos.z;
+    separate(alive, 1.0, this.sepPlayer);
     for (const p of alive) p.y = this.terrain.surface(p.x, p.z);
-    const locked = this.combat.lockTarget(this.pos.x, this.pos.z, this.monsters.map((m) => m.instance));
+    const locked = this.combat.lockTarget(this.pos.x, this.pos.z, this.monsterInstances);
     if (locked) {
       const p = locked.currentPosition;
       this.lockRing.position.set(p.x, this.terrain.surface(p.x, p.z) + 0.03, p.z);
@@ -1289,6 +1397,7 @@ class StarsproutGame {
           stats: { ...self.stats },
           kills: self.kills,
           hits: self.hits,
+          gameTime: self.now,
           drops: self.dropCount,
           picked: self.picked,
           loot: self.loot.drops.length,
@@ -1309,11 +1418,16 @@ class StarsproutGame {
               z: m.instance.currentPosition.z,
               speed: Math.round(m.groundSpeed * 100) / 100,
               attacks: { ...m.instance.attackLog },
-              ...(v ? { rig: { clip: v.clip, ratio: Math.round(v.ratio * 1000) / 1000, weights: v.weights(), hpBar: v.hpBarVisible, hpBarY: v.hpBarWorldY, lod: v.asset?.lod ?? null, fixture: v.asset?.check.fixture ?? null, visible: v.root.isEnabled() } } : {}),
+              ...(v ? { rig: { clip: v.clip, ratio: Math.round(v.ratio * 1000) / 1000, weights: v.weights(), hpBar: v.hpBarVisible, hpBarY: v.hpBarWorldY, lod: v.asset?.lod ?? null, fixture: v.asset?.check.fixture ?? null, visible: v.root.isEnabled(), animMode: v.animMode, shadow: v.shadowCasting, manualSteps: v.manualSteps } } : {}),
+              tier: self.tiers.get(m) ?? null,
+              stride: m.visualStride,
+              visualUpdates: m.visualUpdates,
             };
           }),
           foxStatus: self.foxStatus,
           fieldMonsters: self.fieldStatus.map((x) => ({ ...x })),
+          monsterDetail: { on: self.detailOn, ...self.tierCount },
+          combatFx: self.fx ? { tier: self.fx.tier, ...self.fx.stats, damageShown: self.fx.numbers.shown, knockbacks: self.knockbacks, knockSkipped: self.knockSkipped } : null,
           pets: {
             enabled: p.enabled,
             mode: p.mode,
@@ -1333,6 +1447,12 @@ class StarsproutGame {
       toZone01: () => self.toZone01(),
       heal: () => {
         if (!self.combat.isDown) self.combat.hp = self.combat.tuning.maxHp;
+      },
+      setMonsterHp: (id, hp) => {
+        const m = self.monsters.find((x) => x.instance.instanceId === id);
+        if (!m || !m.instance.isAlive) return false;
+        m.instance.currentHp = Math.max(1, Math.floor(hp));
+        return true;
       },
       pet: {
         give: (item, n = 1) => p.giveItem(item, n),
@@ -1385,6 +1505,8 @@ class StarsproutGame {
         },
       },
       bench: (s) => self.bench(s),
+      // Stage 7.4：與「複製報告」相同的資料（CI 對照用）
+      perf: { session: () => self.perf.session(), reset: () => self.perf.resetSession() },
       world: self.ws
         ? {
             info: () => {

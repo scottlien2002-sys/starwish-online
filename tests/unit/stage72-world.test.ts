@@ -45,7 +45,7 @@ test("存檔：等級、經驗、外觀會存回、讀回；舊存檔補預設�
 
 test("Stage 7.2：M004～M007 出生區對應原本的 7 區配置；每種都有怪物資料與動畫設定", () => {
   const reg = createMonsterRegistry();
-  const expectLv: Record<string, number> = { "04": 7, "05": 8, "06": 9, "07": 10 };
+  const expectLv: Record<string, number> = { "02": 3, "03": 5, "04": 7, "05": 8, "06": 9, "07": 10 };
   for (const { zoneId, spec } of FIELD_RIGGED_SPAWNS) {
     const zone = ZONES.find((z) => z.id === zoneId)!;
     assert.ok(zone, zoneId);
@@ -76,4 +76,19 @@ import { existsSync } from "node:fs";
 test("封存的 Tripo 新版初心者 GLB 不放在 public（預覽只部署已驗收的 C1.0-B5b）", () => {
   assert.equal(existsSync("public/models/novice72"), false);
   for (const g of ["male", "female"]) for (const l of ["hq", "lite"]) assert.ok(existsSync(`public/models/novice_c10b5b_${g}_${l}.glb`), `${g} ${l}`);
+});
+
+// ---------------- Stage 7.3：技能不能穿越不可通行地形 ----------------
+import { FieldTerrainQuery } from "../../src/game/fieldTerrainQuery.ts";
+test("Stage 7.3 FieldTerrainQuery：被岩石、溪流擋住就停在前面；跳躍也不能越過；可走的路照常移動", () => {
+  const river = (x: number) => x > 10 && x < 12; // 溪流
+  const q = new FieldTerrainQuery({ walkable: (x) => !river(x) }, [{ x: 5, z: 0, r: 1 }]);
+  assert.equal(q.canStand(0, 0, 0.4), true);
+  assert.equal(q.canStand(5, 0, 0.4), false);
+  const a = q.clampMove({ x: 0, z: 0 }, { x: 8, z: 0 }, 0.4); // 直衝岩石
+  assert.ok(a.x < 5 - 1.4 + 0.06 && a.x > 3.4, `停在岩石前 ${a.x}`);
+  const b = q.clampMove({ x: 7, z: 0 }, { x: 14, z: 0 }, 0.4); // 跳過溪流 → 不行
+  assert.ok(b.x <= 10 && b.x > 9.9, `停在溪流前 ${b.x}`);
+  const c = q.clampMove({ x: 0, z: 3 }, { x: 8, z: 3 }, 0.4); // 旁邊的路
+  assert.deepEqual([Math.round(c.x * 100) / 100, c.z], [8, 3]);
 });

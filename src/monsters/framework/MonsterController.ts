@@ -22,6 +22,15 @@ export class MonsterController {
   /** 測試頁手動移動怪物時指定地面速度（null = 依 AI 實際位移計算） */
   speedOverride: number | null = null;
   private seenHitSeq = 0;
+  /**
+   * Stage 7.4 距離分級：視覺（姿勢、動畫、血條）每幾幀更新一次。1＝每幀；N＝每 N 幀（期間的時間累計後一次補上）；0＝暫停（視野外）。
+   * AI、狀態機、攻擊命中、死亡重生都在上面照常每幀計算；狀態切換、受擊、特效事件也每幀送給視覺 → 遊戲規則不受影響。
+   */
+  visualStride = 1;
+  private strideCount = 0;
+  private visAccum = 0;
+  /** 測試用：實際呼叫視覺 update 的次數 */
+  visualUpdates = 0;
 
   constructor(instance: MonsterInstance, profile: MonsterAnimationProfile, visual: IMonsterVisual | null, brain: MonsterBrain | null) {
     this.instance = instance;
@@ -64,8 +73,16 @@ export class MonsterController {
       v.setHealth?.(this.instance.currentHp, this.instance.definition.maxHp);
       for (const s of frame.entered) v.onStateEnter(s);
       for (const e of frame.effects) v.playEffect(e);
-      v.applyPose(frame.pose);
-      v.update(dt);
+      this.visAccum += dt;
+      const stride = this.visualStride;
+      // 狀態剛切換的那一幀一定更新（例如死亡、重生的第一格：重生時重新顯示），即使畫面外（間隔 0）；之後再依間隔
+      if ((stride > 0 && ++this.strideCount >= stride) || frame.entered.length > 0) {
+        this.strideCount = 0;
+        v.applyPose(frame.pose);
+        v.update(this.visAccum);
+        this.visAccum = 0;
+        this.visualUpdates++;
+      }
     }
     return frame;
   }
