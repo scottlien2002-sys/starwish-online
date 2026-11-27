@@ -5,6 +5,7 @@ src, out = argv[0], argv[1]
 os.makedirs(out, exist_ok=True)
 # 目標面數：Lite 約 5,000、遠距約 2,000（佈告欄沒有遠距）
 TARGET = {"lite": 5000, "far": 2000}
+# 佈告欄：lite＝5,000（高畫質使用）、far＝2,500（中低畫質使用）；守住村莊每幀三角面標準
 report = {}
 for fn in sorted(os.listdir(src)):
     if not fn.endswith(".obj"):
@@ -12,7 +13,7 @@ for fn in sorted(os.listdir(src)):
     key = fn[:-4]
     for lv, tgt in TARGET.items():
         if key == "board" and lv == "far":
-            continue
+            tgt = 2500
         bpy.ops.wm.read_factory_settings(use_empty=True)
         bpy.ops.wm.obj_import(filepath=os.path.join(src, fn))
         ob = bpy.context.selected_objects[0]
