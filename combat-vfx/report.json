@@ -1,0 +1,1560 @@
+{
+  "startedAt": "2026-11-27T18:02:05.570Z",
+  "note": "FPS 為 CI 軟體繪圖（無 GPU）數字，不代表 iPhone 效能",
+  "runs": [
+    {
+      "browser": "chromium",
+      "case": "perf",
+      "checks": {
+        "載入：6 隻骨骼動畫怪物（M002～M007）且檔案檢查通過": {
+          "ok": true,
+          "detail": [
+            {
+              "l": "M002 苔角獸",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M003 雲絨鳥",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M004 風羽狐",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M005 星雲咩咩",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M006 胡蘿蔔大王",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M007 王冠重錘兔",
+              "ok": true,
+              "e": []
+            }
+          ]
+        },
+        "載入：初心者 C1.0-B5b（非 Tripo 組裝）": {
+          "ok": true,
+          "detail": {
+            "triangles": 40381,
+            "gender": "male"
+          }
+        },
+        "效能：比較條件一致（同人數時三種做法的可見人數相同）": {
+          "ok": false,
+          "detail": {
+            "4": [
+              3,
+              null,
+              null
+            ],
+            "8": [
+              5,
+              null,
+              null
+            ],
+            "16": [
+              9,
+              null,
+              null
+            ],
+            "32": [
+              17,
+              null,
+              null
+            ]
+          }
+        },
+        "效能：32 人時遠距離版有啟用（後兩排切成遠距離版）": {
+          "ok": true,
+          "detail": {
+            "near": 16,
+            "far": 15
+          }
+        },
+        "效能：32 人靜態時 Stage 3 三角面比 Stage 2 少 25% 以上": {
+          "ok": false,
+          "detail": {
+            "stage3": 750785
+          }
+        },
+        "效能：32 人時 Stage 3 的 Draw Call 不比 Stage 2 多（合併繪製保留）": {
+          "ok": false,
+          "detail": {
+            "stage3": 139
+          }
+        },
+        "效能：32 人時 Stage 3 的 Draw Call 比 Stage 1 做法少一半以上": {
+          "ok": false,
+          "detail": {
+            "stage3": 139
+          }
+        },
+        "沒有頁面錯誤": {
+          "ok": true,
+          "detail": []
+        }
+      },
+      "errors": [],
+      "results": {
+        "loadMs": 870,
+        "loaded": {
+          "tier": "medium",
+          "gender": "male",
+          "monsters": [
+            {
+              "idx": 0,
+              "label": "M002 苔角獸",
+              "level": 3,
+              "behaviour": "passive",
+              "angry": 0,
+              "moving": false,
+              "hp": 600,
+              "state": "idle",
+              "pos": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "home": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "check": {
+                "file": "monsters/m002/M002_MossHornBeast_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 0.64,
+                  "Run": 0.44,
+                  "Attack": 1.3,
+                  "Hurt": 0.45,
+                  "Death": 0.8,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 204
+              }
+            },
+            {
+              "idx": 1,
+              "label": "M003 雲絨鳥",
+              "level": 5,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 750,
+              "state": "idle",
+              "pos": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "home": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "check": {
+                "file": "monsters/m003/M003_CloudFluffBird_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 19,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 1.25,
+                  "Move": 0.8,
+                  "Run": 0.5,
+                  "Attack": 1.1,
+                  "Hurt": 0.45,
+                  "Death": 1,
+                  "Respawn": 0.9
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 354
+              }
+            },
+            {
+              "idx": 2,
+              "label": "M004 風羽狐",
+              "level": 7,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 900,
+              "state": "idle",
+              "pos": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "home": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "check": {
+                "file": "monsters/m004/M004_WindfeatherFox_Rig_V1_1_Lite.glb",
+                "ok": true,
+                "joints": 32,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2,
+                  "Move": 0.8,
+                  "Run": 0.38,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.7,
+                  "Respawn": 0.5
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 273
+              }
+            },
+            {
+              "idx": 3,
+              "label": "M005 星雲咩咩",
+              "level": 8,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1100,
+              "state": "idle",
+              "pos": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "home": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "check": {
+                "file": "monsters/m005/M005_NebulaSheep_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.6,
+                  "Run": 0.42,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.75,
+                  "Respawn": 0.6
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 241
+              }
+            },
+            {
+              "idx": 4,
+              "label": "M006 胡蘿蔔大王",
+              "level": 9,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1800,
+              "state": "idle",
+              "pos": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "home": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "check": {
+                "file": "monsters/m006/M006_CarrotKing_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.9,
+                  "Run": 0.5,
+                  "Attack": 1.3,
+                  "Hurt": 0.5,
+                  "Death": 0.9,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 328
+              }
+            },
+            {
+              "idx": 5,
+              "label": "M007 王冠重錘兔",
+              "level": 10,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 4200,
+              "state": "idle",
+              "pos": [
+                0,
+                10
+              ],
+              "home": [
+                0,
+                10
+              ],
+              "check": {
+                "file": "monsters/m007/M007_CrownHammerRabbit_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 29,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 1.1,
+                  "Run": 0.62,
+                  "Attack": 2,
+                  "Hurt": 0.6,
+                  "Death": 1.6,
+                  "Respawn": 1.1
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 301
+              }
+            }
+          ],
+          "vfx": {
+            "meshFx": 0,
+            "particles": 0,
+            "projectiles": 0,
+            "spawned": 0,
+            "materials": 0,
+            "pooledMeshes": 0,
+            "pooledSystems": 0
+          },
+          "budget": {
+            "active": 0,
+            "activeRemote": 0,
+            "particles": 0,
+            "granted": 0,
+            "denied": 0,
+            "scaled": 0,
+            "deniedBy": {}
+          },
+          "damageShown": 0,
+          "audioPlayed": 0,
+          "triangles": 40381,
+          "ghosts": 0,
+          "player": {
+            "x": 0,
+            "z": 0,
+            "yaw": 0
+          },
+          "demoStats": {
+            "attack": 40,
+            "critRate": 0.2,
+            "critMult": 1.6,
+            "spread": 0.1,
+            "note": "展示用測試值（不是正式平衡）"
+          }
+        },
+        "perfMatrix": [
+          {
+            "mode": "stage3",
+            "players": 4,
+            "phase": "static",
+            "scene": {
+              "players": 4,
+              "visiblePlayers": 3,
+              "nearPlayers": 2,
+              "farPlayers": 1,
+              "ghostTriangles": 96891
+            },
+            "fps": 3.252032520325203,
+            "avg10s": 3.0911032640550746,
+            "low1": 2.2070182885222454,
+            "draws": 109,
+            "frames": 11,
+            "activeMeshes": 61,
+            "triangles": 363266,
+            "particles": 0,
+            "meshFx": 0,
+            "projectiles": 0,
+            "materials": 77,
+            "textures": 48,
+            "meshes": 124,
+            "jsHeapMB": 92.2,
+            "perfMode": "stage3",
+            "visiblePlayers": 3,
+            "nearPlayers": 2,
+            "farPlayers": 1,
+            "ghostTriangles": 96891,
+            "lodFarM": 14,
+            "viewport": [
+              932,
+              430
+            ]
+          },
+          {
+            "mode": "stage3",
+            "players": 4,
+            "phase": "active",
+            "fps": 4.981733643308257,
+            "avg10s": 4.574266497379162,
+            "low1": 3.5587188612099645,
+            "draws": 60,
+            "frames": 42,
+            "activeMeshes": 62,
+            "triangles": 181637,
+            "particles": 11,
+            "meshFx": 1,
+            "projectiles": 0,
+            "materials": 87,
+            "textures": 57,
+            "meshes": 135,
+            "jsHeapMB": 100.9,
+            "perfMode": "stage3",
+            "visiblePlayers": 3,
+            "nearPlayers": 2,
+            "farPlayers": 1,
+            "ghostTriangles": 96891,
+            "lodFarM": 14,
+            "viewport": [
+              932,
+              430
+            ]
+          },
+          {
+            "mode": "stage3",
+            "players": 8,
+            "phase": "static",
+            "scene": {
+              "players": 8,
+              "visiblePlayers": 5,
+              "nearPlayers": 4,
+              "farPlayers": 3,
+              "ghostTriangles": 211551
+            },
+            "fps": 3.971931682775424,
+            "avg10s": 3.8818799225751315,
+            "low1": 2.962085254504936,
+            "draws": 67,
+            "frames": 14,
+            "activeMeshes": 73,
+            "triangles": 262937,
+            "particles": 3,
+            "meshFx": 0,
+            "projectiles": 0,
+            "materials": 91,
+            "textures": 63,
+            "meshes": 195,
+            "jsHeapMB": 118.8,
+            "perfMode": "stage3",
+            "visiblePlayers": 5,
+            "nearPlayers": 4,
+            "farPlayers": 3,
+            "ghostTriangles": 211551,
+            "lodFarM": 14,
+            "viewport": [
+              932,
+              430
+            ]
+          },
+          {
+            "mode": "stage3",
+            "players": 8,
+            "phase": "active",
+            "fps": 3.7972280235431497,
+            "avg10s": 3.8668098501595938,
+            "low1": 2.450379772222663,
+            "draws": 77,
+            "frames": 36,
+            "activeMeshes": 79,
+            "triangles": 263807,
+            "particles": 3,
+            "meshFx": 4,
+            "projectiles": 1,
+            "materials": 93,
+            "textures": 71,
+            "meshes": 206,
+            "jsHeapMB": 96.1,
+            "perfMode": "stage3",
+            "visiblePlayers": 5,
+            "nearPlayers": 4,
+            "farPlayers": 3,
+            "ghostTriangles": 211551,
+            "lodFarM": 14,
+            "viewport": [
+              932,
+              430
+            ]
+          },
+          {
+            "mode": "stage3",
+            "players": 16,
+            "phase": "static",
+            "scene": {
+              "players": 16,
+              "visiblePlayers": 9,
+              "nearPlayers": 8,
+              "farPlayers": 7,
+              "ghostTriangles": 440871
+            },
+            "fps": 2.7605244996549345,
+            "avg10s": 2.69519981359956,
+            "low1": 2.140869164917944,
+            "draws": 101,
+            "frames": 10,
+            "activeMeshes": 104,
+            "triangles": 430749,
+            "particles": 3,
+            "meshFx": 5,
+            "projectiles": 0,
+            "materials": 108,
+            "textures": 88,
+            "meshes": 330,
+            "jsHeapMB": 163.8,
+            "perfMode": "stage3",
+            "visiblePlayers": 9,
+            "nearPlayers": 8,
+            "farPlayers": 7,
+            "ghostTriangles": 440871,
+            "lodFarM": 14,
+            "viewport": [
+              932,
+              430
+            ]
+          },
+          {
+            "mode": "stage3",
+            "players": 16,
+            "phase": "active",
+            "fps": 2.782028098484155,
+            "avg10s": 2.7285702414340838,
+            "low1": 1.8362101447472443,
+            "draws": 111,
+            "frames": 26,
+            "activeMeshes": 118,
+            "triangles": 425593,
+            "particles": 3,
+            "meshFx": 8,
+            "projectiles": 0,
+            "materials": 110,
+            "textures": 104,
+            "meshes": 346,
+            "jsHeapMB": 194.9,
+            "perfMode": "stage3",
+            "visiblePlayers": 9,
+            "nearPlayers": 8,
+            "farPlayers": 7,
+            "ghostTriangles": 440871,
+            "lodFarM": 14,
+            "viewport": [
+              932,
+              430
+            ]
+          },
+          {
+            "mode": "stage3",
+            "players": 32,
+            "phase": "static",
+            "scene": {
+              "players": 32,
+              "visiblePlayers": 17,
+              "nearPlayers": 16,
+              "farPlayers": 15,
+              "ghostTriangles": 899511
+            },
+            "fps": 1.7627357659089071,
+            "avg10s": 1.6714821416966748,
+            "low1": 1.3109596434228177,
+            "draws": 139,
+            "frames": 7,
+            "activeMeshes": 151,
+            "triangles": 750785,
+            "particles": 3,
+            "meshFx": 3,
+            "projectiles": 0,
+            "materials": 126,
+            "textures": 135,
+            "meshes": 586,
+            "jsHeapMB": 222,
+            "perfMode": "stage3",
+            "visiblePlayers": 17,
+            "nearPlayers": 16,
+            "farPlayers": 15,
+            "ghostTriangles": 899511,
+            "lodFarM": 14,
+            "viewport": [
+              932,
+              430
+            ]
+          },
+          {
+            "mode": "stage3",
+            "players": 32,
+            "phase": "active",
+            "fps": 1.5227653418606573,
+            "avg10s": 1.667100786298149,
+            "low1": 1.0209290454313424,
+            "draws": 139,
+            "frames": 16,
+            "activeMeshes": 155,
+            "triangles": 750785,
+            "particles": 3,
+            "meshFx": 5,
+            "projectiles": 0,
+            "materials": 129,
+            "textures": 167,
+            "meshes": 592,
+            "jsHeapMB": 194.1,
+            "perfMode": "stage3",
+            "visiblePlayers": 17,
+            "nearPlayers": 16,
+            "farPlayers": 15,
+            "ghostTriangles": 899511,
+            "lodFarM": 14,
+            "viewport": [
+              932,
+              430
+            ]
+          },
+          {
+            "mode": "stage3vis",
+            "players": 4,
+            "phase": "static",
+            "scene": {
+              "players": 4,
+              "visiblePlayers": 4,
+              "nearPlayers": 2,
+              "farPlayers": 1,
+              "ghostTriangles": 96891
+            },
+            "fps": 4.017677782242115,
+            "avg10s": 3.8159616508963463,
+            "low1": 2.5233409810812573,
+            "draws": 115,
+            "frames": 14,
+            "activeMeshes": 64,
+            "triangles": 397336,
+            "particles": 0,
+            "meshFx": 0,
+            "projectiles": 0,
+            "materials": 77,
+            "textures": 48,
+            "meshes": 124,
+            "jsHeapMB": 94.8,
+            "perfMode": "stage3",
+            "visiblePlayers": 4,
+            "nearPlayers": 2,
+            "farPlayers": 1,
+            "ghostTriangles": 96891,
+            "lodFarM": 14,
+            "viewport": [
+              932,
+              430
+            ]
+          },
+          {
+            "mode": "stage3vis",
+            "players": 4,
+            "phase": "active",
+            "fps": 4.685303763861201,
+            "avg10s": 4.335244462199995,
+            "low1": 3.320052986294852,
+            "draws": 66,
+            "frames": 40,
+            "activeMeshes": 66,
+            "triangles": 199526,
+            "particles": 15,
+            "meshFx": 2,
+            "projectiles": 0,
+            "materials": 87,
+            "textures": 57,
+            "meshes": 135,
+            "jsHeapMB": 105.2,
+            "perfMode": "stage3",
+            "visiblePlayers": 4,
+            "nearPlayers": 2,
+            "farPlayers": 1,
+            "ghostTriangles": 96891,
+            "lodFarM": 14,
+            "viewport": [
+              932,
+              430
+            ]
+          },
+          {
+            "mode": "stage3vis",
+            "players": 8,
+            "phase": "static",
+            "scene": {
+              "players": 8,
+              "visiblePlayers": 8,
+              "nearPlayers": 4,
+              "farPlayers": 3,
+              "ghostTriangles": 211551
+            },
+            "fps": 3.5498757543484514,
+            "avg10s": 3.41988271015525,
+            "low1": 2.9726516591665453,
+            "draws": 76,
+            "frames": 13,
+            "activeMeshes": 82,
+            "triangles": 315256,
+            "particles": 7,
+            "meshFx": 0,
+            "projectiles": 0,
+            "materials": 91,
+            "textures": 63,
+            "meshes": 195,
+            "jsHeapMB": 114.1,
+            "perfMode": "stage3",
+            "visiblePlayers": 8,
+            "nearPlayers": 4,
+            "farPlayers": 3,
+            "ghostTriangles": 211551,
+            "lodFarM": 14,
+            "viewport": [
+              932,
+              430
+            ]
+          },
+          {
+            "mode": "stage3vis",
+            "players": 8,
+            "phase": "active",
+            "fps": 3.4548281223007766,
+            "avg10s": 3.458711652734869,
+            "low1": 2.575991675823774,
+            "draws": 88,
+            "frames": 32,
+            "activeMeshes": 91,
+            "triangles": 316980,
+            "particles": 7,
+            "meshFx": 5,
+            "projectiles": 1,
+            "materials": 93,
+            "textures": 71,
+            "meshes": 206,
+            "jsHeapMB": 142.9,
+            "perfMode": "stage3",
+            "visiblePlayers": 8,
+            "nearPlayers": 4,
+            "farPlayers": 3,
+            "ghostTriangles": 211551,
+            "lodFarM": 14,
+            "viewport": [
+              932,
+              430
+            ]
+          },
+          {
+            "mode": "stage3vis",
+            "players": 16,
+            "phase": "static",
+            "scene": {
+              "players": 16,
+              "visiblePlayers": 16,
+              "nearPlayers": 8,
+              "farPlayers": 7,
+              "ghostTriangles": 440871
+            },
+            "fps": 2.2970024118526555,
+            "avg10s": 2.223272089400737,
+            "low1": 1.9193857965451055,
+            "draws": 118,
+            "frames": 8,
+            "activeMeshes": 123,
+            "triangles": 551040,
+            "particles": 7,
+            "meshFx": 3,
+            "projectiles": 1,
+            "materials": 103,
+            "textures": 87,
+            "meshes": 329,
+            "jsHeapMB": 169.1,
+            "perfMode": "stage3",
+            "visiblePlayers": 16,
+            "nearPlayers": 8,
+            "farPlayers": 7,
+            "ghostTriangles": 440871,
+            "lodFarM": 14,
+            "viewport": [
+              932,
+              430
+            ]
+          },
+          {
+            "mode": "stage3vis",
+            "players": 16,
+            "phase": "active",
+            "fps": 2.2686025408349058,
+            "avg10s": 2.2471910332516303,
+            "low1": 1.6061677468889812,
+            "draws": 122,
+            "frames": 21,
+            "activeMeshes": 131,
+            "triangles": 548460,
+            "particles": 7,
+            "meshFx": 5,
+            "projectiles": 0,
+            "materials": 104,
+            "textures": 103,
+            "meshes": 338,
+            "jsHeapMB": 217,
+            "perfMode": "stage3",
+            "visiblePlayers": 16,
+            "nearPlayers": 8,
+            "farPlayers": 7,
+            "ghostTriangles": 440871,
+            "lodFarM": 14,
+            "viewport": [
+              932,
+              430
+            ]
+          },
+          {
+            "mode": "stage3vis",
+            "players": 32,
+            "phase": "static",
+            "scene": {
+              "players": 32,
+              "visiblePlayers": 32,
+              "nearPlayers": 16,
+              "farPlayers": 15,
+              "ghostTriangles": 899511
+            },
+            "fps": 1.3635124079628693,
+            "avg10s": 1.3187392852433075,
+            "low1": 1.1831518996181114,
+            "draws": 180,
+            "frames": 5,
+            "activeMeshes": 194,
+            "triangles": 1014800,
+            "particles": 7,
+            "meshFx": 2,
+            "projectiles": 0,
+            "materials": 120,
+            "textures": 134,
+            "meshes": 578,
+            "jsHeapMB": 232.9,
+            "perfMode": "stage3",
+            "visiblePlayers": 32,
+            "nearPlayers": 16,
+            "farPlayers": 15,
+            "ghostTriangles": 899511,
+            "lodFarM": 14,
+            "viewport": [
+              932,
+              430
+            ]
+          },
+          {
+            "mode": "stage3vis",
+            "players": 32,
+            "phase": "active",
+            "fps": 1.364256480218281,
+            "avg10s": 1.3039902228160969,
+            "low1": 0.864902302570107,
+            "draws": 184,
+            "frames": 13,
+            "activeMeshes": 198,
+            "triangles": 1014808,
+            "particles": 7,
+            "meshFx": 6,
+            "projectiles": 0,
+            "materials": 123,
+            "textures": 167,
+            "meshes": 584,
+            "jsHeapMB": 259,
+            "perfMode": "stage3",
+            "visiblePlayers": 32,
+            "nearPlayers": 16,
+            "farPlayers": 15,
+            "ghostTriangles": 899511,
+            "lodFarM": 14,
+            "viewport": [
+              932,
+              430
+            ]
+          }
+        ],
+        "lodDebug": [
+          {
+            "mode": "stage3",
+            "dbg": {
+              "toggle": "enable",
+              "far": true,
+              "meshes": [
+                {
+                  "name": "__root__#10",
+                  "enabled": false,
+                  "visible": true,
+                  "ready": true,
+                  "verts": 0,
+                  "indices": 0,
+                  "inFrustum": true,
+                  "active": false,
+                  "bbMin": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "bbMax": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "abs": [
+                    -0.75,
+                    0,
+                    8
+                  ],
+                  "parent": "cavatar_10",
+                  "skeleton": null,
+                  "material": null,
+                  "visibility": 1
+                },
+                {
+                  "name": "face__face_male#10",
+                  "enabled": false,
+                  "visible": true,
+                  "ready": true,
+                  "verts": 2939,
+                  "indices": 17622,
+                  "subMeshes": [
+                    [
+                      0,
+                      2939,
+                      0,
+                      17622
+                    ]
+                  ],
+                  "inFrustum": true,
+                  "active": false,
+                  "bbMin": [
+                    -0.2,
+                    0.56,
+                    -0.23
+                  ],
+                  "bbMax": [
+                    0.2,
+                    1.07,
+                    0.17
+                  ],
+                  "abs": [
+                    -0.75,
+                    0,
+                    8
+                  ],
+                  "parent": "rig_male#10",
+                  "skeleton": "rig_male#10",
+                  "material": "face_male",
+                  "visibility": 1
+                },
+                {
+                  "name": "body_merged#10",
+                  "enabled": false,
+                  "visible": true,
+                  "ready": true,
+                  "verts": 16306,
+                  "indices": 103521,
+                  "subMeshes": [
+                    [
+                      0,
+                      16306,
+                      0,
+                      103521
+                    ]
+                  ],
+                  "inFrustum": true,
+                  "active": false,
+                  "bbMin": [
+                    -0.32,
+                    -0.01,
+                    -0.29
+                  ],
+                  "bbMax": [
+                    0.32,
+                    1.24,
+                    0.19
+                  ],
+                  "abs": [
+                    -0.75,
+                    0,
+                    8
+                  ],
+                  "parent": "rig_male#10",
+                  "skeleton": "rig_male#10",
+                  "material": "remote_body_vertexcolor",
+                  "visibility": 1
+                },
+                {
+                  "name": "face_far#10",
+                  "enabled": false,
+                  "visible": true,
+                  "ready": true,
+                  "verts": 2939,
+                  "indices": 7044,
+                  "subMeshes": [
+                    [
+                      0,
+                      2939,
+                      0,
+                      7044
+                    ]
+                  ],
+                  "inFrustum": true,
+                  "active": false,
+                  "bbMin": [
+                    -0.2,
+                    0.56,
+                    -0.23
+                  ],
+                  "bbMax": [
+                    0.2,
+                    1.07,
+                    0.17
+                  ],
+                  "abs": [
+                    -0.75,
+                    0,
+                    8
+                  ],
+                  "parent": "rig_male#10",
+                  "skeleton": "rig_male#10",
+                  "material": "face_male",
+                  "visibility": 1
+                },
+                {
+                  "name": "body_far#10",
+                  "enabled": false,
+                  "visible": true,
+                  "ready": true,
+                  "verts": 16306,
+                  "indices": 42621,
+                  "subMeshes": [
+                    [
+                      0,
+                      16306,
+                      0,
+                      42621
+                    ]
+                  ],
+                  "inFrustum": true,
+                  "active": false,
+                  "bbMin": [
+                    -0.32,
+                    -0.01,
+                    -0.29
+                  ],
+                  "bbMax": [
+                    0.32,
+                    1.24,
+                    0.19
+                  ],
+                  "abs": [
+                    -0.75,
+                    0,
+                    8
+                  ],
+                  "parent": "rig_male#10",
+                  "skeleton": "rig_male#10",
+                  "material": "remote_body_vertexcolor",
+                  "visibility": 1
+                }
+              ]
+            }
+          },
+          {
+            "mode": "stage3vis",
+            "dbg": {
+              "toggle": "visible",
+              "far": true,
+              "meshes": [
+                {
+                  "name": "__root__#10",
+                  "enabled": true,
+                  "visible": false,
+                  "ready": true,
+                  "verts": 0,
+                  "indices": 0,
+                  "inFrustum": true,
+                  "active": false,
+                  "bbMin": [
+                    -0.75,
+                    0,
+                    8
+                  ],
+                  "bbMax": [
+                    -0.75,
+                    0,
+                    8
+                  ],
+                  "abs": [
+                    -0.75,
+                    0,
+                    8
+                  ],
+                  "parent": "cavatar_10",
+                  "skeleton": null,
+                  "material": null,
+                  "visibility": 1
+                },
+                {
+                  "name": "face__face_male#10",
+                  "enabled": true,
+                  "visible": false,
+                  "ready": true,
+                  "verts": 2939,
+                  "indices": 17622,
+                  "subMeshes": [
+                    [
+                      0,
+                      2939,
+                      0,
+                      17622
+                    ]
+                  ],
+                  "inFrustum": true,
+                  "active": false,
+                  "bbMin": [
+                    -0.95,
+                    0.56,
+                    7.83
+                  ],
+                  "bbMax": [
+                    -0.55,
+                    1.07,
+                    8.23
+                  ],
+                  "abs": [
+                    -0.75,
+                    0,
+                    8
+                  ],
+                  "parent": "rig_male#10",
+                  "skeleton": "rig_male#10",
+                  "material": "face_male",
+                  "visibility": 1
+                },
+                {
+                  "name": "body_merged#10",
+                  "enabled": true,
+                  "visible": false,
+                  "ready": true,
+                  "verts": 16306,
+                  "indices": 103521,
+                  "subMeshes": [
+                    [
+                      0,
+                      16306,
+                      0,
+                      103521
+                    ]
+                  ],
+                  "inFrustum": true,
+                  "active": false,
+                  "bbMin": [
+                    -1.07,
+                    -0.01,
+                    7.81
+                  ],
+                  "bbMax": [
+                    -0.43,
+                    1.24,
+                    8.29
+                  ],
+                  "abs": [
+                    -0.75,
+                    0,
+                    8
+                  ],
+                  "parent": "rig_male#10",
+                  "skeleton": "rig_male#10",
+                  "material": "remote_body_vertexcolor",
+                  "visibility": 1
+                },
+                {
+                  "name": "face_far#10",
+                  "enabled": true,
+                  "visible": true,
+                  "ready": true,
+                  "verts": 2939,
+                  "indices": 7044,
+                  "subMeshes": [
+                    [
+                      0,
+                      2939,
+                      0,
+                      7044
+                    ]
+                  ],
+                  "inFrustum": true,
+                  "active": true,
+                  "bbMin": [
+                    -0.95,
+                    0.56,
+                    7.83
+                  ],
+                  "bbMax": [
+                    -0.55,
+                    1.07,
+                    8.23
+                  ],
+                  "abs": [
+                    -0.75,
+                    0,
+                    8
+                  ],
+                  "parent": "rig_male#10",
+                  "skeleton": "rig_male#10",
+                  "material": "face_male",
+                  "visibility": 1
+                },
+                {
+                  "name": "body_far#10",
+                  "enabled": true,
+                  "visible": true,
+                  "ready": true,
+                  "verts": 16306,
+                  "indices": 42621,
+                  "subMeshes": [
+                    [
+                      0,
+                      16306,
+                      0,
+                      42621
+                    ]
+                  ],
+                  "inFrustum": true,
+                  "active": true,
+                  "bbMin": [
+                    -1.07,
+                    -0.01,
+                    7.81
+                  ],
+                  "bbMax": [
+                    -0.43,
+                    1.24,
+                    8.29
+                  ],
+                  "abs": [
+                    -0.75,
+                    0,
+                    8
+                  ],
+                  "parent": "rig_male#10",
+                  "skeleton": "rig_male#10",
+                  "material": "remote_body_vertexcolor",
+                  "visibility": 1
+                }
+              ]
+            }
+          }
+        ],
+        "final": {
+          "tier": "medium",
+          "gender": "male",
+          "monsters": [
+            {
+              "idx": 0,
+              "label": "M002 苔角獸",
+              "level": 3,
+              "behaviour": "passive",
+              "angry": 0,
+              "moving": false,
+              "hp": 600,
+              "state": "idle",
+              "pos": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "home": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "check": {
+                "file": "monsters/m002/M002_MossHornBeast_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 0.64,
+                  "Run": 0.44,
+                  "Attack": 1.3,
+                  "Hurt": 0.45,
+                  "Death": 0.8,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 186
+              }
+            },
+            {
+              "idx": 1,
+              "label": "M003 雲絨鳥",
+              "level": 5,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 750,
+              "state": "idle",
+              "pos": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "home": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "check": {
+                "file": "monsters/m003/M003_CloudFluffBird_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 19,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 1.25,
+                  "Move": 0.8,
+                  "Run": 0.5,
+                  "Attack": 1.1,
+                  "Hurt": 0.45,
+                  "Death": 1,
+                  "Respawn": 0.9
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 213
+              }
+            },
+            {
+              "idx": 2,
+              "label": "M004 風羽狐",
+              "level": 7,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 900,
+              "state": "idle",
+              "pos": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "home": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "check": {
+                "file": "monsters/m004/M004_WindfeatherFox_Rig_V1_1_Lite.glb",
+                "ok": true,
+                "joints": 32,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2,
+                  "Move": 0.8,
+                  "Run": 0.38,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.7,
+                  "Respawn": 0.5
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 238
+              }
+            },
+            {
+              "idx": 3,
+              "label": "M005 星雲咩咩",
+              "level": 8,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1100,
+              "state": "idle",
+              "pos": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "home": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "check": {
+                "file": "monsters/m005/M005_NebulaSheep_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.6,
+                  "Run": 0.42,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.75,
+                  "Respawn": 0.6
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 262
+              }
+            },
+            {
+              "idx": 4,
+              "label": "M006 胡蘿蔔大王",
+              "level": 9,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1800,
+              "state": "idle",
+              "pos": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "home": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "check": {
+                "file": "monsters/m006/M006_CarrotKing_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.9,
+                  "Run": 0.5,
+                  "Attack": 1.3,
+                  "Hurt": 0.5,
+                  "Death": 0.9,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 286
+              }
+            },
+            {
+              "idx": 5,
+              "label": "M007 王冠重錘兔",
+              "level": 10,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 4200,
+              "state": "idle",
+              "pos": [
+                0,
+                10
+              ],
+              "home": [
+                0,
+                10
+              ],
+              "check": {
+                "file": "monsters/m007/M007_CrownHammerRabbit_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 29,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 1.1,
+                  "Run": 0.62,
+                  "Attack": 2,
+                  "Hurt": 0.6,
+                  "Death": 1.6,
+                  "Respawn": 1.1
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 311
+              }
+            }
+          ],
+          "vfx": {
+            "meshFx": 6,
+            "particles": 7,
+            "projectiles": 0,
+            "spawned": 40,
+            "materials": 18,
+            "pooledMeshes": 18,
+            "pooledSystems": 22
+          },
+          "budget": {
+            "active": 12,
+            "activeRemote": 12,
+            "particles": 145,
+            "granted": 77,
+            "denied": 70,
+            "scaled": 0,
+            "deniedBy": {
+              "remote-share": 70
+            }
+          },
+          "damageShown": 0,
+          "audioPlayed": 0,
+          "triangles": 40381,
+          "ghosts": 0,
+          "player": {
+            "x": 0,
+            "z": -2.2,
+            "yaw": 3.141592653589793
+          },
+          "demoStats": {
+            "attack": 40,
+            "critRate": 0.2,
+            "critMult": 1.6,
+            "spread": 0.1,
+            "note": "展示用測試值（不是正式平衡）"
+          }
+        }
+      }
+    }
+  ],
+  "failures": 4,
+  "finishedAt": "2026-11-27T18:04:43.537Z"
+}
