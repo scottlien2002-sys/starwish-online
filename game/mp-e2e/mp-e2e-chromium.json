@@ -1,0 +1,198 @@
+{
+  "browser": "chromium",
+  "checks": [
+    {
+      "name": "兩位玩家進入同一個星芽村房間",
+      "ok": true,
+      "detail": {
+        "room": "village-1"
+      }
+    },
+    {
+      "name": "A 看見 B 的 3D 角色（女、粉紅髮色、法杖；模組化零件）",
+      "ok": true,
+      "detail": {
+        "id": 2,
+        "name": "小願",
+        "loaded": true,
+        "state": "Idle",
+        "pos": [
+          10.8,
+          6.3
+        ],
+        "yaw": -2.094,
+        "link": 1,
+        "parts": 5,
+        "hairColor": "#c0408a",
+        "gender": "female"
+      }
+    },
+    {
+      "name": "B 看見 A 的 3D 角色（男、深棕髮色、短劍）",
+      "ok": true,
+      "detail": {
+        "id": 1,
+        "name": "阿星",
+        "loaded": true,
+        "state": "Idle",
+        "pos": [
+          6.2,
+          10.8
+        ],
+        "yaw": -2.618,
+        "link": 1,
+        "parts": 5,
+        "hairColor": "#3a2a1a",
+        "gender": "male"
+      }
+    },
+    {
+      "name": "本地角色外觀以伺服器資料建立（B 是女性、法杖）",
+      "ok": true,
+      "detail": {
+        "gender": "female",
+        "weapon": "staff"
+      }
+    },
+    {
+      "name": "一般移動沒有跳躍按鈕",
+      "ok": true
+    },
+    {
+      "name": "星芽村正式美術（Claude B Stage 6.7：Tripo NPC、N008 佈告欄、洛恩）載入完成",
+      "ok": true,
+      "detail": {
+        "art": "loaded"
+      }
+    },
+    {
+      "name": "B 看到 A 跑步（Run 動畫）",
+      "ok": true,
+      "detail": {
+        "states": [
+          "Idle",
+          "Run"
+        ]
+      }
+    },
+    {
+      "name": "遠端移動沒有瞬移（取樣間最大位移 < 5 m/s 對應距離的 2 倍）",
+      "ok": true,
+      "detail": {
+        "samples": 5,
+        "maxStepM": 0.5,
+        "maxApparentSpeed": 1.03,
+        "midState": "Run",
+        "midYaw": 2.087
+      }
+    },
+    {
+      "name": "A 停下後 B 看到 Idle",
+      "ok": true,
+      "detail": {
+        "state": "Idle"
+      }
+    },
+    {
+      "name": "B 看到 A 朝東跑（跑步中 yaw≈90°）且停下後朝向＝伺服器朝向",
+      "ok": true,
+      "detail": {
+        "lastRunYaw": 1.602,
+        "remoteYaw": 1.571,
+        "serverYaw": 1.571
+      }
+    },
+    {
+      "name": "B 畫面中 A 的位置＝伺服器權威位置（< 5 cm）",
+      "ok": true,
+      "detail": {
+        "errCm": 0
+      }
+    },
+    {
+      "name": "A 本地預測位置＝伺服器位置（< 5 cm）",
+      "ok": true,
+      "detail": {
+        "errCm": 0
+      }
+    },
+    {
+      "name": "N009 洛恩巡邏：兩位玩家看到的位置一致（< 0.5 m，伺服器時間）",
+      "ok": true,
+      "detail": {
+        "a": {
+          "x": -4.247537350154014,
+          "z": 9.929674035890939,
+          "paused": false
+        },
+        "b": {
+          "x": -4.1498578923394565,
+          "z": 9.970891608747332,
+          "paused": false
+        },
+        "gapM": 0.10601964342100917,
+        "server": {
+          "patrolT": 1795777231.386,
+          "at": 1795777231386,
+          "paused": false,
+          "tx": 0,
+          "tz": 0
+        }
+      }
+    },
+    {
+      "name": "E2E 執行完成",
+      "ok": false,
+      "detail": "page.waitForFunction: Timeout 420000ms exceeded.\n    at waitField (/home/runner/work/starwish-online/starwish-online/tests/e2e/run-mp-e2e.mjs:59:33)\n    at /home/runner/work/starwish-online/starwish-online/tests/e2e/run-mp-e2e.mjs:184:9"
+    }
+  ],
+  "samples": {
+    "loadRemoteMs": 374,
+    "moveSync": {
+      "samples": 5,
+      "maxStepM": 0.5,
+      "maxApparentSpeed": 1.03,
+      "midState": "Run",
+      "midYaw": 2.087
+    },
+    "roan": {
+      "a": {
+        "x": -4.247537350154014,
+        "z": 9.929674035890939,
+        "paused": false
+      },
+      "b": {
+        "x": -4.1498578923394565,
+        "z": 9.970891608747332,
+        "paused": false
+      },
+      "gapM": 0.10601964342100917,
+      "server": {
+        "patrolT": 1795777231.386,
+        "at": 1795777231386,
+        "paused": false,
+        "tx": 0,
+        "tz": 0
+      }
+    }
+  },
+  "consoleErrors": [],
+  "http404": [
+    "404 http://127.0.0.1:33281/asset-remap.json",
+    "404 http://127.0.0.1:33281/asset-remap.json"
+  ],
+  "remappedLoads": 0,
+  "startedAt": "2026-11-27T10:59:32.429Z",
+  "site": "http://127.0.0.1:33281",
+  "passed": 13,
+  "total": 14,
+  "serverLogTail": [
+    "[db] DATABASE_URL not set → in-memory store (data is lost on restart), realm=test",
+    "[2026-11-27T10:59:33.354Z] Starwish MP server listening on http/ws://127.0.0.1:2702",
+    "[2026-11-27T10:59:34.583Z] join pid=1 阿星 room=village-1",
+    "[2026-11-27T10:59:35.149Z] join pid=2 小願 room=village-1",
+    "[2026-11-27T11:08:33.138Z] disconnect pid=1 (grace 20000 ms)",
+    "[2026-11-27T11:08:33.140Z] disconnect pid=2 (grace 20000 ms)",
+    ""
+  ]
+}
