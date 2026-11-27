@@ -1,0 +1,33 @@
+{
+  "startedAt": "2026-11-27T19:47:37.200Z",
+  "browser": "chromium",
+  "benchSeconds": 60,
+  "note": "CI 軟體繪製，不是 iPhone；只比較相對變化",
+  "runs": [
+    {
+      "label": "A_stage73",
+      "url": "(預設)",
+      "ok": false,
+      "error": "page.waitForFunction: Timeout 180000ms exceeded.\n    at openField (/home/runner/work/starwish-online/starwish-online/tests/e2e/run-perf-compare.mjs:44:14)\n    at async file:///home/runner/work/starwish-online/starwish-online/tests/e2e/run-perf-compare.mjs:59:35"
+    },
+    {
+      "label": "B_stage74_off",
+      "url": "&mlod=0&shadowq=original",
+      "ok": false,
+      "error": "page.waitForFunction: Timeout 180000ms exceeded.\n    at openField (/home/runner/work/starwish-online/starwish-online/tests/e2e/run-perf-compare.mjs:44:14)\n    at async file:///home/runner/work/starwish-online/starwish-online/tests/e2e/run-perf-compare.mjs:59:35"
+    },
+    {
+      "label": "C_stage74",
+      "url": "(預設)",
+      "ok": false,
+      "error": "page.waitForFunction: Timeout 180000ms exceeded.\n    at openField (/home/runner/work/starwish-online/starwish-online/tests/e2e/run-perf-compare.mjs:44:14)\n    at async file:///home/runner/work/starwish-online/starwish-online/tests/e2e/run-perf-compare.mjs:59:35"
+    }
+  ],
+  "soak": {
+    "seconds": 180,
+    "ok": false,
+    "samples": [],
+    "error": "page.waitForFunction: Timeout 180000ms exceeded.\n    at openField (/home/runner/work/starwish-online/starwish-online/tests/e2e/run-perf-compare.mjs:44:14)\n    at async file:///home/runner/work/starwish-online/starwish-online/tests/e2e/run-perf-compare.mjs:88:35"
+  },
+  "finishedAt": "2026-11-27T20:05:31.832Z"
+}
