@@ -1,0 +1,1 @@
+import{Mr as e}from"./index-DyT3mOWo.js";var t=class extends e{constructor(e,t){super(e,t,3)}};export{t};
