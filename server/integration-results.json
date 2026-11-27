@@ -1,0 +1,219 @@
+{
+  "twoPlayers": {
+    "room": "village-1",
+    "remoteYawErrRadWhileRunningSouth": 0.001,
+    "remoteFinalPosErrCm": 0,
+    "localFinalPosErrCm": 0.04,
+    "serverPos": [
+      6.07,
+      7.1
+    ],
+    "aStats": {
+      "state": "online",
+      "map": "village",
+      "room": "village-1",
+      "pid": 1,
+      "rttMs": 0,
+      "rttAvgMs": 1,
+      "jitterMs": 0,
+      "bytesUpPerSec": 346,
+      "bytesDownPerSec": 2216,
+      "msgsUpPerSec": 9,
+      "msgsDownPerSec": 21,
+      "snapsPerSec": 20,
+      "players": 2,
+      "pendingInputs": 0,
+      "corrections": 13,
+      "lastCorrectionCm": 31,
+      "maxCorrectionCm": 32,
+      "snapCorrections": 0,
+      "reconnects": 0,
+      "lastResyncMs": 0,
+      "serverTick": 45,
+      "fps": 0,
+      "totalBytesUp": 1172,
+      "totalBytesDown": 5589
+    },
+    "bStats": {
+      "state": "online",
+      "map": "village",
+      "room": "village-1",
+      "pid": 2,
+      "rttMs": 0,
+      "rttAvgMs": 0,
+      "jitterMs": 0,
+      "bytesUpPerSec": 28,
+      "bytesDownPerSec": 2311,
+      "msgsUpPerSec": 1,
+      "msgsDownPerSec": 21,
+      "snapsPerSec": 20,
+      "players": 2,
+      "pendingInputs": 0,
+      "corrections": 0,
+      "lastCorrectionCm": 0,
+      "maxCorrectionCm": 0,
+      "snapCorrections": 0,
+      "reconnects": 0,
+      "lastResyncMs": 0,
+      "serverTick": 45,
+      "fps": 0,
+      "totalBytesUp": 137,
+      "totalBytesDown": 6053
+    }
+  },
+  "prediction": {
+    "lagOneWayMs": 120,
+    "jitterMs": 40,
+    "rttMs": 274,
+    "localResponseMs": 9,
+    "corrections": 0,
+    "maxCorrectionCm": 0,
+    "snapCorrections": 0,
+    "finalErrCm": 0,
+    "serverCounters": {
+      "stepsApplied": 181,
+      "stepsDropped": 0,
+      "staleEpochInputs": 0,
+      "duplicateSteps": 0,
+      "seqGaps": 0,
+      "illegalPositions": 0,
+      "speedViolations": 0,
+      "actsAccepted": 0,
+      "actsRejected": 0,
+      "stepsWhileDown": 0
+    }
+  },
+  "reconnect": {
+    "resyncMsFromDrop": 505,
+    "observerSawDisconnectMs": 62,
+    "samePid": true,
+    "finalErrCm": 0,
+    "reconnects": 1,
+    "clientCorrections": 0,
+    "snapCorrections": 0,
+    "serverResumed": 1
+  },
+  "graceExpiry": {
+    "savedPos": {
+      "x": 6.2,
+      "z": 8.32
+    },
+    "dbPos": [
+      6.2,
+      8.32
+    ],
+    "dbVersion": 3,
+    "respawnPos": [
+      6.2,
+      8.32
+    ]
+  },
+  "sessionLock": {
+    "replaced": 1,
+    "players": 1
+  },
+  "cheat": {
+    "speedHackSeconds": 3.03,
+    "movedM": 15.87,
+    "legitMaxM": 15.13,
+    "limitM": 18.13,
+    "stepsDropped": 1502,
+    "kickedAfterGarbage": true,
+    "badMessages": 60,
+    "posLegal": true,
+    "protocolMismatchRejected": true,
+    "foreignOriginRejected": true
+  },
+  "portal": {
+    "walkSeconds": 13.8,
+    "toRoom": "starsprout-1",
+    "fieldPos": [
+      -53.52,
+      -64.08
+    ],
+    "errCm": 0,
+    "staleEpochInputs": 0,
+    "transfers": 1
+  },
+  "idempotency": {
+    "results": [
+      {
+        "type": "cmd",
+        "id": "1_mwyyaks2_0",
+        "ok": true,
+        "dup": false,
+        "data": {
+          "e": "wave",
+          "pid": 1,
+          "tick": 0
+        }
+      },
+      {
+        "type": "cmd",
+        "id": "1_mwyyaks2_0",
+        "ok": true,
+        "dup": true,
+        "data": {
+          "e": "wave",
+          "pid": 1,
+          "tick": 0
+        }
+      },
+      {
+        "type": "cmd",
+        "id": "1_mwyyaks3_1",
+        "ok": false,
+        "dup": false,
+        "err": "bad_emote"
+      },
+      {
+        "type": "cmd",
+        "id": "1_mwyyaks3_2",
+        "ok": false,
+        "dup": false,
+        "err": "unknown_cmd"
+      }
+    ],
+    "executed": 1
+  },
+  "load40": {
+    "tick": {
+      "count": 160,
+      "avgMs": 0.916,
+      "maxMs": 1.364
+    },
+    "serverNetPerSec": {
+      "bytesIn": 29345,
+      "bytesOut": 830615,
+      "msgsIn": 636,
+      "msgsOut": 835
+    },
+    "perClientDownBps": 23358,
+    "perClientUpBps": 749,
+    "roomPlayers": [
+      40
+    ],
+    "maxSnapCorrections": 0
+  },
+  "sharding": {
+    "rooms": [
+      "village-1",
+      "village-1",
+      "village-2"
+    ]
+  },
+  "respawn": {
+    "early": {
+      "type": "cmd",
+      "id": "respawn-early-001",
+      "ok": false,
+      "dup": false,
+      "err": "not_down"
+    },
+    "room": "village-1",
+    "pos": [
+      6.2,
+      10.8
+    ]
+  }
+}
