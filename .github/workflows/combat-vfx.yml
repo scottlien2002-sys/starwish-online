@@ -1,0 +1,128 @@
+name: Combat VFX Lab (Claude C)
+
+# 只在 feature/combat-vfx-* 分支執行：型別檢查 → 單元測試 → 建置 → Chromium／WebKit E2E →
+# 部署到 gh-pages 的 /preview-combat-vfx/（只替換自己的資料夾；發布前檢查總容量）→ 公開網址驗證 → 測試結果推到 results/ 分支。
+# 不碰 main、不碰其他預覽資料夾、不取消其他工作流程。
+on:
+  push:
+    branches: ["feature/combat-vfx-*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: combat-vfx-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  combat-vfx:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Typecheck
+        id: typecheck
+        continue-on-error: true
+        run: |
+          mkdir -p test-results/combat-vfx
+          npm run typecheck 2>&1 | tee test-results/combat-vfx/typecheck.txt
+          exit ${PIPESTATUS[0]}
+
+      - name: Unit tests (combat-vfx + manifest)
+        id: unit
+        continue-on-error: true
+        run: |
+          node --test tests/unit/combat-vfx.test.ts tests/unit/stage72.test.ts 2>&1 | tee test-results/combat-vfx/unit.txt
+          exit ${PIPESTATUS[0]}
+
+      - name: Build
+        id: build
+        continue-on-error: true
+        run: |
+          npm run build 2>&1 | tee test-results/combat-vfx/build.txt
+          exit ${PIPESTATUS[0]}
+
+      - name: Install test browsers
+        if: steps.build.outcome == 'success'
+        run: npx playwright install --with-deps chromium webkit
+
+      - name: Combat VFX E2E (Chromium + WebKit)
+        id: e2e
+        if: steps.build.outcome == 'success'
+        continue-on-error: true
+        run: node tests/e2e/run-combat-vfx-e2e.mjs dist chromium,webkit 2>&1 | tee test-results/combat-vfx/e2e.txt; exit ${PIPESTATUS[0]}
+
+      - name: Deploy preview /preview-combat-vfx/ (own folder only)
+        id: deploy
+        if: steps.build.outcome == 'success' && steps.typecheck.outcome == 'success'
+        run: |
+          DIR=preview-combat-vfx
+          # 預覽只放這頁需要的檔案：C1.0-B5b 男女、M004～M007、動作檔（其他舊版模型不放，控制 Pages 容量）
+          find dist/models -maxdepth 1 -type f -name '*.glb' ! -name 'novice_c10b5b_*' -delete
+          find dist/models -mindepth 1 -maxdepth 1 -type d ! -name monsters -exec rm -rf {} +
+          du -sh dist
+          for attempt in 1 2 3 4 5; do
+            rm -rf /tmp/pages
+            git clone -q --depth 1 -b gh-pages "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" /tmp/pages
+            rm -rf "/tmp/pages/$DIR"
+            mkdir -p "/tmp/pages/$DIR"
+            cp -r dist/. "/tmp/pages/$DIR/"
+            TOTAL=$(du -sm --exclude=.git /tmp/pages | cut -f1)
+            echo "預覽資料夾 $(du -sm "/tmp/pages/$DIR" | cut -f1) MB；發布後 gh-pages 合計 ${TOTAL} MB"
+            echo "pages_total_mb=${TOTAL}" >> "$GITHUB_OUTPUT"
+            if [ "$TOTAL" -gt 1100 ]; then echo "::error::gh-pages 合計 ${TOTAL} MB 超過 1100 MB，取消發布"; exit 1; fi
+            echo "{\"branch\":\"${GITHUB_REF_NAME}\",\"commit\":\"${GITHUB_SHA}\",\"path\":\"/$DIR/\",\"builtAt\":\"$(date -u +%FT%TZ)\",\"e2e\":\"${{ steps.e2e.outcome }}\"}" > "/tmp/pages/$DIR/preview.json"
+            cd /tmp/pages
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A "$DIR"
+            git commit -q -m "Preview $DIR from ${GITHUB_REF_NAME}@${GITHUB_SHA::8}" || { echo "no changes"; exit 0; }
+            if git push -q origin gh-pages; then echo "deployed /$DIR/"; exit 0; fi
+            cd - >/dev/null
+            echo "push conflict, retry $attempt"; sleep $((attempt * 7))
+          done
+          exit 1
+
+      - name: Verify public URL (GitHub Pages)
+        id: verify
+        if: steps.deploy.outcome == 'success'
+        continue-on-error: true
+        run: |
+          URL="https://${{ github.repository_owner }}.github.io/${GITHUB_REPOSITORY#*/}/preview-combat-vfx"
+          for i in $(seq 1 60); do
+            C=$(curl -fsSL "$URL/preview.json?t=$(date +%s)" 2>/dev/null | sed -n 's/.*"commit":"\([0-9a-f]*\)".*/\1/p')
+            if [ "$C" = "$GITHUB_SHA" ]; then echo "public preview.json = $C (after ${i}0 s)"; break; fi
+            sleep 10
+          done
+          [ "$C" = "$GITHUB_SHA" ] || { echo "Pages not updated yet"; exit 1; }
+          for f in "" "models/novice_c10b5b_male_lite.glb" "models/monsters/manifest.json" "models/monsters/m007/M007_CrownHammerRabbit_Rig_V1_Lite.glb" "combat-vfx/novice_combat_female.json"; do
+            echo "$(curl -s -o /dev/null -w '%{http_code}' "$URL/$f") $f"
+          done | tee test-results/combat-vfx/public-http.txt
+          CVFX_CASES=male-medium node tests/e2e/run-combat-vfx-e2e.mjs "$URL" webkit 2>&1 | tee test-results/combat-vfx/public-e2e.txt; exit ${PIPESTATUS[0]}
+
+      - name: Push test results to results/combat-vfx-<run>
+        if: always()
+        run: |
+          mkdir -p /tmp/res && cp -r test-results/. /tmp/res/ 2>/dev/null || true
+          cat > /tmp/res/outcome.json <<EOF
+          {"commit":"${GITHUB_SHA}","run":"${GITHUB_RUN_ID}","typecheck":"${{ steps.typecheck.outcome }}","unit":"${{ steps.unit.outcome }}","build":"${{ steps.build.outcome }}","e2e":"${{ steps.e2e.outcome }}","deploy":"${{ steps.deploy.outcome }}","verify":"${{ steps.verify.outcome }}","pagesTotalMb":"${{ steps.deploy.outputs.pages_total_mb }}"}
+          EOF
+          cd /tmp/res
+          git init -q -b "results/combat-vfx-${GITHUB_RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -q -m "Combat VFX test results ${GITHUB_SHA::8} run ${GITHUB_RUN_ID}"
+          git push -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" "HEAD:refs/heads/results/combat-vfx-${GITHUB_RUN_ID}"
+
+      - name: Fail if checks failed
+        if: steps.typecheck.outcome != 'success' || steps.unit.outcome != 'success' || steps.build.outcome != 'success' || steps.e2e.outcome != 'success'
+        run: exit 1
