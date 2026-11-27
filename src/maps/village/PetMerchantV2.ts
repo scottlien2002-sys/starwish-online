@@ -163,7 +163,8 @@ export function setupPetMerchantV2(
   let current = "";
   let facing: number | null = null;
   let lastNow: number | null = null;
-  let lastPos: { x: number; z: number } | null = null;
+  let lastPos: { x: number; z: number; t: number } | null = null;
+  let smoothSpeed = opt.walkSpeed ?? 0;
   let lastWalkRate = 1;
   const play = (name: string, speed = 1): void => {
     for (const set of farAnims.size ? [anims, farAnims] : [anims]) {
@@ -242,11 +243,17 @@ export function setupPetMerchantV2(
       // Stage 6.7：Walk 播放速度跟實際移動速度（起步、停下的加減速也不滑步）
       let walkRate = 0.95;
       if (opt.walkSpeed) {
-        const v = lastPos && dt > 0 ? Math.hypot(p.x - lastPos.x, p.z - lastPos.z) / dt : opt.walkSpeed;
-        walkRate = Math.min(1.6, Math.max(0.2, v / opt.walkSpeed));
+        // 用真實經過時間（不受每格 0.1 秒上限影響）量實際速度，並平滑，避免低 FPS 時誤判
+        const realDt = lastPos ? now - lastPos.t : 0;
+        if (lastPos && realDt > 1e-3) {
+          const v = Math.hypot(p.x - lastPos.x, p.z - lastPos.z) / realDt;
+          const k = 1 - Math.exp(-realDt / 0.15);
+          smoothSpeed += (v - smoothSpeed) * k;
+        }
+        walkRate = Math.min(1.6, Math.max(0.2, smoothSpeed / opt.walkSpeed));
         lastWalkRate = walkRate;
       }
-      lastPos = { x: p.x, z: p.z };
+      lastPos = { x: p.x, z: p.z, t: now };
       play(anim, anim === "Walk" ? walkRate : 1);
       // 小寵物：頭部右上方漂浮
       if (head) headPos.copyFrom(head.getAbsolutePosition());

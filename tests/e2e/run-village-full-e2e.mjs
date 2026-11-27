@@ -102,7 +102,7 @@ for (const name of browsers) {
             wp = await V(() => window.__starwishVillage.merchantPose());
           }
           run.results.merchantWalk = wp;
-          check("Stage 6.7 洛恩巡走：播放 Walk，播放速度跟隨實際移動速度（0.2～1.6 倍，設計速度 0.6 m/s）", wp && wp.anim === "Walk" && wp.walkRate >= 0.2 && wp.walkRate <= 1.6, wp);
+          check("Stage 6.7 洛恩巡走：播放 Walk，播放速度跟隨實際移動速度（巡走 0.6 m/s≈1 倍；起步、停下時較慢；範圍 0.25～1.25 倍）", wp && wp.anim === "Walk" && wp.walkRate >= 0.25 && wp.walkRate <= 1.25, wp);
         }
         check("Stage 6.7 洛恩：N009 Tripo 模型（Idle／Walk／Talk／Turn）＋原本的小寵物；委託佈告欄 N008 模型可點擊", n67.set === "v67" && n67.merchant?.model === `pet_merchant67_${lod}` && ["Idle", "Walk", "Talk", "Turn"].every((a) => n67.merchant.animations.includes(a)) && n67.board.length >= 1 && n67.board.every((b) => b.pickable) && n67.board.reduce((a, b) => a + b.tris, 0) <= (q === "high" ? 6000 : 3000), n67);
       }
