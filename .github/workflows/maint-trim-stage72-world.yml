@@ -1,0 +1,49 @@
+name: Maintenance — trim /preview-stage72-world/ to files other previews still use
+# Stage 7.3 取代 Stage 7.2（Claude A 自己的開發線；容量政策「A 只留最新及必要驗收版本」）。
+# Claude D 的 preview-mp81、preview-mp82 透過 asset-remap.json 讀取 preview-stage72-world 裡的 56 個檔案 → 這些檔案保留，其他刪除。
+# 一般 push，不 force；其他預覽不動。原始碼：feature/render-stage72-world、backup/stage72-world-final。
+on:
+  push:
+    branches: [maint/pages-trim-stage72-world]
+permissions:
+  contents: write
+concurrency:
+  group: pages-cleanup
+  cancel-in-progress: false
+jobs:
+  trim:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with: { path: src }
+      - run: |
+          set -e
+          for attempt in 1 2 3 4 5; do
+            rm -rf /tmp/pages
+            git clone -q --depth 1 -b gh-pages "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" /tmp/pages
+            cd /tmp/pages
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            D=preview-stage72-world
+            [ -d "$D" ] || { echo gone; exit 0; }
+            # 目前仍被其他預覽引用的檔案（每次重新掃描 asset-remap.json，避免刪到新的引用）
+            grep -rhoE '\.\./preview-stage72-world/[^"]+' --include=asset-remap.json . | sed 's#\.\./preview-stage72-world/##' | sort -u > /tmp/keep.txt
+            cat "$GITHUB_WORKSPACE/src/maint/keep-stage72-world.txt" >> /tmp/keep.txt
+            sort -u /tmp/keep.txt -o /tmp/keep.txt
+            wc -l /tmp/keep.txt
+            du -sm $D
+            (cd $D && find . -type f | sed 's#^\./##' | sort) > /tmp/all.txt
+            comm -23 /tmp/all.txt /tmp/keep.txt > /tmp/del.txt
+            wc -l /tmp/del.txt
+            (cd $D && xargs -a /tmp/del.txt -d '\n' git rm -q --)
+            printf '%s\n' "Stage 7.2 預覽已由 /preview-stage73-world/ 取代。這個資料夾只保留其他預覽（preview-mp81、preview-mp82）仍在引用的檔案。" > $D/README.txt
+            git add $D/README.txt
+            printf '\n- %s：/preview-stage72-world/ 精簡為其他預覽仍引用的檔案（Stage 7.3 取代；原始碼 backup/stage72-world-final）\n' "$(date -u +%F)" >> PRUNED_PREVIEWS.md
+            git add PRUNED_PREVIEWS.md
+            git commit -qm "Trim /preview-stage72-world/ to files still referenced by other previews (superseded by Stage 7.3)"
+            du -sm $D; du -sm --exclude=.git .
+            if git push -q origin gh-pages; then echo pushed; exit 0; fi
+            cd /; sleep $((attempt * 10))
+          done
+          exit 1
