@@ -31,6 +31,9 @@ for (const name of browsers) {
     { id: "rules", url: "?lab=combat&q=low&g=male&mute=1" },
     { id: "perf", url: "?lab=combat&q=medium&g=male&mute=1" },
     { id: "audio", url: "?lab=combat&q=low&g=male&mute=1&ai=0" },
+    // 手機介面：直向／橫向、Safe Area、開發者選單、縮放、統計數字（iPhone 實機回報的問題）
+    { id: "ui-portrait", url: "?lab=combat&q=low&g=male&mute=1&ai=0", viewport: { width: 390, height: 844 } },
+    { id: "ui-landscape", url: "?lab=combat&q=low&g=female&mute=1&ai=0", viewport: { width: 844, height: 390 } },
     // 固定步長：每 1/30 秒截一張，得到真正 30 fps 的展示畫面序列（CI 沒 GPU，即時播放只有 3～5 FPS 看不出特效）
     { id: "showcase", url: "?lab=combat&q=high&g=male&mute=1&manual=1&ai=0" },
     { id: "showcase-meadow", url: "?lab=combat&q=high&g=female&mute=1&manual=1&ai=0&env=meadow" },
@@ -44,7 +47,7 @@ for (const name of browsers) {
       run.checks[k] = { ok: !!ok, detail };
       if (!ok) failures++;
     };
-    const ctx = await browser.newContext({ viewport: { width: 932, height: 430 }, deviceScaleFactor: 1, hasTouch: true });
+    const ctx = await browser.newContext({ viewport: tcase.viewport ?? { width: 932, height: 430 }, deviceScaleFactor: 1, hasTouch: true });
     const page = await ctx.newPage();
     page.on("pageerror", (e) => run.errors.push(`pageerror: ${e.message}`));
     page.on("console", (m) => m.type() === "error" && !/Failed to load resource/.test(m.text()) && run.errors.push(`console: ${m.text()}`));
@@ -158,6 +161,67 @@ for (const name of browsers) {
         const dist = Math.hypot(after.p.x - rock.x, after.p.z - rock.z);
         check("規則：技能不能穿越不可通行地形（跳斬被岩石擋下）", after.b === true && dist >= rock.r + 0.3 - 0.02, { after, rock, dist });
         await page.evaluate(() => window.__cvfx.setMonsterAI(true));
+      } else if (tcase.id.startsWith("ui-")) {
+        const vp = tcase.viewport;
+        // 模擬 iPhone 瀏海／Home 指示條的 Safe Area（直向：上 47、下 34；橫向：左右 47、下 21）
+        const safe = vp.height > vp.width ? { l: 0, r: 0, t: 47, b: 34 } : { l: 47, r: 47, t: 0, b: 21 };
+        const layout = async () => page.evaluate((sf) => {
+          const hud = document.querySelector(".cv-hud");
+          for (const [k, v] of Object.entries({ "--sl": sf.l, "--sr": sf.r, "--st": sf.t, "--sb": sf.b })) hud.style.setProperty(k, `${v}px`);
+          const R = (el) => { const r = el.getBoundingClientRect(); return { x: r.left, y: r.top, r: r.right, b: r.bottom, w: r.width, h: r.height, vis: getComputedStyle(el).display !== "none" && r.width > 0 }; };
+          const q = (s) => [...document.querySelectorAll(s)];
+          return {
+            W: innerWidth, H: innerHeight,
+            perf: R(q(".cv-perf")[0]), dev: R(q(".cv-devbtn")[0]), menu: R(q(".cv-dev")[0]), target: R(q(".cv-target")[0]), zoom: R(q(".cv-zoom")[0]), joy: R(q(".cv-joy")[0]),
+            skills: q(".cv-skill").map(R), menuButtons: q(".cv-dev .cv-btn").map(R),
+            perfText: q(".cv-perf")[0].textContent, jumpButtons: q("button").filter((b) => /跳躍|jump/i.test(b.textContent) && !b.classList.contains("cv-skill")).length,
+            outsideDev: q(".cv-hud button").filter((b) => !b.closest(".cv-dev") && !b.closest(".cv-skills") && !b.closest(".cv-zoom") && !b.classList.contains("cv-devbtn")).length,
+          };
+        }, safe);
+        await sleep(2500);
+        let L = await layout();
+        const inside = (r) => r.x >= safe.l - 0.5 && r.y >= safe.t - 0.5 && r.r <= L.W - safe.r + 0.5 && r.b <= L.H - safe.b + 0.5;
+        const hit = (a, b) => a.x < b.r - 0.5 && b.x < a.r - 0.5 && a.y < b.b - 0.5 && b.y < a.b - 0.5;
+        const ctrls = { perf: L.perf, dev: L.dev, target: L.target, zoom: L.zoom, joy: L.joy, ...Object.fromEntries(L.skills.map((r, i) => [`skill${i + 1}`, r])) };
+        const out = Object.entries(ctrls).filter(([, r]) => !inside(r)).map(([k, r]) => [k, r]);
+        check(`介面（${vp.width}×${vp.height}）：所有按鈕、搖桿、效能列、血條都在畫面內且避開 Safe Area`, out.length === 0, { safe, out });
+        const keys = Object.keys(ctrls);
+        const ov = [];
+        for (let i = 0; i < keys.length; i++) for (let j = i + 1; j < keys.length; j++) if (hit(ctrls[keys[i]], ctrls[keys[j]])) ov.push([keys[i], keys[j]]);
+        check(`介面（${vp.width}×${vp.height}）：技能、搖桿、縮放、效能列、血條、開發者按鈕互不重疊`, ov.length === 0, ov);
+        check("介面：測試設定都收進開發者選單（選單預設收合；畫面上沒有其他設定按鈕）", !L.menu.vis && L.outsideDev === 0 && L.menuButtons.length >= 14, { menuVisible: L.menu.vis, outside: L.outsideDev, inMenu: L.menuButtons.length });
+        check("介面：效能列精簡（1 行、高度 ≤ 22 px），不擋住目標血條", L.perf.h <= 22 && !hit(L.perf, L.target), { perf: L.perf, target: L.target });
+        const m = /DC (\d+)｜([\d.]+)k面/.exec(L.perfText);
+        check("統計：Draw Call、三角面不再顯示 0", m && Number(m[1]) > 0 && Number(m[2]) > 0, L.perfText);
+        check("移動：沒有跳躍按鈕（跳躍只在技能動作內）", L.jumpButtons === 0, L.jumpButtons);
+        await shot("closed");
+        await page.click(".cv-devbtn");
+        await sleep(400);
+        L = await layout();
+        check(`介面（${vp.width}×${vp.height}）：開發者選單展開後在畫面內（可捲動），收合按鈕仍可按`, L.menu.vis && inside(L.menu) && inside(L.dev) && !hit(L.menu, L.dev), { menu: L.menu, dev: L.dev });
+        await shot("devmenu");
+        await page.click(".cv-devbtn");
+        await sleep(300);
+        L = await layout();
+        check("介面：開發者選單可收合", !L.menu.vis, L.menu);
+        const r0 = await page.evaluate(() => window.__cvfx.camRadius());
+        await page.click(".cv-zoom [data-zoom=in]");
+        await page.click(".cv-zoom [data-zoom=in]");
+        await sleep(1500);
+        const r1 = await page.evaluate(() => window.__cvfx.camRadius());
+        await shot("zoomed");
+        await page.click(".cv-zoom [data-zoom=out]");
+        await page.click(".cv-zoom [data-zoom=out]");
+        await page.click(".cv-zoom [data-zoom=out]");
+        await sleep(1500);
+        const r2 = await page.evaluate(() => window.__cvfx.camRadius());
+        check("鏡頭：＋ 可以拉近角色、－ 可以拉遠（在 2.4～16 m 範圍內）", r1 < r0 * 0.8 && r2 > r1 && r1 >= 2.39, { r0, r1, r2 });
+        // 點效能列可展開詳細數字
+        await page.click(".cv-perf");
+        await sleep(200);
+        const longTxt = await page.evaluate(() => document.querySelector(".cv-perf").textContent);
+        check("效能列：點一下展開詳細數字", /10 秒平均/.test(longTxt) && /三角面/.test(longTxt), longTxt);
+        await page.click(".cv-perf");
       } else if (tcase.id === "audio") {
         // 音效 V2：每個音效離線算出波形（星夜／白天兩種殘響），輸出 WAV 試聽檔並檢查音量
         const adir = `${outDir}audio-${name}/`;

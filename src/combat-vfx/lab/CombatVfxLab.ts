@@ -404,7 +404,7 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
   // ---------------------------------------------------------------- 鏡頭
   const cam = new ArcRotateCamera("cam", -Math.PI / 2 - 0.45, 1.12, 6.2, new Vector3(0, 0.8, 0), scene);
   cam.attachControl(canvas, true);
-  cam.lowerRadiusLimit = 3;
+  cam.lowerRadiusLimit = 2.4;   // Stage 3：可以再拉近一點看角色
   cam.upperRadiusLimit = 16;
   cam.lowerBetaLimit = 0.45;
   cam.upperBetaLimit = 1.42;
@@ -1046,6 +1046,14 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
     return true;
   };
   hud.classButtons.forEach((b) => b.addEventListener("click", () => playClassDemo(b.dataset.cls ?? "")));
+  // 鏡頭縮放（＋拉近／－拉遠；雙指與滾輪照常可用）。用 Babylon 的慣性位移，動作平順
+  const zoomBy = (f: number) => {
+    const from = zoomGoal ?? cam.radius;
+    zoomGoal = Math.max(cam.lowerRadiusLimit ?? 2.4, Math.min(cam.upperRadiusLimit ?? 16, from * f));
+    zoomLast = cam.radius;
+  };
+  hud.zoomIn.addEventListener("click", () => zoomBy(0.8));
+  hud.zoomOut.addEventListener("click", () => zoomBy(1.25));
   hud.aspd.value = String(Math.min(250, aspd));
   hud.aspd.addEventListener("input", () => {
     aspd = Number(hud.aspd.value);
@@ -1066,6 +1074,11 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
   let autoNext = 1.0;
   let hurtT = 0;
 
+  /** 鏡頭縮放按鈕的目標距離（雙指／滾輪改動時自動放棄） */
+  let zoomGoal: number | null = null;
+  let zoomLast = 0;
+  /** 上一格畫完時的統計（HUD 顯示用） */
+  const renderStats = { draws: 0, triangles: 0, activeMeshes: 0 };
   const perfSnapshot = () => {
     const p = perf();
     const mem = (performance as unknown as { memory?: { usedJSHeapSize: number } }).memory;
@@ -1080,6 +1093,8 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
       materials: scene.materials.length,
       textures: scene.textures.length,
       meshes: scene.meshes.length,
+      hudDraws: renderStats.draws,
+      hudTriangles: renderStats.triangles,
       jsHeapMB: mem ? Math.round((mem.usedJSHeapSize / 1048576) * 10) / 10 : null,
       perfMode,
       ...lodCounts(),
@@ -1201,22 +1216,47 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
       Vector3.LerpToRef(cam.target, want, Math.min(1, dt * 8), cam.target);
       cam.target.addInPlace(camfx.update(dt, cam).scale(0.6));
     }
+    if (zoomGoal !== null) {
+      if (Math.abs(cam.radius - zoomLast) > 1e-3) zoomGoal = null;
+      else {
+        cam.radius += (zoomGoal - cam.radius) * Math.min(1, dt * 10);
+        if (Math.abs(zoomGoal - cam.radius) < 0.01) {
+          cam.radius = zoomGoal;
+          zoomGoal = null;
+        }
+        zoomLast = cam.radius;
+      }
+    }
     updateLod();
     // HUD
     const p = perf();
+    const triK = (renderStats.triangles / 1000).toFixed(renderStats.triangles < 10000 ? 1 : 0);
     hud.setPerf(
-      `FPS ${p.fps.toFixed(0)}｜10 秒平均 ${p.avg10s.toFixed(1)}｜1% Low ${p.low1.toFixed(1)}\n` +
-        `Draw ${p.draws}｜三角面 ${(scene.getActiveIndices() / 3000).toFixed(0)}k｜粒子 ${vfx.stats.particles}｜特效 ${vfx.stats.meshFx}＋投射 ${vfx.stats.projectiles}\n` +
-        `預算 ${vfx.budget.stats.active}/${VFX_QUALITY[tier].maxActiveEffects}｜拒絕 ${vfx.budget.stats.denied}｜品質 ${VFX_QUALITY[tier].label}｜攻速 ${clampAttackSpeed(aspd)}${aspd > 160 ? "（上限）" : ""}`,
+      `FPS ${p.fps.toFixed(0)}｜10s ${p.avg10s.toFixed(1)}｜1%Low ${p.low1.toFixed(1)}｜DC ${renderStats.draws}｜${triK}k面`,
+      `Combat VFX Lab（技術展示，非正式技能／數值）\n` +
+        `FPS ${p.fps.toFixed(0)}｜10 秒平均 ${p.avg10s.toFixed(1)}｜1% Low ${p.low1.toFixed(1)}\n` +
+        `Draw ${renderStats.draws}｜三角面 ${triK}k｜網格 ${renderStats.activeMeshes}｜粒子 ${vfx.stats.particles}｜特效 ${vfx.stats.meshFx}＋投射 ${vfx.stats.projectiles}\n` +
+        `預算 ${vfx.budget.stats.active}/${VFX_QUALITY[tier].maxActiveEffects}｜拒絕 ${vfx.budget.stats.denied}｜品質 ${VFX_QUALITY[tier].label}｜攻速 ${clampAttackSpeed(aspd)}${aspd > 160 ? "（上限）" : ""}\n` +
+        `玩家 ${1 + ghosts.length}（遠距離 ${ghosts.filter((g) => g.av.far).length}）｜鏡頭距離 ${cam.radius.toFixed(1)} m`,
     );
     hud.setSkills(SKILLS.map((s) => Math.max(0, (player.cds.get(s.id) ?? 0) - realTime)), player.skill?.id ?? null);
     hud.setTarget(target ? `${target.label}　HP ${Math.ceil(target.hp)} / ${target.maxHp}` : "目標：無（自動選最近的怪物）", target ? target.hp / target.maxHp : 0);
   };
+  // Stage 3 修正：Draw Call／三角面要在「畫完之後」讀（畫面更新前讀會拿到剛歸零的計數 → 顯示 0）
+  scene.onAfterRenderObservable.add(() => {
+    renderStats.draws = instr.drawCallsCounter.current;
+    renderStats.triangles = Math.round(scene.getActiveIndices() / 3);
+    renderStats.activeMeshes = scene.getActiveMeshes().length;
+  });
   if (!manual) {
     scene.onBeforeRenderObservable.add(() => frame(engine.getDeltaTime() / 1000));
     engine.runRenderLoop(() => scene.render());
   } else scene.render();
-  window.addEventListener("resize", () => engine.resize());
+  // 直向／橫向切換：iOS Safari 旋轉後 resize 有時晚到，三種事件都接
+  const onResize = () => engine.resize();
+  window.addEventListener("resize", onResize);
+  window.addEventListener("orientationchange", () => window.setTimeout(onResize, 250));
+  window.visualViewport?.addEventListener("resize", onResize);
 
   // 自動測試用介面
   (window as unknown as Record<string, unknown>).__cvfx = {
@@ -1246,6 +1286,9 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
     perfSnapshot,
     perfScene,
     perfMode,
+    /** 測試：鏡頭距離、HUD 的開發者選單 */
+    camRadius: () => cam.radius,
+    setDevMenu: (on: boolean) => hud.setDev(on),
     /** 測試：結束固定效能場景，回到一般模式 */
     /** 除錯：第一位遠距離其他玩家的網格狀態 */
     lodDebug: () => {
@@ -1350,76 +1393,149 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
 }
 
 // ---------------------------------------------------------------- HUD（DOM）
-
+/**
+ * 技術展示頁的 HUD（不是正式遊戲 HUD；正式介面由 Claude A 統一整合）。
+ * Stage 3 版面：
+ *   - 左上：精簡效能列（1 行；點一下展開詳細數字）
+ *   - 右上：「⚙ 開發者」按鈕 → 可展開／收合的選單（畫質、角色、音效、震動、頓幀、自動示範、多人、場景、攻速、職業特效、說明）
+ *   - 上方中間：目標血條（在效能列下方，不被遮住）
+ *   - 左下：搖桿；右下：6 個技能；技能上方：鏡頭拉近／拉遠
+ *   - 直向、橫向都可用；四周都留 iPhone Safe Area（env(safe-area-inset-*)）
+ *   - 一般移動沒有跳躍鍵；跳躍只在技能動作內
+ */
 function buildHud(root: HTMLElement) {
   const st = document.createElement("style");
   st.textContent = `
-  .cv-top{position:absolute;left:8px;right:8px;top:calc(8px + env(safe-area-inset-top));display:flex;justify-content:space-between;gap:8px;z-index:8;pointer-events:none}
-  .cv-panel{background:rgba(20,24,48,.62);color:#eef3ff;border-radius:10px;padding:6px 9px;font:12px/1.45 system-ui,"PingFang TC",sans-serif;white-space:pre;pointer-events:auto;backdrop-filter:blur(4px)}
-  .cv-title{font-weight:700;font-size:13px;color:#ffe9a8}
-  .cv-ctrl{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end;max-width:58vw}
-  .cv-btn{background:rgba(30,40,80,.75);color:#fff;border:1px solid rgba(255,230,160,.45);border-radius:8px;padding:5px 8px;font:12px system-ui,"PingFang TC",sans-serif;pointer-events:auto}
+  .cv-hud{--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px);--st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);--sk:60px;--joy:116px;
+    position:absolute;inset:0;pointer-events:none;font-family:system-ui,"PingFang TC",sans-serif;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+  .cv-hud>*{pointer-events:auto}
+  .cv-perf{position:absolute;left:calc(6px + var(--sl));top:calc(6px + var(--st));max-width:calc(100vw - 120px - var(--sl) - var(--sr));z-index:9;
+    background:rgba(16,20,42,.5);color:#e8eeff;border-radius:7px;padding:2px 7px;font:10px/1.5 ui-monospace,Menlo,monospace;white-space:pre;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+  .cv-perf.open{background:rgba(16,20,42,.72);white-space:pre-wrap}
+  .cv-devbtn{position:absolute;right:calc(6px + var(--sr));top:calc(6px + var(--st));z-index:21;height:30px;padding:0 10px;border-radius:15px;border:1px solid rgba(255,230,160,.55);
+    background:rgba(30,40,80,.78);color:#fff;font:12px system-ui,"PingFang TC",sans-serif}
+  .cv-devbtn.on{background:linear-gradient(#ffd77a,#e8a83c);color:#3a2300;font-weight:700}
+  .cv-dev{position:absolute;right:calc(6px + var(--sr));top:calc(42px + var(--st));z-index:20;width:min(320px,calc(100vw - 12px - var(--sl) - var(--sr)));
+    max-height:calc(100% - 52px - var(--st) - var(--sb));overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;box-sizing:border-box;
+    background:rgba(16,20,42,.9);border:1px solid rgba(255,230,160,.35);border-radius:12px;padding:8px;color:#eef3ff;font:12px/1.4 system-ui,"PingFang TC",sans-serif;display:none}
+  .cv-dev.open{display:block}
+  .cv-dev h4{margin:6px 2px 4px;font-size:11px;color:#ffe9a8;font-weight:700}
+  .cv-dev h4:first-child{margin-top:0}
+  .cv-row{display:flex;flex-wrap:wrap;gap:5px}
+  .cv-btn{background:rgba(30,40,80,.85);color:#fff;border:1px solid rgba(255,230,160,.45);border-radius:8px;padding:6px 9px;font:12px system-ui,"PingFang TC",sans-serif;min-height:30px}
   .cv-btn.on{background:linear-gradient(#ffd77a,#e8a83c);color:#3a2300;border-color:#fff2c2;font-weight:700}
-  .cv-aspd{display:flex;align-items:center;gap:4px;color:#fff;font:12px system-ui;background:rgba(30,40,80,.75);border-radius:8px;padding:2px 6px;pointer-events:auto}
-  .cv-skills{position:absolute;right:calc(10px + env(safe-area-inset-right));bottom:calc(14px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(3,64px);gap:8px;z-index:8}
-  .cv-skill{position:relative;width:64px;height:64px;border-radius:50%;border:2px solid #ffe3a0;background:radial-gradient(circle at 35% 30%,#7fa8ff,#283a8a 70%);color:#fff;font:700 13px/1.1 system-ui,"PingFang TC",sans-serif;
-    text-shadow:0 1px 2px #000;box-shadow:0 3px 8px rgba(0,0,0,.35),inset 0 0 10px rgba(255,255,255,.35);touch-action:none;overflow:hidden;-webkit-user-select:none;user-select:none}
+  .cv-aspd{display:flex;align-items:center;gap:6px;width:100%}.cv-aspd input{flex:1}
+  .cv-help{opacity:.8;font-size:11px;margin:2px;white-space:normal;overflow-wrap:anywhere;flex:1 1 100%;min-width:0}
+  .cv-target{position:absolute;left:50%;transform:translateX(-50%);top:calc(42px + var(--st));z-index:8;background:rgba(20,24,48,.55);color:#fff;border-radius:8px;padding:2px 10px 4px;
+    font:11px system-ui,"PingFang TC",sans-serif;width:max-content;max-width:calc(100vw - 150px - var(--sl) - var(--sr));min-width:150px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+  .cv-hp{height:4px;background:#422;border-radius:3px;margin-top:2px;overflow:hidden}.cv-hp>div{height:100%;background:linear-gradient(90deg,#ff6b7d,#ffb36b)}
+  .cv-clsnote{position:absolute;left:50%;transform:translateX(-50%);top:calc(76px + var(--st));z-index:8;max-width:calc(100vw - 24px - var(--sl) - var(--sr));color:#ffe9a8;
+    font:11px system-ui,"PingFang TC";text-shadow:0 1px 2px #000;opacity:0;transition:opacity .3s;text-align:center;pointer-events:none}
+  .cv-skills{position:absolute;right:calc(10px + var(--sr));bottom:calc(12px + var(--sb));display:grid;grid-template-columns:repeat(3,var(--sk));gap:8px;z-index:8}
+  .cv-skill{position:relative;width:var(--sk);height:var(--sk);padding:0;border-radius:50%;border:2px solid #ffe3a0;background:radial-gradient(circle at 35% 30%,#7fa8ff,#283a8a 70%);color:#fff;
+    font:700 12px/1.1 system-ui,"PingFang TC",sans-serif;text-shadow:0 1px 2px #000;box-shadow:0 3px 8px rgba(0,0,0,.35),inset 0 0 10px rgba(255,255,255,.35);touch-action:none;overflow:hidden}
   .cv-skill .cd{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;font-size:15px}
   .cv-skill.active{box-shadow:0 0 14px 4px rgba(255,220,120,.9)}
-  .cv-joy{position:absolute;left:calc(18px + env(safe-area-inset-left));bottom:calc(22px + env(safe-area-inset-bottom));width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.14);border:2px solid rgba(255,255,255,.35);z-index:8;touch-action:none}
-  .cv-knob{position:absolute;left:38px;top:38px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.75)}
-  .cv-target{position:absolute;left:50%;transform:translateX(-50%);top:calc(64px + env(safe-area-inset-top));z-index:8;background:rgba(20,24,48,.62);color:#fff;border-radius:8px;padding:4px 10px;font:12px system-ui,"PingFang TC",sans-serif;min-width:200px;text-align:center}
-  .cv-hp{height:5px;background:#422;border-radius:3px;margin-top:3px;overflow:hidden}.cv-hp>div{height:100%;background:linear-gradient(90deg,#ff6b7d,#ffb36b)}
-  .cv-cls{position:absolute;left:calc(150px + env(safe-area-inset-left));bottom:calc(16px + env(safe-area-inset-bottom));z-index:8;display:flex;flex-wrap:wrap;gap:4px;align-items:center;max-width:40vw;color:#fff;font:11px system-ui,"PingFang TC";text-shadow:0 1px 2px #000}
-  .cv-cls .cv-btn{padding:4px 7px;font-size:11px}
-  .cv-clsnote{position:absolute;left:calc(150px + env(safe-area-inset-left));bottom:calc(76px + env(safe-area-inset-bottom));z-index:8;max-width:42vw;color:#ffe9a8;font:11px system-ui,"PingFang TC";text-shadow:0 1px 2px #000;opacity:0;transition:opacity .3s}
-  .cv-note{position:absolute;left:8px;bottom:calc(150px + env(safe-area-inset-bottom));z-index:7;color:#fff;font:11px system-ui,"PingFang TC";opacity:.8;text-shadow:0 1px 2px #000;max-width:46vw}
+  .cv-zoom{position:absolute;right:calc(10px + var(--sr));bottom:calc(12px + var(--sb) + var(--sk) * 2 + 18px);z-index:8;display:flex;gap:6px}
+  .cv-zoom button{width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.55);background:rgba(20,26,56,.6);color:#fff;font:700 20px/1 system-ui;padding:0}
+  .cv-joy{position:absolute;left:calc(16px + var(--sl));bottom:calc(16px + var(--sb));width:var(--joy);height:var(--joy);border-radius:50%;background:rgba(255,255,255,.14);border:2px solid rgba(255,255,255,.35);z-index:8;touch-action:none}
+  .cv-knob{position:absolute;left:calc(50% - 22px);top:calc(50% - 22px);width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.75);pointer-events:none}
+  /* 窄螢幕（iPhone 直向）：按鈕略小，搖桿與技能區不會重疊 */
+  @media (max-width:430px){.cv-hud{--sk:54px;--joy:104px}.cv-skills{gap:7px}}
+  /* 矮螢幕（iPhone 橫向）：目標血條往上，技能略小 */
+  @media (max-height:430px){.cv-hud{--sk:56px;--joy:108px}}
   `;
   document.head.appendChild(st);
-  const top = document.createElement("div");
-  top.className = "cv-top";
-  const info = document.createElement("div");
-  info.className = "cv-panel";
-  const title = document.createElement("div");
-  title.className = "cv-title";
-  title.textContent = "Combat VFX Lab｜技術展示（非正式技能／數值）";
+  const hudEl = document.createElement("div");
+  hudEl.className = "cv-hud";
+  const stop = (el: HTMLElement) => {
+    el.addEventListener("pointerdown", (e) => e.stopPropagation());
+    el.addEventListener("wheel", (e) => e.stopPropagation(), { passive: true });
+    el.addEventListener("touchmove", (e) => e.stopPropagation(), { passive: true });
+  };
+  // 效能列
   const perf = document.createElement("div");
+  perf.className = "cv-perf";
   perf.dataset.perf = "1";
-  info.append(title, perf);
-  const ctrl = document.createElement("div");
-  ctrl.className = "cv-ctrl";
-  const mk = (t: string) => {
+  stop(perf);
+  let perfOpen = false;
+  let perfShort = "";
+  let perfLong = "";
+  perf.addEventListener("click", () => {
+    perfOpen = !perfOpen;
+    perf.classList.toggle("open", perfOpen);
+    perf.textContent = perfOpen ? perfLong : perfShort;
+  });
+  // 開發者選單
+  const devBtn = document.createElement("button");
+  devBtn.className = "cv-devbtn";
+  devBtn.textContent = "⚙ 開發者";
+  devBtn.dataset.dev = "toggle";
+  stop(devBtn);
+  const dev = document.createElement("div");
+  dev.className = "cv-dev";
+  dev.dataset.dev = "menu";
+  stop(dev);
+  const setDev = (on: boolean) => {
+    dev.classList.toggle("open", on);
+    devBtn.classList.toggle("on", on);
+    devBtn.textContent = on ? "✕ 收合" : "⚙ 開發者";
+  };
+  devBtn.addEventListener("click", () => setDev(!dev.classList.contains("open")));
+  const section = (t: string) => {
+    const h = document.createElement("h4");
+    h.textContent = t;
+    const row = document.createElement("div");
+    row.className = "cv-row";
+    dev.append(h, row);
+    return row;
+  };
+  const mk = (row: HTMLElement, t: string) => {
     const b = document.createElement("button");
     b.className = "cv-btn";
     b.textContent = t;
-    b.addEventListener("pointerdown", (e) => e.stopPropagation());
-    ctrl.appendChild(b);
+    row.appendChild(b);
     return b;
   };
+  const rQ = section("特效畫質");
   const tierButtons = (["high", "medium", "low"] as const).map((t) => {
-    const b = mk(`特效 ${VFX_QUALITY[t].label}`);
+    const b = mk(rQ, `特效 ${VFX_QUALITY[t].label}`);
     b.dataset.tier = t;
     return b;
   });
-  const gender = mk("男");
-  const sound = mk("音效 開");
-  const shake = mk("震動 開");
-  const hitstop = mk("頓幀 開");
-  const auto = mk("自動示範 關");
-  const multi = mk("多人 0");
-  const env = mk("場景 星夜競技場");
+  const rC = section("角色與回饋");
+  const gender = mk(rC, "男");
+  const sound = mk(rC, "音效 開");
+  const shake = mk(rC, "震動 開");
+  const hitstop = mk(rC, "頓幀 開");
+  const rT = section("測試場景");
+  const auto = mk(rT, "自動示範 關");
+  const multi = mk(rT, "多人 0");
+  const env = mk(rT, "場景 星夜競技場");
+  const rA = section("攻擊速度（上限 160）");
   const aspdWrap = document.createElement("label");
   aspdWrap.className = "cv-aspd";
-  aspdWrap.textContent = "攻速";
+  const aspdLabel = document.createElement("span");
+  aspdLabel.textContent = "攻速";
   const aspd = document.createElement("input");
   aspd.type = "range";
   aspd.min = "100";
   aspd.max = "200";
   aspd.step = "10";
-  aspd.addEventListener("pointerdown", (e) => e.stopPropagation());
-  aspdWrap.appendChild(aspd);
-  ctrl.appendChild(aspdWrap);
-  top.append(info, ctrl);
+  aspdWrap.append(aspdLabel, aspd);
+  rA.appendChild(aspdWrap);
+  const rK = section("職業特效展示（非正式技能）");
+  const classButtons = CLASS_VFX.map((c) => {
+    const b = mk(rK, c.label);
+    b.dataset.cls = c.id;
+    return b;
+  });
+  const rH = section("操作");
+  const help = document.createElement("div");
+  help.className = "cv-help";
+  help.textContent = "搖桿／WASD 移動（沒有跳躍鍵；跳躍只在技能動作內）｜1～6 或右下按鈕施放技能｜拖曳畫面轉鏡頭｜雙指或滾輪、＋－ 按鈕縮放鏡頭｜點左上效能列看詳細數字";
+  rH.appendChild(help);
+  // 目標
   const tgt = document.createElement("div");
   tgt.className = "cv-target";
   const tgtText = document.createElement("div");
@@ -1428,6 +1544,9 @@ function buildHud(root: HTMLElement) {
   const hpFill = document.createElement("div");
   hp.appendChild(hpFill);
   tgt.append(tgtText, hp);
+  const clsNote = document.createElement("div");
+  clsNote.className = "cv-clsnote";
+  // 技能
   const skills = document.createElement("div");
   skills.className = "cv-skills";
   const skillButtons = SKILLS.map((s, i) => {
@@ -1442,6 +1561,20 @@ function buildHud(root: HTMLElement) {
     skills.appendChild(b);
     return b;
   });
+  // 鏡頭縮放
+  const zoom = document.createElement("div");
+  zoom.className = "cv-zoom";
+  stop(zoom);
+  const zoomIn = document.createElement("button");
+  zoomIn.textContent = "＋";
+  zoomIn.setAttribute("aria-label", "鏡頭拉近");
+  zoomIn.dataset.zoom = "in";
+  const zoomOut = document.createElement("button");
+  zoomOut.textContent = "－";
+  zoomOut.setAttribute("aria-label", "鏡頭拉遠");
+  zoomOut.dataset.zoom = "out";
+  zoom.append(zoomOut, zoomIn);
+  // 搖桿
   const joyEl = document.createElement("div");
   joyEl.className = "cv-joy";
   const knob = document.createElement("div");
@@ -1460,7 +1593,8 @@ function buildHud(root: HTMLElement) {
     }
     joystick.x = x;
     joystick.y = y;
-    knob.style.transform = `translate(${x * 38}px,${y * 38}px)`;
+    const k = r.width * 0.32;
+    knob.style.transform = `translate(${x * k}px,${y * k}px)`;
   };
   joyEl.addEventListener("pointerdown", (e) => {
     e.stopPropagation();
@@ -1480,28 +1614,11 @@ function buildHud(root: HTMLElement) {
   };
   joyEl.addEventListener("pointerup", endJoy);
   joyEl.addEventListener("pointercancel", endJoy);
-  const cls = document.createElement("div");
-  cls.className = "cv-cls";
-  const clsLabel = document.createElement("span");
-  clsLabel.textContent = "職業特效";
-  cls.appendChild(clsLabel);
-  const classButtons = CLASS_VFX.map((c) => {
-    const b = document.createElement("button");
-    b.className = "cv-btn";
-    b.dataset.cls = c.id;
-    b.textContent = c.label;
-    b.addEventListener("pointerdown", (e) => e.stopPropagation());
-    cls.appendChild(b);
-    return b;
-  });
-  const clsNote = document.createElement("div");
-  clsNote.className = "cv-clsnote";
-  const note = document.createElement("div");
-  note.className = "cv-note";
-  note.textContent = "搖桿／WASD 移動（沒有跳躍鍵；跳躍只在技能動作內）｜1～6 施放技能｜拖曳畫面轉鏡頭";
-  root.append(top, tgt, skills, joyEl, note, cls, clsNote);
+  hudEl.append(perf, devBtn, dev, tgt, clsNote, zoom, skills, joyEl);
+  root.appendChild(hudEl);
   return {
-    tierButtons, gender, sound, shake, hitstop, auto, multi, env, aspd, skillButtons, joystick, classButtons,
+    tierButtons, gender, sound, shake, hitstop, auto, multi, env, aspd, skillButtons, joystick, classButtons, zoomIn, zoomOut,
+    setDev,
     setClassNote(t: string) {
       clsNote.textContent = t;
       clsNote.style.opacity = "1";
@@ -1509,7 +1626,11 @@ function buildHud(root: HTMLElement) {
     setTier(t: VfxTier) {
       for (const b of tierButtons) b.classList.toggle("on", b.dataset.tier === t);
     },
-    setPerf(s: string) {
+    /** short：精簡一行；long：展開後的詳細數字 */
+    setPerf(short: string, long: string) {
+      perfShort = short;
+      perfLong = long;
+      const s = perfOpen ? long : short;
       if (perf.textContent !== s) perf.textContent = s;
     },
     setSkills(cds: number[], active: string | null) {
