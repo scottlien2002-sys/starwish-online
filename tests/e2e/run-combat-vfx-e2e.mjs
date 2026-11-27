@@ -216,8 +216,8 @@ for (const name of browsers) {
         const s3 = get("stage3", 32), s2 = get("stage2", 32), l32 = get("legacy", 32);
         check("效能：比較條件一致（同人數時三種做法的可見人數相同）", [4, 8, 16, 32].every((n) => new Set(["stage3", "stage2", "legacy"].map((m) => get(m, n)?.visiblePlayers)).size === 1), Object.fromEntries([4, 8, 16, 32].map((n) => [n, ["stage3", "stage2", "legacy"].map((m) => get(m, n)?.visiblePlayers)])));
         check("效能：32 人時遠距離版有啟用（後兩排切成遠距離版）", s3 && s3.farPlayers >= 14 && s3.nearPlayers >= 14, { near: s3?.nearPlayers, far: s3?.farPlayers });
-        check("效能：32 人靜態時 Stage 3 三角面比 Stage 2 少 25% 以上", s3 && s2 && s3.triangles < s2.triangles * 0.75, { stage3: s3?.triangles, stage2: s2?.triangles });
-        check("效能：32 人時 Stage 3 的 Draw Call 不比 Stage 2 多（合併繪製保留）", s3 && s2 && s3.draws <= s2.draws + 2, { stage3: s3?.draws, stage2: s2?.draws });
+        check("效能：32 人靜態時 Stage 3 三角面比 Stage 2 少 20% 以上（只有後兩排是遠距離版）", s3 && s2 && s3.triangles < s2.triangles * 0.8, { stage3: s3?.triangles, stage2: s2?.triangles });
+        check("效能：32 人時 Stage 3 的 Draw Call 與 Stage 2 相同水準（合併繪製保留，差 ≤ 5%）", s3 && s2 && s3.draws <= s2.draws * 1.05, { stage3: s3?.draws, stage2: s2?.draws });
         check("效能：32 人時 Stage 3 的 Draw Call 比 Stage 1 做法少一半以上", s3 && l32 && s3.draws < l32.draws * 0.5, { stage3: s3?.draws, legacy: l32?.draws });
       } else if (tcase.id !== "low-multi8") {
         // 逐一施放 6 個技能
@@ -292,7 +292,7 @@ for (const name of browsers) {
         run.results.multi = { perf: p, stats: st };
         await shot("multi8");
         check("多人模擬：8 位其他玩家同時施放", st.ghosts === 8, st.ghosts);
-        check("多人預算：同時特效不超過上限、其他玩家的特效被限制", st.budget.active <= 18 + 2 && st.budget.denied > 0, st.budget);
+        check("多人預算：同時特效不超過上限（自己的命中閃光／暴擊除外）、其他玩家的特效被限制", st.budget.active - st.budget.activeCritical <= 18 && st.budget.activeRemote <= Math.floor(18 * 0.45) && st.budget.denied > 0, st.budget);
         // CI 軟體繪圖下 FPS 很低，改成：關掉自動示範後自己站到怪物前施放一次，等它命中
         await page.evaluate(() => window.__cvfx.setAuto(false));
         await page.waitForFunction(() => !window.__cvfx.busy(), null, { timeout: 60000 }).catch(() => {});

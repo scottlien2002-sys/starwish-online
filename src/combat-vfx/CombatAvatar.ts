@@ -147,6 +147,7 @@ export class CombatAvatar {
       m.receiveShadows = false;
       const tris = Math.round((m.getTotalIndices() || 0) / 3);
       const nm = m.name.split("#")[0] ?? m.name;
+      if (!m.getTotalVertices()) continue;      // glTF 的 __root__ 等空節點：不能放進遠近清單（關掉 __root__ 會把整個角色一起關掉）
       if (lod === "remote" && nm.endsWith("_far")) {
         this.farMeshes.push(m);
         this.farTriangles += tris;
