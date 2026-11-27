@@ -5,7 +5,7 @@ name: Village P3 full integration (E2E + screenshots)
 # 獨立預覽網址由既有的 CI & Deploy 部署到 /preview-village-integration/（只替換自己的資料夾，不影響正式遊戲）。
 on:
   push:
-    branches: [feature/render-village-integration, feature/render-village-perf63, feature/render-village-final64, feature/render-village-char65, feature/render-village-art66]
+    branches: [feature/render-village-integration, feature/render-village-perf63, feature/render-village-final64, feature/render-village-char65, feature/render-village-art66, feature/render-village-npc67]
   workflow_dispatch:
 
 permissions:
@@ -39,7 +39,7 @@ jobs:
         if: always()
         env:
           # 效能優化分支的結果另存，不覆蓋 art-village-integration
-          ART_BRANCH: ${{ github.ref_name == 'feature/render-village-perf63' && 'art-village-perf63' || github.ref_name == 'feature/render-village-final64' && 'art-village-final64' || github.ref_name == 'feature/render-village-char65' && 'art-village-char65' || github.ref_name == 'feature/render-village-art66' && 'art-village-art66-e2e' || 'art-village-integration' }}
+          ART_BRANCH: ${{ github.ref_name == 'feature/render-village-perf63' && 'art-village-perf63' || github.ref_name == 'feature/render-village-final64' && 'art-village-final64' || github.ref_name == 'feature/render-village-char65' && 'art-village-char65' || github.ref_name == 'feature/render-village-art66' && 'art-village-art66-e2e' || github.ref_name == 'feature/render-village-npc67' && 'art-village-npc67-e2e' || 'art-village-integration' }}
         run: |
           mkdir -p out/integration
           echo "{\"commit\":\"${GITHUB_SHA}\",\"run\":\"${GITHUB_RUN_ID}\",\"builtAt\":\"$(date -u +%FT%TZ)\"}" > out/integration/build.json

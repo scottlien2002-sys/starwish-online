@@ -2,7 +2,7 @@ import numpy as np, io
 from PIL import Image
 
 def tex_array(img_bytes, size=1024):
-    im = Image.open(io.BytesIO(img_bytes)).convert('RGB')
+    im = (img_bytes if isinstance(img_bytes, Image.Image) else Image.open(io.BytesIO(img_bytes))).convert('RGB')
     if size and im.size[0] != size: im = im.resize((size, size), Image.BILINEAR)
     return np.asarray(im).astype(np.float32) / 255.0
 

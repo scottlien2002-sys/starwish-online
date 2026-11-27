@@ -38,7 +38,7 @@ export function npcProfile(spotId: string): NpcProfile | null {
 
 export interface VillageNpcs {
   readonly ids: readonly string[];
-  readonly stats: Record<string, { triangles: number; farTriangles: number; meshes: number; animations: string[] }>;
+  readonly stats: Record<string, { triangles: number; farTriangles: number; meshes: number; animations: string[]; model: string }>;
   /** talkId：正在對話的 NPC（spot id），null＝沒有；px/pz：玩家位置；camera：用於距離 LOD 與畫面外判斷 */
   update(now: number, dt: number, talkId: string | null, px: number, pz: number, camera?: Camera | null): void;
   state(): Record<string, { anim: string; facing: number; home: number; lod: 0 | 1; paused: boolean; blinkTargets: number; nextAct: number }>;
@@ -77,9 +77,33 @@ export function toStandardNpc(scene: Scene, m: Material, cache: Map<Material, St
   s.specularColor = new Color3(0.08, 0.08, 0.08);
   s.specularPower = 18;
   s.emissiveColor = new Color3(0.06, 0.06, 0.07);
+  copyNormalMap(m, s);
   cache.set(m, s);
   return s;
 }
+
+/** Stage 6.7：Tripo 模型的法線貼圖（只有 HQ 版有）沿用到 StandardMaterial（與村莊同一套光照） */
+export function copyNormalMap(m: Material, s: StandardMaterial): void {
+  const src = m as unknown as { bumpTexture?: Texture | null; invertNormalMapX?: boolean; invertNormalMapY?: boolean };
+  if (!src.bumpTexture) return;
+  s.bumpTexture = src.bumpTexture;
+  s.invertNormalMapX = !!src.invertNormalMapX;
+  s.invertNormalMapY = !!src.invertNormalMapY;
+}
+
+/**
+ * Stage 6.7：使用者提供的 Tripo 正式 NPC（public/models/village-npc67/，已綁骨架、尺寸與腳底高度已統一）。
+ * 檔名 <stem>_{hq,lite,far}.glb；尺寸已含在模型內（縮放 1）。沒有列在這裡的 NPC 沿用 Stage 6.6 模型（星願商會掌櫃：沒有提供 Tripo 模型）。
+ */
+export const NPC67: Readonly<Record<string, string>> = {
+  swordmaster: "npc_swordmaster67",
+  knight: "npc_knight67",
+  smith: "npc_smith67",
+  mage: "npc_mage67",
+  priest: "npc_priest67",
+  clown: "npc_clown67",
+  warehouse: "npc_warehouse67",
+};
 
 /** 骨架角色的包圍盒：依骨架姿勢計算後放大（動作幅度小），讓視錐剔除可以正常運作（取代 alwaysSelectAsActiveMesh） */
 export function skinnedBounds(m: AbstractMesh, scale = 1.35): void {
@@ -102,7 +126,7 @@ interface Set_ {
 
 export function setupVillageNpcs(
   scene: Scene,
-  loaded: Map<string, { near: Loaded; far: Loaded | null }>,
+  loaded: Map<string, { near: Loaded; far: Loaded | null; scale?: number; model?: string }>,
   opt: { lite: boolean; shadows?: ShadowGenerator | null; lod?: NpcLodOptions },
 ): VillageNpcs {
   const cache = new Map<Material, StandardMaterial>();
@@ -158,7 +182,7 @@ export function setupVillageNpcs(
     const r = loaded.get(prof.key);
     if (!spot || !r) continue;
     const root = new TransformNode(`npc_${prof.key}`, scene);
-    root.scaling.setAll(SCALE);
+    root.scaling.setAll(r.scale ?? SCALE);
     root.position.set(spot.x, spot.floor + 0.02, spot.z);
     root.rotation.y = spot.yaw;
     const near = prep(r.near, root);
@@ -190,7 +214,7 @@ export function setupVillageNpcs(
     }
     one.current = "Idle";
     all.push(one);
-    stats[prof.spot] = { triangles: Math.round(near.tris), farTriangles: Math.round(far?.tris ?? 0), meshes: near.set.meshes.length, animations: [...near.set.anims.keys()] };
+    stats[prof.spot] = { triangles: Math.round(near.tris), farTriangles: Math.round(far?.tris ?? 0), meshes: near.set.meshes.length, animations: [...near.set.anims.keys()], model: r.model ?? `npc_${prof.key}` };
     k++;
   }
 
@@ -209,7 +233,9 @@ export function setupVillageNpcs(
   /** Stage 6.6：職業小動作（Act，2～3 秒，播一次）長度 */
   const actLen = (o: One): number => {
     const g = o.sets[0]!.anims.get("Act");
-    return g ? (g.to - g.from) / 30 : 0;
+    // Stage 6.7：依動作實際的影格率換算（glTF 載入器預設 60 fps）
+    const fps = g?.targetedAnimations[0]?.animation.framePerSecond ?? 60;
+    return g ? (g.to - g.from) / fps : 0;
   };
   const setPaused = (o: One, p: boolean): void => {
     if (o.paused === p) return;

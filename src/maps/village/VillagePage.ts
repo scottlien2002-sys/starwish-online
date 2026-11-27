@@ -1,3 +1,5 @@
+import { PortalTrigger } from "../../game/portalTrigger.ts";
+import { VILLAGE_SOUTH_PORTAL } from "../../game/worldPortals.ts";
 import { villageInitialCamera } from "./spawnCamera.ts";
 import { Color3, DirectionalLight, type Engine, HemisphericLight, Scene, ShadowGenerator, Vector3 } from "@babylonjs/core";
 import { shotCam, shotTargets } from "./shotCam.ts";
@@ -184,6 +186,9 @@ class VillagePage {
   private full: VillageArtFull | null = null;
   private fullStatus = "off";
   private interact: VillageInteract | null = null;
+  /** Stage 6.7：南方傳送陣「踩入自動傳送」（與 Claude A Stage 7.1 同一套判定：PortalTrigger＋VILLAGE_SOUTH_PORTAL，觸發半徑 2.6 m） */
+  private readonly portalTrig = new PortalTrigger(VILLAGE_SOUTH_PORTAL);
+  private readonly portalLog: { t: number; map: string; x: number; z: number }[] = [];
 
   constructor(canvas: HTMLCanvasElement, hudRoot: HTMLElement) {
     const t0 = performance.now();
@@ -315,6 +320,7 @@ class VillagePage {
           m.loadVillageArtFull(scene, this.lite, this.shadows, (msg) => (this.fullStatus = msg), {
             lod: { lod: this.perfCfg.npcLod, near: this.perfCfg.lodNear, animThrottle: this.perfCfg.animThrottle, animFar: this.perfCfg.animFar },
             originalModels: this.perfCfg.originalModels,
+            npcSet: this.perfCfg.npcSet,
           }),
         )
         .then(async (full) => {
@@ -322,14 +328,12 @@ class VillagePage {
           const { VillageInteract } = await import("./VillageInteract.ts");
           this.interact = new VillageInteract(scene, full.merchant, {
             avatarUrl: `${import.meta.env.BASE_URL}models/village-p3/pm2_avatar.png`,
-            goToMap: (map) => {
-              const q = new URLSearchParams(location.search);
-              q.set("map", map);
-              q.delete("art");
-              location.search = q.toString();
-            },
+            goToMap: (map) => this.goToMap(map),
+            autoPortals: true,
           });
           this.interact.npcs = full.npcs;
+          this.interact.boardMeshes = full.board;
+          this.interact.hookBoardTap();
           // 腳底柔和陰影（只在 shadow=blob 時顯示）：洛恩＋八位 NPC
           if (full.merchant) {
             const mr = full.merchant.root;
@@ -531,6 +535,11 @@ class VillagePage {
     this.sun.position.copyFrom(this.pos).subtractInPlace(this.sun.direction.scale(45));
     this.world.update(dt, this.overview ? 1e6 : this.pos.x, this.overview ? 1e6 : this.pos.z);
     this.interact?.update(performance.now() / 1000, this.pos.x, this.pos.z);
+    // Stage 6.7：南方傳送陣踩入自動傳送（只觸發一次；載入時在陣內要先走出去才啟用）
+    if (this.portalTrig.update(this.pos.x, this.pos.z)) {
+      this.hud.toast("傳送到 星芽原野…", 1600);
+      window.setTimeout(() => this.goToMap("starsprout"), 350);
+    }
     this.vshadows.update(performance.now() / 1000, this.pos.x, this.pos.z);
     if (this.diag) this.diagFrame(rawDt);
     if (!this.skipRender) this.scene.render();
@@ -545,6 +554,16 @@ class VillagePage {
   };
 
   // ---------------- 巡迴效能測試 ----------------
+  /** 切換地圖（預覽版：重新載入頁面；正式版由 Claude A 的地圖管理器處理）。自動化測試設定 window.__swNoNav 時只記錄不切換 */
+  private goToMap(map: "starsprout"): void {
+    this.portalLog.push({ t: performance.now() / 1000, map, x: this.pos.x, z: this.pos.z });
+    if ((window as unknown as { __swNoNav?: boolean }).__swNoNav) return;
+    const q = new URLSearchParams(location.search);
+    q.set("map", map);
+    q.delete("art");
+    location.search = q.toString();
+  }
+
   startTour(loops: number): void {
     this.teleport(ARRIVAL_SPOT.x, ARRIVAL_SPOT.z, 0);
     this.tour = { runner: new TourRunner(tourPoints(NPC_SPOTS, PORTALS, ARRIVAL_SPOT), loops), dts: [], draws: [], tris: [], marks: [], t: 0, ev0: this.pageEvents.length };
@@ -1102,6 +1121,16 @@ class VillagePage {
         return this.interact.activate();
       },
       interactClose: () => this.interact?.closeAll(),
+      /** Stage 6.7：南方傳送陣踩入狀態（armed：已啟用；fired：已觸發；log：觸發紀錄） */
+      portalState: () => ({ armed: this.portalTrig.isArmed, fired: this.portalTrig.hasFired, dist: this.portalTrig.distance(this.pos.x, this.pos.z), triggerR: this.portalTrig.spec.triggerR, log: [...this.portalLog] }),
+      /** 測試用：重新允許觸發（模擬切換失敗後重試） */
+      portalReset: () => this.portalTrig.reset(),
+      /** Stage 6.7：委託佈告欄（與點擊佈告欄相同的判定：在佈告欄前才開啟） */
+      tapBoard: () => (this.full?.board?.length && this.interact ? this.interact.openQuestBoardIfNear() : "no-board"),
+      /** Stage 6.7：洛恩最近一格的姿勢（anim、walkRate＝Walk 播放速度＝實際速度÷0.6） */
+      merchantPose: () => this.interact?.merchantPose ?? null,
+      /** Stage 6.7：NPC 模型組、佈告欄、洛恩統計 */
+      npc67: () => ({ set: this.full?.npcSet ?? null, board: (this.full?.board ?? []).map((m) => ({ name: m.name, tris: m.getTotalIndices() / 3, pickable: m.isPickable })), merchant: this.full?.merchant?.stats ?? null }),
       /** Stage 6.3：效能設定、陰影投射物、角色 LOD 狀態、目前畫面的網格分類（CI 與實機都可呼叫） */
       perfState: () => ({
         cfg: this.perfCfg,

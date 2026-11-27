@@ -39,6 +39,8 @@ export interface VillagePerfConfig {
   /** 陰影投射物範圍（m） */
   shadowRange: number;
   originalModels: boolean;
+  /** Stage 6.7：NPC 模型組（"v67"＝Tripo 正式 NPC；"v66"＝前後比較用，?npcset=v66） */
+  npcSet: "v67" | "v66";
   /** 被網址參數覆寫的項目（報告用） */
   overrides: string[];
 }
@@ -103,6 +105,7 @@ export function villagePerfConfig(params: URLSearchParams, tier: GraphicsTier): 
     casterCull,
     shadowRange: num(params.get("shadowrange")) ?? p.shadowRange,
     originalModels: s62,
+    npcSet: params.get("npcset") === "v66" ? "v66" : "v67",
     overrides: ov,
   };
 }

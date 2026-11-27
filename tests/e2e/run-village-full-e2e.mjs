@@ -57,6 +57,8 @@ for (const name of browsers) {
       run.screenshots.push(f.split("/").pop());
     };
     const ctx = await browser.newContext({ viewport: vp, deviceScaleFactor: 2, hasTouch: true });
+    // Stage 6.7：南方傳送陣是踩入自動傳送；測試時只記錄、不真的切換地圖
+    await ctx.addInitScript(() => { window.__swNoNav = true; });
     const page = await ctx.newPage();
     page.on("pageerror", (e) => run.errors.push(`pageerror: ${e.message}`));
     page.on("console", (m) => m.type() === "error" && run.errors.push(`console: ${m.text()}`));
@@ -85,7 +87,24 @@ for (const name of browsers) {
         run.results.art66 = a66;
         const minT = q === "high" ? 1200 : q === "medium" ? 700 : 300;
         check(`Stage 6.6 美術升級開啟：草叢 ≥ ${minT}、小花 ≥ ${Math.round(minT / 3)}（各 1 次繪製）、曝光 1.0／對比 1.12`, a66.look === true && a66.foliage && a66.foliage.tufts >= minT && a66.foliage.flowers >= Math.round(minT / 3) && a66.foliage.drawCalls === 2 && Math.abs(a66.lighting.exposure - 1) < 1e-6 && Math.abs(a66.lighting.contrast - 1.12) < 1e-6, a66);
-        check("Stage 6.6 NPC 生活感：8 位都有眨眼（形狀鍵）與職業小動作 Act，小動作時間錯開", npcIds.every((id) => npcInfo.stats[id].animations.includes("Act") && npcInfo.state[id].blinkTargets >= 1) && new Set(npcIds.map((id) => npcInfo.state[id].nextAct)).size >= 6, Object.fromEntries(npcIds.map((id) => [id, { anims: npcInfo.stats[id].animations, blink: npcInfo.state[id].blinkTargets, nextAct: npcInfo.state[id].nextAct }])));
+        // Stage 6.7：七位改用 Tripo 正式 NPC（v67）；星願商會掌櫃沒有提供 Tripo 模型，沿用 Stage 6.6（有眨眼形狀鍵）。
+        //   Tripo 模型的眼睛畫在貼圖上、沒有眼皮幾何 → 模型不支援眨眼（blinkTargets 0），不宣稱有眨眼
+        const v67ids = npcIds.filter((id) => id !== "guild");
+        check("Stage 6.7 正式 NPC：七位使用 Tripo 模型（v67，依畫質 HQ／Lite）、星願商會掌櫃沿用 6.6 模型；全部有職業小動作 Act 且時間錯開", v67ids.every((id) => npcInfo.stats[id].model === `npc_${({ sword: "swordmaster", church: "priest", circus: "clown" })[id] ?? id}67_${lod}`) && npcInfo.stats.guild?.model === "npc_guild" && npcIds.every((id) => npcInfo.stats[id].animations.includes("Act")) && new Set(npcIds.map((id) => npcInfo.state[id].nextAct)).size >= 6, Object.fromEntries(npcIds.map((id) => [id, { model: npcInfo.stats[id].model, tris: npcInfo.stats[id].triangles, far: npcInfo.stats[id].farTriangles, anims: npcInfo.stats[id].animations, blink: npcInfo.state[id].blinkTargets, nextAct: npcInfo.state[id].nextAct }])));
+        check("Stage 6.7 眨眼：只有支援的模型（商會掌櫃 6.6 形狀鍵）會眨眼；Tripo 模型不支援（不假裝）", npcInfo.state.guild?.blinkTargets >= 1 && v67ids.every((id) => npcInfo.state[id].blinkTargets === 0), Object.fromEntries(npcIds.map((id) => [id, npcInfo.state[id].blinkTargets])));
+        const n67 = await V(() => window.__starwishVillage.npc67());
+        run.results.npc67 = n67;
+        // Stage 6.7：洛恩步行：Walk 播放速度＝實際速度÷0.6（加減速時也不滑步）
+        {
+          let wp = null;
+          for (let i = 0; i < 30 && !(wp && wp.anim === "Walk"); i++) {
+            await page.waitForTimeout(700);
+            wp = await V(() => window.__starwishVillage.merchantPose());
+          }
+          run.results.merchantWalk = wp;
+          check("Stage 6.7 洛恩巡走：播放 Walk，播放速度跟隨實際移動速度（0.2～1.6 倍，設計速度 0.6 m/s）", wp && wp.anim === "Walk" && wp.walkRate >= 0.2 && wp.walkRate <= 1.6, wp);
+        }
+        check("Stage 6.7 洛恩：N009 Tripo 模型（Idle／Walk／Talk／Turn）＋原本的小寵物；委託佈告欄 N008 模型可點擊", n67.set === "v67" && n67.merchant?.model === `pet_merchant67_${lod}` && ["Idle", "Walk", "Talk", "Turn"].every((a) => n67.merchant.animations.includes(a)) && n67.board.length >= 1 && n67.board.every((b) => b.pickable) && n67.board.reduce((a, b) => a + b.tris, 0) <= (q === "high" ? 6000 : 3000), n67);
       }
       await page.waitForTimeout(800);
       // 效能（CI 軟體繪圖，只看相對數字）
@@ -166,7 +185,23 @@ for (const name of browsers) {
         if (n.id !== "board") npcRes[npcRes.length - 1].afterAnim = (await V(() => window.__starwishVillage.npcs())).state[n.id]?.anim;
       }
       run.results.npcs = npcRes;
-      check(`NPC 互動：${npcs.length} 位 NPC 都能靠近後點擊對話（名稱、職責）`, npcRes.every((r) => r.target === `npc:${r.id}` && r.what === `npc:${r.id}` && r.dialog.length > 0), npcRes);
+      check(`NPC 互動：${npcs.length} 個互動點都能靠近後按下（NPC 對話：名稱、職責；佈告欄：委託介面）`, npcRes.every((r) => r.target === `npc:${r.id}` && r.what === (r.id === "board" ? "board" : `npc:${r.id}`) && r.dialog.length > 0) && /委託/.test(npcRes.find((r) => r.id === "board")?.dialog ?? ""), npcRes);
+      // Stage 6.7：直接點擊佈告欄（N008 取消人物 NPC）：在佈告欄前開啟委託介面；太遠只提示靠近
+      {
+        const b = npcs.find((n) => n.id === "board");
+        await V(([a, c, d]) => window.__starwishVillage.teleport(a, c, d), [b.x + Math.sin(b.yaw) * 1.2, b.z + Math.cos(b.yaw) * 1.2, ((b.yaw + Math.PI) * 180) / Math.PI]);
+        await settle(page, 3);
+        const near = await V(() => window.__starwishVillage.tapBoard());
+        const dlg = (await V(() => window.__starwishVillage.interact())).dialog;
+        if (mode === "high-portrait") await shot(page, "board_quest");
+        await V(() => window.__starwishVillage.interactClose());
+        await V(([a, c]) => window.__starwishVillage.teleport(a, c, 0), [0, -12]);
+        await settle(page, 3);
+        const far = await V(() => window.__starwishVillage.tapBoard());
+        await V(() => window.__starwishVillage.interactClose());
+        run.results.boardTap = { near, far, dialog: dlg.slice(0, 60) };
+        check("Stage 6.7 委託佈告欄：在佈告欄前點擊 → 開啟委託介面；離太遠 → 只提示靠近", near === "board" && /委託/.test(dlg) && far === "too-far", run.results.boardTap);
+      }
       check("正式NPC：對話時播放對話動作（Talk／面向玩家），結束後回到待機", npcRes.filter((r) => r.id !== "board").every((r) => (r.talkAnim === "Talk" || r.talkAnim === "Turn") && r.afterAnim !== "Talk"), npcRes.map((r) => ({ id: r.id, talk: r.talkAnim, after: r.afterAnim })));
       check("鐵匠只有一位（轉職＋裝備鑑定）", npcs.filter((n) => n.id === "smith").length === 1 && /轉職/.test(npcs.find((n) => n.id === "smith").role) && /鑑定/.test(npcs.find((n) => n.id === "smith").role), npcs.find((n) => n.id === "smith"));
       // 星願商會：選單 → 交易所三分類（裝備／寵物詳細資料）→ 購買 → 掛賣（鎖定）→ 取消（解鎖）→ 再掛賣 → 他人買走（示範）→ 領取收益
@@ -224,7 +259,26 @@ for (const name of browsers) {
       // 傳送門：南門開放（確認視窗）、北東西休眠
       const portals = await V(() => window.__starwishVillage.layout().portals);
       const pRes = [];
-      for (const p of portals) {
+      // Stage 6.7：南方傳送陣踩入自動傳送（與 Claude A Stage 7.1 相同：沒有確認視窗、只觸發一次、半徑 2.6 m）
+      {
+        const sp = portals.find((p) => p.id === "south");
+        const before = await V(() => window.__starwishVillage.portalState());
+        await V(([a, b]) => window.__starwishVillage.teleport(a, b, 180), [sp.x, sp.z + 3.4]);
+        await settle(page, 3);
+        const outside = await V(() => window.__starwishVillage.portalState());
+        const stOut = await V(() => window.__starwishVillage.interact());
+        await V(([a, b]) => window.__starwishVillage.teleport(a, b, 180), [sp.x, sp.z + 1.5]);
+        await settle(page, 4);
+        await page.waitForTimeout(600);
+        const inside = await V(() => window.__starwishVillage.portalState());
+        const stIn = await V(() => window.__starwishVillage.interact());
+        await V(([a, b]) => window.__starwishVillage.teleport(a, b, 0), [sp.x, sp.z]);
+        await settle(page, 3);
+        const again = await V(() => window.__starwishVillage.portalState());
+        run.results.southPortal = { before, outside, inside, again, buttonOutside: stOut?.target, buttonInside: stIn?.target, dialog: stIn?.dialog ?? "" };
+        check("Stage 6.7 南方傳送陣：走進 2.6 m 內自動傳送到星芽原野（沒有按鈕、沒有確認視窗）、只觸發一次；陣外 3.4 m 不觸發", before.armed && !outside.fired && inside.fired && inside.log.length === 1 && inside.log[0].map === "starsprout" && again.log.length === 1 && stOut?.target !== "portal:south" && stIn?.target !== "portal:south" && !/前往/.test(stIn?.dialog ?? ""), run.results.southPortal);
+      }
+      for (const p of portals.filter((x) => x.id !== "south")) {
         await V(([a, b]) => window.__starwishVillage.teleport(a, b, 0), [p.x, p.z]);
         await settle(page, 4);
         const st = await V(() => window.__starwishVillage.interact());
@@ -236,7 +290,7 @@ for (const name of browsers) {
         await V(() => window.__starwishVillage.interactClose());
       }
       run.results.portals = pRes;
-      check("傳送門狀態：南門開放（可前往星芽原野、需確認）、北東西休眠（未開放）；共 4 座、沒有新增出口", pRes.length === 4 && pRes.every((r) => r.target === `portal:${r.id}` && (r.open ? /星芽原野/.test(r.dialog) && /前往/.test(r.dialog) : /未開放/.test(r.dialog))) && pRes.filter((r) => r.open).length === 1, pRes);
+      check("傳送門狀態：北東西休眠（點互動只顯示未開放、不會傳送）；共 4 座（南門開放、踩入傳送），沒有新增出口", portals.length === 4 && pRes.length === 3 && pRes.every((r) => r.target === `portal:${r.id}` && !r.open && /未開放/.test(r.dialog)) && portals.filter((p) => p.open).map((p) => p.id).join() === "south", pRes);
       // 洛恩：靠近 → 停下並面向玩家 → 商人選單 → 寵物鑑定 → 放入 → 鑑定 → 結果
       const met = await V(() => window.__starwishVillage.meetMerchant());
       check("洛恩：靠近 2.5 m 內可以對話", met === "merchant", met);
