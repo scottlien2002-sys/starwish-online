@@ -133,7 +133,7 @@ export class VfxSystem {
     this.glow = null;
     if (this.q.glow) {
       this.glow = new GlowLayer("fxGlow", this.scene, { mainTextureRatio: this.q.glowTextureRatio, blurKernelSize: tier === "high" ? 32 : 16 });
-      this.glow.intensity = this.env === "bright" ? 0.4 : 0.6;
+      this.glow.intensity = this.env === "bright" ? 0.35 : 0.5;
       for (const list of this.meshPool.values()) for (const f of list) this.glowAll(f);
       for (const f of this.active) this.glowAll(f);
     }
@@ -143,7 +143,7 @@ export class VfxSystem {
   setEnvironment(env: VfxEnvironment): void {
     this.env = env;
     for (const { mat, base } of this.mats.values()) this.styleMat(mat, base);
-    if (this.glow) this.glow.intensity = env === "bright" ? 0.4 : 0.6;
+    if (this.glow) this.glow.intensity = env === "bright" ? 0.35 : 0.5;
   }
 
   private glowAll(f: MeshFx): void {
@@ -509,7 +509,7 @@ export class VfxSystem {
         break;
       }
       case "chargeFlash": {
-        this.spawn("hitFlash", at, { ...opt, scale: 2.2 * sc });
+        this.spawn("hitFlash", at, { ...opt, scale: 1.3 * sc });
         this.spawn("hitRing", at, { ...opt, scale: 2.0 * sc });
         this.spawn("shockwave", new Vector3(at.x, 0, at.z), { ...opt, scale: 0.7 * sc });
         break;
@@ -630,7 +630,7 @@ export class VfxSystem {
           const fl = ff.layers[0]!;
           fl.position.copyFrom(ff.mesh.position);
           fl.scaling.setAll(ff.baseScale * 1.4 * (0.5 + 0.8 * Math.sqrt(u)));
-          fl.visibility = 0.8 * Math.max(0, 1 - u * 2.4);
+          fl.visibility = 0.55 * Math.max(0, 1 - u * 2.4);
         });
         this.spawn("hitRing", at.add(new Vector3(0, 0.6 * sc, 0)), { ...opt, scale: 2.4 * sc });
         this.burst("blastStars", at.add(new Vector3(0, 0.6 * sc, 0)), { ...common, count: 90, tex: "star", pal, life: [0.5, 0.95], size: [0.08, 0.2], power: [3, 7],
@@ -679,7 +679,7 @@ export class VfxSystem {
         this.paint(f.mesh, "flare", crit ? PALETTES.gold.core : key === "boltImpact" ? pal.main : pal.core);
         f.mesh.position.copyFrom(at);
         f.mesh.rotation.z = Math.random() * Math.PI;
-        f.baseScale = (crit ? 2.4 : key === "boltImpact" ? 1.6 : 1.1) * sc;
+        f.baseScale = (crit ? 1.7 : key === "boltImpact" ? 1.4 : 1.1) * sc;
         this.startMesh(f, crit ? 0.24 : 0.15, g.handle, (ff, u) => {
           ff.mesh.scaling.setAll(ff.baseScale * (0.35 + 0.8 * Math.sqrt(u)));
           ff.mesh.visibility = 1 - u * u;
@@ -699,19 +699,23 @@ export class VfxSystem {
       case "lightShield": {
         const g = req("primary", 0);
         if (!g.allowed) return;
-        const f = this.takeMesh("shield", () => ({ mesh: MeshBuilder.CreateSphere("fxShield", { diameter: 1, segments: 20 }, this.scene) }));
+        // 光盾：面向鏡頭的六角紋圓盾（球體在加算混合下會整顆發白）
+        const f = this.takeMesh("shield", () => ({ mesh: this.plane("fxShield", false, true), layers: [this.plane("fxShieldRim", false, true)] }));
         this.paint(f.mesh, "hex", pal.main);
+        this.paint(f.layers[0]!, "ringThin", pal.core);
         f.follow = opt.follow;
         f.offset.set(0, 0.62, 0);
         f.mesh.position.copyFrom(at).addInPlaceFromFloats(0, 0.62, 0);
         f.baseScale = 1.7 * sc;
-        this.startMesh(f, opt.duration ?? 1.6, g.handle, (ff, u, dt) => {
-          ff.spin += dt * 0.6;
+        this.startMesh(f, opt.duration ?? 1.6, g.handle, (ff, u) => {
           const pop = u < 0.12 ? 1 + 0.18 * Math.sin((u / 0.12) * Math.PI) : 1;
           const k = Math.min(1, u / 0.08);
-          ff.mesh.scaling.set(ff.baseScale * k * pop, ff.baseScale * 1.1 * k * pop, ff.baseScale * k * pop);
-          ff.mesh.rotation.y = ff.spin;
-          ff.mesh.visibility = (0.55 + 0.15 * Math.sin(u * 25)) * Math.min(1, (1 - u) * 5);
+          ff.mesh.scaling.setAll(ff.baseScale * 1.25 * k * pop);
+          ff.mesh.visibility = (0.38 + 0.1 * Math.sin(u * 25)) * Math.min(1, (1 - u) * 5);
+          const rim = ff.layers[0]!;
+          rim.position.copyFrom(ff.mesh.position);
+          rim.scaling.setAll(ff.baseScale * 1.3 * k * pop);
+          rim.visibility = 0.7 * Math.min(1, (1 - u) * 5);
         });
         this.spawn("hitRing", at.add(new Vector3(0, 0.6, 0)), { ...opt, scale: 1.8 * sc });
         break;
@@ -719,11 +723,11 @@ export class VfxSystem {
       case "shieldBash": {
         const fwd = new Vector3(Math.sin(yaw), 0, Math.cos(yaw));
         const p = at.add(fwd.scale(0.6)).addInPlaceFromFloats(0, 0.6, 0);
-        this.spawn("hitFlash", p, { ...opt, scale: 1.6 * sc });
-        this.spawn("hitRing", p, { ...opt, scale: 1.6 * sc });
+        this.spawn("hitFlash", p, { ...opt, scale: 0.9 * sc });
+        this.spawn("hitRing", p, { ...opt, scale: 1.4 * sc });
         this.spawn("shockwave", new Vector3(p.x, 0, p.z), { ...opt, scale: 0.6 * sc });
         this.burst("bashSpark", p, { ...common, count: 30, tex: "spark", pal, life: [0.12, 0.25], size: [0.06, 0.14], power: [4, 8],
-          emitter: (ps) => ps.createConeEmitter(0.4, Math.PI / 4), stretched: true, priority: "primary" });
+          emitter: (ps) => ps.createDirectedSphereEmitter(0.2, fwd.add(new Vector3(-0.5, -0.2, -0.5)), fwd.add(new Vector3(0.5, 0.5, 0.5))), stretched: true, priority: "primary" });
         break;
       }
       case "thrustLine": {

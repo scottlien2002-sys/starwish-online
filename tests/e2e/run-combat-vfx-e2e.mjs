@@ -22,7 +22,7 @@ const SKILLS = ["triple_slash", "staff_cast", "leap_slam", "whirlwind", "star_me
 const HIT_SHOT_DELAY = { triple_slash: 0, staff_cast: 0, leap_slam: 0, whirlwind: 0, star_meteor: 0, charge_burst: 0 };
 
 for (const name of browsers) {
-  const browser = await pw[name].launch({ args: name === "chromium" ? ["--use-gl=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] : [] });
+  const browser = await pw[name].launch({ args: name === "chromium" ? ["--use-gl=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist", "--enable-precise-memory-info"] : [] });
   for (const tcase of [
     { id: "male-medium", url: "?lab=combat&q=medium&g=male&mute=1" },
     { id: "female-high", url: "?lab=combat&q=high&g=female&mute=1" },
