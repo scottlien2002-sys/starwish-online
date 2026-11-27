@@ -313,9 +313,11 @@ for (const name of browsers) {
             const hurt0 = i0.combatFx?.hurt ?? 0;
             const kb0 = { done: i0.combatFx?.knockbacks ?? 0, skip: i0.combatFx?.knockSkipped ?? 0 };
             const att0 = tgt.attacks?.resolved ?? 0;
-            const t0 = performance.now();
+            // 以遊戲時間計算（CI 是軟體繪製、FPS 低；遊戲每幀最多前進 0.1 秒，實際時間會比遊戲時間長）
+            const g0 = i0.gameTime;
+            const w0 = performance.now();
             let maxGap = 0;
-            let lastHurtAt = performance.now();
+            let lastHurtAt = g0;
             let lastHurt = hurt0;
             let presses = 0;
             const step = () => {
@@ -326,22 +328,22 @@ for (const name of browsers) {
               api.press("attack");
               presses++;
               const h = i.combatFx?.hurt ?? 0;
-              const now = performance.now();
+              const now = i.gameTime;
               if (h > lastHurt) {
                 maxGap = Math.max(maxGap, now - lastHurtAt);
                 lastHurtAt = now;
                 lastHurt = h;
               }
-              if (now - t0 > 25000) {
+              if (now - g0 >= 25 || performance.now() - w0 > 240000) {
                 maxGap = Math.max(maxGap, now - lastHurtAt);
-                res({ kind: tgt.kind, presses, playerHits: i.hits ?? null, hurtTaken: h - hurt0, monsterAttacks: (m?.attacks?.resolved ?? 0) - att0, knockbacks: (i.combatFx?.knockbacks ?? 0) - kb0.done, knockSkipped: (i.combatFx?.knockSkipped ?? 0) - kb0.skip, maxGapMs: Math.round(maxGap), alive: !!m && m.hp > 0 });
+                res({ kind: tgt.kind, gameSeconds: Math.round((now - g0) * 10) / 10, wallSeconds: Math.round((performance.now() - w0) / 100) / 10, presses, playerHits: i.hits ?? null, hurtTaken: h - hurt0, monsterAttacks: (m?.attacks?.resolved ?? 0) - att0, knockbacks: (i.combatFx?.knockbacks ?? 0) - kb0.done, knockSkipped: (i.combatFx?.knockSkipped ?? 0) - kb0.skip, maxGapSec: Math.round(maxGap * 10) / 10, alive: !!m && m.hp > 0 });
               } else setTimeout(step, 120);
             };
             step();
           }),
       );
       run.results.sustainedAttack = sustain;
-      check("Stage 7.4：玩家持續普攻 25 秒（怪物血量調高）：怪物仍多次反擊命中、最長不出手間隔 < 8 秒；擊退有衰減（不會一直被推離）", !sustain.error && sustain.hurtTaken >= 3 && sustain.monsterAttacks >= 3 && sustain.maxGapMs < 8000 && sustain.knockSkipped > sustain.knockbacks, sustain);
+      check("Stage 7.4：玩家持續普攻（遊戲時間 25 秒，怪物血量調高）：怪物仍多次反擊命中（≥ 4 次）、最長不出手間隔 < 8 秒；擊退有衰減（不會一直被推離）", !sustain.error && sustain.gameSeconds >= 24 && sustain.hurtTaken >= 4 && sustain.monsterAttacks >= 4 && sustain.maxGapSec < 8 && sustain.knockSkipped > sustain.knockbacks, sustain);
       await shot("field_fight");
 
       // ---------- 6. 走進營地傳送陣返回星芽村，存檔保留 ----------

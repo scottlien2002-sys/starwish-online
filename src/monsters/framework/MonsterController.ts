@@ -75,8 +75,8 @@ export class MonsterController {
       for (const e of frame.effects) v.playEffect(e);
       this.visAccum += dt;
       const stride = this.visualStride;
-      // 狀態剛切換的那一幀一定更新（例如死亡、重生的第一格），之後再依間隔
-      if (stride > 0 && (++this.strideCount >= stride || frame.entered.length > 0)) {
+      // 狀態剛切換的那一幀一定更新（例如死亡、重生的第一格：重生時重新顯示），即使畫面外（間隔 0）；之後再依間隔
+      if ((stride > 0 && ++this.strideCount >= stride) || frame.entered.length > 0) {
         this.strideCount = 0;
         v.applyPose(frame.pose);
         v.update(this.visAccum);

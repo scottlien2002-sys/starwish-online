@@ -113,6 +113,8 @@ export interface PlayApi {
     stats: CharacterStats;
     kills: number;
     hits: number;
+    /** 遊戲時間（秒；每幀最多前進 0.1 秒，低 FPS 時比實際時間慢） */
+    gameTime: number;
     drops: number;
     picked: number;
     loot: number;
@@ -1284,6 +1286,7 @@ class StarsproutGame {
           stats: { ...self.stats },
           kills: self.kills,
           hits: self.hits,
+          gameTime: self.now,
           drops: self.dropCount,
           picked: self.picked,
           loot: self.loot.drops.length,

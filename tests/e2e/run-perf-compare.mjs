@@ -32,6 +32,8 @@ async function openField(base, extra, label) {
   // 新存檔 → 直接把存檔地圖設成星芽原野（與走南門進入相同的存檔狀態）
   await page.goto(`${base}/?play=world&newgame=1&g=male&seed=11&quality=high`, { waitUntil: "load" });
   await page.waitForFunction(() => window.__starwishWorld?.ready === true, null, { timeout: 180000 });
+  // 離開村莊（村莊在離開時會寫入存檔）→ 到同網域的非遊戲頁面再改存檔，才不會被覆蓋
+  await page.goto(`${base}/__perf_blank__.json`, { waitUntil: "load" }).catch(() => {});
   await page.evaluate(() => {
     const k = "starwish.stage7.save.v1";
     const s = JSON.parse(localStorage.getItem(k));

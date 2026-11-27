@@ -157,7 +157,7 @@ test("7.4 間隔：降低視覺更新頻率時，AI、位置、狀態事件與�
   assert.ok(Math.abs(B.v.dtSum - A.v.dtSum) <= 4 / 60 + 1e-9, `動畫時間不遺失：${B.v.dtSum} vs ${A.v.dtSum}`);
 });
 
-test("7.4 間隔 0（畫面外遠處）：不更新動畫，但狀態切換那一幀仍會更新一次", () => {
+test("7.4 間隔 0（畫面外遠處）：不更新動畫，但狀態切換那一幀仍會更新一次（重生會重新顯示）", () => {
   const { c: a, v: va } = makeOne();
   a.visualStride = 0;
   let now = 0;
@@ -166,17 +166,19 @@ test("7.4 間隔 0（畫面外遠處）：不更新動畫，但狀態切換那�
     a.update(1 / 60, now);
   }
   const before = va.updates;
-  assert.equal(before, 0);
+  assert.ok(before <= 1, `120 幀只在一開始的狀態切換更新（${before}）`);
   a.instance.receiveDamage(999999, now);
   now += 1 / 60;
   a.update(1 / 60, now);
   assert.ok(va.entered.includes("death"));
-  assert.equal(va.updates, before, "間隔 0 時連狀態切換也不畫（畫面外）；回到畫面內才補上");
-  a.visualStride = 1;
-  now += 1 / 60;
-  a.update(1 / 60, now);
-  assert.equal(va.updates, 1);
-  assert.ok(va.dtSum > 2, "回到畫面內時一次補上累積時間，死亡動畫直接到正確進度");
+  assert.equal(va.updates, before + 1, "間隔 0 時，狀態切換那一幀仍更新一次（例如重生時重新顯示）");
+  assert.ok(va.dtSum > 2, "一次補上累積時間，動畫直接到正確進度");
+  const u = va.updates;
+  for (let k = 0; k < 30; k++) {
+    now += 1 / 60;
+    a.update(1 / 60, now);
+  }
+  assert.equal(va.updates, u, "之後沒有狀態切換就不再更新");
 });
 
 // ---------------- 擊退連擊衰減（避免怪物被普攻永久推出攻擊範圍） ----------------
