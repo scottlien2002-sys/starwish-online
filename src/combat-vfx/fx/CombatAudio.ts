@@ -25,6 +25,15 @@ export const SFX_LENGTH: Record<SfxKey, number> = {
   bolt: 0.45, magicHit: 0.6, groundImpact: 0.9, explosion: 1.4, jump: 0.25, land: 0.5, shieldBash: 0.8, heal: 1.1,
 };
 
+/**
+ * 每個音效的音量修正（dB）：依 CI 離線算圖的短時響度（50 ms RMS）調成一致的層級——
+ * 揮擊 < 命中 < 重擊／暴擊 < 地面衝擊／爆炸；跳躍最輕。
+ */
+export const SFX_LEVEL_DB: Record<SfxKey, number> = {
+  swish: 4, staffSwing: 4, swishHeavy: -2, whirl: 0, hit: 8, hitHeavy: 1, crit: 3, magicHit: 6.5, groundImpact: 2, explosion: 0,
+  land: 1, jump: 11, cast: 0, charge: -1.5, release: 0, bolt: 2, shieldBash: 4.5, heal: 3,
+};
+
 interface Bus {
   ctx: BaseAudioContext;
   dry: AudioNode;
@@ -86,7 +95,7 @@ function voice(bus: Bus, key: SfxKey, gain: number, t: number, pan = 0): void {
   const pitch = 1 + (R() - 0.5) * 0.08;
   const panner = (c as BaseAudioContext & { createStereoPanner?: () => StereoPannerNode }).createStereoPanner?.() ?? null;
   const out = c.createGain();
-  out.gain.value = gain;
+  out.gain.value = gain * Math.pow(10, (SFX_LEVEL_DB[key] ?? 0) / 20);
   if (panner) {
     panner.pan.value = pan;
     out.connect(panner);
