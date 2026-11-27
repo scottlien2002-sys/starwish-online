@@ -9,8 +9,8 @@
 | 編號 | 怪物 | 等級 | 行為 | 檔案 | 狀態 |
 |---|---|---|---|---|---|
 | M001 | 星露啵啵 | 1～2 | 被動 | `public/models/bobo_v38r_{high,medium,low}.glb`（已在 main 遊戲中） | ✅ 已驗收；程式動畫（果凍材質＋姿勢函式），不是骨骼動畫，**沿用不重做** |
-| M002 | 苔角獸 | 3～4 | 被動 | `public/models/monsters/m002/M002_MossHornBeast_Rig_V1_{HQ,Lite}.glb` | 🆕 Stage 2 新交付（候選版，待視覺驗收） |
-| M003 | 雲絨鳥 | 5～6 | 主動 | `public/models/monsters/m003/M003_CloudFluffBird_Rig_V1_{HQ,Lite}.glb` | 🆕 Stage 2 新交付（候選版，待視覺驗收） |
+| M002 | 苔角獸 | 3～4 | 被動 | `public/models/monsters/m002/M002_MossHornBeast_Rig_V1_{HQ,Lite}.glb` | Stage 3 更新為 Rig V1.1（蹄緣修正；檔名不變；候選版，待星芽原野統一驗收） |
+| M003 | 雲絨鳥 | 5～6 | 主動 | `public/models/monsters/m003/M003_CloudFluffBird_Rig_V1_{HQ,Lite}.glb` | Stage 3 更新為 Rig V1.1（翅根修正；檔名不變；候選版，待星芽原野統一驗收） |
 | M004 | 風羽狐 V1.1 | 7 | 主動 | `public/models/monsters/m004/M004_WindfeatherFox_Rig_V1_1_{HQ,Lite}.glb` | ✅ 已交付（438c66a） |
 | M005 | 星雲咩咩 | 8 | 主動 | `public/models/monsters/m005/M005_NebulaSheep_Rig_V1_{HQ,Lite}.glb` | ✅ 已交付 |
 | M006 | 胡蘿蔔大王 | 9 精英 | 主動 | `public/models/monsters/m006/M006_CarrotKing_Rig_V1_{HQ,Lite}.glb` | ✅ 已交付 |
@@ -49,14 +49,16 @@
 4. Respawn 播完 → `onStateEnter("idle")`。
 被動／主動規則見 `src/combat-vfx/core/monsterRules.ts`（Lv1～4 被動，被打才反擊；Lv5 以上主動）。
 
-## 3. M002、M003 新檔案
+## 3. M002、M003 檔案（Stage 3：Rig V1.1，檔名、關節、動作名稱與長度都不變，可直接覆蓋）
 
 | 檔案 | 大小 | SHA-256（前 16 碼） | 三角面 | 關節 |
 |---|---|---|---|---|
-| M002_MossHornBeast_Rig_V1_HQ.glb | 2.64 MB | 868afa858f61784b | 9,756 | 26 |
-| M002_MossHornBeast_Rig_V1_Lite.glb | 0.75 MB | a6c836347d8c5bb0 | 9,756 | 26 |
-| M003_CloudFluffBird_Rig_V1_HQ.glb | 3.56 MB | d65048abbcbbf68d | 9,754 | 19 |
-| M003_CloudFluffBird_Rig_V1_Lite.glb | 0.69 MB | 22acc871d71d7558 | 9,754 | 19 |
+| M002_MossHornBeast_Rig_V1_HQ.glb | 2.64 MB | b873329a24de8db3 | 9,756 | 26 |
+| M002_MossHornBeast_Rig_V1_Lite.glb | 0.75 MB | 4978178d2a03ce02 | 9,756 | 26 |
+| M003_CloudFluffBird_Rig_V1_HQ.glb | 3.56 MB | 933224a6214b2646 | 9,754 | 19 |
+| M003_CloudFluffBird_Rig_V1_Lite.glb | 0.69 MB | 950b24c93793ce4a | 9,754 | 19 |
+
+（Stage 2 V1.0 的 SHA：M002 HQ 868afa858f61784b／Lite a6c836347d8c5bb0；M003 HQ d65048abbcbbf68d／Lite 22acc871d71d7558。備份在 `backup/combat-vfx-stage2-final` 分支。）
 
 **M002 苔角獸**（四足、被動）
 - 原始檔：Tripo 自動綁骨版（只用它的綁定姿勢網格；Tripo 的 28 骨架和走路動作都沒有用）。
@@ -65,7 +67,10 @@
 - 剛性部位：臉、兩支棕色種莢角、頭頂藤蔓與葉芽、頭上的花 → 100% 頭骨；背上小白花 → 只跟身體；蹄 → 蹄骨。
 - 攻擊：低頭刨地 → 前衝 → 角往上挑（命中 0.55 s）。
 - 檢查：結構 0 錯誤 0 警告；綁定姿勢與原檔差 0.0 mm（HQ）／0.01 mm（Lite）；HQ 與 Lite 最大差 0.09 mm；IK 夾限 0 次；Respawn 結尾＝Idle 第 0 格。
-- 已知：Move／Run 時蹄緣有小三角面拉伸（距離遠時看不出），請以實際畫面為準。
+- **V1.1（Stage 3）蹄緣修正**：棕色蹄改成 100% 蹄骨（剛性，拉伸 0%）；蹄→腿的過渡改從蹄緣往上（V1.0 是橫跨整個蹄）；蹄本身不再和身體絨毛共用權重；蹄的翻轉幅度與肩髖擺動略收（0.65／0.85 倍）。
+  - 蹄（p99 邊拉伸）：Move 92.8%→0%、Run 162.4%→0%、Attack 168.1%→0%。
+  - 新增量測「蹄腿交界」（蹄緣以上到 0.17 m 的腿與絨毛下緣）：Move 71%、Run 91%、Attack 112%（V1.0 同區域 79%／145%／160%）。這一帶仍有拉伸，是腿很短、絨毛下緣直接蓋到蹄上的造型限制，距離遠時不明顯。
+  - 附帶改善：Run 最低點 −2.9 mm→−0.4 mm；Run 腳底滑動最大 29.5 mm→15.6 mm。
 
 **M003 雲絨鳥**（鳥類、主動）
 - 原始檔：Tripo＋gltfpack 原始模型（沒有骨架）。
@@ -74,11 +79,13 @@
 - 翅膀：下拍快、上拍慢，翅尖相位落後；攻擊為「後仰蓄勢 → 俯衝啄擊（命中 0.52 s）→ 回彈」。
 - 剛性部位：臉、喙、頭上的花與葉、腳 → 0% 拉伸。
 - 檢查：結構 0 錯誤 0 警告；綁定差 0.0／0.009 mm；HQ 與 Lite 最大差 0.05 mm；所有動作最低點 ≥ 0（不穿地）；Idle／Move／Run 循環接縫 0。
-- 已知：翅根拍動時，翅膀和身體絨毛交界的羽毛會拉伸；距離遠時不明顯，請以實際畫面為準。
+- **V1.1（Stage 3）翅根修正**：胸→翅膀的交接帶加寬（交接點外移、寬度 0.05→0.10，身體表面交接 1.06～1.18 → 0.98～1.23）；拍翅時翅根（第 1 節）幅度改為 0.7 倍，少的部分移到第 2、3 節，翅尖擺幅接近 V1.0。
+  - 翅膀 p99 邊拉伸：Idle 98.7%→81.8%、Run 150.7%→114.2%、Attack 212.0%→165.8%、Death 199.3%→154.1%。
+  - 已知：翅膀是和身體絨毛黏在一起的造型，交界處仍有拉伸（改善約 2～3 成，沒有完全消除）；要再降需要把翅膀和身體網格分開，屬於改模型，本階段不做。
 
 ## 4. 整合（給 Claude A）
 1. 把本分支的 `public/models/monsters/m002/`、`m003/` 與 `manifest.json` 帶進你的工作分支（只有資產，沒有程式改動）。
-2. 規格：`feature/combat-vfx-stage2` 的 `src/combat-vfx/lab/monsterSpecs.ts` 有 `M002_MOSS_HORN_BEAST`、`M003_CLOUD_FLUFF_BIRD`，格式和你的 `RiggedMonsterSpec` 相同，可以直接搬到 `riggedSpec.ts`。
+2. 規格：`feature/combat-vfx-stage3`（或 stage2）的 `src/combat-vfx/lab/monsterSpecs.ts` 有 `M002_MOSS_HORN_BEAST`、`M003_CLOUD_FLUFF_BIRD`，格式和你的 `RiggedMonsterSpec` 相同，可以直接搬到 `riggedSpec.ts`。
 3. 出生區：M002 苔葉林緣、M003 微風花丘（依地圖文件）。
 4. 驗證：`?lab=rigged` 或戰鬥展示頁會檢查關節數與 7 組動畫長度（不符會列出錯誤）。
 

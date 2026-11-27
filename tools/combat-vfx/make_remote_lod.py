@@ -5,9 +5,19 @@ coloured), i.e. 26 draw calls per player. For OTHER players we merge the 25 vert
 with one material (the face stays separate because of its texture) -> 2 draw calls per remote player.
 Nothing else changes: same nodes, same 17-joint skin, same inverse bind matrices, same Idle/Run/... animations, same
 vertex positions/colours (the look is identical except that metal trims lose their metallic sheen at distance).
+Stage 3: the same file also carries a FAR LOD (face_far + body_far, same skin) made with decimate.py
+(hair -> 25 %, face -> 40 %, other parts over 400 triangles -> 50 %; seams and borders locked). The near meshes are
+byte-for-byte the Stage 2 merged meshes, so close-up appearance does not change; the engine shows *_far beyond ~12 m.
 usage: python3 make_remote_lod.py <in_lite.glb> <out_remote.glb>"""
+import os
+sys_path_here = os.path.dirname(os.path.abspath(__file__))
 import json, struct, sys
 import numpy as np
+sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
+import decimate as DEC
+FAR_RATIO = {'hair': 0.25, 'head': 0.40}
+FAR_DEFAULT = 0.5
+FAR_MIN_TRIS = 400
 
 CT = {5120: np.int8, 5121: np.uint8, 5122: np.int16, 5123: np.uint16, 5125: np.uint32, 5126: np.float32}
 NC = {'SCALAR': 1, 'VEC2': 2, 'VEC3': 3, 'VEC4': 4, 'MAT4': 16}
@@ -52,7 +62,7 @@ def main(src, dst):
     for im in j.get('images', []): im['bufferView'] = copy_view(im['bufferView'])
     # 2) merge the vertex-coloured body parts (same skin) into one primitive
     names = ['POSITION', 'NORMAL', 'COLOR_0', 'JOINTS_0', 'WEIGHTS_0']
-    parts = {k: [] for k in names}; idx = []; base = 0; n_parts = 0
+    parts = {k: [] for k in names}; idx = []; far_idx = []; base = 0; n_parts = 0
     mesh_nodes = [n for n in j['nodes'] if 'mesh' in n and n['mesh'] != face_mesh]
     for n in mesh_nodes:
         for pr in j['meshes'][n['mesh']]['primitives']:
@@ -65,7 +75,16 @@ def main(src, dst):
                 if k == 'JOINTS_0': d = d.astype(np.uint16)
                 if k == 'WEIGHTS_0' and a['componentType'] != 5126: d = d.astype(np.float32) / (65535.0 if a['componentType'] == 5123 else 255.0)
                 parts[k].append(d.astype(np.float32) if k not in ('JOINTS_0',) else d); cnt = len(d)
-            ii, _ = acc(j, b, pr['indices']); idx.append(ii.ravel().astype(np.uint32) + base); base += cnt; n_parts += 1
+            ii, _ = acc(j, b, pr['indices']); ii = ii.ravel().astype(np.uint32)
+            idx.append(ii + base)
+            mname = j['meshes'][n['mesh']].get('name', '')
+            nt = len(ii) // 3
+            if nt > FAR_MIN_TRIS:
+                pp, _ = acc(j, b, at['POSITION'])
+                far_idx.append(DEC.simplify(pp, ii, int(nt * FAR_RATIO.get(mname, FAR_DEFAULT))).astype(np.uint32) + base)
+            else:
+                far_idx.append(ii + base)
+            base += cnt; n_parts += 1
     attrs = {}
     for k in names:
         d = np.concatenate(parts[k])
@@ -79,11 +98,20 @@ def main(src, dst):
     I = np.concatenate(idx); I = I.astype(np.uint16) if I.max() < 65535 else I
     accessors.append({'bufferView': add_view(I.tobytes(), 34963), 'componentType': 5123 if I.dtype == np.uint16 else 5125, 'count': len(I), 'type': 'SCALAR'})
     ind = len(accessors) - 1
+    FI = np.concatenate(far_idx); FI = FI.astype(np.uint16) if FI.max() < 65535 else FI
+    accessors.append({'bufferView': add_view(FI.tobytes(), 34963), 'componentType': 5123 if FI.dtype == np.uint16 else 5125, 'count': len(FI), 'type': 'SCALAR'})
+    ind_far = len(accessors) - 1
+    fpos, _ = acc(j, b, pf['attributes']['POSITION']); fidx, _ = acc(j, b, pf['indices'])
+    FF = DEC.simplify(fpos, fidx.ravel(), int(len(fidx.ravel()) // 3 * FAR_RATIO['head'])).astype(np.uint32)
+    FF = FF.astype(np.uint16) if FF.max() < 65535 else FF
+    accessors.append({'bufferView': add_view(FF.tobytes(), 34963), 'componentType': 5123 if FF.dtype == np.uint16 else 5125, 'count': len(FF), 'type': 'SCALAR'})
+    ind_face_far = len(accessors) - 1
     # 3) rebuild json: face mesh (remapped) + merged body mesh; materials: face + one cloth material
     face_mat = j['materials'][pf['material']]
     body_mat = {'name': 'remote_body_vertexcolor', 'pbrMetallicRoughness': {'metallicFactor': 0.0, 'roughnessFactor': 0.66}}
     face_prim = {'attributes': {k: acc_map[v] for k, v in pf['attributes'].items()}, 'indices': acc_map[pf['indices']], 'material': 0}
-    meshes = [{'name': 'face', 'primitives': [face_prim]}, {'name': 'body_merged', 'primitives': [{'attributes': attrs, 'indices': ind, 'material': 1}]}]
+    meshes = [{'name': 'face', 'primitives': [face_prim]}, {'name': 'body_merged', 'primitives': [{'attributes': attrs, 'indices': ind, 'material': 1}]},
+              {'name': 'face_far', 'primitives': [dict(face_prim, indices=ind_face_far)]}, {'name': 'body_far', 'primitives': [{'attributes': attrs, 'indices': ind_far, 'material': 1}]}]
     face_node = [n for n in j['nodes'] if n.get('mesh') == face_mesh][0]
     first_body = mesh_nodes[0]; drop = set(id(n) for n in mesh_nodes[1:])
     old_nodes = j['nodes']; keep_idx = [i for i, n in enumerate(old_nodes) if id(n) not in drop]
@@ -102,17 +130,27 @@ def main(src, dst):
         for sm in an['samplers']: sm['input'] = acc_map[sm['input']]; sm['output'] = acc_map[sm['output']]
         for ch in an['channels']: ch['target']['node'] = remap[ch['target']['node']]
     for sc in j.get('scenes', []): sc['nodes'] = [remap[x] for x in sc['nodes'] if x in remap]
+    # far LOD nodes: siblings of the near mesh nodes, same skin
+    fn = dict(nodes[remap[old_nodes.index(face_node)]]); fn['name'] = 'face_far'; fn['mesh'] = 2; fn.pop('children', None)
+    bn = dict(nodes[remap[old_nodes.index(first_body)]]); bn['name'] = 'body_far'; bn['mesh'] = 3; bn.pop('children', None)
+    nodes += [fn, bn]
+    parent_of = {c: i for i, nd in enumerate(nodes) for c in nd.get('children', [])}
+    for k_new, k_src in ((len(nodes) - 2, remap[old_nodes.index(face_node)]), (len(nodes) - 1, remap[old_nodes.index(first_body)])):
+        if k_src in parent_of: nodes[parent_of[k_src]].setdefault('children', []).append(k_new)
+        else:
+            for sc in j.get('scenes', []): sc['nodes'].append(k_new)
     j['nodes'] = nodes; j['meshes'] = meshes; j['materials'] = [face_mat, body_mat]; j['accessors'] = accessors; j['bufferViews'] = views
     j['buffers'] = [{'byteLength': len(out)}]
     j.setdefault('asset', {})['generator'] = 'starwish make_remote_lod.py (Claude C, Combat VFX Stage 2)'
-    j['asset'].setdefault('extras', {})['remoteLod'] = {'source': src.split('/')[-1], 'mergedParts': n_parts, 'drawCalls': 2}
+    j['asset'].setdefault('extras', {})['remoteLod'] = {'source': src.split('/')[-1], 'mergedParts': n_parts, 'drawCalls': 2,
+        'nearTris': int(len(I) // 3 + len(fidx.ravel()) // 3), 'farTris': int(len(FI) // 3 + len(FF) // 3), 'farMeshes': ['face_far', 'body_far']}
     jb = json.dumps(j, separators=(',', ':')).encode(); jb += b' ' * ((4 - len(jb) % 4) % 4)
     while len(out) % 4: out.append(0)
     total = 12 + 8 + len(jb) + 8 + len(out)
     with open(dst, 'wb') as f:
         f.write(struct.pack('<III', 0x46546C67, 2, total)); f.write(struct.pack('<II', len(jb), 0x4E4F534A)); f.write(jb)
         f.write(struct.pack('<II', len(out), 0x004E4942)); f.write(bytes(out))
-    print(dst, total, 'bytes; merged parts', n_parts, 'tris', len(I) // 3)
+    print(dst, total, 'bytes; merged parts', n_parts, 'near tris', len(I) // 3 + len(fidx.ravel()) // 3, 'far tris', len(FI) // 3 + len(FF) // 3)
 
 if __name__ == '__main__':
     main(sys.argv[1], sys.argv[2])

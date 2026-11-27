@@ -121,7 +121,15 @@ export class CombatAvatar {
   private fade = 0.12;
   private skillGroup: AnimationGroup | null = null;
   readonly blob: Mesh;
+  /** 目前在畫的三角面數（遠距離版切換後會變少） */
   triangles = 0;
+  /** remote：近距離版（與 Stage 2 相同）／遠距離版（頭髮減面，見 make_remote_lod.py）；hq／lite 兩者皆空 */
+  readonly nearMeshes: AbstractMesh[] = [];
+  readonly farMeshes: AbstractMesh[] = [];
+  nearTriangles = 0;
+  farTriangles = 0;
+  /** 目前是否顯示遠距離版 */
+  far = false;
   /** 面向（Babylon rotation.y） */
   yaw = 0;
 
@@ -137,8 +145,19 @@ export class CombatAvatar {
     for (const m of this.meshes) {
       m.isPickable = false;
       m.receiveShadows = false;
-      this.triangles += Math.round((m.getTotalIndices() || 0) / 3);
+      const tris = Math.round((m.getTotalIndices() || 0) / 3);
+      const nm = m.name.split("#")[0] ?? m.name;
+      if (lod === "remote" && nm.endsWith("_far")) {
+        this.farMeshes.push(m);
+        this.farTriangles += tris;
+        m.setEnabled(false);
+      } else {
+        if (lod === "remote") this.nearMeshes.push(m);
+        this.nearTriangles += tris;
+      }
     }
+    // 舊版 remote 檔（只有近距離版）也能用：沒有遠距離版就永遠顯示近距離版
+    this.triangles = this.nearTriangles;
     for (const n of this.root.getChildTransformNodes(false)) {
       const nm = n.name.split("#")[0] ?? n.name;
       if (!this.nodes.has(nm)) this.nodes.set(nm, n);
@@ -167,6 +186,16 @@ export class CombatAvatar {
     this.blob.parent = this.root;
     this.blob.position.y = 0.01;
     this.play("Idle", true, 0);
+  }
+
+  /** 遠近切換（只換角色本體；武器、陰影不變）。沒有遠距離版時不動作，回傳是否已切換 */
+  setFar(on: boolean): boolean {
+    if (!this.farMeshes.length || on === this.far) return false;
+    this.far = on;
+    for (const m of this.nearMeshes) m.setEnabled(!on);
+    for (const m of this.farMeshes) m.setEnabled(on);
+    this.triangles = on ? this.farTriangles : this.nearTriangles;
+    return true;
   }
 
   static async create(scene: Scene, baseUrl: string, g: Gender, lod: Lod): Promise<CombatAvatar> {

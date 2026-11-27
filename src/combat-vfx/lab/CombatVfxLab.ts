@@ -28,7 +28,7 @@ import { VFX_QUALITY, parseTier, type VfxTier } from "../core/quality.ts";
 import { VfxSystem, type Projectile } from "../fx/VfxSystem.ts";
 import { WeaponTrail } from "../fx/WeaponTrail.ts";
 import { DamageNumbers } from "../fx/DamageNumbers.ts";
-import { CombatAudio } from "../fx/CombatAudio.ts";
+import { CombatAudio, renderSfxOffline, encodeWav, SFX_KEYS } from "../fx/CombatAudio.ts";
 import { CameraFx } from "../fx/CameraFx.ts";
 import { PALETTES } from "../fx/palette.ts";
 import { ScreenFx } from "../fx/ScreenFx.ts";
@@ -111,9 +111,14 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
   const lodFor = (t: VfxTier): Lod => (lodParam === "hq" || lodParam === "lite" ? lodParam : t === "high" ? "hq" : "lite");
   let aspd = Math.max(50, Number(qs.get("aspd") ?? "100") || 100);
   let auto = qs.get("auto") === "1";
-  let multiN = Math.max(0, Math.min(16, Number(qs.get("multi") ?? "0") || 0));
+  let multiN = Math.max(0, Math.min(32, Number(qs.get("multi") ?? "0") || 0));
   let envName: "dark" | "meadow" = qs.get("env") === "meadow" ? "meadow" : "dark";
-  const perfLegacy = qs.get("perf") === "legacy";
+  /** 效能比較模式：legacy＝Stage 1 做法（lite 模型）；stage2＝合併模型、不切遠距離版；stage3（預設）＝合併模型＋遠距離減面版 */
+  const perfMode: "legacy" | "stage2" | "stage3" = qs.get("perf") === "legacy" ? "legacy" : qs.get("perf") === "stage2" ? "stage2" : "stage3";
+  const perfLegacy = perfMode === "legacy";
+  /** 遠距離版切換距離（鏡頭到角色，公尺；有緩衝避免來回閃） */
+  const LOD_FAR_M = Number(qs.get("lodFar") ?? "14") || 14;
+  const LOD_NEAR_M = LOD_FAR_M - 1;
   let monAI = qs.get("ai") !== "0";
 
   const engine = new Engine(canvas, true, { stencil: true, adaptToDeviceRatio: false, antialias: true, powerPreference: "high-performance" });
@@ -420,6 +425,7 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
   if (perfLegacy) vfx.remoteSimplify = false;
   applyEnv(envName);
   vfx.setEnvironment(envName === "meadow" ? "bright" : "dark");
+  audio.setEnvironment(envName === "meadow" ? "bright" : "dark");
   let hitstopOn = true;
   const resolver = new DemoResolver();
   const errors: string[] = [];
@@ -605,7 +611,14 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
       })();
       sync.push({ skill: skill.id, hit: hit.id, clipT, animT, realT: realTime, targets: list.length, damage: dmgs, crit: anyCrit, shownSameFrame: shownThisFrame >= dmgs.length, kind: proj ? "projectile" : "melee" });
       if (sync.length > 200) sync.shift();
-    } else if (list.length) audio.play(hit.sfx, 0.35);
+    } else if (list.length) audio.play(hit.sfx, 0.35, panOf(c));
+  };
+
+  /** 其他玩家的音效左右位置（依鏡頭右方向） */
+  const panOf = (c: Caster): number => {
+    const right = cam.getDirection(Vector3.Right());
+    const d = c.pos.subtract(player.pos);
+    return Math.max(-0.8, Math.min(0.8, Vector3.Dot(d, right) / 8));
   };
 
   const projectiles: { p: Projectile; c: Caster; skill: SkillDef; ev: Extract<SkillEvent, { kind: "projectile" }>; target: Mon | null; hitSet: Set<number>; dest: Vector3 | null; clipT: number }[] = [];
@@ -628,7 +641,7 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
       }
       case "sfx":
         if (c.owner === "self") audio.play(ev.sfx);
-        else audio.play(ev.sfx, 0.3);
+        else audio.play(ev.sfx, 0.3, panOf(c));
         break;
       case "shake":
         if (c.owner === "self") camfx.shake(ev.amount);
@@ -867,6 +880,60 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
   };
 
   // ---------------------------------------------------------------- 多人模擬
+  /**
+   * 固定效能場景（4／8／16／32 人比較用）：鏡頭固定、怪物不動、玩家站位固定（8 欄 × 4 排），
+   * 人數少時從中間欄交錯填入，讓每個人數的前後排比例一致。
+   */
+  let perfFixed = false;
+  let perfCast = false;
+  let perfCastN = 0;
+  const PERF_COLS = [3, 4, 1, 6, 2, 5, 0, 7];
+  const PERF_ROWS = [0, 3, 8, 11];
+  const PERF_CAM = { pos: new Vector3(0, 5, -8), target: new Vector3(0, 0.8, 5) };
+  const perfSlot = (i: number): Vector3 => {
+    const row = PERF_ROWS[i % 4] ?? 0;
+    const col = PERF_COLS[Math.floor(i / 4) % 8] ?? 0;
+    return new Vector3(-5.25 + col * 1.5, 0, row);
+  };
+  const updateLod = (): void => {
+    if (perfMode !== "stage3") return;
+    const cp = cam.position;
+    for (const g of ghosts) {
+      const d = Vector3.Distance(cp, g.pos);
+      if (!g.av.far && d > LOD_FAR_M) g.av.setFar(true);
+      else if (g.av.far && d < LOD_NEAR_M) g.av.setFar(false);
+    }
+  };
+  const lodCounts = () => {
+    let visible = 0, near = 0, far = 0, ghostTris = 0;
+    for (const g of ghosts) {
+      const m = g.av.meshes.find((x) => x.isEnabled() && !x.name.startsWith("face"));
+      if (m && cam.isInFrustum(m)) visible++;
+      if (g.av.far) far++;
+      else near++;
+      ghostTris += g.av.triangles;
+    }
+    return { visiblePlayers: visible + (cam.isInFrustum(player.av.meshes[0]!) ? 1 : 0), nearPlayers: near, farPlayers: far, ghostTriangles: ghostTris };
+  };
+  const perfScene = async (n: number, castOn = false): Promise<ReturnType<typeof lodCounts> & { players: number }> => {
+    perfFixed = true;
+    perfCast = castOn;
+    perfCastN = 0;
+    monAI = false;
+    auto = false;
+    if (player.tl) player.tl = null;
+    await setMulti(0);
+    player.pos.set(0, 0, -2.2);
+    player.av.yaw = Math.PI;
+    cam.setTarget(PERF_CAM.target.clone());
+    cam.setPosition(PERF_CAM.pos.clone());
+    await setMulti(Math.max(0, Math.min(32, n - 1)));
+    for (const g of ghosts) g.nextAuto = realTime + 0.5 + (ghosts.indexOf(g) % 8) * 0.15;
+    updateLod();
+    ringN = 0;
+    ringI = 0;
+    return { players: 1 + ghosts.length, ...lodCounts() };
+  };
   const setMulti = async (n: number): Promise<void> => {
     multiN = n;
     while (ghosts.length > n) {
@@ -876,17 +943,19 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
     }
     while (ghosts.length < n) {
       const i = ghosts.length;
-      // 圍繞場中央兩圈，避開岩石
+      // 圍繞場中央兩圈，避開岩石（固定效能場景則排成 8×4 方陣）
       let at = new Vector3();
-      for (let k = 0; k < 12; k++) {
-        const ring = i < 8 ? 3.2 : 4.6;
-        const a = ((i % 8) / 8) * Math.PI * 2 + 0.4 + k * 0.21 + (i >= 8 ? 0.39 : 0);
+      if (perfFixed) at = perfSlot(i);
+      else for (let k = 0; k < 12; k++) {
+        const ring = 3.2 + 1.4 * Math.floor(i / 8);
+        const a = ((i % 8) / 8) * Math.PI * 2 + 0.4 + k * 0.21 + (Math.floor(i / 8) % 2 ? 0.39 : 0);
         at = new Vector3(Math.cos(a) * ring, 0, Math.sin(a) * ring + 2.2);
         if (terrain.canStand(at.x, at.z, 0.4)) break;
       }
       // Stage 2：其他玩家用 remote 合併模型（2 個 draw call）＋簡化武器；&perf=legacy 時用 Stage 1 的 lite 模型做比較
       const g = await makeCaster(`ghost${i}`, "other", i % 2 ? "female" : "male", perfLegacy ? "lite" : "remote", at);
       g.nextAuto = realTime + 0.3 * i;
+      if (perfFixed) g.av.yaw = Math.PI;
       ghosts.push(g);
     }
     hud.multi.textContent = `多人 ${multiN}`;
@@ -955,11 +1024,12 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
     auto = !auto;
     hud.auto.textContent = auto ? "自動示範 開" : "自動示範 關";
   });
-  const MULTI_STEPS = [0, 1, 4, 8, 16];
+  const MULTI_STEPS = [0, 1, 4, 8, 16, 32];
   hud.multi.addEventListener("click", () => void setMulti(MULTI_STEPS[(MULTI_STEPS.indexOf(multiN) + 1) % MULTI_STEPS.length] ?? 0));
   const setEnv = (e: "dark" | "meadow"): void => {
     applyEnv(e);
     vfx.setEnvironment(e === "meadow" ? "bright" : "dark");
+    audio.setEnvironment(e === "meadow" ? "bright" : "dark");
     for (const c of [player, ...ghosts]) c.trail.setBright(e === "meadow");
     hud.env.textContent = e === "meadow" ? "場景 白天草地" : "場景 星夜競技場";
   };
@@ -1010,7 +1080,10 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
       textures: scene.textures.length,
       meshes: scene.meshes.length,
       jsHeapMB: mem ? Math.round((mem.usedJSHeapSize / 1048576) * 10) / 10 : null,
-      perfMode: perfLegacy ? "legacy" : "stage2",
+      perfMode,
+      ...lodCounts(),
+      lodFarM: LOD_FAR_M,
+      viewport: [engine.getRenderWidth(), engine.getRenderHeight()],
     };
   };
   const perf = () => {
@@ -1082,7 +1155,22 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
         } else autoNext = realTime + 0.2;
       }
     }
-    for (const g of ghosts) {
+    for (const [gi, g] of ghosts.entries()) {
+      if (perfFixed) {
+        // 固定效能場景：施放完回到原位、面向鏡頭；技能依序輪替（每次結果一致）
+        if (!g.tl) {
+          g.pos.copyFrom(perfSlot(gi));
+          g.av.yaw = Math.PI;
+          if (perfCast && realTime >= g.nextAuto) {
+            const s = SKILLS[(gi + perfCastN++) % SKILLS.length]!;
+            g.target = nearestTarget(g);
+            cast(g, s, true);
+            g.nextAuto = realTime + 1.2;
+          }
+        }
+        updateCaster(g, dt, null);
+        continue;
+      }
       if (!g.tl && realTime >= g.nextAuto) {
         const s = SKILLS[Math.floor(Math.random() * SKILLS.length)]!;
         g.target = nearestTarget(g);
@@ -1106,10 +1194,13 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
     vfx.update(dt);
     dmg.update(dt);
     screen.update(dt);
-    // 鏡頭跟隨＋震動
-    const want = player.pos.add(new Vector3(0, 0.75, 0));
-    Vector3.LerpToRef(cam.target, want, Math.min(1, dt * 8), cam.target);
-    cam.target.addInPlace(camfx.update(dt, cam).scale(0.6));
+    // 鏡頭跟隨＋震動（固定效能場景時鏡頭不動）
+    if (!perfFixed) {
+      const want = player.pos.add(new Vector3(0, 0.75, 0));
+      Vector3.LerpToRef(cam.target, want, Math.min(1, dt * 8), cam.target);
+      cam.target.addInPlace(camfx.update(dt, cam).scale(0.6));
+    }
+    updateLod();
     // HUD
     const p = perf();
     hud.setPerf(
@@ -1152,6 +1243,14 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
     },
     perf,
     perfSnapshot,
+    perfScene,
+    perfMode,
+    /** 測試：結束固定效能場景，回到一般模式 */
+    perfSceneEnd: async () => {
+      perfFixed = false;
+      perfCast = false;
+      await setMulti(0);
+    },
     setEnv,
     env: () => envName,
     classDemo: (id: string) => playClassDemo(id),
@@ -1172,6 +1271,15 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
       return !!m;
     },
     debugFx: () => vfx.debugActive(),
+    /** 測試：離線算出音效波形，回傳音量統計與 WAV（base64） */
+    sfxKeys: SFX_KEYS,
+    renderSfx: async (key: string, env: "dark" | "bright" = "dark") => {
+      const r = await renderSfxOffline(key as (typeof SFX_KEYS)[number], env);
+      const wav = encodeWav(r.left, r.right);
+      let bin = "";
+      for (let i = 0; i < wav.length; i += 0x8000) bin += String.fromCharCode(...wav.subarray(i, i + 0x8000));
+      return { key, env, peak: r.peak, rms: r.rms, activeSec: r.activeSec, samples: r.left.length, wav: btoa(bin) };
+    },
     stats: () => ({
       tier,
       gender,

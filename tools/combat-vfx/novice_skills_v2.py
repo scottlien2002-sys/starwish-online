@@ -208,17 +208,62 @@ def whirl_root_f():
     rc = RootCurve([(0.0, 0.0, 0.0), (0.18, 0.0, 0.0), (0.25, 0.01, 0.45), (1.25, 0.24, 2 * 2 * np.pi - 0.4), (1.38, 0.25, 4 * np.pi), (1.6, 0.25, 4 * np.pi)])
     return rc
 WHIRL_ROOT = whirl_root_f()
+# Stage 3: WORLD-PLANTED pivot steps. Stage 2 kept the feet fixed in the character frame while the root spun, so the
+# ankles orbited the body centre (~18 mm drift per 1/120 s). Now each foot is planted at a world spot and only moves
+# during a quick shuffle step: per foot one step every 120 deg of spin (60% planted / 40% stepping), the two feet
+# alternate (offset half a period) so one foot is always on the ground. The planted foot also keeps its world
+# heading (footYaw counter-rotates against the spin); the knee follows the foot through the IK pole.
+_WP = 2 * np.pi / 3                       # spin per step cycle (rad)
+_W_STANCE = {'L': np.array([0.03, 0.0, 0.025]), 'R': np.array([-0.03, 0.0, -0.025])}
+_W_FY = {'L': 0.15, 'R': -0.4}
+_W_TS = np.linspace(0.0, 1.6, 1601)
+_W_YS = np.array([WHIRL_ROOT(t)[1] for t in _W_TS]); _W_FS = np.array([WHIRL_ROOT(t)[0] for t in _W_TS])
+def _w_windows(side):
+    """planted windows in spin angle: (yaw_from, yaw_to, anchor_yaw); steps happen between windows"""
+    if side == 'L':
+        w = [(-1e9, 0.3 * _WP, 0.0)] + [(k * _WP - 0.3 * _WP, k * _WP + 0.3 * _WP, k * _WP) for k in range(1, 6)]
+        w.append((6 * _WP - 0.3 * _WP, 1e9, 6 * _WP))
+    else:
+        w = [(-1e9, 0.05 * _WP, 0.0)] + [((k + 0.5) * _WP - 0.3 * _WP, (k + 0.5) * _WP + 0.3 * _WP, (k + 0.5) * _WP) for k in range(0, 6)]
+        w.append((5.95 * _WP, 1e9, 6 * _WP))
+    return w
+_W_WIN = {k: _w_windows(k) for k in 'LR'}
+def _w_ankle_local(rig_ank, side, y, f):
+    """(offset from bind ankle, foot yaw) in the character frame for a foot at spin angle y, root forward f"""
+    def world(anchor):
+        fa = float(np.interp(anchor, _W_YS, _W_FS))                        # root forward when the body faced the anchor
+        a = rig_ank + _W_STANCE[side]; c, s_ = np.cos(anchor), np.sin(anchor)
+        return np.array([c * a[0] + s_ * a[2], a[1], -s_ * a[0] + c * a[2] + fa])
+    win = _W_WIN[side]
+    W = None; fy_world = None; lift = 0.0
+    for i, (y0, y1, an) in enumerate(win):
+        if y0 <= y <= y1:
+            W = world(an); fy_world = an + _W_FY[side]; break
+        nxt = win[i + 1] if i + 1 < len(win) else None
+        if nxt and y1 < y < nxt[0]:
+            u = (y - y1) / (nxt[0] - y1); e = ss(u)
+            A, B = world(an), world(nxt[2])
+            W = A + (B - A) * e; fy_world = an + (nxt[2] - an) * e + _W_FY[side]
+            lift = 0.03 * np.sin(np.pi * u); break
+    c, s_ = np.cos(y), np.sin(y); d = W - np.array([0.0, 0.0, f])
+    loc = np.array([c * d[0] - s_ * d[2], W[1] + lift, s_ * d[0] + c * d[2]])
+    return loc - rig_ank, fy_world - y
+_W_ANK = {}
 def whirl_extra(t, p):
-    # pivot steps: each half turn the feet shuffle (small lifts), body bobs and leans into the spin
     if 0.25 < t < 1.3:
         ph = (t - 0.25) / 1.05 * 4.0
-        bob = np.sin(np.pi * 2 * ph)
-        for side, s0 in (('footL', 0.0), ('footR', 0.5)):
-            f = p[side]; lift = max(0.0, np.sin(np.pi * 2 * (ph + s0))) ** 2 * 0.035
-            p[side] = (f[0], f[1] + lift, f[2])
-        h = p['hips']; p['hips'] = (h[0], h[1] + 0.012 * bob, h[2])
+        h = p['hips']; p['hips'] = (h[0], h[1] + 0.012 * np.sin(np.pi * 2 * ph), h[2])       # body bob into the spin
+    if t < 1.4 and _W_ANK:
+        f, y = WHIRL_ROOT(t); fy = list(p['footYaw'])
+        for i, (side, name) in enumerate((('L', 'footL'), ('R', 'footR'))):
+            off, yaw_l = _w_ankle_local(_W_ANK[side], side, y, f)
+            p[name] = tuple(float(v) for v in off); fy[i] = float(yaw_l)
+        p['footYaw'] = tuple(fy)
     return p
-WHIRL_FEET = Feet({'L': (0.03, 0.0, 0.025), 'R': (-0.03, 0.0, -0.025)}, {'L': [(1.4, 1.58, (0.012, 0.0, 0.075), 0.02)], 'R': [(1.42, 1.6, (-0.012, 0.0, -0.075), 0.02)]})
+def whirl_bind(rig):
+    """the planted-foot maths needs the bind ankles of the skeleton being baked"""
+    _W_ANK.clear(); _W_ANK.update({k: rig.ank[k].copy() for k in 'LR'})
+WHIRL_FEET = Feet({'L': (0.03, 0.0, 0.025), 'R': (-0.03, 0.0, -0.025)}, {'L': [(1.40, 1.49, (0.012, 0.0, 0.075), 0.02)], 'R': [(1.50, 1.60, (-0.012, 0.0, -0.075), 0.02)]})
 WHIRL = dict(name='Skill_Whirlwind', dur=1.60, fn=make(WHIRL_KEYS, WHIRL_FEET, WHIRL_ROOT, comp=False, extra=whirl_extra), root=WHIRL_ROOT,
              marks=dict(hit1=0.48, hit2=0.76, hit3=1.04, trail=(0.22, 1.30)))
 
@@ -301,10 +346,11 @@ if __name__ == '__main__':
     out = sys.argv[1]; os.makedirs(out, exist_ok=True)
     for g in ('male', 'female'):
         sk = Skel(os.path.join(MODELS, f'novice_c10b5b_{g}_lite.glb'))
+        whirl_bind(Rig(sk))
         WR, WT = sk.fk(); k = sk.id['hand.R']
         D = np.array([-0.1, 0.25, 0.96]); D /= np.linalg.norm(D); E = Y - D * np.dot(Y, D); E /= np.linalg.norm(E)
         attach = dict(bone='hand.R', bladeDir=np.round(qrot(qinv(WR[k]), D), 4).tolist(), edgeUp=np.round(qrot(qinv(WR[k]), E), 4).tolist())
-        data = dict(format='starwish.combat-anim/1', version='2.0', skeleton='novice-c10b5b', gender=g, joints=sk.names,
+        data = dict(format='starwish.combat-anim/1', version='2.1', skeleton='novice-c10b5b', gender=g, joints=sk.names,
                     frame='glTF (+Y up, +Z forward)', weaponAttach=attach, clips={S['name']: V1.bake(sk, S) for S in SKILLS})
         p = f'{out}/novice_combat_{g}.json'
         open(p, 'w').write(json.dumps(data, separators=(',', ':')))

@@ -30,6 +30,7 @@ for (const name of browsers) {
     { id: "meadow-high", url: "?lab=combat&q=high&g=female&mute=1&env=meadow" },
     { id: "rules", url: "?lab=combat&q=low&g=male&mute=1" },
     { id: "perf", url: "?lab=combat&q=medium&g=male&mute=1" },
+    { id: "audio", url: "?lab=combat&q=low&g=male&mute=1&ai=0" },
     // 固定步長：每 1/30 秒截一張，得到真正 30 fps 的展示畫面序列（CI 沒 GPU，即時播放只有 3～5 FPS 看不出特效）
     { id: "showcase", url: "?lab=combat&q=high&g=male&mute=1&manual=1&ai=0" },
     { id: "showcase-meadow", url: "?lab=combat&q=high&g=female&mute=1&manual=1&ai=0&env=meadow" },
@@ -157,29 +158,62 @@ for (const name of browsers) {
         const dist = Math.hypot(after.p.x - rock.x, after.p.z - rock.z);
         check("規則：技能不能穿越不可通行地形（跳斬被岩石擋下）", after.b === true && dist >= rock.r + 0.3 - 0.02, { after, rock, dist });
         await page.evaluate(() => window.__cvfx.setMonsterAI(true));
+      } else if (tcase.id === "audio") {
+        // 音效 V2：每個音效離線算出波形（星夜／白天兩種殘響），輸出 WAV 試聽檔並檢查音量
+        const adir = `${outDir}audio-${name}/`;
+        mkdirSync(adir, { recursive: true });
+        const keys = await page.evaluate(() => window.__cvfx.sfxKeys);
+        const rows = [];
+        for (const env of ["dark", "bright"]) {
+          for (const k of keys) {
+            const r = await page.evaluate(([kk, ee]) => window.__cvfx.renderSfx(kk, ee), [k, env]);
+            if (name === "chromium") writeFileSync(`${adir}${env}_${k}.wav`, Buffer.from(r.wav, "base64"));
+            delete r.wav;
+            rows.push(r);
+          }
+        }
+        run.results.audio = rows;
+        check("音效：18 種戰鬥音效都能離線算出（WebAudio 合成）", keys.length >= 18 && rows.length === keys.length * 2, { keys: keys.length, rows: rows.length });
+        check("音效：沒有破音（峰值 < 0.99，主輸出限幅器有效）", rows.every((r) => r.peak < 0.99), rows.map((r) => [r.env, r.key, +r.peak.toFixed(3)]));
+        check("音效：每個音效都聽得到（峰值 > 0.05）", rows.every((r) => r.peak > 0.05), rows.filter((r) => r.peak <= 0.05).map((r) => [r.env, r.key, r.peak]));
+        check("音效：長度合理（尾音在 3 秒內結束）", rows.every((r) => r.activeSec > 0.05 && r.activeSec < 3), rows.map((r) => [r.env, r.key, +r.activeSec.toFixed(2)]));
+        const dk = (k) => rows.find((r) => r.env === "dark" && r.key === k);
+        const en = (k) => dk(k).rms * dk(k).rms * dk(k).samples;
+        check("音效：重擊／暴擊／地面衝擊比一般命中更有份量（總能量較大）", en("hitHeavy") > en("hit") && en("crit") > en("hit") && en("groundImpact") > en("hit") && en("explosion") > en("hit"), Object.fromEntries(["hit", "hitHeavy", "crit", "groundImpact", "explosion"].map((k) => [k, +en(k).toFixed(1)])));
+        const bk = (k) => rows.find((r) => r.env === "bright" && r.key === k);
+        check("音效：白天草地殘響比星夜競技場短", bk("explosion").activeSec < dk("explosion").activeSec, { dark: dk("explosion").activeSec, bright: bk("explosion").activeSec });
       } else if (tcase.id === "perf") {
-        // 效能比較：Stage 2（remote 合併模型＋簡化武器＋其他玩家特效簡化）vs &perf=legacy（Stage 1 做法）
+        // 效能比較（Stage 3）：固定鏡頭、固定站位（8×4 方陣），4／8／16／32 人 × 三種做法
+        //   stage3＝合併模型＋遠距離減面版；stage2＝合併模型（不切遠距離）；legacy＝Stage 1 做法（lite 模型）
+        //   static＝大家站著不放技能（只比模型）；active＝依序輪流放技能（含特效）
         const matrix = [];
-        for (const mode of ["stage2", "legacy"]) {
-          if (mode === "legacy") {
-            await page.goto(`${server.url}/?lab=combat&q=medium&g=male&mute=1&perf=legacy`, { waitUntil: "load" });
+        for (const mode of ["stage3", "stage2", "legacy"]) {
+          if (mode !== "stage3") {
+            await page.goto(`${server.url}/?lab=combat&q=medium&g=male&mute=1&perf=${mode}`, { waitUntil: "load" });
             await page.waitForFunction(() => window.__cvfx?.ready === true, null, { timeout: 300000 });
           }
-          for (const n of [1, 4, 8, 16]) {
-            await page.evaluate((k) => window.__cvfx.setMulti(k - 1), n);
-            await page.evaluate(() => window.__cvfx.setAuto(true));
+          for (const n of [4, 8, 16, 32]) {
+            const scn = await page.evaluate((k) => window.__cvfx.perfScene(k, false), n);
+            await sleep(3500);
+            const st = await page.evaluate(() => window.__cvfx.perfSnapshot());
+            matrix.push({ mode, players: n, phase: "static", scene: scn, ...st });
+            await shot(`perf_${mode}_${n}_static`);
+            await page.evaluate((k) => window.__cvfx.perfScene(k, true), n);
             await sleep(9000);
-            const snap = await page.evaluate(() => window.__cvfx.perfSnapshot());
-            matrix.push({ mode, players: n, ...snap });
-            await shot(`perf_${mode}_${n}`);
+            const ac = await page.evaluate(() => window.__cvfx.perfSnapshot());
+            matrix.push({ mode, players: n, phase: "active", ...ac });
+            if (n === 32 || n === 8) await shot(`perf_${mode}_${n}_active`);
           }
-          await page.evaluate(() => window.__cvfx.setAuto(false));
-          await page.evaluate(() => window.__cvfx.setMulti(0));
+          await page.evaluate(() => window.__cvfx.perfSceneEnd());
         }
         run.results.perfMatrix = matrix;
-        const s16 = matrix.find((m) => m.mode === "stage2" && m.players === 16);
-        const l16 = matrix.find((m) => m.mode === "legacy" && m.players === 16);
-        check("效能：16 人時 Stage 2 的 Draw Call 比 Stage 1 做法少一半以上", s16 && l16 && s16.draws < l16.draws * 0.5, { stage2: s16?.draws, legacy: l16?.draws });
+        const get = (mode, n, ph = "static") => matrix.find((m) => m.mode === mode && m.players === n && m.phase === ph);
+        const s3 = get("stage3", 32), s2 = get("stage2", 32), l32 = get("legacy", 32);
+        check("效能：比較條件一致（同人數時三種做法的可見人數相同）", [4, 8, 16, 32].every((n) => new Set(["stage3", "stage2", "legacy"].map((m) => get(m, n)?.visiblePlayers)).size === 1), Object.fromEntries([4, 8, 16, 32].map((n) => [n, ["stage3", "stage2", "legacy"].map((m) => get(m, n)?.visiblePlayers)])));
+        check("效能：32 人時遠距離版有啟用（後兩排切成遠距離版）", s3 && s3.farPlayers >= 14 && s3.nearPlayers >= 14, { near: s3?.nearPlayers, far: s3?.farPlayers });
+        check("效能：32 人靜態時 Stage 3 三角面比 Stage 2 少 25% 以上", s3 && s2 && s3.triangles < s2.triangles * 0.75, { stage3: s3?.triangles, stage2: s2?.triangles });
+        check("效能：32 人時 Stage 3 的 Draw Call 不比 Stage 2 多（合併繪製保留）", s3 && s2 && s3.draws <= s2.draws + 2, { stage3: s3?.draws, stage2: s2?.draws });
+        check("效能：32 人時 Stage 3 的 Draw Call 比 Stage 1 做法少一半以上", s3 && l32 && s3.draws < l32.draws * 0.5, { stage3: s3?.draws, legacy: l32?.draws });
       } else if (tcase.id !== "low-multi8") {
         // 逐一施放 6 個技能
         for (const [i, sk] of SKILLS.entries()) {

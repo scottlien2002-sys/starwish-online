@@ -9,7 +9,7 @@ on:
 
 env:
   # Stage 1 保留原網址；Stage 2 起用自己的資料夾，不覆蓋 Stage 1 預覽
-  PREVIEW_DIR: ${{ github.ref_name == 'feature/combat-vfx-stage1' && 'preview-combat-vfx' || 'preview-combat-vfx-s2' }}
+  PREVIEW_DIR: ${{ github.ref_name == 'feature/combat-vfx-stage1' && 'preview-combat-vfx' || github.ref_name == 'feature/combat-vfx-stage2' && 'preview-combat-vfx-s2' || 'preview-combat-vfx-s3' }}
   workflow_dispatch:
 
 permissions:
