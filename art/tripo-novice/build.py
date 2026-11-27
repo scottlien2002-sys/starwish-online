@@ -35,7 +35,7 @@ FIT = {
     "male": {
         "body": "Male_Base_V1",
         "sleeve_zmin": -0.12,  # 袖子量測範圍（避開衣襬）
-        "hair": {"src": "Male_Hair_01_V1", "s": 0.47, "t": [-0.012, 0.0, 0.352]},
+        "hair": {"src": "Male_Hair_01_V1", "s": 0.50, "t": [-0.012, 0.0, 0.342]},
         "top": {"src": "Male_Novice_Top_V1", "s": 0.423, "t": [0.007, 0.0, 0.060]},
         "bottom": {"src": "Male_Novice_Pants_V1", "s": 0.384, "t": [-0.006, 0.0, -0.246]},
         "boots": {"src": "Male_Novice_Boots_V1", "foot_scale": 1.12},
@@ -44,7 +44,7 @@ FIT = {
         "body": "CHR_Female_Base",
         "sleeve_zmin": -0.10,  # 袖子量測範圍（避開裙襬）
         # 女生髮型原檔面向 −X（與身體相反）→ 先轉 180°
-        "hair": {"src": "Novice_Female_Hair_01", "s": 0.50, "t": [-0.02, 0.0, 0.33], "flip": True},
+        "hair": {"src": "Novice_Female_Hair_01", "s": 0.53, "t": [-0.02, 0.0, 0.322], "flip": True},
         "top": {"src": "Novice_Female_Top", "s": 0.421, "t": [0.02, 0.0, 0.014]},
         "bottom": {"src": "Novice_Female_Leggings", "box": {"z": [-0.458, -0.06], "yhalf": 0.106, "xc": 0.028}},
         "boots": {"src": "Novice_Female_Boots", "foot_scale": 1.12},
