@@ -533,9 +533,13 @@ for (const n of [4, 8, 16, 40]) {
       const downKBs = bots.map((b, i) => (b.c.stats.totalBytesDown - down0[i]!) / secs / 1024);
       const avgKBs = downKBs.reduce((s, v) => s + v, 0) / downKBs.length;
       // 每位玩家看到的怪物血量與伺服器一致
-      await sleep(400);
-      let mismatch = 0;
-      for (const b of bots) for (const rm of b.c.monsters()) if (rm.hp !== cb.monster(rm.nid)!.ctl.instance.currentHp) mismatch++;
+      // 停止攻擊後等進行中的命中結算完（最多 3 秒）再比對
+      let mismatch = -1;
+      for (let k = 0; k < 30 && mismatch !== 0; k++) {
+        await sleep(100);
+        mismatch = 0;
+        for (const b of bots) for (const rm of b.c.monsters()) if (rm.hp !== cb.monster(rm.nid)!.ctl.instance.currentHp) mismatch++;
+      }
       assert.equal(mismatch, 0, "所有玩家看到的怪物血量與伺服器一致");
       assert.ok(m.tick.avgMs < 10, `tick 平均 ${m.tick.avgMs} ms`);
       results[`load${n}`] = { players: n, seconds: +secs.toFixed(1), ticks: srv.stats.ticks - tick0, tickAvgMs: m.tick.avgMs, tickMaxMs: m.tick.maxMs, atkSent: sent, accepted: cb.counters.attacksAccepted, kills: cb.counters.killsSettled, downKBpsPerClientAvg: +avgKBs.toFixed(2), downKBpsPerClientMax: +Math.max(...downKBs).toFixed(2) };
@@ -545,3 +549,40 @@ for (const n of [4, 8, 16, 40]) {
     }
   });
 }
+
+test("同一件掉落物的兩個撿取要求在資料庫寫入完成前同時進行：第二個被 already_claimed 擋下", async () => {
+  // 慢速資料庫（每次寫入 150 ms）：兩個要求一定重疊
+  const store = new MemoryStore();
+  const slow = <T>(f: () => Promise<T>): Promise<T> => new Promise((r) => setTimeout(() => r(f()), 150));
+  const g0 = store.changeGold.bind(store);
+  const i0 = store.grantItem.bind(store);
+  store.changeGold = (...a: Parameters<typeof g0>) => slow(() => g0(...a));
+  store.grantItem = (...a: Parameters<typeof i0>) => slow(() => i0(...a));
+  const srv = await startServer({ store });
+  const a = new CombatBot(srv, "slowA");
+  const b = new CombatBot(srv, "slowB");
+  try {
+    await a.online();
+    await b.online();
+    const cb = room(srv, a).combat!;
+    await killTogether(srv, [a], 5);
+    await sleep(300);
+    const l = [...cb.loot.values()][0]!;
+    l.ownerUntil = 0;
+    const pa = sp(srv, a);
+    const pb = sp(srv, b);
+    for (const p of [pa, pb]) {
+      p.state.x = l.x;
+      p.state.z = l.z;
+    }
+    const [ra, rb] = await Promise.all([cb.pick(pa, l.uid), cb.pick(pb, l.uid)]);
+    assert.equal(Number(ra.ok) + Number(rb.ok), 1);
+    const loser = (ra.ok ? rb : ra) as { ok: false; err: string };
+    assert.equal(loser.err, "already_claimed");
+    results.inflightPick = { defId: l.defId, winner: ra.ok ? "A" : "B", loserErr: loser.err, lootPickRejected: cb.counters.lootPickRejected };
+  } finally {
+    a.stop();
+    b.stop();
+    await srv.stop();
+  }
+});
