@@ -140,7 +140,14 @@ export class PerfOverlay {
       .sort((a, b) => b[1].tri - a[1].tri)
       .slice(0, n)
       .map(([name, a]) => ({ name, triK: Math.round(a.tri / 100) / 10, instances: a.inst, skinned: a.skinned }));
+    const tseen = new Set<unknown>();
     const textures = this.scene.textures
+      .filter((t) => {
+        const it = t.getInternalTexture?.() ?? t;
+        if (tseen.has(it)) return false;
+        tseen.add(it);
+        return true;
+      })
       .map((t) => {
         const sz = t.getSize?.();
         const w = sz?.width ?? 0, h = sz?.height ?? 0;
@@ -152,18 +159,25 @@ export class PerfOverlay {
   }
 
   /** Stage 7.4：記憶體與資源（iOS Safari 不提供 JS 記憶體數值 → null；資源數可以判斷有沒有洩漏） */
-  memory(): { jsHeapMB: number | null; meshes: number; materials: number; textures: number; textureMB: number; skeletons: number; animationGroups: number; particleSystems: number } {
+  memory(): { jsHeapMB: number | null; meshes: number; materials: number; textures: number; gpuTextures: number; textureMB: number; skeletons: number; animationGroups: number; particleSystems: number } {
     const pm = (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory;
+    // 同一張 GPU 貼圖（複製材質時共用）只算一次
     let tex = 0;
+    const seen = new Set<unknown>();
     for (const t of this.scene.textures) {
+      const it = t.getInternalTexture?.() ?? t;
+      if (seen.has(it)) continue;
+      seen.add(it);
       const sz = t.getSize?.();
       if (sz && sz.width > 0) tex += sz.width * sz.height * 4 * ((t as { isCube?: boolean }).isCube ? 6 : 1) * 1.33;
     }
+    const gpuTextures = seen.size;
     return {
       jsHeapMB: pm ? Math.round((pm.usedJSHeapSize / 1048576) * 10) / 10 : null,
       meshes: this.scene.meshes.length,
       materials: this.scene.materials.length,
       textures: this.scene.textures.length,
+      gpuTextures,
       textureMB: Math.round(tex / 1048576),
       skeletons: this.scene.skeletons.length,
       animationGroups: this.scene.animationGroups.length,
