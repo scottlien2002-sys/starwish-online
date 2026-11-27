@@ -1,1 +1,0 @@
-import{vr as e}from"./index-B9nlmqeO.js";var t=class extends e{constructor(e,t){super(e,t,3)}};export{t};
