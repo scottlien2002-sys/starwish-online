@@ -6,14 +6,14 @@
    "fit": {
     "hair": {
      "scale": [
-      0.42,
-      0.42,
-      0.42
+      0.44,
+      0.44,
+      0.44
      ],
      "offset": [
-      0.004,
       0.0,
-      0.355
+      0.0,
+      0.365
      ]
     },
     "top": {
@@ -196,74 +196,92 @@
      -0.4702
     ]
    },
-   "sleeve_delta_deg": {
-    "L": 33.0,
-    "R": 30.1
+   "arm_from_sleeve": {
+    "hand.L": [
+     0.0034,
+     0.1622,
+     -0.0419
+    ],
+    "hand_end.L": [
+     0.0064,
+     0.1824,
+     -0.0976
+    ],
+    "hand.R": [
+     0.0046,
+     -0.1613,
+     -0.0419
+    ],
+    "hand_end.R": [
+     0.0078,
+     -0.1808,
+     -0.0978
+    ]
    },
    "weights_body": {
-    "hips": 499,
-    "spine": 1092,
-    "chest": 81,
+    "hips": 481,
+    "spine": 1067,
+    "chest": 192,
     "neck": 156,
     "head": 1221,
-    "shoulder.L": 214,
-    "upperarm.L": 442,
-    "forearm.L": 372,
+    "shoulder.L": 373,
+    "upperarm.L": 402,
+    "forearm.L": 307,
     "hand.L": 326,
     "thigh.L": 434,
     "shin.L": 191,
     "foot.L": 239,
     "toe.L": 244,
-    "shoulder.R": 146,
-    "upperarm.R": 404,
-    "forearm.R": 344,
-    "hand.R": 288,
-    "thigh.R": 345,
+    "shoulder.R": 150,
+    "upperarm.R": 320,
+    "forearm.R": 245,
+    "hand.R": 437,
+    "thigh.R": 303,
     "shin.R": 193,
     "foot.R": 276,
     "toe.R": 283
    },
    "weights_top": {
-    "hips": 437,
-    "spine": 1792,
-    "chest": 1240,
-    "neck": 692,
-    "shoulder.L": 680,
-    "upperarm.L": 1021,
-    "forearm.L": 810,
-    "hand.L": 605,
-    "shoulder.R": 871,
-    "upperarm.R": 1134,
-    "forearm.R": 774,
-    "hand.R": 605
+    "hips": 1223,
+    "spine": 2051,
+    "chest": 1521,
+    "neck": 647,
+    "shoulder.L": 668,
+    "upperarm.L": 938,
+    "forearm.L": 955,
+    "hand.L": 475,
+    "shoulder.R": 788,
+    "upperarm.R": 952,
+    "forearm.R": 979,
+    "hand.R": 627
    },
    "weapons": {
     "sword": {
      "length_m": 0.56,
      "scale": 0.435,
      "grip": [
-      -0.316,
-      -0.0432,
-      0.5526
+      -0.2171,
+      -0.0077,
+      0.5394
      ],
      "tip_dir": [
-      0.087,
-      -0.988,
-      0.125
+      -0.034,
+      -0.997,
+      0.069
      ]
     },
     "staff": {
      "length_m": 1.02,
      "scale": 0.7741,
      "grip": [
-      -0.316,
-      -0.0432,
-      0.5526
+      -0.2171,
+      -0.0077,
+      0.5394
      ],
      "tip_dir": [
-      -0.656,
-      -0.491,
-      0.573
+      -0.834,
+      -0.451,
+      0.317
      ]
     }
    },
@@ -273,7 +291,7 @@
      "loop": true
     },
     "Run": {
-     "seconds": 0.6,
+     "seconds": 0.5,
      "loop": true
     },
     "Jump": {
@@ -344,19 +362,19 @@
      0.8239
     ],
     "forearm.L": [
-     0.2236,
-     -0.0185,
-     0.6794
+     0.1706,
+     0.0011,
+     0.6719
     ],
     "hand.L": [
-     0.2931,
-     -0.0364,
-     0.5866
+     0.207,
+     -0.0043,
+     0.5716
     ],
     "hand_end.L": [
-     0.3469,
-     -0.0502,
-     0.5148
+     0.2328,
+     -0.0081,
+     0.5004
     ],
     "thigh.L": [
      0.0754,
@@ -394,19 +412,19 @@
      0.8242
     ],
     "forearm.R": [
-     -0.224,
-     -0.0191,
-     0.6786
+     -0.1708,
+     -0.0001,
+     0.6719
     ],
     "hand.R": [
-     -0.2923,
-     -0.037,
-     0.5851
+     -0.2059,
+     -0.0059,
+     0.5715
     ],
     "hand_end.R": [
-     -0.3451,
-     -0.0508,
-     0.5128
+     -0.2307,
+     -0.01,
+     0.5002
     ],
     "thigh.R": [
      -0.075,
@@ -439,7 +457,11 @@
     "male_rest_front.png",
     "male_rest_side.png",
     "male_rest_back.png",
-    "male_rest_q34.png"
+    "male_rest_q34.png",
+    "male_idle_front.png",
+    "male_idle_side.png",
+    "male_idle_back.png",
+    "male_idle_q34.png"
    ],
    "anim_preview": [
     "male_Idle_01_q34.png",
@@ -461,7 +483,7 @@
    ],
    "files": {
     "novice72_male_body_hq.glb": {
-     "bytes": 566624,
+     "bytes": 565584,
      "tris": 7154,
      "meshes": [
       "Body_Core",
@@ -469,49 +491,49 @@
      ]
     },
     "novice72_male_hair01_hq.glb": {
-     "bytes": 472748,
+     "bytes": 472672,
      "tris": 6755,
      "meshes": [
       "Male_Hair_01_V1"
      ]
     },
     "novice72_male_top_hq.glb": {
-     "bytes": 500876,
+     "bytes": 500800,
      "tris": 6589,
      "meshes": [
       "Male_Novice_Top_V1"
      ]
     },
     "novice72_male_bottom_hq.glb": {
-     "bytes": 372496,
+     "bytes": 372420,
      "tris": 6783,
      "meshes": [
       "Male_Novice_Pants_V1"
      ]
     },
     "novice72_male_boots_hq.glb": {
-     "bytes": 442272,
+     "bytes": 442196,
      "tris": 6735,
      "meshes": [
       "Male_Novice_Boots_V1"
      ]
     },
     "novice72_male_sword_hq.glb": {
-     "bytes": 475548,
+     "bytes": 475472,
      "tris": 6881,
      "meshes": [
       "Novice_ShortSword_V1"
      ]
     },
     "novice72_male_staff_hq.glb": {
-     "bytes": 537484,
+     "bytes": 537404,
      "tris": 7165,
      "meshes": [
       "Novice_Weapon_Staff"
      ]
     },
     "novice72_male_body_lite.glb": {
-     "bytes": 374580,
+     "bytes": 373540,
      "tris": 3575,
      "meshes": [
       "Body_Core",
@@ -519,42 +541,42 @@
      ]
     },
     "novice72_male_hair01_lite.glb": {
-     "bytes": 264736,
-     "tris": 3376,
+     "bytes": 264720,
+     "tris": 3377,
      "meshes": [
       "Male_Hair_01_V1"
      ]
     },
     "novice72_male_top_lite.glb": {
-     "bytes": 263980,
+     "bytes": 263752,
      "tris": 3294,
      "meshes": [
       "Male_Novice_Top_V1"
      ]
     },
     "novice72_male_bottom_lite.glb": {
-     "bytes": 204888,
+     "bytes": 204812,
      "tris": 3391,
      "meshes": [
       "Male_Novice_Pants_V1"
      ]
     },
     "novice72_male_boots_lite.glb": {
-     "bytes": 232240,
+     "bytes": 232164,
      "tris": 3367,
      "meshes": [
       "Male_Novice_Boots_V1"
      ]
     },
     "novice72_male_sword_lite.glb": {
-     "bytes": 249352,
+     "bytes": 249276,
      "tris": 3440,
      "meshes": [
       "Novice_ShortSword_V1"
      ]
     },
     "novice72_male_staff_lite.glb": {
-     "bytes": 282188,
+     "bytes": 282112,
      "tris": 3581,
      "meshes": [
       "Novice_Weapon_Staff"
@@ -566,14 +588,14 @@
    "fit": {
     "hair": {
      "scale": [
-      0.54,
-      0.54,
-      0.54
+      0.46,
+      0.46,
+      0.46
      ],
      "offset": [
-      -0.008,
-      -0.03,
-      0.325
+      -0.015,
+      0.0,
+      0.345
      ]
     },
     "top": {
@@ -756,74 +778,92 @@
      -0.4702
     ]
    },
-   "sleeve_delta_deg": {
-    "L": 36.8,
-    "R": 35.5
+   "arm_from_sleeve": {
+    "hand.L": [
+     0.002,
+     0.1415,
+     -0.0411
+    ],
+    "hand_end.L": [
+     0.0017,
+     0.1563,
+     -0.0865
+    ],
+    "hand.R": [
+     0.0056,
+     -0.1423,
+     -0.0417
+    ],
+    "hand_end.R": [
+     0.0051,
+     -0.1577,
+     -0.0863
+    ]
    },
    "weights_body": {
-    "hips": 728,
-    "spine": 994,
-    "chest": 436,
-    "neck": 435,
+    "hips": 593,
+    "spine": 849,
+    "chest": 451,
+    "neck": 462,
     "head": 1549,
-    "shoulder.L": 520,
-    "upperarm.L": 197,
-    "forearm.L": 328,
-    "hand.L": 151,
-    "thigh.L": 506,
+    "shoulder.L": 554,
+    "upperarm.L": 167,
+    "forearm.L": 461,
+    "hand.L": 383,
+    "thigh.L": 437,
     "shin.L": 279,
     "foot.L": 257,
     "toe.L": 224,
-    "shoulder.R": 448,
-    "upperarm.R": 265,
-    "forearm.R": 316,
-    "hand.R": 161,
-    "thigh.R": 388,
+    "shoulder.R": 528,
+    "upperarm.R": 207,
+    "forearm.R": 246,
+    "hand.R": 349,
+    "thigh.R": 331,
     "shin.R": 259,
     "foot.R": 209,
     "toe.R": 182
    },
    "weights_top": {
-    "hips": 1838,
-    "spine": 1174,
-    "chest": 766,
+    "hips": 2573,
+    "spine": 1782,
+    "chest": 1230,
     "neck": 148,
-    "shoulder.L": 516,
-    "upperarm.L": 1030,
-    "forearm.L": 773,
-    "hand.L": 876,
-    "shoulder.R": 460,
-    "upperarm.R": 800,
-    "forearm.R": 985,
-    "hand.R": 959
+    "shoulder.L": 622,
+    "upperarm.L": 529,
+    "forearm.L": 823,
+    "hand.L": 916,
+    "shoulder.R": 578,
+    "upperarm.R": 708,
+    "forearm.R": 1077,
+    "hand.R": 1187
    },
    "weapons": {
     "sword": {
      "length_m": 0.56,
      "scale": 0.435,
      "grip": [
-      -0.2777,
-      -0.0185,
-      0.5684
+      -0.1904,
+      -0.0069,
+      0.546
      ],
      "tip_dir": [
-      -0.106,
-      -0.986,
-      0.131
+      -0.225,
+      -0.972,
+      0.068
      ]
     },
     "staff": {
      "length_m": 1.02,
      "scale": 0.7741,
      "grip": [
-      -0.2777,
-      -0.0185,
-      0.5684
+      -0.1904,
+      -0.0069,
+      0.546
      ],
      "tip_dir": [
-      -0.72,
-      -0.35,
-      0.599
+      -0.907,
+      -0.283,
+      0.311
      ]
     }
    },
@@ -833,7 +873,7 @@
      "loop": true
     },
     "Run": {
-     "seconds": 0.6,
+     "seconds": 0.5,
      "loop": true
     },
     "Jump": {
@@ -904,19 +944,19 @@
      0.7774
     ],
     "forearm.L": [
-     0.2021,
-     -0.0114,
-     0.6646
+     0.1539,
+     -0.003,
+     0.6538
     ],
     "hand.L": [
-     0.2578,
-     -0.0163,
-     0.5937
+     0.1805,
+     -0.0025,
+     0.5723
     ],
     "hand_end.L": [
-     0.3009,
-     -0.0201,
-     0.5388
+     0.1994,
+     -0.0022,
+     0.5145
     ],
     "thigh.L": [
      0.0624,
@@ -954,19 +994,19 @@
      0.7736
     ],
     "forearm.R": [
-     -0.2015,
-     -0.0142,
-     0.6626
+     -0.1537,
+     -0.0079,
+     0.6519
     ],
     "hand.R": [
-     -0.258,
-     -0.0174,
-     0.5927
+     -0.1815,
+     -0.0071,
+     0.5717
     ],
     "hand_end.R": [
-     -0.3017,
-     -0.0198,
-     0.5387
+     -0.2012,
+     -0.0065,
+     0.5147
     ],
     "thigh.R": [
      -0.0639,
@@ -999,7 +1039,11 @@
     "female_rest_front.png",
     "female_rest_side.png",
     "female_rest_back.png",
-    "female_rest_q34.png"
+    "female_rest_q34.png",
+    "female_idle_front.png",
+    "female_idle_side.png",
+    "female_idle_back.png",
+    "female_idle_q34.png"
    ],
    "anim_preview": [
     "female_Idle_01_q34.png",
@@ -1021,7 +1065,7 @@
    ],
    "files": {
     "novice72_female_body_hq.glb": {
-     "bytes": 568216,
+     "bytes": 567232,
      "tris": 6991,
      "meshes": [
       "Body_Core",
@@ -1029,49 +1073,49 @@
      ]
     },
     "novice72_female_hair01_hq.glb": {
-     "bytes": 539108,
+     "bytes": 539084,
      "tris": 7011,
      "meshes": [
       "Novice_Female_Hair_01"
      ]
     },
     "novice72_female_top_hq.glb": {
-     "bytes": 510328,
+     "bytes": 510304,
      "tris": 6791,
      "meshes": [
       "Novice_Female_Top"
      ]
     },
     "novice72_female_bottom_hq.glb": {
-     "bytes": 398768,
+     "bytes": 398748,
      "tris": 7142,
      "meshes": [
       "Novice_Female_Leggings"
      ]
     },
     "novice72_female_boots_hq.glb": {
-     "bytes": 490064,
+     "bytes": 490044,
      "tris": 6679,
      "meshes": [
       "Novice_Female_Boots"
      ]
     },
     "novice72_female_sword_hq.glb": {
-     "bytes": 475124,
+     "bytes": 475100,
      "tris": 6881,
      "meshes": [
       "Novice_ShortSword_V1"
      ]
     },
     "novice72_female_staff_hq.glb": {
-     "bytes": 537060,
+     "bytes": 537036,
      "tris": 7165,
      "meshes": [
       "Novice_Weapon_Staff"
      ]
     },
     "novice72_female_body_lite.glb": {
-     "bytes": 381044,
+     "bytes": 380060,
      "tris": 3494,
      "meshes": [
       "Body_Core",
@@ -1079,42 +1123,42 @@
      ]
     },
     "novice72_female_hair01_lite.glb": {
-     "bytes": 291308,
+     "bytes": 291288,
      "tris": 3504,
      "meshes": [
       "Novice_Female_Hair_01"
      ]
     },
     "novice72_female_top_lite.glb": {
-     "bytes": 266232,
-     "tris": 3395,
+     "bytes": 266044,
+     "tris": 3394,
      "meshes": [
       "Novice_Female_Top"
      ]
     },
     "novice72_female_bottom_lite.glb": {
-     "bytes": 222420,
+     "bytes": 222396,
      "tris": 3570,
      "meshes": [
       "Novice_Female_Leggings"
      ]
     },
     "novice72_female_boots_lite.glb": {
-     "bytes": 260660,
+     "bytes": 260640,
      "tris": 3339,
      "meshes": [
       "Novice_Female_Boots"
      ]
     },
     "novice72_female_sword_lite.glb": {
-     "bytes": 248928,
+     "bytes": 248908,
      "tris": 3440,
      "meshes": [
       "Novice_ShortSword_V1"
      ]
     },
     "novice72_female_staff_lite.glb": {
-     "bytes": 281764,
+     "bytes": 281744,
      "tris": 3581,
      "meshes": [
       "Novice_Weapon_Staff"
@@ -1123,5 +1167,5 @@
    }
   }
  },
- "seconds": 23.1
+ "seconds": 24.2
 }
