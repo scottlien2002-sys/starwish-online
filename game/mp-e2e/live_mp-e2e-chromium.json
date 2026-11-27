@@ -1,0 +1,290 @@
+{
+  "browser": "chromium",
+  "checks": [
+    {
+      "name": "兩位玩家進入同一個星芽村房間",
+      "ok": true,
+      "detail": {
+        "room": "village-1"
+      }
+    },
+    {
+      "name": "A 看見 B 的 3D 角色（女、粉紅髮色、法杖；模組化零件）",
+      "ok": true,
+      "detail": {
+        "id": 2,
+        "name": "小願",
+        "loaded": true,
+        "state": "Idle",
+        "pos": [
+          10.8,
+          6.3
+        ],
+        "yaw": -2.094,
+        "link": 1,
+        "parts": 5,
+        "hairColor": "#c0408a",
+        "gender": "female"
+      }
+    },
+    {
+      "name": "B 看見 A 的 3D 角色（男、深棕髮色、短劍）",
+      "ok": true,
+      "detail": {
+        "id": 1,
+        "name": "阿星",
+        "loaded": true,
+        "state": "Idle",
+        "pos": [
+          6.2,
+          10.8
+        ],
+        "yaw": -2.618,
+        "link": 1,
+        "parts": 5,
+        "hairColor": "#3a2a1a",
+        "gender": "male"
+      }
+    },
+    {
+      "name": "本地角色外觀以伺服器資料建立（B 是女性、法杖）",
+      "ok": true,
+      "detail": {
+        "gender": "female",
+        "weapon": "staff"
+      }
+    },
+    {
+      "name": "一般移動沒有跳躍按鈕",
+      "ok": true
+    },
+    {
+      "name": "星芽村正式美術（Claude B Stage 6.7：Tripo NPC、N008 佈告欄、洛恩）載入完成",
+      "ok": true,
+      "detail": {
+        "art": "loaded"
+      }
+    },
+    {
+      "name": "B 看到 A 跑步（Run 動畫）",
+      "ok": true,
+      "detail": {
+        "states": [
+          "Idle",
+          "Run"
+        ]
+      }
+    },
+    {
+      "name": "遠端移動沒有瞬移（取樣間最大位移 < 5 m/s 對應距離的 2 倍）",
+      "ok": true,
+      "detail": {
+        "samples": 7,
+        "maxStepM": 0.5,
+        "maxApparentSpeed": 1.31,
+        "midState": "Run",
+        "midYaw": 1.648
+      }
+    },
+    {
+      "name": "A 停下後 B 看到 Idle",
+      "ok": true,
+      "detail": {
+        "state": "Idle"
+      }
+    },
+    {
+      "name": "B 看到 A 朝東跑（跑步中 yaw≈90°）且停下後朝向＝伺服器朝向",
+      "ok": true,
+      "detail": {
+        "lastRunYaw": 1.572,
+        "remoteYaw": 1.571,
+        "serverYaw": 1.571
+      }
+    },
+    {
+      "name": "B 畫面中 A 的位置＝伺服器權威位置（< 5 cm）",
+      "ok": true,
+      "detail": {
+        "errCm": 0
+      }
+    },
+    {
+      "name": "A 本地預測位置＝伺服器位置（< 5 cm）",
+      "ok": true,
+      "detail": {
+        "errCm": 0
+      }
+    },
+    {
+      "name": "N009 洛恩巡邏：兩位玩家看到的位置一致（< 0.5 m，伺服器時間）",
+      "ok": true,
+      "detail": {
+        "a": {
+          "x": 3.6128038746877005,
+          "z": -10.177801735298322,
+          "paused": false
+        },
+        "b": {
+          "x": 3.5639652210972654,
+          "z": -10.195006223774909,
+          "paused": false
+        },
+        "gapM": 0.051780387293525715,
+        "server": {
+          "patrolT": 1795785253.877,
+          "at": 1795785253877,
+          "paused": false,
+          "tx": 0,
+          "tz": 0
+        }
+      }
+    },
+    {
+      "name": "A 走入南門自動到星芽原野（伺服器換房間）",
+      "ok": true,
+      "detail": {
+        "room": "starsprout-1"
+      }
+    },
+    {
+      "name": "留在村莊的 B 看不到已到原野的 A（不同地圖互不可見）",
+      "ok": true,
+      "detail": {
+        "remotes": []
+      }
+    },
+    {
+      "name": "換地圖後 A 外觀與角色保留（同一玩家、同一外觀）",
+      "ok": true,
+      "detail": {
+        "pid": 1,
+        "weapon": "sword"
+      }
+    },
+    {
+      "name": "A、B 都在星芽原野，互相看見",
+      "ok": true,
+      "detail": {
+        "room": "starsprout-1"
+      }
+    },
+    {
+      "name": "E2E 執行完成",
+      "ok": false,
+      "detail": "page.evaluate: Execution context was destroyed, most likely because of a navigation\n    at finfo (/home/runner/work/starwish-online/starwish-online/tests/e2e/run-mp-e2e.mjs:78:29)\n    at /home/runner/work/starwish-online/starwish-online/tests/e2e/run-mp-e2e.mjs:255:23"
+    }
+  ],
+  "samples": {
+    "loadRemoteMs": 1423,
+    "moveSync": {
+      "samples": 7,
+      "maxStepM": 0.5,
+      "maxApparentSpeed": 1.31,
+      "midState": "Run",
+      "midYaw": 1.648
+    },
+    "roan": {
+      "a": {
+        "x": 3.6128038746877005,
+        "z": -10.177801735298322,
+        "paused": false
+      },
+      "b": {
+        "x": 3.5639652210972654,
+        "z": -10.195006223774909,
+        "paused": false
+      },
+      "gapM": 0.051780387293525715,
+      "server": {
+        "patrolT": 1795785253.877,
+        "at": 1795785253877,
+        "paused": false,
+        "tx": 0,
+        "tz": 0
+      }
+    },
+    "portalA": {
+      "seconds": 52.096
+    }
+  },
+  "consoleErrors": [],
+  "http404": [],
+  "remappedLoads": 42,
+  "startedAt": "2026-11-27T13:13:18.336Z",
+  "site": "https://scottlien2002-sys.github.io/starwish-online/preview-mp81",
+  "failureDiag": {
+    "阿星": {
+      "url": "https://scottlien2002-sys.github.io/starwish-online/preview-mp81/?play=world&mp=1&lod=lite&quality=low&server=wss%3A%2F%2F127.0.0.1%3A2773%2Fws&name=%E9%98%BF%E6%98%9F&hairColor=%233a2a1a&weapon=sword",
+      "boot": "載入中…",
+      "village": null,
+      "field": null,
+      "mp": null
+    },
+    "小願": {
+      "url": "https://scottlien2002-sys.github.io/starwish-online/preview-mp81/?play=world&mp=1&lod=lite&quality=low&server=wss%3A%2F%2F127.0.0.1%3A2773%2Fws&name=%E5%B0%8F%E9%A1%98&hairColor=%23c0408a&weapon=staff",
+      "boot": null,
+      "village": null,
+      "field": {
+        "pos": [
+          -56.06,
+          2,
+          -65
+        ]
+      },
+      "mp": {
+        "state": "online",
+        "map": "starsprout",
+        "room": "starsprout-1",
+        "server": {
+          "x": -56.06,
+          "z": -65,
+          "yaw": 3.047
+        },
+        "stats": {
+          "state": "online",
+          "map": "starsprout",
+          "room": "starsprout-1",
+          "pid": 2,
+          "rttMs": 147,
+          "rttAvgMs": 536,
+          "jitterMs": 488,
+          "bytesUpPerSec": 32,
+          "bytesDownPerSec": 2308,
+          "msgsUpPerSec": 1,
+          "msgsDownPerSec": 27,
+          "snapsPerSec": 26,
+          "players": 1,
+          "pendingInputs": 0,
+          "corrections": 0,
+          "lastCorrectionCm": 0,
+          "maxCorrectionCm": 0,
+          "snapCorrections": 0,
+          "reconnects": 0,
+          "lastResyncMs": 0,
+          "serverTick": 2523,
+          "fps": 3,
+          "totalBytesUp": 1934,
+          "totalBytesDown": 129000
+        }
+      }
+    }
+  },
+  "passed": 17,
+  "total": 18,
+  "serverLogTail": [
+    "[db] DATABASE_URL not set → in-memory store (data is lost on restart), realm=test",
+    "[2026-11-27T13:13:19.490Z] Starwish MP server listening on https/wss://127.0.0.1:2773",
+    "[2026-11-27T13:13:20.861Z] join pid=1 阿星 room=village-1",
+    "[2026-11-27T13:13:20.961Z] join pid=2 小願 room=village-1",
+    "[2026-11-27T13:14:59.178Z] disconnect pid=1 (grace 20000 ms)",
+    "[2026-11-27T13:14:59.642Z] resume pid=1 阿星 room=starsprout-1",
+    "[2026-11-27T13:15:50.728Z] disconnect pid=2 (grace 20000 ms)",
+    "[2026-11-27T13:15:51.180Z] resume pid=2 小願 room=starsprout-1",
+    "[2026-11-27T13:17:04.337Z] disconnect pid=1 (grace 20000 ms)",
+    "[2026-11-27T13:17:04.903Z] resume pid=1 阿星 room=village-1",
+    "[2026-11-27T13:17:05.889Z] disconnect pid=1 (grace 20000 ms)",
+    "[2026-11-27T13:17:05.907Z] disconnect pid=2 (grace 20000 ms)",
+    ""
+  ]
+}
