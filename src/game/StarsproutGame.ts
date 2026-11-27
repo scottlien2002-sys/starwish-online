@@ -60,7 +60,6 @@ import { expToNext, gainExp } from "../core/progression.ts";
 import { FieldCombatFx } from "./fieldCombatFx.ts";
 import { contactShadowQuality, renderExperimentsFromSearch } from "../render/renderExperiments.ts";
 import { type DetailTier, detailFor, pickTier, sphereInFrustum } from "./monsterDetail.ts";
-import { RiggedMonsterVisual } from "../monsters/rigged/RiggedMonsterVisual.ts";
 import { FieldKnockback } from "./fieldKnockback.ts";
 import { FieldTerrainQuery } from "./fieldTerrainQuery.ts";
 import { isAggressive } from "../monsters/framework/types.ts";
