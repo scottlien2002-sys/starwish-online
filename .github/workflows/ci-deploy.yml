@@ -3,7 +3,7 @@ name: CI & Deploy
 # 每次推送到 main：型別檢查 → 單元測試 → 建置 → 瀏覽器測試 → 部署到 gh-pages 分支（GitHub Pages）
 on:
   push:
-    branches: [main, "feature/**"]
+    branches: [main, "feature/**", "!feature/combat-vfx-*"] # combat-vfx 有自己的工作流程（combat-vfx.yml）
   workflow_dispatch:
 
 permissions:

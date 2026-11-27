@@ -166,6 +166,18 @@ function main(): void {
       return;
     }
     // ?lab=rigged：Stage 7.2 骨骼動畫怪物接入測試（M004 風羽狐；未交付時用接口測試替身）&q=hq|lite&count=N
+    // ?lab=combat：Combat VFX Lab（Claude C；戰鬥動畫與技能特效技術展示，非正式技能）&q=high|medium|low&g=female&auto=1&multi=4
+    if (lab === "combat") {
+      document.body.classList.add("lab-mode");
+      void import("./combat-vfx/lab/CombatVfxLab.ts")
+        .then((m) => m.startCombatVfxLab(canvas, hudRoot))
+        .then(() => hideBoot())
+        .catch((err: unknown) => {
+          console.error(err);
+          fail(`Combat VFX Lab 載入失敗：${err instanceof Error ? err.message : String(err)}`);
+        });
+      return;
+    }
     if (lab === "rigged") {
       document.body.classList.add("lab-mode");
       void import("./lab/RiggedMonsterLab.ts")
