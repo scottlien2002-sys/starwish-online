@@ -128,7 +128,7 @@ for (const [name, vp] of [["webkit", { width: 393, height: 852 }], ["chromium", 
       const p74 = await page.evaluate(() => ({ remap: window.__starwishAssetRemap ?? 0, detail: window.__starwishPlay.info().monsterDetail ?? null, s: window.__starwishPlay.perf?.session() ?? null }));
       const ok74 = p74.remap > 0 && !!p74.detail?.on && !!p74.s && p74.s.drawCalls.avg > 0 && Array.isArray(p74.s.heavy?.meshes);
       if (!ok74) fails++;
-      console.log(`${ok74 ? "✓" : "✗"} Stage 7.4：共用資產 ${p74.remap} 個（從 preview-stage73-world 讀取）｜分級 ${JSON.stringify(p74.detail)}｜報告 Draw Calls ${p74.s?.drawCalls.avg}、三角面 ${p74.s?.triangles.avgK}k、貼圖約 ${p74.s?.memory.textureMB} MB`);
+      console.log(`${ok74 ? "✓" : "✗"} Stage 7.4：共用資產 ${p74.remap} 個（從 preview-stage73-world 讀取）｜分級 ${JSON.stringify(p74.detail)}｜報告 Draw Calls ${p74.s?.drawCalls.avg}、三角面 ${p74.s?.triangles.avgK}k、貼圖約 ${p74.s?.memory.textureMB} MB（GPU 貼圖 ${p74.s?.memory.gpuTextures}／物件 ${p74.s?.memory.textures}）`);
       console.log(`  三角面最多：${JSON.stringify(p74.s?.heavy?.meshes?.slice(0, 8))}`);
       console.log(`  貼圖最大：${JSON.stringify(p74.s?.heavy?.textures?.slice(0, 8))}`);
     } catch (e) {
