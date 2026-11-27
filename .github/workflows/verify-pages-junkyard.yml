@@ -1,0 +1,17 @@
+name: Verify public preview — junkyard (read-only)
+# Stage 6.8＋6.9 部署驗證：只讀取公開 GitHub Pages 網址（HTTP、遊戲載入、三段畫質），不部署、不修改 gh-pages。
+on:
+  push:
+    branches: [verify/pages-junkyard]
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund && npx playwright install --with-deps chromium webkit >/dev/null
+      - run: node tests/e2e/verify-junkyard-preview.mjs
