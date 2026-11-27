@@ -115,7 +115,7 @@ test("框架 1：怪物資料正確載入與驗證", () => {
   assert.equal(dummy.testOnly, true, "測試怪物必須標記 testOnly");
   assert.ok(!Object.values(MONSTER_CANON).includes(dummy.name as never), "測試怪物不得使用正式怪物名稱");
   for (const d of MONSTER_DEFINITIONS) assert.deepEqual(validateDefinition(d), [], d.monsterId);
-  assert.throws(() => registry.definition("moss_horn_beast"), /找不到怪物資料/);
+  assert.throws(() => registry.definition("not_a_monster"), /找不到怪物資料/);
 });
 
 test("框架 1b：錯誤資料會被擋下", () => {

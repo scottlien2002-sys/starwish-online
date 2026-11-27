@@ -244,6 +244,25 @@ for (const name of browsers) {
       check("原野與村莊用同一個角色模型（C1.0-B5b，沒有變回其他版本）", fp.avatarModel?.modular === false && fp.file === vi.file, { village: vi.file, field: fp.file });
       check("切換地圖後寵物仍裝備、在頭部側邊 15～25 cm", fi.pets.length >= 1 && fi.petGap >= 0.15 && fi.petGap <= 0.25, { gap: fi.petGap, pets: fi.pets });
       await shot("field_arrive");
+      // ---------- Stage 7.3：七種怪物 ----------
+      const fm = fp.fieldMonsters ?? [];
+      const kinds = {};
+      for (const m of fp.monsters) kinds[m.kind] = (kinds[m.kind] ?? 0) + 1;
+      run.results.fieldMonsters = { fm, kinds };
+      check("Stage 7.3 七種怪物：M002～M007 都是 Claude C 的正式模型（已交付、Lite），依原本 7 區出現；星露啵啵沿用", fm.length === 6 && fm.every((x) => x.delivered && x.count > 0 && /Lite/.test(x.status)) && kinds.star_dew_bobo === 6 && kinds.moss_horn_beast === 5 && kinds.cloud_fluff_bird === 5 && kinds.windfeather_fox === 4 && kinds.nebula_sheep === 4 && kinds.carrot_king === 2 && kinds.crown_hammer_rabbit === 1 && !kinds.rig_contract_fixture, { fm, kinds });
+      const lv = Object.fromEntries(fp.monsters.map((m) => [m.kind, { level: m.level, aggressive: m.aggressive }]));
+      check("Stage 7.3：Lv.1～4 被動（星露啵啵、苔角獸）、Lv.5 以上主動（雲絨鳥～王冠重錘兔）", lv.star_dew_bobo?.aggressive === false && lv.moss_horn_beast?.aggressive === false && ["cloud_fluff_bird", "windfeather_fox", "nebula_sheep", "carrot_king", "crown_hammer_rabbit"].every((k) => lv[k]?.aggressive === true), lv);
+      if (g === "male" && name === "webkit") {
+        // 各區截圖（交付用）：站在區域外緣看怪物
+        const zones = [["01_bobo", -24, -60], ["02_moss_horn_beast", -62, -39], ["03_cloud_fluff_bird", 14, -19], ["04_windfeather_fox", 52, 16], ["05_nebula_sheep", -44, 37], ["06_carrot_king", -12, 28], ["07_crown_hammer_rabbit", 0, 57]];
+        for (const [label, x, z] of zones) {
+          await V(([x, z]) => { window.__starwishPlay.teleport(x, z); window.__starwishPlay.heal(); }, [x, z]);
+          await wait(2500);
+          await shot(`zone_${label}`);
+        }
+        await V(() => window.__starwishPlay.teleport(-56, -60));
+        await wait(1500);
+      }
 
       // ---------- 5. 打怪、金幣掉落、撿取 ----------
       const fight = await V(
@@ -277,6 +296,8 @@ for (const name of browsers) {
       const drops = fight.w.ledger.filter((l) => l.kind === "monsterDrop");
       check("原野：擊倒怪物、掉落金幣（測試設定 3–8）並撿起入帳", fight.kills >= 2 && fight.w.goldPicked > 0 && fight.w.gold === goldBeforeField + fight.w.goldPicked && drops.every((d) => d.amount >= 3 && d.amount <= 8), run.results.fight);
       const fw = fight.w;
+      const cfx = (await V(() => window.__starwishPlay.info())).combatFx;
+      check("Stage 7.3 戰鬥特效（Claude C VFX V2）：命中火花與傷害數字和命中同步出現", !!cfx && cfx.hitFx >= fight.kills && cfx.numbers >= cfx.hitFx && cfx.damageShown > 0, cfx);
       check("Stage 7.2：擊敗怪物得到經驗（測試設定），存進角色存檔", fw.expGained > 0 && (fw.level > 1 || fw.exp > 0), { expGained: fw.expGained, level: fw.level, exp: fw.exp });
       check("掉落物唯一編號：每個撿起的掉落只入帳一次", new Set(drops.map((d) => d.requestId)).size === drops.length && fight.w.claimed >= drops.length, { drops: drops.length, claimed: fight.w.claimed });
       await shot("field_fight");

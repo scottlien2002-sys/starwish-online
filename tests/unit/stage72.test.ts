@@ -154,13 +154,13 @@ test("死亡停止行動、淡出後才開始重生計時、重生回 Idle；普
   assert.equal(c.instance.currentHp, c.instance.definition.maxHp);
 });
 
-test("玩家近戰距離從怪物身體外緣算（風羽狐 0.45 m）；星露啵啵沒有設定 = 原本行為", () => {
+test("玩家近戰距離從怪物身體外緣算（風羽狐 0.55 m，Stage 7.3 統一為地圖文件值）；星露啵啵沒有設定 = 原本行為", () => {
   const combat = new PreviewCombat();
   const c = foxCtrl();
   const R = 2.5; // PREVIEW_COMBAT.playerAttackRange（見 previewCombat.ts）
-  const near = combat.nearestTarget(c.instance.currentPosition.x + R + 0.4, 0, [c.instance]);
+  const near = combat.nearestTarget(c.instance.currentPosition.x + R + 0.5, 0, [c.instance]);
   assert.ok(near !== null);
-  const far = combat.nearestTarget(c.instance.currentPosition.x + R + 0.5, 0, [c.instance]);
+  const far = combat.nearestTarget(c.instance.currentPosition.x + R + 0.6, 0, [c.instance]);
   assert.equal(far, null);
 });
 

@@ -45,7 +45,7 @@ test("存檔：等級、經驗、外觀會存回、讀回；舊存檔補預設�
 
 test("Stage 7.2：M004～M007 出生區對應原本的 7 區配置；每種都有怪物資料與動畫設定", () => {
   const reg = createMonsterRegistry();
-  const expectLv: Record<string, number> = { "04": 7, "05": 8, "06": 9, "07": 10 };
+  const expectLv: Record<string, number> = { "02": 3, "03": 5, "04": 7, "05": 8, "06": 9, "07": 10 };
   for (const { zoneId, spec } of FIELD_RIGGED_SPAWNS) {
     const zone = ZONES.find((z) => z.id === zoneId)!;
     assert.ok(zone, zoneId);

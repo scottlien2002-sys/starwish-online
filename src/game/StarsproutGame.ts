@@ -55,6 +55,7 @@ import type { WorldSession } from "./worldSession.ts";
 import { WorldPanel } from "../ui/WorldPanel.ts";
 import { MODEL_LOD_LABEL, pickModelLod } from "./modelLod.ts";
 import { expToNext, gainExp } from "../core/progression.ts";
+import { FieldCombatFx } from "./fieldCombatFx.ts";
 import { isAggressive } from "../monsters/framework/types.ts";
 import { defaultAppearance } from "../core/gameSave.ts";
 import { FIELD_RIGGED_SPAWNS } from "../monsters/rigged/riggedSpec.ts";
@@ -114,6 +115,8 @@ export interface PlayApi {
     foxStatus: string;
     /** Stage 7.2：原野各區的骨骼動畫怪物（已交付／未交付） */
     fieldMonsters: { zone: string; zoneName: string; monster: string; delivered: boolean; count: number; status: string }[];
+    /** Stage 7.3：戰鬥特效計數 */
+    combatFx: { tier: string; hitFx: number; numbers: number; hurt: number; respawnFx: number; damageShown: number } | null;
     pets: { enabled: boolean; mode: string; reason: string; items: Record<ItemId, number>; count: number; equipped: number | null; followerVisible: boolean; followerDist: number };
     render: { p3: boolean; pipeline: boolean; charShadow: CharShadowMode; drawCalls: number; fps: number; contextLost: number };
   };
@@ -212,6 +215,8 @@ class StarsproutGame {
   private monsters: MonsterController[] = [];
   /** Stage 7.2：羽風高地的怪物狀態（畫面與測試顯示） */
   private foxStatus = "";
+  /** Stage 7.3：戰鬥特效（完整遊戲） */
+  private fx: FieldCombatFx | null = null;
   /** 沒有世界存檔（舊預覽）時的等級與經驗 */
   private readonly localProgress = { level: 1, exp: 0 };
   private expGained = 0;
@@ -463,7 +468,9 @@ class StarsproutGame {
     );
     // ---------- Stage 7.2：骨骼動畫怪物（M004～M007；GLB 列在 models/monsters/manifest.json 才會出現，沒交付的區域保持空的） ----------
     // &rigfixture=1（只供自動測試）：風羽狐檔案還沒交付時，用灰色方塊的接口測試替身驗證 AI、命中與重生（只放羽風高地）
-    const rigLod = this.ws ? pickModelLod(this.params) : this.lod;
+    // Stage 7.3 效能：原野同時有 6 種骨骼動畫怪物（21 隻）。HQ 每種 3 張 2048 貼圖，6 種約 18 張 → iPhone 記憶體風險高；
+    // 怪物一律用 Lite（貼圖 1024／512、量化頂點，外觀與動畫相同）。&monlod=hq 可切回 HQ 比較。
+    const rigLod = this.params.get("monlod") === "hq" ? "hq" : this.params.get("monlod") === "lite" ? "lite" : this.ws ? "lite" : this.lod;
     const rigReg = registerBabylonVisuals(createMonsterRegistry({ legacyAggressive: !this.ws }), { scene, shadows: this.shadows, quality, modelLod: rigLod });
     const rigFactory = new MonsterFactory(rigReg);
     for (const { zoneId, spec } of FIELD_RIGGED_SPAWNS) {
@@ -484,6 +491,8 @@ class StarsproutGame {
       this.fieldStatus.push({ zone: zoneId, zoneName: zone.name, monster: name, delivered: ok, count, status });
     }
     await Promise.all(this.monsters.map((m) => m.visual?.load() ?? Promise.resolve()));
+    // Stage 7.3：戰鬥特效（Claude C Combat VFX Stage 2）：命中火花、傷害數字、受傷紅框、重生光柱。完整遊戲才開；&fx=0 關閉（比較用）
+    if (this.ws && this.params.get("fx") !== "0") this.fx = new FieldCombatFx(scene, this.hudRoot, this.lod === "hq" ? "high" : "medium");
     this.lockRing = MeshBuilder.CreateTorus("PH_lockRing", { diameter: 1.1, thickness: 0.05, tessellation: 40 }, scene);
     const ringMat = new StandardMaterial("PH_lockRingMat", scene);
     ringMat.disableLighting = true;
@@ -580,6 +589,7 @@ class StarsproutGame {
     this.camera.update(dt, this.pos, this.input.consumeCamera());
     this.sun.position.copyFrom(this.pos).subtractInPlace(this.sun.direction.scale(45));
     this.updateMonsters(dt);
+    this.fx?.update(dt);
     this.updateLoot(dt);
     this.follower.update(dt, this.avatar.petAnchor(this.earTmp), this.yaw, this.avatar.headHalfWidth);
     if (this.ws) this.worldFrame(dt);
@@ -624,6 +634,8 @@ class StarsproutGame {
     const mc = this.monsters.find((x) => x.instance.instanceId === r.targetId);
     if (!mc) return;
     const i = mc.instance;
+    const ip = i.currentPosition;
+    this.fx?.playerHit(ip.x, this.terrain.surface(ip.x, ip.z), ip.z, i.definition.height ?? 1, r.damage, r.killed);
     if (r.killed) {
       this.kills++;
       const items = this.pets.onMonsterKilled(false); // 地上掉落物：撿起時才放進背包
@@ -673,11 +685,14 @@ class StarsproutGame {
     for (const m of this.monsters) {
       const p = m.instance.currentPosition;
       p.y = this.terrain.surface(p.x, p.z);
+      const before = m.instance.currentState;
       const frame = m.update(dt, this.now, target);
+      if (before !== "respawn" && m.instance.currentState === "respawn") this.fx?.respawn(p.x, this.terrain.surface(p.x, p.z), p.z, Math.max(0.8, (m.instance.definition.bodyRadius ?? 0.5) * 1.6));
       p.y = this.terrain.surface(p.x, p.z);
       if (frame.effects.includes("attackImpact") && m.instance.claimAttackImpact() !== null) {
         const dmg = this.combat.monsterImpact(this.now, m.instance, this.pos.x, this.pos.z);
         if (dmg > 0) {
+          this.fx?.playerHurt(this.pos.x, this.pos.y, this.pos.z, dmg);
           // 普通攻擊不打斷移動、攻擊（已定案規則）：站著不動時才播受傷動作
           if (this.curSpeed < 0.05 && this.avatar.state !== "Attack") this.pending.hurt = true;
           this.hud.toast(this.combat.isDown ? (this.ws ? "你倒下了…" : "你倒下了…（測試規則：2 秒後在營地復活）") : `受到${m.instance.definition.name}攻擊 -${dmg}`, 900);
@@ -1199,6 +1214,7 @@ class StarsproutGame {
           }),
           foxStatus: self.foxStatus,
           fieldMonsters: self.fieldStatus.map((x) => ({ ...x })),
+          combatFx: self.fx ? { tier: self.fx.tier, ...self.fx.stats, damageShown: self.fx.numbers.shown } : null,
           pets: {
             enabled: p.enabled,
             mode: p.mode,
