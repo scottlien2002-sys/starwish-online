@@ -56,6 +56,7 @@ import { WorldPanel } from "../ui/WorldPanel.ts";
 import { MODEL_LOD_LABEL, pickModelLod } from "./modelLod.ts";
 import { expToNext, gainExp } from "../core/progression.ts";
 import { FieldCombatFx } from "./fieldCombatFx.ts";
+import { FieldTerrainQuery } from "./fieldTerrainQuery.ts";
 import { isAggressive } from "../monsters/framework/types.ts";
 import { defaultAppearance } from "../core/gameSave.ts";
 import { FIELD_RIGGED_SPAWNS } from "../monsters/rigged/riggedSpec.ts";
@@ -116,7 +117,7 @@ export interface PlayApi {
     /** Stage 7.2：原野各區的骨骼動畫怪物（已交付／未交付） */
     fieldMonsters: { zone: string; zoneName: string; monster: string; delivered: boolean; count: number; status: string }[];
     /** Stage 7.3：戰鬥特效計數 */
-    combatFx: { tier: string; hitFx: number; numbers: number; hurt: number; respawnFx: number; damageShown: number } | null;
+    combatFx: { tier: string; hitFx: number; numbers: number; hurt: number; respawnFx: number; damageShown: number; knockbacks: number } | null;
     pets: { enabled: boolean; mode: string; reason: string; items: Record<ItemId, number>; count: number; equipped: number | null; followerVisible: boolean; followerDist: number };
     render: { p3: boolean; pipeline: boolean; charShadow: CharShadowMode; drawCalls: number; fps: number; contextLost: number };
   };
@@ -217,6 +218,11 @@ class StarsproutGame {
   private foxStatus = "";
   /** Stage 7.3：戰鬥特效（完整遊戲） */
   private fx: FieldCombatFx | null = null;
+  private knockbacks = 0;
+  private get tq(): FieldTerrainQuery {
+    return (this._tq ??= new FieldTerrainQuery(this.terrain, this.colliders));
+  }
+  private _tq: FieldTerrainQuery | null = null;
   /** 沒有世界存檔（舊預覽）時的等級與經驗 */
   private readonly localProgress = { level: 1, exp: 0 };
   private expGained = 0;
@@ -636,6 +642,18 @@ class StarsproutGame {
     const i = mc.instance;
     const ip = i.currentPosition;
     this.fx?.playerHit(ip.x, this.terrain.surface(ip.x, ip.z), ip.z, i.definition.height ?? 1, r.damage, r.killed);
+    // Stage 7.3：普通攻擊的輕微擊退（Claude C 受擊反應 V2：0.12＋震動×0.75，普通攻擊震動 0.14 → 約 0.22 m；Boss ×0.25）。
+    // 用 FieldTerrainQuery：撞到岩石、溪流、地圖邊界就停在前面
+    if (this.ws && !r.killed && this.params.get("fx") !== "0") {
+      const dx = ip.x - this.pos.x;
+      const dz = ip.z - this.pos.z;
+      const d = Math.hypot(dx, dz) || 1;
+      const k = (0.12 + 0.14 * 0.75) * (i.definition.rank === "boss" ? 0.25 : 1);
+      const to = this.tq.clampMove({ x: ip.x, z: ip.z }, { x: ip.x + (dx / d) * k, z: ip.z + (dz / d) * k }, i.definition.bodyRadius ?? 0.5);
+      ip.x = to.x;
+      ip.z = to.z;
+      this.knockbacks++;
+    }
     if (r.killed) {
       this.kills++;
       const items = this.pets.onMonsterKilled(false); // 地上掉落物：撿起時才放進背包
@@ -1214,7 +1232,7 @@ class StarsproutGame {
           }),
           foxStatus: self.foxStatus,
           fieldMonsters: self.fieldStatus.map((x) => ({ ...x })),
-          combatFx: self.fx ? { tier: self.fx.tier, ...self.fx.stats, damageShown: self.fx.numbers.shown } : null,
+          combatFx: self.fx ? { tier: self.fx.tier, ...self.fx.stats, damageShown: self.fx.numbers.shown, knockbacks: self.knockbacks } : null,
           pets: {
             enabled: p.enabled,
             mode: p.mode,
