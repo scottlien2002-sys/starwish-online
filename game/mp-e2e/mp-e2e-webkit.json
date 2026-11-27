@@ -1,0 +1,489 @@
+{
+  "browser": "webkit",
+  "checks": [
+    {
+      "name": "兩位玩家進入同一個星芽村房間",
+      "ok": true,
+      "detail": {
+        "room": "village-1"
+      }
+    },
+    {
+      "name": "A 看見 B 的 3D 角色（女、粉紅髮色、法杖；模組化零件）",
+      "ok": true,
+      "detail": {
+        "id": 2,
+        "name": "小願",
+        "loaded": true,
+        "state": "Idle",
+        "pos": [
+          10.8,
+          6.3
+        ],
+        "yaw": -2.094,
+        "link": 1,
+        "parts": 5,
+        "hairColor": "#c0408a",
+        "gender": "female"
+      }
+    },
+    {
+      "name": "B 看見 A 的 3D 角色（男、深棕髮色、短劍）",
+      "ok": true,
+      "detail": {
+        "id": 1,
+        "name": "阿星",
+        "loaded": true,
+        "state": "Idle",
+        "pos": [
+          6.2,
+          10.8
+        ],
+        "yaw": -2.618,
+        "link": 1,
+        "parts": 5,
+        "hairColor": "#3a2a1a",
+        "gender": "male"
+      }
+    },
+    {
+      "name": "本地角色外觀以伺服器資料建立（B 是女性、法杖）",
+      "ok": true,
+      "detail": {
+        "gender": "female",
+        "weapon": "staff"
+      }
+    },
+    {
+      "name": "一般移動沒有跳躍按鈕",
+      "ok": true
+    },
+    {
+      "name": "星芽村正式美術（Claude B Stage 6.7：Tripo NPC、N008 佈告欄、洛恩）載入完成",
+      "ok": true,
+      "detail": {
+        "art": "loaded"
+      }
+    },
+    {
+      "name": "B 看到 A 跑步（Run 動畫）",
+      "ok": true,
+      "detail": {
+        "states": [
+          "Idle",
+          "Run"
+        ]
+      }
+    },
+    {
+      "name": "遠端移動沒有瞬移（取樣間最大位移 < 5 m/s 對應距離的 2 倍）",
+      "ok": true,
+      "detail": {
+        "samples": 15,
+        "maxStepM": 0.5,
+        "maxApparentSpeed": 3.7,
+        "midState": "Run",
+        "midYaw": 1.572
+      }
+    },
+    {
+      "name": "A 停下後 B 看到 Idle",
+      "ok": true,
+      "detail": {
+        "state": "Idle"
+      }
+    },
+    {
+      "name": "B 看到 A 朝東跑（跑步中 yaw≈90°）且停下後朝向＝伺服器朝向",
+      "ok": true,
+      "detail": {
+        "lastRunYaw": 1.571,
+        "remoteYaw": 1.571,
+        "serverYaw": 1.571
+      }
+    },
+    {
+      "name": "B 畫面中 A 的位置＝伺服器權威位置（< 5 cm）",
+      "ok": true,
+      "detail": {
+        "errCm": 0
+      }
+    },
+    {
+      "name": "A 本地預測位置＝伺服器位置（< 5 cm）",
+      "ok": true,
+      "detail": {
+        "errCm": 0
+      }
+    },
+    {
+      "name": "N009 洛恩巡邏：兩位玩家看到的位置一致（< 0.5 m，伺服器時間）",
+      "ok": true,
+      "detail": {
+        "a": {
+          "x": -9.9778989511219,
+          "z": -4.132981069542967,
+          "paused": false
+        },
+        "b": {
+          "x": -9.9778989511219,
+          "z": -4.132981069542967,
+          "paused": false
+        },
+        "gapM": 0,
+        "server": {
+          "patrolT": 1795782493.327,
+          "at": 1795782493327,
+          "paused": false,
+          "tx": 0,
+          "tz": 0
+        }
+      }
+    },
+    {
+      "name": "A 走入南門自動到星芽原野（伺服器換房間）",
+      "ok": true,
+      "detail": {
+        "room": "starsprout-1"
+      }
+    },
+    {
+      "name": "留在村莊的 B 看不到已到原野的 A（不同地圖互不可見）",
+      "ok": true,
+      "detail": {
+        "remotes": []
+      }
+    },
+    {
+      "name": "換地圖後 A 外觀與角色保留（同一玩家、同一外觀）",
+      "ok": true,
+      "detail": {
+        "pid": 1,
+        "weapon": "sword"
+      }
+    },
+    {
+      "name": "A、B 都在星芽原野，互相看見",
+      "ok": true,
+      "detail": {
+        "room": "starsprout-1"
+      }
+    },
+    {
+      "name": "A 在原野實際攻擊怪物，B 看到 A 的 Attack 動畫",
+      "ok": true,
+      "detail": {
+        "localAttack": true,
+        "distances": [
+          11.87,
+          11.39,
+          10.91,
+          10.62,
+          10.19,
+          9.72,
+          9.25,
+          8.75,
+          8.25,
+          7.75,
+          7.24,
+          6.74,
+          6.23,
+          5.73,
+          4.72,
+          4.22,
+          3.21,
+          2.71,
+          2.2,
+          1.71
+        ],
+        "seconds": 27.881
+      }
+    },
+    {
+      "name": "Hurt 動作同步（B 看到 A 受擊動畫）",
+      "ok": true
+    },
+    {
+      "name": "B 斷線時 A 看到 B 標示斷線中",
+      "ok": true
+    },
+    {
+      "name": "B 自動重連、同一角色、A 看到 B 恢復",
+      "ok": true,
+      "detail": {
+        "reconnects": 1,
+        "resyncMs": 532
+      }
+    },
+    {
+      "name": "Death 動作同步（B 看到 A 倒地）",
+      "ok": true
+    },
+    {
+      "name": "B 走入原野營地傳送陣回到星芽村、A 倒地後在星芽村復活",
+      "ok": true,
+      "detail": {
+        "a": "village-1",
+        "b": "village-1"
+      }
+    },
+    {
+      "name": "回到村莊後再次互相看見",
+      "ok": true
+    },
+    {
+      "name": "同一角色重複登入：新分頁接手同一玩家，舊分頁被中斷且不自動重連",
+      "ok": true,
+      "detail": {
+        "oldState": "offline",
+        "newPid": 2,
+        "oldPid": 2
+      }
+    },
+    {
+      "name": "伺服器沒有加速／非法位置紀錄",
+      "ok": true,
+      "detail": [
+        {
+          "pid": 1,
+          "name": "阿星",
+          "room": "village-1",
+          "connected": true,
+          "queue": 0,
+          "ack": 1146,
+          "stepsApplied": 1146,
+          "stepsDropped": 0,
+          "staleEpochInputs": 0,
+          "duplicateSteps": 0,
+          "seqGaps": 0,
+          "illegalPositions": 0,
+          "speedViolations": 0,
+          "actsAccepted": 4,
+          "actsRejected": 5,
+          "stepsWhileDown": 0
+        },
+        {
+          "pid": 2,
+          "name": "小願",
+          "room": "village-1",
+          "connected": true,
+          "queue": 0,
+          "ack": 699,
+          "stepsApplied": 699,
+          "stepsDropped": 0,
+          "staleEpochInputs": 0,
+          "duplicateSteps": 0,
+          "seqGaps": 0,
+          "illegalPositions": 0,
+          "speedViolations": 0,
+          "actsAccepted": 0,
+          "actsRejected": 0,
+          "stepsWhileDown": 0
+        }
+      ]
+    },
+    {
+      "name": "瀏覽器沒有 JavaScript 錯誤",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "name": "沒有 404／載入失敗的檔案",
+      "ok": true,
+      "detail": []
+    }
+  ],
+  "samples": {
+    "loadRemoteMs": 2723,
+    "moveSync": {
+      "samples": 15,
+      "maxStepM": 0.5,
+      "maxApparentSpeed": 3.7,
+      "midState": "Run",
+      "midYaw": 1.572
+    },
+    "roan": {
+      "a": {
+        "x": -9.9778989511219,
+        "z": -4.132981069542967,
+        "paused": false
+      },
+      "b": {
+        "x": -9.9778989511219,
+        "z": -4.132981069542967,
+        "paused": false
+      },
+      "gapM": 0,
+      "server": {
+        "patrolT": 1795782493.327,
+        "at": 1795782493327,
+        "paused": false,
+        "tx": 0,
+        "tz": 0
+      }
+    },
+    "portalA": {
+      "seconds": 21.852
+    },
+    "attack": {
+      "localAttack": true,
+      "distances": [
+        11.87,
+        11.39,
+        10.91,
+        10.62,
+        10.19,
+        9.72,
+        9.25,
+        8.75,
+        8.25,
+        7.75,
+        7.24,
+        6.74,
+        6.23,
+        5.73,
+        4.72,
+        4.22,
+        3.21,
+        2.71,
+        2.2,
+        1.71
+      ],
+      "seconds": 27.881
+    },
+    "diag": {
+      "A": {
+        "state": "online",
+        "map": "village",
+        "room": "village-1",
+        "pid": 1,
+        "rttMs": 254,
+        "rttAvgMs": 254,
+        "jitterMs": 0,
+        "bytesUpPerSec": 159,
+        "bytesDownPerSec": 1728,
+        "msgsUpPerSec": 2,
+        "msgsDownPerSec": 12,
+        "snapsPerSec": 11,
+        "players": 2,
+        "pendingInputs": 0,
+        "corrections": 0,
+        "lastCorrectionCm": 0,
+        "maxCorrectionCm": 0,
+        "snapCorrections": 0,
+        "reconnects": 0,
+        "lastResyncMs": 0,
+        "serverTick": 2008,
+        "fps": 0,
+        "totalBytesUp": 178,
+        "totalBytesDown": 3458
+      },
+      "B": {
+        "state": "online",
+        "map": "village",
+        "room": "village-1",
+        "pid": 2,
+        "rttMs": 293,
+        "rttAvgMs": 207,
+        "jitterMs": 107,
+        "bytesUpPerSec": 18,
+        "bytesDownPerSec": 1935,
+        "msgsUpPerSec": 1,
+        "msgsDownPerSec": 18,
+        "snapsPerSec": 17,
+        "players": 2,
+        "pendingInputs": 0,
+        "corrections": 0,
+        "lastCorrectionCm": 0,
+        "maxCorrectionCm": 0,
+        "snapCorrections": 0,
+        "reconnects": 0,
+        "lastResyncMs": 0,
+        "serverTick": 2013,
+        "fps": 6,
+        "totalBytesUp": 201,
+        "totalBytesDown": 6002
+      }
+    },
+    "remap": {
+      "remappedLoads": 0
+    }
+  },
+  "consoleErrors": [],
+  "http404": [],
+  "remappedLoads": 0,
+  "startedAt": "2026-11-27T12:27:53.726Z",
+  "site": "http://127.0.0.1:33025",
+  "serverMetrics": {
+    "players": 2,
+    "rooms": [
+      {
+        "key": "village-1",
+        "map": "village",
+        "players": 2,
+        "connected": 2,
+        "tick": 2086
+      },
+      {
+        "key": "starsprout-1",
+        "map": "starsprout",
+        "players": 0,
+        "connected": 0,
+        "tick": 1464
+      }
+    ],
+    "totals": {
+      "ticks": 2160,
+      "tickMsSum": 1097.0453189995792,
+      "tickMsMax": 9.15796599999885,
+      "bytesIn": 18605,
+      "bytesOut": 420989,
+      "msgsIn": 517,
+      "msgsOut": 4316,
+      "badMessages": 0,
+      "rateLimited": 0,
+      "kicked": 0,
+      "replaced": 1,
+      "resumed": 6,
+      "graceExpired": 0,
+      "transfers": 4,
+      "persistOk": 20,
+      "persistConflict": 0,
+      "snapshotsSkippedBackpressure": 0,
+      "rejectedOrigin": 0,
+      "rejectedProtocol": 0,
+      "roanRejected": 0
+    },
+    "tick": {
+      "count": 2160,
+      "avgMs": 0.457,
+      "maxMs": 2.886
+    },
+    "store": {
+      "kind": "memory",
+      "realm": "test"
+    }
+  },
+  "passed": 28,
+  "total": 28,
+  "serverLogTail": [
+    "[db] DATABASE_URL not set → in-memory store (data is lost on restart), realm=test",
+    "[2026-11-27T12:27:54.512Z] Starwish MP server listening on http/ws://127.0.0.1:2720",
+    "[2026-11-27T12:27:58.241Z] join pid=1 阿星 room=village-1",
+    "[2026-11-27T12:27:58.822Z] join pid=2 小願 room=village-1",
+    "[2026-11-27T12:28:30.921Z] disconnect pid=1 (grace 20000 ms)",
+    "[2026-11-27T12:28:31.424Z] resume pid=1 阿星 room=starsprout-1",
+    "[2026-11-27T12:28:48.907Z] disconnect pid=2 (grace 20000 ms)",
+    "[2026-11-27T12:28:49.387Z] resume pid=2 小願 room=starsprout-1",
+    "[2026-11-27T12:29:22.428Z] disconnect pid=2 (grace 20000 ms)",
+    "[2026-11-27T12:29:22.952Z] resume pid=2 小願 room=starsprout-1",
+    "[2026-11-27T12:29:37.914Z] disconnect pid=2 (grace 20000 ms)",
+    "[2026-11-27T12:29:38.241Z] resume pid=2 小願 room=village-1",
+    "[2026-11-27T12:29:38.698Z] disconnect pid=1 (grace 20000 ms)",
+    "[2026-11-27T12:29:39.170Z] resume pid=1 阿星 room=village-1",
+    "[2026-11-27T12:29:42.593Z] resume pid=2 小願 room=village-1",
+    "[2026-11-27T12:29:44.535Z] disconnect pid=2 (grace 20000 ms)",
+    "[2026-11-27T12:29:44.548Z] disconnect pid=1 (grace 20000 ms)",
+    ""
+  ]
+}
