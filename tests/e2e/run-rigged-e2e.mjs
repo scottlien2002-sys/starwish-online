@@ -50,14 +50,14 @@ for (const name of browsers) {
         check("Stage 7.3：七種怪物都在原本的區域（M002 5、M003 5、M004 4、M005 4、M006 2、M007 1，另有星露啵啵 6）", byKind.moss_horn_beast === 5 && byKind.cloud_fluff_bird === 5 && byKind.windfeather_fox === 4 && byKind.nebula_sheep === 4 && byKind.carrot_king === 2 && byKind.crown_hammer_rabbit === 1, byKind);
         check("Stage 7.3：骨骼動畫怪物都是正式模型（沒有接口測試替身或方塊）", i.monsters.filter((x) => x.rig).every((x) => x.kind !== "rig_contract_fixture"), i.fieldMonsters);
         // 巡邏：等到至少一隻 patrol
-        await page.waitForFunction(() => window.__starwishPlay.info().monsters.some((m) => m.rig && m.mode === "patrol" && m.rig.clip === "move"), null, { timeout: 60000 }).catch(() => {});
+        await page.waitForFunction(() => window.__starwishPlay.info().monsters.some((m) => m.kind === "windfeather_fox" && m.mode === "patrol" && m.rig.clip === "move" && m.speed > 0.45 && m.speed < 0.75), null, { timeout: 180000, polling: 200 }).catch(() => {});
         i = await page.evaluate(() => window.__starwishPlay.info());
         const pat = i.monsters.filter((m) => m.kind === "windfeather_fox" && m.mode === "patrol");
         check("巡邏：播 Move，速度約 0.6 m/s", pat.some((m) => m.rig.clip === "move" && m.speed > 0.45 && m.speed < 0.75), pat.map((m) => ({ clip: m.rig.clip, speed: m.speed, ratio: m.rig.ratio })));
         // 玩家走進警戒範圍 → 追擊（Run）
         const f0 = foxes[0];
         await page.evaluate(([x, z]) => window.__starwishPlay.teleport(x + 6, z), [f0.x, f0.z]);
-        await page.waitForFunction(() => window.__starwishPlay.info().monsters.some((m) => m.rig && m.mode === "chase" && m.rig.clip === "run"), null, { timeout: 30000 }).catch(() => {});
+        await page.waitForFunction(() => window.__starwishPlay.info().monsters.some((m) => m.kind === "windfeather_fox" && m.mode === "chase" && m.rig.clip === "run"), null, { timeout: 30000 }).catch(() => {});
         i = await page.evaluate(() => window.__starwishPlay.info());
         const ch = i.monsters.filter((m) => m.kind === "windfeather_fox" && m.mode === "chase");
         check("主動攻擊：玩家進入警戒範圍後追擊，播 Run（獨立動畫），速度約 2.4 m/s", ch.some((m) => m.rig.clip === "run" && m.speed > 2.0 && m.speed < 2.6), ch.map((m) => ({ clip: m.rig.clip, speed: m.speed, ratio: m.rig.ratio })));
