@@ -58,7 +58,8 @@ B 的模組沒有修改，原樣複製（`VillageInteract.ts`、`PerfOverlay.ts`
 | PostgreSQL 21 項（含伺服器重啟保留、資料區分開、背包冪等、工作階段鎖） | 本機 PostgreSQL 16＋GitHub Actions | 通過 |
 | 2D 雙人測試頁 16 項 | Chromium＋WebKit（GitHub Actions） | 通過 |
 | 遊戲單元測試 425 項（A＋B 原有＋新增） | 本機＋GitHub Actions | 通過 |
-| **3D 雙人 E2E 28 項** | 本機 Chromium、GitHub Actions Chromium＋WebKit | 見第 9 節 |
+| **3D 雙人 E2E 28 項** | 本機 Chromium＋GitHub Actions Chromium、WebKit | 28/28 通過（兩種瀏覽器） |
+| **已發布網址實測**（GitHub Pages https 預覽＋測試機上的 WSS 伺服器） | GitHub Actions Chromium | 28/28 通過；80 個模型／貼圖從其他預覽資料夾讀取，0 個 404 |
 | 單機回歸：Stage 7.1 世界循環 E2E 128 項 | GitHub Actions Chromium＋WebKit × 男女 | 128/128 通過 |
 | **iPhone Safari 實機** | — | **未測試** |
 
@@ -67,8 +68,8 @@ B 的模組沒有修改，原樣複製（`VillageInteract.ts`、`PerfOverlay.ts`
 ## 6. 部署
 
 - 前端：`https://scottlien2002-sys.github.io/starwish-online/preview-mp81/`（只替換自己的資料夾）。
-  - 預覽只發布 18 MB：與其他預覽資料夾內容完全相同的模型與貼圖（比對 SHA-1）改從原處讀取。依賴 `preview-village-npc67` 等預覽資料夾；若之後刪除那些資料夾，重新部署會自動改為自己發布。
-  - 部署後 gh-pages 合計 796 MB（低於 1000 MB 警告線）。
+  - 預覽只發布 27 MB：與其他預覽資料夾內容完全相同的模型與貼圖（比對 SHA-1）改從原處讀取。依賴 `preview-village-npc67` 等預覽資料夾；若之後刪除那些資料夾，重新部署會自動改為自己發布。
+  - 部署後 gh-pages 合計 852 MB（低於 1000 MB 警告線）。
 - 伺服器：`render.yaml`（Render Blueprint，免費 Web Service＋免費 PostgreSQL，realm=test）。需要您操作，步驟見 `RENDER_DEPLOY.md`。
 - Render 免費方案限制（官方文件）：閒置 15 分鐘休眠、喚醒約 1 分鐘；每月 750 小時；PostgreSQL 1 GB、30 天後到期、沒有備份。
 
@@ -85,3 +86,12 @@ B 的模組沒有修改，原樣複製（`VillageInteract.ts`、`PerfOverlay.ts`
 | 8.3 | 掉落與背包伺服器化（道具 UUID、撿取冪等），本機背包改為伺服器資料 | 單機進度是否帶入線上（建議不帶入） |
 | 8.4 | 寵物（鑑定在伺服器產生並永久固定、跟隨同步）、洛恩服務接伺服器 | 寵物正式數值 |
 | 8.5 | 星願商會交易所（原子成交）、頻道選擇 UI、正式登入 | 手續費等數值；正式主機與資料庫方案（可能需要付費，需另外核准） |
+
+## 9. 版本與 CI
+| 項目 | 值 |
+|---|---|
+| 整合分支 | `integration/multiplayer-stage8-1`（9d9ec43） |
+| 基準備份 | `backup/multiplayer-stage8-1-base`（A 6e4c143）、`backup/multiplayer-stage8-0-accepted`（cb9791f） |
+| 最終 CI | GitHub Actions run 46006957205：伺服器、3D 雙人 E2E（Chromium＋WebKit）、單機回歸 128/128、部署、已發布網址實測全部通過 |
+| 測試結果分支 | `results/mp81-server-46006957205`、`results/mp81-game-46006957205`（JSON＋截圖） |
+| 不觸發其他部門工作流程 | 分支名稱不在 `feature/**`，只會執行自己的 Multiplayer Stage 8 工作流程 |
