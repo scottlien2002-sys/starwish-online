@@ -91,7 +91,12 @@ function terrainColor(x: number, z: number, y: number, slope: number): [number, 
     const d2 = (x - m.x) ** 2 + (z - m.z) ** 2;
     junkW = Math.max(junkW, Math.exp(-d2 / (2 * (m.s * 1.35) ** 2)));
   }
-  c = mix(c, mix([0.62, 0.46, 0.33], [0.5, 0.42, 0.36], n2), smoothstep(0.25, 0.7, junkW));
+  // 垃圾山：多色廢料斑塊（鏽紅、青綠烤漆、米白、鐵灰），遠看是一座座彩色廢料堆
+  const b1 = 0.5 + 0.5 * Math.sin(x * 0.53 + Math.sin(z * 0.41) * 2.1);
+  const b2 = 0.5 + 0.5 * Math.sin(z * 0.47 - x * 0.29 + Math.sin(x * 0.17) * 1.7);
+  const scrap: [number, number, number] =
+    b1 > 0.72 ? [0.36, 0.56, 0.56] : b2 > 0.78 ? [0.8, 0.74, 0.62] : b1 < 0.22 ? [0.48, 0.48, 0.52] : b2 < 0.25 ? [0.66, 0.36, 0.22] : mix([0.62, 0.44, 0.3], [0.52, 0.44, 0.38], n2);
+  c = mix(c, scrap, smoothstep(0.25, 0.62, junkW));
   // 高台地面
   const rec = PLATEAUS.find((p) => p.id === "recycle")!;
   const fac = PLATEAUS.find((p) => p.id === "factory")!;
@@ -316,6 +321,7 @@ export class JunkyardWorld {
     this.buildColossus();
     this.buildPipes();
     this.buildPropsMisc();
+    this.buildHeroJunk();
     this.buildCrystals();
   }
 
@@ -899,6 +905,128 @@ export class JunkyardWorld {
     }
     this.addKit(k, "central");
     this.addKit(kg, "central", false);
+  }
+
+  /**
+   * 大型半埋垃圾（地標）：廢車殼、巨大齒輪、斷掉的機械手臂、鍋爐、舊貨櫃，放在路線看得到的垃圾山腳與山腰。
+   * 依區域合併（每區約 2～3 次繪製）；都在不可走的垃圾山上或有碰撞的位置旁，不擋路。
+   */
+  private buildHeroJunk(): void {
+    const kits = new Map<string, Kit>();
+    const kitFor = (x: number, z: number): Kit => {
+      const zone = this.zoneAt(x, z);
+      let k = kits.get(zone);
+      if (!k) {
+        k = new Kit(this.scene, this.mats, `jy_hero_${zone}`);
+        kits.set(zone, k);
+      }
+      return k;
+    };
+    const r = rng(31337);
+    const paints: Rgb[] = [PAL.teal, PAL.rust, PAL.cream, PAL.blue, PAL.red, PAL.yellow, PAL.tealDark, PAL.iron];
+    const car = (k: Kit, x: number, z: number, yaw: number, tilt: number, c: Rgb): void => {
+      const y = groundHeight(x, z) - 0.4;
+      const node = new TransformNode("jy_heroN", this.scene);
+      node.position.set(x, y, z);
+      node.rotation.set(tilt, yaw, tilt * 0.6);
+      node.computeWorldMatrix(true);
+      const add = (m: Mesh, col: Rgb, mat: "paint" | "metal" = "paint"): void => {
+        m.parent = node;
+        m.computeWorldMatrix(true);
+        m.bakeCurrentTransformIntoVertices();
+        m.parent = null;
+        m.position.copyFrom(m.getAbsolutePosition());
+        k.add(m, col, mat);
+      };
+      const box = (w: number, h: number, d: number, px: number, py: number, pz: number, col: Rgb, mat: "paint" | "metal" = "paint"): void => {
+        const m = MeshBuilder.CreateBox("jy_part", { width: w, height: h, depth: d }, this.scene);
+        m.position.set(px, py, pz);
+        add(m, col, mat);
+      };
+      box(2.2, 1.0, 4.2, 0, 0.9, 0, c);
+      box(2.0, 0.9, 2.2, 0, 1.8, -0.3, mix(c, PAL.cream, 0.25));
+      box(1.9, 0.6, 0.05, 0, 1.85, 0.82, PAL.tealDark);
+      for (const [wx, wz] of [
+        [-1.1, 1.3],
+        [1.1, 1.3],
+        [-1.1, -1.4],
+        [1.1, -1.4],
+      ] as const) {
+        const w = MeshBuilder.CreateCylinder("jy_part", { diameter: 0.9, height: 0.35, tessellation: 8 }, this.scene);
+        w.rotation.z = Math.PI / 2;
+        w.position.set(wx, 0.45, wz);
+        add(w, PAL.black);
+      }
+      node.dispose();
+    };
+    const bigGear = (k: Kit, x: number, z: number, yaw: number, R: number): void => {
+      const y = groundHeight(x, z);
+      const node = new TransformNode("jy_heroG", this.scene);
+      node.position.set(x, y + R * 0.45, z);
+      node.rotation.set(Math.PI / 2 - 0.35, yaw, 0);
+      node.computeWorldMatrix(true);
+      const parts: Mesh[] = [MeshBuilder.CreateCylinder("jy_part", { diameter: R * 2, height: R * 0.22, tessellation: 18 }, this.scene)];
+      const hub = MeshBuilder.CreateCylinder("jy_part", { diameter: R * 0.5, height: R * 0.3, tessellation: 8 }, this.scene);
+      parts.push(hub);
+      for (let i = 0; i < 12; i++) {
+        const a = (i / 12) * Math.PI * 2;
+        const t = MeshBuilder.CreateBox("jy_part", { width: R * 0.3, height: R * 0.2, depth: R * 0.3 }, this.scene);
+        t.position.set(Math.cos(a) * R * 1.08, 0, Math.sin(a) * R * 1.08);
+        t.rotation.y = -a;
+        parts.push(t);
+      }
+      for (const m of parts) {
+        m.parent = node;
+        m.computeWorldMatrix(true);
+        m.bakeCurrentTransformIntoVertices();
+        m.parent = null;
+        k.add(m, m === hub ? PAL.ironDark : PAL.rust, "metal");
+      }
+      node.dispose();
+    };
+    const arm = (k: Kit, x: number, z: number, yaw: number, c: Rgb): void => {
+      const y = groundHeight(x, z);
+      const a = new Vector3(x, y - 0.5, z);
+      const e = new Vector3(x + Math.sin(yaw) * 3.5, y + 4.2, z + Math.cos(yaw) * 3.5);
+      const h = new Vector3(e.x + Math.sin(yaw + 0.8) * 3, e.y + 0.8, e.z + Math.cos(yaw + 0.8) * 3);
+      k.beam(a, e, 1.1, c, "metal");
+      k.beam(e, h, 0.9, c, "metal");
+      k.sphere(1.5, e.x, e.y, e.z, PAL.ironDark, "metal", 8);
+      for (let i = 0; i < 3; i++) k.box(0.35, 1.4, 0.35, h.x + (i - 1) * 0.45, h.y + 0.6, h.z, PAL.iron, "metal", [0.4, yaw, (i - 1) * 0.3]);
+    };
+    const boiler = (k: Kit, x: number, z: number, yaw: number, c: Rgb): void => {
+      const y = groundHeight(x, z);
+      k.cyl(3.2, 3.2, 7, x, y + 1.1, z, c, "metal", 12, [Math.PI / 2 - 0.2, yaw, 0]);
+      k.cyl(3.5, 3.5, 0.3, x + Math.sin(yaw) * 3.3, y + 1.6, z + Math.cos(yaw) * 3.3, PAL.ironDark, "metal", 12, [Math.PI / 2 - 0.2, yaw, 0]);
+    };
+    const container = (k: Kit, x: number, z: number, yaw: number, c: Rgb): void => {
+      const y = groundHeight(x, z);
+      k.box(2.6, 2.6, 6.2, x, y + 0.9, z, c, "paint", [0.12, yaw, 0.18]);
+      for (let i = 0; i < 5; i++) k.box(2.66, 2.2, 0.12, x + Math.sin(yaw) * (-2.4 + i * 1.2), y + 0.95, z + Math.cos(yaw) * (-2.4 + i * 1.2), mix(c, PAL.black, 0.25), "paint", [0.12, yaw, 0.18]);
+    };
+    // 放在垃圾山腳（離中心 1～1.6σ，坡度大、不可走或在碰撞旁）
+    for (const m of MOUNDS) {
+      if (m.kind !== "junk") continue;
+      const n = m.h > 20 ? 4 : 3;
+      for (let i = 0; i < n; i++) {
+        const a = r() * Math.PI * 2;
+        const rr = m.s * (0.6 + r() * 0.9);
+        const x = m.x + Math.cos(a) * rr;
+        const z = m.z + Math.sin(a) * rr;
+        if (Math.abs(x) > 140 || Math.abs(z) > 140) continue;
+        if (polyDist(x, z, MAIN_ROUTE) < 7 || insideColliders(STATIC_COLLIDERS, x, z, 3)) continue;
+        const k = kitFor(x, z);
+        const c = paints[Math.floor(r() * paints.length)]!;
+        const kind = Math.floor(r() * 5);
+        const yaw = r() * Math.PI * 2;
+        if (kind === 0) car(k, x, z, yaw, (r() - 0.5) * 0.7, c);
+        else if (kind === 1) bigGear(k, x, z, yaw, 1.6 + r() * 1.4);
+        else if (kind === 2) arm(k, x, z, yaw, c);
+        else if (kind === 3) boiler(k, x, z, yaw, c);
+        else container(k, x, z, yaw, c);
+      }
+    }
+    for (const [zone, k] of kits) this.addKit(k, zone, false);
   }
 
   /** 漂浮魔法水晶（thin instances，3 種顏色共用 1 個網格） */

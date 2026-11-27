@@ -139,7 +139,7 @@ class JunkyardPage {
     const scene = new Scene(this.engine);
     this.scene = scene;
     scene.skipPointerMovePicking = true;
-    createSkyDome(scene);
+    const dome = createSkyDome(scene);
     // 天空：明亮帶一點暖色（概念圖的藍天白雲＋遠方霞光）
     scene.ambientColor = new Color3(0.34, 0.32, 0.36);
     scene.fogMode = Scene.FOGMODE_LINEAR;
@@ -181,6 +181,8 @@ class JunkyardPage {
     this.camera = new ThirdPersonCamera(scene, this.pos, (x, z) => this.grid.height(x, z), { keepPitch: true });
     scene.activeCamera = this.camera.camera;
     this.camera.camera.maxZ = fogEnd + 30;
+    // 天空球（半徑 300 m、跟著鏡頭）縮到遠裁切面以內，否則整個被裁掉、只剩底色
+    dome.scaling.setAll(((fogEnd + 30) * 0.9) / 300);
     this.camera.snap(this.pos, this.alphaBehind(this.yaw), TUNING.camera.defaultBeta, TUNING.camera.distance);
     this.render = setupRendering(scene, this.camera.camera, this.quality, { hdr: preset.hdr });
     if (this.render.glow) this.render.glow.isEnabled = false;
@@ -548,8 +550,9 @@ class JunkyardPage {
       this.topCam = c;
       this.scene.activeCamera = c;
       this.scene.fogEnabled = false;
-      for (const zn of STREAM_CELLS) void zn;
-      this.world.updateStreaming(0, 0, false);
+      // 俯視：隱藏天空球（正交鏡頭會被天空球擋住角落）與介面
+      this.scene.getMeshByName("PH_skyDome")?.setEnabled(false);
+      document.body.classList.add("jy-topview");
       // 俯視時全部分區都載入（看完整地圖）
       for (const zn of STREAM_CELLS) this.world.updateStreaming(zn.x, zn.z);
     } else if (!on && this.topCam) {
@@ -557,6 +560,8 @@ class JunkyardPage {
       this.topCam = null;
       this.scene.activeCamera = this.camera.camera;
       this.scene.fogEnabled = true;
+      this.scene.getMeshByName("PH_skyDome")?.setEnabled(true);
+      document.body.classList.remove("jy-topview");
       this.world.updateStreaming(this.pos.x, this.pos.z, true);
       this.world.updateStreaming(this.pos.x, this.pos.z);
     }
@@ -564,6 +569,9 @@ class JunkyardPage {
 
   // ---------------- 面板與報告 ----------------
   private buildPanel(root: HTMLElement): void {
+    const style = document.createElement("style");
+    style.textContent = "body.jy-topview .hud, body.jy-topview .perf-panel, body.jy-topview .jy-panel, body.jy-topview .jy-panel-btn, body.jy-topview [class*='hud-'] { visibility: hidden !important; }";
+    document.head.appendChild(style);
     const btn = document.createElement("button");
     btn.textContent = "垃圾場";
     btn.className = "jy-panel-btn";

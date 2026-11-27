@@ -12,9 +12,10 @@ import { ARENA, BASINS, DECKS, JUNKYARD_ENTRY_PORTAL, MAIN_ROUTE, MOUNDS, RAMPS,
 import { polyDist, rng, segDist } from "./geom.ts";
 
 export type ScatterJunk = "can" | "crate" | "barrel" | "tire" | "gear" | "plate" | "tv" | "pipe" | "rock" | "spring";
-const FLAT: readonly ScatterJunk[] = ["plate", "gear", "tire", "rock", "spring", "pipe"];
-const TALL: readonly ScatterJunk[] = ["crate", "barrel", "can", "tv", "crate", "barrel", "tire"];
-const ALL: readonly ScatterJunk[] = ["can", "crate", "barrel", "tire", "gear", "plate", "tv", "pipe", "rock", "spring", "gear", "plate", "can"];
+// 7 種（每區每種 1 次繪製；種類少＝Draw Calls 少）
+const FLAT: readonly ScatterJunk[] = ["plate", "gear", "tire", "rock", "plate"];
+const TALL: readonly ScatterJunk[] = ["crate", "barrel", "can", "crate", "barrel", "tire"];
+const ALL: readonly ScatterJunk[] = ["can", "crate", "barrel", "tire", "gear", "plate", "rock", "gear", "plate", "can", "crate"];
 
 export interface Inst {
   x: number;
@@ -69,9 +70,9 @@ export interface ScatterTier {
 }
 
 export const SCATTER_TIERS: Readonly<Record<"high" | "medium" | "low", ScatterTier>> = {
-  high: { mound: 1, debris: 520, tufts: 2400, flowers: 700 },
-  medium: { mound: 0.62, debris: 320, tufts: 1400, flowers: 420 },
-  low: { mound: 0.38, debris: 180, tufts: 700, flowers: 200 },
+  high: { mound: 1.3, debris: 520, tufts: 2400, flowers: 700 },
+  medium: { mound: 0.6, debris: 300, tufts: 1300, flowers: 400 },
+  low: { mound: 0.4, debris: 180, tufts: 700, flowers: 200 },
 };
 
 export interface ScatterResult {
@@ -160,8 +161,9 @@ export function scatterAll(h: HeightFn, blocked: BlockFn, tier: ScatterTier): Sc
       const gh = m.h * Math.exp(-(rr * rr) / (2 * m.s * m.s));
       if (slopeAt(h, x, z) <= MAX_TAN * 1.02 && gh < 2.5) continue;
       if (blocked(x, z, 0.8)) continue;
-      const big = m.h > 20 ? 1.6 : 1;
-      const s = (0.8 + r1() * 1.3) * big;
+      // 垃圾山上的垃圾放大（遠看要像一座座廢料堆，不是散落的小東西）；畫質越低件數越少、單件越大
+      const big = (m.h > 20 ? 1.9 : 1.25) / Math.sqrt(Math.max(0.5, tier.mound));
+      const s = (1.0 + r1() * 1.8) * big;
       const type = ALL[Math.floor(r1() * ALL.length)]!;
       push(type, {
         x,
