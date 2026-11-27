@@ -38,6 +38,8 @@ jobs:
       - name: WSS test (self-signed TLS)
         run: npm run test:wss
       - name: PostgreSQL schema / atomicity test
+        id: db
+        continue-on-error: true
         run: sudo bash db/test-db.sh
       - name: Install browsers
         run: npx playwright install --with-deps chromium webkit

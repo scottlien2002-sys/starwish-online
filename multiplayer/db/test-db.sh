@@ -4,17 +4,19 @@
 # 執行（需要本機 PostgreSQL 16 與 postgres 系統帳號）：bash multiplayer/db/test-db.sh
 set -uo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
-PGBIN=/usr/lib/postgresql/16/bin
+PGBIN="${PGBIN:-$(ls -d /usr/lib/postgresql/*/bin 2>/dev/null | sort -V | tail -1)}"
+if [ ! -x "$PGBIN/initdb" ]; then echo "::error::PostgreSQL server binaries not found"; exit 1; fi
+echo "using $PGBIN"
 tmp="$(mktemp -d /tmp/starwish-pg.XXXX)"
-chown postgres "$tmp"
+chown postgres "$tmp"; chmod 755 "$tmp"
 as_pg() { runuser -u postgres -- "$@"; }
-as_pg "$PGBIN/initdb" -D "$tmp/data" -A trust -U postgres >/dev/null
-as_pg "$PGBIN/pg_ctl" -D "$tmp/data" -o "-k $tmp -p 55432 -c listen_addresses=''" -l "$tmp/log" start -w >/dev/null
+if ! out=$(cd "$tmp" && as_pg "$PGBIN/initdb" -D "$tmp/data" -A trust -U postgres 2>&1); then echo "::error::initdb failed: $(echo "$out" | tail -5 | tr '\n' ' ')"; exit 1; fi
+if ! (cd "$tmp" && as_pg "$PGBIN/pg_ctl" -D "$tmp/data" -o "-k $tmp -p 55432 -c listen_addresses=''" -l "$tmp/log" start -w >/dev/null); then echo "::error::pg_ctl start failed: $(tail -5 "$tmp/log" | tr '\n' ' ')"; exit 1; fi
 PSQL=(runuser -u postgres -- psql -h "$tmp" -p 55432 -U postgres -v ON_ERROR_STOP=1 -X -q -t -A)
 "${PSQL[@]}" -c "CREATE DATABASE starwish" >/dev/null
 DB=("${PSQL[@]}" -d starwish)
 pass=0; fail=0
-check() { if [ "$2" == "$3" ]; then echo "PASS $1"; pass=$((pass+1)); else echo "FAIL $1 (expected '$3', got '$2')"; fail=$((fail+1)); fi; }
+check() { if [ "$2" == "$3" ]; then echo "PASS $1"; pass=$((pass+1)); else echo "FAIL $1 (expected '$3', got '$2')"; echo "::error::DB check failed: $1 expected '$3' got '$2'"; fail=$((fail+1)); fi; }
 
 "${DB[@]}" -f "$here/schema.sql" >/dev/null && check "schema.sql 套用成功" ok ok
 
