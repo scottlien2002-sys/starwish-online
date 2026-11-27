@@ -1,0 +1,261 @@
+{
+ "totalMB": 1132.1,
+ "duplicateMB": 432.7,
+ "folders": [
+  {
+   "name": "assets",
+   "owner": "main",
+   "MB": 8.1,
+   "files": 607,
+   "ciReportMB": 0,
+   "screenshotsMB": 0,
+   "branch": null,
+   "commit": null,
+   "builtAt": null,
+   "sharesFrom": [],
+   "usedBy": []
+  },
+  {
+   "name": "ci-report",
+   "owner": "main",
+   "MB": 7.6,
+   "files": 45,
+   "ciReportMB": 0,
+   "screenshotsMB": 0,
+   "branch": null,
+   "commit": null,
+   "builtAt": null,
+   "sharesFrom": [],
+   "usedBy": []
+  },
+  {
+   "name": "models",
+   "owner": "main",
+   "MB": 0,
+   "files": 1,
+   "ciReportMB": 0,
+   "screenshotsMB": 0,
+   "branch": null,
+   "commit": null,
+   "builtAt": null,
+   "sharesFrom": [],
+   "usedBy": []
+  },
+  {
+   "name": "preview-combat-vfx",
+   "owner": "C",
+   "MB": 46,
+   "files": 117,
+   "ciReportMB": 0,
+   "screenshotsMB": 0,
+   "branch": "feature/combat-vfx-stage2",
+   "commit": "b1fe78e7",
+   "builtAt": "2026-11-27T15:01:56Z",
+   "sharesFrom": [],
+   "usedBy": [
+    "preview-mp81",
+    "preview-mp82"
+   ]
+  },
+  {
+   "name": "preview-combat-vfx-s2",
+   "owner": "C",
+   "MB": 57.4,
+   "files": 123,
+   "ciReportMB": 0,
+   "screenshotsMB": 0,
+   "branch": "feature/combat-vfx-stage2",
+   "commit": "9714a0e2",
+   "builtAt": "2026-11-27T16:37:56Z",
+   "sharesFrom": [],
+   "usedBy": []
+  },
+  {
+   "name": "preview-combat-vfx-s3",
+   "owner": "C",
+   "MB": 57.6,
+   "files": 123,
+   "ciReportMB": 0,
+   "screenshotsMB": 0,
+   "branch": "feature/combat-vfx-stage3",
+   "commit": "ac70ba61",
+   "builtAt": "2026-11-27T19:36:55Z",
+   "sharesFrom": [],
+   "usedBy": []
+  },
+  {
+   "name": "preview-map-junkyard",
+   "owner": "B",
+   "MB": 26.8,
+   "files": 91,
+   "ciReportMB": 0,
+   "screenshotsMB": 0,
+   "branch": "feature/render-map-junkyard",
+   "commit": "76e87378",
+   "builtAt": "2026-11-27T18:48:37Z",
+   "sharesFrom": [],
+   "usedBy": []
+  },
+  {
+   "name": "preview-mp81",
+   "owner": "D",
+   "MB": 27.2,
+   "files": 209,
+   "ciReportMB": 0,
+   "screenshotsMB": 0,
+   "branch": "integration/multiplayer-stage8-1",
+   "commit": "172ab048",
+   "builtAt": "2026-11-27T14:23:23Z",
+   "sharesFrom": [
+    "preview-stage71-world",
+    "preview-combat-vfx",
+    "preview-stage72-world"
+   ],
+   "usedBy": []
+  },
+  {
+   "name": "preview-mp82",
+   "owner": "D",
+   "MB": 16.5,
+   "files": 189,
+   "ciReportMB": 0,
+   "screenshotsMB": 0,
+   "branch": "integration/multiplayer-stage8-2",
+   "commit": "235e93cc",
+   "builtAt": "2026-11-27T19:54:22Z",
+   "sharesFrom": [
+    "preview-stage71-world",
+    "preview-combat-vfx",
+    "preview-stage72-world"
+   ],
+   "usedBy": []
+  },
+  {
+   "name": "preview-stage71-world",
+   "owner": "A",
+   "MB": 100.6,
+   "files": 793,
+   "ciReportMB": 11.3,
+   "screenshotsMB": 11.3,
+   "branch": "feature/render-stage71-world",
+   "commit": "edbd6740",
+   "builtAt": "2026-11-26T11:16:03Z",
+   "sharesFrom": [],
+   "usedBy": [
+    "preview-mp81",
+    "preview-mp82"
+   ]
+  },
+  {
+   "name": "preview-stage72-world",
+   "owner": "A",
+   "MB": 29.4,
+   "files": 57,
+   "ciReportMB": 0,
+   "screenshotsMB": 0,
+   "branch": null,
+   "commit": null,
+   "builtAt": null,
+   "sharesFrom": [],
+   "usedBy": [
+    "preview-mp81",
+    "preview-mp82"
+   ]
+  },
+  {
+   "name": "preview-stage73-world",
+   "owner": "A",
+   "MB": 144.8,
+   "files": 314,
+   "ciReportMB": 10.2,
+   "screenshotsMB": 10,
+   "branch": "feature/render-stage73-world",
+   "commit": "0366d0fa",
+   "builtAt": "2026-11-27T19:08:31Z",
+   "sharesFrom": [],
+   "usedBy": [
+    "preview-stage74-perf"
+   ]
+  },
+  {
+   "name": "preview-stage74-perf",
+   "owner": "A",
+   "MB": 28.5,
+   "files": 751,
+   "ciReportMB": 11.5,
+   "screenshotsMB": 11.2,
+   "branch": "feature/render-stage74-perf",
+   "commit": "7edbbbbd",
+   "builtAt": "2026-11-27T23:35:09Z",
+   "sharesFrom": [
+    "preview-stage73-world"
+   ],
+   "usedBy": []
+  },
+  {
+   "name": "preview-village-art66",
+   "owner": "B",
+   "MB": 283.9,
+   "files": 454,
+   "ciReportMB": 183.5,
+   "screenshotsMB": 183.3,
+   "branch": "feature/render-village-art66",
+   "commit": "192337ae",
+   "builtAt": "2026-11-27T00:35:43Z",
+   "sharesFrom": [],
+   "usedBy": []
+  },
+  {
+   "name": "preview-village-npc67",
+   "owner": "B",
+   "MB": 297.7,
+   "files": 482,
+   "ciReportMB": 183.6,
+   "screenshotsMB": 183.5,
+   "branch": "feature/render-village-npc67",
+   "commit": "5baf03a8",
+   "builtAt": "2026-11-27T11:49:16Z",
+   "sharesFrom": [],
+   "usedBy": []
+  }
+ ],
+ "dependencies": [
+  {
+   "link": "preview-mp81 → preview-stage71-world",
+   "files": 15,
+   "MB": 9.1
+  },
+  {
+   "link": "preview-mp81 → preview-combat-vfx",
+   "files": 4,
+   "MB": 18.3
+  },
+  {
+   "link": "preview-mp81 → preview-stage72-world",
+   "files": 56,
+   "MB": 29.4
+  },
+  {
+   "link": "preview-mp82 → preview-stage71-world",
+   "files": 15,
+   "MB": 9.1
+  },
+  {
+   "link": "preview-mp82 → preview-combat-vfx",
+   "files": 12,
+   "MB": 36.8
+  },
+  {
+   "link": "preview-mp82 → preview-stage72-world",
+   "files": 56,
+   "MB": 29.4
+  },
+  {
+   "link": "preview-stage74-perf → preview-stage73-world",
+   "files": 121,
+   "MB": 118
+  }
+ ],
+ "textRefs": [],
+ "broken": []
+}
