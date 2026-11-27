@@ -1,4 +1,4 @@
-# 星願物語 Stage 8.0｜多人連線原型（Claude D）
+# 星願物語 Stage 8.0～8.1｜多人連線（Claude D）
 
 與單機版完全分開：本資料夾不修改 `src/`，只「唯讀引用」Stage 7.1 已驗收的地圖碰撞、傳送陣與移動數值。
 單機版（GitHub Pages、`npm run dev`）完全不受影響。
@@ -45,3 +45,18 @@ CI：`.github/workflows/multiplayer-stage8.yml` 只在 `feature/multiplayer-**` 
 | `db/` | PostgreSQL 結構與測試 |
 | `reports/` | 測試輸出與截圖 |
 | `docs/` | 架構圖、Stage 8.0 報告 |
+
+## Stage 8.1：正式 3D 遊戲多人模式
+
+- 入口：`?play=world&mp=1&server=<伺服器>`（不加 `mp=1` 就是原本的單機模式，行為不變）
+- 本機測試：
+  ```bash
+  npm run build                       # 專案根目錄：建置遊戲
+  node multiplayer/server/main.ts     # 多人伺服器（沒有 DATABASE_URL → 記憶體）
+  npx vite preview --host             # 或任何靜態伺服器
+  # 兩個瀏覽器視窗：http://localhost:4173/?play=world&mp=1&name=A 與 &name=B&g=female&hairColor=%23c0408a&weapon=staff
+  ```
+- PostgreSQL：`DATABASE_URL=postgres://... MP_REALM=test node multiplayer/server/main.ts`
+- 部署：`render.yaml`＋`docs/RENDER_DEPLOY.md`
+- 3D 雙人 E2E：`node tests/e2e/run-mp-e2e.mjs dist chromium|webkit`
+- 報告：`docs/STAGE8_1_REPORT.md`、架構圖 `docs/architecture-8_1.png`

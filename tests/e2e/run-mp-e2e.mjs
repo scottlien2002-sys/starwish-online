@@ -248,11 +248,19 @@ try {
   const atkLog = [];
   const tAtk = Date.now();
   while (Date.now() - tAtk < 300000 && !sawAttack) {
-    const t = await target();
+    const t = await target().catch(() => null);
     if (!t) break;
+    // 不要誤踩營地傳送陣（-56, -68）：太靠近就先往東北離開
+    const me = await finfo(A).catch(() => null);
+    if (!me) break;
+    if (Math.hypot(me.pos[0] + 56, me.pos[2] + 68) < 4.5) {
+      await drive(A, 0.7, 0.7);
+      await sleep(800);
+      continue;
+    }
     if (atkLog.length < 400) atkLog.push(+t.d.toFixed(2));
     if (t.d > 1.8) {
-      const i = await finfo(A);
+      const i = me;
       const dx = t.x - i.pos[0];
       const dz = t.z - i.pos[2];
       const l = Math.hypot(dx, dz);
@@ -275,7 +283,7 @@ try {
     }
     await drive(A, 0, 0);
     await A.page.evaluate(() => window.__starwishPlay.press("attack"));
-    if ((await finfo(A)).state === "Attack") localAttack = true;
+    if ((await finfo(A).catch(() => null))?.state === "Attack") localAttack = true;
     for (let k = 0; k < 8 && !sawAttack; k++) {
       await sleep(60);
       const r = await B.page.evaluate((pid) => window.__mpWorld.remoteInfo().find((x) => x.id === pid), fa.mp.pid);
