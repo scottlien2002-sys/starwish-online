@@ -42,9 +42,7 @@ function main(): void {
     // ?play=world：Stage 7 完整遊戲（星芽村出生 → 南門 → 星芽原野 → 星願石返回；共用存檔）；&newgame=1 重新開始、&g=female 新存檔性別
     if (new URLSearchParams(location.search).get("play") === "world") {
       document.body.classList.add("map-mode");
-      void import("./core/assetRemap.ts")
-        .then((m) => m.installAssetRemap())
-        .then(() => import("./game/worldSession.ts"))
+      void import("./game/worldSession.ts")
         .then(async (ws) => {
           const world = new ws.WorldSession(new URLSearchParams(location.search));
           if (world.save.character.map === "starsprout") {
@@ -215,4 +213,8 @@ function main(): void {
   }
 }
 
-main();
+// Stage 7.4：預覽站共用其他預覽資料夾的大型模型（asset-remap.json；本機與一般建置為空清單）→ 所有頁面開機前先設定
+void import("./core/assetRemap.ts")
+  .then((m) => m.installAssetRemap())
+  .catch(() => 0)
+  .then(() => main());
