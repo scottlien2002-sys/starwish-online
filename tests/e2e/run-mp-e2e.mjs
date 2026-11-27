@@ -259,7 +259,8 @@ try {
   });
   results.samples.coop = { targetId };
   /** 一位玩家朝目標走；夠近就按攻擊（法杖玩家用技能「魔法彈」，射程 9 m） */
-  const fighter = (P, useSkill, gate = async () => true) => {
+  const ready = { A: false, B: false };
+  const fighter = (P, useSkill, gate = async () => true, key = "A") => {
     let best = Infinity, stuck = Date.now(), side = 1, presses = 0;
     return async () => {
       const m = await monOf(P, targetId).catch(() => null);
@@ -275,6 +276,7 @@ try {
         return;
       }
       const reach = useSkill ? 6 : 1.7;
+      ready[key] = d <= reach;
       if (d > reach) {
         if (d < best - 0.3) {
           best = d;
@@ -294,11 +296,17 @@ try {
       await drive(P, 0, 0);
       if (!(await gate())) return; // 合作測試：等隊友先出手，確保兩人都有造成傷害
       presses++;
-      await P.page.evaluate((sk) => window.__starwishPlay.press(sk && Math.random() < 0.6 ? "skill" : "attack"), useSkill);
+      await P.page.evaluate((sk) => window.__starwishPlay.press(sk ? "skill" : "attack"), useSkill);
     };
   };
-  const fA = fighter(A, false);
-  const fB = fighter(B, true, async () => ((await field(A).catch(() => null))?.hitsShown ?? 0) > 0);
+  // 出手順序固定（避免一人先打死）：A 走到近戰距離 → B 先放魔法彈 → 伺服器接受 B 的技能後 A 才開始攻擊
+  const fA = fighter(A, false, async () => ((await field(B).catch(() => null))?.skillsOk ?? 0) > 0, "A");
+  // B 第一發之後要等 A 真的打出傷害（伺服器 hit 事件）才繼續，確保兩人都有貢獻
+  const fB = fighter(B, true, async () => {
+    if (!ready.A) return false;
+    const [fa2, fb2] = await Promise.all([field(A).catch(() => null), field(B).catch(() => null)]);
+    return (fb2?.skillsOk ?? 0) === 0 || (fa2?.damageDealt ?? 0) > 0;
+  }, "B");
   const hpSamples = [];
   const tFight = Date.now();
   mark("fightApproach");
@@ -326,7 +334,7 @@ try {
   results.samples.coop = { targetId, seconds: (Date.now() - tFight) / 1000, samples: hpSamples.length, sameHpRatio: +(same / Math.max(1, hpSamples.length)).toFixed(3), hpTrailA: hpSamples.slice(-12).map((x) => x[0]), A: fldA, B: { ...fldB, monsterHp: undefined } };
   check("A、B 合作把同一隻怪打倒（兩邊都看到 HP 0、死亡）", mA?.hp === 0 && mB?.hp === 0 && ["death", "dead"].includes(mA.state) && ["death", "dead"].includes(mB.state), { mA, mB });
   check("戰鬥中兩邊看到的怪物 HP 一致（同一份伺服器狀態；≥ 85% 取樣相同）", same / Math.max(1, hpSamples.length) >= 0.85, { same, total: hpSamples.length });
-  check("A 的攻擊與 B 的技能都被伺服器接受（B 法杖用魔法彈）", fldA.attacksOk > 0 && (fldB.skillsOk > 0 || fldB.attacksOk > 0), { A: { sent: fldA.attacksSent, ok: fldA.attacksOk, rej: fldA.attacksRejected }, B: { skills: fldB.skillsOk, atk: fldB.attacksOk, last: fldB.lastReject } });
+  check("A 的攻擊與 B 的技能都被伺服器接受、兩人都打出傷害（B 法杖用魔法彈）", fldA.attacksOk > 0 && fldB.skillsOk > 0 && fldA.damageDealt > 0 && fldB.damageDealt > 0, { A: { sent: fldA.attacksSent, ok: fldA.attacksOk, rej: fldA.attacksRejected, dmg: fldA.damageDealt }, B: { skills: fldB.skillsOk, dmg: fldB.damageDealt, last: fldB.lastReject } });
   check("傷害數字顯示伺服器結果（兩邊都有命中特效）", fldA.hitsShown > 0 && fldB.hitsShown > 0, { A: fldA.hitsShown, B: fldB.hitsShown });
   check("其他玩家的技能特效依伺服器施放事件播放（A 看到 B 的施放）", fldA.remoteCastsShown > 0, { remoteCasts: fldA.remoteCastsShown, vfx: fldA.vfx });
   check("兩人都拿到經驗（伺服器結算，擊殺只結算一次）", fldA.self?.exp > 0 && fldB.self?.exp > 0, { A: fldA.self, B: fldB.self });

@@ -84,6 +84,7 @@ export interface CombatCounters {
   lootPickRejected: Record<string, number>;
   monsterHits: number;
   playersDowned: number;
+  hitsOnDeadTarget?: number;
 }
 
 const STATE_CODE = new Map<string, number>(MON_STATES.map((s, i) => [s, i]));
@@ -300,6 +301,11 @@ export class FieldCombat {
         continue;
       }
       this.resolved.add(key);
+      // 命中時目標已經死亡（被別人先打倒）：不結算、不送傷害
+      if (!m.ctl.instance.isAlive) {
+        this.counters.hitsOnDeadTarget = (this.counters.hitsOnDeadTarget ?? 0) + 1;
+        continue;
+      }
       // 普通攻擊：命中時再確認距離（目標跑掉就揮空）
       if (!h.skill && this.distToBody(p, m) > R.attackRange + R.impactSlack + R.latencySlack) {
         this.emit({ k: "hit", c: h.castId, h: h.hitId, p: p.pid, t: m.nid, d: 0, cr: 0, ms: 1, hp: m.ctl.instance.currentHp, kl: 0 });

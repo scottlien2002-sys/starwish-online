@@ -79,7 +79,7 @@ export class MpFieldCombat {
   private readonly mats = new Map<string, StandardMaterial>();
   readonly tier: VfxTier;
   /** 統計（測試介面） */
-  readonly stats = { attacksSent: 0, attacksOk: 0, attacksRejected: 0, skillsSent: 0, skillsOk: 0, hitsShown: 0, castsShown: 0, remoteCastsShown: 0, picksSent: 0, picksOk: 0, picksRejected: 0, monsterHitsTaken: 0, lastReject: "" };
+  readonly stats = { attacksSent: 0, attacksOk: 0, attacksRejected: 0, skillsSent: 0, skillsOk: 0, hitsShown: 0, castsShown: 0, remoteCastsShown: 0, picksSent: 0, picksOk: 0, picksRejected: 0, monsterHitsTaken: 0, damageDealt: 0, lastReject: "" };
   private readonly pendingCmd = new Map<string, "atk" | "sk" | "pick">();
   private readonly gender: "male" | "female";
 
@@ -265,6 +265,7 @@ export class MpFieldCombat {
         this.vfx.hitFx(at, keys, self && e.cr === 1, { owner, palette: cast?.def?.palette ?? "steel", distance: dist });
         if (self || dist < 18) this.dmg.show(at.add(new Vector3(0, 0.35, 0)), e.d, e.cr ? "crit" : "normal");
         this.stats.hitsShown++;
+        if (self) this.stats.damageDealt += e.d;
         // 受擊回饋（0 傷害：只播受擊閃光，血量用伺服器的值）
         if (e.d > 0 && mc.instance.isAlive && !e.kl) {
           const hp = mc.instance.currentHp;
