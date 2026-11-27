@@ -71,6 +71,7 @@ for (const name of browsers) {
             const L = Math.hypot(dx, dz) || 1;
             window.__cvfx.moveTo(m.pos[0] + (dx / L) * 1.6, m.pos[1] + (dz / L) * 1.6);
           });
+          await page.evaluate(() => window.__cvfx.view(1.15, 5.2));
           await page.evaluate(() => window.__cvfx.advance(0.5));
           const n0 = await page.evaluate(() => window.__cvfx.sync.length);
           const ok = await page.evaluate((id) => window.__cvfx.cast(id), sk);

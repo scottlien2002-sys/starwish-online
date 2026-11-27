@@ -105,72 +105,131 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
   const applyDpr = () => engine.setHardwareScalingLevel(1 / Math.min(window.devicePixelRatio || 1, VFX_QUALITY[tier].maxDpr));
   applyDpr();
   const scene = new Scene(engine);
-  scene.clearColor = new Color4(0.62, 0.72, 0.9, 1);
-  scene.ambientColor = new Color3(0.35, 0.35, 0.45);
+  // 星夜競技場：背景偏暗，讓加算混合的劍氣／魔法陣／震波有對比（白底會把特效洗掉）
+  scene.clearColor = new Color4(0.06, 0.07, 0.17, 1);
+  scene.ambientColor = new Color3(0.3, 0.3, 0.42);
   scene.fogMode = Scene.FOGMODE_EXP2;
-  scene.fogDensity = 0.012;
-  scene.fogColor = new Color3(0.66, 0.74, 0.9);
+  scene.fogDensity = 0.022;
+  scene.fogColor = new Color3(0.08, 0.09, 0.2);
   const instr = new SceneInstrumentation(scene);
 
   const hemi = new HemisphericLight("hemi", new Vector3(0.2, 1, 0.1), scene);
-  hemi.intensity = 0.95;
-  hemi.groundColor = new Color3(0.45, 0.42, 0.55);
+  hemi.intensity = 0.9;
+  hemi.diffuse = new Color3(0.78, 0.82, 1);
+  hemi.groundColor = new Color3(0.28, 0.24, 0.4);
   const sun = new DirectionalLight("sun", new Vector3(-0.4, -1, 0.5), scene);
-  sun.intensity = 1.25;
-  sun.diffuse = new Color3(1, 0.96, 0.88);
+  sun.intensity = 1.2;
+  sun.diffuse = new Color3(1, 0.9, 0.78);
 
-  // ---------------------------------------------------------------- 競技場（程式貼圖：白石地磚＋金色星紋）
+  // ---------------------------------------------------------------- 競技場（程式貼圖：深藍石板＋發光金色星紋）
   const ground = MeshBuilder.CreateDisc("arena", { radius: 18, tessellation: 64 }, scene);
   ground.rotation.x = Math.PI / 2;
   ground.isPickable = false;
   const gtex = new DynamicTexture("arenaTex", { width: 1024, height: 1024 }, scene, true);
+  const etex = new DynamicTexture("arenaGlow", { width: 512, height: 512 }, scene, true);
   {
     const c = gtex.getContext() as unknown as CanvasRenderingContext2D;
     const s = 1024;
     const g = c.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
-    g.addColorStop(0, "#e9e6f2");
-    g.addColorStop(0.6, "#d9d6e6");
-    g.addColorStop(1, "#aeb8a0");
+    g.addColorStop(0, "#4a4f78");
+    g.addColorStop(0.55, "#353a5e");
+    g.addColorStop(1, "#1d2140");
     c.fillStyle = g;
     c.fillRect(0, 0, s, s);
-    c.strokeStyle = "rgba(120,115,150,0.35)";
-    c.lineWidth = 2;
-    for (let r = 60; r < s / 2; r += 60) {
+    // 石板接縫
+    c.strokeStyle = "rgba(15,17,35,0.55)";
+    c.lineWidth = 3;
+    for (let r = 64; r < s / 2; r += 64) {
       c.beginPath();
       c.arc(s / 2, s / 2, r, 0, Math.PI * 2);
       c.stroke();
     }
     for (let i = 0; i < 32; i++) {
-      const a = (i / 32) * Math.PI * 2;
+      const a = (i / 32) * Math.PI * 2 + (Math.floor(i / 2) % 2) * 0.05;
       c.beginPath();
-      c.moveTo(s / 2 + Math.cos(a) * 60, s / 2 + Math.sin(a) * 60);
-      c.lineTo(s / 2 + Math.cos(a) * s * 0.48, s / 2 + Math.sin(a) * s * 0.48);
+      c.moveTo(s / 2 + Math.cos(a) * 64, s / 2 + Math.sin(a) * 64);
+      c.lineTo(s / 2 + Math.cos(a) * s * 0.49, s / 2 + Math.sin(a) * s * 0.49);
       c.stroke();
     }
-    c.strokeStyle = "rgba(214,170,70,0.85)";
-    c.lineWidth = 6;
-    c.beginPath();
-    c.arc(s / 2, s / 2, s * 0.3, 0, Math.PI * 2);
-    c.stroke();
-    c.fillStyle = "rgba(214,170,70,0.5)";
-    c.beginPath();
+    // 石面雜點
+    for (let i = 0; i < 2600; i++) {
+      c.fillStyle = `rgba(${200 + Math.random() * 55},${200 + Math.random() * 55},255,${Math.random() * 0.05})`;
+      c.fillRect(Math.random() * s, Math.random() * s, 2 + Math.random() * 5, 2 + Math.random() * 5);
+    }
+    gtex.update();
+    // 發光層：金色星紋＋外圈符文環（emissive，不吃光）
+    const e = etex.getContext() as unknown as CanvasRenderingContext2D;
+    const t = 512;
+    e.fillStyle = "#000";
+    e.fillRect(0, 0, t, t);
+    e.strokeStyle = "rgba(255,196,90,0.9)";
+    e.lineWidth = 3;
+    e.beginPath();
+    e.arc(t / 2, t / 2, t * 0.3, 0, Math.PI * 2);
+    e.stroke();
+    e.lineWidth = 1.5;
+    e.strokeStyle = "rgba(140,170,255,0.6)";
+    e.beginPath();
+    e.arc(t / 2, t / 2, t * 0.46, 0, Math.PI * 2);
+    e.stroke();
+    e.beginPath();
+    e.arc(t / 2, t / 2, t * 0.43, 0, Math.PI * 2);
+    e.stroke();
+    for (let i = 0; i < 48; i++) {
+      const a = (i / 48) * Math.PI * 2;
+      const x = t / 2 + Math.cos(a) * t * 0.445;
+      const y = t / 2 + Math.sin(a) * t * 0.445;
+      e.fillStyle = i % 4 === 0 ? "rgba(255,210,120,0.9)" : "rgba(150,180,255,0.6)";
+      e.fillRect(x - 1.5, y - 1.5, 3, 3);
+    }
+    e.fillStyle = "rgba(255,200,100,0.55)";
+    e.beginPath();
     for (let i = 0; i < 10; i++) {
       const a = -Math.PI / 2 + (i * Math.PI) / 5;
-      const r = i % 2 === 0 ? 90 : 36;
-      const x = s / 2 + Math.cos(a) * r;
-      const y = s / 2 + Math.sin(a) * r;
-      if (i === 0) c.moveTo(x, y);
-      else c.lineTo(x, y);
+      const r = i % 2 === 0 ? 46 : 18;
+      const x = t / 2 + Math.cos(a) * r;
+      const y = t / 2 + Math.sin(a) * r;
+      if (i === 0) e.moveTo(x, y);
+      else e.lineTo(x, y);
     }
-    c.closePath();
-    c.fill();
-    gtex.update();
+    e.closePath();
+    e.fill();
+    etex.update();
   }
   const gmat = new StandardMaterial("arenaMat", scene);
   gmat.diffuseTexture = gtex;
-  gmat.specularColor = new Color3(0.08, 0.08, 0.1);
+  gmat.emissiveTexture = etex;
+  gmat.specularColor = new Color3(0.12, 0.12, 0.18);
   ground.material = gmat;
   ground.freezeWorldMatrix();
+  // 星空穹頂（1 個網格、不吃光、不受霧影響）
+  {
+    const sky = MeshBuilder.CreateSphere("sky", { diameter: 100, segments: 12, sideOrientation: Mesh.BACKSIDE }, scene);
+    const st = new DynamicTexture("skyTex", { width: 1024, height: 512 }, scene, true);
+    const c = st.getContext() as unknown as CanvasRenderingContext2D;
+    const g = c.createLinearGradient(0, 0, 0, 512);
+    g.addColorStop(0, "#05061a");
+    g.addColorStop(0.45, "#141a44");
+    g.addColorStop(0.62, "#3a2f6a");
+    g.addColorStop(1, "#0b0d24");
+    c.fillStyle = g;
+    c.fillRect(0, 0, 1024, 512);
+    for (let i = 0; i < 700; i++) {
+      const y = Math.random() * 300;
+      c.fillStyle = `rgba(255,255,255,${0.25 + Math.random() * 0.75})`;
+      const r = Math.random() < 0.06 ? 2 : 1;
+      c.fillRect(Math.random() * 1024, y, r, r);
+    }
+    st.update();
+    const sm = new StandardMaterial("skyMat", scene);
+    sm.emissiveTexture = st;
+    sm.disableLighting = true;
+    sm.fogEnabled = false;
+    sky.material = sm;
+    sky.isPickable = false;
+    sky.infiniteDistance = true;
+    sky.applyFog = false;
+  }
   // 外圈石柱（合併成 1 個網格）
   {
     const parts = [];
@@ -183,7 +242,8 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
     const m = Mesh.MergeMeshes(parts, true, true);
     if (m) {
       const pm = new StandardMaterial("pillarMat", scene);
-      pm.diffuseColor = new Color3(0.92, 0.9, 0.96);
+      pm.diffuseColor = new Color3(0.5, 0.52, 0.66);
+      pm.emissiveColor = new Color3(0.06, 0.07, 0.14);
       pm.specularColor = new Color3(0.1, 0.1, 0.12);
       m.material = pm;
       m.isPickable = false;
@@ -822,6 +882,20 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
     }),
     moveTo: (x: number, z: number) => {
       player.pos.set(x, 0, z);
+    },
+    /** 鏡頭擺到「玩家→最近目標」的側前方 theta 弧度（展示截圖用） */
+    view: (theta = 1.15, radius = 5.2) => {
+      const t = nearestTarget(player);
+      const dx = t ? t.pos.x - player.pos.x : 0;
+      const dz = t ? t.pos.z - player.pos.z : 1;
+      const L = Math.hypot(dx, dz) || 1;
+      const fx = dx / L, fz = dz / L;
+      const cx = fx * Math.cos(theta) - fz * Math.sin(theta);
+      const cz = fx * Math.sin(theta) + fz * Math.cos(theta);
+      cam.alpha = Math.atan2(cz, cx);
+      cam.beta = 1.18;
+      cam.radius = radius;
+      cam.target.copyFrom(player.pos.add(new Vector3(fx * 0.8, 0.75, fz * 0.8)));
     },
     /** 固定步長前進 sec 秒（每步 1/60 秒並繪製一次；只在 &manual=1） */
     advance: (sec: number) => {
