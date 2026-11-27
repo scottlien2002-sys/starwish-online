@@ -3,6 +3,7 @@
 日期：2026-11-27
 分支：`assets/monster-rigs-m002-m007`（從 `assets/monster-rigs-m004-m007` 438c66a 接續，只加資產與文件，不改程式）
 同樣的檔案也在 `feature/combat-vfx-stage2`（戰鬥展示頁使用中）。
+**Stage 3 更新（2026-11-28）**：M002、M003 的 Rig V1.1（蹄緣、翅根修正）在 `feature/combat-vfx-stage3` 的 `public/models/monsters/m002/`、`m003/`；檔名不變，可直接覆蓋 V1.0。
 
 ## 1. 七隻怪物總表
 
