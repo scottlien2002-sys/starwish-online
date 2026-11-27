@@ -9,7 +9,7 @@
 
 | # | 交付物 | 位置 | 狀態 |
 |---|---|---|---|
-| 1 | 多人戰鬥預覽網址 | `https://scottlien2002-sys.github.io/starwish-online/preview-mp82/?play=world&mp=1&server=<Render 網址>` | CI 部署（見 §11）；需要 Render 伺服器（您操作，§10） |
+| 1 | 多人戰鬥預覽網址 | `https://scottlien2002-sys.github.io/starwish-online/preview-mp82/?play=world&mp=1&server=<Render 網址>` | 已部署、已發布網址實測 37／37；iPhone 連線需要 Render 伺服器（您操作，§10） |
 | 2 | 兩人合作打怪示範影片 | `Starwish_Stage8_2_coop_demo.mp4`（78 秒，左＝A 桌機、右＝B iPhone 尺寸）；CI 每次產生 `coop_demo.mp4`／`coop_demo_fight.mp4` | 已產生（自動測試錄影，無 GPU 的測試機 FPS 很低，畫面只看同步，不代表效能） |
 | 3 | 怪物資產整合清單 | §4 | 完成 |
 | 4 | 伺服器權威戰鬥測試報告 | §5 | 完成 |
@@ -57,7 +57,8 @@
 | M007 王冠重錘兔 Rig V1.0（Boss） | Lv10／900／28 | 主動 | 無 | 3.83 MB | 0.79 MB | 29（29） | 7／7 | 0 秒 | 王冠遺跡（1） | ✅ 伺服器 |
 
 - 三角面：M004～M007 HQ 與 Lite 相同（約 9,500～9,800），差別在貼圖解析度（記錄，不是錯誤；是否需要更低面數的 Lite 請 Claude A／怪物部門決定）。
-- M002／M003：沒有製作替代模型。等級 Lv1～4 被動、Lv5 以上主動、Lv1～10 無屬性：依 Claude A 的怪物資料，伺服器用同一份 AI。
+- **更新（2026-11-28）**：Claude C 之後交付了 M002 苔角獸、M003 雲絨鳥的**候選版**（`assets/monster-rigs-m002-m007`，待視覺驗收），Claude A 的 Stage 7.3（`feature/render-stage73-world`）已加入兩隻的規格與怪物資料，並把 M004／M005 碰撞半徑改為地圖文件的 0.55／0.6。本 8.2 分支是以 Stage 7.2 為基準完成與測試的，**還沒有合併 7.3**；合併後伺服器不需要改程式就會生成 M002（苔葉林緣 5 隻）、M003（微風花丘 5 隻），列為下一步（§12）。
+- M002／M003：本分支沒有製作替代模型。等級 Lv1～4 被動、Lv5 以上主動、Lv1～10 無屬性：依 Claude A 的怪物資料，伺服器用同一份 AI。
 - **介面保留**：伺服器與客戶端都從 `FIELD_RIGGED_SPAWNS`＋`manifest.json` 決定生成；M002／M003 交付時 Claude A 加上規格與怪物資料，伺服器不需要改程式。
 - 伺服器怪物 ID 與客戶端相同（`star_dew_bobo#1…6`、`windfeather_fox#1…4`、`nebula_sheep#5…8`、`carrot_king#9…10`、`crown_hammer_rabbit#11`），兩支手機看到的是同一隻。
 
@@ -135,15 +136,16 @@
 
 | 項目 | 本機 | CI |
 |---|---|---|
-| 伺服器單元測試 | 16／16 | 見 §11 |
-| 整合測試（真伺服器＋機器人） | 11／11 | 見 §11 |
-| Stage 8.2 戰鬥／掉落／背包（含 4／8／16／40 人） | 15／15 | 見 §11 |
-| PostgreSQL（SQL 21 項＋伺服器重啟 5 項） | 21／21＋5／5 | 見 §11 |
-| 遊戲單元測試 | 433／433 | 見 §11 |
-| 3D 雙人 E2E Chromium | 37／37 | 見 §11 |
-| 3D 雙人 E2E WebKit（Safari 引擎） | **本機沒有 WebKit（不能下載）→ 未執行** | 見 §11 |
-| 共用資產遷移 E2E（Chromium） | 37／37 | 見 §11 |
-| 單機回歸（Stage 7 世界循環 E2E） | Chromium 66／66 | 見 §11（Chromium＋WebKit） |
+| 伺服器單元測試 | 16／16 | 通過 |
+| 整合測試（真伺服器＋機器人） | 11／11 | 通過 |
+| Stage 8.2 戰鬥／掉落／背包（含 4／8／16／40 人） | 15／15 | 15／15 |
+| PostgreSQL（SQL＋伺服器重啟） | 21／21＋5／5 | 20／20＋通過 |
+| 遊戲單元測試 | 433／433 | 通過 |
+| 3D 雙人 E2E Chromium | 37／37 | 37／37 |
+| 3D 雙人 E2E WebKit（Safari 引擎） | 本機沒有 WebKit → 未執行 | 37／37 |
+| 共用資產遷移 E2E（Chromium） | 37／37 | 37／37 |
+| 已發布網址實測 | — | 37／37 |
+| 單機回歸（Stage 7 世界循環 E2E） | Chromium 66／66 | Chromium＋WebKit 132／132 |
 
 ## 9. 共用資產管理計畫（交付物 7，Stage 8.3）
 
@@ -178,8 +180,23 @@ Stage 8.1 預覽靠 `asset-remap.json` 讀**其他部門預覽資料夾**的檔�
 Render 沒有部署時，本機與 CI 都不受影響（CI 在測試機自己啟動伺服器）。
 
 ## 11. CI 結果
-（推送後由 GitHub Actions 執行；結果分支 `results/mp82-server-<run>`、`results/mp82-game-<run>`，含截圖、JSON、示範影片）
-- 待 CI 完成後填入
+GitHub Actions run 46051391668（commit b8e06c5，全部通過）；結果分支 `results/mp82-server-46051391668`、`results/mp82-game-46051391668`（截圖、JSON、`coop_demo.mp4`、`coop_demo_fight.mp4`、`shared-assets-plan.json`）
+
+| 項目 | 結果 |
+|---|---|
+| 伺服器：型別、單元、整合 | 通過 |
+| Stage 8.2 戰鬥／掉落／背包（含 4／8／16／40 人） | 15／15（40 人 tick 平均 1.37 ms、最大 2.4 ms；每人下載 29.6 KB/s） |
+| PostgreSQL SQL 檢查＋伺服器重啟 | 20／20＋pg.test 通過 |
+| WSS、2D 雙人頁（Chromium／WebKit） | 通過 |
+| 遊戲型別檢查、單元測試、建置 | 通過 |
+| 3D 雙人 E2E Chromium | 37／37 |
+| 3D 雙人 E2E WebKit（Safari 引擎） | 37／37 |
+| 共用資產遷移 E2E | 37／37（129 次從 `/shared-assets/v1/` 載入，0 個 404） |
+| 單機回歸（Stage 7 世界循環） | Chromium 男／女、WebKit 男／女 各 33／33 |
+| 部署 `/preview-mp82/` | 完成（預覽 17 MB） |
+| 已發布網址實測（GitHub Pages＋測試機伺服器） | 37／37 |
+
+⚠ gh-pages 合計 **1,062 MB**，超過 1 GB 建議值（低於 1,100 MB 的自動停止值）；包含其他部門預覽的成長。建議依 §9 建立共用資產目錄、並由您決定是否清理已不用的舊預覽（我不會自行刪除）。
 
 ## 12. 未完成項目與需要 iPhone 驗證的項目（交付物 8）
 
@@ -192,6 +209,12 @@ Render 沒有部署時，本機與 CI 都不受影響（CI 在測試機自己啟
 6. 免費主機休眠喚醒（約 1 分鐘）時的等待畫面
 7. 長時間（30 分鐘以上）連線穩定度、發熱
 
+### 下一步（新交付，尚未合併進本分支）
+1. 合併 Claude A Stage 7.3（`feature/render-stage73-world`）：M002／M003 候選版、M004／M005 新碰撞半徑、`FieldTerrainQuery`（伺服器可直接用來做擊退／技能位移的地形判定）、`FieldCombatFx`（命中、受傷、重生表現；改由伺服器事件觸發）
+2. 其他玩家改用 Claude C 的合併模型 `novice_c10b5b_{male,female}_remote.glb`（26 個網格合併為 2 個，繪製次數大幅減少；外觀與 Lite 相同），A 已帶進 7.3
+3. 依 Claude C Stage 2 多人文件：其他玩家特效改用 Stage 2 的簡化層、延遲補償（cast_hit 晚到 0.25 秒以上立即演出）
+以上不改變本報告的伺服器權威架構；完成後重跑同一套自動測試。
+
 ### 未完成／需要其他部門或您決定
 1. Render 實際部署：需要您操作（§10）
 2. `/shared-assets/` 正式建立：需要您同意（§9.4）
@@ -203,4 +226,4 @@ Render 沒有部署時，本機與 CI 都不受影響（CI 在測試機自己啟
 8. 背包／倉庫／裝備的操作畫面：伺服器與協定完成並測試，遊戲畫面上的操作 UI 尚未做（現有背包畫面是單機寵物背包；多人模式撿到的道具存在伺服器，目前不會進入本機寵物背包，所以多人模式不能用撿到的蛋孵寵物）；畫面上方「多人」列可看到等級、經驗、金幣、背包件數
 9. 正式帳號系統：目前是訪客角色＋分頁憑證（公開給外部玩家前需要）
 10. 換武器後，本人畫面要換地圖或重新登入才更新武器模型（其他玩家立即更新）
-11. WebKit（Safari 引擎）3D E2E：本機無法執行，只在 CI 執行
+11. gh-pages 合計 1,062 MB（超過 1 GB 建議值）：需要您決定清理或採用共用資產目錄
