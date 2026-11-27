@@ -36,8 +36,22 @@ let fails = 0;
 const html = await (await fetch(`${base}?t=${Date.now()}`, { cache: "no-store" })).text();
 const assets = [...html.matchAll(/(?:src|href)="(\.\/assets\/[^"]+)"/g)].map((m) => m[1]);
 const urls = [...assets.map((a) => new URL(a, base).href), ...["male", "female"].flatMap((g) => ["hq", "lite"].map((l) => `${base}models/novice_c10b5b_${g}_${l}.glb`)), `${base}models/village-p3/portals_hq.glb`, `${base}models/village-p3/portals_lite.glb`];
-for (const u of urls) {
-  const r = await fetch(u, { method: "GET", cache: "no-store" });
+// Stage 7.4：共用資產（asset-remap.json）→ 檢查實際讀取的那個網址
+const remap = await fetch(`${base}asset-remap.json?t=${Date.now()}`, { cache: "no-store" }).then((r) => (r.ok ? r.json() : { files: {} })).catch(() => ({ files: {} }));
+const remapFiles = remap.files ?? {};
+console.log(`共用資產：${Object.keys(remapFiles).length} 個（來源 ${(remap.sources ?? []).join("、")}）`);
+const remapped = (u) => {
+  const rel = u.startsWith(base) ? decodeURIComponent(u.slice(base.length).split("?")[0]) : null;
+  return rel && remapFiles[rel] ? new URL(remapFiles[rel], base).href : u;
+};
+// 共用清單裡每一個檔案都要能從來源資料夾讀到
+for (const to of Object.values(remapFiles)) {
+  const u = new URL(to, base).href;
+  if (!urls.includes(u)) urls.push(u);
+}
+for (const u0 of urls) {
+  const u = remapped(u0);
+  const r = await fetch(u, { method: "HEAD", cache: "no-store" }).then((x) => (x.ok ? x : fetch(u, { method: "GET", cache: "no-store" })));
   if (!r.ok) {
     fails++;
     console.log(`✗ HTTP ${r.status} ${u}`);
