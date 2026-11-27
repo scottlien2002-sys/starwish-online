@@ -172,3 +172,13 @@ CREATE TABLE IF NOT EXISTS schema_meta (
 );
 INSERT INTO schema_meta(key, value) VALUES ('schema_version', '8.1') ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
 CREATE INDEX IF NOT EXISTS characters_realm_idx ON characters(realm);
+
+-- Stage 8.2／8.3：倉庫位置、裝備欄、道具給予函式（可重複執行）
+ALTER TABLE items ADD COLUMN IF NOT EXISTS location text NOT NULL DEFAULT 'bag';
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'items_location_check') THEN
+    ALTER TABLE items ADD CONSTRAINT items_location_check CHECK (location IN ('bag', 'storage'));
+  END IF;
+END $$;
+ALTER TABLE characters ADD COLUMN IF NOT EXISTS equipment jsonb NOT NULL DEFAULT '{}'::jsonb;
+INSERT INTO schema_meta(key, value) VALUES ('schema_version', '8.2') ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;

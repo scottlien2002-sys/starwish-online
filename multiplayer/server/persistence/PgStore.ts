@@ -9,7 +9,7 @@ import { readFileSync } from "node:fs";
 import { hostname } from "node:os";
 import { parseAppearance } from "../../../src/core/gameSave.ts";
 import type { AppearanceWire, Gender, MapId } from "../../shared/protocol.ts";
-import { hashToken, newToken, type CharacterRecord, type CharacterStore, type InventoryItem, type ItemResult, type SaveResult } from "./Store.ts";
+import { hashToken, newToken, type CharacterRecord, type CharacterStore, type GoldResult, type InventoryItem, type ItemResult, type SaveResult } from "./Store.ts";
 
 type Sql = ReturnType<typeof postgres>;
 type Row = Record<string, unknown>;
@@ -17,6 +17,10 @@ type Row = Record<string, unknown>;
 const SCHEMA = new URL("../../db/schema.sql", import.meta.url);
 const num = (v: unknown): number => Number(v);
 const numOrNull = (v: unknown): number | null => (v === null || v === undefined ? null : Number(v));
+
+function toItem(x: Row): InventoryItem {
+  return { uid: String(x.uid), defId: String(x.def_id), qty: num(x.qty), state: x.state as InventoryItem["state"], location: x.location === "storage" ? "storage" : "bag", version: num(x.version) };
+}
 
 function toRecord(r: Row): CharacterRecord {
   return {
@@ -27,6 +31,8 @@ function toRecord(r: Row): CharacterRecord {
     appearance: parseAppearance(r.appearance),
     level: num(r.level),
     exp: num(r.exp),
+    gold: num(r.gold),
+    equipment: r.equipment && typeof r.equipment === "object" ? { ...(r.equipment as Record<string, string>) } : {},
     map: (r.map_id === "starsprout" ? "starsprout" : "village") as MapId,
     x: numOrNull(r.x),
     z: numOrNull(r.z),
@@ -110,8 +116,8 @@ export class PgStore implements CharacterStore {
   }
 
   async listItems(characterId: string): Promise<InventoryItem[]> {
-    const r = await this.sql`SELECT i.uid, i.def_id, i.qty, i.state, i.version FROM items i JOIN characters c ON c.id = i.owner_id WHERE i.owner_id = ${characterId}::uuid AND c.realm = ${this.realm} AND i.state <> 'consumed' ORDER BY i.created_at`;
-    return r.map((x) => ({ uid: String(x.uid), defId: String(x.def_id), qty: num(x.qty), state: x.state as InventoryItem["state"], version: num(x.version) }));
+    const r = await this.sql`SELECT i.uid, i.def_id, i.qty, i.state, i.location, i.version FROM items i JOIN characters c ON c.id = i.owner_id WHERE i.owner_id = ${characterId}::uuid AND c.realm = ${this.realm} AND i.state <> 'consumed' ORDER BY i.created_at`;
+    return r.map((x) => toItem(x as Row));
   }
 
   /** 給道具（冪等）：同一 requestId 只會產生一件 */
@@ -125,9 +131,8 @@ export class PgStore implements CharacterStore {
       let res: ItemResult;
       if (!Number.isInteger(qty) || qty <= 0) res = { ok: false, err: "bad_request" };
       else {
-        const it = await tx`INSERT INTO items (owner_id, def_id, qty) VALUES (${characterId}::uuid, ${defId}, ${qty}) RETURNING uid, def_id, qty, state, version`;
-        const x = it[0]!;
-        res = { ok: true, item: { uid: String(x.uid), defId: String(x.def_id), qty: num(x.qty), state: "owned", version: num(x.version) } };
+        const it = await tx`INSERT INTO items (owner_id, def_id, qty) VALUES (${characterId}::uuid, ${defId}, ${qty}) RETURNING uid, def_id, qty, state, location, version`;
+        res = { ok: true, item: toItem(it[0] as Row) };
       }
       await tx`UPDATE request_ledger SET result = ${tx.json(res as never)} WHERE character_id = ${characterId}::uuid AND request_id = ${requestId}`;
       return res;
@@ -153,6 +158,56 @@ export class PgStore implements CharacterStore {
       await tx`UPDATE request_ledger SET result = ${tx.json(res as never)} WHERE character_id = ${characterId}::uuid AND request_id = ${requestId}`;
       return res;
     }) as Promise<ItemResult>;
+  }
+
+  /** 存入／取出倉庫（冪等＋版本檢查＋列鎖定；裝備中的道具不能存入倉庫） */
+  async moveItem(characterId: string, requestId: string, uid: string, to: "bag" | "storage", expectedVersion: number): Promise<ItemResult> {
+    return this.sql.begin(async (tx) => {
+      const ins = await tx`INSERT INTO request_ledger (character_id, request_id, kind, result) VALUES (${characterId}::uuid, ${requestId}, 'move_item', '{"pending":true}') ON CONFLICT DO NOTHING RETURNING request_id`;
+      if (ins.length === 0) {
+        const prev = await tx`SELECT result FROM request_ledger WHERE character_id = ${characterId}::uuid AND request_id = ${requestId}`;
+        return { ...(prev[0]!.result as ItemResult), dup: true };
+      }
+      const it = await tx`SELECT owner_id, state, location, version FROM items WHERE uid = ${uid}::uuid FOR UPDATE`;
+      const eq = await tx`SELECT equipment FROM characters WHERE id = ${characterId}::uuid FOR UPDATE`;
+      const equipped = Object.values((eq[0]?.equipment ?? {}) as Record<string, string>).includes(uid);
+      let res: ItemResult;
+      if (!it[0] || String(it[0].owner_id) !== characterId || it[0].state !== "owned") res = { ok: false, err: "not_owner" };
+      else if (num(it[0].version) !== expectedVersion) res = { ok: false, err: "version_conflict" };
+      else if (it[0].location === to) res = { ok: false, err: "already_there" };
+      else if (to === "storage" && equipped) res = { ok: false, err: "equipped" };
+      else {
+        const u = await tx`UPDATE items SET location = ${to}, version = version + 1, updated_at = now() WHERE uid = ${uid}::uuid RETURNING uid, def_id, qty, state, location, version`;
+        res = { ok: true, item: toItem(u[0] as Row) };
+      }
+      await tx`UPDATE request_ledger SET result = ${tx.json(res as never)} WHERE character_id = ${characterId}::uuid AND request_id = ${requestId}`;
+      return res;
+    }) as Promise<ItemResult>;
+  }
+
+  /** 金幣（資料庫函式 change_gold：冪等、餘額不能為負、流水帳） */
+  async changeGold(characterId: string, requestId: string, delta: number, reason: string): Promise<GoldResult> {
+    const r = await this.sql`SELECT change_gold(${requestId}, ${characterId}::uuid, ${delta}, ${reason}) AS r`;
+    const x = r[0]!.r as { ok: boolean; balance?: number; err?: string; dup?: boolean };
+    return x.ok ? { ok: true, balance: num(x.balance), ...(x.dup ? { dup: true } : {}) } : { ok: false, err: String(x.err), ...(x.dup ? { dup: true } : {}) };
+  }
+
+  async saveProgress(characterId: string, lockEpoch: number, level: number, exp: number): Promise<boolean> {
+    const r = await this.sql`UPDATE characters SET level = ${level}, exp = ${exp}, version = version + 1, updated_at = now() WHERE id = ${characterId}::uuid AND lock_epoch = ${lockEpoch} AND realm = ${this.realm} RETURNING id`;
+    return r.length === 1;
+  }
+
+  async equip(characterId: string, lockEpoch: number, slot: string, uid: string | null): Promise<boolean> {
+    return this.sql.begin(async (tx) => {
+      if (uid) {
+        const it = await tx`SELECT owner_id, state, location FROM items WHERE uid = ${uid}::uuid FOR UPDATE`;
+        if (!it[0] || String(it[0].owner_id) !== characterId || it[0].state !== "owned" || it[0].location !== "bag") return false;
+        const r = await tx`UPDATE characters SET equipment = equipment || ${tx.json({ [slot]: uid } as never)}, version = version + 1 WHERE id = ${characterId}::uuid AND lock_epoch = ${lockEpoch} AND realm = ${this.realm} RETURNING id`;
+        return r.length === 1;
+      }
+      const r = await tx`UPDATE characters SET equipment = equipment - ${slot}, version = version + 1 WHERE id = ${characterId}::uuid AND lock_epoch = ${lockEpoch} AND realm = ${this.realm} RETURNING id`;
+      return r.length === 1;
+    }) as Promise<boolean>;
   }
 
   /** 測試用：這個資料區的角色數 */

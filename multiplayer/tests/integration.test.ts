@@ -386,7 +386,13 @@ test("Stage 8.1：倒地前不能要求復活傳送；倒地後 respawn 由伺�
     const early = a.events.find((e) => e.type === "cmd") as { ok: boolean; err?: string };
     assert.equal(early.ok, false);
     assert.equal(early.err, "not_down");
+    // Stage 8.2：原野的倒地由伺服器戰鬥決定 → 客戶端送 death 被忽略
     a.c.act("death");
+    await sleep(300);
+    assert.equal(a.c.down, false, "client cannot declare itself down");
+    const sp0 = srv.playerOf(a.c.characterId)!;
+    sp0.cs.hp = 0;
+    sp0.down = true; // 模擬伺服器戰鬥判定倒地
     await a.until(() => a.c.down, 2000, "server says down");
     a.dir = { x: 1, z: 0 };
     await sleep(400);

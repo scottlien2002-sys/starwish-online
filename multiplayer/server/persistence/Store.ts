@@ -18,6 +18,10 @@ export interface CharacterRecord {
   appearance: AppearanceWire;
   level: number;
   exp: number;
+  /** 金幣（伺服器權威；只能透過 changeGold 冪等異動） */
+  gold: number;
+  /** 裝備欄：slot → 道具 uid */
+  equipment: Record<string, string>;
   map: MapId;
   x: number | null;
   z: number | null;
@@ -35,8 +39,12 @@ export interface InventoryItem {
   defId: string;
   qty: number;
   state: "owned" | "listed" | "consumed";
+  /** bag＝背包、storage＝倉庫 */
+  location: "bag" | "storage";
   version: number;
 }
+
+export type GoldResult = { ok: true; balance: number; dup?: boolean } | { ok: false; err: string; dup?: boolean };
 
 export type ItemResult = { ok: true; item?: InventoryItem; dup?: boolean } | { ok: false; err: string; dup?: boolean };
 
@@ -50,6 +58,14 @@ export interface CharacterStore {
   listItems(characterId: string): Promise<InventoryItem[]>;
   grantItem(characterId: string, requestId: string, defId: string, qty: number): Promise<ItemResult>;
   consumeItem(characterId: string, requestId: string, uid: string, expectedVersion: number): Promise<ItemResult>;
+  /** 存入／取出倉庫（版本檢查＋冪等） */
+  moveItem(characterId: string, requestId: string, uid: string, to: "bag" | "storage", expectedVersion: number): Promise<ItemResult>;
+  /** 金幣異動（冪等；餘額不能為負） */
+  changeGold(characterId: string, requestId: string, delta: number, reason: string): Promise<GoldResult>;
+  /** 等級與經驗（工作階段鎖檢查） */
+  saveProgress(characterId: string, lockEpoch: number, level: number, exp: number): Promise<boolean>;
+  /** 裝備（只能裝自己背包裡的道具） */
+  equip(characterId: string, lockEpoch: number, slot: string, uid: string | null): Promise<boolean>;
   close(): Promise<void>;
   /** 用憑證找角色（只存憑證雜湊） */
   findByToken(token: string): Promise<CharacterRecord | null>;
@@ -68,14 +84,14 @@ export class MemoryStore implements CharacterStore {
   private readonly chars = new Map<string, CharacterRecord>();
   private readonly tokens = new Map<string, string>();
   private readonly items = new Map<string, InventoryItem & { owner: string }>();
-  private readonly ledger = new Map<string, ItemResult>();
+  private readonly ledger = new Map<string, ItemResult | GoldResult>();
 
   constructor(realm = "test") {
     this.realm = realm;
   }
 
   async createGuest(name: string, gender: Gender, appearance: AppearanceWire, now: number): Promise<{ character: CharacterRecord; token: string }> {
-    const c: CharacterRecord = { id: randomUUID(), realm: this.realm, name, gender, appearance: { ...appearance }, level: 1, exp: 0, map: "village", x: null, z: null, yaw: 0, version: 1, lockEpoch: 0, updatedAt: now };
+    const c: CharacterRecord = { id: randomUUID(), realm: this.realm, name, gender, appearance: { ...appearance }, level: 1, exp: 0, gold: 0, equipment: {}, map: "village", x: null, z: null, yaw: 0, version: 1, lockEpoch: 0, updatedAt: now };
     this.chars.set(c.id, c);
     const token = newToken();
     this.tokens.set(hashToken(token), c.id);
@@ -108,7 +124,7 @@ export class MemoryStore implements CharacterStore {
 
   async get(characterId: string): Promise<CharacterRecord | null> {
     const c = this.chars.get(characterId);
-    return c ? { ...c } : null;
+    return c ? { ...c, equipment: { ...c.equipment } } : null;
   }
 
   async saveAppearance(characterId: string, lockEpoch: number, appearance: AppearanceWire): Promise<boolean> {
@@ -125,14 +141,14 @@ export class MemoryStore implements CharacterStore {
 
   async grantItem(characterId: string, requestId: string, defId: string, qty: number): Promise<ItemResult> {
     const k = `${characterId}\u0000${requestId}`;
-    const prev = this.ledger.get(k);
+    const prev = this.ledger.get(k) as ItemResult | undefined;
     if (prev) return { ...prev, dup: true };
     let r: ItemResult;
     if (!this.chars.has(characterId) || !Number.isInteger(qty) || qty <= 0) r = { ok: false, err: "bad_request" };
     else {
-      const item = { uid: randomUUID(), defId, qty, state: "owned" as const, version: 1, owner: characterId };
+      const item = { uid: randomUUID(), defId, qty, state: "owned" as const, location: "bag" as const, version: 1, owner: characterId };
       this.items.set(item.uid, item);
-      r = { ok: true, item: { uid: item.uid, defId, qty, state: "owned", version: 1 } };
+      r = { ok: true, item: { uid: item.uid, defId, qty, state: "owned", location: "bag", version: 1 } };
     }
     this.ledger.set(k, r);
     return r;
@@ -140,7 +156,7 @@ export class MemoryStore implements CharacterStore {
 
   async consumeItem(characterId: string, requestId: string, uid: string, expectedVersion: number): Promise<ItemResult> {
     const k = `${characterId}\u0000${requestId}`;
-    const prev = this.ledger.get(k);
+    const prev = this.ledger.get(k) as ItemResult | undefined;
     if (prev) return { ...prev, dup: true };
     const it = this.items.get(uid);
     let r: ItemResult;
@@ -153,6 +169,64 @@ export class MemoryStore implements CharacterStore {
     }
     this.ledger.set(k, r);
     return r;
+  }
+
+  async moveItem(characterId: string, requestId: string, uid: string, to: "bag" | "storage", expectedVersion: number): Promise<ItemResult> {
+    const k = `${characterId}\u0000${requestId}`;
+    const prev = this.ledger.get(k) as ItemResult | undefined;
+    if (prev) return { ...prev, dup: true };
+    const it = this.items.get(uid);
+    let r: ItemResult;
+    if (!it || it.owner !== characterId || it.state !== "owned") r = { ok: false, err: "not_owner" };
+    else if (it.version !== expectedVersion) r = { ok: false, err: "version_conflict" };
+    else if (it.location === to) r = { ok: false, err: "already_there" };
+    else if (to === "storage" && Object.values(this.chars.get(characterId)?.equipment ?? {}).includes(uid)) r = { ok: false, err: "equipped" };
+    else {
+      it.location = to;
+      it.version++;
+      const { owner: _o, ...item } = it;
+      r = { ok: true, item: { ...item } };
+    }
+    this.ledger.set(k, r);
+    return r;
+  }
+
+  async changeGold(characterId: string, requestId: string, delta: number, _reason: string): Promise<GoldResult> {
+    const k = `${characterId}\u0000${requestId}`;
+    const prev = this.ledger.get(k) as GoldResult | undefined;
+    if (prev) return { ...prev, dup: true };
+    const c = this.chars.get(characterId);
+    let r: GoldResult;
+    if (!c || !Number.isInteger(delta)) r = { ok: false, err: "bad_request" };
+    else if (c.gold + delta < 0) r = { ok: false, err: "insufficient_gold" };
+    else {
+      c.gold += delta;
+      c.version++;
+      r = { ok: true, balance: c.gold };
+    }
+    this.ledger.set(k, r);
+    return r;
+  }
+
+  async saveProgress(characterId: string, lockEpoch: number, level: number, exp: number): Promise<boolean> {
+    const c = this.chars.get(characterId);
+    if (!c || c.lockEpoch !== lockEpoch) return false;
+    c.level = level;
+    c.exp = exp;
+    c.version++;
+    return true;
+  }
+
+  async equip(characterId: string, lockEpoch: number, slot: string, uid: string | null): Promise<boolean> {
+    const c = this.chars.get(characterId);
+    if (!c || c.lockEpoch !== lockEpoch) return false;
+    if (uid) {
+      const it = this.items.get(uid);
+      if (!it || it.owner !== characterId || it.state !== "owned" || it.location !== "bag") return false;
+      c.equipment[slot] = uid;
+    } else delete c.equipment[slot];
+    c.version++;
+    return true;
   }
 
   async close(): Promise<void> {}

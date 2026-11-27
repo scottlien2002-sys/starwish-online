@@ -8,10 +8,12 @@
  *   4. 產生快照：只送有變動的玩家；新加入或要求重新同步的玩家送完整狀態
  */
 import { INPUT_BUDGET_MAX_S, INPUT_QUEUE_MAX_STEPS, MOVE_SPEED, STEP } from "../shared/constants.ts";
-import { ANIM, toCm, toMrad, type ActKind, type AnimCode, type AppearanceWire, type Gender, type InputMsg, type MapId, type PlayerMeta, type PlayerTuple, type ServerMsg } from "../shared/protocol.ts";
+import { ANIM, toCm, toMrad, type CombatEvent, type MonTuple, type ActKind, type AnimCode, type AppearanceWire, type Gender, type InputMsg, type MapId, type PlayerMeta, type PlayerTuple, type ServerMsg } from "../shared/protocol.ts";
 import { getMap, type MapAuthority, type PortalRule } from "../shared/maps.ts";
 import { stepMove, type MoveState } from "../shared/sim.ts";
 import type { PlayerView, RoomSystem, RoomView } from "./extensions.ts";
+import type { FieldCombat } from "./combat/FieldCombat.ts";
+import { expToNext } from "../../src/core/progression.ts";
 import { PetMerchantPatrolClock, petMerchantPose, PET_MERCHANT } from "../../src/maps/village/petMerchant.ts";
 
 export interface PlayerCounters {
@@ -29,6 +31,28 @@ export interface PlayerCounters {
 
 /** 動作事件的最短間隔（秒）：防止洗封包；不影響任何數值 */
 export const ACT_MIN_INTERVAL: Record<ActKind, number> = { attack: 0.25, hurt: 0.15, death: 1 };
+
+export interface PlayerCombatState {
+  hp: number;
+  maxHp: number;
+  level: number;
+  exp: number;
+  gold: number;
+  /** 下次可普通攻擊時間、施放中到何時（伺服器房間時間，秒） */
+  nextAtk: number;
+  busyUntil: number;
+  /** 技能冷卻（skillId → 可再次施放的時間） */
+  readonly cds: Map<string, number>;
+  downAt: number;
+  /** 等級／經驗需要存檔 */
+  progressDirty: boolean;
+  /** 需要送 ps（生命、等級、金幣）給本人 */
+  statsDirty: boolean;
+}
+
+export function newCombatState(): PlayerCombatState {
+  return { hp: 100, maxHp: 100, level: 1, exp: 0, gold: 0, nextAtk: 0, busyUntil: 0, cds: new Map(), downAt: 0, progressDirty: false, statsDirty: true };
+}
 
 export class ServerPlayer implements PlayerView {
   readonly pid: number;
@@ -61,6 +85,8 @@ export class ServerPlayer implements PlayerView {
   readonly portalArmed = new Map<string, boolean>();
   readonly counters: PlayerCounters = { stepsApplied: 0, stepsDropped: 0, staleEpochInputs: 0, duplicateSteps: 0, seqGaps: 0, illegalPositions: 0, speedViolations: 0, actsAccepted: 0, actsRejected: 0, stepsWhileDown: 0 };
   send: (m: ServerMsg) => void = () => {};
+  /** Stage 8.2：伺服器保存的戰鬥狀態（換地圖、斷線重連都沿用；不信任客戶端數值） */
+  readonly cs: PlayerCombatState = newCombatState();
 
   constructor(o: { pid: number; characterId: string; name: string; gender: Gender; appearance?: AppearanceWire; x: number; z: number; yaw: number; version: number; lockEpoch: number }) {
     this.pid = o.pid;
@@ -164,6 +190,10 @@ export interface TransferRequest {
   to: PortalRule["to"];
 }
 
+function statsOf(p: ServerPlayer): [number, number, number, number, number, number, number] {
+  return [p.cs.hp, p.cs.maxHp, p.cs.level, p.cs.exp, expToNext(p.cs.level), p.cs.gold, p.down ? 1 : 0];
+}
+
 const sameTuple = (a: PlayerTuple | null, b: PlayerTuple): boolean => !!a && a.every((v, i) => v === b[i]);
 
 export class Room implements RoomView {
@@ -179,6 +209,10 @@ export class Room implements RoomView {
   /** N009 洛恩：巡邏由伺服器時間決定，所有玩家看到同一個位置；有人對話時停下（多人模式有逾時與連續暫停上限） */
   readonly roan: PetMerchantPatrolClock | null;
   roanRejected = 0;
+  /** Stage 8.2：原野房間的伺服器權威戰鬥（村莊為 null） */
+  combat: FieldCombat | null = null;
+  /** 房間時間（秒）：戰鬥冷卻、命中時間、怪物 AI 共用 */
+  clock = 0;
 
   constructor(key: string, map: MapId, capacity: number) {
     this.key = key;
@@ -216,6 +250,10 @@ export class Room implements RoomView {
   get size(): number {
     return this.byPid.size;
   }
+  /** 伺服器不需要地形高度（怪物 y 不同步；客戶端貼地） */
+  ground(): number {
+    return 0;
+  }
   players(): Iterable<ServerPlayer> {
     return this.byPid.values();
   }
@@ -242,6 +280,7 @@ export class Room implements RoomView {
     const ai = this.added.indexOf(p);
     if (ai >= 0) this.added.splice(ai, 1);
     for (const s of this.systems) s.onPlayerLeave?.(this, p);
+    this.combat?.onPlayerLeave(pid);
     return p;
   }
 
@@ -298,6 +337,8 @@ export class Room implements RoomView {
       }
     }
     for (const s of this.systems) s.tick?.(this, dt);
+    this.clock += dt;
+    this.combat?.tick(dt, this.clock);
     void now;
     return transfers;
   }
@@ -330,9 +371,29 @@ export class Room implements RoomView {
     this.added.length = 0;
     const metaAll = [...this.byPid.values()].map((p) => p.meta());
     const roan = this.roanState(now);
+    // 戰鬥：本 tick 的事件（施放、命中、死亡、掉落…）送給房間內所有人；怪物只送有變動的
+    const cb = this.combat;
+    const ev = cb ? cb.takeEvents() : [];
+    const monChanged = cb ? cb.monsterUpdates(false) : [];
+    let monAll: MonTuple[] | null = null;
+    let monMeta: [number, string, string, number][] | null = null;
+    let lootAll: CombatEvent[] | null = null;
     for (const p of this.byPid.values()) {
       if (!p.connected) continue;
       const full = p.needFull;
+      let mon: MonTuple[] | undefined;
+      let evs: CombatEvent[] = ev;
+      if (cb) {
+        if (full) {
+          monAll ??= cb.monsterUpdates(true);
+          monMeta ??= cb.meta();
+          lootAll ??= [...cb.loot.values()].filter((e) => !e.claimed).map((e) => cb.lootEvent(e));
+          mon = monAll;
+          evs = [...lootAll, ...ev.filter((e) => e.k !== "loot")];
+        } else if (monChanged.length) mon = monChanged;
+      }
+      const ps = full || p.cs.statsDirty ? cb?.statsOf(p) ?? statsOf(p) : undefined;
+      p.cs.statsDirty = false;
       const list = (full ? all : changed).filter((t) => t[0] !== p.pid);
       const add = (full ? metaAll : addMeta).filter((m) => m.id !== p.pid);
       p.send({
@@ -346,8 +407,13 @@ export class Room implements RoomView {
         ...(gone.length && !full ? { gone } : {}),
         ...(full ? { full: 1 as const } : {}),
         ...(roan ? { roan } : {}),
+        ...(mon ? { mon } : {}),
+        ...(full && monMeta ? { monMeta } : {}),
+        ...(evs.length ? { ev: evs } : {}),
+        ...(ps ? { ps } : {}),
       });
       p.needFull = false;
     }
+    cb?.markSent();
   }
 }

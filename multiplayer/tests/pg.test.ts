@@ -102,3 +102,70 @@ test("PostgreSQL：被新連線取得工作階段鎖後，舊連線的寫入被�
   mkdirSync(new URL("../reports/", import.meta.url), { recursive: true });
   writeFileSync(new URL("../reports/pg-results.json", import.meta.url), JSON.stringify(results, null, 2));
 });
+
+test("PostgreSQL（Stage 8.2）：原野擊殺＋撿取 → 伺服器重啟後等級／經驗／金幣／背包／裝備還在；撿取與起始裝備不重複入帳", { skip }, async () => {
+  type Cmd = { type: "cmd"; id: string; ok: boolean; dup: boolean; err?: string };
+  const cmd = async (b: Bot, k: string, p: unknown, id?: string): Promise<Cmd> => {
+    const rid = b.c.command(k, p, id);
+    await b.until(() => b.events.some((e) => e.type === "cmd" && e.id === rid && !(e as { _s?: 1 })._s), 5000, k);
+    const e = b.events.find((x) => x.type === "cmd" && x.id === rid && !(x as { _s?: 1 })._s) as Cmd & { _s?: 1 };
+    e._s = 1;
+    return e;
+  };
+  let store = await PgStore.open({ url: url!, realm: "test", ssl: "disable" });
+  let srv = await startServer({ store });
+  const a = new Bot(srv, { name: "戰鬥存檔", devMap: "starsprout" });
+  await a.online();
+  const cid = a.c.characterId;
+  const token = a.c.token!;
+  const room = srv.roomOf(cid)!;
+  const cb = room.combat!;
+  const m = cb.monster(1)!;
+  const p = srv.playerOf(cid)!;
+  while (m.ctl.instance.isAlive) {
+    const q = m.ctl.instance.currentPosition;
+    p.state.x = Math.round((q.x + 1) * 100) / 100;
+    p.state.z = Math.round(q.z * 100) / 100;
+    await cmd(a, "atk", { t: 1 });
+    await sleep(150);
+  }
+  await sleep(300);
+  const picks: { uid: string; id: string }[] = [];
+  for (const l of [...cb.loot.values()]) {
+    p.state.x = l.x;
+    p.state.z = l.z;
+    const r = await cmd(a, "pick", { u: l.uid });
+    assert.equal(r.ok, true, String(r.err));
+    picks.push({ uid: l.uid, id: r.id });
+  }
+  await sleep(500);
+  const r0 = (await store.get(cid))!;
+  const before = { level: r0.level, exp: r0.exp, gold: r0.gold, weapon: r0.equipment.weapon, items: (await store.listItems(cid)).map((i) => `${i.defId}:${i.uid}`).sort() };
+  assert.ok(before.exp > 0, "經驗已寫入資料庫");
+  assert.ok(before.gold > 100, "撿到的金幣已入帳");
+  a.stop();
+  await srv.stop();
+  store = await PgStore.open({ url: url!, realm: "test", ssl: "disable" });
+  srv = await startServer({ store });
+  const b = new Bot(srv, { resumeToken: token });
+  try {
+    await b.online();
+    await b.until(() => !!b.c.inventory && !!b.c.self, 3000, "inv");
+    const r1 = (await store.get(cid))!;
+    const after = { level: r1.level, exp: r1.exp, gold: r1.gold, weapon: r1.equipment.weapon, items: (await store.listItems(cid)).map((i) => `${i.defId}:${i.uid}`).sort() };
+    assert.deepEqual(after, before, "重啟後完全相同（起始裝備沒有重複發放）");
+    assert.equal(b.c.self!.exp, before.exp);
+    assert.equal(b.c.self!.gold, before.gold);
+    // 直接在資料庫層用同一個 requestId 重送撿取入帳 → 冪等
+    for (const pk of picks) {
+      const g = await store.changeGold(cid, `loot-${pk.uid}`, 999, "replay");
+      const it = await store.grantItem(cid, `loot-${pk.uid}`, "monsterMaterial", 1);
+      assert.ok((g.ok && g.dup) || (!g.ok && g.dup) || (it.ok && it.dup) || (!it.ok && it.dup), "loot requestId 已記錄");
+    }
+    assert.equal((await store.get(cid))!.gold, before.gold, "重送不增加金幣");
+    results.combatRestart = { before, after, picks: picks.length };
+  } finally {
+    b.stop();
+    await srv.stop();
+  }
+});

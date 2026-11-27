@@ -8,7 +8,7 @@
  * 斷線：自動重連（0.5→1→2→4→8 秒），帶憑證接回原角色，收到完整快照即完成重新同步，未送達的輸入會重送
  */
 import { INPUT_SEND_MS, INTERP_DELAY_MS, MAX_STEPS_PER_MSG, MOVE_DEADZONE, PROTOCOL_VERSION, SNAP_CORRECTION_M, STEP } from "../shared/constants.ts";
-import { ANIM, fromCm, fromMrad, quantizeDir, type ActKind, type AppearanceWire, type Gender, type MapId, type PlayerMeta, type ServerMsg, type SnapMsg } from "../shared/protocol.ts";
+import { ANIM, MON_STATES, fromCm, fromMrad, quantizeDir, type CombatEvent, type InvMsg, type ActKind, type AppearanceWire, type Gender, type MapId, type PlayerMeta, type ServerMsg, type SnapMsg } from "../shared/protocol.ts";
 import { getMap, type MapAuthority } from "../shared/maps.ts";
 import { runLength, stepMove, type MoveState } from "../shared/sim.ts";
 import { Interpolator, type Pose } from "./Interpolator.ts";
@@ -30,6 +30,46 @@ export interface NetClientOptions {
   now?: () => number;
   WebSocketImpl?: typeof WebSocket;
   onEvent?: (e: NetEvent) => void;
+  /** Stage 8.2：伺服器戰鬥事件（施放、命中、死亡、掉落…）；st＝事件所在快照的伺服器時間（毫秒） */
+  onCombat?: (e: CombatEvent, st: number) => void;
+}
+
+/** 伺服器的怪物（已插值）。狀態、血量、攻擊序號、受擊序號都以伺服器為準 */
+export interface RemoteMonster {
+  nid: number;
+  instanceId: string;
+  monsterId: string;
+  maxHp: number;
+  x: number;
+  z: number;
+  yaw: number;
+  hp: number;
+  state: (typeof MON_STATES)[number];
+  attackId: number;
+  hitSeq: number;
+  targetPid: number;
+}
+
+export interface ServerLoot {
+  uid: string;
+  defId: string;
+  qty: number;
+  x: number;
+  z: number;
+  ownerPid: number;
+  ownerUntil: number;
+  expiresAt: number;
+}
+
+/** 伺服器保存的本人戰鬥數值（ps）。客戶端只顯示，不計算 */
+export interface SelfStats {
+  hp: number;
+  maxHp: number;
+  level: number;
+  exp: number;
+  expNext: number;
+  gold: number;
+  down: boolean;
 }
 
 export type NetEvent =
@@ -120,6 +160,13 @@ export class NetClient {
   private offX = 0;
   private offZ = 0;
   private readonly metas = new Map<number, PlayerMeta>();
+  private readonly monMeta = new Map<number, { instanceId: string; monsterId: string; maxHp: number }>();
+  private readonly monBuf = new Map<number, { buf: Interpolator; hp: number; state: number; attackId: number; hitSeq: number; target: number }>();
+  readonly loot = new Map<string, ServerLoot>();
+  self: SelfStats | null = null;
+  inventory: InvMsg | null = null;
+  /** 收到的戰鬥事件總數（偵錯） */
+  combatEvents = 0;
   private readonly remoteBuf = new Map<number, Interpolator>();
   private clockOff: number[] = [];
   private attempt = 0;
@@ -284,6 +331,20 @@ export class NetClient {
     return { x: this.local.x + this.offX, z: this.local.z + this.offZ, yaw: this.local.yaw, anim: this.local.anim };
   }
 
+  /** 伺服器的怪物（位置以伺服器時間 − 100 ms 插值；狀態用最新值） */
+  monsters(): RemoteMonster[] {
+    const off = this.clockOff.length ? Math.max(...this.clockOff) : 0;
+    const rt = this.now() + off - INTERP_DELAY_MS;
+    const out: RemoteMonster[] = [];
+    for (const [nid, b] of this.monBuf) {
+      const meta = this.monMeta.get(nid);
+      const pose = b.buf.sample(rt);
+      if (!meta || !pose) continue;
+      out.push({ nid, ...meta, x: pose.x, z: pose.z, yaw: pose.yaw, hp: b.hp, state: MON_STATES[b.state] ?? "idle", attackId: b.attackId, hitSeq: b.hitSeq, targetPid: b.target });
+    }
+    return out;
+  }
+
   /** 遠端玩家（已插值） */
   remotes(): RemotePlayer[] {
     const off = this.clockOff.length ? Math.max(...this.clockOff) : 0;
@@ -358,6 +419,7 @@ export class NetClient {
         this.applyAuthoritative(m.me, m.ack, true);
         this.metas.clear();
         this.remoteBuf.clear();
+        this.clearCombat();
         this.attempt = 0;
         this.awaitingResync = reconnecting;
         this.setState("online");
@@ -377,6 +439,7 @@ export class NetClient {
         this.applyAuthoritative(m.me, m.ack, true);
         this.metas.clear();
         this.remoteBuf.clear();
+        this.clearCombat();
         this.opts.onEvent?.({ type: "map", map: m.map });
         return;
       }
@@ -390,10 +453,59 @@ export class NetClient {
       case "res":
         this.opts.onEvent?.({ type: "cmd", id: m.id, ok: m.ok, dup: m.dup === 1, data: m.data, err: m.err });
         return;
+      case "inv":
+        this.inventory = m;
+        if (this.self) this.self.gold = m.gold;
+        return;
       case "err":
         if (m.code === "replaced" || m.code === "proto" || m.code === "full") this.noReconnect = true;
         this.opts.onEvent?.({ type: "error", code: m.code, msg: m.msg });
         return;
+    }
+  }
+
+  private clearCombat(): void {
+    this.monMeta.clear();
+    this.monBuf.clear();
+    this.loot.clear();
+  }
+
+  private onCombatSnap(m: SnapMsg): void {
+    if (m.full) {
+      this.monBuf.clear();
+      this.loot.clear();
+    }
+    for (const [nid, iid, mid, maxHp] of m.monMeta ?? []) this.monMeta.set(nid, { instanceId: iid, monsterId: mid, maxHp });
+    const seen = new Set<number>();
+    for (const t of m.mon ?? []) {
+      seen.add(t[0]);
+      let b = this.monBuf.get(t[0]);
+      if (!b) {
+        b = { buf: new Interpolator(), hp: 0, state: 0, attackId: 0, hitSeq: 0, target: 0 };
+        this.monBuf.set(t[0], b);
+      }
+      b.buf.push({ t: m.st, x: fromCm(t[1]), z: fromCm(t[2]), yaw: fromMrad(t[3]), anim: t[5], speed: 0, link: 1, act: 0, actSeq: 0 });
+      b.hp = t[4];
+      b.state = t[5];
+      b.attackId = t[6];
+      b.hitSeq = t[7];
+      b.target = t[8];
+    }
+    for (const [nid, b] of this.monBuf) {
+      if (seen.has(nid)) continue;
+      const l = b.buf.latest;
+      if (l) b.buf.push({ ...l, t: m.st });
+    }
+    if (m.ps) this.self = { hp: m.ps[0], maxHp: m.ps[1], level: m.ps[2], exp: m.ps[3], expNext: m.ps[4], gold: m.ps[5], down: m.ps[6] === 1 };
+    for (const e of m.ev ?? []) {
+      this.combatEvents++;
+      if (e.k === "loot") this.loot.set(e.u, { uid: e.u, defId: e.i, qty: e.n, x: fromCm(e.x), z: fromCm(e.z), ownerPid: e.o, ownerUntil: e.ou, expiresAt: e.ex });
+      else if (e.k === "lgone") this.loot.delete(e.u);
+      else if (e.k === "hit") {
+        const b = this.monBuf.get(e.t);
+        if (b) b.hp = e.hp;
+      } else if (e.k === "mh" && e.p === this.pid && this.self) this.self.hp = e.hp;
+      this.opts.onCombat?.(e, m.st);
     }
   }
 
@@ -447,6 +559,7 @@ export class NetClient {
     if (this.clockOff.length > 40) this.clockOff.shift();
     this.applyAuthoritative(m.me, m.ack, false);
     this.down = m.me[3] === ANIM.Death;
+    this.onCombatSnap(m);
     if (m.roan) this.roan = { patrolT: m.roan[0] / 1000, at: m.st, paused: m.roan[1] === 1, tx: fromCm(m.roan[2]), tz: fromCm(m.roan[3]) };
     if (m.full) {
       this.metas.clear();

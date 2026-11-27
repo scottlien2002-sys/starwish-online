@@ -125,7 +125,32 @@ export interface SnapMsg {
   full?: 1;
   /** 星芽村：洛恩巡邏狀態 [巡邏時間 毫秒（於 st）, 暫停中 1/0, 面向目標 x 公分, z 公分] */
   roan?: [number, number, number, number];
+  /** Stage 8.2：怪物狀態（有變動的；full 時全部） */
+  mon?: MonTuple[];
+  /** 怪物固定資料（full 時）：[網路編號, instanceId, monsterId, 最大生命] */
+  monMeta?: [number, string, string, number][];
+  /** 戰鬥／掉落事件（這個 tick 發生的） */
+  ev?: CombatEvent[];
+  /** 自己的戰鬥資料（有變動或 full 時）：[生命, 最大生命, 等級, 經驗, 下一級所需, 金幣, 倒地 1/0] */
+  ps?: [number, number, number, number, number, number, number];
 }
+
+/** 怪物狀態：[網路編號, x 公分, z 公分, yaw 毫弧度, 生命, 狀態代碼, 攻擊序號, 受擊序號, 目標玩家編號] */
+export type MonTuple = [number, number, number, number, number, number, number, number, number];
+/** 怪物狀態代碼（與 A 的怪物狀態機同名） */
+export const MON_STATES = ["idle", "move", "attack", "hit", "death", "dead", "respawn"] as const;
+
+/** 戰鬥事件（客戶端依事件播放動作、特效、傷害數字；不逐幀同步特效） */
+export type CombatEvent =
+  | { k: "cast"; c: number; p: number; s: string; t: number; x: number; z: number; y: number; st: number; r: number; dur: number }
+  | { k: "hit"; c: number; h: string; p: number; t: number; d: number; cr: 0 | 1; ms: 0 | 1; hp: number; kl: 0 | 1 }
+  | { k: "end"; c: number; p: number }
+  | { k: "mh"; m: number; p: number; d: number; b: 0 | 1; hp: number }
+  | { k: "die"; m: number; by: number }
+  | { k: "loot"; u: string; i: string; n: number; x: number; z: number; o: number; ou: number; ex: number }
+  | { k: "lgone"; u: string; by: number }
+  | { k: "exp"; p: number; n: number; lv: number }
+  | { k: "down"; p: number };
 export interface MapChangeMsg {
   t: "map";
   map: MapId;
@@ -155,7 +180,14 @@ export interface ErrorMsg {
   code: "proto" | "bad_msg" | "rate" | "full" | "auth" | "replaced" | "server";
   msg: string;
 }
-export type ServerMsg = WelcomeMsg | SnapMsg | MapChangeMsg | PongMsg | CmdResultMsg | ErrorMsg;
+/** 背包（只送給本人） */
+export interface InvMsg {
+  t: "inv";
+  items: { uid: string; defId: string; qty: number; location: "bag" | "storage"; version: number }[];
+  gold: number;
+  equipment: Record<string, string>;
+}
+export type ServerMsg = WelcomeMsg | SnapMsg | MapChangeMsg | PongMsg | CmdResultMsg | ErrorMsg | InvMsg;
 
 // ---------------- 量化 ----------------
 export const toCm = (m: number): number => Math.round(m * 100);

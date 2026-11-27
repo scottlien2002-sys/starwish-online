@@ -12,7 +12,11 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { WebSocketServer, type WebSocket } from "ws";
 import { MAX_MESSAGE_BYTES, MOVE_SPEED, PROTOCOL_VERSION, RECONNECT_GRACE_MS, ROOM_CAPACITY, SNAPSHOT_HZ, STEP, TICK_HZ } from "../shared/constants.ts";
-import type { ClientMsg, Gender, HelloMsg, MapId, ServerMsg } from "../shared/protocol.ts";
+import type { ClientMsg, Gender, HelloMsg, InvMsg, MapId, ServerMsg } from "../shared/protocol.ts";
+import { EQUIP_SLOTS } from "../../src/core/gameSave.ts";
+import { FieldCombat } from "./combat/FieldCombat.ts";
+import { COMBAT_TEST_RULES, STARTER_KIT_TEST, WEAPON_ITEMS_TEST } from "./combat/rules.ts";
+import type { CharacterRecord } from "./persistence/Store.ts";
 import { parseAppearance } from "../../src/core/gameSave.ts";
 import { RESPAWN_SLOTS } from "../../src/maps/village/layout.ts";
 import { getMap } from "../shared/maps.ts";
@@ -98,7 +102,13 @@ export class GameServer {
     rejectedOrigin: 0,
     rejectedProtocol: 0,
     roanRejected: 0,
+    actsIgnoredInCombatRoom: 0,
+    autoRespawns: 0,
+    progressSaved: 0,
+    starterKits: 0,
   };
+  /** 非同步指令（撿取、背包移動、裝備）的重複請求防護：同一角色同一 requestId 只執行一次 */
+  private readonly asyncLedger = new Map<string, Promise<{ ok: boolean; data?: unknown; err?: string }>>();
   private rate = { at: Date.now(), bytesIn: 0, bytesOut: 0, msgsIn: 0, msgsOut: 0, perSec: { bytesIn: 0, bytesOut: 0, msgsIn: 0, msgsOut: 0 } };
   private tickWindow: number[] = [];
 
@@ -193,6 +203,7 @@ export class GameServer {
       tickHz: TICK_HZ,
       connections: this.conns.size,
       store: { kind: this.store.kind, realm: this.store.realm },
+      combat: [...this.rooms.values()].filter((r) => r.combat).map((r) => ({ room: r.key, monsters: r.combat!.monsters.length, alive: r.combat!.monsters.filter((m) => m.ctl.instance.isAlive).length, loot: r.combat!.loot.size, ...r.combat!.counters })),
       players: this.live.size,
       rooms: [...this.rooms.values()].map((r) => ({ key: r.key, map: r.map, players: r.size, connected: [...r.players()].filter((p) => p.connected).length, tick: r.tick })),
       tick: { count: this.stats.ticks, avgMs: tw.length ? +(tw.reduce((a, b) => a + b, 0) / tw.length).toFixed(3) : 0, maxMs: tw.length ? +Math.max(...tw).toFixed(3) : 0 },
@@ -211,6 +222,10 @@ export class GameServer {
     while (this.rooms.has(`${map}-${n}`)) n++;
     const r = new Room(`${map}-${n}`, map, this.opts.roomCapacity);
     r.systems.push(...this.systems);
+    if (map === "starsprout") {
+      r.combat = new FieldCombat(r, this.store);
+      r.combat.onInventory = (p) => void this.sendInventory(p);
+    }
     this.rooms.set(r.key, r);
     return r;
   }
@@ -313,6 +328,11 @@ export class GameServer {
           this.stats.rateLimited++;
           return;
         }
+        // 原野房間的攻擊、受擊、倒地由伺服器戰鬥決定；客戶端的動作回報只在村莊（表情動作）有效
+        if (this.live.get(p.characterId)?.room.combat) {
+          this.stats.actsIgnoredInCombatRoom++;
+          return;
+        }
         p.applyAct(m.k, m.y, performance.now() / 1000);
         return;
       case "cmd": {
@@ -322,11 +342,13 @@ export class GameServer {
         }
         const live = this.live.get(p.characterId);
         if (!live) return;
+        if (m.k === "pick" || m.k === "move" || m.k === "equip" || m.k === "inv") return this.asyncCmd(c, p, live, m.id, m.k, m.p);
         const sys = live.room.systems.find((s) => s.commands.includes(m.k));
         const now = Date.now();
         const r = this.ledger.run(p.characterId, m.id, now, () => {
           if (m.k === "respawn") return this.respawn(p, live);
           if (m.k === "appearance") return this.changeAppearance(p, live, m.p);
+          if (m.k === "atk" || m.k === "sk") return this.combatCmd(p, live, m.k, m.p);
           if (!sys?.onCommand) return { ok: false, err: "unknown_cmd" };
           const out = sys.onCommand(m.k, m.p, { room: live.room, player: p, requestId: m.id, now });
           return out.ok ? { ok: true, data: out.data } : { ok: false, err: out.err };
@@ -360,6 +382,8 @@ export class GameServer {
     }
     if (c.ws.readyState !== 1) return;
     const lockEpoch = await this.store.acquireLock(rec.id);
+    if (!this.live.has(rec.id)) rec = await this.ensureStarterKit(rec, lockEpoch);
+    if (c.ws.readyState !== 1) return;
     let live = this.live.get(rec.id);
     if (live) {
       // 同一角色已在線上或在保留期間：接回原本的角色
@@ -385,6 +409,10 @@ export class GameServer {
       const map: MapId = this.opts.dev && m.devMap ? m.devMap : rec.map;
       const sp = this.opts.dev && m.devMap && m.devMap !== rec.map ? this.spawnPoint(map, null, null, 0) : this.spawnPoint(map, rec.x, rec.z, rec.yaw);
       const player = new ServerPlayer({ pid: this.nextPid++, characterId: rec.id, name: rec.name, gender: rec.gender, appearance: rec.appearance, x: sp.x, z: sp.z, yaw: sp.yaw, version: rec.version, lockEpoch });
+      // 戰鬥狀態從資料庫載入（等級、經驗、金幣）；生命在重新登入時回滿（測試設定）
+      player.cs.level = rec.level;
+      player.cs.exp = rec.exp;
+      player.cs.gold = rec.gold;
       const room = this.pickRoom(map);
       room.add(player);
       live = { player, room, conn: c, graceTimer: null };
@@ -423,6 +451,8 @@ export class GameServer {
       me: p.me(),
       cfg: { step: STEP, tickHz: TICK_HZ, snapHz: SNAPSHOT_HZ, speed: MOVE_SPEED, graceMs: this.opts.graceMs },
     });
+    p.cs.statsDirty = true;
+    void this.sendInventory(p);
     this.log(`${resumed ? "resume" : "join"} pid=${p.pid} ${p.name} room=${live.room.key}`);
   }
 
@@ -454,6 +484,18 @@ export class GameServer {
     for (const room of this.rooms.values()) {
       const transfers = room.step(dt, now);
       for (const tr of transfers) this.transfer(tr.player, room, tr.to);
+      if (!room.combat) continue;
+      for (const p of [...room.players()]) {
+        const live = this.live.get(p.characterId);
+        if (!live) continue;
+        // 經驗、等級：擊殺結算後立即存檔（伺服器重啟不會遺失）
+        if (p.cs.progressDirty) void this.persist(live, false, true);
+        // 倒地太久：自動送回星芽村（測試設定 30 秒）
+        if (p.down && room.clock - p.cs.downAt >= COMBAT_TEST_RULES.autoRespawnSeconds) {
+          this.stats.autoRespawns++;
+          this.respawn(p, live);
+        }
+      }
     }
     for (const room of this.rooms.values()) room.broadcast(now);
     const ms = performance.now() - t0;
@@ -495,6 +537,9 @@ export class GameServer {
   /** 倒地後回星芽村星願之泉（只有倒地中可以使用；Stage 8.2 起倒地由伺服器戰鬥判定） */
   private respawn(p: ServerPlayer, live: Live): { ok: boolean; data?: unknown; err?: string } {
     if (!p.down) return { ok: false, err: "not_down" };
+    p.cs.hp = p.cs.maxHp;
+    p.cs.statsDirty = true;
+    p.cs.busyUntil = 0;
     this.respawnCount = (this.respawnCount + 1) % RESPAWN_SLOTS.length;
     const slot = RESPAWN_SLOTS[this.respawnCount]!;
     p.down = false;
@@ -506,7 +551,8 @@ export class GameServer {
   /** 換外觀（髮型、髮色、武器）：只是造型，驗證後存檔並通知同房間玩家 */
   private changeAppearance(p: ServerPlayer, live: Live, payload: unknown): { ok: boolean; data?: unknown; err?: string } {
     if (!payload || typeof payload !== "object" || JSON.stringify(payload).length > 200) return { ok: false, err: "bad_appearance" };
-    p.appearance = parseAppearance(payload);
+    // 武器由裝備決定（Stage 8.2）：換外觀不能直接換武器
+    p.appearance = { ...parseAppearance(payload), weapon: p.appearance.weapon };
     live.room.metaChanged(p);
     const pr = this.store.saveAppearance(p.characterId, p.lockEpoch, p.appearance).then(() => {}, () => void this.stats.persistConflict++);
     this.inflight.add(pr);
@@ -515,19 +561,37 @@ export class GameServer {
   }
 
   // ---------------- 存檔 ----------------
-  private persist(live: Live, force = false): Promise<void> {
+  private persist(live: Live, force = false, progressOnly = false): Promise<void> {
     if (this.stopping) return Promise.resolve();
-    const pr = this.persistNow(live, force).catch((e: unknown) => this.log(`persist error: ${String(e)}`));
+    const pr = (progressOnly ? this.saveProgress(live.player) : this.persistNow(live, force)).catch((e: unknown) => this.log(`persist error: ${String(e)}`));
     this.inflight.add(pr);
     void pr.finally(() => this.inflight.delete(pr));
     return pr;
   }
 
+  private async saveProgress(p: ServerPlayer): Promise<void> {
+    if (!p.cs.progressDirty) return;
+    p.cs.progressDirty = false;
+    const ok = await this.store.saveProgress(p.characterId, p.lockEpoch, p.cs.level, p.cs.exp);
+    if (ok) this.stats.progressSaved++;
+    else this.stats.persistConflict++;
+  }
+
   private async persistNow(live: Live, force = false): Promise<void> {
     const p = live.player;
+    await this.saveProgress(p);
     if (!p.persistDirty && !force) return;
     p.persistDirty = false;
-    const r = await this.store.savePosition(p.characterId, p.version, p.lockEpoch, { map: live.room.map, x: p.x, z: p.z, yaw: p.yaw }, Date.now());
+    const patch = { map: live.room.map, x: p.x, z: p.z, yaw: p.yaw };
+    let r = await this.store.savePosition(p.characterId, p.version, p.lockEpoch, patch, Date.now());
+    if (!r.ok && r.reason === "conflict") {
+      // 版本被本角色自己的其他寫入（外觀、裝備、經驗）推進：工作階段鎖仍是自己的 → 採用最新版本重試一次
+      const cur = await this.store.get(p.characterId);
+      if (cur && cur.lockEpoch === p.lockEpoch) {
+        p.version = cur.version;
+        r = await this.store.savePosition(p.characterId, p.version, p.lockEpoch, patch, Date.now());
+      }
+    }
     if (r.ok) {
       p.version = r.version;
       this.stats.persistOk++;
@@ -539,6 +603,117 @@ export class GameServer {
 
   private async persistAll(force: boolean): Promise<void> {
     for (const l of this.live.values()) await this.persist(l, force);
+  }
+
+  // ---------------- Stage 8.2：戰鬥、背包、掉落 ----------------
+  /** 新角色的測試起始裝備：金幣＋練習短劍＋練習法杖（requestId 固定 → 重複登入不會重複發放） */
+  private async ensureStarterKit(rec: CharacterRecord, lockEpoch: number): Promise<CharacterRecord> {
+    const cid = rec.id;
+    const g = await this.store.changeGold(cid, `starter-gold-${cid}`, STARTER_KIT_TEST.gold, "starter_kit_test");
+    if (g.ok && !g.dup) this.stats.starterKits++;
+    const granted: Record<string, string> = {};
+    for (const it of STARTER_KIT_TEST.items) {
+      const r = await this.store.grantItem(cid, `starter-${it}-${cid}`, it, 1);
+      if (r.ok && r.item) granted[it] = r.item.uid;
+    }
+    if (!rec.equipment.weapon) {
+      const want = rec.appearance.weapon === "staff" ? "test_novice_staff" : "test_novice_sword";
+      const items = await this.store.listItems(cid);
+      const uid = granted[want] ?? items.find((i) => i.defId === want && i.location === "bag")?.uid;
+      if (uid) await this.store.equip(cid, lockEpoch, "weapon", uid);
+    }
+    return (await this.store.get(cid)) ?? rec;
+  }
+
+  private combatCmd(p: ServerPlayer, live: Live, k: "atk" | "sk", payload: unknown): { ok: boolean; data?: unknown; err?: string } {
+    const cb = live.room.combat;
+    if (!cb) return { ok: false, err: "no_combat_here" };
+    const o = (payload && typeof payload === "object" ? payload : {}) as Record<string, unknown>;
+    const t = Number.isInteger(o.t) ? (o.t as number) : 0;
+    if (k === "atk") {
+      const r = cb.attack(p, t, live.room.clock);
+      return r.ok ? { ok: true, data: { c: r.castId } } : { ok: false, err: r.err };
+    }
+    const sid = typeof o.s === "string" && o.s.length <= 32 ? o.s : "";
+    const y = Number.isInteger(o.y) && Math.abs(o.y as number) <= 3142 ? (o.y as number) : null;
+    const r = cb.skill(p, sid, t, y, live.room.clock);
+    return r.ok ? { ok: true, data: { c: r.castId, hits: r.hits, dur: Math.round(r.duration * 1000) } } : { ok: false, err: r.err };
+  }
+
+  private asyncCmd(c: Conn, p: ServerPlayer, live: Live, id: string, k: string, payload: unknown): void {
+    if (typeof id !== "string" || id.length > 64) return;
+    const key = `${p.characterId}|${id}`;
+    let pr = this.asyncLedger.get(key);
+    const dup = !!pr;
+    if (!pr) {
+      pr = this.runAsyncCmd(p, live, id, k, payload).catch((e: unknown) => ({ ok: false, err: `error:${String(e)}` }));
+      this.asyncLedger.set(key, pr);
+      if (this.asyncLedger.size > 5000) this.asyncLedger.delete(this.asyncLedger.keys().next().value!);
+    }
+    const tr = pr.then((r) => {
+      this.sendTo(c, { t: "res", id, ok: r.ok, ...(r.data !== undefined ? { data: r.data } : {}), ...(r.err ? { err: r.err } : {}), ...(dup ? { dup: 1 as const } : {}) });
+    });
+    const done = tr.then(() => {});
+    this.inflight.add(done);
+    void done.finally(() => this.inflight.delete(done));
+  }
+
+  private async runAsyncCmd(p: ServerPlayer, live: Live, id: string, k: string, payload: unknown): Promise<{ ok: boolean; data?: unknown; err?: string }> {
+    const o = (payload && typeof payload === "object" ? payload : {}) as Record<string, unknown>;
+    if (k === "inv") {
+      await this.sendInventory(p);
+      return { ok: true };
+    }
+    if (k === "pick") {
+      const cb = live.room.combat;
+      if (!cb) return { ok: false, err: "no_combat_here" };
+      if (typeof o.u !== "string" || o.u.length > 40) return { ok: false, err: "bad_request" };
+      const r = await cb.pick(p, o.u);
+      return r.ok ? { ok: true, data: { i: r.defId, n: r.qty, ...(r.gold !== undefined ? { gold: r.gold } : {}), ...(r.item ? { uid: r.item.uid } : {}) } } : { ok: false, err: r.err };
+    }
+    if (k === "move") {
+      // 倉庫存取（測試）：只在星芽村
+      if (live.room.map !== "village") return { ok: false, err: "storage_village_only" };
+      if (typeof o.u !== "string" || (o.to !== "bag" && o.to !== "storage") || !Number.isInteger(o.v)) return { ok: false, err: "bad_request" };
+      const cur = await this.store.get(p.characterId);
+      if (cur && Object.values(cur.equipment).includes(o.u) && o.to === "storage") return { ok: false, err: "equipped" };
+      const r = await this.store.moveItem(p.characterId, `mv-${id}`, o.u, o.to, o.v as number);
+      await this.sendInventory(p);
+      return r.ok ? { ok: true, data: { uid: o.u, to: o.to } } : { ok: false, err: r.err };
+    }
+    if (k === "equip") {
+      const slot = typeof o.slot === "string" && (EQUIP_SLOTS as readonly string[]).includes(o.slot) ? o.slot : null;
+      if (!slot) return { ok: false, err: "bad_slot" };
+      const uid = typeof o.u === "string" ? o.u : null;
+      if (p.down || p.cs.busyUntil > live.room.clock) return { ok: false, err: "busy" };
+      let kind: "sword" | "staff" | null = null;
+      if (uid) {
+        const it = (await this.store.listItems(p.characterId)).find((i) => i.uid === uid);
+        if (!it || it.location !== "bag") return { ok: false, err: "not_in_bag" };
+        if (slot === "weapon") {
+          kind = WEAPON_ITEMS_TEST[it.defId] ?? null;
+          if (!kind) return { ok: false, err: "not_weapon" };
+        }
+      }
+      const ok = await this.store.equip(p.characterId, p.lockEpoch, slot, uid);
+      if (!ok) return { ok: false, err: "equip_failed" };
+      if (kind && kind !== p.appearance.weapon) {
+        p.appearance = { ...p.appearance, weapon: kind };
+        live.room.metaChanged(p);
+        await this.store.saveAppearance(p.characterId, p.lockEpoch, p.appearance);
+      }
+      await this.sendInventory(p);
+      return { ok: true, data: { slot, uid, weapon: p.appearance.weapon } };
+    }
+    return { ok: false, err: "unknown_cmd" };
+  }
+
+  async sendInventory(p: ServerPlayer): Promise<void> {
+    const [items, rec] = await Promise.all([this.store.listItems(p.characterId), this.store.get(p.characterId)]);
+    if (rec) p.cs.gold = rec.gold;
+    const msg: InvMsg = { t: "inv", items: items.map((i) => ({ uid: i.uid, defId: i.defId, qty: i.qty, location: i.location, version: i.version })), gold: rec?.gold ?? p.cs.gold, equipment: { ...(rec?.equipment ?? {}) } };
+    p.cs.statsDirty = true;
+    p.send(msg);
   }
 
   // 測試用
