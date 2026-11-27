@@ -1,0 +1,1 @@
+import{qr as e}from"./index-imZL9V8n.js";var t={value:.3};function n(n,r){if(!r||t.value<=0)return;let i=t.value;n.emissiveColor=new e(i,i,i),n.diffuseColor=new e(.94,1,1.12)}export{n,t};

@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-11-27T10:06:21.308Z",
+  "startedAt": "2026-11-27T11:37:38.174Z",
   "runs": [
     {
       "browser": "webkit",
@@ -10,9 +10,9 @@
           "detail": "ok"
         },
         "male hq：c10b5a GLB、6 隻星露啵啵、寵物＝測試設定": {
-          "ok": false,
+          "ok": true,
           "detail": {
-            "file": "novice72_male_body_hq.glb",
+            "file": "novice_c10b5a_male_hq.glb",
             "monsters": 6,
             "pets": {
               "enabled": true,
@@ -28,7 +28,7 @@
               "count": 0,
               "equipped": null,
               "followerVisible": false,
-              "followerDist": 85.04489779625158
+              "followerDist": 85.09472564062699
             }
           }
         },
@@ -38,8 +38,8 @@
             "p3": true,
             "pipeline": false,
             "charShadow": "blob",
-            "drawCalls": 115,
-            "fps": 0.9894459102902375,
+            "drawCalls": 135,
+            "fps": 0.6407518154634773,
             "contextLost": 0
           }
         },
@@ -47,7 +47,7 @@
           "ok": true,
           "detail": {
             "speed": 5.000000000000001,
-            "runRate": 2.2222222222222228,
+            "runRate": 2.2123893805309742,
             "slide": 0,
             "state": "Run"
           }
@@ -56,7 +56,7 @@
           "ok": true,
           "detail": {
             "speed": 5.000000000000001,
-            "runRate": 2.2222222222222228,
+            "runRate": 2.2123893805309742,
             "slide": 0,
             "state": "Run"
           }
@@ -84,7 +84,7 @@
           "ok": true,
           "detail": {
             "attacks": 25,
-            "ms": 22632,
+            "ms": 48278,
             "kills": 3,
             "hits": 9,
             "drops": 4,
@@ -112,7 +112,7 @@
           "ok": true,
           "detail": {
             "attacks": 25,
-            "ms": 22632,
+            "ms": 48278,
             "kills": 3,
             "hits": 9,
             "drops": 4,
@@ -181,7 +181,7 @@
                 "count": 1,
                 "equipped": 1,
                 "followerVisible": true,
-                "followerDist": 60.981928163486344
+                "followerDist": 60.985020389843704
               },
               "stats": {
                 "attack": 100,
@@ -210,7 +210,7 @@
               "count": 1,
               "equipped": 1,
               "followerVisible": true,
-              "followerDist": 0.40620536991023437
+              "followerDist": 0.41527645002229324
             }
           }
         },
@@ -237,7 +237,7 @@
             "count": 1,
             "equipped": 1,
             "followerVisible": true,
-            "followerDist": 0.40620536991023437
+            "followerDist": 0.41527645002229324
           }
         },
         "寵物加成反映到角色屬性；攻速 ≤ 160 且同步到攻擊動作": {
@@ -291,14 +291,14 @@
           "ok": true,
           "detail": {
             "seconds": 10.7,
-            "avgFps": 1.7757009345794397,
-            "low1Fps": 1.7035775127768313,
-            "minFps": 1.7035775127768313,
-            "avgDraw": 110.73684210526316,
-            "kills": 1,
+            "avgFps": 0.8385353582409392,
+            "low1Fps": 0.828500414250207,
+            "minFps": 0.828500414250207,
+            "avgDraw": 131,
+            "kills": 0,
             "contextLost": 0,
-            "first30": 1.7757009345794397,
-            "last30": 1.7757009345794394,
+            "first30": 0.8385353582409392,
+            "last30": 0.8385353582409392,
             "quality": "high",
             "gender": "male",
             "lod": "hq",
@@ -321,7 +321,7 @@
             "count": 0,
             "equipped": null,
             "followerVisible": false,
-            "followerDist": 85.05095215357834
+            "followerDist": 85.0969156201905
           }
         },
         "&charshadow=realtime 可載入": {
@@ -330,8 +330,8 @@
             "p3": true,
             "pipeline": false,
             "charShadow": "realtime",
-            "drawCalls": 120,
-            "fps": 1.1415525114155252,
+            "drawCalls": 160,
+            "fps": 0.7590708972218004,
             "contextLost": 0
           }
         },
@@ -341,8 +341,8 @@
             "p3": true,
             "pipeline": false,
             "charShadow": "realtime",
-            "drawCalls": 120,
-            "fps": 1.1415525114155252,
+            "drawCalls": 160,
+            "fps": 0.7590708972218004,
             "contextLost": 0
           }
         }
@@ -358,56 +358,21 @@
         "start": {
           "gender": "male",
           "lod": "hq",
-          "file": "novice72_male_body_hq.glb",
+          "file": "novice_c10b5a_male_hq.glb",
           "avatarModel": {
-            "modular": true,
-            "weapon": "sword",
-            "bones": 23,
-            "triangles": 43526,
-            "parts": [
-              {
-                "kind": "hair",
-                "file": "novice72_male_hair01_hq.glb",
-                "meshes": 1,
-                "remapped": false
-              },
-              {
-                "kind": "top",
-                "file": "novice72_male_top_hq.glb",
-                "meshes": 1,
-                "remapped": false
-              },
-              {
-                "kind": "bottom",
-                "file": "novice72_male_bottom_hq.glb",
-                "meshes": 1,
-                "remapped": false
-              },
-              {
-                "kind": "boots",
-                "file": "novice72_male_boots_hq.glb",
-                "meshes": 1,
-                "remapped": false
-              },
-              {
-                "kind": "weapon",
-                "file": "novice72_male_sword_hq.glb",
-                "meshes": 1,
-                "remapped": false
-              }
-            ],
+            "modular": false,
+            "weapon": null,
+            "bones": 17,
+            "triangles": 199965,
+            "parts": [],
             "clips": [
-              "Death",
+              "Attack",
               "Hurt",
               "Idle",
               "Jump",
-              "Run",
-              "Attack"
+              "Run"
             ],
-            "attackClips": [
-              "staff",
-              "sword"
-            ]
+            "attackClips": []
           },
           "state": "Idle",
           "pos": [
@@ -420,7 +385,7 @@
           "down": false,
           "speed": 0,
           "runRate": 0.8,
-          "slide": -1.8,
+          "slide": -1.8079999999999998,
           "attack": {
             "interval": 0.5,
             "hitAt": 0.2,
@@ -621,26 +586,26 @@
             "count": 0,
             "equipped": null,
             "followerVisible": false,
-            "followerDist": 85.04489779625158
+            "followerDist": 85.09472564062699
           },
           "render": {
             "p3": true,
             "pipeline": false,
             "charShadow": "blob",
-            "drawCalls": 115,
-            "fps": 0.9894459102902375,
+            "drawCalls": 135,
+            "fps": 0.6407518154634773,
             "contextLost": 0
           }
         },
         "move": {
           "speed": 5.000000000000001,
-          "runRate": 2.2222222222222228,
+          "runRate": 2.2123893805309742,
           "slide": 0,
           "state": "Run"
         },
         "fight": {
           "attacks": 25,
-          "ms": 22632,
+          "ms": 48278,
           "kills": 3,
           "hits": 9,
           "drops": 4,
@@ -690,7 +655,7 @@
               "count": 1,
               "equipped": 1,
               "followerVisible": true,
-              "followerDist": 60.981928163486344
+              "followerDist": 60.985020389843704
             },
             "stats": {
               "attack": 100,
@@ -719,7 +684,7 @@
             "count": 1,
             "equipped": 1,
             "followerVisible": true,
-            "followerDist": 0.40620536991023437
+            "followerDist": 0.41527645002229324
           }
         },
         "itemAppraisal": {
@@ -743,32 +708,32 @@
         },
         "bench": {
           "seconds": 10.7,
-          "avgFps": 1.7757009345794397,
-          "low1Fps": 1.7035775127768313,
-          "minFps": 1.7035775127768313,
-          "avgDraw": 110.73684210526316,
-          "kills": 1,
+          "avgFps": 0.8385353582409392,
+          "low1Fps": 0.828500414250207,
+          "minFps": 0.828500414250207,
+          "avgDraw": 131,
+          "kills": 0,
           "contextLost": 0,
-          "first30": 1.7757009345794397,
-          "last30": 1.7757009345794394,
+          "first30": 0.8385353582409392,
+          "last30": 0.8385353582409392,
           "quality": "high",
           "gender": "male",
           "lod": "hq",
           "charShadow": "blob"
         },
-        "drawRealtime": 120,
+        "drawRealtime": 160,
         "end": {
           "render": {
             "p3": true,
             "pipeline": false,
             "charShadow": "realtime",
-            "drawCalls": 120,
-            "fps": 1.1415525114155252,
+            "drawCalls": 160,
+            "fps": 0.7590708972218004,
             "contextLost": 0
           }
         }
       },
-      "ok": false
+      "ok": true
     },
     {
       "browser": "webkit",
@@ -779,9 +744,9 @@
           "detail": "ok"
         },
         "female lite：c10b5a GLB、6 隻星露啵啵、寵物＝測試設定": {
-          "ok": false,
+          "ok": true,
           "detail": {
-            "file": "novice72_female_body_lite.glb",
+            "file": "novice_c10b5a_female_lite.glb",
             "monsters": 6,
             "pets": {
               "enabled": true,
@@ -797,7 +762,7 @@
               "count": 0,
               "equipped": null,
               "followerVisible": false,
-              "followerDist": 85.03182415795735
+              "followerDist": 85.08967250789152
             }
           }
         },
@@ -807,8 +772,8 @@
             "p3": true,
             "pipeline": false,
             "charShadow": "blob",
-            "drawCalls": 102,
-            "fps": 2.2701475595913734,
+            "drawCalls": 1,
+            "fps": 60,
             "contextLost": 0
           }
         },
@@ -816,7 +781,7 @@
           "ok": true,
           "detail": {
             "speed": 5.000000000000001,
-            "runRate": 2.2222222222222228,
+            "runRate": 2.074688796680498,
             "slide": 0,
             "state": "Run"
           }
@@ -825,7 +790,7 @@
           "ok": true,
           "detail": {
             "speed": 5.000000000000001,
-            "runRate": 2.2222222222222228,
+            "runRate": 2.074688796680498,
             "slide": 0,
             "state": "Run"
           }
@@ -853,7 +818,7 @@
           "ok": true,
           "detail": {
             "attacks": 25,
-            "ms": 11221,
+            "ms": 17506,
             "kills": 3,
             "hits": 9,
             "drops": 4,
@@ -881,7 +846,7 @@
           "ok": true,
           "detail": {
             "attacks": 25,
-            "ms": 11221,
+            "ms": 17506,
             "kills": 3,
             "hits": 9,
             "drops": 4,
@@ -950,7 +915,7 @@
                 "count": 1,
                 "equipped": 1,
                 "followerVisible": true,
-                "followerDist": 60.97044536940822
+                "followerDist": 60.97475770081491
               },
               "stats": {
                 "attack": 100,
@@ -979,7 +944,7 @@
               "count": 1,
               "equipped": 1,
               "followerVisible": true,
-              "followerDist": 0.3602793119719181
+              "followerDist": 0.422805241853495
             }
           }
         },
@@ -1006,7 +971,7 @@
             "count": 1,
             "equipped": 1,
             "followerVisible": true,
-            "followerDist": 0.3602793119719181
+            "followerDist": 0.422805241853495
           }
         },
         "寵物加成反映到角色屬性；攻速 ≤ 160 且同步到攻擊動作": {
@@ -1059,15 +1024,15 @@
         "實玩效能測試流程（自動打怪、報告欄位、Context Lost 0）": {
           "ok": true,
           "detail": {
-            "seconds": 10.3,
-            "avgFps": 4.669714952816421,
-            "low1Fps": 4.098360655737705,
-            "minFps": 4.098360655737705,
-            "avgDraw": 91.83333333333333,
-            "kills": 2,
+            "seconds": 10.7,
+            "avgFps": 2.908613248264214,
+            "low1Fps": 2.6666666666666665,
+            "minFps": 2.6666666666666665,
+            "avgDraw": 114.2258064516129,
+            "kills": 1,
             "contextLost": 0,
-            "first30": 4.669714952816423,
-            "last30": 4.669714952816423,
+            "first30": 2.908613248264215,
+            "last30": 2.9086132482642144,
             "quality": "medium",
             "gender": "female",
             "lod": "lite",
@@ -1080,8 +1045,8 @@
             "p3": true,
             "pipeline": false,
             "charShadow": "blob",
-            "drawCalls": 90,
-            "fps": 4.841052121994515,
+            "drawCalls": 109,
+            "fps": 2.905287623474725,
             "contextLost": 0
           }
         }
@@ -1097,56 +1062,21 @@
         "start": {
           "gender": "female",
           "lod": "lite",
-          "file": "novice72_female_body_lite.glb",
+          "file": "novice_c10b5a_female_lite.glb",
           "avatarModel": {
-            "modular": true,
-            "weapon": "sword",
-            "bones": 23,
-            "triangles": 22106,
-            "parts": [
-              {
-                "kind": "hair",
-                "file": "novice72_female_hair01_lite.glb",
-                "meshes": 1,
-                "remapped": false
-              },
-              {
-                "kind": "top",
-                "file": "novice72_female_top_lite.glb",
-                "meshes": 1,
-                "remapped": false
-              },
-              {
-                "kind": "bottom",
-                "file": "novice72_female_bottom_lite.glb",
-                "meshes": 1,
-                "remapped": false
-              },
-              {
-                "kind": "boots",
-                "file": "novice72_female_boots_lite.glb",
-                "meshes": 1,
-                "remapped": false
-              },
-              {
-                "kind": "weapon",
-                "file": "novice72_female_sword_lite.glb",
-                "meshes": 1,
-                "remapped": false
-              }
-            ],
+            "modular": false,
+            "weapon": null,
+            "bones": 17,
+            "triangles": 39955,
+            "parts": [],
             "clips": [
-              "Death",
+              "Attack",
               "Hurt",
               "Idle",
               "Jump",
-              "Run",
-              "Attack"
+              "Run"
             ],
-            "attackClips": [
-              "staff",
-              "sword"
-            ]
+            "attackClips": []
           },
           "state": "Idle",
           "pos": [
@@ -1158,8 +1088,8 @@
           "maxHp": 100,
           "down": false,
           "speed": 0,
-          "runRate": 0.8,
-          "slide": -1.8,
+          "runRate": 1,
+          "slide": -1.9280000000000002,
           "attack": {
             "interval": 0.5,
             "hitAt": 0.2,
@@ -1360,26 +1290,26 @@
             "count": 0,
             "equipped": null,
             "followerVisible": false,
-            "followerDist": 85.03182415795735
+            "followerDist": 85.08967250789152
           },
           "render": {
             "p3": true,
             "pipeline": false,
             "charShadow": "blob",
-            "drawCalls": 102,
-            "fps": 2.2701475595913734,
+            "drawCalls": 1,
+            "fps": 60,
             "contextLost": 0
           }
         },
         "move": {
           "speed": 5.000000000000001,
-          "runRate": 2.2222222222222228,
+          "runRate": 2.074688796680498,
           "slide": 0,
           "state": "Run"
         },
         "fight": {
           "attacks": 25,
-          "ms": 11221,
+          "ms": 17506,
           "kills": 3,
           "hits": 9,
           "drops": 4,
@@ -1429,7 +1359,7 @@
               "count": 1,
               "equipped": 1,
               "followerVisible": true,
-              "followerDist": 60.97044536940822
+              "followerDist": 60.97475770081491
             },
             "stats": {
               "attack": 100,
@@ -1458,7 +1388,7 @@
             "count": 1,
             "equipped": 1,
             "followerVisible": true,
-            "followerDist": 0.3602793119719181
+            "followerDist": 0.422805241853495
           }
         },
         "itemAppraisal": {
@@ -1481,15 +1411,15 @@
           "itemAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]"
         },
         "bench": {
-          "seconds": 10.3,
-          "avgFps": 4.669714952816421,
-          "low1Fps": 4.098360655737705,
-          "minFps": 4.098360655737705,
-          "avgDraw": 91.83333333333333,
-          "kills": 2,
+          "seconds": 10.7,
+          "avgFps": 2.908613248264214,
+          "low1Fps": 2.6666666666666665,
+          "minFps": 2.6666666666666665,
+          "avgDraw": 114.2258064516129,
+          "kills": 1,
           "contextLost": 0,
-          "first30": 4.669714952816423,
-          "last30": 4.669714952816423,
+          "first30": 2.908613248264215,
+          "last30": 2.9086132482642144,
           "quality": "medium",
           "gender": "female",
           "lod": "lite",
@@ -1500,16 +1430,16 @@
             "p3": true,
             "pipeline": false,
             "charShadow": "blob",
-            "drawCalls": 90,
-            "fps": 4.841052121994515,
+            "drawCalls": 109,
+            "fps": 2.905287623474725,
             "contextLost": 0
           }
         }
       },
-      "ok": false
+      "ok": true
     }
   ],
-  "finishedAt": "2026-11-27T10:08:32.205Z",
+  "finishedAt": "2026-11-27T11:41:31.977Z",
   "characterVersion": "c10b5a",
-  "failures": 2
+  "failures": 0
 }
