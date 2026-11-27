@@ -156,8 +156,9 @@ export class VfxSystem {
     const m = new StandardMaterial(name, this.scene);
     m.diffuseTexture = tex;
     m.useAlphaFromDiffuseTexture = true;
-    m.diffuseColor = color.clone();
-    m.emissiveColor = Color3.Black();
+    // disableLighting 時 Babylon 只輸出自發光：顏色放在 emissiveColor（放 diffuseColor 會整片變黑，加算後看不見）
+    m.diffuseColor = Color3.Black();
+    m.emissiveColor = color.clone();
     m.specularColor = Color3.Black();
     m.disableLighting = true;
     m.backFaceCulling = false;
@@ -304,7 +305,7 @@ export class VfxSystem {
           mesh.material = mat;
           return { mesh, mat };
         });
-        f.mat.diffuseColor.copyFrom(pal.main);
+        f.mat.emissiveColor.copyFrom(pal.main);
         const big = key === "slashArcBig";
         const tilt = key === "slashArc" ? Math.PI / 2 : key === "slashArcRise" ? Math.PI / 2 - 0.9 : Math.PI / 2 + 0.75;
         f.mesh.position.copyFrom(at);
@@ -332,8 +333,8 @@ export class VfxSystem {
           extra.material = extraMat;
           return { mesh, mat, extra, extraMat };
         });
-        f.mat.diffuseColor.copyFrom(pal.main);
-        f.extraMat!.diffuseColor.copyFrom(pal.main);
+        f.mat.emissiveColor.copyFrom(pal.main);
+        f.extraMat!.emissiveColor.copyFrom(pal.main);
         f.follow = opt.follow;
         f.offset.set(0, 0.42, 0);
         f.baseScale = 4.2 * sc;
@@ -364,8 +365,8 @@ export class VfxSystem {
           extra.material = extraMat;
           return { mesh, mat, extra, extraMat };
         });
-        f.mat.diffuseColor.copyFrom(pal.main);
-        f.extraMat!.diffuseColor.copyFrom(pal.main);
+        f.mat.emissiveColor.copyFrom(pal.main);
+        f.extraMat!.emissiveColor.copyFrom(pal.main);
         f.follow = opt.follow;
         f.offset.set(0, 0.03, 0);
         f.mesh.position.copyFrom(at).addInPlaceFromFloats(0, 0.03, 0);
@@ -401,7 +402,7 @@ export class VfxSystem {
           mesh.material = mat;
           return { mesh, mat };
         });
-        f.mat.diffuseColor.copyFrom(pal.main);
+        f.mat.emissiveColor.copyFrom(pal.main);
         f.follow = opt.follow;
         f.offset.set(0, 0.025, 0);
         f.baseScale = 2.6 * sc;
@@ -428,7 +429,7 @@ export class VfxSystem {
           mesh.material = mat;
           return { mesh, mat };
         });
-        f.mat.diffuseColor.copyFrom(pal.main);
+        f.mat.emissiveColor.copyFrom(pal.main);
         f.follow = node;
         f.offset.set(0, 0.55, 0);
         f.baseScale = 1.6 * sc;
@@ -456,8 +457,8 @@ export class VfxSystem {
           extra.material = extraMat;
           return { mesh, mat, extra, extraMat };
         });
-        f.mat.diffuseColor.copyFrom(pal.main);
-        f.extraMat!.diffuseColor.copyFrom(pal.main);
+        f.mat.emissiveColor.copyFrom(pal.main);
+        f.extraMat!.emissiveColor.copyFrom(pal.main);
         f.mesh.position.copyFrom(at).addInPlaceFromFloats(0, 0.04, 0);
         f.baseScale = 3.4 * sc;
         if (f.extra) f.extra.setEnabled(q.secondary);
@@ -495,8 +496,8 @@ export class VfxSystem {
           extra.material = extraMat;
           return { mesh, mat, extra, extraMat };
         });
-        f.mat.diffuseColor.copyFrom(pal.main);
-        f.extraMat!.diffuseColor.copyFrom(pal.core);
+        f.mat.emissiveColor.copyFrom(pal.main);
+        f.extraMat!.emissiveColor.copyFrom(pal.core);
         f.mesh.position.copyFrom(at).addInPlaceFromFloats(0, 0.5 * sc, 0);
         f.baseScale = 3.2 * sc;
         this.startMesh(f, 0.55, g.handle, (ff, u) => {
@@ -538,7 +539,7 @@ export class VfxSystem {
           mesh.material = mat;
           return { mesh, mat };
         });
-        f.mat.diffuseColor.copyFrom(crit ? PALETTES.gold.core : key === "boltImpact" ? pal.main : pal.core);
+        f.mat.emissiveColor.copyFrom(crit ? PALETTES.gold.core : key === "boltImpact" ? pal.main : pal.core);
         f.mesh.position.copyFrom(at);
         f.mesh.rotation.z = Math.random() * Math.PI;
         f.baseScale = (crit ? 2.2 : key === "boltImpact" ? 1.5 : 1.05) * sc;

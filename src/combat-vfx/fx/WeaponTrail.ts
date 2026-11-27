@@ -61,13 +61,15 @@ export class WeaponTrail {
     this.mat.alphaMode = Constants.ALPHA_ADD;
     this.mat.disableDepthWrite = true;
     this.mat.specularColor = Color3.Black();
+    this.mat.diffuseColor = Color3.Black();
+    this.mat.emissiveColor = new Color3(0.8, 0.9, 1);
     this.mesh.material = this.mat;
     this.mesh.setEnabled(false);
     glow?.addIncludedOnlyMesh(this.mesh);
   }
 
   setColor(c: Color3): void {
-    this.mat.diffuseColor.copyFrom(c);
+    this.mat.emissiveColor.copyFrom(c);
   }
 
   setQuality(segments: number, life: number): void {
@@ -116,7 +118,7 @@ export class WeaponTrail {
       const by = t.y + (b.y - t.y) * w;
       const bz = t.z + (b.z - t.z) * w;
       this.pos.set([bx, by, bz, t.x, t.y, t.z], i * 6);
-      this.col.set([1, 1, 1, fade * 0.6, 1, 1, 1, fade], i * 8);
+      this.col.set([1, 1, 1, fade * 0.75, 1, 1, 1, fade], i * 8);
     }
     this.mesh.updateVerticesData("position", this.pos, false, false);
     this.mesh.updateVerticesData("color", this.col, false, false);
