@@ -1,0 +1,31 @@
+name: Verify public preview — village art66 (read-only)
+
+# Stage 6.6 部署驗證：只讀取公開 GitHub Pages 網址（HTTP、遊戲載入、模型載入、HQ／Lite），不部署、不修改 gh-pages。
+on:
+  push:
+    branches: [verify/pages-art66]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Verify https://scottlien2002-sys.github.io/starwish-online/preview-village-art66/
+        run: |
+          npm install --no-audit --no-fund >/dev/null
+          npx playwright install --with-deps chromium webkit >/dev/null
+          mkdir -p out
+          node tests/e2e/verify-public-preview.mjs "https://scottlien2002-sys.github.io/starwish-online/preview-village-art66/"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: verify-art66
+          path: out/
