@@ -1,0 +1,856 @@
+{
+  "startedAt": "2026-11-27T21:37:04.231Z",
+  "browser": "chromium",
+  "benchSeconds": 60,
+  "note": "CI 軟體繪製，不是 iPhone；只比較相對變化",
+  "runs": [
+    {
+      "label": "A_stage73",
+      "url": "(預設)",
+      "ok": true,
+      "bench": {
+        "seconds": 60.9,
+        "avgFps": 1.6753280029433226,
+        "low1Fps": 1.4050864128144225,
+        "minFps": 1.377979881493708,
+        "avgDraw": 141.97058823529412,
+        "kills": 4,
+        "contextLost": 0,
+        "first30": 1.6611406055854196,
+        "last30": 1.691015073244163,
+        "quality": "high",
+        "gender": "male",
+        "lod": "hq",
+        "charShadow": "blob"
+      },
+      "info": {
+        "monsters": 27,
+        "tiers": null,
+        "rig": [
+          {
+            "id": "star_dew_bobo#1",
+            "kind": "star_dew_bobo",
+            "level": 1,
+            "aggressive": false,
+            "provoked": true,
+            "state": "death",
+            "mode": "dead",
+            "hp": 0,
+            "maxHp": 60,
+            "x": -20.363571402681544,
+            "z": -50.237341493657,
+            "speed": 0,
+            "attacks": {
+              "started": 1,
+              "resolved": 1,
+              "cancelled": 0,
+              "duplicatesBlocked": 0,
+              "lastResolvedId": 1,
+              "lastCancelledId": null
+            }
+          },
+          {
+            "id": "star_dew_bobo#2",
+            "kind": "star_dew_bobo",
+            "level": 1,
+            "aggressive": false,
+            "provoked": false,
+            "state": "idle",
+            "mode": "idle",
+            "hp": 60,
+            "maxHp": 60,
+            "x": -22.222797088783146,
+            "z": -42.757919658941084,
+            "speed": 0,
+            "attacks": {
+              "started": 0,
+              "resolved": 0,
+              "cancelled": 0,
+              "duplicatesBlocked": 0,
+              "lastResolvedId": null,
+              "lastCancelledId": null
+            }
+          },
+          {
+            "id": "star_dew_bobo#3",
+            "kind": "star_dew_bobo",
+            "level": 1,
+            "aggressive": false,
+            "provoked": true,
+            "state": "dead",
+            "mode": "dead",
+            "hp": 0,
+            "maxHp": 60,
+            "x": -28.3279877245721,
+            "z": -48.764009201667655,
+            "speed": 0,
+            "attacks": {
+              "started": 1,
+              "resolved": 1,
+              "cancelled": 0,
+              "duplicatesBlocked": 0,
+              "lastResolvedId": 1,
+              "lastCancelledId": null
+            }
+          }
+        ]
+      },
+      "session": null,
+      "errors": []
+    },
+    {
+      "label": "B_stage74_off",
+      "url": "&mlod=0&shadowq=original",
+      "ok": true,
+      "bench": {
+        "seconds": 60.6,
+        "avgFps": 1.6508269817765209,
+        "low1Fps": 1.4324595330181207,
+        "minFps": 1.4324595330181207,
+        "avgDraw": 142.02,
+        "kills": 4,
+        "contextLost": 0,
+        "first30": 1.6155301906325636,
+        "last30": 1.686223553567353,
+        "quality": "high",
+        "gender": "male",
+        "lod": "hq",
+        "charShadow": "blob"
+      },
+      "info": {
+        "monsters": 27,
+        "tiers": {
+          "on": false,
+          "near": 0,
+          "mid": 0,
+          "far": 0,
+          "hidden": 0,
+          "offscreen": 0
+        },
+        "rig": [
+          {
+            "id": "star_dew_bobo#1",
+            "kind": "star_dew_bobo",
+            "level": 1,
+            "aggressive": false,
+            "provoked": true,
+            "state": "death",
+            "mode": "dead",
+            "hp": 0,
+            "maxHp": 60,
+            "x": -20.67904591660388,
+            "z": -50.04982789660788,
+            "speed": 0,
+            "attacks": {
+              "started": 1,
+              "resolved": 1,
+              "cancelled": 0,
+              "duplicatesBlocked": 0,
+              "lastResolvedId": 1,
+              "lastCancelledId": null
+            },
+            "tier": null,
+            "stride": 1,
+            "visualUpdates": 107
+          },
+          {
+            "id": "star_dew_bobo#2",
+            "kind": "star_dew_bobo",
+            "level": 1,
+            "aggressive": false,
+            "provoked": false,
+            "state": "idle",
+            "mode": "idle",
+            "hp": 60,
+            "maxHp": 60,
+            "x": -22.222797088783146,
+            "z": -42.757919658941084,
+            "speed": 0,
+            "attacks": {
+              "started": 0,
+              "resolved": 0,
+              "cancelled": 0,
+              "duplicatesBlocked": 0,
+              "lastResolvedId": null,
+              "lastCancelledId": null
+            },
+            "tier": null,
+            "stride": 1,
+            "visualUpdates": 107
+          },
+          {
+            "id": "star_dew_bobo#3",
+            "kind": "star_dew_bobo",
+            "level": 1,
+            "aggressive": false,
+            "provoked": true,
+            "state": "dead",
+            "mode": "dead",
+            "hp": 0,
+            "maxHp": 60,
+            "x": -28.512526484401864,
+            "z": -48.87162304971345,
+            "speed": 0,
+            "attacks": {
+              "started": 1,
+              "resolved": 1,
+              "cancelled": 0,
+              "duplicatesBlocked": 0,
+              "lastResolvedId": 1,
+              "lastCancelledId": null
+            },
+            "tier": null,
+            "stride": 1,
+            "visualUpdates": 107
+          }
+        ]
+      },
+      "session": {
+        "seconds": 63.4,
+        "frames": 104,
+        "avgFps": 1.6,
+        "low1": 1.2,
+        "minFps": 1.2,
+        "hitches": 104,
+        "pixelRatio": 1,
+        "quality": "high",
+        "model": "HQ",
+        "map": "星芽原野",
+        "hitchRule": "卡頓＝單幀超過 50 ms（低於 20 FPS）；另列 >33 ms、>100 ms",
+        "frames33": 104,
+        "frames100": 104,
+        "drawCalls": {
+          "avg": 142,
+          "max": 167
+        },
+        "triangles": {
+          "avgK": 962,
+          "maxK": 1010
+        },
+        "cpuMs": {
+          "frame": 6.44,
+          "render": 1.96,
+          "animations": 1.17,
+          "activeMeshes": 1.26,
+          "renderTargets": 0.37
+        },
+        "memory": {
+          "jsHeapMB": 129,
+          "meshes": 305,
+          "materials": 100,
+          "textures": 119,
+          "gpuTextures": 74,
+          "textureMB": 127,
+          "skeletons": 22,
+          "animationGroups": 153,
+          "particleSystems": 3
+        },
+        "extra": {
+          "monsterDetail": "關閉（&mlod=0）",
+          "monsters": 27,
+          "shadow": "PCSS 2048（取樣 高）",
+          "shadowCasters": 31,
+          "fx": {
+            "hitFx": 12,
+            "numbers": 16,
+            "hurt": 4,
+            "respawnFx": 0,
+            "particles": 0
+          }
+        },
+        "heavy": {
+          "meshes": [
+            {
+              "name": "PH_vegHi",
+              "triK": 104.6,
+              "instances": 4,
+              "skinned": false
+            },
+            {
+              "name": "PH_grass",
+              "triK": 54.9,
+              "instances": 4573,
+              "skinned": false
+            },
+            {
+              "name": "PH_flowers",
+              "triK": 49.3,
+              "instances": 1760,
+              "skinned": false
+            },
+            {
+              "name": "hair__male_hair",
+              "triK": 46.8,
+              "instances": 1,
+              "skinned": true
+            },
+            {
+              "name": "PH_vegLo",
+              "triK": 39.2,
+              "instances": 6,
+              "skinned": false
+            },
+            {
+              "name": "face__face_male",
+              "triK": 24.9,
+              "instances": 1,
+              "skinned": true
+            },
+            {
+              "name": "Body_high",
+              "triK": 21,
+              "instances": 3,
+              "skinned": false
+            },
+            {
+              "name": "outfit__male_tabard",
+              "triK": 17.8,
+              "instances": 1,
+              "skinned": true
+            },
+            {
+              "name": "body__male_skin",
+              "triK": 17.5,
+              "instances": 1,
+              "skinned": true
+            },
+            {
+              "name": "PH_mapGround_2",
+              "triK": 16.2,
+              "instances": 4,
+              "skinned": false
+            },
+            {
+              "name": "PH_mapGround_3",
+              "triK": 16.2,
+              "instances": 4,
+              "skinned": false
+            },
+            {
+              "name": "feet__male_boot",
+              "triK": 15.9,
+              "instances": 1,
+              "skinned": true
+            }
+          ],
+          "textures": [
+            {
+              "name": "sun_shadowMap",
+              "size": "2048x2048",
+              "mb": 21.3
+            },
+            {
+              "name": "face_male (Base Color)",
+              "size": "2048x2048",
+              "mb": 21.3
+            },
+            {
+              "name": "M002_MossHornBeast_Mat (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M002_MossHornBeast_Mat (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M003_CloudFluffBird_Mat (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M003_CloudFluffBird_Mat (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M004_WindfeatherFox_Mat (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M004_WindfeatherFox_Mat (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M005_NebulaSheep_Mat (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M005_NebulaSheep_Mat (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "m006_carrot_king_Mat (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "m006_carrot_king_Mat (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            }
+          ]
+        }
+      },
+      "errors": []
+    },
+    {
+      "label": "C_stage74",
+      "url": "(預設)",
+      "ok": true,
+      "bench": {
+        "seconds": 60.4,
+        "avgFps": 2.0034140825108584,
+        "low1Fps": 1.702127659574468,
+        "minFps": 1.6460905349794237,
+        "avgDraw": 117.4297520661157,
+        "kills": 4,
+        "contextLost": 0,
+        "first30": 1.9748665319368837,
+        "last30": 2.0323104037634403,
+        "quality": "high",
+        "gender": "male",
+        "lod": "hq",
+        "charShadow": "blob"
+      },
+      "info": {
+        "monsters": 27,
+        "tiers": {
+          "on": true,
+          "near": 3,
+          "mid": 0,
+          "far": 0,
+          "hidden": 0,
+          "offscreen": 24
+        },
+        "rig": [
+          {
+            "id": "star_dew_bobo#1",
+            "kind": "star_dew_bobo",
+            "level": 1,
+            "aggressive": false,
+            "provoked": true,
+            "state": "dead",
+            "mode": "dead",
+            "hp": 0,
+            "maxHp": 60,
+            "x": -20.261992910601858,
+            "z": -50.681147729892956,
+            "speed": 0,
+            "attacks": {
+              "started": 1,
+              "resolved": 1,
+              "cancelled": 0,
+              "duplicatesBlocked": 0,
+              "lastResolvedId": 1,
+              "lastCancelledId": null
+            },
+            "tier": "near",
+            "stride": 1,
+            "visualUpdates": 126
+          },
+          {
+            "id": "star_dew_bobo#2",
+            "kind": "star_dew_bobo",
+            "level": 1,
+            "aggressive": false,
+            "provoked": false,
+            "state": "move",
+            "mode": "patrol",
+            "hp": 60,
+            "maxHp": 60,
+            "x": -23.4576776067953,
+            "z": -44.011981103302595,
+            "speed": 1.6,
+            "attacks": {
+              "started": 0,
+              "resolved": 0,
+              "cancelled": 0,
+              "duplicatesBlocked": 0,
+              "lastResolvedId": null,
+              "lastCancelledId": null
+            },
+            "tier": "offscreen",
+            "stride": 0,
+            "visualUpdates": 121
+          },
+          {
+            "id": "star_dew_bobo#3",
+            "kind": "star_dew_bobo",
+            "level": 1,
+            "aggressive": false,
+            "provoked": true,
+            "state": "dead",
+            "mode": "dead",
+            "hp": 0,
+            "maxHp": 60,
+            "x": -28.656316703137286,
+            "z": -48.92753350562363,
+            "speed": 0,
+            "attacks": {
+              "started": 1,
+              "resolved": 1,
+              "cancelled": 0,
+              "duplicatesBlocked": 0,
+              "lastResolvedId": 1,
+              "lastCancelledId": null
+            },
+            "tier": "offscreen",
+            "stride": 0,
+            "visualUpdates": 101
+          }
+        ]
+      },
+      "session": {
+        "seconds": 63.2,
+        "frames": 126,
+        "avgFps": 2,
+        "low1": 1.6,
+        "minFps": 1.6,
+        "hitches": 126,
+        "pixelRatio": 1,
+        "quality": "high",
+        "model": "HQ",
+        "map": "星芽原野",
+        "hitchRule": "卡頓＝單幀超過 50 ms（低於 20 FPS）；另列 >33 ms、>100 ms",
+        "frames33": 126,
+        "frames100": 126,
+        "drawCalls": {
+          "avg": 118,
+          "max": 146
+        },
+        "triangles": {
+          "avgK": 745,
+          "maxK": 806
+        },
+        "cpuMs": {
+          "frame": 4.54,
+          "render": 1.8,
+          "animations": 0.21,
+          "activeMeshes": 1.25,
+          "renderTargets": 0.36
+        },
+        "memory": {
+          "jsHeapMB": 124,
+          "meshes": 303,
+          "materials": 99,
+          "textures": 119,
+          "gpuTextures": 74,
+          "textureMB": 127,
+          "skeletons": 22,
+          "animationGroups": 153,
+          "particleSystems": 3
+        },
+        "extra": {
+          "monsterDetail": {
+            "near": 3,
+            "mid": 0,
+            "far": 0,
+            "hidden": 0,
+            "offscreen": 24
+          },
+          "monsters": 27,
+          "shadow": "PCSS 2048（取樣 中）",
+          "shadowCasters": 10,
+          "fx": {
+            "hitFx": 14,
+            "numbers": 18,
+            "hurt": 4,
+            "respawnFx": 0,
+            "particles": 0
+          }
+        },
+        "heavy": {
+          "meshes": [
+            {
+              "name": "PH_vegHi",
+              "triK": 104.6,
+              "instances": 4,
+              "skinned": false
+            },
+            {
+              "name": "PH_grass",
+              "triK": 54.9,
+              "instances": 4573,
+              "skinned": false
+            },
+            {
+              "name": "PH_flowers",
+              "triK": 49.3,
+              "instances": 1760,
+              "skinned": false
+            },
+            {
+              "name": "hair__male_hair",
+              "triK": 46.8,
+              "instances": 1,
+              "skinned": true
+            },
+            {
+              "name": "PH_vegLo",
+              "triK": 39.2,
+              "instances": 6,
+              "skinned": false
+            },
+            {
+              "name": "face__face_male",
+              "triK": 24.9,
+              "instances": 1,
+              "skinned": true
+            },
+            {
+              "name": "outfit__male_tabard",
+              "triK": 17.8,
+              "instances": 1,
+              "skinned": true
+            },
+            {
+              "name": "body__male_skin",
+              "triK": 17.5,
+              "instances": 1,
+              "skinned": true
+            },
+            {
+              "name": "PH_mapGround_2",
+              "triK": 16.2,
+              "instances": 4,
+              "skinned": false
+            },
+            {
+              "name": "PH_mapGround_3",
+              "triK": 16.2,
+              "instances": 4,
+              "skinned": false
+            },
+            {
+              "name": "feet__male_boot",
+              "triK": 15.9,
+              "instances": 1,
+              "skinned": true
+            },
+            {
+              "name": "hands__male_glove",
+              "triK": 15,
+              "instances": 1,
+              "skinned": true
+            }
+          ],
+          "textures": [
+            {
+              "name": "sun_shadowMap",
+              "size": "2048x2048",
+              "mb": 21.3
+            },
+            {
+              "name": "face_male (Base Color)",
+              "size": "2048x2048",
+              "mb": 21.3
+            },
+            {
+              "name": "M002_MossHornBeast_Mat (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M002_MossHornBeast_Mat (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M003_CloudFluffBird_Mat (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M003_CloudFluffBird_Mat (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M004_WindfeatherFox_Mat (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M004_WindfeatherFox_Mat (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M005_NebulaSheep_Mat (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M005_NebulaSheep_Mat (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "m006_carrot_king_Mat (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "m006_carrot_king_Mat (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            }
+          ]
+        }
+      },
+      "errors": []
+    }
+  ],
+  "soak": {
+    "seconds": 180,
+    "ok": true,
+    "samples": [
+      {
+        "t": 0.6,
+        "mem": {
+          "jsHeapMB": 134.3,
+          "meshes": 303,
+          "materials": 98,
+          "textures": 119,
+          "gpuTextures": 74,
+          "textureMB": 127,
+          "skeletons": 22,
+          "animationGroups": 153,
+          "particleSystems": 3
+        },
+        "kills": 0,
+        "monsters": 27
+      },
+      {
+        "t": 31,
+        "mem": {
+          "jsHeapMB": 129.8,
+          "meshes": 303,
+          "materials": 100,
+          "textures": 119,
+          "gpuTextures": 74,
+          "textureMB": 127,
+          "skeletons": 22,
+          "animationGroups": 153,
+          "particleSystems": 3
+        },
+        "kills": 2,
+        "monsters": 27
+      },
+      {
+        "t": 61.2,
+        "mem": {
+          "jsHeapMB": 122.9,
+          "meshes": 304,
+          "materials": 99,
+          "textures": 119,
+          "gpuTextures": 74,
+          "textureMB": 127,
+          "skeletons": 22,
+          "animationGroups": 153,
+          "particleSystems": 3
+        },
+        "kills": 4,
+        "monsters": 27
+      },
+      {
+        "t": 91.5,
+        "mem": {
+          "jsHeapMB": 126.6,
+          "meshes": 304,
+          "materials": 99,
+          "textures": 119,
+          "gpuTextures": 74,
+          "textureMB": 127,
+          "skeletons": 22,
+          "animationGroups": 153,
+          "particleSystems": 3
+        },
+        "kills": 6,
+        "monsters": 27
+      },
+      {
+        "t": 121.9,
+        "mem": {
+          "jsHeapMB": 130.3,
+          "meshes": 304,
+          "materials": 100,
+          "textures": 119,
+          "gpuTextures": 74,
+          "textureMB": 127,
+          "skeletons": 22,
+          "animationGroups": 153,
+          "particleSystems": 3
+        },
+        "kills": 9,
+        "monsters": 27
+      },
+      {
+        "t": 152.1,
+        "mem": {
+          "jsHeapMB": 125.5,
+          "meshes": 304,
+          "materials": 100,
+          "textures": 119,
+          "gpuTextures": 74,
+          "textureMB": 127,
+          "skeletons": 22,
+          "animationGroups": 153,
+          "particleSystems": 3
+        },
+        "kills": 11,
+        "monsters": 27
+      },
+      {
+        "t": 183.5,
+        "mem": {
+          "jsHeapMB": 127.7,
+          "meshes": 304,
+          "materials": 99,
+          "textures": 119,
+          "gpuTextures": 74,
+          "textureMB": 127,
+          "skeletons": 22,
+          "animationGroups": 153,
+          "particleSystems": 3
+        },
+        "kills": 12,
+        "monsters": 27
+      }
+    ],
+    "bench": {
+      "seconds": 180.5,
+      "avgFps": 2.0273110931028784,
+      "low1Fps": 1.7847581652686433,
+      "minFps": 1.5276504735717011,
+      "avgDraw": 107.74590163934427,
+      "kills": 12,
+      "contextLost": 0,
+      "first30": 1.9312282944923398,
+      "last30": 2.0647464524658723,
+      "quality": "high",
+      "gender": "male",
+      "lod": "hq",
+      "charShadow": "blob"
+    },
+    "growth": {
+      "meshes": 1,
+      "materials": -1,
+      "textures": 0
+    },
+    "errors": []
+  },
+  "delta": {
+    "avgFps": 0.3,
+    "low1Fps": 0.3,
+    "avgDraw": -25,
+    "ratio": 1.2
+  },
+  "finishedAt": "2026-11-27T21:44:04.589Z"
+}
