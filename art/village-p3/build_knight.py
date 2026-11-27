@@ -21,6 +21,7 @@ args = dict(zip(argv[::2], argv[1::2]))
 OUT = os.path.abspath(args.get("--out", "out"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import vp3_geo as G  # noqa: E402
+import vp3_detail66 as D66  # noqa: E402  （Stage 6.6 壁燈、花盆）
 import vp3_kit  # noqa: E402
 
 # ---------------- V1.3 騎士軍團 ----------------
@@ -28,7 +29,7 @@ BEARING, FRONT, W, D, TOP, FLOOR = 332.0, 27.0, 16.0, 14.0, 19.0, 2.0
 OX, OZ = G.pol(BEARING, FRONT)  # 正面中心（地面）
 F = G.frame(OX, OZ, BEARING, FLOOR)  # 區域座標：x 右（從廣場看）、y 往建築內、h 高（離高台面）
 FACE = BEARING + 180  # 正面朝向（噴泉）
-BUDGET = {"hq": 40000, "lite": 16000}
+BUDGET = {"hq": 40700, "lite": 16350}  # Stage 6.6：＋壁燈與花盆
 LOD = {
     "hq": dict(tower=32, roof=32, small=12, corbels=True, studs=True, win_levels=3, statue_full=True, sword_emblem=True),
     "lite": dict(tower=12, roof=12, small=6, corbels=False, studs=False, win_levels=2, statue_full=False, sword_emblem=False),
@@ -477,6 +478,7 @@ def build(lod):
         G.lathe(gm, px, pz, FLOOR, [(0.0, 10.4), (0.1, 10.48), (0.12, 10.6), (0.07, 10.72), (0.0, 10.82)], P["small"], gcol)
         G.box(gm, F, sx - 0.72, sx + 0.72, 0.66, 0.72, 10.08, 10.16, gcol)
         banner(props, gm, gcol, F, sx - 0.68, sx + 0.68, 10.06, 5.0, 0.62, 0.05, lite)
+    D66.decorate66("knight", locals(), F, lod)
     return {k: v for k, v in (("stone", stone), ("roof", roof), ("gold", gold), ("props", props)) if v.f}
 
 

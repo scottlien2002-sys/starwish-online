@@ -29,7 +29,8 @@ export class PerfOverlay {
   private uiTimer = 0;
   private last: PerfStats;
 
-  constructor(engine: Engine, scene: Scene, q: QualitySettings, parent: HTMLElement) {
+  /** opts.label／onQualityClick：頁面自訂畫質按鈕（例如星芽村三段畫質）；不給則沿用原本的 switchQuality */
+  constructor(engine: Engine, scene: Scene, q: QualitySettings, parent: HTMLElement, opts: { label?: string; onQualityClick?: () => void } = {}) {
     this.engine = engine;
     this.scene = scene;
     this.q = q;
@@ -46,11 +47,12 @@ export class PerfOverlay {
     const btn = document.createElement("button");
     btn.className = "perf-quality";
     btn.dataset.layout = "btn-quality";
-    btn.textContent = `畫質：${QUALITY_LABEL[q.level]}`;
+    btn.textContent = opts.label ?? `畫質：${QUALITY_LABEL[q.level]}`;
     btn.setAttribute("aria-label", "切換畫質（高、中、低）");
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
-      switchQuality(nextQuality(q.level));
+      if (opts.onQualityClick) opts.onQualityClick();
+      else switchQuality(nextQuality(q.level));
     });
     btn.addEventListener("pointerdown", (e) => e.stopPropagation());
     this.el.append(this.text, btn);
@@ -142,6 +144,27 @@ export class PerfOverlay {
     return this.steps[this.stepIndex]!;
   }
 
+  /** 實際生效的解析度倍率（＝1 ÷ Hardware Scaling Level；鎖定時是鎖定值，不是動態解析度的階梯值） */
+  get actualPixelRatio(): number {
+    return 1 / this.engine.getHardwareScalingLevel();
+  }
+
+  /** 解析度狀態（報告用：要求值、實際值、framebuffer、Hardware Scaling、動態解析度是否介入、是否鎖定、裝置 DPR） */
+  resolutionInfo(): { requestedMax: number; actual: number; hardwareScaling: number; width: number; height: number; dynamicSteps: number[]; dynamicStep: number; dynamicEngaged: boolean; locked: boolean; dpr: number } {
+    return {
+      requestedMax: this.q.maxPixelRatio,
+      actual: Math.round(this.actualPixelRatio * 1000) / 1000,
+      hardwareScaling: Math.round(this.engine.getHardwareScalingLevel() * 10000) / 10000,
+      width: this.engine.getRenderWidth(),
+      height: this.engine.getRenderHeight(),
+      dynamicSteps: [...this.steps],
+      dynamicStep: this.stepIndex,
+      dynamicEngaged: this.stepIndex > 0 && !this.resolutionLocked,
+      locked: this.resolutionLocked,
+      dpr: window.devicePixelRatio || 1,
+    };
+  }
+
   /** 每幀呼叫（render 之後） */
   update(dt: number): void {
     this.recordFrame();
@@ -160,8 +183,8 @@ export class PerfOverlay {
       this.last = this.read();
       const s = this.last;
       this.text.innerHTML = this.labels
-        ? `FPS ${Math.round(s.fps)}｜平均 ${Math.round(this.avgFps(5))}<br>Draw ${s.drawCalls}｜${Math.round(this.scene.getActiveIndices() / 3000)}k<br>${s.pixelRatio}x｜模型 ${this.labels.model}`
-        : `FPS ${Math.round(s.fps)}<br>Draw ${s.drawCalls}<br>Tri ${(this.scene.getActiveIndices() / 3000).toFixed(1)}k<br>Mesh ${s.activeMeshes}<br>${s.pixelRatio}x`;
+        ? `FPS ${Math.round(s.fps)}｜平均 ${Math.round(this.avgFps(5))}<br>Draw ${s.drawCalls}｜${Math.round(this.scene.getActiveIndices() / 3000)}k<br>${Math.round(this.actualPixelRatio * 100) / 100}x${this.resolutionLocked ? "🔒" : ""}｜模型 ${this.labels.model}`
+        : `FPS ${Math.round(s.fps)}<br>Draw ${s.drawCalls}<br>Tri ${(this.scene.getActiveIndices() / 3000).toFixed(1)}k<br>Mesh ${s.activeMeshes}<br>${Math.round(this.actualPixelRatio * 100) / 100}x${this.resolutionLocked ? "🔒" : ""}`;
     }
   }
 
@@ -174,7 +197,7 @@ export class PerfOverlay {
       fps: this.engine.getFps(),
       drawCalls: this.instr.drawCallsCounter.current,
       activeMeshes: this.scene.getActiveMeshes().length,
-      pixelRatio: this.pixelRatio,
+      pixelRatio: Math.round(this.actualPixelRatio * 100) / 100,
       quality: this.q.level,
     };
   }

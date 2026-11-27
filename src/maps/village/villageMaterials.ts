@@ -8,6 +8,14 @@ import { villageTexture } from "./villageTextures.ts";
  */
 const caches = new WeakMap<Scene, Map<string, Material>>();
 
+/**
+ * Stage 6.6 美術升級的石材設定（載入模型前由村莊頁設定）：
+ * - liteNormals：中畫質（Lite 模型）也使用石材法線貼圖（低畫質不用）
+ * - stoneAlbedo：石材整體亮度（6.5 以前 1.08～1.12 偏亮，造成過曝與塑膠感）
+ * - stoneRough：石材粗糙度
+ */
+export const VILLAGE_LOOK = { liteNormals: false, stoneAlbedo: 1, stoneRough: 0.85, slateRough: 0.45 };
+
 function once<T extends Material>(scene: Scene, key: string, make: () => T): T {
   let m = caches.get(scene);
   if (!m) {
@@ -69,7 +77,7 @@ export function villageGlass(scene: Scene): StandardMaterial {
 function stonePbr(scene: Scene, name: string, tex: string, nrm: string | null, level: number, albedo: Color3, rough: number, hq: boolean): PBRMaterial {
   const m = new PBRMaterial(name, scene);
   m.albedoTexture = villageTexture(scene, tex, hq);
-  m.albedoColor = albedo;
+  m.albedoColor = albedo.scale(VILLAGE_LOOK.stoneAlbedo);
   m.metallic = 0;
   m.roughness = rough;
   if (nrm) {
@@ -83,21 +91,21 @@ function stonePbr(scene: Scene, name: string, tex: string, nrm: string | null, l
 /** 暖白石灰岩（廣場石板、噴泉雕刻）：無接縫細紋；石板分割由模型負責 */
 export function villageLimestone(scene: Scene, texBase: string, hq: boolean): PBRMaterial {
   return once(scene, `limestone:${hq}`, () =>
-    stonePbr(scene, "VP3_limestone", `${texBase}slab_${hq ? "hq" : "lite"}.png`, hq ? `${texBase}slab_nrm_hq.png` : null, 0.5, new Color3(1.12, 1.1, 1.06), 0.85, hq),
+    stonePbr(scene, "VP3_limestone", `${texBase}slab_${hq ? "hq" : "lite"}.png`, hq || VILLAGE_LOOK.liteNormals ? `${texBase}slab_nrm_hq.png` : null, 0.5, new Color3(1.12, 1.1, 1.06), VILLAGE_LOOK.stoneRough, hq),
   );
 }
 
 /** 城牆砌石（騎士軍團及之後的建築）：錯縫大石塊、倒角、淺色灰縫 */
 export function villageAshlar(scene: Scene, texBase: string, hq: boolean): PBRMaterial {
   return once(scene, `ashlar:${hq}`, () =>
-    stonePbr(scene, "VP3_ashlar", `${texBase}ashlar_${hq ? "hq" : "lite"}.png`, hq ? `${texBase}ashlar_nrm_512.png` : null, 0.85, new Color3(1.1, 1.08, 1.03), 0.85, hq),
+    stonePbr(scene, "VP3_ashlar", `${texBase}ashlar_${hq ? "hq" : "lite"}.png`, hq || VILLAGE_LOOK.liteNormals ? `${texBase}ashlar_nrm_512.png` : null, 0.85, new Color3(1.1, 1.08, 1.03), VILLAGE_LOOK.stoneRough, hq),
   );
 }
 
 /** 魚鱗瓦屋頂（顏色＝頂點色深藍），略有光澤 */
 export function villageSlate(scene: Scene, texBase: string, hq: boolean): PBRMaterial {
   return once(scene, `slate:${hq}`, () =>
-    stonePbr(scene, "VP3_slate", `${texBase}slate_${hq ? "hq" : "lite"}.png`, hq ? `${texBase}slate_nrm_512.png` : null, 0.9, new Color3(1.08, 1.08, 1.12), 0.45, hq),
+    stonePbr(scene, "VP3_slate", `${texBase}slate_${hq ? "hq" : "lite"}.png`, hq || VILLAGE_LOOK.liteNormals ? `${texBase}slate_nrm_512.png` : null, 0.9, new Color3(1.08, 1.08, 1.12), VILLAGE_LOOK.slateRough, hq),
   );
 }
 

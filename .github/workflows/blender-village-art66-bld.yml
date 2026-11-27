@@ -1,0 +1,86 @@
+name: Blender — Village Stage 6.6 buildings + env (lanterns, pots, trees)
+
+# Stage 6.6 星芽村建築生活感裝飾（Claude B）：只重建有改動的建築（劍士、騎士、法師、教堂、鐵匠鋪、倉庫、商會）與環境（樹冠）。
+# 建模腳本與 feature/render-village-p3 相同，只多了 vp3_detail66（壁燈、花盆，全部在原碰撞箱內）與 build_env 的新樹冠。
+# 結果推到 art-village-art66-bld 分支（一般 push，不 force；不影響遊戲網站與 main）。
+on:
+  workflow_dispatch:
+  push:
+    branches: ["feature/render-village-art66"]
+    paths:
+      - "art/village-p3/vp3_detail66.py"
+      - "art/village-p3/build_*.py"
+      - ".github/workflows/blender-village-art66-bld.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: blender-village-art66-bld
+  cancel-in-progress: false
+
+env:
+  BLENDER_VERSION: "4.2.3"
+  BLENDER_SERIES: "4.2"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v5
+      - name: System libraries for Blender (headless)
+        run: |
+          python3 -m pip install --quiet numpy pillow
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libsm6 libxkbcommon0 >/dev/null
+      - name: Download Blender ${{ env.BLENDER_VERSION }} (official, free)
+        run: |
+          URL="https://download.blender.org/release/Blender${BLENDER_SERIES}/blender-${BLENDER_VERSION}-linux-x64.tar.xz"
+          curl -fsSL --retry 5 --retry-delay 10 "$URL" -o /tmp/blender.tar.xz || curl -fsSL --retry 5 "https://mirrors.ocf.berkeley.edu/blender/release/Blender${BLENDER_SERIES}/blender-${BLENDER_VERSION}-linux-x64.tar.xz" -o /tmp/blender.tar.xz
+          mkdir -p /opt/blender && tar -xf /tmp/blender.tar.xz -C /opt/blender --strip-components=1
+          /opt/blender/blender --version | head -2
+      - name: Build buildings + env (budget and collider checks inside each script)
+        run: |
+          mkdir -p out
+          for b in sword knight mage church smith warehouse guild env; do
+            echo "== $b"
+            /opt/blender/blender -b --factory-startup -noaudio -P art/village-p3/build_$b.py -- --out "$PWD/out" --previews 0 2>&1 | tee out/$b.log | grep -v "^Fra:" | grep -v "Sample" | tail -6
+            for q in hq lite; do test -f "out/${b}_$q.glb"; done
+          done
+          ls -la out/*.glb
+      - name: Validate GLB (Khronos glTF-Validator)
+        run: |
+          mkdir -p /tmp/gv && cd /tmp/gv && npm init -y >/dev/null && npm i --no-save gltf-validator@latest 2>&1 | tail -2
+          cd "$GITHUB_WORKSPACE"
+          NODE_PATH=/tmp/gv/node_modules node -e '
+            const v = require("gltf-validator"); const fs = require("fs");
+            (async () => {
+              let bad = 0; const s = {};
+              for (const f of fs.readdirSync("out").filter((n) => n.endsWith(".glb"))) {
+                const b = fs.readFileSync(`out/${f}`);
+                const r = await v.validateBytes(new Uint8Array(b));
+                s[f] = { errors: r.issues.numErrors, warnings: r.issues.numWarnings, bytes: b.length, triangles: r.info.totalTriangleCount, materials: r.info.materialCount };
+                console.log(f, JSON.stringify(s[f]));
+                bad += r.issues.numErrors;
+              }
+              fs.writeFileSync("out/validator_summary.json", JSON.stringify(s, null, 1));
+              if (bad) process.exit(1);
+            })();'
+      - name: Push results to art-village-art66-bld (normal push, no force)
+        if: always()
+        run: |
+          echo "{\"commit\":\"${GITHUB_SHA}\",\"blender\":\"${BLENDER_VERSION}\",\"builtAt\":\"$(date -u +%FT%TZ)\"}" > out/build.json
+          REPO="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads "$REPO" art-village-art66-bld >/dev/null 2>&1; then
+            git clone -q --depth 1 --branch art-village-art66-bld "$REPO" /tmp/artbld
+          else
+            mkdir -p /tmp/artbld && cd /tmp/artbld && git init -q -b art-village-art66-bld && git remote add origin "$REPO" && cd -
+          fi
+          rsync -a --delete --exclude .git out/ /tmp/artbld/
+          cd /tmp/artbld
+          git add -A
+          git commit -qm "Village art66 buildings ${GITHUB_SHA::7}" || echo "no changes"
+          git push -q origin HEAD:art-village-art66-bld

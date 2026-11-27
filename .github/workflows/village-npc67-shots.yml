@@ -1,0 +1,60 @@
+name: Village Stage 6.7 NPC shots (before/after, read-only)
+
+# Stage 6.7 正式 NPC 與委託佈告欄（Claude B）：只在 feature/render-village-npc67 執行。
+# 同一份建置拍兩組：升級後（預設：Tripo 正式 NPC，高／中／低）、升級前（&npcset=v66：Stage 6.6 程式模型，高畫質）。
+# 結果推到 art-village-npc67 分支的 shots/（一般 push，不 force）。不部署、不影響其他預覽與正式網站。
+# 注意：CI 是無頭瀏覽器＋軟體繪圖，只用來看畫面；FPS 不代表 iPhone 實機。
+on:
+  push:
+    branches: [feature/render-village-npc67]
+    paths:
+      - "src/**"
+      - "public/models/village-npc67/**"
+      - "tests/e2e/npc67-shots.mjs"
+      - ".github/workflows/village-npc67-shots.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: village-npc67-shots-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  shots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Install, typecheck, build
+        run: |
+          npm install --no-audit --no-fund
+          npm run typecheck
+          npm run build
+          npx playwright install --with-deps chromium >/dev/null
+      - name: After shots (Tripo NPC; high / medium / low)
+        run: node tests/e2e/npc67-shots.mjs dist "$PWD/out/shots" after high,medium,low chromium
+      - name: Before shots (Stage 6.6 NPC via &npcset=v66; high)
+        run: node tests/e2e/npc67-shots.mjs dist "$PWD/out/shots" before high chromium "&npcset=v66"
+      - name: Push shots to art-village-npc67 (normal push, no force)
+        if: always()
+        run: |
+          echo "{\"commit\":\"${GITHUB_SHA}\",\"run\":\"${GITHUB_RUN_ID}\",\"builtAt\":\"$(date -u +%FT%TZ)\"}" > out/shots/build.json
+          REPO="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads "$REPO" art-village-npc67 >/dev/null 2>&1; then
+            git clone -q --depth 1 --branch art-village-npc67 "$REPO" /tmp/artshots
+          else
+            mkdir -p /tmp/artshots && cd /tmp/artshots && git init -q -b art-village-npc67 && git remote add origin "$REPO" && cd -
+          fi
+          mkdir -p /tmp/artshots/shots
+          rsync -a --delete --exclude .git out/shots/ /tmp/artshots/shots/
+          cd /tmp/artshots
+          git add -A
+          git commit -qm "Village npc67 shots ${GITHUB_SHA::7}" || echo "no changes"
+          git push -q origin HEAD:art-village-npc67

@@ -24,7 +24,7 @@ os.makedirs(OUT, exist_ok=True)
 W, H = 1040, 1280
 PX = 0.00105
 Z_BOTTOM = -0.02 - 16 * PX
-BUDGET = {"hq": 60000, "lite": 15000}
+BUDGET = {"hq": 14000, "lite": 6000, "far": 2500}
 FPS = 30
 PAL = ("pal", "pal_eyes")
 PAL_AT = Vector((0.2, 0.06, 1.13))  # 美術圖用：小寵物在頭部右上方
@@ -77,7 +77,9 @@ def load():
     objs, pal, mats = [], [], {}
     for it in meta["parts"]:
         k = it["key"]
-        v = d[k + "__v"].astype(np.float64)
+        if k + "__blink" in d and LOD_NOW[0] == "far":
+            continue
+        v = (d[k + "__blink"] if k + "__blink" in d else d[k + "__v"]).astype(np.float64)
         q = d[k + "__q"]
         name = it["name"]
         is_pal = name in PAL
@@ -107,8 +109,36 @@ def load():
         ob = bpy.data.objects.new(("PetPal_" + name) if is_pal else name, me)
         bpy.context.scene.collection.objects.link(ob)
         me.shade_smooth()
+        if k + "__blink" in d:
+            add_blink_keys(ob, d[k + "__v"].astype(np.float64), v)
         (pal if is_pal else objs).append(ob)
     return objs, pal, mats
+
+
+LOD_NOW = ["hq"]
+
+
+def add_blink_keys(ob, open_v, closed_v):
+    """Stage 6.6 眨眼：網格建在閉眼位置（法線朝前），Basis＝睜眼（收到睫毛線）、Blink＝閉眼"""
+    import bmesh
+    me = ob.data
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bm.normal_update()
+    if sum(f.normal.y for f in bm.faces) > 0:
+        for f in bm.faces:
+            f.normal_flip()
+    bm.to_mesh(me)
+    bm.free()
+    me.update()
+    opened = open_v + (closed_v - open_v) * 0.02
+    ob.shape_key_add(name="Basis", from_mix=False)
+    kb = ob.shape_key_add(name="Blink", from_mix=False)
+    kb.data.foreach_set("co", closed_v.ravel())
+    ob.data.shape_keys.key_blocks["Basis"].data.foreach_set("co", opened.ravel())
+    me.vertices.foreach_set("co", opened.ravel())
+    me.update()
+    ob["blink"] = 1
 
 
 def tri_count(objs):
@@ -119,6 +149,9 @@ KEEP_MORE = {"hair": 2.0, "head": 1.7, "PetPal_pal": 1.6, "PetPal_pal_eyes": 3.0
 
 
 def decimate_to(objs, target):
+    fixed = [o for o in objs if o.get("blink")]
+    target -= tri_count(fixed)
+    objs = [o for o in objs if not o.get("blink")]
     tris = {o.name: max(tri_count([o]), 1) for o in objs}
     lo, hi = 0.0, 1.0
     for _ in range(40):
@@ -133,6 +166,20 @@ def decimate_to(objs, target):
         mod.use_collapse_triangulate = True
         bpy.ops.object.modifier_apply(modifier=mod.name)
         o.data.shade_smooth()
+    for _ in range(4):
+        cur = tri_count(objs)
+        if cur <= target:
+            break
+        r = target / cur * 0.985
+        for o in objs:
+            if len(o.data.polygons) < 24:
+                continue
+            bpy.context.view_layer.objects.active = o
+            mod = o.modifiers.new("dec2", "DECIMATE")
+            mod.ratio = r
+            mod.use_collapse_triangulate = True
+            bpy.ops.object.modifier_apply(modifier=mod.name)
+            o.data.shade_smooth()
 
 
 def setup_scene():
@@ -222,7 +269,7 @@ ALL = None
 
 
 def policy(n):
-    if n in ("hair",):
+    if n in ("hair", "lids"):
         return {"head": 1.0}
     if n == "head":
         return {"head": 1.0, "neck": 1.0}
@@ -392,7 +439,7 @@ def merge_by_material(objs):
         bpy.ops.object.select_all(action="DESELECT")
         for o in lst:
             o.select_set(True)
-        bpy.context.view_layer.objects.active = lst[0]
+        bpy.context.view_layer.objects.active = next((o for o in lst if o.get("blink")), lst[0])
         if len(lst) > 1:
             bpy.ops.object.join()
         ob = bpy.context.view_layer.objects.active
@@ -407,7 +454,7 @@ def export_glb(objs, rig, pal, path):
     for o in objs + [rig] + pal:
         o.select_set(True)
     bpy.context.view_layer.objects.active = rig
-    kw = dict(filepath=path, export_format="GLB", use_selection=True, export_apply=True, export_yup=True, export_skins=True,
+    kw = dict(filepath=path, export_format="GLB", use_selection=True, export_apply=False, export_yup=True, export_skins=True, export_morph=True, export_morph_normal=False,
               export_animations=True, export_animation_mode="ACTIONS", export_force_sampling=True)
     try:
         bpy.ops.export_scene.gltf(**kw, export_optimize_animation_size=True, export_reset_pose_bones=True)
@@ -417,8 +464,9 @@ def export_glb(objs, rig, pal, path):
 
 def main():
     report = {"budget": BUDGET, "lods": {}}
-    for lod in ("hq", "lite"):
+    for lod in ("hq", "lite", "far"):
         bpy.ops.wm.read_factory_settings(use_empty=True)
+        LOD_NOW[0] = lod
         objs, pal, mats = load()
         cam = setup_scene()
         before = tri_count(objs + pal)
@@ -438,6 +486,13 @@ def main():
                 shoot(cam, yaw, zc, H * PX, (W, H), os.path.join(OUT, f"pm2_{v}.png"))
             for v, yaw in (("head_front", 0), ("head_45", 35)):
                 shoot(cam, yaw, 0.86, 0.5, (900, 900), os.path.join(OUT, f"pm2_{v}.png"))
+            for o in objs:
+                if o.data.shape_keys and "Blink" in o.data.shape_keys.key_blocks:
+                    o.data.shape_keys.key_blocks["Blink"].value = 1.0
+            shoot(cam, 0, 0.86, 0.5, (900, 900), os.path.join(OUT, "pm2_head_blink.png"))
+            for o in objs:
+                if o.data.shape_keys and "Blink" in o.data.shape_keys.key_blocks:
+                    o.data.shape_keys.key_blocks["Blink"].value = 0.0
             bpy.context.scene.cycles.samples = 40
             for name, fn, t in (("talk", pose_talk, 0.3), ("walk", pose_walk, 0.25), ("turn", pose_turn, 0.5)):
                 set_pose(rig, *fn(t))

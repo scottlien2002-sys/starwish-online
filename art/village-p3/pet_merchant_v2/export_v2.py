@@ -14,6 +14,7 @@ from PIL import Image
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE.parent / "npc"))  # Stage 6.6 臉部繪製（npc_face66）
 import shapes_v2 as S  # noqa: E402
 import bobo_shape  # noqa: E402  （A 的 Surface Nets，經 shapes_v2 加入路徑）
 from export_c0 import sdf_ao  # noqa: E402
@@ -104,6 +105,13 @@ HEAD_PIVOT = np.array([0.0, 0.02, 0.6])
 HEAD_PARTS = {"head", "hair"}
 
 
+def paint_face66(dst):
+    """Stage 6.6：用 B 的臉部繪製（npc_face66，洛恩專屬五官）取代「A 的臉＋改虹膜顏色」"""
+    import npc_face66 as F66
+    F66.paint("merchant", "male", ((0.36, 0.17, 0.04), (0.86, 0.55, 0.14), (1.0, 0.86, 0.45))).save(dst)
+    return 0
+
+
 def head_tf(name, V):
     return (V - HEAD_PIVOT) * HEAD_SCALE + HEAD_PIVOT if name in HEAD_PARTS else V
 
@@ -123,7 +131,12 @@ def main(a_out, out):
         for suf in ("__v", "__q", "__n", "__c", "__uv"):
             if k + suf in a:
                 data[key + suf] = a[k + suf]
-        data[key + "__v"] = head_tf(it["name"], a[k + "__v"]).astype(np.float32)
+        Vk = a[k + "__v"]
+        if it["name"] == "head":
+            import npc_face66 as F66
+            head_orig = Vk
+            Vk = F66.deform_head("merchant", Vk)
+        data[key + "__v"] = head_tf(it["name"], Vk).astype(np.float32)
         data[key + "__c"] = recolor_kept(it["name"], a[k + "__c"]).astype(np.float32)
         info.append({**it, "key": key, "source": "A:C1.0-B4 male（唯讀）"})
         i += 1
@@ -151,8 +164,18 @@ def main(a_out, out):
         info.append({"key": key, "name": p.name, "group": p.group, "palette": p.name, "step": p.step, "verts": len(V), "quads": len(Q), "textured": False, "source": "B:寵物商人 V2"})
         print(f"  {p.name:12s} {len(V):7d} verts {time.time() - t:5.1f}s", flush=True)
         i += 1
+    # Stage 6.6 眨眼眼皮（形狀鍵 Blink；與頭一起縮放）
+    import npc_face66 as F66
+    Vb, Vc, Qd, Cd = F66.lid_mesh(head_orig, F66.eyes_info("merchant", "male"))
+    key = f"{i:02d}_lids"
+    data[key + "__v"] = head_tf("head", F66.deform_head("merchant", Vb)).astype(np.float32)
+    data[key + "__blink"] = head_tf("head", F66.deform_head("merchant", Vc)).astype(np.float32)
+    data[key + "__q"] = Qd
+    data[key + "__n"] = np.tile(np.array([0.0, -1.0, 0.0], np.float32), (len(Vb), 1))
+    data[key + "__c"] = np.clip(Cd, 0, 1).astype(np.float32)
+    info.append({"key": key, "name": "lids", "group": "skin", "palette": "lids", "step": 0, "verts": len(Vb), "quads": len(Qd), "textured": False, "source": "B:寵物商人 V2（眨眼）"})
     np.savez_compressed(out / "pm2_parts.npz", **data)
-    n_blue = amber_face(Path(a_out) / "c10b4_face_male.png", out / "pm2_face.png")
+    n_blue = paint_face66(out / "pm2_face.png")
     json.dump({"parts": info, "surface": meta.get("surface", {}), "face_recolored_px": n_blue}, open(out / "pm2_parts.json", "w"), ensure_ascii=False, indent=1)
 
 

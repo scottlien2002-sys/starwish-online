@@ -57,6 +57,9 @@ for (const name of browsers) {
       const kinds = new Set((am?.parts ?? []).map((p) => p.kind));
       void kinds;
       const villageFile = vi.file;
+      // Stage 6.7（Claude B）NPC：等 NPC 全部載入（美術在背景載入）
+      const vn = await V(() => window.__starwishWorld.info().npcs);
+      check("村莊 NPC（Claude B Stage 6.7）：七位 NPC＋洛恩＋N008 委託佈告欄已載入", !!vn && vn.ids.length >= 7 && vn.merchant && vn.board, vn);
       check("角色模型：使用已驗收的初心者 C1.0-B5b（不是封存的 Tripo 新版）", !!am && am.modular === false && /^novice_c10b5b_(male|female)_(hq|lite)\.glb$/.test(vi.file), { file: vi.file, modular: am?.modular });
       check("角色動作：Idle／Run／Attack／Hurt／Death 齊全；Jump 只給技能（一般移動沒有跳躍鍵）", !!am && ["Idle", "Run", "Attack", "Hurt", "Death", "Jump"].every((c) => am.clips.includes(c)) && vi.jumpButtonVisible === false, am && { clips: am.clips });
       check("Stage 7.2：存檔有等級、經驗、外觀（髮型、髮色、武器）", vi.level === 1 && vi.exp === 0 && vi.appearance?.hair === "hair01" && vi.appearance?.weapon === "sword", { level: vi.level, exp: vi.exp, appearance: vi.appearance });

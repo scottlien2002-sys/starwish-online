@@ -221,7 +221,16 @@ class VillageGame {
     this.installApi();
     // 正式美術、NPC、洛恩、商會（Claude B 全村整合）
     void import("../maps/village/VillageArtFull.ts")
-      .then((m) => m.loadVillageArtFull(scene, this.lod === "lite", this.quality.shadows.filter === "contact" ? this.shadows : null, (msg) => (this.artStatus = msg)))
+      .then(async (m) => {
+        // Stage 6.7（Claude B）：Tripo 正式 NPC 七位＋洛恩、N008 委託佈告欄；NPC 距離 LOD／遠距動作暫停沿用 B 的畫質設定
+        const { villagePerfConfig } = await import("../maps/village/villagePerf.ts");
+        const pc = villagePerfConfig(this.params, this.lod === "hq" ? "high" : "medium");
+        return m.loadVillageArtFull(scene, this.lod === "lite", this.quality.shadows.filter === "contact" ? this.shadows : null, (msg) => (this.artStatus = msg), {
+          lod: { lod: pc.npcLod, near: pc.lodNear, animThrottle: pc.animThrottle, animFar: pc.animFar },
+          originalModels: false,
+          npcSet: pc.npcSet,
+        });
+      })
       .then(async (full) => {
         const { VillageInteract } = await import("../maps/village/VillageInteract.ts");
         this.interact = new VillageInteract(scene, full.merchant, {
@@ -233,6 +242,9 @@ class VillageGame {
           autoPortals: true,
         });
         this.interact.npcs = full.npcs;
+        this.interact.boardMeshes = full.board;
+        this.interact.hookBoardTap();
+        this.npcInfo = { ids: [...(full.npcs?.ids ?? [])], board: full.board.length > 0, merchant: !!full.merchant };
         // 洛恩的其他服務（飼料、進化、復活、培育指南）：接在角色存檔與金幣上
         const { connectPetMerchantService } = await import("../maps/village/petMerchant.ts");
         const { createWorldPetMerchantService } = await import("../economy/worldPetMerchant.ts");
@@ -257,6 +269,8 @@ class VillageGame {
   }
 
   private readonly portal = new PortalTrigger(VILLAGE_SOUTH_PORTAL);
+  /** Stage 7.2：村莊 NPC（B Stage 6.7）載入結果 */
+  private npcInfo: { ids: string[]; board: boolean; merchant: boolean } | null = null;
 
   private hp(): number | null {
     return this.w.save.character.hp;
@@ -354,6 +368,8 @@ class VillageGame {
         map: "village",
         gender: self.w.gender,
         file: self.avatar.file,
+        npcs: self.npcInfo,
+        merchantPose: self.interact?.merchantPose ?? null,
         avatarModel: { modular: self.avatar.parts.length > 0, weapon: self.avatar.weapon, bones: self.avatar.bones, triangles: self.avatar.triangles, parts: self.avatar.parts.map((x) => ({ kind: x.kind, file: x.file, meshes: x.meshes.length, remapped: x.remapped })), clips: [...self.avatar.groups.keys()], attackClips: [...self.avatar.attackClips.keys()] },
         state: self.avatar.state,
         pos: [self.pos.x, self.pos.y, self.pos.z],

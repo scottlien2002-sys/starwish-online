@@ -1,4 +1,4 @@
-import { Color3, DynamicTexture, Mesh, MeshBuilder, type Scene, type ShadowGenerator, StandardMaterial, TransformNode, VertexData } from "@babylonjs/core";
+import { Color3, DynamicTexture, Mesh, MeshBuilder, type Scene, type ShadowGenerator, StandardMaterial, TransformNode, Vector3, VertexData } from "@babylonjs/core";
 import { bake, geoOf, joinGeo, type Geo, type Placed } from "../starsprout/StarsproutVegetation.ts";
 import {
   ARRIVAL_SPOT,
@@ -255,7 +255,8 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
   // 地面：草地＋外圍緩坡（高台、石階另外做）
   {
     const size = 130;
-    const sub = lite ? 52 : 78;
+    // Stage 6.6：正式美術模式的高畫質地面 64 格（草地細節由 Stage 6.6 草地貼圖提供；外圍緩坡仍平順）
+    const sub = lite ? 52 : art ? 64 : 78;
     const g = MeshBuilder.CreateGround("PH_vTmp", { width: size, height: size, subdivisions: sub }, scene);
     const pos = g.getVerticesData("position")!;
     for (let i = 0; i < pos.length; i += 3) {
@@ -468,7 +469,12 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
   for (const n of NPC_SPOTS) {
     if (art) {
       if (n.id === "board") {
-        const ring = MeshBuilder.CreateTorus("PH_vTmp", { diameter: n.interactR * 2, thickness: 0.04, tessellation: 48 }, scene);
+        // Stage 6.6：平面圓環帶（64 段、雙面 256 面）取代細圓環 Torus（48×48＝4,608 面），俯視外觀相同
+        const ring = MeshBuilder.CreateLathe(
+          "PH_vTmp",
+          { shape: [new Vector3(n.interactR - 0.025, 0, 0), new Vector3(n.interactR + 0.025, 0, 0)], tessellation: 64, sideOrientation: Mesh.DOUBLESIDE },
+          scene,
+        );
         ring.position.y = 0.08;
         mark(m(ring, [1, 0.78, 0.45]), n.x, n.floor, n.z, n.yaw);
       }
@@ -533,12 +539,13 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
   void shadows;
 
   // 文字標籤：建築名稱、NPC、傳送陣、噴泉
-  const labels: { mesh: Mesh; x: number; z: number; hide: number }[] = [];
+  const labels: { mesh: Mesh; x: number; z: number; hide: number; far: number }[] = [];
   const label = (text: string, sub: string, x: number, y: number, z: number, w: number): void => {
     const p = textPlane(scene, text, sub, w);
     p.position.set(x, y, z);
     // 大標籤在角色附近 6 m 內隱藏、小標籤 2.5 m（不擋住角色）
-    labels.push({ mesh: p, x, z, hide: w >= 3.5 ? 6 : 2.5 });
+    // Stage 6.3（art 模式）：太遠看不清楚的標籤不繪製（每個標籤是一次繪製）：建築名稱 45 m、NPC／傳送門 26 m
+    labels.push({ mesh: p, x, z, hide: w >= 3.5 ? 6 : 2.5, far: art ? (w >= 5 ? 45 : 26) : 1e9 });
   };
   if (!art) {
     for (const b of BUILDINGS) {
@@ -559,7 +566,10 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
       ringA.rotation.y += dt * 0.25;
       if (!labelsOn) return;
       // 角色附近 2.5 m 內的標籤隱藏（不擋住角色）
-      for (const l of labels) l.mesh.isVisible = Math.hypot(l.x - px, l.z - pz) > l.hide;
+      for (const l of labels) {
+        const d = Math.hypot(l.x - px, l.z - pz);
+        l.mesh.isVisible = d > l.hide && d < l.far;
+      }
     },
     setLabels(on: boolean): void {
       labelsOn = on;
