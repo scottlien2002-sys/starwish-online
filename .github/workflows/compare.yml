@@ -33,6 +33,8 @@ env:
 
 jobs:
   compare:
+    # 星廢垃圾場分支（Claude B）不跑：這個工作會 force push 到共用的 compare 分支；垃圾場有自己的 E2E 工作流程
+    if: github.ref_name != 'feature/render-map-junkyard'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:

@@ -71,6 +71,13 @@ jobs:
             rm -rf "/tmp/pages/$DIR"
             mkdir -p "/tmp/pages/$DIR"
             cp -r dist/. "/tmp/pages/$DIR/"
+            if [ "$DIR" = "preview-map-junkyard" ]; then
+              # Stage 6.8＋6.9 星廢垃圾場：瘦身部署（GitHub Pages 已用約 943 MB／1 GB）。
+              # 這張地圖只需要網頁本體與正式初心者角色（novice_c10b5b_*）；其他地圖的模型與測試截圖不放進這個預覽。
+              find "/tmp/pages/$DIR/models" -mindepth 1 -maxdepth 1 ! -name 'novice_c10b5b_*' -exec rm -rf {} +
+              find "/tmp/pages/$DIR/ci-report" -mindepth 1 ! -name 'summary.json' -exec rm -rf {} + 2>/dev/null || true
+              echo "瘦身後大小：$(du -sh "/tmp/pages/$DIR" | cut -f1)"
+            fi
             echo "{\"branch\":\"${GITHUB_REF_NAME}\",\"commit\":\"${GITHUB_SHA}\",\"path\":\"/$DIR/\",\"builtAt\":\"$(date -u +%FT%TZ)\"}" > "/tmp/pages/$DIR/preview.json"
             cd /tmp/pages
             git config user.name "github-actions[bot]"

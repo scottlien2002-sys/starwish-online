@@ -51,6 +51,18 @@ function main(): void {
         });
       return;
     }
+    // ?map=junkyard：Stage 6.8＋6.9 星廢垃圾場（Lv11–20）；&quality=high|medium|low、&spawns=1、&autoplay=walk|tour
+    if (map === "junkyard") {
+      document.body.classList.add("map-mode");
+      void import("./maps/junkyard/JunkyardPage.ts")
+        .then((m) => m.startJunkyardMap(canvas, hudRoot))
+        .then(() => hideBoot())
+        .catch((err: unknown) => {
+          console.error(err);
+          fail(`星廢垃圾場載入失敗：${err instanceof Error ? err.message : String(err)}`);
+        });
+      return;
+    }
     // ?map=village：Stage 6 P2-3 星芽村（第一階段 Grey-box：配置、佔位建築、道路、碰撞；沒有 NPC 功能）
     if (map === "village") {
       document.body.classList.add("map-mode");
