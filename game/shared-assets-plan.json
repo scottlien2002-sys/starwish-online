@@ -1,0 +1,644 @@
+{
+ "note": "Stage 8.3 共用資產目錄規劃（Claude D）：依賴清單與容量估算。數字由 tools/mp-shared-assets.mjs 從 build 結果計算。",
+ "version": "v1",
+ "totals": {
+  "previewAllMB": 183.2,
+  "unusedOldModelsMB": 104.2,
+  "sharedCandidatesMB": 71.8,
+  "sharedCandidates": 83,
+  "keptInPreviewSmallMB": 7.2
+ },
+ "groups": {
+  "M001 星露啵啵 V3.8R（Claude A）": {
+   "key": "monsters/m001-bobo-v38r",
+   "files": 3,
+   "bytes": 1234624,
+   "mb": 1.2
+  },
+  "M004 骨骼動畫怪物（怪物製作分支）": {
+   "key": "monsters/m004",
+   "files": 2,
+   "bytes": 4811752,
+   "mb": 4.6
+  },
+  "M005 骨骼動畫怪物（怪物製作分支）": {
+   "key": "monsters/m005",
+   "files": 2,
+   "bytes": 4220552,
+   "mb": 4
+  },
+  "M006 骨骼動畫怪物（怪物製作分支）": {
+   "key": "monsters/m006",
+   "files": 2,
+   "bytes": 4682244,
+   "mb": 4.5
+  },
+  "M007 骨骼動畫怪物（怪物製作分支）": {
+   "key": "monsters/m007",
+   "files": 2,
+   "bytes": 4844224,
+   "mb": 4.6
+  },
+  "角色 C1.0-B5b（Claude A／Blender CI）": {
+   "key": "characters/novice-c10b5b",
+   "files": 4,
+   "bytes": 18266556,
+   "mb": 17.4
+  },
+  "星芽村 NPC（Claude B）": {
+   "key": "village/npc",
+   "files": 25,
+   "bytes": 13435580,
+   "mb": 12.8
+  },
+  "星芽村建築與道具（Claude B）": {
+   "key": "village/p3",
+   "files": 43,
+   "bytes": 23795386,
+   "mb": 22.7
+  }
+ },
+ "files": [
+  {
+   "path": "models/bobo_v38r_high.glb",
+   "bytes": 481144,
+   "sha1": "e27912af57eb01fd014d27363374abb040d7e1d7",
+   "group": "M001 星露啵啵 V3.8R（Claude A）",
+   "sharedPath": "shared-assets/v1/models/bobo_v38r_high.glb"
+  },
+  {
+   "path": "models/bobo_v38r_low.glb",
+   "bytes": 353932,
+   "sha1": "55523c0e8032072f8c88926e037378fd94c0dc7d",
+   "group": "M001 星露啵啵 V3.8R（Claude A）",
+   "sharedPath": "shared-assets/v1/models/bobo_v38r_low.glb"
+  },
+  {
+   "path": "models/bobo_v38r_medium.glb",
+   "bytes": 399548,
+   "sha1": "5b4fc7b4c541cc1ec525cb3d5e5c5299e864fea7",
+   "group": "M001 星露啵啵 V3.8R（Claude A）",
+   "sharedPath": "shared-assets/v1/models/bobo_v38r_medium.glb"
+  },
+  {
+   "path": "models/monsters/m004/M004_WindfeatherFox_Rig_V1_1_HQ.glb",
+   "bytes": 3984432,
+   "sha1": "229e4ae4b971f425ca975ea69ce95be60a975b71",
+   "group": "M004 骨骼動畫怪物（怪物製作分支）",
+   "sharedPath": "shared-assets/v1/models/monsters/m004/M004_WindfeatherFox_Rig_V1_1_HQ.glb"
+  },
+  {
+   "path": "models/monsters/m004/M004_WindfeatherFox_Rig_V1_1_Lite.glb",
+   "bytes": 827320,
+   "sha1": "0ddb81e292b95319f6653c9f7e05a779f7769b95",
+   "group": "M004 骨骼動畫怪物（怪物製作分支）",
+   "sharedPath": "shared-assets/v1/models/monsters/m004/M004_WindfeatherFox_Rig_V1_1_Lite.glb"
+  },
+  {
+   "path": "models/monsters/m005/M005_NebulaSheep_Rig_V1_HQ.glb",
+   "bytes": 3513632,
+   "sha1": "919123953a8804e39d583469736209a2b7b61928",
+   "group": "M005 骨骼動畫怪物（怪物製作分支）",
+   "sharedPath": "shared-assets/v1/models/monsters/m005/M005_NebulaSheep_Rig_V1_HQ.glb"
+  },
+  {
+   "path": "models/monsters/m005/M005_NebulaSheep_Rig_V1_Lite.glb",
+   "bytes": 706920,
+   "sha1": "b6e235fc9173a946306645fa99cb2a29461cc5e2",
+   "group": "M005 骨骼動畫怪物（怪物製作分支）",
+   "sharedPath": "shared-assets/v1/models/monsters/m005/M005_NebulaSheep_Rig_V1_Lite.glb"
+  },
+  {
+   "path": "models/monsters/m006/M006_CarrotKing_Rig_V1_HQ.glb",
+   "bytes": 3888308,
+   "sha1": "4b0d338eff8cb54741a11dabd87d5321ee00a54d",
+   "group": "M006 骨骼動畫怪物（怪物製作分支）",
+   "sharedPath": "shared-assets/v1/models/monsters/m006/M006_CarrotKing_Rig_V1_HQ.glb"
+  },
+  {
+   "path": "models/monsters/m006/M006_CarrotKing_Rig_V1_Lite.glb",
+   "bytes": 793936,
+   "sha1": "4c45b24c14a7bd664573b1de72e8947c850c9ba5",
+   "group": "M006 骨骼動畫怪物（怪物製作分支）",
+   "sharedPath": "shared-assets/v1/models/monsters/m006/M006_CarrotKing_Rig_V1_Lite.glb"
+  },
+  {
+   "path": "models/monsters/m007/M007_CrownHammerRabbit_Rig_V1_HQ.glb",
+   "bytes": 4012300,
+   "sha1": "d9a42b008a8a582803427d57d38ebdea79ca6a0d",
+   "group": "M007 骨骼動畫怪物（怪物製作分支）",
+   "sharedPath": "shared-assets/v1/models/monsters/m007/M007_CrownHammerRabbit_Rig_V1_HQ.glb"
+  },
+  {
+   "path": "models/monsters/m007/M007_CrownHammerRabbit_Rig_V1_Lite.glb",
+   "bytes": 831924,
+   "sha1": "a35c37164de3715f72a911713c6e3211204e5ade",
+   "group": "M007 骨骼動畫怪物（怪物製作分支）",
+   "sharedPath": "shared-assets/v1/models/monsters/m007/M007_CrownHammerRabbit_Rig_V1_Lite.glb"
+  },
+  {
+   "path": "models/novice_c10b5b_female_hq.glb",
+   "bytes": 7282568,
+   "sha1": "91e095b457c4d6e5bde91267e9c03573762e3a98",
+   "group": "角色 C1.0-B5b（Claude A／Blender CI）",
+   "sharedPath": "shared-assets/v1/models/novice_c10b5b_female_hq.glb"
+  },
+  {
+   "path": "models/novice_c10b5b_female_lite.glb",
+   "bytes": 1784024,
+   "sha1": "9245d7801570a6f3b44f11446aa2c70c0c1c5a9c",
+   "group": "角色 C1.0-B5b（Claude A／Blender CI）",
+   "sharedPath": "shared-assets/v1/models/novice_c10b5b_female_lite.glb"
+  },
+  {
+   "path": "models/novice_c10b5b_male_hq.glb",
+   "bytes": 7351060,
+   "sha1": "1d7777b5f502d7d9645444b0cacaaf2460298867",
+   "group": "角色 C1.0-B5b（Claude A／Blender CI）",
+   "sharedPath": "shared-assets/v1/models/novice_c10b5b_male_hq.glb"
+  },
+  {
+   "path": "models/novice_c10b5b_male_lite.glb",
+   "bytes": 1848904,
+   "sha1": "4f4947e0778044ef0cade4aae861abed4ab7fff3",
+   "group": "角色 C1.0-B5b（Claude A／Blender CI）",
+   "sharedPath": "shared-assets/v1/models/novice_c10b5b_male_lite.glb"
+  },
+  {
+   "path": "models/village-npc67/board67_hq.glb",
+   "bytes": 503896,
+   "sha1": "3a4601ca57f9005fbee13472c03a060f0d84936e",
+   "group": "星芽村 NPC（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-npc67/board67_hq.glb"
+  },
+  {
+   "path": "models/village-npc67/board67_lite.glb",
+   "bytes": 378688,
+   "sha1": "154161e139b10abb4b9e2564934be057f3557258",
+   "group": "星芽村 NPC（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-npc67/board67_lite.glb"
+  },
+  {
+   "path": "models/village-npc67/npc_clown67_far.glb",
+   "bytes": 285452,
+   "sha1": "9c6886d66904bb9caea268a06adbcccdf50badb2",
+   "group": "星芽村 NPC（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-npc67/npc_clown67_far.glb"
+  },
+  {
+   "path": "models/village-npc67/npc_clown67_hq.glb",
+   "bytes": 881708,
+   "sha1": "3968fe06ae8182c77b4ae4a8b345f0f7573edad5",
+   "group": "星芽村 NPC（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-npc67/npc_clown67_hq.glb"
+  },
+  {
+   "path": "models/village-npc67/npc_clown67_lite.glb",
+   "bytes": 480696,
+   "sha1": "340ae24f4a8580401b528945e921a8ca82caa4d0",
+   "group": "星芽村 NPC（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-npc67/npc_clown67_lite.glb"
+  },
+  {
+   "path": "models/village-npc67/npc_knight67_far.glb",
+   "bytes": 285488,
+   "sha1": "de830d36a352c5c15786a517fb1e1e84e7611a4c",
+   "group": "星芽村 NPC（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-npc67/npc_knight67_far.glb"
+  },
+  {
+   "path": "models/village-npc67/npc_knight67_hq.glb",
+   "bytes": 877696,
+   "sha1": "f3378dd5f1508c313e891d253f087c687f0371c9",
+   "group": "星芽村 NPC（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-npc67/npc_knight67_hq.glb"
+  },
+  {
+   "path": "models/village-npc67/npc_knight67_lite.glb",
+   "bytes": 481856,
+   "sha1": "2637a6ddcf35bc194522a6d1e7bb05e2de551d9d",
+   "group": "星芽村 NPC（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-npc67/npc_knight67_lite.glb"
+  },
+  {
+   "path": "models/village-npc67/npc_mage67_far.glb",
+   "bytes": 288272,
+   "sha1": "9967ad7b4637f91b2f46c102c7ecbf835ff80a40",
+   "group": "星芽村 NPC（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-npc67/npc_mage67_far.glb"
+  },
+  {
+   "path": "models/village-npc67/npc_mage67_hq.glb",
+   "bytes": 876748,
+   "sha1": "eb8aeea52443b60f42c61cb2b991b7ad3d42a851",
+   "group": "星芽村 NPC（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-npc67/npc_mage67_hq.glb"
+  },
+  {
+   "path": "models/village-npc67/npc_mage67_lite.glb",
+   "bytes": 482892,
+   "sha1": "7889b10cdf71e6f20f80ef6220e99680a87d72d8",
+   "group": "星芽村 NPC（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-npc67/npc_mage67_lite.glb"
+  },
+  {
+   "path": "models/village-npc67/npc_priest67_far.glb",
+   "bytes": 296152,
+   "sha1": "afeef05d875172a6c9721fa266d4da7f62a6e706",
+   "group": "星芽村 NPC（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-npc67/npc_priest67_far.glb"
+  },
+  {
+   "path": "models/village-npc67/npc_priest67_hq.glb",
+   "bytes": 883408,
+   "sha1": "a0e40680a97a43af0519de2fa9de5473762cfe90",
+   "group": "星芽村 NPC（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-npc67/npc_priest67_hq.glb"
+  },
+  {
+   "path": "models/village-npc67/npc_priest67_lite.glb",
+   "bytes": 497408,
+   "sha1": "966351564e67425d8b1c7b841a89c5c477d4d2d8",
+   "group": "星芽村 NPC（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-npc67/npc_priest67_lite.glb"
+  },
+  {
+   "path": "models/village-npc67/npc_smith67_far.glb",
+   "bytes": 268716,
+   "sha1": "264798c707e476d0192c5171b1645903efcc1d5f",
+   "group": "星芽村 NPC（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-npc67/npc_smith67_far.glb"
+  },
+  {
+   "path": "models/village-npc67/npc_smith67_hq.glb",
+   "bytes": 840960,
+   "sha1": "f1e243efde7ee454034161e21a8818c23ee0f5a0",
+   "group": "星芽村 NPC（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-npc67/npc_smith67_hq.glb"
+  },
+  {
+   "path": "models/village-npc67/npc_smith67_lite.glb",
+   "bytes": 452088,
+   "sha1": "00826a65c0fde24a5bee5ab59002ed9517c40408",
+   "group": "星芽村 NPC（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-npc67/npc_smith67_lite.glb"
+  },
+  {
+   "path": "models/village-npc67/npc_swordmaster67_far.glb",
+   "bytes": 267848,
+   "sha1": "77b18c1544c2bf3f1bf3ed520d376d9fca3e690f",
+   "group": "星芽村 NPC（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-npc67/npc_swordmaster67_far.glb"
+  },
+  {
+   "path": "models/village-npc67/npc_swordmaster67_hq.glb",
+   "bytes": 828116,
+   "sha1": "008fc39b5a9aaddb5037bbf50bd643227daea7e1",
+   "group": "星芽村 NPC（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-npc67/npc_swordmaster67_hq.glb"
+  },
+  {
+   "path": "models/village-npc67/npc_swordmaster67_lite.glb",
+   "bytes": 450464,
+   "sha1": "f6a9162234cff7c06c37b010422a06a1f5d4b498",
+   "group": "星芽村 NPC（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-npc67/npc_swordmaster67_lite.glb"
+  },
+  {
+   "path": "models/village-npc67/npc_warehouse67_far.glb",
+   "bytes": 267636,
+   "sha1": "3b31ea109c3471cfbc284402d92cdf2fce82b184",
+   "group": "星芽村 NPC（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-npc67/npc_warehouse67_far.glb"
+  },
+  {
+   "path": "models/village-npc67/npc_warehouse67_hq.glb",
+   "bytes": 814572,
+   "sha1": "64c3e1a50d5604d6b6a9b6b12f5c064899a38dbf",
+   "group": "星芽村 NPC（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-npc67/npc_warehouse67_hq.glb"
+  },
+  {
+   "path": "models/village-npc67/npc_warehouse67_lite.glb",
+   "bytes": 447392,
+   "sha1": "37441d2d29329fe496489ac0d1b9843dc17b46af",
+   "group": "星芽村 NPC（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-npc67/npc_warehouse67_lite.glb"
+  },
+  {
+   "path": "models/village-npc67/pet_merchant67_hq.glb",
+   "bytes": 847588,
+   "sha1": "32ceab92885c113d9b8f9efdb4b14fefce9f2223",
+   "group": "星芽村 NPC（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-npc67/pet_merchant67_hq.glb"
+  },
+  {
+   "path": "models/village-npc67/pet_merchant67_lite.glb",
+   "bytes": 449840,
+   "sha1": "4d492d6c664c75ba3d1db589cfc1f560f9167939",
+   "group": "星芽村 NPC（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-npc67/pet_merchant67_lite.glb"
+  },
+  {
+   "path": "models/village-p3/church_hq.glb",
+   "bytes": 363048,
+   "sha1": "651f59a9ace5b8f7171ebec6c408c1d5cd54ce8b",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/church_hq.glb"
+  },
+  {
+   "path": "models/village-p3/env_hq.glb",
+   "bytes": 880940,
+   "sha1": "354ad4b210d3200d9081edaced43f50270e19bcf",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/env_hq.glb"
+  },
+  {
+   "path": "models/village-p3/env_lite.glb",
+   "bytes": 323872,
+   "sha1": "eeaf863e0952f93ea6c4b747a349fdf075496956",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/env_lite.glb"
+  },
+  {
+   "path": "models/village-p3/fountain_hq.glb",
+   "bytes": 1336168,
+   "sha1": "8b1956797867ec3269a9bf2898183db45613ce96",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/fountain_hq.glb"
+  },
+  {
+   "path": "models/village-p3/fountain_lite.glb",
+   "bytes": 624240,
+   "sha1": "4a0a84016fd247a7903f9cc23fa54b4e1566a9f0",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/fountain_lite.glb"
+  },
+  {
+   "path": "models/village-p3/knight_hq.glb",
+   "bytes": 920736,
+   "sha1": "a7ee1cd5c5b3809f2e35c92dd4285ab1dc9ace16",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/knight_hq.glb"
+  },
+  {
+   "path": "models/village-p3/knight_lite.glb",
+   "bytes": 353276,
+   "sha1": "4a35de7ce272ab90f34cb9bd775d72ab31a2f43b",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/knight_lite.glb"
+  },
+  {
+   "path": "models/village-p3/mage_hq.glb",
+   "bytes": 905220,
+   "sha1": "2c4e2034843d8bcd2d080fbfb06c5def1b71e303",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/mage_hq.glb"
+  },
+  {
+   "path": "models/village-p3/mage_lite.glb",
+   "bytes": 317116,
+   "sha1": "2a949f397bb872f2bf7d99819697f4be983fd6d1",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/mage_lite.glb"
+  },
+  {
+   "path": "models/village-p3/npc_clown_hq.glb",
+   "bytes": 566728,
+   "sha1": "4151d9a3f8c36f3b002f213c2029b104447d761f",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/npc_clown_hq.glb"
+  },
+  {
+   "path": "models/village-p3/npc_clown_lite.glb",
+   "bytes": 299164,
+   "sha1": "a61f2ebcd0fba2c04439de9ab9cffd48450409ca",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/npc_clown_lite.glb"
+  },
+  {
+   "path": "models/village-p3/npc_guild_hq.glb",
+   "bytes": 525952,
+   "sha1": "31792f144806251dc8c5d5c05547e633b48e1556",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/npc_guild_hq.glb"
+  },
+  {
+   "path": "models/village-p3/npc_guild_lite.glb",
+   "bytes": 285500,
+   "sha1": "d3971f07cc349879b4aaf050ee273a915e6a6f20",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/npc_guild_lite.glb"
+  },
+  {
+   "path": "models/village-p3/npc_knight_hq.glb",
+   "bytes": 520668,
+   "sha1": "53c5d4ce1fafd7161e6b75563b721c85cb2bf9ae",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/npc_knight_hq.glb"
+  },
+  {
+   "path": "models/village-p3/npc_knight_lite.glb",
+   "bytes": 282584,
+   "sha1": "e7e9cfafbd6fd76ea30837d30f3392142224ca75",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/npc_knight_lite.glb"
+  },
+  {
+   "path": "models/village-p3/npc_mage_hq.glb",
+   "bytes": 556680,
+   "sha1": "7c1413fc6ff195a206eb5a406a1433197e6de33a",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/npc_mage_hq.glb"
+  },
+  {
+   "path": "models/village-p3/npc_mage_lite.glb",
+   "bytes": 296832,
+   "sha1": "87491d2ea5ce8362fdb046695b0d02a343ebda4a",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/npc_mage_lite.glb"
+  },
+  {
+   "path": "models/village-p3/npc_priest_hq.glb",
+   "bytes": 554164,
+   "sha1": "b59b1d320170f96ccb51fdaeadc0a46c64766076",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/npc_priest_hq.glb"
+  },
+  {
+   "path": "models/village-p3/npc_priest_lite.glb",
+   "bytes": 296336,
+   "sha1": "d9d6a151cd18b72d62436c22ca76138802af8142",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/npc_priest_lite.glb"
+  },
+  {
+   "path": "models/village-p3/npc_smith_hq.glb",
+   "bytes": 537420,
+   "sha1": "88bbbe2cffd8e37026a959dbbf24286c17870590",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/npc_smith_hq.glb"
+  },
+  {
+   "path": "models/village-p3/npc_smith_lite.glb",
+   "bytes": 298100,
+   "sha1": "7f848e7e364d2d365924cc3a2013bfa780813f38",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/npc_smith_lite.glb"
+  },
+  {
+   "path": "models/village-p3/npc_swordmaster_hq.glb",
+   "bytes": 535660,
+   "sha1": "d887262e09e8d5f541a5cae85f0fbc88baa130fd",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/npc_swordmaster_hq.glb"
+  },
+  {
+   "path": "models/village-p3/npc_swordmaster_lite.glb",
+   "bytes": 294136,
+   "sha1": "00bc1876dad6989ee9c3f4e0ab55b8833c508e39",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/npc_swordmaster_lite.glb"
+  },
+  {
+   "path": "models/village-p3/npc_warehouse_hq.glb",
+   "bytes": 558940,
+   "sha1": "2b1f8bb8ea88d9fff83d25e656485e2489d6b85f",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/npc_warehouse_hq.glb"
+  },
+  {
+   "path": "models/village-p3/npc_warehouse_lite.glb",
+   "bytes": 298080,
+   "sha1": "f0e71fa3b9504401cf92ade8c5c3760c89a1b392",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/npc_warehouse_lite.glb"
+  },
+  {
+   "path": "models/village-p3/pet_merchant_v2_far.glb",
+   "bytes": 453644,
+   "sha1": "b01a4b13bf87242d960cea15df3791e8fafafed3",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/pet_merchant_v2_far.glb"
+  },
+  {
+   "path": "models/village-p3/pet_merchant_v2_hq.glb",
+   "bytes": 792384,
+   "sha1": "a9a8496323ec74400904eb2a7e09df466a24a191",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/pet_merchant_v2_hq.glb"
+  },
+  {
+   "path": "models/village-p3/pet_merchant_v2_lite.glb",
+   "bytes": 528776,
+   "sha1": "e50af37556a1405b0d9e2339cf53e3f9938af96c",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/pet_merchant_v2_lite.glb"
+  },
+  {
+   "path": "models/village-p3/platform_hq.glb",
+   "bytes": 391568,
+   "sha1": "d438005c260baa2dd91bbd633ca38d66204f2eb3",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/platform_hq.glb"
+  },
+  {
+   "path": "models/village-p3/platform_lite.glb",
+   "bytes": 308536,
+   "sha1": "0b97d4721c31b0fc0ba7960385d95c255c8f4fd7",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/platform_lite.glb"
+  },
+  {
+   "path": "models/village-p3/plaza_hq.glb",
+   "bytes": 2156368,
+   "sha1": "1f016e75ab7f6ef1fe981d47abccca24c242d459",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/plaza_hq.glb"
+  },
+  {
+   "path": "models/village-p3/plaza_lite.glb",
+   "bytes": 721536,
+   "sha1": "df31671f4378fca11368689ce3915a8603e2272a",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/plaza_lite.glb"
+  },
+  {
+   "path": "models/village-p3/portals_hq.glb",
+   "bytes": 667388,
+   "sha1": "5c8e0a7f651ec2222fd055331444dec0fabf48ad",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/portals_hq.glb"
+  },
+  {
+   "path": "models/village-p3/portals_lite.glb",
+   "bytes": 357144,
+   "sha1": "d0c8d7ba62ada5e53c721a944491e3e30947a0db",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/portals_lite.glb"
+  },
+  {
+   "path": "models/village-p3/sword_hq.glb",
+   "bytes": 490096,
+   "sha1": "14347c6ae751157cb2027f2ffa2a9f675b55f522",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/sword_hq.glb"
+  },
+  {
+   "path": "models/village-p3/sword_lite.glb",
+   "bytes": 263720,
+   "sha1": "62182d2f12350c2744b734caa3ff7a42a53402c3",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/sword_lite.glb"
+  },
+  {
+   "path": "models/village-p3/tex/ashlar_hq.png",
+   "bytes": 277455,
+   "sha1": "f86859aabe3135f0c3082c570228c6da9676e43d",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/tex/ashlar_hq.png"
+  },
+  {
+   "path": "models/village-p3/tex/detail66_hq.png",
+   "bytes": 1265746,
+   "sha1": "331cecccd353dfe1f1d598bea982a6ffdb0987e8",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/tex/detail66_hq.png"
+  },
+  {
+   "path": "models/village-p3/tex/detail66_lite.png",
+   "bytes": 424863,
+   "sha1": "3275887f496ec7eb0bd3aae276254cceba7d16ec",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/tex/detail66_lite.png"
+  },
+  {
+   "path": "models/village-p3/tex/grass66_hq.png",
+   "bytes": 925567,
+   "sha1": "3f0ae4f1355b6d3db2749794047ced75c6b567bd",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/tex/grass66_hq.png"
+  },
+  {
+   "path": "models/village-p3/tex/paving_nrm_hq.png",
+   "bytes": 313911,
+   "sha1": "f566f4eb25022665dc42d7adc37046d469d1d16e",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/tex/paving_nrm_hq.png"
+  },
+  {
+   "path": "models/village-p3/tex/stone_nrm_hq.png",
+   "bytes": 302364,
+   "sha1": "7cdaa410bfa89181a540f91f6181dc5c78a29d5c",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/tex/stone_nrm_hq.png"
+  },
+  {
+   "path": "models/village-p3/tex/wood_hq.png",
+   "bytes": 422760,
+   "sha1": "3d7bf93487d2c77b6b058d0548ea197d32dda39b",
+   "group": "星芽村建築與道具（Claude B）",
+   "sharedPath": "shared-assets/v1/models/village-p3/tex/wood_hq.png"
+  }
+ ]
+}
