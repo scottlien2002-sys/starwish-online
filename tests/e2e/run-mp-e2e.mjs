@@ -97,6 +97,10 @@ const shot = (p, n) => p.page.screenshot({ path: join(outDir, `${TAG}${browserNa
 async function walk(p, pts, getPos, done, ms = 40000) {
   let i = 0;
   const t0 = Date.now();
+  // 卡住偵測：2.5 秒沒有更接近目前路點就往側邊繞 1 秒（左右交替；柵欄、木箱等道具）
+  let best = Infinity;
+  let bestAt = Date.now();
+  let side = 1;
   while (Date.now() - t0 < ms) {
     if (done && (await done().catch(() => true))) break;
     const pos = await getPos();
@@ -109,8 +113,22 @@ async function walk(p, pts, getPos, done, ms = 40000) {
     const dz = w.z - pos[1];
     const l = Math.hypot(dx, dz);
     if (l < 0.6) {
-      if (i < pts.length - 1) i++;
-      else if (!done) break;
+      if (i < pts.length - 1) {
+        i++;
+        best = Infinity;
+        bestAt = Date.now();
+      } else if (!done) break;
+      continue;
+    }
+    if (l < best - 0.3) {
+      best = l;
+      bestAt = Date.now();
+    } else if (Date.now() - bestAt > 2500) {
+      await drive(p, (-dz / l) * side, (dx / l) * side);
+      await sleep(1000);
+      side = -side;
+      best = Infinity;
+      bestAt = Date.now();
       continue;
     }
     await drive(p, dx / l, dz / l);
