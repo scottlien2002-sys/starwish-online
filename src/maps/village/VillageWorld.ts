@@ -1,4 +1,4 @@
-import { Color3, DynamicTexture, Mesh, MeshBuilder, type Scene, type ShadowGenerator, StandardMaterial, TransformNode, VertexData } from "@babylonjs/core";
+import { Color3, DynamicTexture, Mesh, MeshBuilder, type Scene, type ShadowGenerator, StandardMaterial, TransformNode, Vector3, VertexData } from "@babylonjs/core";
 import { bake, geoOf, joinGeo, type Geo, type Placed } from "../starsprout/StarsproutVegetation.ts";
 import {
   ARRIVAL_SPOT,
@@ -255,7 +255,8 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
   // 地面：草地＋外圍緩坡（高台、石階另外做）
   {
     const size = 130;
-    const sub = lite ? 52 : 78;
+    // Stage 6.6：正式美術模式的高畫質地面 64 格（草地細節由 Stage 6.6 草地貼圖提供；外圍緩坡仍平順）
+    const sub = lite ? 52 : art ? 64 : 78;
     const g = MeshBuilder.CreateGround("PH_vTmp", { width: size, height: size, subdivisions: sub }, scene);
     const pos = g.getVerticesData("position")!;
     for (let i = 0; i < pos.length; i += 3) {
@@ -468,7 +469,12 @@ export function buildVillageWorld(scene: Scene, shadows: ShadowGenerator | null,
   for (const n of NPC_SPOTS) {
     if (art) {
       if (n.id === "board") {
-        const ring = MeshBuilder.CreateTorus("PH_vTmp", { diameter: n.interactR * 2, thickness: 0.04, tessellation: 48 }, scene);
+        // Stage 6.6：平面圓環帶（64 段、雙面 256 面）取代細圓環 Torus（48×48＝4,608 面），俯視外觀相同
+        const ring = MeshBuilder.CreateLathe(
+          "PH_vTmp",
+          { shape: [new Vector3(n.interactR - 0.025, 0, 0), new Vector3(n.interactR + 0.025, 0, 0)], tessellation: 64, sideOrientation: Mesh.DOUBLESIDE },
+          scene,
+        );
         ring.position.y = 0.08;
         mark(m(ring, [1, 0.78, 0.45]), n.x, n.floor, n.z, n.yaw);
       }
