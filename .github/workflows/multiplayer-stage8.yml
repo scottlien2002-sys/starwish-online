@@ -1,0 +1,56 @@
+name: Multiplayer Stage 8 (Claude D)
+
+# 只在 Claude D 的多人連線分支、且只有 multiplayer/** 變動時執行。
+# 不部署、不寫入 gh-pages、不碰其他分支；concurrency 依分支名稱分開，不會取消其他人的 CI。
+on:
+  push:
+    branches: ["feature/multiplayer-**"]
+    paths: ["multiplayer/**", ".github/workflows/multiplayer-stage8.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: multiplayer-stage8-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  multiplayer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: multiplayer
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Install (ws, typescript, esbuild, playwright)
+        run: npm install --no-audit --no-fund
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Unit tests
+        run: npm run test:unit
+      - name: Integration tests (real WebSocket server + bots)
+        run: npm run test:integration
+      - name: WSS test (self-signed TLS)
+        run: npm run test:wss
+      - name: PostgreSQL schema / atomicity test
+        id: db
+        continue-on-error: true
+        run: sudo bash db/test-db.sh
+      - name: Install browsers
+        run: npx playwright install --with-deps chromium webkit
+      - name: Two-player browser test (Chromium)
+        run: npm run test:browser
+      - name: Two-player browser test (WebKit / Safari engine)
+        run: MP_BROWSER=webkit node tests/browser-two-players.mjs
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: multiplayer-stage8-reports
+          path: multiplayer/reports/
+          retention-days: 14
