@@ -1,4 +1,7 @@
-# 星願物語 Stage 8.0～8.1｜多人連線（Claude D）
+# 星願物語 Stage 8.0～8.3｜多人連線（Claude D）
+
+> Stage 8.2＋8.3：原野戰鬥改為伺服器權威（怪物、傷害、經驗、金幣、掉落、背包、倉庫、裝備都由伺服器管理）。
+> 報告：`docs/STAGE8_2_REPORT.md`；Render 部署：`docs/RENDER_DEPLOY.md`；伺服器戰鬥：`server/combat/`（測試設定集中在 `rules.ts`）。
 
 與單機版完全分開：本資料夾不修改 `src/`，只「唯讀引用」Stage 7.1 已驗收的地圖碰撞、傳送陣與移動數值。
 單機版（GitHub Pages、`npm run dev`）完全不受影響。
@@ -25,8 +28,9 @@ npm start              # http://127.0.0.1:2567/mp/  （WebSocket：ws://127.0.0.
 
 ```bash
 npm run typecheck
-npm run test:unit          # 13 項
-npm run test:integration   # 10 項（真的開伺服器＋機器人）
+npm run test:unit          # 16 項
+npm run test:integration   # 11 項（真的開伺服器＋機器人）
+npm run test:combat        # 15 項：伺服器權威戰鬥、掉落、背包、倉庫、重啟、4／8／16／40 人負載
 npm run test:wss           # 自簽憑證 WSS
 npm run test:browser       # Chromium 兩個分頁＝兩位玩家（MP_BROWSER=webkit 改 Safari 引擎）
 sudo bash db/test-db.sh    # 本機 PostgreSQL 16 暫時實例：結構＋原子交易＋並行測試
