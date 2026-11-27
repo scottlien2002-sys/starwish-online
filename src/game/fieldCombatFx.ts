@@ -24,6 +24,19 @@ export class FieldCombatFx {
     this.vfx.setEnvironment("bright");
     this.numbers = new DamageNumbers(scene, hudRoot, VFX_QUALITY[tier].damageNumbers);
     this.screen = new ScreenFx(hudRoot);
+    this.prewarm();
+  }
+
+  /**
+   * Stage 7.4：先在地底下各播一次（建立粒子系統、編譯著色器），第一次命中時不會因為編譯而卡一下。
+   * 數字層也先建立元素。
+   */
+  private prewarm(): void {
+    const at = new Vector3(0, -500, 0);
+    this.vfx.hitFx(at, ["hitFlash", "hitSpark", "starBurst"], false, { owner: "self" });
+    this.vfx.spawn("lightPillar", at, { owner: "self" });
+    this.vfx.update(5);
+    this.vfx.update(5);
   }
 
   /** 玩家普通攻擊命中怪物（位置在地面；height = 怪物身高） */

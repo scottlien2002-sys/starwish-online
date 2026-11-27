@@ -35,6 +35,12 @@ export class PerfOverlay {
     this.scene = scene;
     this.q = q;
     this.instr = new SceneInstrumentation(scene);
+    // Stage 7.4：CPU 時間拆解（每幀只多幾次 performance.now()）
+    this.instr.captureFrameTime = true;
+    this.instr.captureRenderTime = true;
+    this.instr.captureAnimationsTime = true;
+    this.instr.captureActiveMeshesEvaluationTime = true;
+    this.instr.captureRenderTargetsRenderTime = true;
     this.steps = resolutionSteps(window.devicePixelRatio || 1, q.maxPixelRatio);
     engine.setHardwareScalingLevel(1 / this.steps[0]!);
 
@@ -72,6 +78,20 @@ export class PerfOverlay {
   private sessMs = 0;
   private sessSlow = 0;
   private sessFrameMs: number[] = [];
+  /** Stage 7.4：累計 Draw Calls、三角面、較細的卡頓分級 */
+  private sessDraw = 0;
+  private sessDrawMax = 0;
+  private sessTri = 0;
+  private sessTriMax = 0;
+  private sess33 = 0;
+  private sess100 = 0;
+  private sessCpu = { frame: 0, render: 0, anim: 0, active: 0, rtt: 0, n: 0 };
+  private extra: (() => Record<string, unknown>) | null = null;
+
+  /** 頁面自己的效能資訊（例如怪物距離分級）一起放進報告 */
+  setExtra(fn: () => Record<string, unknown>): void {
+    this.extra = fn;
+  }
   private labels: { model: string; map: string } | null = null;
 
   /** 顯示模型 LOD 與地圖（只有完整遊戲頁使用；畫質另外顯示） */
@@ -96,10 +116,51 @@ export class PerfOverlay {
     this.sessMs = 0;
     this.sessSlow = 0;
     this.sessFrameMs = [];
+    this.sessDraw = this.sessDrawMax = this.sessTri = this.sessTriMax = this.sess33 = this.sess100 = 0;
+    this.sessCpu = { frame: 0, render: 0, anim: 0, active: 0, rtt: 0, n: 0 };
+  }
+
+  /** Stage 7.4：記憶體與資源（iOS Safari 不提供 JS 記憶體數值 → null；資源數可以判斷有沒有洩漏） */
+  memory(): { jsHeapMB: number | null; meshes: number; materials: number; textures: number; textureMB: number; skeletons: number; animationGroups: number; particleSystems: number } {
+    const pm = (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory;
+    let tex = 0;
+    for (const t of this.scene.textures) {
+      const sz = t.getSize?.();
+      if (sz && sz.width > 0) tex += sz.width * sz.height * 4 * ((t as { isCube?: boolean }).isCube ? 6 : 1) * 1.33;
+    }
+    return {
+      jsHeapMB: pm ? Math.round((pm.usedJSHeapSize / 1048576) * 10) / 10 : null,
+      meshes: this.scene.meshes.length,
+      materials: this.scene.materials.length,
+      textures: this.scene.textures.length,
+      textureMB: Math.round(tex / 1048576),
+      skeletons: this.scene.skeletons.length,
+      animationGroups: this.scene.animationGroups.length,
+      particleSystems: this.scene.particleSystems.length,
+    };
   }
 
   /** 累計量測報告：平均 FPS、1% Low、最低、卡頓（>50 ms）、秒數 */
-  session(): { seconds: number; frames: number; avgFps: number; low1: number; minFps: number; hitches: number; pixelRatio: number; quality: string; model: string; map: string } {
+  session(): {
+    seconds: number;
+    frames: number;
+    avgFps: number;
+    low1: number;
+    minFps: number;
+    hitches: number;
+    pixelRatio: number;
+    quality: string;
+    model: string;
+    map: string;
+    hitchRule: string;
+    frames33: number;
+    frames100: number;
+    drawCalls: { avg: number; max: number };
+    triangles: { avgK: number; maxK: number };
+    cpuMs: { frame: number; render: number; animations: number; activeMeshes: number; renderTargets: number };
+    memory: ReturnType<PerfOverlay["memory"]>;
+    extra: Record<string, unknown> | null;
+  } {
     const sorted = [...this.sessFrameMs].sort((a, b) => b - a);
     const worst1 = sorted.slice(0, Math.max(1, Math.floor(sorted.length / 100)));
     const w = worst1.length ? worst1.reduce((a, b) => a + b, 0) / worst1.length : 0;
@@ -114,6 +175,18 @@ export class PerfOverlay {
       quality: this.q.level,
       model: this.labels?.model ?? "",
       map: this.labels?.map ?? "",
+      hitchRule: "卡頓＝單幀超過 50 ms（低於 20 FPS）；另列 >33 ms、>100 ms",
+      frames33: this.sess33,
+      frames100: this.sess100,
+      drawCalls: { avg: this.sessFrames ? Math.round(this.sessDraw / this.sessFrames) : 0, max: this.sessDrawMax },
+      triangles: { avgK: this.sessFrames ? Math.round(this.sessTri / this.sessFrames / 1000) : 0, maxK: Math.round(this.sessTriMax / 1000) },
+      cpuMs: (() => {
+        const c = this.sessCpu;
+        const r = (v: number): number => (c.n ? Math.round((v / c.n) * 100) / 100 : 0);
+        return { frame: r(c.frame), render: r(c.render), animations: r(c.anim), activeMeshes: r(c.active), renderTargets: r(c.rtt) };
+      })(),
+      memory: this.memory(),
+      extra: this.extra ? this.extra() : null,
     };
   }
 
@@ -126,7 +199,22 @@ export class PerfOverlay {
     this.sessFrames++;
     this.sessMs += ms;
     if (ms > 50) this.sessSlow++;
+    if (ms > 33.4) this.sess33++;
+    if (ms > 100) this.sess100++;
     if (this.sessFrameMs.length < 36000) this.sessFrameMs.push(ms);
+    const dc = this.instr.drawCallsCounter.current;
+    const tri = this.scene.getActiveIndices() / 3;
+    this.sessDraw += dc;
+    this.sessTri += tri;
+    if (dc > this.sessDrawMax) this.sessDrawMax = dc;
+    if (tri > this.sessTriMax) this.sessTriMax = tri;
+    const c = this.sessCpu;
+    c.frame += this.instr.frameTimeCounter.lastSecAverage > 0 ? this.instr.frameTimeCounter.current : 0;
+    c.render += this.instr.renderTimeCounter.current;
+    c.anim += this.instr.animationsTimeCounter.current;
+    c.active += this.instr.activeMeshesEvaluationTimeCounter.current;
+    c.rtt += this.instr.renderTargetsRenderTimeCounter.current;
+    c.n++;
   }
 
   /** 測試截圖用：固定解析度（不做動態降解析度），讓不同畫質的截圖可比較 */

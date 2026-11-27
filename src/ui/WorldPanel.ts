@@ -196,7 +196,7 @@ export class WorldPanel {
       const pf = this.hooks.perf?.();
       if (!pf) return "";
       const r = pf.session();
-      return `5 秒平均 <b>${pf.avgFps(5).toFixed(1)} FPS</b><br>累計 ${r.seconds} 秒：平均 <b>${r.avgFps} FPS</b>｜1% Low ${r.low1}｜最低 ${r.minFps}｜卡頓（>50 ms）${r.hitches} 次｜解析度 ${r.pixelRatio}x`;
+      return `5 秒平均 <b>${pf.avgFps(5).toFixed(1)} FPS</b><br>累計 ${r.seconds} 秒：平均 <b>${r.avgFps} FPS</b>｜1% Low ${r.low1}｜最低 ${r.minFps}｜卡頓（>50 ms）${r.hitches} 次（>33 ms ${r.frames33}）｜解析度 ${r.pixelRatio}x<br>Draw Calls 平均 ${r.drawCalls.avg}（最高 ${r.drawCalls.max}）｜三角面 平均 ${r.triangles.avgK}k（最高 ${r.triangles.maxK}k）<br>CPU 每幀 ${r.cpuMs.frame} ms（動畫 ${r.cpuMs.animations}、陰影等 ${r.cpuMs.renderTargets}）｜貼圖約 ${r.memory.textureMB} MB${r.memory.jsHeapMB !== null ? `｜JS ${r.memory.jsHeapMB} MB` : "（此瀏覽器不提供 JS 記憶體）"}`;
     }
     const x = p.pet(Number(idStr));
     if (!x) return "";

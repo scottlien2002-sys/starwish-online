@@ -167,7 +167,8 @@ export class CrossFader {
     let others = 0;
     for (const [k, v] of this.w) if (k !== t) others += v;
     const remain = 1 - nt;
-    for (const [k, v] of [...this.w]) {
+    // Stage 7.4：不複製 Map（每隻每幀少一個陣列配置）；迭代中刪除目前項目是安全的
+    for (const [k, v] of this.w) {
       if (k === t) continue;
       const nv = others > 0 ? (v / others) * remain : 0;
       if (nv <= 1e-4) this.w.delete(k);

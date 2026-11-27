@@ -4,7 +4,7 @@ name: Stage 7 world loop E2E (quick, with screenshots)
 # 獨立於 CI & Deploy（避免超過該工作 150 分鐘上限），在同一個 commit 平行執行。
 on:
   push:
-    branches: [feature/render-stage7-world, feature/render-stage71-world, feature/render-stage72-monsters, feature/render-stage72-world, feature/render-stage72-npc, feature/render-stage73-world]
+    branches: [feature/render-stage7-world, feature/render-stage71-world, feature/render-stage72-monsters, feature/render-stage72-world, feature/render-stage72-npc, feature/render-stage73-world, feature/render-stage74-perf]
 
 permissions:
   contents: read

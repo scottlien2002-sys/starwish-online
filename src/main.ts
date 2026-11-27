@@ -42,7 +42,9 @@ function main(): void {
     // ?play=world：Stage 7 完整遊戲（星芽村出生 → 南門 → 星芽原野 → 星願石返回；共用存檔）；&newgame=1 重新開始、&g=female 新存檔性別
     if (new URLSearchParams(location.search).get("play") === "world") {
       document.body.classList.add("map-mode");
-      void import("./game/worldSession.ts")
+      void import("./core/assetRemap.ts")
+        .then((m) => m.installAssetRemap())
+        .then(() => import("./game/worldSession.ts"))
         .then(async (ws) => {
           const world = new ws.WorldSession(new URLSearchParams(location.search));
           if (world.save.character.map === "starsprout") {

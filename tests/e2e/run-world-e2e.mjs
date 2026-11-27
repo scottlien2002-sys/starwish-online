@@ -300,6 +300,48 @@ for (const name of browsers) {
       check("Stage 7.3 戰鬥特效（Claude C VFX V2）：命中火花與傷害數字和命中同步出現", !!cfx && cfx.hitFx >= fight.kills && cfx.numbers >= cfx.hitFx && cfx.damageShown > 0, cfx);
       check("Stage 7.2：擊敗怪物得到經驗（測試設定），存進角色存檔", fw.expGained > 0 && (fw.level > 1 || fw.exp > 0), { expGained: fw.expGained, level: fw.level, exp: fw.exp });
       check("掉落物唯一編號：每個撿起的掉落只入帳一次", new Set(drops.map((d) => d.requestId)).size === drops.length && fight.w.claimed >= drops.length, { drops: drops.length, claimed: fight.w.claimed });
+      // ---------- Stage 7.4：持續普通攻擊 25 秒，怪物不會因受擊／擊退而永久無法反擊 ----------
+      const sustain = await V(
+        () =>
+          new Promise((res) => {
+            const api = window.__starwishPlay;
+            const i0 = api.info();
+            const tgt = i0.monsters.filter((m) => m.state !== "death" && m.hp > 0).sort((a, b) => Math.hypot(a.x - i0.pos[0], a.z - i0.pos[2]) - Math.hypot(b.x - i0.pos[0], b.z - i0.pos[2]))[0];
+            if (!tgt) return res({ error: "no target" });
+            api.setMonsterHp(tgt.id, 999999);
+            api.teleport(tgt.x + 1.0, tgt.z);
+            const hurt0 = i0.combatFx?.hurt ?? 0;
+            const kb0 = { done: i0.combatFx?.knockbacks ?? 0, skip: i0.combatFx?.knockSkipped ?? 0 };
+            const att0 = tgt.attacks?.resolved ?? 0;
+            const t0 = performance.now();
+            let maxGap = 0;
+            let lastHurtAt = performance.now();
+            let lastHurt = hurt0;
+            let presses = 0;
+            const step = () => {
+              const i = api.info();
+              const m = i.monsters.find((x) => x.id === tgt.id);
+              if (i.hp < i.maxHp * 0.5) api.world.setHp(i.maxHp);
+              if (m && Math.hypot(m.x - i.pos[0], m.z - i.pos[2]) > 2.0) api.teleport(m.x + 1.0, m.z);
+              api.press("attack");
+              presses++;
+              const h = i.combatFx?.hurt ?? 0;
+              const now = performance.now();
+              if (h > lastHurt) {
+                maxGap = Math.max(maxGap, now - lastHurtAt);
+                lastHurtAt = now;
+                lastHurt = h;
+              }
+              if (now - t0 > 25000) {
+                maxGap = Math.max(maxGap, now - lastHurtAt);
+                res({ kind: tgt.kind, presses, playerHits: i.hits ?? null, hurtTaken: h - hurt0, monsterAttacks: (m?.attacks?.resolved ?? 0) - att0, knockbacks: (i.combatFx?.knockbacks ?? 0) - kb0.done, knockSkipped: (i.combatFx?.knockSkipped ?? 0) - kb0.skip, maxGapMs: Math.round(maxGap), alive: !!m && m.hp > 0 });
+              } else setTimeout(step, 120);
+            };
+            step();
+          }),
+      );
+      run.results.sustainedAttack = sustain;
+      check("Stage 7.4：玩家持續普攻 25 秒（怪物血量調高）：怪物仍多次反擊命中、最長不出手間隔 < 8 秒；擊退有衰減（不會一直被推離）", !sustain.error && sustain.hurtTaken >= 3 && sustain.monsterAttacks >= 3 && sustain.maxGapMs < 8000 && sustain.knockSkipped > sustain.knockbacks, sustain);
       await shot("field_fight");
 
       // ---------- 6. 走進營地傳送陣返回星芽村，存檔保留 ----------

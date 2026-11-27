@@ -166,6 +166,35 @@ export interface RiggedVisualOptions {
 
 let seq = 0;
 
+/** 血條材質：全場共用兩個（Stage 7.4：原本每隻 2 個，21 隻＝42 個材質） */
+const barMats = new WeakMap<Scene, { bg: StandardMaterial; fill: StandardMaterial }>();
+function sharedBarMaterials(s: Scene): { bg: StandardMaterial; fill: StandardMaterial } {
+  let m = barMats.get(s);
+  if (!m) {
+    const mk = (name: string, c: Color3): StandardMaterial => {
+      const mat = new StandardMaterial(name, s);
+      mat.disableLighting = true;
+      mat.emissiveColor = c;
+      mat.backFaceCulling = false;
+      mat.freeze();
+      return mat;
+    };
+    m = { bg: mk("hpbar_bg_shared", new Color3(0.12, 0.1, 0.18)), fill: mk("hpbar_fill_shared", new Color3(0.95, 0.32, 0.38)) };
+    barMats.set(s, m);
+  }
+  return m;
+}
+
+/**
+ * 動畫更新方式（Stage 7.4 距離分級）：
+ * - "auto"：Babylon 每幀驅動（近距離，完整品質）
+ * - "manual"：AnimationGroup 暫停，由 update() 依自己的時鐘跳到正確的格（中、遠距離：呼叫頻率由 MonsterController 的 stride 決定）
+ * 兩種方式的播放時間都用同一個時鐘，切換時不會跳格或變速。
+ */
+export type RigAnimMode = "auto" | "manual";
+const BAR_BG = new Color3(0.12, 0.1, 0.18);
+const BAR_FILL = new Color3(0.95, 0.32, 0.38);
+
 export class RiggedMonsterVisual implements IMonsterVisual {
   readonly kind = "gltf" as const;
   readonly opts: RiggedVisualOptions;
@@ -191,6 +220,12 @@ export class RiggedMonsterVisual implements IMonsterVisual {
   private maxHp = 1;
   private bar: { root: TransformNode; fill: Mesh } | null = null;
   readonly id = ++seq;
+  /** Stage 7.4：動畫更新方式與每個片段自己的播放秒數 */
+  animMode: RigAnimMode = "auto";
+  private readonly clipTime = new Map<RigClipKey, number>();
+  private castShadow = true;
+  /** 測試用：手動跳格次數 */
+  manualSteps = 0;
 
   constructor(opts: RiggedVisualOptions) {
     this.opts = opts;
@@ -222,6 +257,7 @@ export class RiggedMonsterVisual implements IMonsterVisual {
       }
       this.opts.shadows?.addShadowCaster(m, false);
     }
+    this.castShadow = !!this.opts.shadows;
     this.materials = [...cloned.values()];
     // 動畫群組：instantiateModelsToScene 依原本順序複製
     a.container.animationGroups.forEach((src, i) => {
@@ -249,7 +285,7 @@ export class RiggedMonsterVisual implements IMonsterVisual {
     const g = this.groups.get(k);
     if (!g) return;
     const loop = RIG_LOOPING.has(k);
-    if (this.clip === k && g.isPlaying && loop) {
+    if (this.clip === k && g.isStarted && loop) {
       g.speedRatio = ratio;
       this.ratio = ratio;
       return;
@@ -258,7 +294,10 @@ export class RiggedMonsterVisual implements IMonsterVisual {
     g.stop();
     g.reset();
     g.start(loop, ratio, g.from, g.to, false);
-    g.weight = fade > 0 ? 0 : 1;
+    // 只有一個片段時用 -1（不混合；Babylon 不走權重混合的較慢路徑）
+    g.weight = fade > 0 ? 0 : -1;
+    if (this.animMode === "manual") g.pause();
+    this.clipTime.set(k, 0);
     this.clip = k;
     this.ratio = ratio;
     this.fader.play(k, fade);
@@ -365,13 +404,69 @@ export class RiggedMonsterVisual implements IMonsterVisual {
       }
     } else this.updateLocomotion(false);
     const w = this.fader.update(dt);
+    const blending = w.size > 1;
     for (const [k, g] of this.groups) {
       const wk = w.get(k) ?? 0;
       if (wk <= 0) {
-        if (g.isPlaying && k !== this.clip) g.stop();
-      } else g.weight = wk;
+        if (g.isStarted && k !== this.clip) g.stop();
+        continue;
+      }
+      if (!g.isStarted) continue;
+      g.weight = blending ? wk : -1;
+      // 自己的時鐘（自動、手動模式都記錄；切換模式時不會跳格）
+      this.clipTime.set(k, (this.clipTime.get(k) ?? 0) + dt * g.speedRatio);
+      if (this.animMode === "manual") this.stepGroup(k, g, blending);
     }
     this.updateBar();
+  }
+
+  /** 手動模式：跳到這個片段目前應該在的格 */
+  private stepGroup(k: RigClipKey, g: AnimationGroup, blending: boolean): void {
+    const fps = g.targetedAnimations[0]?.animation.framePerSecond ?? 60;
+    const len = g.to - g.from;
+    let f = (this.clipTime.get(k) ?? 0) * fps;
+    f = g.loopAnimation && len > 0 ? f % len : Math.min(f, len);
+    (g.goToFrame as (frame: number, useWeight?: boolean) => AnimationGroup).call(g, g.from + f, blending);
+    this.manualSteps++;
+  }
+
+  /**
+   * Stage 7.4：切換動畫更新方式。manual：暫停 Babylon 的自動播放，改由 update() 跳格；
+   * auto：先跳到目前的格再恢復自動播放。
+   */
+  setAnimMode(mode: RigAnimMode): void {
+    if (mode === this.animMode) return;
+    this.animMode = mode;
+    for (const [k, g] of this.groups) {
+      if (!g.isStarted) continue;
+      if (mode === "manual") {
+        g.pause();
+        this.stepGroup(k, g, this.fader.weight(k) < 1);
+      } else {
+        this.stepGroup(k, g, this.fader.weight(k) < 1);
+        g.play(g.loopAnimation);
+      }
+    }
+  }
+
+  /** Stage 7.4：遠距離不投射陰影（陰影貼圖少畫蒙皮網格） */
+  setShadowCasting(on: boolean): void {
+    const sg = this.opts.shadows;
+    if (!sg || on === this.castShadow) return;
+    this.castShadow = on;
+    for (const m of this.meshes) {
+      if (on) sg.addShadowCaster(m, false);
+      else sg.removeShadowCaster(m, false);
+    }
+  }
+
+  get shadowCasting(): boolean {
+    return this.castShadow;
+  }
+
+  /** Stage 7.4：極遠距離不畫（AI、戰鬥、死亡重生照常計算；回到範圍內立刻顯示） */
+  setRenderVisible(on: boolean): void {
+    for (const m of this.meshes) if (m.isVisible !== on) m.isVisible = on;
   }
 
   private makeBar(): { root: TransformNode; fill: Mesh } {
@@ -380,20 +475,17 @@ export class RiggedMonsterVisual implements IMonsterVisual {
     root.parent = this.root;
     root.position.y = this.spec.hpBarHeight;
     root.billboardMode = TransformNode.BILLBOARDMODE_ALL;
+    const mats = sharedBarMaterials(s);
     const mk = (name: string, w: number, h: number, c: Color3, z: number): Mesh => {
       const m = MeshBuilder.CreatePlane(name, { width: w, height: h }, s);
-      const mat = new StandardMaterial(`${name}Mat`, s);
-      mat.disableLighting = true;
-      mat.emissiveColor = c;
-      mat.backFaceCulling = false;
-      m.material = mat;
+      m.material = c === BAR_BG ? mats.bg : mats.fill;
       m.parent = root;
       m.position.z = z;
       m.isPickable = false;
       return m;
     };
-    mk(`hpbg_${this.id}`, 0.56, 0.07, new Color3(0.12, 0.1, 0.18), 0.001);
-    const fill = mk(`hpfill_${this.id}`, 0.52, 0.045, new Color3(0.95, 0.32, 0.38), 0);
+    mk(`hpbg_${this.id}`, 0.56, 0.07, BAR_BG, 0.001);
+    const fill = mk(`hpfill_${this.id}`, 0.52, 0.045, BAR_FILL, 0);
     root.setEnabled(false);
     return { root, fill };
   }
@@ -423,7 +515,7 @@ export class RiggedMonsterVisual implements IMonsterVisual {
   /** 每個片段目前的權重（測試用） */
   weights(): Record<string, number> {
     const o: Record<string, number> = {};
-    for (const [k, g] of this.groups) if (g.isPlaying) o[k] = Math.round(g.weight * 1000) / 1000;
+    for (const [k, g] of this.groups) if (g.isStarted) o[k] = g.weight < 0 ? 1 : Math.round(g.weight * 1000) / 1000;
     return o;
   }
 
