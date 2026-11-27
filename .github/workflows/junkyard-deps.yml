@@ -1,0 +1,23 @@
+name: Junkyard dev deps (read-only artifact)
+# 只安裝 npm 套件並上傳成 artifact，讓 Claude B 本機做型別檢查與建置；不部署、不改任何分支。
+on:
+  push:
+    branches: [tools/junkyard-deps]
+  workflow_dispatch:
+jobs:
+  deps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --ignore-scripts || npm install --ignore-scripts
+      - run: cp package-lock.json node_modules/.package-lock.copy.json || true
+      - run: tar czf deps.tgz node_modules package-lock.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: junkyard-deps
+          path: deps.tgz
+          retention-days: 3
