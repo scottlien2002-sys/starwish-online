@@ -35,19 +35,21 @@ FIT = {
     "male": {
         "body": "Male_Base_V1",
         "sleeve_zmin": -0.12,  # 袖子量測範圍（避開衣襬）
-        "hair": {"src": "Male_Hair_01_V1", "s": 0.50, "t": [-0.012, 0.025, 0.342]},
+        "hair": {"src": "Male_Hair_01_V1", "s": 0.50, "t": [-0.012, 0.0, 0.342]},
         "top": {"src": "Male_Novice_Top_V1", "s": 0.423, "t": [0.007, 0.0, 0.060]},
         "bottom": {"src": "Male_Novice_Pants_V1", "s": 0.384, "t": [-0.006, 0.0, -0.246]},
         "boots": {"src": "Male_Novice_Boots_V1", "foot_scale": 1.12},
+        "scalp": [0.42, 0.24, 0.15],  # 頭髮縫隙下的頭皮染成髮色（頂點色）
     },
     "female": {
         "body": "CHR_Female_Base",
         "sleeve_zmin": -0.10,  # 袖子量測範圍（避開裙襬）
         # 女生髮型原檔面向 −X（與身體相反）→ 先轉 180°
-        "hair": {"src": "Novice_Female_Hair_01", "s": 0.53, "t": [-0.02, -0.03, 0.322], "flip": True},
+        "hair": {"src": "Novice_Female_Hair_01", "s": 0.53, "t": [-0.02, 0.0, 0.322], "flip": True},
         "top": {"src": "Novice_Female_Top", "s": 0.421, "t": [0.02, 0.0, 0.014]},
         "bottom": {"src": "Novice_Female_Leggings", "box": {"z": [-0.458, -0.06], "yhalf": 0.106, "xc": 0.028}},
         "boots": {"src": "Novice_Female_Boots", "foot_scale": 1.12},
+        "scalp": [0.55, 0.22, 0.17],
     },
 }
 WEAPONS = {
@@ -308,6 +310,7 @@ def build_gender(g):
     for wk, wc in WEAPONS.items():
         parts["weapon_" + wk] = import_part(wc["src"])
     log(g, "imported + fitted")
+    paint_scalp(body, parts["hair"], cfg["scalp"], J, H)
 
     # ---- 手臂骨骼沿上衣袖子（穿上衣時看得到的是袖子與手套；身體被蓋住的部分不畫）----
     top = parts["top"]
@@ -487,6 +490,37 @@ def build_gender(g):
             continue
     REPORT["genders"][g] = rep
     return arm, rep
+
+
+def paint_scalp(body, hair, color, J, H):
+    """頭髮底下的頭皮（離頭髮很近、眼睛以上）用頂點色染成髮色：頭髮縫隙不會露出膚色"""
+    from mathutils.kdtree import KDTree
+    HV = verts_np(hair)
+    kd = KDTree(len(HV))
+    for i, v in enumerate(HV):
+        kd.insert(Vector(v), i)
+    kd.balance()
+    BV = verts_np(body)
+    head = np.array(J["head"])
+    top = np.array(J["head_end"])
+    eye_z = head[2] + (top[2] - head[2]) * 0.5
+    me = body.data
+    attr = me.color_attributes.new("Col", "BYTE_COLOR", "POINT")
+    cols = np.ones((len(BV), 4))
+    near, far = 0.02 * H, 0.05 * H
+    painted = 0
+    for i, v in enumerate(BV):
+        if v[2] < eye_z - 0.02 * H:
+            continue
+        _, _, d = kd.find(Vector(v))
+        k = 1.0 if d <= near else (0.0 if d >= far else (far - d) / (far - near))
+        k *= min(1.0, max(0.0, (v[2] - (eye_z - 0.02 * H)) / (0.03 * H)))
+        if k > 0:
+            cols[i, :3] = 1 - k + k * np.array(color)
+            painted += 1
+    attr.data.foreach_set("color", cols.ravel())
+    me.color_attributes.active_color = attr
+    REPORT.setdefault("scalp_painted", {})[body.name] = painted
 
 
 def split_body(o, W):
@@ -737,7 +771,7 @@ def export(objs, path, anim, jpeg):
     bpy.ops.export_scene.gltf(
         filepath=path, export_format="GLB", use_selection=True, export_animations=anim, export_animation_mode="ACTIONS" if anim else "ACTIVE_ACTIONS",
         export_skins=True, export_def_bones=False, export_extras=True, export_image_format="JPEG", export_jpeg_quality=jpeg,
-        export_yup=True, export_apply=False, export_morph=False, export_optimize_animation_size=True,
+        export_yup=True, export_apply=False, export_vertex_color="ACTIVE", export_morph=False, export_optimize_animation_size=True,
     )
 
 
