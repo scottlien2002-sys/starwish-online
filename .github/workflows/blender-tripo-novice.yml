@@ -1,0 +1,59 @@
+name: "Blender — Tripo 新版初心者（檢查／綁骨／動畫）"
+# 使用者交付的 Tripo 角色零件（art/tripo-novice/source）→ 解壓 → Blender 檢查與建置。
+# 結果推到 art-tripo-novice 分支（一般推送）。不影響遊戲網站、main 與其他部門分支。
+on:
+  workflow_dispatch:
+  push:
+    branches: ["feature/tripo-novice-rig"]
+    paths:
+      - "art/tripo-novice/**"
+      - ".github/workflows/blender-tripo-novice.yml"
+permissions:
+  contents: write
+concurrency:
+  group: blender-tripo-novice
+  cancel-in-progress: true
+env:
+  BLENDER_VERSION: "4.2.3"
+  BLENDER_SERIES: "4.2"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Decode meshopt / quantization
+        run: |
+          mkdir -p /tmp/gt && cd /tmp/gt && npm init -y >/dev/null && npm i --no-save @gltf-transform/core@4 @gltf-transform/extensions@4 @gltf-transform/functions@4 meshoptimizer 2>&1 | tail -2
+          cd "$GITHUB_WORKSPACE" && cp art/tripo-novice/decompress.mjs /tmp/gt/ && node /tmp/gt/decompress.mjs art/tripo-novice/source /tmp/decoded
+      - name: System libraries for Blender (headless)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libsm6 libxkbcommon0 >/dev/null
+      - name: Download Blender
+        run: |
+          URL="https://download.blender.org/release/Blender${BLENDER_SERIES}/blender-${BLENDER_VERSION}-linux-x64.tar.xz"
+          curl -fsSL --retry 5 --retry-delay 10 "$URL" -o /tmp/blender.tar.xz || curl -fsSL --retry 5 "https://mirrors.ocf.berkeley.edu/blender/release/Blender${BLENDER_SERIES}/blender-${BLENDER_VERSION}-linux-x64.tar.xz" -o /tmp/blender.tar.xz
+          mkdir -p /opt/blender && tar -xf /tmp/blender.tar.xz -C /opt/blender --strip-components=1
+      - name: Inspect parts
+        run: |
+          mkdir -p out/inspect
+          /opt/blender/blender -b --factory-startup -noaudio -P art/tripo-novice/inspect.py -- /tmp/decoded out/inspect 2>&1 | grep -E "inspected|Error|Traceback" | tail -40
+      - name: Build (fit, rig, animate, export) if present
+        run: |
+          if [ -f art/tripo-novice/build.py ]; then
+            /opt/blender/blender -b --factory-startup -noaudio -P art/tripo-novice/build.py -- /tmp/decoded out 2>&1 | tee out/build.log | grep -vE "^Fra:|Sample" | tail -80
+          fi
+      - name: Push results to art-tripo-novice (normal push)
+        run: |
+          set -e
+          cd out
+          git init -q && git checkout -q -b art-tripo-novice
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          URL="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          if git fetch -q "$URL" art-tripo-novice 2>/dev/null; then git reset -q --soft FETCH_HEAD; fi
+          git add -A && git commit -qm "Tripo novice build ${GITHUB_SHA::7}" || exit 0
+          git push -q "$URL" HEAD:art-tripo-novice
