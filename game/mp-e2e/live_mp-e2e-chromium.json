@@ -1,0 +1,863 @@
+{
+  "browser": "chromium",
+  "checks": [
+    {
+      "name": "兩位玩家進入同一個星芽村房間",
+      "ok": true,
+      "detail": {
+        "room": "village-1"
+      }
+    },
+    {
+      "name": "A 看見 B 的 3D 角色（C1.0-B5b Lite、女、粉紅髮色已套用、法杖）",
+      "ok": true,
+      "detail": {
+        "id": 2,
+        "name": "小願",
+        "loaded": true,
+        "state": "Idle",
+        "pos": [
+          10.8,
+          6.3
+        ],
+        "yaw": -2.094,
+        "link": 1,
+        "parts": 0,
+        "file": "novice_c10b5b_female_lite.glb",
+        "weapon": "staff",
+        "hairTinted": 2,
+        "hairColor": "#c0408a",
+        "gender": "female"
+      }
+    },
+    {
+      "name": "B 看見 A 的 3D 角色（C1.0-B5b Lite、男、深棕髮色已套用、短劍）",
+      "ok": true,
+      "detail": {
+        "id": 1,
+        "name": "阿星",
+        "loaded": true,
+        "state": "Idle",
+        "pos": [
+          6.2,
+          10.8
+        ],
+        "yaw": -2.618,
+        "link": 1,
+        "parts": 0,
+        "file": "novice_c10b5b_male_lite.glb",
+        "weapon": "sword",
+        "hairTinted": 1,
+        "hairColor": "#3a2a1a",
+        "gender": "male"
+      }
+    },
+    {
+      "name": "本地角色外觀以伺服器資料建立（B 是女性、法杖；不是 Tripo 零件）",
+      "ok": true,
+      "detail": {
+        "gender": "female",
+        "ap": {
+          "hair": "hair01",
+          "hairColor": "#c0408a",
+          "weapon": "staff"
+        },
+        "modular": false
+      }
+    },
+    {
+      "name": "一般移動沒有跳躍按鈕",
+      "ok": true
+    },
+    {
+      "name": "星芽村正式美術（Claude B Stage 6.7：Tripo NPC、N008 佈告欄、洛恩）載入完成",
+      "ok": true,
+      "detail": {
+        "art": "loaded"
+      }
+    },
+    {
+      "name": "B 看到 A 跑步（Run 動畫）",
+      "ok": true,
+      "detail": {
+        "states": [
+          "Idle",
+          "Run"
+        ]
+      }
+    },
+    {
+      "name": "遠端移動沒有瞬移（取樣間最大位移 < 5 m/s 對應距離的 2 倍）",
+      "ok": true,
+      "detail": {
+        "samples": 6,
+        "maxStepM": 1,
+        "maxApparentSpeed": 2.19,
+        "midState": "Run",
+        "midYaw": 1.59
+      }
+    },
+    {
+      "name": "A 停下後 B 看到 Idle",
+      "ok": true,
+      "detail": {
+        "state": "Idle"
+      }
+    },
+    {
+      "name": "B 看到 A 朝東跑（跑步中 yaw≈90°）且停下後朝向＝伺服器朝向",
+      "ok": true,
+      "detail": {
+        "lastRunYaw": 1.576,
+        "remoteYaw": 1.571,
+        "serverYaw": 1.571
+      }
+    },
+    {
+      "name": "B 畫面中 A 的位置＝伺服器權威位置（< 5 cm）",
+      "ok": true,
+      "detail": {
+        "errCm": 0
+      }
+    },
+    {
+      "name": "A 本地預測位置＝伺服器位置（< 5 cm）",
+      "ok": true,
+      "detail": {
+        "errCm": 0
+      }
+    },
+    {
+      "name": "N009 洛恩巡邏：兩位玩家看到的位置一致（< 0.5 m，伺服器時間）",
+      "ok": true,
+      "detail": {
+        "a": {
+          "x": 4.132981069542971,
+          "z": -9.977898951121897,
+          "paused": false
+        },
+        "b": {
+          "x": 4.132981069542971,
+          "z": -9.977898951121897,
+          "paused": true
+        },
+        "gapM": 0,
+        "server": {
+          "patrolT": 1795807058.357,
+          "at": 1795807058357,
+          "paused": false,
+          "tx": 0,
+          "tz": 0
+        }
+      }
+    },
+    {
+      "name": "A 走入南門自動到星芽原野（伺服器換房間）",
+      "ok": true,
+      "detail": {
+        "room": "starsprout-1"
+      }
+    },
+    {
+      "name": "留在村莊的 B 看不到已到原野的 A（不同地圖互不可見）",
+      "ok": true,
+      "detail": {
+        "remotes": []
+      }
+    },
+    {
+      "name": "換地圖後 A 外觀與角色保留（同一玩家、髮色與短劍套用）",
+      "ok": true,
+      "detail": {
+        "pid": 1,
+        "look": {
+          "weapon": "sword",
+          "hairTinted": 1
+        }
+      }
+    },
+    {
+      "name": "A、B 都在星芽原野，互相看見",
+      "ok": true,
+      "detail": {
+        "room": "starsprout-1"
+      }
+    },
+    {
+      "name": "A、B 合作把同一隻怪打倒（兩邊都看到 HP 0、死亡）",
+      "ok": true,
+      "detail": {
+        "mA": {
+          "x": -34.07,
+          "z": -55.72,
+          "hp": 0,
+          "maxHp": 60,
+          "state": "death",
+          "me": [
+            -34.11999999909515,
+            -55.680000000331844
+          ]
+        },
+        "mB": {
+          "x": -34.07,
+          "z": -55.72,
+          "hp": 0,
+          "maxHp": 60,
+          "state": "death",
+          "me": [
+            -34.31,
+            -55.14
+          ]
+        }
+      }
+    },
+    {
+      "name": "戰鬥中兩邊看到的怪物 HP 一致（同一份伺服器狀態；≥ 85% 取樣相同）",
+      "ok": true,
+      "detail": {
+        "same": 88,
+        "total": 88
+      }
+    },
+    {
+      "name": "A 的攻擊與 B 的技能都被伺服器接受、兩人都打出傷害（B 法杖用魔法彈）",
+      "ok": true,
+      "detail": {
+        "A": {
+          "sent": 1,
+          "ok": 1,
+          "rej": 0,
+          "dmg": 20
+        },
+        "B": {
+          "skills": 2,
+          "dmg": 52,
+          "last": ""
+        }
+      }
+    },
+    {
+      "name": "傷害數字顯示伺服器結果（兩邊都有命中特效）",
+      "ok": true,
+      "detail": {
+        "A": 3,
+        "B": 3
+      }
+    },
+    {
+      "name": "其他玩家的技能特效依伺服器施放事件播放（A 看到 B 的施放）",
+      "ok": true,
+      "detail": {
+        "remoteCasts": 2,
+        "vfx": {
+          "meshFx": 1,
+          "particles": 0,
+          "projectiles": 0,
+          "spawned": 7
+        }
+      }
+    },
+    {
+      "name": "兩人都拿到經驗（伺服器結算，擊殺只結算一次）",
+      "ok": true,
+      "detail": {
+        "A": {
+          "hp": 100,
+          "maxHp": 100,
+          "level": 1,
+          "exp": 12,
+          "expNext": 100,
+          "gold": 100,
+          "down": false
+        },
+        "B": {
+          "hp": 12,
+          "maxHp": 100,
+          "level": 1,
+          "exp": 12,
+          "expNext": 100,
+          "gold": 108,
+          "down": false
+        }
+      }
+    },
+    {
+      "name": "掉落物由伺服器產生、撿取後兩邊畫面都消失（每件只入帳一次）",
+      "ok": true,
+      "detail": {
+        "spawned": 3,
+        "picked": 3,
+        "rejected": {},
+        "killsSettled": 1,
+        "duplicateKillsBlocked": 0,
+        "picksOk": {
+          "A": 0,
+          "B": 3
+        },
+        "gold": {
+          "A": 100,
+          "B": 108
+        },
+        "leftA": 0,
+        "leftB": 0,
+        "before": {
+          "spawned": 3,
+          "picked": 3
+        }
+      }
+    },
+    {
+      "name": "擊殺只結算一次（伺服器沒有重複結算）",
+      "ok": true,
+      "detail": {
+        "killsSettled": 1,
+        "dup": 0
+      }
+    },
+    {
+      "name": "撿到的金幣由伺服器入帳（起始 100 金幣以上）",
+      "ok": true,
+      "detail": {
+        "A": 100,
+        "B": 108
+      }
+    },
+    {
+      "name": "怪物重生同步（兩邊都看到滿血、位置一致 < 0.5 m）",
+      "ok": true,
+      "detail": {
+        "secs": 4.748,
+        "rA2": {
+          "x": -31.52,
+          "z": -55.18,
+          "hp": 60,
+          "maxHp": 60,
+          "state": "respawn",
+          "me": [
+            -34.12,
+            -55.68
+          ]
+        },
+        "rB2": {
+          "x": -31.52,
+          "z": -55.18,
+          "hp": 60,
+          "maxHp": 60,
+          "state": "idle",
+          "me": [
+            -34.31,
+            -55.14
+          ]
+        }
+      }
+    },
+    {
+      "name": "客戶端不能自行宣告倒地（原野的 act 由伺服器忽略）",
+      "ok": true
+    },
+    {
+      "name": "B 斷線時 A 看到 B 標示斷線中",
+      "ok": true
+    },
+    {
+      "name": "B 自動重連、同一角色、A 看到 B 恢復",
+      "ok": true,
+      "detail": {
+        "reconnects": 1,
+        "resyncMs": 3442
+      }
+    },
+    {
+      "name": "A、B 走入原野營地傳送陣回到星芽村",
+      "ok": true,
+      "detail": {
+        "a": "village-1",
+        "b": "village-1"
+      }
+    },
+    {
+      "name": "回村後等級／經驗／金幣沿用（伺服器保存）",
+      "ok": true,
+      "detail": {
+        "field": {
+          "hp": 100,
+          "maxHp": 100,
+          "level": 1,
+          "exp": 12,
+          "expNext": 100,
+          "gold": 100,
+          "down": false
+        },
+        "village": {
+          "hp": 100,
+          "maxHp": 100,
+          "level": 1,
+          "exp": 12,
+          "expNext": 100,
+          "gold": 100,
+          "down": false
+        }
+      }
+    },
+    {
+      "name": "回到村莊後再次互相看見",
+      "ok": true
+    },
+    {
+      "name": "同一角色重複登入：新分頁接手同一玩家，舊分頁被中斷且不自動重連",
+      "ok": true,
+      "detail": {
+        "oldState": "offline",
+        "newPid": 2,
+        "oldPid": 2
+      }
+    },
+    {
+      "name": "伺服器沒有加速／非法位置紀錄",
+      "ok": true,
+      "detail": [
+        {
+          "pid": 1,
+          "name": "阿星",
+          "room": "village-1",
+          "connected": true,
+          "queue": 0,
+          "ack": 2635,
+          "stepsApplied": 2635,
+          "stepsDropped": 0,
+          "staleEpochInputs": 2,
+          "duplicateSteps": 0,
+          "seqGaps": 0,
+          "illegalPositions": 0,
+          "speedViolations": 0,
+          "actsAccepted": 0,
+          "actsRejected": 0,
+          "stepsWhileDown": 0
+        },
+        {
+          "pid": 2,
+          "name": "小願",
+          "room": "village-1",
+          "connected": true,
+          "queue": 0,
+          "ack": 1582,
+          "stepsApplied": 1582,
+          "stepsDropped": 0,
+          "staleEpochInputs": 1,
+          "duplicateSteps": 0,
+          "seqGaps": 0,
+          "illegalPositions": 0,
+          "speedViolations": 0,
+          "actsAccepted": 0,
+          "actsRejected": 0,
+          "stepsWhileDown": 0
+        }
+      ]
+    },
+    {
+      "name": "瀏覽器沒有 JavaScript 錯誤",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "name": "沒有 404／載入失敗的檔案",
+      "ok": true,
+      "detail": []
+    }
+  ],
+  "samples": {
+    "loadRemoteMs": 2125,
+    "moveSync": {
+      "samples": 6,
+      "maxStepM": 1,
+      "maxApparentSpeed": 2.19,
+      "midState": "Run",
+      "midYaw": 1.59
+    },
+    "roan": {
+      "a": {
+        "x": 4.132981069542971,
+        "z": -9.977898951121897,
+        "paused": false
+      },
+      "b": {
+        "x": 4.132981069542971,
+        "z": -9.977898951121897,
+        "paused": true
+      },
+      "gapM": 0,
+      "server": {
+        "patrolT": 1795807058.357,
+        "at": 1795807058357,
+        "paused": false,
+        "tx": 0,
+        "tz": 0
+      }
+    },
+    "portalA": {
+      "seconds": 60.692
+    },
+    "coop": {
+      "targetId": "star_dew_bobo#4",
+      "seconds": 126.83,
+      "samples": 88,
+      "sameHpRatio": 1,
+      "hpTrailA": [
+        60,
+        34,
+        34,
+        34,
+        34,
+        34,
+        34,
+        34,
+        34,
+        34,
+        14,
+        0
+      ],
+      "A": {
+        "attacksSent": 1,
+        "attacksOk": 1,
+        "attacksRejected": 0,
+        "skillsSent": 0,
+        "skillsOk": 0,
+        "hitsShown": 3,
+        "castsShown": 1,
+        "remoteCastsShown": 2,
+        "picksSent": 0,
+        "picksOk": 0,
+        "picksRejected": 0,
+        "monsterHitsTaken": 0,
+        "damageDealt": 20,
+        "lastReject": "",
+        "monsters": 17,
+        "casts": 0,
+        "loot": 0,
+        "vfx": {
+          "meshFx": 1,
+          "particles": 0,
+          "projectiles": 0,
+          "spawned": 7
+        },
+        "self": {
+          "hp": 100,
+          "maxHp": 100,
+          "level": 1,
+          "exp": 12,
+          "expNext": 100,
+          "gold": 100,
+          "down": false
+        },
+        "monsterHp": [
+          [
+            1,
+            "star_dew_bobo#1",
+            60,
+            "idle"
+          ],
+          [
+            2,
+            "star_dew_bobo#2",
+            60,
+            "move"
+          ],
+          [
+            3,
+            "star_dew_bobo#3",
+            60,
+            "idle"
+          ],
+          [
+            4,
+            "star_dew_bobo#4",
+            0,
+            "death"
+          ],
+          [
+            5,
+            "star_dew_bobo#5",
+            60,
+            "move"
+          ],
+          [
+            6,
+            "star_dew_bobo#6",
+            60,
+            "move"
+          ],
+          [
+            7,
+            "windfeather_fox#1",
+            140,
+            "idle"
+          ],
+          [
+            8,
+            "windfeather_fox#2",
+            140,
+            "move"
+          ],
+          [
+            9,
+            "windfeather_fox#3",
+            140,
+            "move"
+          ],
+          [
+            10,
+            "windfeather_fox#4",
+            140,
+            "move"
+          ],
+          [
+            11,
+            "nebula_sheep#5",
+            170,
+            "move"
+          ],
+          [
+            12,
+            "nebula_sheep#6",
+            170,
+            "move"
+          ],
+          [
+            13,
+            "nebula_sheep#7",
+            170,
+            "move"
+          ],
+          [
+            14,
+            "nebula_sheep#8",
+            170,
+            "move"
+          ],
+          [
+            15,
+            "carrot_king#9",
+            320,
+            "move"
+          ],
+          [
+            16,
+            "carrot_king#10",
+            320,
+            "move"
+          ],
+          [
+            17,
+            "crown_hammer_rabbit#11",
+            900,
+            "idle"
+          ]
+        ]
+      },
+      "B": {
+        "attacksSent": 0,
+        "attacksOk": 0,
+        "attacksRejected": 0,
+        "skillsSent": 2,
+        "skillsOk": 2,
+        "hitsShown": 3,
+        "castsShown": 2,
+        "remoteCastsShown": 1,
+        "picksSent": 3,
+        "picksOk": 3,
+        "picksRejected": 0,
+        "monsterHitsTaken": 11,
+        "damageDealt": 52,
+        "lastReject": "",
+        "monsters": 17,
+        "casts": 0,
+        "loot": 0,
+        "vfx": {
+          "meshFx": 1,
+          "particles": 0,
+          "projectiles": 0,
+          "spawned": 6
+        },
+        "self": {
+          "hp": 12,
+          "maxHp": 100,
+          "level": 1,
+          "exp": 12,
+          "expNext": 100,
+          "gold": 108,
+          "down": false
+        }
+      }
+    },
+    "loot": {
+      "spawned": 3,
+      "picked": 3,
+      "rejected": {},
+      "killsSettled": 1,
+      "duplicateKillsBlocked": 0,
+      "picksOk": {
+        "A": 0,
+        "B": 3
+      },
+      "gold": {
+        "A": 100,
+        "B": 108
+      },
+      "leftA": 0,
+      "leftB": 0,
+      "before": {
+        "spawned": 3,
+        "picked": 3
+      }
+    },
+    "monsterAttacks": {
+      "A": 0,
+      "B": 11
+    },
+    "diag": {
+      "A": {
+        "state": "online",
+        "map": "village",
+        "room": "village-1",
+        "pid": 1,
+        "rttMs": 595,
+        "rttAvgMs": 1270,
+        "jitterMs": 62,
+        "bytesUpPerSec": 31,
+        "bytesDownPerSec": 3942,
+        "msgsUpPerSec": 1,
+        "msgsDownPerSec": 36,
+        "snapsPerSec": 34,
+        "players": 2,
+        "pendingInputs": 0,
+        "corrections": 0,
+        "lastCorrectionCm": 0,
+        "maxCorrectionCm": 0,
+        "snapCorrections": 0,
+        "reconnects": 0,
+        "lastResyncMs": 0,
+        "serverTick": 8714,
+        "fps": 1,
+        "totalBytesUp": 271,
+        "totalBytesDown": 13647
+      },
+      "B": {
+        "state": "online",
+        "map": "village",
+        "room": "village-1",
+        "pid": 2,
+        "rttMs": 408,
+        "rttAvgMs": 418,
+        "jitterMs": 104,
+        "bytesUpPerSec": 31,
+        "bytesDownPerSec": 2364,
+        "msgsUpPerSec": 1,
+        "msgsDownPerSec": 21,
+        "snapsPerSec": 20,
+        "players": 2,
+        "pendingInputs": 0,
+        "corrections": 0,
+        "lastCorrectionCm": 0,
+        "maxCorrectionCm": 0,
+        "snapCorrections": 0,
+        "reconnects": 0,
+        "lastResyncMs": 0,
+        "serverTick": 8717,
+        "fps": 3,
+        "totalBytesUp": 2016,
+        "totalBytesDown": 156573
+      }
+    },
+    "remap": {
+      "remappedLoads": 129
+    }
+  },
+  "consoleErrors": [],
+  "http404": [],
+  "remappedLoads": 129,
+  "startedAt": "2026-11-27T19:16:36.684Z",
+  "site": "https://scottlien2002-sys.github.io/starwish-online/preview-mp82",
+  "videoMarks": {
+    "fightApproach": 192.7,
+    "firstHit": 296.1,
+    "fightEnd": 318,
+    "lootDone": 324.5,
+    "respawned": 329.2
+  },
+  "serverMetrics": {
+    "players": 2,
+    "rooms": [
+      {
+        "key": "village-1",
+        "map": "village",
+        "players": 2,
+        "connected": 2,
+        "tick": 9133
+      },
+      {
+        "key": "starsprout-1",
+        "map": "starsprout",
+        "players": 0,
+        "connected": 0,
+        "tick": 6961
+      }
+    ],
+    "totals": {
+      "ticks": 9154,
+      "tickMsSum": 4779.056977998065,
+      "tickMsMax": 9.18541199999163,
+      "bytesIn": 54858,
+      "bytesOut": 5206307,
+      "msgsIn": 1449,
+      "msgsOut": 18919,
+      "badMessages": 0,
+      "rateLimited": 0,
+      "kicked": 0,
+      "replaced": 1,
+      "resumed": 6,
+      "graceExpired": 0,
+      "transfers": 4,
+      "persistOk": 65,
+      "persistConflict": 0,
+      "snapshotsSkippedBackpressure": 0,
+      "rejectedOrigin": 0,
+      "rejectedProtocol": 0,
+      "roanRejected": 0,
+      "actsIgnoredInCombatRoom": 1,
+      "autoRespawns": 0,
+      "progressSaved": 2,
+      "starterKits": 2
+    },
+    "tick": {
+      "count": 9154,
+      "avgMs": 0.61,
+      "maxMs": 6.093
+    },
+    "store": {
+      "kind": "memory",
+      "realm": "test"
+    }
+  },
+  "passed": 37,
+  "total": 37,
+  "serverLogTail": [
+    "[db] DATABASE_URL not set → in-memory store (data is lost on restart), realm=test",
+    "[2026-11-27T19:16:37.603Z] Starwish MP server listening on https/wss://127.0.0.1:2848",
+    "[2026-11-27T19:16:38.666Z] join pid=1 阿星 room=village-1",
+    "[2026-11-27T19:16:38.995Z] join pid=2 小願 room=village-1",
+    "[2026-11-27T19:18:29.879Z] disconnect pid=1 (grace 20000 ms)",
+    "[2026-11-27T19:18:30.493Z] resume pid=1 阿星 room=starsprout-1",
+    "[2026-11-27T19:19:29.113Z] disconnect pid=2 (grace 20000 ms)",
+    "[2026-11-27T19:19:29.644Z] resume pid=2 小願 room=starsprout-1",
+    "[2026-11-27T19:22:08.648Z] disconnect pid=2 (grace 20000 ms)",
+    "[2026-11-27T19:22:11.648Z] resume pid=2 小願 room=starsprout-1",
+    "[2026-11-27T19:22:49.003Z] disconnect pid=2 (grace 20000 ms)",
+    "[2026-11-27T19:22:49.472Z] resume pid=2 小願 room=village-1",
+    "[2026-11-27T19:23:51.252Z] disconnect pid=1 (grace 20000 ms)",
+    "[2026-11-27T19:23:51.606Z] resume pid=1 阿星 room=village-1",
+    "[2026-11-27T19:24:03.667Z] resume pid=2 小願 room=village-1",
+    "[2026-11-27T19:24:18.357Z] disconnect pid=1 (grace 20000 ms)",
+    "[2026-11-27T19:24:18.392Z] disconnect pid=2 (grace 20000 ms)",
+    ""
+  ]
+}
