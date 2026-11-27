@@ -24,7 +24,9 @@ os.makedirs(OUT, exist_ok=True)
 T0 = time.time()
 REPORT = {"tool": "art/tripo-novice/build.py", "blender": bpy.app.version_string, "genders": {}}
 
-HEIGHT_M = 1.25  # 角色身高規範（公尺；與既有初心者、寵物錨點一致）
+HEIGHT_M = 1.25
+RUN_T = 0.5  # 跑步循環秒數（兩步）
+RUN_SWING = 42  # 大腿前後擺幅（度）  # 角色身高規範（公尺；與既有初心者、寵物錨點一致）
 FPS = 30
 
 # ---------------- 對位設定（零件原始空間：Z 上、面向 +X、角色左 = +Y；單位 = 身體原始單位） ----------------
@@ -32,14 +34,17 @@ FPS = 30
 FIT = {
     "male": {
         "body": "Male_Base_V1",
-        "hair": {"src": "Male_Hair_01_V1", "s": 0.42, "t": [0.004, 0.0, 0.355]},
+        "sleeve_zmin": -0.12,  # 袖子量測範圍（避開衣襬）
+        "hair": {"src": "Male_Hair_01_V1", "s": 0.44, "t": [0.0, 0.0, 0.365]},
         "top": {"src": "Male_Novice_Top_V1", "s": 0.423, "t": [0.007, 0.0, 0.060]},
         "bottom": {"src": "Male_Novice_Pants_V1", "s": 0.384, "t": [-0.006, 0.0, -0.246]},
         "boots": {"src": "Male_Novice_Boots_V1", "foot_scale": 1.12},
     },
     "female": {
         "body": "CHR_Female_Base",
-        "hair": {"src": "Novice_Female_Hair_01", "s": 0.54, "t": [-0.008, -0.03, 0.325]},
+        "sleeve_zmin": -0.10,  # 袖子量測範圍（避開裙襬）
+        # 女生髮型原檔面向 −X（與身體相反）→ 先轉 180°
+        "hair": {"src": "Novice_Female_Hair_01", "s": 0.46, "t": [-0.015, 0.0, 0.345], "flip": True},
         "top": {"src": "Novice_Female_Top", "s": 0.421, "t": [0.02, 0.0, 0.014]},
         "bottom": {"src": "Novice_Female_Leggings", "box": {"z": [-0.458, -0.06], "yhalf": 0.106, "xc": 0.028}},
         "boots": {"src": "Novice_Female_Boots", "foot_scale": 1.12},
@@ -164,6 +169,8 @@ def fit_part(o, cfg, body_V):
         return out
     s = np.array(cfg.get("sv", [cfg["s"]] * 3))
     t = np.array(cfg["t"])
+    if cfg.get("flip"):
+        V = V * np.array([-1, -1, 1])
     set_verts(o, V * s + t)
     return {"scale": s.round(4).tolist(), "offset": t.round(4).tolist()}
 
@@ -188,7 +195,7 @@ def mesh_graph(o):
     return adj
 
 
-def geodesic_weights(o, joints, bones, H, allow=None, power=4.0, keep=3, extra_seed=0.012):
+def geodesic_weights(o, joints, bones, H, allow=None, power=4.0, keep=3, extra_seed=0.012, seed_factor=1.35):
     """
     沿網格表面的測地距離權重。joints：關節位置（同一空間）；bones：要參與的骨骼名稱。
     allow(name, V) → 布林陣列：限制某些骨骼只能影響某些頂點（例如左手骨不影響右半身）
@@ -213,7 +220,7 @@ def geodesic_weights(o, joints, bones, H, allow=None, power=4.0, keep=3, extra_s
         if not own.any():
             continue
         dmin = E[own, j].min()
-        seeds = np.where(own & (E[:, j] <= dmin * 1.35 + extra_seed * H))[0]
+        seeds = np.where(own & (E[:, j] <= dmin * seed_factor + extra_seed * H))[0]
         dist = np.full(n, np.inf)
         pq = []
         for s in seeds:
@@ -302,37 +309,23 @@ def build_gender(g):
         parts["weapon_" + wk] = import_part(wc["src"])
     log(g, "imported + fitted")
 
-    # ---- 上衣袖子角度 → 擺好的手臂骨架 ----
+    # ---- 手臂骨骼沿上衣袖子（穿上衣時看得到的是袖子與手套；身體被蓋住的部分不畫）----
     top = parts["top"]
     TV = verts_np(top)
-    sleeve = {}
     for S, sg in (("L", 1), ("R", -1)):
         ua = np.array(J[f"upperarm.{S}"])
-        he = np.array(J[f"hand_end.{S}"])
-        body_dir = (he - ua) / np.linalg.norm(he - ua)
-        A = TV[(TV[:, 1] * sg > abs(ua[1]) + 0.02 * H) & (TV[:, 2] < ua[2]) & (TV[:, 2] > info["crotch"] - 0.06 * H)]
-        c = A.mean(0)
-        _, _, vt = np.linalg.svd(A - c)
-        ax = vt[0] if vt[0][2] < 0 else -vt[0]
-        a_body = math.atan2(abs(body_dir[1]), -body_dir[2])
-        a_top = math.atan2(abs(ax[1]), -ax[2])
-        delta = a_body - a_top  # 袖子要往外抬多少（弧度）
-        sleeve[S] = delta
-    rep["sleeve_delta_deg"] = {k: round(math.degrees(v), 1) for k, v in sleeve.items()}
-    # 擺好姿勢的關節（上臂繞前後軸往下轉 delta）
-    rots = {}
-    for S, sg in (("L", 1), ("R", -1)):
-        rots[f"upperarm.{S}"] = Matrix.Rotation(-sg * sleeve[S], 3, "X")  # 繞 +X（前方）軸：左臂 −θ、右臂 +θ = 往身體收
-    Mpose = lbs_matrices(J, J, rots)
-    Jpose = dict(J)
-    for name, parent, head, tail in BONES:
-        Jpose[tail] = list(Mpose[name] @ Vector(J[tail])) if name != "root" else J[tail]
-        Jpose[head] = list(Mpose[parent] @ Vector(J[head])) if parent else J[head]
-    # 修正：子骨關節由父骨變換決定
-    for name, parent, head, tail in BONES:
-        if parent:
-            Jpose[head] = list(Mpose[parent] @ Vector(J[head]))
-        Jpose[tail] = list(Mpose[name] @ Vector(J[tail]))
+        A = TV[(TV[:, 1] * sg > 0.13 * H / 0.98) & (TV[:, 2] > cfg["sleeve_zmin"]) & (TV[:, 2] < ua[2])]
+        far = A[np.argmax(np.linalg.norm((A - ua) * np.array([0.3, 1, 1]), axis=1))]
+        d = (far - ua) / np.linalg.norm(far - ua)
+        pr = (A - ua) @ d
+        tip = ua + d * pr.max()
+        Lr = np.linalg.norm(tip - ua)
+        J[f"forearm.{S}"] = list(ua + d * Lr * 0.47)
+        J[f"hand.{S}"] = list(ua + d * Lr * 0.78)
+        J[f"hand_end.{S}"] = list(tip)
+    rep["arm_from_sleeve"] = {k: [round(x, 4) for x in J[k]] for k in ("hand.L", "hand_end.L", "hand.R", "hand_end.R")}
+    Mpose = {name: Matrix.Identity(4) for name, *_ in BONES}
+    Jpose = J
 
     # ---- 統一座標：放大到 1.25 m、腳底 y=0、轉成面向 −Y（glTF +Z 前方）、角色左 = +X ----
     k = HEIGHT_M / H
@@ -382,16 +375,8 @@ def build_gender(g):
     # 頭髮：100% 頭
     hv = verts_np(parts["hair"])
     apply_weights(parts["hair"], {"head": np.ones(len(hv))})
-    # 上衣：用擺好手臂的骨架算權重，再反向蒙皮回綁定姿勢
-    Wt = geodesic_weights(top, Jpose, [b for b in def_bones if not b.startswith(("thigh", "shin", "foot", "toe", "head"))], H, allow=allow)
-    TVf = verts_np(top)
-    blend = np.zeros((len(TVf), 4, 4))
-    for b, w in Wt.items():
-        Mi = np.array(Mpose[b].inverted())
-        blend += w[:, None, None] * Mi[None]
-    Vh = np.c_[TVf, np.ones(len(TVf))]
-    TVrest = np.einsum("nij,nj->ni", blend, Vh)[:, :3]
-    set_verts(top, TVrest)
+    # 上衣：測地距離（袖子、衣襬分開）
+    Wt = geodesic_weights(top, J, [b for b in def_bones if not b.startswith(("thigh", "shin", "foot", "toe", "head"))], H, allow=allow, seed_factor=1.1, extra_seed=0.004)
     apply_weights(top, Wt)
     rep["weights_top"] = {b: int((w > 0.01).sum()) for b, w in Wt.items()}
     # 下身、靴子
@@ -489,6 +474,9 @@ def build_gender(g):
     log(g, "rig built")
 
     clips = make_clips(arm, JF, g)
+    for p in arm.pose.bones:
+        p.rotation_quaternion = Quaternion()
+        p.location = Vector()
     rep["clips"] = clips
     rep["joints_final_m"] = {kk: [round(float(x), 4) for x in v] for kk, v in JF.items()}
     rep["parts"] = {}
@@ -616,7 +604,7 @@ def make_clips(arm, JF, g):
 
     # Run 0.6 s 一個循環（兩步）
     run = []
-    T = 0.6
+    T = RUN_T
     for i in range(9):
         t = T * i / 8
         ph = 2 * math.pi * t / T
@@ -626,7 +614,7 @@ def make_clips(arm, JF, g):
         bob = abs(math.sin(ph)) * 0.025 - 0.012
         run.append((t, merge(arms_down, {
             "spine": [(X, 8)], "chest": [(X, 4), (Z, 6 * sw)], "head": [(X, -8)],
-            "thigh.L": [(X, -38 * sw)], "thigh.R": [(X, 38 * sw)],
+            "thigh.L": [(X, -RUN_SWING * sw)], "thigh.R": [(X, RUN_SWING * sw)],
             "shin.L": [(X, kneeL)], "shin.R": [(X, kneeR)],
             "foot.L": [(X, -12 * max(0, sw))], "foot.R": [(X, -12 * max(0, -sw))],
             "upperarm.L": [(X, 35 * sw)], "upperarm.R": [(X, -35 * sw)],
@@ -761,8 +749,13 @@ def main():
         prev = os.path.join(OUT, "preview")
         os.makedirs(prev, exist_ok=True)
         # 預覽：綁定姿勢（含兩把武器）與各動畫關鍵格
-        rep["preview"] = render_views(arm, os.path.join(prev, f"{g}_rest"))
         objs = {o.name: o for o in bpy.data.objects if o.parent == arm}
+        # 預覽和遊戲一樣：穿整套衣服時被蓋住的身體不畫
+        for o in objs.values():
+            if o.name == "Body_Covered":
+                o.hide_render = True
+        rep["preview"] = render_views(arm, os.path.join(prev, f"{g}_rest"))
+        rep["preview"] += render_views(arm, os.path.join(prev, f"{g}_idle"), "Idle", 1)
         staff = [o for n, o in objs.items() if "Staff" in n]
         sword = [o for n, o in objs.items() if "Sword" in n]
         for o in staff:
