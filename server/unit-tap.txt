@@ -1,0 +1,106 @@
+TAP version 13
+# Subtest: 移動速度與轉身沿用單機版正式數值（未變更）
+ok 1 - 移動速度與轉身沿用單機版正式數值（未變更）
+  ---
+  duration_ms: 0.688671
+  type: 'test'
+  ...
+# Subtest: 方向量化：斜向不加速、往返誤差 < 1%
+ok 2 - 方向量化：斜向不加速、往返誤差 < 1%
+  ---
+  duration_ms: 0.613603
+  type: 'test'
+  ...
+# Subtest: 客戶端預測與伺服器計算一致：每個快照的預測誤差 < 2 公分（村莊＋原野，含碰撞滑動）
+ok 3 - 客戶端預測與伺服器計算一致：每個快照的預測誤差 < 2 公分（村莊＋原野，含碰撞滑動）
+  ---
+  duration_ms: 1627.247431
+  type: 'test'
+  ...
+# Subtest: 加速外掛無效：一次塞 3 倍步數，伺服器位移不超過 速度×時間＋預算
+ok 4 - 加速外掛無效：一次塞 3 倍步數，伺服器位移不超過 速度×時間＋預算
+  ---
+  duration_ms: 0.976698
+  type: 'test'
+  ...
+# Subtest: 合法區域：往噴泉、建築與地圖邊界硬走 10 秒，位置始終合法
+ok 5 - 合法區域：往噴泉、建築與地圖邊界硬走 10 秒，位置始終合法
+  ---
+  duration_ms: 249.98089
+  type: 'test'
+  ...
+# Subtest: 舊地圖世代與重複序號的輸入被丟棄
+ok 6 - 舊地圖世代與重複序號的輸入被丟棄
+  ---
+  duration_ms: 0.211081
+  type: 'test'
+  ...
+# Subtest: 傳送陣：踩入觸發一次，抵達後需先離開才會再觸發
+ok 7 - 傳送陣：踩入觸發一次，抵達後需先離開才會再觸發
+  ---
+  duration_ms: 0.30391
+  type: 'test'
+  ...
+# Subtest: 訊息格式檢查：錯誤格式、超量步數、非整數方向一律拒絕
+ok 8 - 訊息格式檢查：錯誤格式、超量步數、非整數方向一律拒絕
+  ---
+  duration_ms: 0.648803
+  type: 'test'
+  ...
+# Subtest: 重複請求防護：同 requestId 只執行一次
+ok 9 - 重複請求防護：同 requestId 只執行一次
+  ---
+  duration_ms: 0.308475
+  type: 'test'
+  ...
+# Subtest: 存檔版本控制與工作階段鎖
+ok 10 - 存檔版本控制與工作階段鎖
+  ---
+  duration_ms: 5.409519
+  type: 'test'
+  ...
+# Subtest: 插值：中間值正確、Idle 不外插、Run 最多外插 200 ms
+ok 11 - 插值：中間值正確、Idle 不外插、Run 最多外插 200 ms
+  ---
+  duration_ms: 0.471676
+  type: 'test'
+  ...
+# Subtest: 單步移動距離＝速度×步長
+ok 12 - 單步移動距離＝速度×步長
+  ---
+  duration_ms: 0.121077
+  type: 'test'
+  ...
+# Subtest: AvatarSync（Stage 8.1 遊戲整合介面）：建立、套姿勢、切動畫、移除
+ok 13 - AvatarSync（Stage 8.1 遊戲整合介面）：建立、套姿勢、切動畫、移除
+  ---
+  duration_ms: 1.613549
+  type: 'test'
+  ...
+# Subtest: Stage 8.1 動作事件：限速、倒地後不能移動也不能再送動作
+ok 14 - Stage 8.1 動作事件：限速、倒地後不能移動也不能再送動作
+  ---
+  duration_ms: 0.203627
+  type: 'test'
+  ...
+# Subtest: Stage 8.1 外觀：用單機版 parseAppearance 驗證，不合法值回到預設
+ok 15 - Stage 8.1 外觀：用單機版 parseAppearance 驗證，不合法值回到預設
+  ---
+  duration_ms: 75.210836
+  type: 'test'
+  ...
+# Subtest: Stage 8.1 N009 洛恩：伺服器時間巡邏、只有站在旁邊的玩家可以讓他停下
+ok 16 - Stage 8.1 N009 洛恩：伺服器時間巡邏、只有站在旁邊的玩家可以讓他停下
+  ---
+  duration_ms: 0.806445
+  type: 'test'
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 16
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2726.669174
