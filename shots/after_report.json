@@ -1,0 +1,801 @@
+{
+ "label": "after",
+ "startedAt": "2026-11-27T10:07:45.337Z",
+ "note": "CI 軟體繪圖：只用來看畫面，FPS 不代表 iPhone 實機",
+ "runs": [
+  {
+   "tier": "high",
+   "shots": [
+    "after_high_aerial_south.png",
+    "after_high_aerial_east.png",
+    "after_high_plaza_fountain.png",
+    "after_high_fountain_close.png",
+    "after_high_fountain_water.png",
+    "after_high_bld_sword.png",
+    "after_high_bld_sword_q45.png",
+    "after_high_bld_sword_entry.png",
+    "after_high_bld_knight.png",
+    "after_high_bld_knight_q45.png",
+    "after_high_bld_knight_entry.png",
+    "after_high_bld_mage.png",
+    "after_high_bld_mage_q45.png",
+    "after_high_bld_mage_entry.png",
+    "after_high_bld_church.png",
+    "after_high_bld_church_q45.png",
+    "after_high_bld_church_entry.png",
+    "after_high_bld_circus.png",
+    "after_high_bld_circus_q45.png",
+    "after_high_bld_circus_entry.png",
+    "after_high_bld_warehouse.png",
+    "after_high_bld_warehouse_q45.png",
+    "after_high_bld_warehouse_entry.png",
+    "after_high_bld_smith.png",
+    "after_high_bld_smith_q45.png",
+    "after_high_bld_smith_entry.png",
+    "after_high_bld_guild.png",
+    "after_high_bld_guild_q45.png",
+    "after_high_bld_guild_entry.png",
+    "after_high_board.png",
+    "after_high_south_gate.png",
+    "after_high_south_portal.png",
+    "after_high_road_east.png",
+    "after_high_platform_stairs.png",
+    "after_high_npc_sword_front.png",
+    "after_high_npc_sword_side.png",
+    "after_high_npc_sword_q45.png",
+    "after_high_npc_knight_front.png",
+    "after_high_npc_knight_side.png",
+    "after_high_npc_knight_q45.png",
+    "after_high_npc_mage_front.png",
+    "after_high_npc_mage_side.png",
+    "after_high_npc_mage_q45.png",
+    "after_high_npc_church_front.png",
+    "after_high_npc_church_side.png",
+    "after_high_npc_church_q45.png",
+    "after_high_npc_circus_front.png",
+    "after_high_npc_circus_side.png",
+    "after_high_npc_circus_q45.png",
+    "after_high_npc_warehouse_front.png",
+    "after_high_npc_warehouse_side.png",
+    "after_high_npc_warehouse_q45.png",
+    "after_high_npc_smith_front.png",
+    "after_high_npc_smith_side.png",
+    "after_high_npc_smith_q45.png",
+    "after_high_npc_guild_front.png",
+    "after_high_npc_guild_side.png",
+    "after_high_npc_guild_q45.png",
+    "after_high_npc_merchant_front.png",
+    "after_high_npc_merchant_side.png",
+    "after_high_board_close.png"
+   ],
+   "errors": [],
+   "art": {
+    "on": true,
+    "status": "loaded",
+    "loadMs": 32307,
+    "parts": {
+     "環境": {
+      "meshes": 7,
+      "triangles": 17484
+     },
+     "廣場與道路": {
+      "meshes": 5,
+      "triangles": 26438
+     },
+     "星願之泉": {
+      "meshes": 7,
+      "triangles": 25644
+     },
+     "高台與石階": {
+      "meshes": 4,
+      "triangles": 4190
+     },
+     "騎士軍團": {
+      "meshes": 4,
+      "triangles": 13434
+     },
+     "法師軍團": {
+      "meshes": 5,
+      "triangles": 14161
+     },
+     "劍士軍團": {
+      "meshes": 4,
+      "triangles": 7544
+     },
+     "鐵匠鋪": {
+      "meshes": 5,
+      "triangles": 2968
+     },
+     "倉庫": {
+      "meshes": 5,
+      "triangles": 2071
+     },
+     "祭司教堂": {
+      "meshes": 5,
+      "triangles": 4359
+     },
+     "小丑馬戲團": {
+      "meshes": 4,
+      "triangles": 2635
+     },
+     "星願商會": {
+      "meshes": 5,
+      "triangles": 3984
+     },
+     "委託佈告欄": {
+      "meshes": 1,
+      "triangles": 4999
+     },
+     "傳送門與南門": {
+      "meshes": 7,
+      "triangles": 10507
+     },
+     "寵物商人洛恩": {
+      "meshes": 1,
+      "triangles": 9602
+     },
+     "正式NPC（8位）": {
+      "meshes": 8,
+      "triangles": 76262
+     }
+    },
+    "errors": [],
+    "merchant": true,
+    "npcs": [
+     "sword",
+     "knight",
+     "smith",
+     "mage",
+     "church",
+     "circus",
+     "warehouse",
+     "guild"
+    ]
+   },
+   "perfState": {
+    "npcStats": {
+     "sword": {
+      "triangles": 9452,
+      "farTriangles": 2000,
+      "meshes": 1,
+      "animations": [
+       "Idle",
+       "Talk",
+       "Turn",
+       "Act"
+      ],
+      "model": "npc_swordmaster67_hq"
+     },
+     "knight": {
+      "triangles": 9429,
+      "farTriangles": 1999,
+      "meshes": 1,
+      "animations": [
+       "Idle",
+       "Talk",
+       "Turn",
+       "Act"
+      ],
+      "model": "npc_knight67_hq"
+     },
+     "smith": {
+      "triangles": 9512,
+      "farTriangles": 2000,
+      "meshes": 1,
+      "animations": [
+       "Idle",
+       "Talk",
+       "Turn",
+       "Act"
+      ],
+      "model": "npc_smith67_hq"
+     },
+     "mage": {
+      "triangles": 9520,
+      "farTriangles": 2000,
+      "meshes": 1,
+      "animations": [
+       "Idle",
+       "Talk",
+       "Turn",
+       "Act"
+      ],
+      "model": "npc_mage67_hq"
+     },
+     "church": {
+      "triangles": 9673,
+      "farTriangles": 2000,
+      "meshes": 1,
+      "animations": [
+       "Idle",
+       "Talk",
+       "Turn",
+       "Act"
+      ],
+      "model": "npc_priest67_hq"
+     },
+     "circus": {
+      "triangles": 9619,
+      "farTriangles": 1999,
+      "meshes": 1,
+      "animations": [
+       "Idle",
+       "Talk",
+       "Turn",
+       "Act"
+      ],
+      "model": "npc_clown67_hq"
+     },
+     "warehouse": {
+      "triangles": 9384,
+      "farTriangles": 2000,
+      "meshes": 1,
+      "animations": [
+       "Idle",
+       "Talk",
+       "Turn",
+       "Act"
+      ],
+      "model": "npc_warehouse67_hq"
+     },
+     "guild": {
+      "triangles": 9673,
+      "farTriangles": 2394,
+      "meshes": 1,
+      "animations": [
+       "Act",
+       "Idle",
+       "Talk",
+       "Turn"
+      ],
+      "model": "npc_guild"
+     }
+    },
+    "merchant": {
+     "meshes": 3,
+     "triangles": 9892,
+     "farTriangles": 2000,
+     "bones": 19,
+     "animations": [
+      "Idle",
+      "Talk",
+      "Turn",
+      "Walk"
+     ],
+     "shadowCasters": 1,
+     "model": "pet_merchant67_hq"
+    }
+   }
+  },
+  {
+   "tier": "medium",
+   "shots": [
+    "after_medium_aerial_south.png",
+    "after_medium_aerial_east.png",
+    "after_medium_plaza_fountain.png",
+    "after_medium_fountain_close.png",
+    "after_medium_fountain_water.png",
+    "after_medium_bld_sword.png",
+    "after_medium_bld_sword_q45.png",
+    "after_medium_bld_sword_entry.png",
+    "after_medium_bld_knight.png",
+    "after_medium_bld_knight_q45.png",
+    "after_medium_bld_knight_entry.png",
+    "after_medium_bld_mage.png",
+    "after_medium_bld_mage_q45.png",
+    "after_medium_bld_mage_entry.png",
+    "after_medium_bld_church.png",
+    "after_medium_bld_church_q45.png",
+    "after_medium_bld_church_entry.png",
+    "after_medium_bld_circus.png",
+    "after_medium_bld_circus_q45.png",
+    "after_medium_bld_circus_entry.png",
+    "after_medium_bld_warehouse.png",
+    "after_medium_bld_warehouse_q45.png",
+    "after_medium_bld_warehouse_entry.png",
+    "after_medium_bld_smith.png",
+    "after_medium_bld_smith_q45.png",
+    "after_medium_bld_smith_entry.png",
+    "after_medium_bld_guild.png",
+    "after_medium_bld_guild_q45.png",
+    "after_medium_bld_guild_entry.png",
+    "after_medium_board.png",
+    "after_medium_south_gate.png",
+    "after_medium_south_portal.png",
+    "after_medium_road_east.png",
+    "after_medium_platform_stairs.png",
+    "after_medium_npc_sword_front.png",
+    "after_medium_npc_sword_side.png",
+    "after_medium_npc_sword_q45.png",
+    "after_medium_npc_knight_front.png",
+    "after_medium_npc_knight_side.png",
+    "after_medium_npc_knight_q45.png",
+    "after_medium_npc_mage_front.png",
+    "after_medium_npc_mage_side.png",
+    "after_medium_npc_mage_q45.png",
+    "after_medium_npc_church_front.png",
+    "after_medium_npc_church_side.png",
+    "after_medium_npc_church_q45.png",
+    "after_medium_npc_circus_front.png",
+    "after_medium_npc_circus_side.png",
+    "after_medium_npc_circus_q45.png",
+    "after_medium_npc_warehouse_front.png",
+    "after_medium_npc_warehouse_side.png",
+    "after_medium_npc_warehouse_q45.png",
+    "after_medium_npc_smith_front.png",
+    "after_medium_npc_smith_side.png",
+    "after_medium_npc_smith_q45.png",
+    "after_medium_npc_guild_front.png",
+    "after_medium_npc_guild_side.png",
+    "after_medium_npc_guild_q45.png",
+    "after_medium_npc_merchant_front.png",
+    "after_medium_npc_merchant_side.png",
+    "after_medium_board_close.png"
+   ],
+   "errors": [],
+   "art": {
+    "on": true,
+    "status": "loaded",
+    "loadMs": 20704,
+    "parts": {
+     "環境": {
+      "meshes": 2,
+      "triangles": 5624
+     },
+     "廣場與道路": {
+      "meshes": 4,
+      "triangles": 9232
+     },
+     "星願之泉": {
+      "meshes": 7,
+      "triangles": 10460
+     },
+     "高台與石階": {
+      "meshes": 3,
+      "triangles": 3176
+     },
+     "騎士軍團": {
+      "meshes": 3,
+      "triangles": 5070
+     },
+     "法師軍團": {
+      "meshes": 4,
+      "triangles": 4854
+     },
+     "劍士軍團": {
+      "meshes": 3,
+      "triangles": 3494
+     },
+     "鐵匠鋪": {
+      "meshes": 4,
+      "triangles": 1850
+     },
+     "倉庫": {
+      "meshes": 4,
+      "triangles": 1235
+     },
+     "祭司教堂": {
+      "meshes": 4,
+      "triangles": 2550
+     },
+     "小丑馬戲團": {
+      "meshes": 3,
+      "triangles": 1137
+     },
+     "星願商會": {
+      "meshes": 4,
+      "triangles": 1892
+     },
+     "委託佈告欄": {
+      "meshes": 1,
+      "triangles": 2499
+     },
+     "傳送門與南門": {
+      "meshes": 6,
+      "triangles": 4819
+     },
+     "寵物商人洛恩": {
+      "meshes": 1,
+      "triangles": 5000
+     },
+     "正式NPC（8位）": {
+      "meshes": 8,
+      "triangles": 39662
+     }
+    },
+    "errors": [],
+    "merchant": true,
+    "npcs": [
+     "sword",
+     "knight",
+     "smith",
+     "mage",
+     "church",
+     "circus",
+     "warehouse",
+     "guild"
+    ]
+   },
+   "perfState": {
+    "npcStats": {
+     "sword": {
+      "triangles": 5000,
+      "farTriangles": 2000,
+      "meshes": 1,
+      "animations": [
+       "Idle",
+       "Talk",
+       "Turn",
+       "Act"
+      ],
+      "model": "npc_swordmaster67_lite"
+     },
+     "knight": {
+      "triangles": 4999,
+      "farTriangles": 1999,
+      "meshes": 1,
+      "animations": [
+       "Idle",
+       "Talk",
+       "Turn",
+       "Act"
+      ],
+      "model": "npc_knight67_lite"
+     },
+     "smith": {
+      "triangles": 5000,
+      "farTriangles": 2000,
+      "meshes": 1,
+      "animations": [
+       "Idle",
+       "Talk",
+       "Turn",
+       "Act"
+      ],
+      "model": "npc_smith67_lite"
+     },
+     "mage": {
+      "triangles": 5000,
+      "farTriangles": 2000,
+      "meshes": 1,
+      "animations": [
+       "Idle",
+       "Talk",
+       "Turn",
+       "Act"
+      ],
+      "model": "npc_mage67_lite"
+     },
+     "church": {
+      "triangles": 5000,
+      "farTriangles": 2000,
+      "meshes": 1,
+      "animations": [
+       "Idle",
+       "Talk",
+       "Turn",
+       "Act"
+      ],
+      "model": "npc_priest67_lite"
+     },
+     "circus": {
+      "triangles": 4999,
+      "farTriangles": 1999,
+      "meshes": 1,
+      "animations": [
+       "Idle",
+       "Talk",
+       "Turn",
+       "Act"
+      ],
+      "model": "npc_clown67_lite"
+     },
+     "warehouse": {
+      "triangles": 5000,
+      "farTriangles": 2000,
+      "meshes": 1,
+      "animations": [
+       "Idle",
+       "Talk",
+       "Turn",
+       "Act"
+      ],
+      "model": "npc_warehouse67_lite"
+     },
+     "guild": {
+      "triangles": 4664,
+      "farTriangles": 2394,
+      "meshes": 1,
+      "animations": [
+       "Act",
+       "Idle",
+       "Talk",
+       "Turn"
+      ],
+      "model": "npc_guild"
+     }
+    },
+    "merchant": {
+     "meshes": 3,
+     "triangles": 5290,
+     "farTriangles": 2000,
+     "bones": 19,
+     "animations": [
+      "Idle",
+      "Talk",
+      "Turn",
+      "Walk"
+     ],
+     "shadowCasters": 1,
+     "model": "pet_merchant67_lite"
+    }
+   }
+  },
+  {
+   "tier": "low",
+   "shots": [
+    "after_low_aerial_south.png",
+    "after_low_aerial_east.png",
+    "after_low_plaza_fountain.png",
+    "after_low_fountain_close.png",
+    "after_low_fountain_water.png",
+    "after_low_bld_sword.png",
+    "after_low_bld_sword_q45.png",
+    "after_low_bld_sword_entry.png",
+    "after_low_bld_knight.png",
+    "after_low_bld_knight_q45.png",
+    "after_low_bld_knight_entry.png",
+    "after_low_bld_mage.png",
+    "after_low_bld_mage_q45.png",
+    "after_low_bld_mage_entry.png",
+    "after_low_bld_church.png",
+    "after_low_bld_church_q45.png",
+    "after_low_bld_church_entry.png",
+    "after_low_bld_circus.png",
+    "after_low_bld_circus_q45.png",
+    "after_low_bld_circus_entry.png",
+    "after_low_bld_warehouse.png",
+    "after_low_bld_warehouse_q45.png",
+    "after_low_bld_warehouse_entry.png",
+    "after_low_bld_smith.png",
+    "after_low_bld_smith_q45.png",
+    "after_low_bld_smith_entry.png",
+    "after_low_bld_guild.png",
+    "after_low_bld_guild_q45.png",
+    "after_low_bld_guild_entry.png",
+    "after_low_board.png",
+    "after_low_south_gate.png",
+    "after_low_south_portal.png",
+    "after_low_road_east.png",
+    "after_low_platform_stairs.png",
+    "after_low_npc_sword_front.png",
+    "after_low_npc_sword_side.png",
+    "after_low_npc_sword_q45.png",
+    "after_low_npc_knight_front.png",
+    "after_low_npc_knight_side.png",
+    "after_low_npc_knight_q45.png",
+    "after_low_npc_mage_front.png",
+    "after_low_npc_mage_side.png",
+    "after_low_npc_mage_q45.png",
+    "after_low_npc_church_front.png",
+    "after_low_npc_church_side.png",
+    "after_low_npc_church_q45.png",
+    "after_low_npc_circus_front.png",
+    "after_low_npc_circus_side.png",
+    "after_low_npc_circus_q45.png",
+    "after_low_npc_warehouse_front.png",
+    "after_low_npc_warehouse_side.png",
+    "after_low_npc_warehouse_q45.png",
+    "after_low_npc_smith_front.png",
+    "after_low_npc_smith_side.png",
+    "after_low_npc_smith_q45.png",
+    "after_low_npc_guild_front.png",
+    "after_low_npc_guild_side.png",
+    "after_low_npc_guild_q45.png",
+    "after_low_npc_merchant_front.png",
+    "after_low_npc_merchant_side.png",
+    "after_low_npc_merchant_walk.png",
+    "after_low_board_close.png"
+   ],
+   "errors": [],
+   "art": {
+    "on": true,
+    "status": "loaded",
+    "loadMs": 17009,
+    "parts": {
+     "環境": {
+      "meshes": 2,
+      "triangles": 5624
+     },
+     "廣場與道路": {
+      "meshes": 4,
+      "triangles": 9232
+     },
+     "星願之泉": {
+      "meshes": 7,
+      "triangles": 10460
+     },
+     "高台與石階": {
+      "meshes": 3,
+      "triangles": 3176
+     },
+     "騎士軍團": {
+      "meshes": 3,
+      "triangles": 5070
+     },
+     "法師軍團": {
+      "meshes": 4,
+      "triangles": 4854
+     },
+     "劍士軍團": {
+      "meshes": 3,
+      "triangles": 3494
+     },
+     "鐵匠鋪": {
+      "meshes": 4,
+      "triangles": 1850
+     },
+     "倉庫": {
+      "meshes": 4,
+      "triangles": 1235
+     },
+     "祭司教堂": {
+      "meshes": 4,
+      "triangles": 2550
+     },
+     "小丑馬戲團": {
+      "meshes": 3,
+      "triangles": 1137
+     },
+     "星願商會": {
+      "meshes": 4,
+      "triangles": 1892
+     },
+     "委託佈告欄": {
+      "meshes": 1,
+      "triangles": 2499
+     },
+     "傳送門與南門": {
+      "meshes": 6,
+      "triangles": 4819
+     },
+     "寵物商人洛恩": {
+      "meshes": 1,
+      "triangles": 5000
+     },
+     "正式NPC（8位）": {
+      "meshes": 8,
+      "triangles": 39662
+     }
+    },
+    "errors": [],
+    "merchant": true,
+    "npcs": [
+     "sword",
+     "knight",
+     "smith",
+     "mage",
+     "church",
+     "circus",
+     "warehouse",
+     "guild"
+    ]
+   },
+   "perfState": {
+    "npcStats": {
+     "sword": {
+      "triangles": 5000,
+      "farTriangles": 2000,
+      "meshes": 1,
+      "animations": [
+       "Idle",
+       "Talk",
+       "Turn",
+       "Act"
+      ],
+      "model": "npc_swordmaster67_lite"
+     },
+     "knight": {
+      "triangles": 4999,
+      "farTriangles": 1999,
+      "meshes": 1,
+      "animations": [
+       "Idle",
+       "Talk",
+       "Turn",
+       "Act"
+      ],
+      "model": "npc_knight67_lite"
+     },
+     "smith": {
+      "triangles": 5000,
+      "farTriangles": 2000,
+      "meshes": 1,
+      "animations": [
+       "Idle",
+       "Talk",
+       "Turn",
+       "Act"
+      ],
+      "model": "npc_smith67_lite"
+     },
+     "mage": {
+      "triangles": 5000,
+      "farTriangles": 2000,
+      "meshes": 1,
+      "animations": [
+       "Idle",
+       "Talk",
+       "Turn",
+       "Act"
+      ],
+      "model": "npc_mage67_lite"
+     },
+     "church": {
+      "triangles": 5000,
+      "farTriangles": 2000,
+      "meshes": 1,
+      "animations": [
+       "Idle",
+       "Talk",
+       "Turn",
+       "Act"
+      ],
+      "model": "npc_priest67_lite"
+     },
+     "circus": {
+      "triangles": 4999,
+      "farTriangles": 1999,
+      "meshes": 1,
+      "animations": [
+       "Idle",
+       "Talk",
+       "Turn",
+       "Act"
+      ],
+      "model": "npc_clown67_lite"
+     },
+     "warehouse": {
+      "triangles": 5000,
+      "farTriangles": 2000,
+      "meshes": 1,
+      "animations": [
+       "Idle",
+       "Talk",
+       "Turn",
+       "Act"
+      ],
+      "model": "npc_warehouse67_lite"
+     },
+     "guild": {
+      "triangles": 4664,
+      "farTriangles": 2394,
+      "meshes": 1,
+      "animations": [
+       "Act",
+       "Idle",
+       "Talk",
+       "Turn"
+      ],
+      "model": "npc_guild"
+     }
+    },
+    "merchant": {
+     "meshes": 3,
+     "triangles": 5290,
+     "farTriangles": 2000,
+     "bones": 19,
+     "animations": [
+      "Idle",
+      "Talk",
+      "Turn",
+      "Walk"
+     ],
+     "shadowCasters": 1,
+     "model": "pet_merchant67_lite"
+    }
+   }
+  }
+ ],
+ "finishedAt": "2026-11-27T10:37:35.926Z"
+}
