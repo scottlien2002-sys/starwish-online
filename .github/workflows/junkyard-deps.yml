@@ -1,9 +1,11 @@
 name: Junkyard dev deps (read-only artifact)
-# 只安裝 npm 套件並上傳成 artifact，讓 Claude B 本機做型別檢查與建置；不部署、不改任何分支。
+# 只安裝 npm 套件，把型別檢查需要的 .d.ts 打包推到孤立分支 tools/junkyard-deps-types（Claude B 本機型別檢查用）；不部署。
 on:
   push:
     branches: [tools/junkyard-deps]
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
   deps:
     runs-on: ubuntu-latest
@@ -13,11 +15,21 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm ci --ignore-scripts || npm install --ignore-scripts
-      - run: cp package-lock.json node_modules/.package-lock.copy.json || true
-      - run: tar czf deps.tgz node_modules package-lock.json
-      - uses: actions/upload-artifact@v4
-        with:
-          name: junkyard-deps
-          path: deps.tgz
-          retention-days: 3
+      - run: npm ci --ignore-scripts
+      - name: Pack type definitions only
+        run: |
+          mkdir -p /tmp/pack
+          find node_modules/@babylonjs node_modules/typescript node_modules/vite node_modules/@types -type f \( -name "*.d.ts" -o -name "package.json" -o -name "*.d.mts" -o -name "*.d.cts" \) 2>/dev/null > /tmp/list.txt
+          find node_modules/typescript/lib -type f >> /tmp/list.txt
+          find node_modules/typescript/bin -type f >> /tmp/list.txt
+          tar czf /tmp/pack/types.tgz -T /tmp/list.txt
+          ls -la /tmp/pack
+      - name: Push to orphan branch
+        run: |
+          cd /tmp/pack
+          git init -q -b tools/junkyard-deps-types
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add types.tgz
+          git commit -q -m "types for local typecheck (Claude B, junkyard)"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" HEAD:refs/heads/tools/junkyard-deps-types
