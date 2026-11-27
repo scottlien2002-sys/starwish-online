@@ -167,6 +167,10 @@ export const MOUNDS: readonly MoundDef[] = [
   { x: 40, z: -18, h: 10, s: 6, kind: "junk" },
   { x: 100, z: 4, h: 14, s: 8, kind: "junk" },
   { x: 62, z: 14, h: 11, s: 7, kind: "junk" },
+  // 入口兩旁與山丘東緣（從入口一路看到兩側堆積如山的廢料；離路線 ≥ 15 m）
+  { x: -24, z: -114, h: 10, s: 5.5, kind: "junk" },
+  { x: 26, z: -118, h: 9, s: 5, kind: "junk" },
+  { x: 109, z: -62, h: 12, s: 6, kind: "junk" },
   // ---- 中央窪地周邊 ----
   { x: -18, z: -2, h: 8, s: 5.5, kind: "junk" },
   { x: 44, z: 40, h: 12, s: 7.5, kind: "junk" },

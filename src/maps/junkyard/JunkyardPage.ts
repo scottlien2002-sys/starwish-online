@@ -23,6 +23,7 @@ import { type GraphicsTier, loadTierPreference, nextTier, resolveTier, saveTierP
 import { PerfOverlay } from "../../render/PerfOverlay.ts";
 import { summarizeFrames } from "../../render/benchmark.ts";
 import { PortalTrigger } from "../../game/portalTrigger.ts";
+import { JUNKYARD_ENTRY, JUNKYARD_LINKS } from "../../game/junkyardPortals.ts";
 import type { VillageCharacter } from "../village/villageCharacter.ts";
 import {
   ARENA,
@@ -107,7 +108,8 @@ class JunkyardPage {
   private charSpeed = 0;
   private blockedFrames = 0;
   private fpsTimer = 0;
-  private readonly portal = new PortalTrigger({ id: JUNKYARD_ENTRY_PORTAL.id, x: JUNKYARD_ENTRY_PORTAL.x, z: JUNKYARD_ENTRY_PORTAL.z, triggerR: JUNKYARD_ENTRY_PORTAL.triggerR, open: true });
+  /** 入口傳送陣：與 Claude A 相同的 PortalTrigger（踩入自動傳送、只觸發一次）；資料在 src/game/junkyardPortals.ts */
+  private readonly portal = new PortalTrigger(JUNKYARD_ENTRY);
   private readonly portalLog: { t: number; map: string; x: number; z: number }[] = [];
   private sampler: Sampler | null = null;
   private lastSample: ReturnType<JunkyardPage["sampleSummary"]> | null = null;
@@ -684,7 +686,7 @@ class JunkyardPage {
       },
       setSpawns: (on: boolean) => this.setSpawns(on),
       setTopView: (on: boolean) => this.setTopView(on),
-      portal: () => ({ armed: this.portal.isArmed, fired: this.portal.hasFired, log: this.portalLog.slice(), spec: JUNKYARD_ENTRY_PORTAL }),
+      portal: () => ({ armed: this.portal.isArmed, fired: this.portal.hasFired, log: this.portalLog.slice(), spec: JUNKYARD_ENTRY_PORTAL, links: JUNKYARD_LINKS }),
       charStats: () => this.char?.stats() ?? null,
       report: () => this.reportText(),
       action: (a: "attack" | "hurt" | "die" | "revive") => this.char?.action(a),

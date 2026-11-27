@@ -16,6 +16,8 @@ import {
 import { COLLIDERS, groundHeight, insideColliders, pushOut, simulateRoute, STATIC_COLLIDERS, WalkGrid } from "../../src/maps/junkyard/terrain.ts";
 import { excluded, SCATTER_TIERS, scatterAll } from "../../src/maps/junkyard/scatter.ts";
 import { polyDist } from "../../src/maps/junkyard/geom.ts";
+import { FIELD_NORTH_PORTAL, JUNKYARD_ENTRY, JUNKYARD_LINKS } from "../../src/game/junkyardPortals.ts";
+import { PortalTrigger } from "../../src/game/portalTrigger.ts";
 
 const grid = new WalkGrid();
 
@@ -159,4 +161,20 @@ test("橋、步道、階梯：兩端與地面高度相接（沒有落差），�
   // 推出碰撞：反應爐中心推出到半徑外
   const p = pushOut(REACTOR.x, REACTOR.z + 0.1, 0.3);
   assert.ok(Math.hypot(p.x - REACTOR.x, p.z - REACTOR.z) >= REACTOR.r + 0.29);
+});
+
+test("雙向傳送接口（與 Claude A worldPortals 相同格式）：踩入觸發一次；抵達點都在對方觸發半徑外；原野端預設不開放", () => {
+  assert.equal(JUNKYARD_LINKS.length, 2);
+  assert.equal(FIELD_NORTH_PORTAL.open, false);
+  assert.equal(FIELD_NORTH_PORTAL.to.map, "junkyard");
+  assert.equal(JUNKYARD_ENTRY.to.map, "starsprout");
+  // 垃圾場抵達點不在垃圾場入口陣內；原野抵達點不在原野北門陣內
+  assert.ok(Math.hypot(FIELD_NORTH_PORTAL.to.x - JUNKYARD_ENTRY.x, FIELD_NORTH_PORTAL.to.z - JUNKYARD_ENTRY.z) > JUNKYARD_ENTRY.triggerR + 1);
+  assert.ok(Math.hypot(JUNKYARD_ENTRY.to.x - FIELD_NORTH_PORTAL.x, JUNKYARD_ENTRY.to.z - FIELD_NORTH_PORTAL.z) > FIELD_NORTH_PORTAL.triggerR + 1);
+  // 從抵達點走進陣 → 觸發一次；再走出走進 → 不再觸發
+  const t = new PortalTrigger(JUNKYARD_ENTRY);
+  assert.equal(t.update(FIELD_NORTH_PORTAL.to.x, FIELD_NORTH_PORTAL.to.z), false);
+  assert.equal(t.update(JUNKYARD_ENTRY.x, JUNKYARD_ENTRY.z + 1), true);
+  assert.equal(t.update(0, -120), false);
+  assert.equal(t.update(JUNKYARD_ENTRY.x, JUNKYARD_ENTRY.z), false);
 });
