@@ -417,11 +417,11 @@ function setAlpha(meshes: AbstractMesh[], a: number): void {
 void Color3;
 
 const CSS = `
-.mp-bar{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 6px);z-index:60;padding:4px 10px;border-radius:12px;background:rgba(20,26,60,.72);color:#fbf6ea;font:600 11px/1.4 -apple-system,'PingFang TC',sans-serif;white-space:nowrap;cursor:pointer;max-width:92vw;overflow:hidden;text-overflow:ellipsis}
-.mp-detail{display:none;position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 30px);z-index:60;padding:8px 12px;border-radius:12px;background:rgba(20,26,60,.9);color:#fbf6ea;font:500 11px/1.5 -apple-system,'PingFang TC',sans-serif;width:min(92vw,360px);box-sizing:border-box}
+.mp-bar{position:fixed;left:max(10px,env(safe-area-inset-left,0px));top:calc(env(safe-area-inset-top,0px) + 104px);z-index:60;padding:4px 10px;border-radius:12px;background:rgba(20,26,60,.72);color:#fbf6ea;font:600 11px/1.4 -apple-system,'PingFang TC',sans-serif;white-space:nowrap;cursor:pointer;max-width:92vw;overflow:hidden;text-overflow:ellipsis}
+.mp-detail{display:none;position:fixed;left:max(10px,env(safe-area-inset-left,0px));top:calc(env(safe-area-inset-top,0px) + 130px);z-index:60;padding:8px 12px;border-radius:12px;background:rgba(20,26,60,.9);color:#fbf6ea;font:500 11px/1.5 -apple-system,'PingFang TC',sans-serif;width:min(92vw,360px);box-sizing:border-box}
 .mp-detail.open{display:block}
 .mp-warn{color:#ffd36b}
 .mp-name{position:absolute;left:0;top:0;z-index:30;pointer-events:none;padding:1px 7px;border-radius:9px;background:rgba(20,26,60,.6);color:#fff;font:600 12px/1.3 -apple-system,'PingFang TC',sans-serif;white-space:nowrap;will-change:transform}
 .mp-name.off{opacity:.6}
-.mp-toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 64px);transform:translateX(-50%);z-index:70;padding:8px 14px;border-radius:14px;background:rgba(20,26,60,.9);color:#fbf6ea;font:600 13px -apple-system,'PingFang TC',sans-serif}
+.mp-toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 150px);transform:translateX(-50%);z-index:70;padding:8px 14px;border-radius:14px;background:rgba(20,26,60,.9);color:#fbf6ea;font:600 13px -apple-system,'PingFang TC',sans-serif}
 `;

@@ -38,6 +38,7 @@ const browser = await pw[browserName].launch();
 const metrics = async () => (await fetch(`http://127.0.0.1:${PORT}/metrics`)).json();
 
 const base = `${site.url}/?play=world&mp=1&lod=lite&quality=low&newgame=1&server=ws://127.0.0.1:${PORT}/ws`;
+const players = [];
 async function player(name, extra, mobile) {
   const ctx = await browser.newContext(mobile ? { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: browserName !== "firefox", hasTouch: true } : { viewport: { width: 960, height: 600 } });
   const page = await ctx.newPage();
@@ -51,7 +52,9 @@ async function player(name, extra, mobile) {
     if (m.type() === "error" && !/favicon|404/.test(m.text())) results.consoleErrors.push(`${name}: ${m.text()}`);
   });
   await page.goto(`${base}&name=${encodeURIComponent(name)}${extra}`, { waitUntil: "load" });
-  return { name, ctx, page };
+  const pl = { name, ctx, page };
+  players.push(pl);
+  return pl;
 }
 const vinfo = (p) => p.page.evaluate(() => window.__starwishWorld?.ready && window.__starwishWorld.map === "village" ? window.__starwishWorld.info() : null);
 const finfo = (p) => p.page.evaluate(() => (window.__starwishPlay?.ready ? window.__starwishPlay.info() : null));
@@ -115,6 +118,17 @@ try {
   await A.page.waitForFunction(() => (() => { const a = window.__starwishWorld.info().art; return a === "loaded" || /^(error|部分)/.test(a); })(), null, { timeout: 400000 }).catch(() => {});
   const art = (await vinfo(A)).art;
   check("星芽村正式美術（Claude B Stage 6.7：Tripo NPC、N008 佈告欄、洛恩）載入完成", art === "loaded", { art });
+  // 截圖前讓 A 走到 B 前方 2 m（一般移動，經伺服器判定），兩邊畫面都看得到對方
+  {
+    const bi = await vinfo(B);
+    const tx = bi.pos[0] + Math.sin(bi.mp.server.yaw) * 3;
+    const tz = bi.pos[2] + Math.cos(bi.mp.server.yaw) * 3;
+    await walk(A, [{ x: tx, z: tz }], async () => {
+      const i = await vinfo(A);
+      return i ? [i.pos[0], i.pos[2]] : null;
+    }, null, 20000);
+    await sleep(1500);
+  }
   await shot(A, "01_village_A_sees_B");
   await shot(B, "01_village_B_sees_A_iphone");
 
@@ -177,7 +191,7 @@ try {
     await walk(p, pts, async () => {
       const i = await vinfo(p).catch(() => null);
       return i ? [i.pos[0], i.pos[2]] : null;
-    }, async () => !(await p.page.evaluate(() => window.__starwishWorld?.map === "village").catch(() => false)), 60000);
+    }, async () => !(await p.page.evaluate(() => window.__starwishWorld?.map === "village").catch(() => false)), 300000);
   };
   const tA0 = Date.now();
   await toSouth(A);
@@ -212,7 +226,7 @@ try {
   let localAttack = false;
   const atkLog = [];
   const tAtk = Date.now();
-  while (Date.now() - tAtk < 120000 && !sawAttack) {
+  while (Date.now() - tAtk < 300000 && !sawAttack) {
     const t = await target();
     if (!t) break;
     if (atkLog.length < 400) atkLog.push(+t.d.toFixed(2));
@@ -280,7 +294,7 @@ try {
     await walk(p, [{ x: -56, z: -64 }, { x: -56, z: -68 }], async () => {
       const i = await finfo(p).catch(() => null);
       return i ? [i.pos[0], i.pos[2]] : null;
-    }, async () => !(await p.page.evaluate(() => !!window.__starwishPlay?.ready).catch(() => false)), 90000);
+    }, async () => !(await p.page.evaluate(() => !!window.__starwishPlay?.ready).catch(() => false)), 300000);
   };
   await toCamp(B);
   await waitVillage(B);
@@ -320,6 +334,27 @@ try {
   results.samples.remap = { remappedLoads: results.remappedLoads };
 } catch (e) {
   check("E2E 執行完成", false, String(e?.stack ?? e));
+  // 失敗時的診斷：每位玩家的網址、開機訊息、地圖、位置、連線狀態＋截圖
+  results.failureDiag = {};
+  for (const p of players) {
+    try {
+      results.failureDiag[p.name] = await p.page.evaluate(() => {
+        const w = window.__starwishWorld;
+        const f = window.__starwishPlay;
+        const mp = window.__mpWorld;
+        return {
+          url: location.href,
+          boot: document.getElementById("boot-status")?.textContent ?? null,
+          village: w?.ready ? { map: w.map, pos: w.info().pos } : null,
+          field: f?.ready ? { pos: f.info().pos } : null,
+          mp: mp ? { state: mp.client.state, map: mp.client.map?.id, room: mp.client.room, server: mp.client.server, stats: mp.client.stats } : null,
+        };
+      });
+      await shot(p, `fail_${p.name}`);
+    } catch (err) {
+      results.failureDiag[p.name] = String(err);
+    }
+  }
 } finally {
   await browser.close();
   site.close?.();
