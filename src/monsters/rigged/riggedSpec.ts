@@ -206,6 +206,58 @@ export const M004_WINDFEATHER_FOX: RiggedMonsterSpec = Object.freeze({
   heightM: 1.07,
 });
 
+// M005～M007：數值全部取自 Claude C 的交付報告與整合說明（2026-11-27）。GLB 根節點 extras 有值時以 GLB 為準。
+const RIG_COMMON = { fades: { normal: 0.15, locomotion: 0.12, urgent: 0.05 }, deathHold: 1.2, deathFade: 0.6 } as const;
+
+/** M005 星雲咩咩 Rig V1.0（Lv.8，四足主動；26 關節） */
+export const M005_NEBULA_SHEEP: RiggedMonsterSpec = Object.freeze({
+  modelId: "m005_nebula_sheep_v10",
+  monsterId: "nebula_sheep",
+  label: "M005 星雲咩咩 Rig V1.0",
+  files: { hq: "monsters/m005/M005_NebulaSheep_Rig_V1_HQ.glb", lite: "monsters/m005/M005_NebulaSheep_Rig_V1_Lite.glb" },
+  clips: STD_CLIPS,
+  expect: { joints: 26, durations: { idle: 2.4, move: 0.6, run: 0.42, attack: 1.2, hurt: 0.45, death: 0.75, respawn: 0.6 } },
+  locomotion: { moveNativeMps: 0.45, runNativeMps: 1.5, runThresholdMps: 0.85, hysteresisMps: 0.08, stopMps: 0.05, ratioMin: 0.6, ratioMax: 1.5 },
+  attackHitTime: 0.5,
+  ...RIG_COMMON,
+  bodyRadius: 0.5,
+  hpBarHeight: 1.3,
+  heightM: 1.15,
+});
+
+/** M006 胡蘿蔔大王 Rig V1.0（Lv.9 精英，雙足；26 關節；碰撞半徑依地圖文件 0.75 m） */
+export const M006_CARROT_KING: RiggedMonsterSpec = Object.freeze({
+  modelId: "m006_carrot_king_v10",
+  monsterId: "carrot_king",
+  label: "M006 胡蘿蔔大王 Rig V1.0",
+  files: { hq: "monsters/m006/M006_CarrotKing_Rig_V1_HQ.glb", lite: "monsters/m006/M006_CarrotKing_Rig_V1_Lite.glb" },
+  clips: STD_CLIPS,
+  expect: { joints: 26, durations: { idle: 2.4, move: 0.9, run: 0.5, attack: 1.3, hurt: 0.5, death: 0.9, respawn: 0.7 } },
+  locomotion: { moveNativeMps: 0.35, runNativeMps: 1.0, runThresholdMps: 0.68, hysteresisMps: 0.06, stopMps: 0.05, ratioMin: 0.6, ratioMax: 1.5 },
+  attackHitTime: 0.55,
+  ...RIG_COMMON,
+  bodyRadius: 0.75,
+  hpBarHeight: 1.85,
+  heightM: 1.65,
+});
+
+/** M007 王冠重錘兔 Rig V1.0（Lv.10 BOSS，雙足；29 關節；碰撞半徑依地圖文件 1.3 m） */
+export const M007_CROWN_HAMMER_RABBIT: RiggedMonsterSpec = Object.freeze({
+  modelId: "m007_crown_hammer_rabbit_v10",
+  monsterId: "crown_hammer_rabbit",
+  label: "M007 王冠重錘兔 Rig V1.0",
+  files: { hq: "monsters/m007/M007_CrownHammerRabbit_Rig_V1_HQ.glb", lite: "monsters/m007/M007_CrownHammerRabbit_Rig_V1_Lite.glb" },
+  clips: STD_CLIPS,
+  expect: { joints: 29, durations: { idle: 2.8, move: 1.1, run: 0.62, attack: 2.0, hurt: 0.6, death: 1.6, respawn: 1.1 } },
+  locomotion: { moveNativeMps: 0.55, runNativeMps: 1.5, runThresholdMps: 1.02, hysteresisMps: 0.08, stopMps: 0.05, ratioMin: 0.6, ratioMax: 1.5 },
+  attackHitTime: 1.05,
+  ...RIG_COMMON,
+  deathHold: 2.0,
+  bodyRadius: 1.3,
+  hpBarHeight: 2.95,
+  heightM: 2.7,
+});
+
 /** 接口測試替身（灰色方塊；只用在 ?lab=rigged 與自動測試） */
 export const RIG_CONTRACT_FIXTURE: RiggedMonsterSpec = Object.freeze({
   ...M004_WINDFEATHER_FOX,
@@ -216,7 +268,18 @@ export const RIG_CONTRACT_FIXTURE: RiggedMonsterSpec = Object.freeze({
   fixture: true,
 });
 
-export const RIGGED_MONSTERS: readonly RiggedMonsterSpec[] = [M004_WINDFEATHER_FOX, RIG_CONTRACT_FIXTURE];
+export const RIGGED_MONSTERS: readonly RiggedMonsterSpec[] = [M004_WINDFEATHER_FOX, M005_NEBULA_SHEEP, M006_CARROT_KING, M007_CROWN_HAMMER_RABBIT, RIG_CONTRACT_FIXTURE];
+
+/**
+ * 星芽原野的骨骼動畫怪物出生區（區域編號對應 maps/starsprout/layout.ts 的 ZONES）。
+ * 只有 GLB 已交付（列在 models/monsters/manifest.json）的怪物會出現；沒交付的區域保持空的，不放替代模型。
+ */
+export const FIELD_RIGGED_SPAWNS: readonly { zoneId: string; spec: RiggedMonsterSpec }[] = [
+  { zoneId: "04", spec: M004_WINDFEATHER_FOX },
+  { zoneId: "05", spec: M005_NEBULA_SHEEP },
+  { zoneId: "06", spec: M006_CARROT_KING },
+  { zoneId: "07", spec: M007_CROWN_HAMMER_RABBIT },
+];
 
 export function riggedSpec(modelId: string): RiggedMonsterSpec | undefined {
   return RIGGED_MONSTERS.find((s) => s.modelId === modelId);

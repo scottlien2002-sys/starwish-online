@@ -6,12 +6,36 @@
 import { newSave as newPetSave, parseSave as parsePetSave, type PetSave } from "../pets/petSystem.ts";
 import { newWallet, parseWallet, type WalletState } from "../economy/wallet.ts";
 
+import { sanitizeProgress } from "./progression.ts";
 export const GAME_SAVE_KEY = "starwish.stage7.save.v1";
 export type MapId = "village" | "starsprout";
 export type Gender = "male" | "female";
 /** 裝備欄（企劃確認的 7 格；裝備系統尚未接入，先保留欄位） */
 export const EQUIP_SLOTS = ["weapon", "headwear", "clothes", "pants", "shoes", "earrings", "back"] as const;
 export type EquipSlot = (typeof EQUIP_SLOTS)[number];
+
+/** 角色外觀（髮型與職業預留 6 種；目前交付的是 hair01、初心者短劍／法杖） */
+export interface Appearance {
+  /** 髮型編號：hair01～hair06（目前只有 hair01 有模型） */
+  hair: string;
+  /** 髮色（#rrggbb；null = 模型原色） */
+  hairColor: string | null;
+  /** 武器類型：短劍（近戰）／法杖 */
+  weapon: "sword" | "staff";
+}
+export const HAIR_SLOTS = ["hair01", "hair02", "hair03", "hair04", "hair05", "hair06"] as const;
+export function defaultAppearance(): Appearance {
+  return { hair: "hair01", hairColor: null, weapon: "sword" };
+}
+export function parseAppearance(v: unknown): Appearance {
+  const a = (v && typeof v === "object" ? v : {}) as Partial<Appearance>;
+  const d = defaultAppearance();
+  return {
+    hair: typeof a.hair === "string" && (HAIR_SLOTS as readonly string[]).includes(a.hair) ? a.hair : d.hair,
+    hairColor: typeof a.hairColor === "string" && /^#[0-9a-f]{6}$/i.test(a.hairColor) ? a.hairColor.toLowerCase() : null,
+    weapon: a.weapon === "staff" ? "staff" : "sword",
+  };
+}
 
 export interface LocalListing {
   listingId: string;
@@ -38,6 +62,11 @@ export interface GameSave {
     z: number | null;
     yaw: number | null;
     deaths: number;
+    /** Stage 7.2：等級與目前經驗（升級表為測試設定，見 core/progression.ts） */
+    level: number;
+    exp: number;
+    /** Stage 7.2：模組化外觀（髮型、髮色、武器類型）；切換地圖保留 */
+    appearance: Appearance;
   };
   equipment: Record<EquipSlot, string | null>;
   wallet: WalletState;
@@ -53,7 +82,7 @@ export function newGameSave(gender: Gender, startingGold: number, now = Date.now
     version: 1,
     createdAt: now,
     updatedAt: now,
-    character: { gender, hp: null, map: "village", x: null, z: null, yaw: null, deaths: 0 },
+    character: { gender, hp: null, map: "village", x: null, z: null, yaw: null, deaths: 0, level: 1, exp: 0, appearance: defaultAppearance() },
     equipment: Object.fromEntries(EQUIP_SLOTS.map((s) => [s, null])) as Record<EquipSlot, string | null>,
     wallet: newWallet(startingGold),
     pets: newPetSave(),
@@ -82,6 +111,8 @@ export function parseGameSave(json: string | null): GameSave | null {
         z: typeof c.z === "number" ? c.z : null,
         yaw: typeof c.yaw === "number" ? c.yaw : null,
         deaths: Math.max(0, Math.floor(Number(c.deaths) || 0)),
+        ...sanitizeProgress(c.level, c.exp),
+        appearance: parseAppearance(c.appearance),
       },
       equipment: { ...base.equipment, ...(v.equipment ?? {}) },
       wallet: parseWallet(v.wallet),

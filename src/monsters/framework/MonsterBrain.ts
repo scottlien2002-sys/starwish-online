@@ -1,6 +1,6 @@
 import { createRng, type Rng } from "../../core/rng.ts";
 import type { MonsterInstance } from "./MonsterInstance.ts";
-import type { BrainMode, MonsterTarget } from "./types.ts";
+import { isAggressive, type BrainMode, type MonsterTarget } from "./types.ts";
 
 export interface BrainOptions {
   seed?: number;
@@ -106,12 +106,15 @@ export class MonsterBrain {
     const busy = state === "attack" || state === "hit";
     const pos = m.currentPosition;
     const fromSpawn = Math.hypot(pos.x - m.spawnPosition.x, pos.z - m.spawnPosition.z);
-    const hasTarget = target !== null && target.alive;
+    // 被動怪物（Lv.1～4）：沒被打過就當作沒看到玩家
+    const hasTarget = target !== null && target.alive && (isAggressive(def) || m.provoked);
     const distToTarget = hasTarget ? Math.hypot(target.x - pos.x, target.z - pos.z) : Infinity;
 
     // ---- 決定模式 ----
     if (this._mode === "return") {
       if (fromSpawn <= this.arrive) {
+        // 脫戰回到出生點：被動怪物恢復被動
+        m.provoked = false;
         this._mode = "idle";
         this.idleTimer = this.rng.range(this.idleMin, this.idleMax);
       }

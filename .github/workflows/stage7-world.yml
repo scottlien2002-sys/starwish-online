@@ -4,7 +4,7 @@ name: Stage 7 world loop E2E (quick, with screenshots)
 # 獨立於 CI & Deploy（避免超過該工作 150 分鐘上限），在同一個 commit 平行執行。
 on:
   push:
-    branches: [feature/render-stage7-world, feature/render-stage71-world, feature/render-stage72-monsters]
+    branches: [feature/render-stage7-world, feature/render-stage71-world, feature/render-stage72-monsters, feature/render-stage72-world]
 
 permissions:
   contents: read
@@ -23,6 +23,7 @@ jobs:
         with:
           node-version: 22
       - run: npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+      - run: npm test
       - run: npm run build
       - run: npx playwright install --with-deps chromium webkit
       - name: Rigged monster E2E (Stage 7.2)

@@ -76,7 +76,9 @@ export class Hud {
   }
 
   setLevel(level: number): void {
-    this.levelEl.textContent = `Lv.${level}`;
+    const t = `Lv.${level}`;
+    if (this.levelEl.textContent === t) return;
+    this.levelEl.textContent = t;
   }
 
   setBars(v: BarValues): void {

@@ -45,6 +45,15 @@ export interface MonsterDefinition {
   chaseSpeed?: number;
   /** 身體碰撞半徑（公尺）：玩家近戰距離從身體外緣算；省略 = 0（以中心點計，星露啵啵既有行為） */
   bodyRadius?: number;
+  /**
+   * 主動／被動（Stage 7.2 規則）：省略 = 依等級判斷（Lv.1～4 被動、Lv.5 以上主動）。
+   * 被動怪物不會因為玩家靠近而追擊；被玩家打到之後才會反擊，脫戰回到出生點後恢復被動。
+   */
+  aggressive?: boolean;
+  /** 屬性：第一張地圖（Lv.1～10）全部無屬性 */
+  element?: "none";
+  /** 怪物階級（顯示用）：一般／精英／BOSS */
+  rank?: "normal" | "elite" | "boss";
   /** true = 數值為暫定，待企劃確認 */
   provisional?: boolean;
   /** true = 僅供程式測試，不是正式怪物 */
@@ -128,3 +137,9 @@ export interface MonsterTarget {
 }
 
 export type BrainMode = "idle" | "patrol" | "chase" | "attack" | "return" | "dead" | "respawn";
+
+/** Stage 7.2 規則：Lv.1～4 被動、Lv.5 以上主動（定義裡有明確設定時以設定為準） */
+export const AGGRESSIVE_FROM_LEVEL = 5;
+export function isAggressive(def: Pick<MonsterDefinition, "level" | "aggressive">): boolean {
+  return def.aggressive ?? def.level >= AGGRESSIVE_FROM_LEVEL;
+}

@@ -12,11 +12,15 @@ import {
   SceneLoader,
   StandardMaterial,
   type ShadowGenerator,
+  type Skeleton,
+  VertexBuffer,
   type CubeTexture,
   type BaseTexture,
   TransformNode,
   Vector3,
 } from "@babylonjs/core";
+import { MODULAR_DIR, MODULAR_HAIR_FILES, MODULAR_VERSION, modularFile, type ModularPartInfo } from "./novice72.ts";
+export { MODULAR_DIR, MODULAR_HAIR_FILES, MODULAR_VERSION, modularFile, type ModularPartInfo } from "./novice72.ts";
 import { AnimStateMachine, ANIM_NAMES, ONE_SHOT, type AnimName } from "../actors/animState.ts";
 import { animClock, ANIM_TIMING, attackPlaybackRate } from "../actors/animTiming.ts";
 
@@ -40,6 +44,33 @@ export interface AvatarFrameInput {
   die?: boolean;
   /** 復活：回到 Idle */
   revive?: boolean;
+}
+
+/** 把蒙皮網格的骨骼索引從零件骨架換成身體骨架（依骨骼名稱）。回傳是否需要改寫 */
+export function rebindToSkeleton(mesh: Mesh, from: Skeleton, to: Skeleton): boolean {
+  const map = from.bones.map((b) => to.bones.findIndex((x) => x.name === b.name));
+  if (map.some((i) => i < 0)) throw new Error(`零件 ${mesh.name} 有身體骨架沒有的骨骼`);
+  if (map.every((v, i) => v === i)) return false;
+  for (const kind of [VertexBuffer.MatricesIndicesKind, VertexBuffer.MatricesIndicesExtraKind]) {
+    const d = mesh.getVerticesData(kind);
+    if (!d) continue;
+    const out = Array.from(d, (v) => map[v] ?? 0);
+    mesh.setVerticesData(kind, out, false);
+  }
+  return true;
+}
+
+/** models/novice72/manifest.json：Blender CI 產生並放進 public 的檔案清單（沒有 → 用上一版初心者） */
+export async function modularAvailable(baseUrl: string, g: NoviceGender, lod: NoviceLod): Promise<boolean> {
+  try {
+    const r = await fetch(`${baseUrl}${MODULAR_DIR}/manifest.json`, { cache: "no-cache" });
+    if (!r.ok) return false;
+    const m = (await r.json()) as { files?: string[] };
+    const need = ["body", "hair01", "top", "bottom", "boots", "sword", "staff"].map((s) => modularFile(g, s, lod));
+    return need.every((n) => m.files?.includes(n));
+  } catch {
+    return false;
+  }
 }
 
 export function noviceFile(g: NoviceGender, lod: NoviceLod, version = "c10b5"): string {
@@ -70,7 +101,13 @@ export class NoviceAvatar {
   private blob: Mesh | null = null;
   private readonly tmp = new Vector3();
 
-  private constructor(scene: Scene, file: string, res: Awaited<ReturnType<typeof SceneLoader.ImportMeshAsync>>) {
+  /** Stage 7.2 新版（Tripo 模組化）：武器類型對應的攻擊動作（Attack_Sword／Attack_Staff） */
+  readonly attackClips = new Map<"sword" | "staff", AnimationGroup>();
+  /** Stage 7.2 新版：已載入的模組零件（髮型、上衣、下身、靴子、武器） */
+  parts: ModularPartInfo[] = [];
+  weapon: "sword" | "staff" | null = null;
+
+  private constructor(scene: Scene, file: string, res: { meshes: AbstractMesh[]; animationGroups: AnimationGroup[]; skeletons: Skeleton[] }) {
     this.file = file;
     this.root = new TransformNode("player", scene);
     // glTF 的 __root__ 保留左右手座標轉換，不要改它；移動、轉向都在 player 這一層
@@ -81,11 +118,14 @@ export class NoviceAvatar {
       m.receiveShadows = false;
     }
     for (const ag of res.animationGroups) {
+      if (ag.name === "Attack_Sword") this.attackClips.set("sword", ag);
+      if (ag.name === "Attack_Staff") this.attackClips.set("staff", ag);
       const a = ANIM_NAMES.find((n) => ag.name === n || ag.name.endsWith(n));
       if (a) this.groups.set(a, ag);
       ag.stop();
     }
     this.triangles = res.meshes.reduce((a, m) => a + Math.round((m.getTotalIndices() || 0) / 3), 0);
+    if (!this.groups.has("Attack") && this.attackClips.size) this.groups.set("Attack", this.attackClips.get("sword") ?? [...this.attackClips.values()][0]!);
     this.headBone = res.skeletons[0]?.bones.find((b) => b.name === "head") ?? null;
     this.skinnedRef = res.meshes.find((m) => !!m.skeleton) ?? null;
     // 頭部側邊半寬（頭、頭髮、馬尾、蝴蝶結的綁定姿勢包圍盒，左右取大者）
@@ -109,6 +149,66 @@ export class NoviceAvatar {
     const gs = ANIM_TIMING.run.groundSpeedBy[opts.version ?? "c10b5"];
     if (gs) a.groundSpeed = gs[opts.gender];
     return a;
+  }
+
+  /**
+   * Stage 7.2 新版初心者（Tripo 零件，模組化）：身體（骨架＋動畫）＋髮型、上衣、下身、靴子、武器各一個 GLB。
+   * 零件的蒙皮網格重新綁到身體骨架（依骨骼名稱對應索引），零件自己的骨架丟掉。
+   */
+  static async loadModular(scene: Scene, opts: { gender: NoviceGender; lod: NoviceLod; baseUrl: string; appearance: { hair: string; hairColor: string | null; weapon: "sword" | "staff" } }): Promise<NoviceAvatar> {
+    const dir = `${opts.baseUrl}${MODULAR_DIR}/`;
+    const f = (slot: string) => modularFile(opts.gender, slot, opts.lod);
+    const body = await SceneLoader.ImportMeshAsync("", dir, f("body"), scene);
+    const skel = body.skeletons[0];
+    if (!skel) throw new Error("新版初心者身體沒有骨架");
+    const bodyRoot = body.meshes[0]!;
+    const hair = MODULAR_HAIR_FILES.includes(opts.appearance.hair) ? opts.appearance.hair : "hair01";
+    const slots: { slot: string; kind: ModularPartInfo["kind"] }[] = [
+      { slot: hair, kind: "hair" },
+      { slot: "top", kind: "top" },
+      { slot: "bottom", kind: "bottom" },
+      { slot: "boots", kind: "boots" },
+      { slot: opts.appearance.weapon, kind: "weapon" },
+    ];
+    const parts: ModularPartInfo[] = [];
+    const meshes: AbstractMesh[] = [...body.meshes];
+    const loaded = await Promise.all(slots.map((s) => SceneLoader.ImportMeshAsync("", dir, f(s.slot), scene).then((r) => ({ s, r }))));
+    for (const { s, r } of loaded) {
+      const ps = r.skeletons[0];
+      const info: ModularPartInfo = { kind: s.kind, file: f(s.slot), meshes: [], remapped: false };
+      for (const m of r.meshes) {
+        if (!m.getTotalVertices()) continue;
+        if (ps && m.skeleton === ps) info.remapped = rebindToSkeleton(m as Mesh, ps, skel) || info.remapped;
+        m.skeleton = skel;
+        m.parent = bodyRoot;
+        meshes.push(m);
+        info.meshes.push(m.name);
+        if (s.kind === "hair" && opts.appearance.hairColor && m.material instanceof PBRMaterial) m.material.albedoColor = Color3.FromHexString(opts.appearance.hairColor);
+      }
+      for (const m of r.meshes) if (!m.getTotalVertices()) m.dispose(false, false);
+      for (const t of r.transformNodes) t.dispose();
+      ps?.dispose();
+      for (const g of r.animationGroups) g.dispose();
+      parts.push(info);
+    }
+    // 穿上整套衣服（上衣＋下身＋靴子）時，被蓋住的身體不畫（少一個繪製、不會穿模）
+    const dressed = ["top", "bottom", "boots"].every((k) => parts.some((p) => p.kind === k && p.meshes.length));
+    for (const m of body.meshes) if (/Body_Covered/.test(m.name)) m.setEnabled(!dressed);
+    const a = new NoviceAvatar(scene, f("body"), { meshes, animationGroups: body.animationGroups, skeletons: body.skeletons });
+    a.parts = parts;
+    a.setWeapon(opts.appearance.weapon);
+    const gs = ANIM_TIMING.run.groundSpeedBy[MODULAR_VERSION];
+    if (gs) a.groundSpeed = gs[opts.gender];
+    return a;
+  }
+
+  /** 換武器類型的攻擊動作（模型零件另外載入；這裡只切換動作） */
+  setWeapon(kind: "sword" | "staff"): void {
+    const g = this.attackClips.get(kind);
+    if (!g) return;
+    this.weapon = kind;
+    this.groups.get("Attack")?.stop();
+    this.groups.set("Attack", g);
   }
 
   get bones(): number {
@@ -280,7 +380,7 @@ export class NoviceAvatar {
   }
 
   dispose(): void {
-    for (const g of this.groups.values()) g.dispose();
+    for (const g of new Set([...this.groups.values(), ...this.attackClips.values()])) g.dispose();
     for (const m of this.meshes) m.dispose();
     this.blob?.dispose(false, true);
     this.root.dispose();

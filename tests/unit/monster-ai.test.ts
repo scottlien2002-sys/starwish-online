@@ -4,9 +4,17 @@ import { MonsterFactory, createMonsterRegistry, type MonsterTarget } from "../..
 import type { MonsterController } from "../../src/monsters/framework/MonsterController.ts";
 import type { BrainMode } from "../../src/monsters/framework/types.ts";
 
-const factory = () => new MonsterFactory(createMonsterRegistry());
+// AI 流程測試用「主動攻擊型」：星露啵啵（Lv.1）依 Stage 7.2 規則是被動，這裡複製一份設成主動
+const factory = () => {
+  const r = createMonsterRegistry();
+  r.addDefinitions([
+    { ...r.definition("star_dew_bobo"), monsterId: "ai_aggressive_bobo", aggressive: true },
+    { ...r.definition("test_dummy"), monsterId: "ai_aggressive_dummy", aggressive: true },
+  ]);
+  return new MonsterFactory(r);
+};
 const spawnBobo = (seed = 1) =>
-  factory().create("star_dew_bobo", { x: 0, y: 0, z: 0 }, { visual: false, brain: { seed, idleMin: 0.5, idleMax: 1 } });
+  factory().create("ai_aggressive_bobo", { x: 0, y: 0, z: 0 }, { visual: false, brain: { seed, idleMin: 0.5, idleMax: 1 } });
 
 function run(c: MonsterController, seconds: number, target: MonsterTarget | null, now0 = 0, dt = 1 / 30): { now: number; modes: Set<BrainMode> } {
   const modes = new Set<BrainMode>();
@@ -137,12 +145,55 @@ test("AI：死亡後停止行動，respawnTime 後重生", () => {
 
 test("AI：不同怪物使用自己的數值（速度、範圍）", () => {
   const f = factory();
-  const bobo = f.create("star_dew_bobo", { x: 0, y: 0, z: 0 }, { visual: false });
-  const dummy = f.create("test_dummy", { x: 0, y: 0, z: 0 }, { visual: false });
+  const bobo = f.create("ai_aggressive_bobo", { x: 0, y: 0, z: 0 }, { visual: false });
+  const dummy = f.create("ai_aggressive_dummy", { x: 0, y: 0, z: 0 }, { visual: false });
   const target: MonsterTarget = { id: "player", x: 5.5, z: 0, alive: true };
   for (let i = 0; i < 20; i++) {
     bobo.update(1 / 30, i / 30, target);
     dummy.update(1 / 30, i / 30, target);
   }
   assert.ok(dummy.instance.currentPosition.x > bobo.instance.currentPosition.x, "測試方塊移速較快");
+});
+
+// ---------------- Stage 7.2：Lv.1～4 被動、Lv.5 以上主動 ----------------
+import { isAggressive } from "../../src/monsters/framework/types.ts";
+import { MONSTER_DEFINITIONS } from "../../src/config/monsters.ts";
+
+test("Stage 7.2：Lv.1～4 預設被動、Lv.5 以上預設主動；第一張地圖怪物全部無屬性", () => {
+  assert.equal(isAggressive({ level: 1 }), false);
+  assert.equal(isAggressive({ level: 4 }), false);
+  assert.equal(isAggressive({ level: 5 }), true);
+  assert.equal(isAggressive({ level: 10 }), true);
+  assert.equal(isAggressive({ level: 1, aggressive: true }), true);
+  for (const d of MONSTER_DEFINITIONS.filter((x) => !x.testOnly)) {
+    assert.equal(isAggressive(d), d.level >= 5, `${d.name} Lv.${d.level}`);
+    assert.equal(d.element ?? "none", "none", `${d.name} 無屬性`);
+  }
+});
+
+test("Stage 7.2：被動怪物（星露啵啵）玩家靠近不追擊；被打之後反擊；脫戰回家後恢復被動", () => {
+  const c = new MonsterFactory(createMonsterRegistry()).create("star_dew_bobo", { x: 0, y: 0, z: 0 }, { visual: false, brain: { seed: 1, idleMin: 0.5, idleMax: 1 } });
+  const target: MonsterTarget = { id: "player", x: 2, z: 0, alive: true };
+  let r = run(c, 5, target);
+  assert.ok(!r.modes.has("chase") && !r.modes.has("attack"), "沒被打不追擊");
+  assert.equal(c.instance.lastAttackTime, Number.NEGATIVE_INFINITY, "沒被打不攻擊");
+  c.instance.receiveDamage(1);
+  assert.equal(c.instance.provoked, true);
+  r = run(c, 6, target, r.now);
+  assert.ok(r.modes.has("chase") || r.modes.has("attack"), "被打後反擊");
+  assert.ok(c.instance.lastAttackTime > 0, "被打後會攻擊");
+  target.x = 60; // 玩家跑遠 → 回家
+  r = run(c, 15, target, r.now);
+  assert.ok(r.modes.has("return"));
+  assert.equal(c.instance.provoked, false, "回到出生點後恢復被動");
+  target.x = 2;
+  const r2 = run(c, 4, target, r.now);
+  assert.ok(!r2.modes.has("chase") && !r2.modes.has("attack"), "恢復被動後玩家靠近不追擊");
+});
+
+test("Stage 7.2：主動怪物（風羽狐 Lv.7）玩家進入警戒範圍就追擊", () => {
+  const c = new MonsterFactory(createMonsterRegistry()).create("windfeather_fox", { x: 0, y: 0, z: 0 }, { visual: false, brain: { seed: 1 } });
+  const target: MonsterTarget = { id: "player", x: 4, z: 0, alive: true };
+  const r = run(c, 3, target);
+  assert.ok(r.modes.has("chase") || r.modes.has("attack"));
 });

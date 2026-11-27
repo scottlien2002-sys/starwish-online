@@ -52,6 +52,12 @@ for (const name of browsers) {
       run.results.start = vi;
       check("新存檔在星芽村出生（性別、測試設定、起始金幣 100）", vi.map === "village" && vi.gender === g && vi.mode === "test" && vi.gold === 100, { map: vi.map, gender: vi.gender, gold: vi.gold, mode: vi.mode });
       check("星芽村：一般移動沒有跳躍按鈕", vi.jumpButtonVisible === false, vi.jumpButtonVisible);
+      // ---------- Stage 7.2：新版初心者（Tripo 模組化） ----------
+      const am = vi.avatarModel;
+      const kinds = new Set((am?.parts ?? []).map((p) => p.kind));
+      check("Stage 7.2 新版初心者：身體＋髮型、上衣、下身、靴子、武器分開的模組（共用身體骨架）", !!am && am.modular && ["hair", "top", "bottom", "boots", "weapon"].every((k) => kinds.has(k)) && am.parts.every((p) => p.meshes >= 1), am);
+      check("Stage 7.2 新版初心者：Idle／Run／Attack／Hurt／Death／Jump 動作齊全，短劍與法杖各有攻擊動作", !!am && ["Idle", "Run", "Attack", "Hurt", "Death", "Jump"].every((c) => am.clips.includes(c)) && am.attackClips.includes("sword") && am.attackClips.includes("staff"), am && { clips: am.clips, attackClips: am.attackClips });
+      check("Stage 7.2：存檔有等級、經驗、外觀（髮型、髮色、武器）", vi.level === 1 && vi.exp === 0 && vi.appearance?.hair === "hair01" && vi.appearance?.weapon === "sword", { level: vi.level, exp: vi.exp, appearance: vi.appearance });
       await shot("village_start");
 
       // ---------- 2. 洛恩鑑定：收鑑定費、同一請求只扣一次、金幣不足不鑑定 ----------
@@ -230,6 +236,7 @@ for (const name of browsers) {
       check("營地傳送陣：已建立（魔法陣＋符文＋光柱）、抵達後啟用但不會自動觸發（不會兩張地圖無限往返）", fi2.map === "starsprout" && fi2.portal.built && fi2.portal.meshes >= 3 && fi2.portal.armed && !fi2.portal.fired, fi2.portal);
       check("切換地圖：金幣、背包、模型性別保留", fi.gold === goldBeforeField && fi.bag === bagBeforeField - 0 && fp.gender === g, { gold: fi.gold, goldBeforeField, bag: fi.bag, bagBeforeField });
       check("星芽原野：一般移動沒有跳躍按鈕", fi.jumpButton === false, fi.jumpButton);
+      check("Stage 7.2：原野也用新版初心者（同一套模組、同一把武器）", fp.avatarModel?.modular === true && fp.avatarModel.weapon === am?.weapon && fp.avatarModel.parts.length === am?.parts.length, fp.avatarModel);
       check("切換地圖後寵物仍裝備、在頭部側邊 15～25 cm", fi.pets.length >= 1 && fi.petGap >= 0.15 && fi.petGap <= 0.25, { gap: fi.petGap, pets: fi.pets });
       await shot("field_arrive");
 
@@ -264,6 +271,8 @@ for (const name of browsers) {
       run.results.fight = { kills: fight.kills, picked: fight.picked, goldDropped: fight.w.goldDropped, goldPicked: fight.w.goldPicked, gold: fight.w.gold, claimed: fight.w.claimed };
       const drops = fight.w.ledger.filter((l) => l.kind === "monsterDrop");
       check("原野：擊倒怪物、掉落金幣（測試設定 3–8）並撿起入帳", fight.kills >= 2 && fight.w.goldPicked > 0 && fight.w.gold === goldBeforeField + fight.w.goldPicked && drops.every((d) => d.amount >= 3 && d.amount <= 8), run.results.fight);
+      const fw = fight.w;
+      check("Stage 7.2：擊敗怪物得到經驗（測試設定），存進角色存檔", fw.expGained > 0 && (fw.level > 1 || fw.exp > 0), { expGained: fw.expGained, level: fw.level, exp: fw.exp });
       check("掉落物唯一編號：每個撿起的掉落只入帳一次", new Set(drops.map((d) => d.requestId)).size === drops.length && fight.w.claimed >= drops.length, { drops: drops.length, claimed: fight.w.claimed });
       await shot("field_fight");
 
@@ -287,6 +296,7 @@ for (const name of browsers) {
       vi = await V(() => window.__starwishWorld.info());
       run.results.backVillage = { gold: vi.gold, pos: vi.pos, bag: vi.bag.length };
       check("營地傳送陣：踩進去直接回到星芽村南門內側（南方傳送陣外、沒有再被傳回原野）", vi.map === "village" && Math.hypot(vi.pos[0] - 0, vi.pos[2] + 39) < 1.5 && vi.portal.armed && !vi.portal.fired, { pos: vi.pos, portal: vi.portal });
+      check("Stage 7.2 返回村莊：等級、經驗、外觀、武器保留", vi.level === beforeBack.level && vi.exp === beforeBack.exp && JSON.stringify(vi.appearance) === JSON.stringify(beforeBack.appearance) && vi.avatarModel?.weapon === am?.weapon, { village: { level: vi.level, exp: vi.exp, appearance: vi.appearance }, field: { level: beforeBack.level, exp: beforeBack.exp, appearance: beforeBack.appearance } });
       check("返回村莊：金幣、背包、物品數量保留", vi.gold === beforeBack.gold && vi.bag.length === beforeBack.bag && vi.items.monsterMaterial === beforeBack.items.monsterMaterial, { vi: vi.gold, field: beforeBack.gold });
       await shot("village_back");
 
@@ -312,6 +322,8 @@ for (const name of browsers) {
                 if (i.hp > 1) api.world.setHp(1);
                 const m = i.monsters.find((x) => x.state !== "death" && x.hp > 0);
                 if (m && Math.hypot(m.x - i.pos[0], m.z - i.pos[2]) > 1.2) api.teleport(m.x + 0.9, m.z);
+                // Stage 7.2：星露啵啵（Lv.1）是被動怪物，要先打一下才會反擊
+                else if (m && !m.provoked) api.press("attack");
               }
               if ((seen && (seen.states.length >= 6 || !w.down)) || performance.now() - t0 > 120000) {
                 if (seen) seen.state = seen.states.includes("Death") ? "Death" : seen.states[seen.states.length - 1];
@@ -328,7 +340,7 @@ for (const name of browsers) {
       await waitVillage();
       vi = await V(() => window.__starwishWorld.info());
       run.results.respawn = { pos: vi.pos, deaths: vi.deaths, hp: vi.hp, gold: vi.gold };
-      check("戰死：生命歸零後倒地並播 C1.0-B5b 死亡動作（不是整個角色僵硬往後倒）", !!death && death.deathClip === true && death.state === "Death", death);
+      check("戰死：生命歸零後倒地並播死亡動作（不是整個角色僵硬往後倒）", !!death && death.deathClip === true && death.state === "Death", death);
       check("戰死 → 在星芽村復活（死亡次數 +1、滿血、金幣不變）", vi.map === "village" && vi.deaths === 1 && (vi.hp === null || vi.hp >= 100) && vi.gold === goldBeforeDeath, run.results.respawn);
       await shot("village_respawn");
     } catch (e) {

@@ -40,7 +40,7 @@ import { BOBO_MODEL_IDS, BOBO_PROFILE_IDS } from "./boboVariant.ts";
 import { PreviewCombat, separate, type PlayerAttackResult } from "./previewCombat.ts";
 import { combatTuningFromStats, FIELD_TEST, zoneSpawnPoints } from "./fieldRules.ts";
 import { FieldLoot, type LootDrop } from "./fieldLoot.ts";
-import { NoviceAvatar, type CharShadowMode, type NoviceGender, type NoviceLod } from "../characters/NoviceAvatar.ts";
+import { modularAvailable, NoviceAvatar, type CharShadowMode, type NoviceGender, type NoviceLod } from "../characters/NoviceAvatar.ts";
 import { runRate } from "../actors/animTiming.ts";
 import { createRng } from "../core/rng.ts";
 import { CORE_RULES } from "../core/rules.ts";
@@ -54,7 +54,10 @@ import { isSoul } from "../pets/petSystem.ts";
 import type { WorldSession } from "./worldSession.ts";
 import { WorldPanel } from "../ui/WorldPanel.ts";
 import { MODEL_LOD_LABEL, pickModelLod } from "./modelLod.ts";
-import { M004_WINDFEATHER_FOX } from "../monsters/rigged/riggedSpec.ts";
+import { expToNext, gainExp } from "../core/progression.ts";
+import { isAggressive } from "../monsters/framework/types.ts";
+import { defaultAppearance } from "../core/gameSave.ts";
+import { FIELD_RIGGED_SPAWNS } from "../monsters/rigged/riggedSpec.ts";
 import { riggedAssetAvailable, RiggedMonsterVisual } from "../monsters/rigged/RiggedMonsterVisual.ts";
 import { NOVICE_VERSION } from "./noviceVersion.ts";
 import { FIELD_CAMP_ARRIVAL } from "../maps/village/mapLinks.ts";
@@ -81,7 +84,6 @@ const ITEM_COLOR: Record<ItemId, string> = { seed: "#7bd96a", egg: "#fff3d6", bi
 const SAVE_KEY = "starwish.stage56.pets.v1";
 const ZONE01 = ZONES.find((z) => z.id === "01")!;
 /** 羽風高地（Lv.7 風羽狐，上限 4 隻；layout 既定） */
-const ZONE04 = ZONES.find((z) => z.id === "04")!;
 const START = MAIN_ROUTE[0]!;
 
 export interface PlayApi {
@@ -90,6 +92,8 @@ export interface PlayApi {
     gender: NoviceGender;
     lod: NoviceLod;
     file: string;
+    /** Stage 7.2：角色模型（新版 Tripo 模組化／上一版） */
+    avatarModel: { modular: boolean; weapon: string | null; bones: number; triangles: number; parts: { kind: string; file: string; meshes: number; remapped: boolean }[]; clips: string[]; attackClips: string[] };
     state: string;
     pos: number[];
     hp: number;
@@ -108,6 +112,8 @@ export interface PlayApi {
     monsters: ({ id: string; state: string; hp: number; x: number; z: number } & Record<string, unknown>)[];
     /** Stage 7.2：羽風高地的怪物狀態 */
     foxStatus: string;
+    /** Stage 7.2：原野各區的骨骼動畫怪物（已交付／未交付） */
+    fieldMonsters: { zone: string; zoneName: string; monster: string; delivered: boolean; count: number; status: string }[];
     pets: { enabled: boolean; mode: string; reason: string; items: Record<ItemId, number>; count: number; equipped: number | null; followerVisible: boolean; followerDist: number };
     render: { p3: boolean; pipeline: boolean; charShadow: CharShadowMode; drawCalls: number; fps: number; contextLost: number };
   };
@@ -206,6 +212,11 @@ class StarsproutGame {
   private monsters: MonsterController[] = [];
   /** Stage 7.2：羽風高地的怪物狀態（畫面與測試顯示） */
   private foxStatus = "";
+  /** 沒有世界存檔（舊預覽）時的等級與經驗 */
+  private readonly localProgress = { level: 1, exp: 0 };
+  private expGained = 0;
+  /** Stage 7.2：原野各區的骨骼動畫怪物（已交付／未交付） */
+  private readonly fieldStatus: { zone: string; zoneName: string; monster: string; delivered: boolean; count: number; status: string }[] = [];
   private readonly combat = new PreviewCombat();
   private stats: CharacterStats = { ...FIELD_TEST.baseStats };
   private readonly rng = createRng(Number(this.params.get("seed") ?? Date.now()) >>> 0);
@@ -424,7 +435,12 @@ class StarsproutGame {
   async init(): Promise<void> {
     const scene = this.scene;
     // ---------- 角色 ----------
-    this.avatar = await NoviceAvatar.load(scene, { gender: this.gender, lod: this.lod, baseUrl: `${import.meta.env.BASE_URL}models/`, version: this.version });
+    // Stage 7.2：新版初心者（Tripo 模組化：髮型、衣服、靴子、武器分開）；檔案沒交付或 &nv72=0 → 上一版
+    const modelsUrl = `${import.meta.env.BASE_URL}models/`;
+    const useNew = this.params.get("nv72") !== "0" && (await modularAvailable(modelsUrl, this.gender, this.lod));
+    this.avatar = useNew
+      ? await NoviceAvatar.loadModular(scene, { gender: this.gender, lod: this.lod, baseUrl: modelsUrl, appearance: this.ws?.save.character.appearance ?? defaultAppearance() })
+      : await NoviceAvatar.load(scene, { gender: this.gender, lod: this.lod, baseUrl: `${import.meta.env.BASE_URL}models/`, version: this.version });
     this.avatar.setupShadow(this.charShadow, scene, this.shadows);
     const sky = scene.getMeshByName("PH_skyDome");
     if (sky) {
@@ -439,22 +455,32 @@ class StarsproutGame {
 
     // ---------- 怪物：星露草坪 6 隻星露啵啵 V3.8R ----------
     const quality = this.quality.level;
-    const registry = registerBabylonVisuals(createMonsterRegistry(), { scene, shadows: this.shadows, quality });
+    const registry = registerBabylonVisuals(createMonsterRegistry({ legacyAggressive: !this.ws }), { scene, shadows: this.shadows, quality });
     const factory = new MonsterFactory(registry);
     this.monsters = zoneSpawnPoints(ZONE01.x, ZONE01.z, ZONE01.r, FIELD_TEST.boboCount).map((p) =>
       factory.create("star_dew_bobo", { x: p.x, y: this.terrain.surface(p.x, p.z), z: p.z }, { modelId: BOBO_MODEL_IDS.v38r, animationProfileId: BOBO_PROFILE_IDS.v38r }),
     );
-    // ---------- Stage 7.2：M004 風羽狐（骨骼動畫怪物；Claude C 的 GLB 放進 public/models/monsters/m004/ 才會出現） ----------
-    // &rigfixture=1（只供自動測試）：風羽狐檔案還沒交付時，用灰色方塊的接口測試替身驗證 AI、命中與重生
-    const foxLod = this.ws ? pickModelLod(this.params) : this.lod;
-    const foxOk = await riggedAssetAvailable(import.meta.env.BASE_URL, M004_WINDFEATHER_FOX, foxLod);
-    const foxId = foxOk ? "windfeather_fox" : this.params.get("rigfixture") === "1" ? "rig_contract_fixture" : null;
-    this.foxStatus = foxOk ? `M004 風羽狐 ${foxLod === "hq" ? "HQ" : "Lite"}` : foxId ? "接口測試替身（風羽狐檔案未交付）" : "風羽狐檔案未交付（羽風高地暫時沒有怪物）";
-    if (foxId) {
-      const foxReg = registerBabylonVisuals(createMonsterRegistry(), { scene, shadows: this.shadows, quality, modelLod: foxLod });
-      const foxFactory = new MonsterFactory(foxReg);
-      const pts = zoneSpawnPoints(ZONE04.x, ZONE04.z, ZONE04.r * 0.75, ZONE04.cap ?? 4);
-      for (const p of pts) this.monsters.push(foxFactory.create(foxId, { x: p.x, y: this.terrain.surface(p.x, p.z), z: p.z }, { brain: { seed: Math.round(p.x * 31 + p.z * 17) } }));
+    // ---------- Stage 7.2：骨骼動畫怪物（M004～M007；GLB 列在 models/monsters/manifest.json 才會出現，沒交付的區域保持空的） ----------
+    // &rigfixture=1（只供自動測試）：風羽狐檔案還沒交付時，用灰色方塊的接口測試替身驗證 AI、命中與重生（只放羽風高地）
+    const rigLod = this.ws ? pickModelLod(this.params) : this.lod;
+    const rigReg = registerBabylonVisuals(createMonsterRegistry({ legacyAggressive: !this.ws }), { scene, shadows: this.shadows, quality, modelLod: rigLod });
+    const rigFactory = new MonsterFactory(rigReg);
+    for (const { zoneId, spec } of FIELD_RIGGED_SPAWNS) {
+      const zone = ZONES.find((z) => z.id === zoneId)!;
+      const ok = await riggedAssetAvailable(import.meta.env.BASE_URL, spec, rigLod);
+      const id = ok ? spec.monsterId : zoneId === "04" && this.params.get("rigfixture") === "1" ? "rig_contract_fixture" : null;
+      const name = rigReg.definition(spec.monsterId).name;
+      const status = ok ? `${spec.label} ${rigLod === "hq" ? "HQ" : "Lite"}` : id ? `接口測試替身（${name}檔案未交付）` : `${name}檔案未交付（${zone.name}暫時沒有怪物）`;
+      if (zoneId === "04") this.foxStatus = ok ? `M004 風羽狐 ${rigLod === "hq" ? "HQ" : "Lite"}` : status;
+      let count = 0;
+      if (id) {
+        const pts = zoneSpawnPoints(zone.x, zone.z, zone.r * (zone.cap === 1 ? 0 : 0.75), zone.cap ?? 1);
+        for (const p of pts) {
+          this.monsters.push(rigFactory.create(id, { x: p.x, y: this.terrain.surface(p.x, p.z), z: p.z }, { brain: { seed: Math.round(p.x * 31 + p.z * 17) } }));
+          count++;
+        }
+      }
+      this.fieldStatus.push({ zone: zoneId, zoneName: zone.name, monster: name, delivered: ok, count, status });
     }
     await Promise.all(this.monsters.map((m) => m.visual?.load() ?? Promise.resolve()));
     this.lockRing = MeshBuilder.CreateTorus("PH_lockRing", { diameter: 1.1, thickness: 0.05, tessellation: 40 }, scene);
@@ -615,7 +641,16 @@ class StarsproutGame {
           this.spawnLootMesh(d!, true);
         }
       }
-      this.hud.toast(items.length || gold ? `擊敗${i.definition.name}！掉落：${[...(gold ? [`${gold} 金幣`] : []), ...items.map((k) => ITEM_LABEL[k])].join("、")}` : `擊敗${i.definition.name}！`, 1400);
+      // Stage 7.2：經驗（怪物經驗與升級表都是測試設定）
+      let expMsg = "";
+      const exp = i.definition.experience;
+      if (exp > 0) {
+        const ups = this.ws ? this.ws.addExp(exp) : gainExp(this.localProgress, exp);
+        this.expGained += exp;
+        expMsg = ` 經驗 +${exp}`;
+        if (ups > 0) window.setTimeout(() => this.hud.toast(`升級！Lv.${this.ws ? this.ws.progress.level : this.localProgress.level}`, 1600), 1500);
+      }
+      this.hud.toast((items.length || gold ? `擊敗${i.definition.name}！掉落：${[...(gold ? [`${gold} 金幣`] : []), ...items.map((k) => ITEM_LABEL[k])].join("、")}` : `擊敗${i.definition.name}！`) + expMsg, 1400);
     } else {
       this.hud.toast(`${i.definition.name} -${r.damage}（HP ${i.currentHp}/${i.definition.maxHp}）`, 800);
     }
@@ -658,7 +693,9 @@ class StarsproutGame {
       this.lockRing.rotation.y += dt * 1.5;
     }
     this.lockRing.setEnabled(locked !== null);
-    this.hud.setBars({ hp: this.combat.hp, maxHp: this.combat.tuning.maxHp, mp: 40, maxMp: 40, exp: 0, expToNext: 100 });
+    const pg = this.ws ? this.ws.progress : { ...this.localProgress, expToNext: expToNext(this.localProgress.level) };
+    this.hud.setBars({ hp: this.combat.hp, maxHp: this.combat.tuning.maxHp, mp: 40, maxMp: 40, exp: pg.exp, expToNext: pg.expToNext });
+    this.hud.setLevel(pg.level);
   }
 
   // ---------------- 掉落物 ----------------
@@ -1124,6 +1161,7 @@ class StarsproutGame {
           gender: self.gender,
           lod: self.lod,
           file: self.avatar.file,
+          avatarModel: { modular: self.avatar.parts.length > 0, weapon: self.avatar.weapon, bones: self.avatar.bones, triangles: self.avatar.triangles, parts: self.avatar.parts.map((x) => ({ kind: x.kind, file: x.file, meshes: x.meshes.length, remapped: x.remapped })), clips: [...self.avatar.groups.keys()], attackClips: [...self.avatar.attackClips.keys()] },
           state: self.avatar.state,
           pos: [self.pos.x, self.pos.y, self.pos.z],
           hp: self.combat.hp,
@@ -1144,6 +1182,9 @@ class StarsproutGame {
             return {
               id: m.instance.instanceId,
               kind: m.instance.definition.monsterId,
+              level: m.instance.definition.level,
+              aggressive: isAggressive(m.instance.definition),
+              provoked: m.instance.provoked,
               state: m.instance.sm.state,
               mode: m.brain?.mode ?? null,
               hp: m.instance.currentHp,
@@ -1156,6 +1197,7 @@ class StarsproutGame {
             };
           }),
           foxStatus: self.foxStatus,
+          fieldMonsters: self.fieldStatus.map((x) => ({ ...x })),
           pets: {
             enabled: p.enabled,
             mode: p.mode,
@@ -1235,6 +1277,10 @@ class StarsproutGame {
                 map: "starsprout",
                 gold: ws.save.wallet.balance,
                 deaths: ws.save.character.deaths,
+                level: ws.progress.level,
+                exp: ws.progress.exp,
+                expGained: self.expGained,
+                appearance: { ...ws.save.character.appearance },
                 hp: self.combat.hp,
                 down: self.combat.isDown,
                 deathClip: self.avatar.hasDeathClip,

@@ -16,6 +16,7 @@ import { createServerGuildService } from "../economy/serverGuildService.ts";
 import type { GuildMarketService } from "../maps/village/guildMarket.ts";
 import { credit } from "../economy/wallet.ts";
 import { claimLoot } from "../core/gameSave.ts";
+import { expToNext, gainExp } from "../core/progression.ts";
 
 export type ConfigMode = "test" | "official";
 
@@ -85,6 +86,19 @@ export class WorldSession {
   persistSoon(): void {
     if (this.saveTimer !== null) return;
     this.saveTimer = window.setTimeout(() => this.persist(), 400);
+  }
+
+  /** 等級與經驗（升級表為測試設定） */
+  get progress(): { level: number; exp: number; expToNext: number } {
+    const c = this.save.character;
+    return { level: c.level, exp: c.exp, expToNext: expToNext(c.level) };
+  }
+
+  /** 擊敗怪物得到經驗；回傳升了幾級 */
+  addExp(amount: number): number {
+    const ups = gainExp(this.save.character, amount);
+    this.persistSoon();
+    return ups;
   }
 
   /** 撿起金幣：同一個掉落物 uid 只會入帳一次（重複領取 → false） */

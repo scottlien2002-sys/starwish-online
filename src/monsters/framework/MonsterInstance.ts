@@ -64,6 +64,8 @@ export class MonsterInstance {
   /** 最近一次受擊反應與序號（MonsterController 據此通知視覺：後退幅度、受擊表情） */
   lastHitReaction: HitReaction | null = null;
   hitReactionSeq = 0;
+  /** 被玩家打過（被動怪物據此反擊）；回到出生點或重生後清除 */
+  provoked = false;
 
   constructor(instanceId: string, definition: MonsterDefinition, timings: MonsterAnimTimings, spawn: Vec3) {
     this.instanceId = instanceId;
@@ -153,6 +155,7 @@ export class MonsterInstance {
     if (!this.isAlive) return { applied: false, killed: false, reason: "死亡或重生中不受傷害" };
     const dmg = Math.max(0, Math.floor(amount));
     const wasAttacking = this.sm.state === "attack";
+    this.provoked = true;
     this.currentHp = Math.max(0, this.currentHp - dmg);
     if (this.currentHp <= 0) {
       // 死亡優先：直接進入死亡（不經過受擊），未命中的攻擊一併取消
@@ -198,6 +201,7 @@ export class MonsterInstance {
     this.currentPosition.y = this.spawnPosition.y;
     this.currentPosition.z = this.spawnPosition.z;
     this.currentTarget = null;
+    this.provoked = false;
     this.lastAttackTime = Number.NEGATIVE_INFINITY;
     this.attackId = 0;
     this.attackSettled = true;
@@ -215,6 +219,7 @@ export class MonsterInstance {
     this.currentPosition.y = this.spawnPosition.y;
     this.currentPosition.z = this.spawnPosition.z;
     this.currentTarget = null;
+    this.provoked = false;
     this.lastAttackTime = Number.NEGATIVE_INFINITY;
     this.attackSettled = true;
     this.resistance.reset();

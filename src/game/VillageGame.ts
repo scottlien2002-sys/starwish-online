@@ -16,7 +16,7 @@ import { artCameraDistance } from "../maps/village/artCamera.ts";
 import { villageInitialCamera } from "../maps/village/spawnCamera.ts";
 import { FIELD_CAMP_ARRIVAL } from "../maps/village/mapLinks.ts";
 import type { VillageInteract } from "../maps/village/VillageInteract.ts";
-import { NoviceAvatar, type CharShadowMode, type NoviceLod } from "../characters/NoviceAvatar.ts";
+import { modularAvailable, NoviceAvatar, type CharShadowMode, type NoviceLod } from "../characters/NoviceAvatar.ts";
 import { PetFollower } from "../pets/PetFollower.ts";
 import { isSoul } from "../pets/petSystem.ts";
 import { WorldSession } from "./worldSession.ts";
@@ -198,7 +198,12 @@ class VillageGame {
   async init(): Promise<void> {
     const scene = this.scene;
     const w = this.w;
-    this.avatar = await NoviceAvatar.load(scene, { gender: w.gender, lod: this.lod, baseUrl: `${import.meta.env.BASE_URL}models/`, version: NOVICE_VERSION });
+    // Stage 7.2：新版初心者（Tripo 模組化：髮型、衣服、靴子、武器分開）；檔案沒交付或 &nv72=0 → 上一版
+    const modelsUrl = `${import.meta.env.BASE_URL}models/`;
+    const useNew = this.params.get("nv72") !== "0" && (await modularAvailable(modelsUrl, w.gender, this.lod));
+    this.avatar = useNew
+      ? await NoviceAvatar.loadModular(scene, { gender: w.gender, lod: this.lod, baseUrl: modelsUrl, appearance: w.save.character.appearance })
+      : await NoviceAvatar.load(scene, { gender: w.gender, lod: this.lod, baseUrl: `${import.meta.env.BASE_URL}models/`, version: NOVICE_VERSION });
     this.avatar.setupShadow(this.charShadow, scene, this.shadows);
     const sky = scene.getMeshByName("PH_skyDome");
     if (sky) {
@@ -333,7 +338,8 @@ class VillageGame {
     if (this.fpsTimer >= 0.5) {
       this.fpsTimer = 0;
       this.hud.setFps(this.perf.avgFps(2));
-      this.hud.setBars({ hp: this.hp() ?? 100, maxHp: combatTuningFromStats(this.w.pets.characterStats({ ...FIELD_TEST.baseStats })).maxHp, mp: 40, maxMp: 40, exp: 0, expToNext: 100 });
+      this.hud.setBars({ hp: this.hp() ?? 100, maxHp: combatTuningFromStats(this.w.pets.characterStats({ ...FIELD_TEST.baseStats })).maxHp, mp: 40, maxMp: 40, exp: this.w.progress.exp, expToNext: this.w.progress.expToNext });
+      this.hud.setLevel(this.w.progress.level);
       this.panel.refresh();
     }
   };
@@ -347,6 +353,7 @@ class VillageGame {
         map: "village",
         gender: self.w.gender,
         file: self.avatar.file,
+        avatarModel: { modular: self.avatar.parts.length > 0, weapon: self.avatar.weapon, bones: self.avatar.bones, triangles: self.avatar.triangles, parts: self.avatar.parts.map((x) => ({ kind: x.kind, file: x.file, meshes: x.meshes.length, remapped: x.remapped })), clips: [...self.avatar.groups.keys()], attackClips: [...self.avatar.attackClips.keys()] },
         state: self.avatar.state,
         pos: [self.pos.x, self.pos.y, self.pos.z],
         gold: self.w.gold,
@@ -359,6 +366,9 @@ class VillageGame {
         followerSize: self.follower.size,
         ledger: self.w.save.wallet.ledger.slice(-20),
         deaths: self.w.save.character.deaths,
+        level: self.w.progress.level,
+        exp: self.w.progress.exp,
+        appearance: { ...self.w.save.character.appearance },
         art: self.artStatus,
         interact: self.interact?.state() ?? null,
         portal: { armed: self.portal.isArmed, fired: self.portal.hasFired, dist: self.portal.distance(self.pos.x, self.pos.z), triggerR: self.portal.spec.triggerR },
