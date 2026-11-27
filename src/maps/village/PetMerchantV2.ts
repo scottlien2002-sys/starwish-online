@@ -1,6 +1,7 @@
 import { type AbstractMesh, type AnimationGroup, type Camera, Color3, type Material, type Node, type Scene, type ShadowGenerator, StandardMaterial, type Texture, TransformNode, Vector3 } from "@babylonjs/core";
 import { PetMerchantPatrolClock, petMerchantPose, type PetMerchantPose } from "./petMerchant.ts";
 import { copyNormalMap, type NpcLodOptions, skinnedBounds } from "./NpcP3.ts";
+import { applyTripoFill } from "./tripoFill.ts";
 import { lodLevel } from "./villagePerf.ts";
 
 /**
@@ -47,6 +48,7 @@ function toStandard(scene: Scene, m: Material, cache: Map<Material, StandardMate
     s.emissiveColor = new Color3(0.05, 0.05, 0.06);
   }
   copyNormalMap(m, s);
+  if (m.name.includes("67")) applyTripoFill(s, tex);
   cache.set(m, s);
   return s;
 }

@@ -3,6 +3,7 @@ import { VILLAGE_SOUTH_PORTAL } from "../../game/worldPortals.ts";
 import { villageInitialCamera } from "./spawnCamera.ts";
 import { Color3, DirectionalLight, type Engine, HemisphericLight, Scene, ShadowGenerator, Vector3 } from "@babylonjs/core";
 import { shotCam, shotTargets } from "./shotCam.ts";
+import { TRIPO_FILL } from "./tripoFill.ts";
 import { type Foliage66, addDetail66, addGrass66, applyLighting66, buildFoliage66, upgradeSky66 } from "./villageArt66.ts";
 import { ENV_SECTORS } from "./EnvP3.ts";
 import { VILLAGE_LOOK, villageProps } from "./villageMaterials.ts";
@@ -277,6 +278,9 @@ class VillagePage {
       // 正式美術有自己的發光物（噴泉、傳送門、彩繪玻璃）：用材質自發光，不開全畫面發光層
       this.fullStatus = "loading";
       // Stage 6.6 全村美術升級（材質細節、草地、光影、天空、草叢小花）；&look=65 可改回 Stage 6.5 外觀（比較用）
+      // Stage 6.7：Tripo NPC 背光補光（&npcfill=0～1；預設 0.3）
+      const fill = Number(params.get("npcfill"));
+      if (params.has("npcfill") && Number.isFinite(fill)) TRIPO_FILL.value = Math.min(1, Math.max(0, fill));
       this.look66 = params.get("look") !== "65";
       if (this.look66) {
         const texBase = `${import.meta.env.BASE_URL}models/village-p3/tex/`;
@@ -1130,7 +1134,7 @@ class VillagePage {
       /** Stage 6.7：洛恩最近一格的姿勢（anim、walkRate＝Walk 播放速度＝實際速度÷0.6） */
       merchantPose: () => this.interact?.merchantPose ?? null,
       /** Stage 6.7：NPC 模型組、佈告欄、洛恩統計 */
-      npc67: () => ({ set: this.full?.npcSet ?? null, board: (this.full?.board ?? []).map((m) => ({ name: m.name, tris: m.getTotalIndices() / 3, pickable: m.isPickable })), merchant: this.full?.merchant?.stats ?? null }),
+      npc67: () => ({ set: this.full?.npcSet ?? null, fill: TRIPO_FILL.value, board: (this.full?.board ?? []).map((m) => ({ name: m.name, tris: m.getTotalIndices() / 3, pickable: m.isPickable })), merchant: this.full?.merchant?.stats ?? null }),
       /** Stage 6.3：效能設定、陰影投射物、角色 LOD 狀態、目前畫面的網格分類（CI 與實機都可呼叫） */
       perfState: () => ({
         cfg: this.perfCfg,

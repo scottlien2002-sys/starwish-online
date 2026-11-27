@@ -7,6 +7,7 @@ import { setupKnightP3 } from "./KnightP3.ts";
 import { setupMageP3 } from "./MageP3.ts";
 import { copyNormalMap, type Loaded as NpcLoaded, NPC67, NPC_PROFILES, type NpcLodOptions, setupVillageNpcs, type VillageNpcs } from "./NpcP3.ts";
 import { BOARD } from "./layout.ts";
+import { applyTripoFill } from "./tripoFill.ts";
 import { type PetMerchantV2, setupPetMerchantV2 } from "./PetMerchantV2.ts";
 import { setupPlazaP3 } from "./PlazaP3.ts";
 import { setupPortalsP3 } from "./PortalP3.ts";
@@ -163,6 +164,7 @@ export async function loadVillageArtFull(scene: Scene, lite: boolean, shadows: S
           sm.specularPower = 16;
           sm.emissiveColor = new Color3(0.05, 0.05, 0.05);
           copyNormalMap(src, sm);
+          applyTripoFill(sm, sm.diffuseTexture as Texture | null);
           mats.set(src, sm);
         }
         m.material = sm;

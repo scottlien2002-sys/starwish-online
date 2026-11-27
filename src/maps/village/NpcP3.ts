@@ -1,4 +1,5 @@
 import { type AbstractMesh, type AnimationGroup, type Camera, Color3, type Material, type Mesh, type Node, type Scene, type ShadowGenerator, StandardMaterial, type Texture, TransformNode } from "@babylonjs/core";
+import { applyTripoFill } from "./tripoFill.ts";
 import { lodLevel } from "./villagePerf.ts";
 import { NPC_SPOTS, type NpcSpot } from "./layout.ts";
 
@@ -78,9 +79,11 @@ export function toStandardNpc(scene: Scene, m: Material, cache: Map<Material, St
   s.specularPower = 18;
   s.emissiveColor = new Color3(0.06, 0.06, 0.07);
   copyNormalMap(m, s);
+  if (m.name.includes("67")) applyTripoFill(s, tex);
   cache.set(m, s);
   return s;
 }
+
 
 /** Stage 6.7：Tripo 模型的法線貼圖（只有 HQ 版有）沿用到 StandardMaterial（與村莊同一套光照） */
 export function copyNormalMap(m: Material, s: StandardMaterial): void {
