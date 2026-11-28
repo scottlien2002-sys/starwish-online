@@ -1,0 +1,66 @@
+{
+  "note": "Stage 8.5 技能位移測試設定（非正式數值）",
+  "leapSlamOpen": {
+    "start": {
+      "x": -56,
+      "z": -64,
+      "yaw": -3.142,
+      "stop": 1.5999999999999979
+    },
+    "end": {
+      "x": -56,
+      "z": -65.2
+    },
+    "dist": 1.2,
+    "clipForward": 1.2,
+    "moveMs": 817,
+    "midDist": 0.35,
+    "self": {
+      "x": -56,
+      "z": -65.17057833010054,
+      "yaw": -3.142,
+      "anim": 0
+    },
+    "observer": {
+      "x": -56,
+      "z": -65.2
+    }
+  },
+  "leapSlamBlocked": {
+    "start": {
+      "x": -59.18,
+      "z": -60.82,
+      "yaw": -1.178,
+      "stop": 0.6500000000000018
+    },
+    "end": {
+      "x": -59.8,
+      "z": -60.56
+    },
+    "dist": 0.672,
+    "expectedStop": 0.65,
+    "blockedCounter": 1
+  },
+  "inputDuringSkill": {
+    "stepsDuringSkill": 89,
+    "dist": 0.6,
+    "speedViolations": 0
+  },
+  "kinds": {
+    "triple_slash": 0.55,
+    "charge_burst": 0.6,
+    "whirlwind": 0.25
+  },
+  "noJump": {
+    "start": {
+      "x": -59.18,
+      "z": -60.82,
+      "yaw": -1.178,
+      "stop": 0.6500000000000018
+    },
+    "after": {
+      "x": -63.72,
+      "z": -57.73
+    }
+  }
+}
