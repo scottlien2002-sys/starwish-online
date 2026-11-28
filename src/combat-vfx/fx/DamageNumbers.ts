@@ -48,10 +48,23 @@ export class DamageNumbers {
     this.layer = document.createElement("div");
     this.layer.className = "cvfx-dmg-layer";
     parent.appendChild(this.layer);
+    this.ensure(max);
+  }
+
+  /** 先建好 DOM 元素（Stage 3.1：第一次大量跳字時不在戰鬥中建立元素） */
+  private ensure(n: number): void {
+    while (this.items.length < n) {
+      const el = document.createElement("div");
+      el.className = "cvfx-dmg";
+      el.style.display = "none";
+      this.layer.appendChild(el);
+      this.items.push({ el, pos: new Vector3(), t: 0, life: 1, dx: 0, lift: 0, style: "normal", active: false });
+    }
   }
 
   setMax(n: number): void {
     this.max = n;
+    this.ensure(n);
   }
 
   show(world: Vector3, value: number | string, style: DamageStyle = "normal"): void {
