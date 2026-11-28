@@ -68,6 +68,7 @@ for (const name of browsers) {
             }
           }
           if (r.hitFxCount) check(`${tag}：命中特效出現在目標命中點（≤ 5 cm）`, r.hitFxErr <= 0.05, { n: r.hitFxCount, err: +r.hitFxErr.toFixed(3) });
+          if (r.weaponFxCount) check(`${tag}：武器上的特效從武器發射點產生（≤ 5 cm）`, r.weaponFxErr <= 0.05, { n: r.weaponFxCount, err: +r.weaponFxErr.toFixed(3) });
           if (r.hits.length) {
             const bad = r.hits.filter((h) => Math.abs(h.wall - h.expect) > FRAME + 1e-6 || Math.abs(h.animT - h.mark) > rate * FRAME + 1e-6);
             check(`${tag}：命中特效時間＝標記／攻速，且與動作同一格`, bad.length === 0, r.hits.map((h) => ({ mark: +h.mark.toFixed(3), wall: +h.wall.toFixed(3), expect: +h.expect.toFixed(3), animT: +h.animT.toFixed(3), tip: +h.tipToTarget.toFixed(2) })));

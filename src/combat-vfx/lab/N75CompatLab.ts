@@ -153,14 +153,18 @@ export async function startN75CompatLab(canvas: HTMLCanvasElement, hudRoot: HTML
     const inside: { t: number; axis: number; y: number }[] = [];
     let trailFrames = 0;
     let prevTip: Vector3 | null = null;
-    const spawns: { key: string; at: Vector3; t: number }[] = [];
-    fx.vfx.onSpawn = (key, at) => spawns.push({ key, at: at.clone(), t: wall });
-    const HIT_KEYS = ["hitFlash", "hitSpark", "hitRing", "critBurst", "boltImpact"];
+    // 特效生成位置：fromHit＝遊戲呼叫 fx.hit 產生的命中特效；weapon＝技能定義中掛在武器上的特效（到法杖頭／武器發射點的距離）
+    const spawns: { key: string; at: Vector3; t: number; fromHit: boolean; toFocus: number }[] = [];
+    let inHit = false;
+    fx.vfx.onSpawn = (key, at) => spawns.push({ key, at: at.clone(), t: wall, fromHit: inHit, toFocus: Vector3.Distance(at, abs(weapon.focus)) });
+    const weaponKeys = new Set(skill.events.filter((e) => e.kind === "fx" && e.anchor === "weapon").map((e) => (e as { fx: string }).fx));
     const h = fx.playSkill("me", skill, clip, rate, {
       // 模擬遊戲：命中時在目標命中點呼叫 fx.hit（不給傷害數字）
       onHit: (_hit, t) => {
         pending.push({ mark: t, wall });
+        inHit = true;
         fx.hit(targetPoint, ["hitSpark", "hitFlash"], { owner: "self" });
+        inHit = false;
       },
       onProjectile: (ev, vis, t) => {
         const from = vis ? vis.pos.clone() : abs(weapon.focus);
@@ -205,9 +209,11 @@ export async function startN75CompatLab(canvas: HTMLCanvasElement, hudRoot: HTML
     g.stop();
     fx.vfx.onSpawn = null;
     // 命中類特效到目標命中點（或其地面投影）的最大距離
-    const hitFx = spawns.filter((s) => HIT_KEYS.includes(s.key));
+    const hitFx = spawns.filter((s) => s.fromHit);
     const hitFxErr = hitFx.reduce((m, s) => Math.max(m, Math.min(Vector3.Distance(s.at, targetPoint), Vector3.Distance(s.at, new Vector3(targetPoint.x, 0, targetPoint.z)))), 0);
-    return { skillId, rate, duration: dur, wall, hitFxCount: hitFx.length, hitFxErr, trailFrames, trailErrMax, tipJumpMax, chordMax, insideFrames, inside, hits, projectiles };
+    const wfx = spawns.filter((s) => !s.fromHit && weaponKeys.has(s.key));
+    const weaponFxErr = wfx.reduce((m, s) => Math.max(m, s.toFocus), 0);
+    return { skillId, rate, duration: dur, wall, hitFxCount: hitFx.length, hitFxErr, weaponFxCount: wfx.length, weaponFxErr, trailFrames, trailErrMax, tipJumpMax, chordMax, insideFrames, inside, hits, projectiles };
   };
 
   /** A 的普通攻擊／雙手武器動作：只播 A 的動作＋C 的拖尾（basicSwing），量測刀尖是否穿進身體、左手與握把距離 */

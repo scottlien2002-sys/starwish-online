@@ -141,6 +141,7 @@ export class CombatFx {
   remoteFrustumMargin = 2.5;
   private readonly actors = new Map<string, ActorState>();
   private readonly playing: Playing[] = [];
+  private readonly deferred: { p: Playing; actorId: string; ev: SkillEvent; t: number; end?: number }[] = [];
   private readonly frustum: Plane[] = [];
   private frustumFrame = -1;
   private disposed = false;
@@ -471,7 +472,12 @@ export class CombatFx {
         if (st?.trail) st.trail.stop();
         continue;
       }
-      for (const e of p.tl.advance(dt)) this.runEvent(p, st, e.event, e.t, e.end);
+      // 命中 hook 立即呼叫（遊戲邏輯）；特效／投射物／拖尾／音效延到 updateVisuals：那時角色已套上這一格的姿勢，
+      // 掛在武器、角色前方的特效才會在這一格的正確位置產生（不是上一格）
+      for (const e of p.tl.advance(dt)) {
+        if (e.event.kind === "hit") this.runEvent(p, st, e.event, e.t, e.end);
+        else this.deferred.push({ p, actorId: p.actorId, ev: e.event, t: e.t, end: e.end });
+      }
       if (p.tl.done) {
         this.playing.splice(i, 1);
         st.trail?.stop();
@@ -483,6 +489,16 @@ export class CombatFx {
   /** 第二段：武器拖尾（強制更新武器節點的世界座標）、特效、傷害數字、畫面閃光；回傳鏡頭震動位移 */
   updateVisuals(dt: number): Vector3 {
     if (this.disposed) return Vector3.ZeroReadOnly as Vector3;
+    if (this.deferred.length) {
+      const list = this.deferred.splice(0);
+      for (const d of list) {
+        const st = this.actors.get(d.actorId);
+        if (!st || d.p.cancelled) continue;
+        for (const n of [st.actor.weaponFocus, st.actor.weaponTip, st.actor.weaponBase]) if (n) syncWorld(n);
+        syncWorld(st.actor.root);
+        this.runEvent(d.p, st, d.ev, d.t, d.end);
+      }
+    }
     for (const st of this.actors.values()) {
       if (st.trail && st.trailEnd >= 0 && this.now >= st.trailEnd) {
         st.trail.stop();
@@ -580,6 +596,7 @@ export class CombatFx {
     if (this.disposed) return;
     this.disposed = true;
     this.playing.length = 0;
+    this.deferred.length = 0;
     for (const st of this.actors.values()) st.trail?.dispose();
     this.actors.clear();
     this.vfx.dispose();
