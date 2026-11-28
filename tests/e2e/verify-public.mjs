@@ -145,6 +145,22 @@ for (const [name, vp] of [["webkit", { width: 393, height: 852 }], ["chromium", 
       console.log(`${ok74 ? "✓" : "✗"} Stage 7.4：共用資產 ${p74.remap} 個（共用資產）｜分級 ${JSON.stringify(p74.detail)}｜報告 Draw Calls ${p74.s?.drawCalls.avg}、三角面 ${p74.s?.triangles.avgK}k、貼圖約 ${p74.s?.memory.textureMB} MB（GPU 貼圖 ${p74.s?.memory.gpuTextures}／物件 ${p74.s?.memory.textures}）`);
       console.log(`  三角面最多：${JSON.stringify(p74.s?.heavy?.meshes?.slice(0, 8))}`);
       console.log(`  貼圖最大：${JSON.stringify(p74.s?.heavy?.textures?.slice(0, 8))}`);
+      // Stage 7.5：新版男性初心者（這一段在男性、iPhone 直向尺寸 WebKit／橫向 Chromium 各跑一次）
+      const a75 = await page.evaluate(() => { const i = window.__starwishPlay.info(); return { file: i.file, am: i.avatarModel }; });
+      const ok75 = a75.am?.version === "n75" && /novice_n75_male_/.test(a75.file) && a75.am.allClips.length >= 27 && a75.am.sockets.R && a75.am.sockets.L;
+      if (!ok75) fails++;
+      console.log(`${ok75 ? "✓" : "✗"} Stage 7.5：男性新版初心者 ${a75.file}｜三角面 ${a75.am?.triangles}、骨骼 ${a75.am?.bones}、動作 ${a75.am?.allClips?.length}｜掛點 ${JSON.stringify(a75.am?.sockets)}｜次級動態 ${a75.am?.secondary}`);
+      const wt = await page.evaluate(() => window.__starwishPlay.weaponTest("sword", "R"));
+      if (!wt.attached) fails++;
+      console.log(`${wt.attached ? "✓" : "✗"} Stage 7.5：右手掛短劍（掛點離手骨 ${wt.dist?.toFixed(3)} m）`);
+      await page.waitForTimeout(800);
+      await page.screenshot({ path: `${dir}/9_n75_sword_idle.png` });
+      for (const [clip, at] of [["Attack_2H_Smash", 330], ["Cast_Heal", 500], ["Block", 380]]) {
+        await page.evaluate((c) => window.__starwishPlay.previewClip(c), clip);
+        await page.waitForTimeout(at);
+        await page.screenshot({ path: `${dir}/9_n75_${clip}.png` });
+        await page.waitForTimeout(900);
+      }
     } catch (e) {
       console.log(`截圖流程失敗：${e.message}`);
     }
