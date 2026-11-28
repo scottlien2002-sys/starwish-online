@@ -39,7 +39,7 @@ import {
   WALK_SPEED,
   ZONES,
 } from "./layout.ts";
-import { COLLIDERS, resolveMove, simulateRoute, WalkGrid, type RouteSimResult } from "./terrain.ts";
+import { COLLIDERS, groundHeight, resolveMove, simulateRoute, WalkGrid, type RouteSimResult } from "./terrain.ts";
 import { JunkyardWorld, type JyTier } from "./JunkyardWorld.ts";
 import { STREAM_CELLS } from "./scatter.ts";
 
@@ -118,6 +118,10 @@ class JunkyardPage {
   private topCam: FreeCamera | null = null;
   private readonly loadMs: number;
   private contextLost = 0;
+  /** 截圖用：鏡頭停在指定位置（不受距離上限與跟隨影響），移動或 shotRelease 後恢復 */
+  private shotHold = false;
+  private lmReport: import("./JunkyardLandmarks.ts").LandmarkLoadReport | null = null;
+  private lmNodes: Map<string, import("@babylonjs/core").TransformNode> | null = null;
   private pauseFlag = false;
   private reportBox!: HTMLTextAreaElement;
   private readonly t0 = performance.now();
@@ -151,13 +155,15 @@ class JunkyardPage {
     scene.fogColor = new Color3(0.78, 0.86, 0.95);
     scene.clearColor = new Color4(0.62, 0.8, 0.98, 1);
 
+    // V3 光影：天光略降、陽光略強偏暖 → 受光面與背光面對比更明顯（立體感）；地面反光偏暖。&jylight=v2 用 V2 數值對照
+    const v2Light = params.get("jylight") === "v2";
     const hemi = new HemisphericLight("jy_sky", new Vector3(0.2, 1, 0.1), scene);
-    hemi.intensity = 0.78;
-    hemi.diffuse = new Color3(1, 0.98, 1);
-    hemi.groundColor = new Color3(0.58, 0.55, 0.5);
+    hemi.intensity = v2Light ? 0.78 : 0.7;
+    hemi.diffuse = v2Light ? new Color3(1, 0.98, 1) : new Color3(0.94, 0.97, 1.04);
+    hemi.groundColor = v2Light ? new Color3(0.58, 0.55, 0.5) : new Color3(0.62, 0.55, 0.47);
     this.sun = new DirectionalLight("jy_sun", new Vector3(-0.5, -1, 0.45).normalize(), scene);
-    this.sun.intensity = 0.82;
-    this.sun.diffuse = new Color3(1, 0.94, 0.84);
+    this.sun.intensity = v2Light ? 0.82 : 0.92;
+    this.sun.diffuse = v2Light ? new Color3(1, 0.94, 0.84) : new Color3(1, 0.92, 0.79);
     this.sun.autoUpdateExtends = false;
     const box = this.tier === "high" ? 30 : 22;
     this.sun.orthoLeft = -box;
@@ -189,6 +195,16 @@ class JunkyardPage {
     this.render = setupRendering(scene, this.camera.camera, this.quality, { hdr: preset.hdr });
     if (this.render.glow) this.render.glow.isEnabled = false;
     this.world.updateStreaming(this.pos.x, this.pos.z);
+    // V3：大型地標 GLB（清單裡有檔案才載入；沒有時維持程序化地標）
+    void import("./JunkyardLandmarks.ts")
+      .then((m) => m.loadLandmarks(this.world, { baseUrl: `${import.meta.env.BASE_URL}models/junkyard/`, lite: this.lite }).then((r) => ({ r, nodes: m.LANDMARK_NODES })))
+      .then(({ r, nodes }) => {
+        this.lmReport = r;
+        this.lmNodes = nodes;
+      })
+      .catch((e) => {
+        this.lmReport = { manifest: [], loaded: [], failed: [{ file: "*", error: String(e) }], hidden: 0 };
+      });
 
     if (params.get("char") !== "simple") {
       this.charStatus = "loading";
@@ -318,7 +334,7 @@ class JunkyardPage {
       this.player.update(dt, speed01);
     }
     const cam = this.input.consumeCamera();
-    if (!this.topCam) {
+    if (!this.topCam && !this.shotHold) {
       if (smp && !smp.done && smp.kind === "walk") {
         const c = this.camera.camera;
         let da = this.alphaBehind(this.yaw) - c.alpha;
@@ -689,6 +705,25 @@ class JunkyardPage {
       },
       setSpawns: (on: boolean) => this.setSpawns(on),
       setTopView: (on: boolean) => this.setTopView(on),
+      /** V3：截圖用鏡頭（角色站在 x,z 面向 yaw；鏡頭在角色後方 radius 公尺、俯角 beta） */
+      shot: (o: { x: number; z: number; yaw: number; beta: number; radius: number }) => {
+        this.teleport(o.x, o.z, o.yaw);
+        this.camera.snap(this.pos, this.alphaBehind(o.yaw), o.beta, o.radius);
+        this.shotHold = true;
+      },
+      shotRelease: () => {
+        this.shotHold = false;
+      },
+      ground: (x: number, z: number) => groundHeight(x, z),
+      /** V3：地標 GLB 載入結果與每個擺放的世界包圍盒 */
+      landmarks: () => {
+        const boxes: Record<string, { min: number[]; max: number[] }> = {};
+        for (const [k, n] of this.lmNodes ?? []) {
+          const b = n.getHierarchyBoundingVectors(true);
+          boxes[k] = { min: [b.min.x, b.min.y, b.min.z], max: [b.max.x, b.max.y, b.max.z] };
+        }
+        return { report: this.lmReport, boxes, procHidden: [...this.world.procParts.entries()].map(([k, ms]) => [k, ms.filter((m) => m.isEnabled()).length, ms.length]) };
+      },
       portal: () => ({ armed: this.portal.isArmed, fired: this.portal.hasFired, log: this.portalLog.slice(), spec: JUNKYARD_ENTRY_PORTAL, links: JUNKYARD_LINKS }),
       charStats: () => this.char?.stats() ?? null,
       report: () => this.reportText(),

@@ -1,0 +1,77 @@
+name: Blender — Junkyard V3 landmarks (Tripo raw → HQ / Lite GLB)
+
+# 星廢垃圾場 V3（Claude B）：使用者交付的 Tripo 地標原檔（art/junkyard-lm/raw/*.glb，原檔不修改）
+# → 依 src/maps/junkyard/landmarkSlots.ts 的預算減面、縮小貼圖、輸出 HQ／Lite GLB。
+# raw 是空的時候跑自我測試（高面數球＋3000² 貼圖），確認流程可用。
+# 只在 dev/junkyard-v3 執行；不部署。結果推到 art-junkyard-lm 分支（一般 push，不 force）。
+on:
+  workflow_dispatch:
+  push:
+    branches: ["dev/junkyard-v3"]
+    paths:
+      - "art/junkyard-lm/**"
+      - "src/maps/junkyard/landmarkSlots.ts"
+      - ".github/workflows/blender-junkyard-lm.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: blender-junkyard-lm
+  cancel-in-progress: false
+
+env:
+  BLENDER_VERSION: "4.2.3"
+  BLENDER_SERIES: "4.2"
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Budgets from landmarkSlots.ts
+        run: node --experimental-strip-types tools/junkyard-lm-budgets.ts > /tmp/budgets.json && cat /tmp/budgets.json | head -40
+      - name: System libraries for Blender (headless)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libsm6 libxkbcommon0 >/dev/null
+      - name: Download Blender ${{ env.BLENDER_VERSION }} (official, free)
+        run: |
+          URL="https://download.blender.org/release/Blender${BLENDER_SERIES}/blender-${BLENDER_VERSION}-linux-x64.tar.xz"
+          curl -fsSL --retry 5 --retry-delay 10 "$URL" -o /tmp/blender.tar.xz || curl -fsSL --retry 5 "https://mirrors.ocf.berkeley.edu/blender/release/Blender${BLENDER_SERIES}/blender-${BLENDER_VERSION}-linux-x64.tar.xz" -o /tmp/blender.tar.xz
+          mkdir -p /opt/blender && tar -xf /tmp/blender.tar.xz -C /opt/blender --strip-components=1
+      - name: Process (or self-test when raw/ is empty)
+        run: |
+          mkdir -p out
+          if ls art/junkyard-lm/raw/*.glb >/dev/null 2>&1; then MODE=""; else MODE="--selftest"; echo "raw/ 沒有 GLB → 自我測試"; fi
+          /opt/blender/blender -b --factory-startup -noaudio -P art/junkyard-lm/process.py -- art/junkyard-lm/raw out /tmp/budgets.json $MODE 2>&1 | tee out/process.log | grep -E "JYLM|Error|Traceback" || true
+          ls -la out
+          python3 - <<'PY'
+          import json, sys
+          r = json.load(open("out/report.json"))
+          print(json.dumps(r, ensure_ascii=False, indent=1)[:3000])
+          bad = [f for f in r["files"] if f["tris"] > f["budget"]]
+          if r["errors"] or bad or not r["files"]:
+              print("FAILED", r["errors"], bad); sys.exit(1)
+          PY
+      - name: Push results to art-junkyard-lm (normal push, no force)
+        if: always()
+        run: |
+          echo "{\"commit\":\"${GITHUB_SHA}\",\"blender\":\"${BLENDER_VERSION}\",\"builtAt\":\"$(date -u +%FT%TZ)\"}" > out/build.json
+          REPO="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads "$REPO" art-junkyard-lm >/dev/null 2>&1; then
+            git clone -q --depth 1 --branch art-junkyard-lm "$REPO" /tmp/artlm
+          else
+            mkdir -p /tmp/artlm && cd /tmp/artlm && git init -q -b art-junkyard-lm && git remote add origin "$REPO" && cd -
+          fi
+          rsync -a --delete --exclude .git out/ /tmp/artlm/
+          cd /tmp/artlm
+          git add -A
+          git commit -qm "Junkyard landmarks ${GITHUB_SHA::7}" || echo "no changes"
+          git push -q origin HEAD:art-junkyard-lm

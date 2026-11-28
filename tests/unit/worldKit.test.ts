@@ -53,3 +53,12 @@ test("碰撞空間格：垃圾場推開結果與逐一檢查完全相同", async
     assert.ok(Math.abs(a.x - b.x) < 1e-9 && Math.abs(a.z - b.z) < 1e-9 && a.hit === b.hit, `(${x},${z})`);
   }
 });
+
+test("接觸陰影：物件邊緣變暗、遠處不變、多個物件疊加但有下限", async () => {
+  const { makeContactAO } = await import("../../src/world/contactAO.ts");
+  const ao = makeContactAO([{ x: 0, z: 0, r: 2 }, { x: 3, z: 0, r: 1 }], { strength: 0.35, width: 1.5 });
+  assert.ok(Math.abs(ao(50, 50) - 1) < 1e-9);
+  assert.ok(ao(-2.1, 0) < 0.7);
+  assert.ok(ao(-4, 0) > ao(-2.5, 0));
+  assert.ok(ao(1.8, 0) >= 0.45);
+});

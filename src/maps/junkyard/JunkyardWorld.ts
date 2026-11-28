@@ -47,7 +47,9 @@ import {
   STEAM_VENTS,
   type Vec2,
 } from "./layout.ts";
-import { groundHeight, insideColliders, pipeSupports, plateauInside, STATIC_COLLIDERS } from "./terrain.ts";
+import { COLLIDERS, groundHeight, insideColliders, pipeSupports, plateauInside, STATIC_COLLIDERS } from "./terrain.ts";
+import { makeContactAO } from "../../world/contactAO.ts";
+import { GlowHalos } from "../../world/glowHalos.ts";
 import { polyDist, rng, smoothstep } from "./geom.ts";
 import { createJunkMaterials, type JunkMaterials, Kit, junkSource, type JunkType, PAL, type Rgb } from "./junkKit.ts";
 import { cellOf, type Inst, SCATTER_TIERS, type ScatterResult, STREAM_CELLS, scatterAll } from "./scatter.ts";
@@ -89,6 +91,7 @@ export interface JunkyardStats {
   buildMs: number;
   scatter: ScatterResult["counts"];
   fade: { on: boolean; meshes: number; total: number; shown: number; tris: number; trisFull: number };
+  halos: number;
 }
 
 interface CellView {
@@ -104,7 +107,21 @@ const CHUNK = 50;
 const mix = (a: Rgb, b: Rgb, t: number): [number, number, number] => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
 
 /** 地形頂點色（依區域、路面、坡度、高度） */
+/** V3：地面接觸陰影（垃圾堆、建築、機械、地標、道具的腳邊變暗；烘焙到頂點色） */
+const GROUND_AO = makeContactAO(
+  COLLIDERS.map((c) => (c.kind === "circle" ? { x: c.x, z: c.z, r: c.r, k: c.r < 0.4 ? 0.4 : 1 } : { x: c.x, z: c.z, r: Math.min(c.hx, c.hz) * 1.05, k: 0.8 })),
+  { strength: 0.3, width: 1.6 },
+);
+const AO_ON = typeof location === "undefined" || new URLSearchParams(location.search).get("jyao") !== "0";
+
 function terrainColor(x: number, z: number, y: number, slope: number): [number, number, number] {
+  const c0 = terrainColorBase(x, z, y, slope);
+  if (!AO_ON) return c0;
+  const a = GROUND_AO(x, z);
+  return [c0[0] * a, c0[1] * a, c0[2] * a];
+}
+
+function terrainColorBase(x: number, z: number, y: number, slope: number): [number, number, number] {
   const n1 = 0.5 + 0.5 * Math.sin(x * 0.11 + Math.sin(z * 0.07) * 2);
   const n2 = 0.5 + 0.5 * Math.sin(z * 0.13 - x * 0.05 + 1.7);
   // 低地草地（明亮、帶點黃綠）
@@ -183,6 +200,12 @@ export class JunkyardWorld {
   readonly fadeOn = typeof location === "undefined" || new URLSearchParams(location.search).get("jyfade") !== "0";
   private t = 0;
   readonly buildMs: number;
+  /** V3：發光光暈（1 次繪製；&jyhalo=0 關閉） */
+  readonly halos: GlowHalos | null;
+  /** V3：各地標的程序化網格（GLB 載入後隱藏） */
+  readonly procParts = new Map<string, Mesh[]>();
+  /** V3：活動零件節點（GLB 吊臂、抓斗掛在這裡） */
+  readonly craneNodes = new Map<string, { swing: TransformNode; claw: TransformNode; gy: number }>();
   /** 分區載入／釋放紀錄（報告用） */
   readonly streamLog: { t: number; cell: string; op: "load" | "unload"; ms: number }[] = [];
 
@@ -197,6 +220,8 @@ export class JunkyardWorld {
     this.shadows = shadows;
     this.shadowRange = shadowRange;
     const t0 = performance.now();
+    const haloOn = typeof location === "undefined" || new URLSearchParams(location.search).get("jyhalo") !== "0";
+    this.halos = haloOn ? new GlowHalos(scene, 256, tier === "high" ? 175 : tier === "medium" ? 145 : 115) : null;
     this.lite = tier !== "high";
     this.tierCfg = SCATTER_TIERS[tier];
     this.mats = createJunkMaterials(scene, tier);
@@ -415,6 +440,33 @@ export class JunkyardWorld {
     return out;
   }
 
+  /** V3：外部載入的地標網格（GLB）加入陰影與統計 */
+  registerLandmarkMesh(mesh: Mesh, zone: string, caster: boolean): void {
+    mesh.receiveShadows = true;
+    this.landmarks.push({ mesh, zone, caster });
+  }
+
+  /** V3：隱藏某地標的程序化網格（GLB 已取代）；回傳隱藏的網格數 */
+  hideProcedural(key: string): number {
+    const list = this.procParts.get(key) ?? [];
+    for (const m of list) {
+      m.setEnabled(false);
+      const i = this.landmarks.findIndex((l) => l.mesh === m);
+      if (i >= 0) this.landmarks.splice(i, 1);
+    }
+    return list.length;
+  }
+
+  private halo(x: number, y: number, z: number, size: number, color: Rgb, o: { alpha?: number; pulse?: { speed: number; amp: number; phase?: number }; flicker?: { phase: number } } = {}): void {
+    this.halos?.add(new Vector3(x, y, z), { size, color: [color[0], color[1], color[2]], ...o });
+  }
+
+  private regProc(key: string, meshes: Mesh[]): void {
+    const a = this.procParts.get(key) ?? [];
+    a.push(...meshes);
+    this.procParts.set(key, a);
+  }
+
   private buildLandmarks(): void {
     this.buildEntry();
     for (const d of DECKS) this.buildDeck(d);
@@ -451,6 +503,7 @@ export class JunkyardWorld {
       k.cyl(0.55, 0.75, 3, px, y + 1.5, pz, PAL.stone, "paint", 8);
       k.cyl(0.8, 0.8, 0.25, px, y + 3.1, pz, PAL.gold, "metal", 8);
       k.sphere(0.5, px, y + 3.5, pz, PAL.cyan, "glowBlue", 8);
+      this.halo(px, y + 3.5, pz, 2.4, PAL.cyan, { alpha: 0.55, pulse: { speed: 2, amp: 0.25, phase: i } });
     }
     // 歡迎拱門（木與鐵；概念圖入口的木柵欄風格）
     const ay = groundHeight(0, -112);
@@ -641,7 +694,9 @@ export class JunkyardWorld {
         k.beam(pa, pb, 0.1, col, "metal");
       }
     }
-    this.addKit(k, this.zoneAt(c.x, c.z));
+    this.regProc(`crane:${c.id}:tower`, this.addKit(k, this.zoneAt(c.x, c.z)));
+    // 塔頂警示燈（旋轉軸上，不隨吊臂移動）
+    this.halo(c.x, gy + 1 + c.h + 2.9, c.z, 1.8, PAL.red, { alpha: 0.8, pulse: { speed: 4.2, amp: 0.9, phase: c.phase } });
     // 旋轉部分
     const swing = new TransformNode(`jy_${c.id}_swing`, this.scene);
     swing.parent = this.root;
@@ -667,6 +722,7 @@ export class JunkyardWorld {
     for (const m of ks.bake()) {
       m.receiveShadows = true;
       this.landmarks.push({ mesh: m, zone: this.zoneAt(c.x, c.z), caster: true });
+      this.regProc(`crane:${c.id}:jib`, [m]);
     }
     // 抓斗（上下移動）
     const claw = new TransformNode(`jy_${c.id}_claw`, this.scene);
@@ -683,8 +739,10 @@ export class JunkyardWorld {
     for (const m of kc.bake()) {
       m.receiveShadows = true;
       this.landmarks.push({ mesh: m, zone: this.zoneAt(c.x, c.z), caster: true });
+      this.regProc(`crane:${c.id}:claw`, [m]);
     }
     this.anim.cranes.push({ swing, claw, def: c });
+    this.craneNodes.set(c.id, { swing, claw, gy });
   }
 
   /** 廢棄輸送帶（帶面貼圖流動） */
@@ -810,7 +868,9 @@ export class JunkyardWorld {
       // 爐口
       k.box(f.r * 1.1, 1.2, 0.3, f.x, f.y + 1.1, f.z - f.r * 1.08, PAL.orange, "glowOrange");
       k.cyl(0.9, 1.1, 6, f.x + f.r * 0.6, f.y + 5.6, f.z + f.r * 0.4, PAL.rust, "paint", 10);
-      this.addKit(k, this.zoneAt(f.x, f.z));
+      this.regProc(`furnace:${f.id}`, this.addKit(k, this.zoneAt(f.x, f.z)));
+      this.halo(f.x, f.y + 1.2, f.z - f.r * 1.25, f.r * 1.7, PAL.orange, { alpha: 0.65, pulse: { speed: 3.1, amp: 0.3 } });
+      this.halo(f.x, f.y + 3.9, f.z, f.r * 2.4, [1, 0.6, 0.25], { alpha: 0.45, pulse: { speed: 1.7, amp: 0.25, phase: 1 } });
       if (this.tier !== "low") this.sparks(new Vector3(f.x, f.y + 3.6, f.z), this.tier === "high" ? 26 : 14);
     }
   }
@@ -850,19 +910,22 @@ export class JunkyardWorld {
       if (Math.hypot(px - -4, pz - 100) < 9 || Math.hypot(px - REACTOR.x, pz - REACTOR.z) < REACTOR.r + 2) continue;
       k.cyl(0.6, 0.8, 2.4, px, y + 1.2, pz, PAL.ironDark, "metal", 8);
       k.sphere(0.6, px, y + 2.6, pz, PAL.orange, "glowOrange", 8);
+      this.halo(px, y + 2.6, pz, 2.2, PAL.orange, { alpha: 0.5, pulse: { speed: 2.4, amp: 0.2, phase: i * 0.7 } });
     }
-    // 反應爐本體
+    // 反應爐本體（V3：獨立一組，GLB 載入後可隱藏）
     const R = REACTOR;
-    k.cyl(R.r * 2 + 2, R.r * 2 + 3, 2.2, R.x, y + 1.1, R.z, PAL.ironDark, "metal", 24);
-    k.cyl(R.r * 2, R.r * 2 + 0.6, 6, R.x, y + 5.2, R.z, PAL.rust, "metal", 20);
-    k.cyl(R.r * 1.3, R.r * 1.7, 10, R.x, y + 13, R.z, PAL.iron, "metal", 16);
-    k.cyl(R.r * 1.1, R.r * 1.3, 6, R.x, y + 21, R.z, PAL.ironDark, "metal", 16);
-    k.cyl(R.r * 1.6, R.r * 1.6, 0.8, R.x, y + 24.4, R.z, PAL.gold, "metal", 20);
+    const kr0 = new Kit(this.scene, this.mats, "jy_reactor_shell");
+    kr0.cyl(R.r * 2 + 2, R.r * 2 + 3, 2.2, R.x, y + 1.1, R.z, PAL.ironDark, "metal", 24);
+    kr0.cyl(R.r * 2, R.r * 2 + 0.6, 6, R.x, y + 5.2, R.z, PAL.rust, "metal", 20);
+    kr0.cyl(R.r * 1.3, R.r * 1.7, 10, R.x, y + 13, R.z, PAL.iron, "metal", 16);
+    kr0.cyl(R.r * 1.1, R.r * 1.3, 6, R.x, y + 21, R.z, PAL.ironDark, "metal", 16);
+    kr0.cyl(R.r * 1.6, R.r * 1.6, 0.8, R.x, y + 24.4, R.z, PAL.gold, "metal", 20);
     // 透明籠架（發光核心周圍的直柱）
     for (let i = 0; i < 10; i++) {
       const a = (i / 10) * Math.PI * 2;
-      k.box(0.4, 9, 0.4, R.x + Math.cos(a) * R.r * 0.82, y + 13, R.z + Math.sin(a) * R.r * 0.82, PAL.gold, "metal");
+      kr0.box(0.4, 9, 0.4, R.x + Math.cos(a) * R.r * 0.82, y + 13, R.z + Math.sin(a) * R.r * 0.82, PAL.gold, "metal");
     }
+    this.regProc("reactor:reactor", this.addKit(kr0, "core"));
     // 排氣塔 ×2
     for (const sx of [8, 36]) {
       k.cyl(3.2, 3.8, 11, sx, y + 5.5, 128, PAL.rust, "paint", 12);
@@ -879,6 +942,8 @@ export class JunkyardWorld {
     kc.sphere(R.r * 1.2, 0, 4.2, 0, PAL.gold, "glowOrange", 12, [1, 0.6, 1], coreNode);
     for (const m of kc.bake()) this.landmarks.push({ mesh: m, zone: "core", caster: false });
     this.anim.core = coreNode;
+    this.halo(R.x, y + 13, R.z, R.r * 3.2, [1, 0.72, 0.35], { alpha: 0.5, pulse: { speed: 2.2, amp: 0.2 } });
+    this.halo(R.x, y + 17.5, R.z, R.r * 1.8, PAL.gold, { alpha: 0.4, pulse: { speed: 2.2, amp: 0.25, phase: 0.6 } });
     for (let i = 0; i < 3; i++) {
       const rn = new TransformNode(`jy_reactor_ring${i}`, this.scene);
       rn.parent = this.root;
@@ -926,7 +991,13 @@ export class JunkyardWorld {
     k.cyl(2.6, 3, 9, -9, 2.2, -4, PAL.teal, "metal", 10, [0.2, 0, 1.15], node);
     k.box(4, 2.6, 4.2, -13, 0.6, -4.6, PAL.tealDark, "metal", [0.1, 0.4, 0.2], node);
     for (let i = 0; i < 4; i++) k.box(0.9, 0.9, 3.2, -14.6, 0.5, -6.8 + i * 1.1, PAL.iron, "metal", [0.2, 0.3, 0.1], node);
-    this.addKit(k, "hills");
+    this.regProc("colossus:colossus", this.addKit(k, "hills"));
+    // 雙眼光暈（本地座標 → 世界座標）
+    node.computeWorldMatrix(true);
+    for (const sx of [-2.6, 2.6]) {
+      const w = Vector3.TransformCoordinates(new Vector3(sx, 4.6, -7.2), node.getWorldMatrix());
+      this.halo(w.x, w.y, w.z, 4.2, PAL.orange, { alpha: 0.7, pulse: { speed: 1.3, amp: 0.35 }, flicker: { phase: sx } });
+    }
   }
 
   /** 魔法能源管線（頭頂高度、發藍光）＋支架 */
@@ -990,6 +1061,7 @@ export class JunkyardWorld {
         k.cyl(0.22, 0.3, 3.4, x, y + 1.7, z, PAL.ironDark, "metal", 6);
         k.box(1.1, 0.12, 0.12, x + nx * -0.45, y + 3.4, z + nz * -0.45, PAL.ironDark, "metal", [0, Math.atan2(nx, nz) + Math.PI / 2, 0]);
         kg.sphere(0.42, x - nx * 0.9, y + 3.2, z - nz * 0.9, PAL.gold, "glowOrange", 6);
+        this.halo(x - nx * 0.9, y + 3.2, z - nz * 0.9, 2.6, PAL.gold, { alpha: 0.5 });
       }
     }
     // 高處閃爍燈（遠處廢棄機械偶爾閃爍）
@@ -1000,6 +1072,7 @@ export class JunkyardWorld {
       const y = groundHeight(m.x, m.z);
       const kk = fl[n % 3]!;
       kk.box(0.8, 0.5, 0.8, m.x + 1, y + 0.6, m.z - 1, PAL.orange, "glowOrange");
+      this.halo(m.x + 1, y + 0.8, m.z - 1, 3, PAL.orange, { alpha: 0.6, flicker: { phase: n * 1.7 } });
       n++;
     }
     for (let i = 0; i < 3; i++) {
@@ -1514,6 +1587,7 @@ export class JunkyardWorld {
       }
       cr.mesh.thinInstanceBufferUpdated("matrix");
     }
+    this.halos?.update(dt, px, pz);
     if (this.ambient) (this.ambient.emitter as Vector3).set(px, py, pz);
     this.fadeTimer -= dt;
     if (this.fadeTimer <= 0) {
@@ -1584,6 +1658,7 @@ export class JunkyardWorld {
       buildMs: Math.round(this.buildMs),
       scatter: this.scatter.counts,
       fade: this.fadeStats(),
+      halos: this.halos?.count ?? 0,
     };
   }
 
