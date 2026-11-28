@@ -303,7 +303,7 @@ for (const name of browsers) {
         check("接入模組：技能依動作檔時間觸發命中 hook（三連斬 3 次），不自行判定", R.runs.every((r) => r.hits === 3), R.runs.map((r) => r.hits));
         check("接入模組：遠距離（> 28 m）的其他玩家特效不生成", R.runs.every((r) => r.culled.distance >= 1), R.runs.map((r) => r.culled));
         const a0 = R.runs[0].after;
-        check("接入模組：重複進出地圖 4 次，網格、材質、粒子、發光層、節點數不累積（每次都回到相同數量）", R.runs.every((r) => JSON.stringify(r.after) === JSON.stringify(a0)) && R.end.meshes === R.base.meshes && R.end.particles === R.base.particles && R.end.layers === R.base.layers && R.end.materials === R.base.materials, { base: R.base, runs: R.runs.map((r) => r.after), end: R.end });
+        check("接入模組：重複進出地圖 4 次，網格、材質、貼圖、粒子、發光層、節點數不累積，也不會誤刪共用貼圖", R.runs.every((r) => JSON.stringify(r.after) === JSON.stringify(a0)) && R.end.meshes === R.base.meshes && R.end.particles === R.base.particles && R.end.layers === R.base.layers && R.end.materials === R.base.materials && R.end.textures === R.base.textures, { base: R.base, runs: R.runs.map((r) => r.after), end: R.end });
         check("接入模組：釋放後 DOM（傷害數字、畫面閃光）全部移除", R.runs.every((r) => r.dom === 0), R.runs.map((r) => r.dom));
         const pl = L.runs[0].prewarm, ph = H.runs[0].prewarm;
         check("接入模組：低畫質預熱建立的網格／粒子／材質不多於高畫質（不預熱高畫質專用資源）", pl.pooledMeshes <= ph.pooledMeshes && pl.particleSystems <= ph.particleSystems && pl.materials <= ph.materials, { low: pl, high: ph });
