@@ -1305,6 +1305,8 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
     perfMode,
     /** 測試：已編譯的 shader 數、預熱結果 */
     shaderCount,
+    /** 測試：已編譯 shader 的識別字串（找出還沒被預熱的） */
+    shaderKeys: () => Object.keys((engine as unknown as { _compiledEffects?: Record<string, unknown> })._compiledEffects ?? {}),
     prewarm: () => prewarmStats,
     /** 測試：鏡頭距離、HUD 的開發者選單 */
     camRadius: () => cam.radius,

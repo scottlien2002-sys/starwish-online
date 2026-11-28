@@ -290,6 +290,7 @@ for (const name of browsers) {
         await page.click(".cv-devbtn");
       } else if (tcase.id.startsWith("shader-")) {
         const s0 = await page.evaluate(() => window.__cvfx.shaderCount());
+        const k0 = await page.evaluate(() => window.__cvfx.shaderKeys());
         const pw = await page.evaluate(() => window.__cvfx.prewarm());
         for (const sk of SKILLS) {
           await page.evaluate((k) => window.__cvfx.cast(k), sk);
@@ -304,7 +305,8 @@ for (const name of browsers) {
         await page.evaluate(() => window.__cvfx.cast("star_meteor"));
         await sleep(3000);
         const s1 = await page.evaluate(() => window.__cvfx.shaderCount());
-        run.results.shaders = { beforeCasts: s0, afterCasts: s1, newDuringPlay: s1 - s0, prewarm: pw };
+        const k1 = await page.evaluate(() => window.__cvfx.shaderKeys());
+        run.results.shaders = { beforeCasts: s0, afterCasts: s1, newDuringPlay: s1 - s0, prewarm: pw, newKeys: k1.filter((k) => !k0.includes(k)).map((k) => k.slice(0, 300)) };
         if (tcase.id === "shader-warm") {
           check("特效預熱：載入時已預先生成全部特效與投射物（沒有超時）", pw && pw.spawned >= 60 && pw.shadersAfter > pw.shadersBefore, pw);
           check("特效預熱：施放 6 個技能＋6 種職業特效＋白天場景時，新編譯的 shader ≤ 3（關閉預熱時約 10）", s1 - s0 <= 3, run.results.shaders);
