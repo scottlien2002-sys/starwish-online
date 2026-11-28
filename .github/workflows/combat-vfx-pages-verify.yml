@@ -1,0 +1,33 @@
+# Claude C：接入共用資產後，唯讀驗證所有受影響的公開預覽（C 的三個戰鬥展示頁、引用 C 檔案的 D mp81／mp82、使用共用區的 A stage73／74）。
+# 不部署、不修改 gh-pages。
+name: Combat VFX Pages verify (Claude C, read-only)
+on:
+  push:
+    branches: ["feature/combat-vfx-stage3"]
+    paths: [".github/workflows/combat-vfx-pages-verify.yml", "tests/e2e/verify-preview-remap.mjs"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: { node-version: 22 }
+      - name: Verify public previews (HTTP + shared-assets hashes)
+        run: |
+          mkdir -p out
+          ROOT="https://${{ github.repository_owner }}.github.io/${GITHUB_REPOSITORY#*/}"
+          FAIL=0
+          for p in preview-combat-vfx preview-combat-vfx-s2 preview-combat-vfx-s3; do
+            echo "== $p"; node tests/e2e/verify-preview-remap.mjs "$ROOT/$p" 18 > "out/$p.json" || FAIL=1; tail -c 300 "out/$p.json"
+          done
+          for p in preview-mp81 preview-mp82 preview-stage73-world preview-stage74-perf; do
+            echo "== $p"; node tests/e2e/verify-preview-remap.mjs "$ROOT/$p" 6 --generic > "out/$p.json" || FAIL=1; tail -c 300 "out/$p.json"
+          done
+          curl -s "$ROOT/shared-assets/index.json" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const j=JSON.parse(s);const o={files:Object.keys(j.files).length,totalMB:+(j.totalBytes/1048576).toFixed(1),orphans:Object.keys(j.orphans).length,previews:j.previews};console.log(JSON.stringify(o,null,1));require("fs").writeFileSync("out/shared-index-summary.json",JSON.stringify(o,null,1))})'
+          echo "{\"fail\":$FAIL,\"run\":\"${GITHUB_RUN_ID}\",\"commit\":\"${GITHUB_SHA}\"}" > out/outcome.json
+          cd out && git init -q -b "results/combat-vfx-pages-${GITHUB_RUN_ID}" && git config user.name "github-actions[bot]" && git config user.email "41898282+github-actions[bot]@users.noreply.github.com" && git add -A && git commit -q -m "Pages verify ${GITHUB_RUN_ID}" && git push -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" "HEAD:refs/heads/results/combat-vfx-pages-${GITHUB_RUN_ID}"
+          exit $FAIL
