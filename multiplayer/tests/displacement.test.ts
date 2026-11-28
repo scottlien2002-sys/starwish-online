@@ -11,6 +11,7 @@ import type { GameServer } from "../server/GameServer.ts";
 import type { NetEvent } from "../client/NetClient.ts";
 import type { CombatEvent } from "../shared/protocol.ts";
 import { SKILL_DISPLACEMENT_TEST } from "../server/combat/rules.ts";
+import { MOVE_SPEED } from "../shared/constants.ts";
 import { PLAYER_RADIUS } from "../../src/maps/starsprout/route.ts";
 import type { FieldTerrainQuery } from "../../src/game/fieldTerrainQuery.ts";
 
@@ -187,7 +188,9 @@ test("位移中的一般移動輸入：照算序號、不移動（不能邊跳�
     // 伺服器位置＝驗證過的終點，沒有被側推
     await sleep(150);
     const sideMoved = Math.abs((p.x - ex) * side.x + (p.z - ez) * side.z);
-    assert.ok(sideMoved < 0.05 + 0.25 /* 結束後最多 1 tick 正常移動 */, `側移 ${sideMoved}`);
+    // 結束後到測試把搖桿放開之前，最多約 0.12 秒的正常移動（CI 慢時會多一點）；
+    // 「結束後補走」會把位移期間約 0.8 秒的輸入一次補上（約 4 m），遠大於這個上限
+    assert.ok(sideMoved < 0.05 + MOVE_SPEED * 0.12, `側移 ${sideMoved}`);
     assert.equal(p.counters.speedViolations, sv0, "速度稽核沒有誤判");
     // 結束後可以正常走路
     const x1 = p.x;
