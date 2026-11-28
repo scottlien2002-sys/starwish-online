@@ -39,7 +39,7 @@ jobs:
       - name: Small-prop density fade compare (jyfade=0 vs on; CI, not iPhone)
         if: always()
         run: node tests/e2e/run-junkyard-fade-compare.mjs dist chromium "$PWD/out/junkyard/fade/"
-      - name: Landmarks (Tripo GLB integration: sizes, cranes, FX, colliders; CI, not iPhone)
+      - name: "Landmarks (Tripo GLB integration - sizes, cranes, FX, colliders; CI, not iPhone)"
         if: always() && github.ref_name != 'feature/render-map-junkyard' && github.ref_name != 'dev/junkyard-v2'
         run: node tests/e2e/run-junkyard-landmarks-e2e.mjs dist chromium "$PWD/out/junkyard/landmarks/"
       - name: Push results to art branch (normal push, no force)
