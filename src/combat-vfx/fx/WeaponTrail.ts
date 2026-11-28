@@ -86,6 +86,22 @@ export class WeaponTrail {
     this.mesh = this.layers[0]!.mesh;
   }
 
+  /** 補取樣：一格最多補幾個、補到弦長多短（公尺） */
+  static MAX_SUB = 3;
+  static MAX_CHORD = 0.16;
+
+  private push(b: Vector3, t: Vector3, age: number): void {
+    for (let i = Math.min(this.count, this.n - 1); i > 0; i--) {
+      this.base[i]!.copyFrom(this.base[i - 1]!);
+      this.tip[i]!.copyFrom(this.tip[i - 1]!);
+      this.age[i] = this.age[i - 1] ?? 99;
+    }
+    this.base[0]!.copyFrom(b);
+    this.tip[0]!.copyFrom(t);
+    this.age[0] = age;
+    this.count = Math.min(this.n, this.count + 1);
+  }
+
   setColor(c: Color3): void {
     for (const [i, l] of this.layers.entries()) if (i !== 1) l.mat.emissiveColor.copyFrom(c);
   }
@@ -116,15 +132,29 @@ export class WeaponTrail {
     if (!this.enabled) return;
     for (let i = 0; i < this.count; i++) this.age[i] = (this.age[i] ?? 99) + dt;
     if (this.emitting) {
-      for (let i = Math.min(this.count, this.n - 1); i > 0; i--) {
-        this.base[i]!.copyFrom(this.base[i - 1]!);
-        this.tip[i]!.copyFrom(this.tip[i - 1]!);
-        this.age[i] = this.age[i - 1] ?? 99;
+      const nb = this.baseNode.getAbsolutePosition();
+      const nt = this.tipNode.getAbsolutePosition();
+      // 快速揮砍（高攻速）時一格內刀尖會移動很遠：在上一格與這一格之間補取樣（以刀根為軸旋轉刀身方向），
+      // 刀光才是弧線而不是折線。最多補 MAX_SUB 個，弦長 ≤ MAX_CHORD。
+      if (this.count > 0) {
+        const chord = Vector3.Distance(nt, this.tip[0]!);
+        const sub = Math.min(WeaponTrail.MAX_SUB, Math.ceil(chord / WeaponTrail.MAX_CHORD) - 1);
+        if (sub > 0) {
+          const pb = this.base[0]!.clone();
+          const pd = this.tip[0]!.subtract(pb);
+          const nd = nt.subtract(nb);
+          const pl = pd.length();
+          const nl = nd.length();
+          const pa = this.age[0] ?? 0;
+          for (let s = 1; s <= sub; s++) {
+            const u = s / (sub + 1);
+            const b = Vector3.Lerp(pb, nb, u);
+            const d = slerpDir(pd, nd, u).scale(pl + (nl - pl) * u);
+            this.push(b, b.add(d), pa * (1 - u));
+          }
+        }
       }
-      this.base[0]!.copyFrom(this.baseNode.getAbsolutePosition());
-      this.tip[0]!.copyFrom(this.tipNode.getAbsolutePosition());
-      this.age[0] = 0;
-      this.count = Math.min(this.n, this.count + 1);
+      this.push(nb, nt, 0);
     }
     let alive = false;
     for (const L of this.layers) {
@@ -151,8 +181,10 @@ export class WeaponTrail {
   }
 
   /** 測試：最新一筆取樣（刀根、刀尖）與是否正在發射 */
-  head(): { base: Vector3; tip: Vector3; emitting: boolean; samples: number } {
-    return { base: this.base[0]!.clone(), tip: this.tip[0]!.clone(), emitting: this.emitting, samples: this.count };
+  head(): { base: Vector3; tip: Vector3; emitting: boolean; samples: number; maxChord: number } {
+    let mc = 0;
+    for (let i = 1; i < this.count; i++) mc = Math.max(mc, Vector3.Distance(this.tip[i]!, this.tip[i - 1]!));
+    return { base: this.base[0]!.clone(), tip: this.tip[0]!.clone(), emitting: this.emitting, samples: this.count, maxChord: mc };
   }
 
   dispose(): void {
@@ -162,4 +194,15 @@ export class WeaponTrail {
       l.mesh.dispose(false, false);
     }
   }
+}
+
+/** 兩個方向之間球面插值（回傳單位向量） */
+function slerpDir(a: Vector3, b: Vector3, u: number): Vector3 {
+  const an = a.normalizeToNew();
+  const bn = b.normalizeToNew();
+  const dot = Math.max(-1, Math.min(1, Vector3.Dot(an, bn)));
+  const th = Math.acos(dot);
+  if (th < 1e-4) return Vector3.Lerp(an, bn, u).normalize();
+  const s = Math.sin(th);
+  return an.scale(Math.sin((1 - u) * th) / s).add(bn.scale(Math.sin(u * th) / s)).normalize();
 }

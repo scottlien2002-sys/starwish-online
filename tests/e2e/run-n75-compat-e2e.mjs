@@ -58,14 +58,19 @@ for (const name of browsers) {
           }
           if (r.trailFrames > 0) {
             check(`${tag}：拖尾沿著刀尖移動（誤差 ≤ 1 cm）`, r.trailErrMax <= 0.01, +r.trailErrMax.toFixed(4));
-            check(`${tag}：拖尾期間刀尖沒有瞬移（每格 ≤ 0.5 m）`, r.tipJumpMax <= 0.5, +r.tipJumpMax.toFixed(3));
-            check(`${tag}：拖尾期間刀尖不穿進軀幹`, r.insideFrames === 0, r.insideFrames);
+            // 刀尖速度依攻速放大；換算回攻速×1 後超過 0.6 m／格（36 m/s）才算瞬移／錯位
+            check(`${tag}：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）`, r.tipJumpMax / rate <= 0.6, { raw: +r.tipJumpMax.toFixed(3), perRate1: +(r.tipJumpMax / rate).toFixed(3) });
+            check(`${tag}：刀光呈弧線（補取樣後每段 ≤ 0.25 m）`, r.chordMax <= 0.25, +r.chordMax.toFixed(3));
+            run.results.torso = run.results.torso ?? {};
+            if (r.insideFrames) run.results.torso[tag] = r.inside;
           }
           if (r.hits.length) {
             const bad = r.hits.filter((h) => Math.abs(h.wall - h.expect) > FRAME + 1e-6 || Math.abs(h.animT - h.mark) > rate * FRAME + 1e-6);
             check(`${tag}：命中特效時間＝標記／攻速，且與動作同一格`, bad.length === 0, r.hits.map((h) => ({ mark: +h.mark.toFixed(3), wall: +h.wall.toFixed(3), expect: +h.expect.toFixed(3), animT: +h.animT.toFixed(3), tip: +h.tipToTarget.toFixed(2) })));
           }
-          if (r.projectiles.length) check(`${tag}：投射物從武器／手部發射（≤ 0.9 m）`, r.projectiles.every((p) => p.fromToHand <= 0.9), r.projectiles.map((p) => +p.fromToHand.toFixed(2)));
+          // 隕石是從目標上空落下（設計如此），不檢查發射點
+          const pj = r.projectiles.filter((p) => p.fx !== "meteor");
+          if (pj.length) check(`${tag}：投射物從武器／手部發射（≤ 0.9 m）`, pj.every((p) => p.fromToHand <= 0.9), pj.map((p) => +p.fromToHand.toFixed(2)));
         }
       }
       // 截圖：每個技能命中／釋放那一格

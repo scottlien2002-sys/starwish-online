@@ -145,17 +145,19 @@ export async function startN75CompatLab(canvas: HTMLCanvasElement, hudRoot: HTML
     let wall = 0;
     const hits: { mark: number; wall: number; expect: number; animT: number; tipToTarget: number; tipAxis: number }[] = [];
     const pending: { mark: number; wall: number }[] = [];
-    const projectiles: { mark: number; fromToHand: number }[] = [];
+    const projectiles: { mark: number; fx: string; fromToHand: number }[] = [];
     let trailErrMax = 0;
     let tipJumpMax = 0;
+    let chordMax = 0;
     let insideFrames = 0;
+    const inside: { t: number; axis: number; y: number }[] = [];
     let trailFrames = 0;
     let prevTip: Vector3 | null = null;
     const h = fx.playSkill("me", skill, clip, rate, {
       onHit: (_hit, t) => pending.push({ mark: t, wall }),
-      onProjectile: (_ev, vis, t) => {
+      onProjectile: (ev, vis, t) => {
         const from = vis ? vis.pos.clone() : abs(weapon.focus);
-        projectiles.push({ mark: t, fromToHand: Vector3.Distance(from, abs(rHand)) });
+        projectiles.push({ mark: t, fx: ev.fx, fromToHand: Vector3.Distance(from, abs(rHand)) });
       },
     });
     if (!h) return { skillId, missing: "actor" };
@@ -178,7 +180,11 @@ export async function startN75CompatLab(canvas: HTMLCanvasElement, hudRoot: HTML
         trailFrames++;
         trailErrMax = Math.max(trailErrMax, Vector3.Distance(head.tip, tip));
         if (prevTip) tipJumpMax = Math.max(tipJumpMax, Vector3.Distance(prevTip, tip));
-        if (inTorso(tip)) insideFrames++;
+        chordMax = Math.max(chordMax, head.maxChord);
+        if (inTorso(tip)) {
+          insideFrames++;
+          inside.push({ t: +t.toFixed(3), axis: +axisDist(tip).toFixed(3), y: +tip.y.toFixed(3) });
+        }
         prevTip = tip;
       } else prevTip = null;
       if (stopAt >= 0 && t >= stopAt) {
@@ -189,7 +195,7 @@ export async function startN75CompatLab(canvas: HTMLCanvasElement, hudRoot: HTML
       }
     }
     g.stop();
-    return { skillId, rate, duration: dur, wall, trailFrames, trailErrMax, tipJumpMax, insideFrames, hits, projectiles };
+    return { skillId, rate, duration: dur, wall, trailFrames, trailErrMax, tipJumpMax, chordMax, insideFrames, inside, hits, projectiles };
   };
 
   /** A 的普通攻擊／雙手武器動作：只播 A 的動作＋C 的拖尾（basicSwing），量測刀尖是否穿進身體、左手與握把距離 */
@@ -244,25 +250,25 @@ export async function startN75CompatLab(canvas: HTMLCanvasElement, hudRoot: HTML
   const essentialCheck = () => {
     const far = new Vector3(0, 0, -40);
     const s0 = fx.stats();
-    const spawned0 = s0.vfx.spawned;
+    const spawned0 = s0.budget.granted;
     fx.spawn("other", "starShards", far, { palette: "azure" });
-    const decorCulled = fx.stats().culled.distance + fx.stats().culled.offscreen > s0.culled.distance + s0.culled.offscreen && fx.stats().vfx.spawned === spawned0;
+    const decorCulled = fx.stats().culled.distance + fx.stats().culled.offscreen > s0.culled.distance + s0.culled.offscreen && fx.stats().budget.granted === spawned0;
     const r: Record<string, unknown> = { decorCulled };
-    const before = () => fx.stats().vfx.spawned;
+    const before = () => fx.stats().budget.granted;
     let b = before();
-    r.bossWarning = fx.zone("bossWarning", far, 6) && fx.stats().vfx.spawned > b;
+    r.bossWarning = fx.zone("bossWarning", far, 6) && fx.stats().budget.granted > b;
     b = before();
-    r.dangerOnMe = fx.zone("danger", new Vector3(0, 0, -2), 4, { owner: "other" }) && fx.stats().vfx.spawned > b;
+    r.dangerOnMe = fx.zone("danger", new Vector3(0, 0, -2), 4, { owner: "other" }) && fx.stats().budget.granted > b;
     b = before();
     r.dangerFarAway = fx.zone("danger", far, 4, { owner: "other" }); // 不影響自己 → 依一般規則省略（應為 false）
     b = before();
-    r.healOnMe = fx.zone("heal", new Vector3(1, 0, 0), 3, { owner: "other" }) && fx.stats().vfx.spawned > b;
+    r.healOnMe = fx.zone("heal", new Vector3(1, 0, 0), 3, { owner: "other" }) && fx.stats().budget.granted > b;
     b = before();
-    r.projectileToMe = !!fx.launch("other", "magicBolt", far, new Vector3(0, 0, 1), 18, "azure", true) && fx.stats().vfx.spawned >= b;
+    r.projectileToMe = !!fx.launch("other", "magicBolt", far, new Vector3(0, 0, 1), 18, "azure", true) && fx.stats().budget.granted >= b;
     r.projectileElsewhere = !!fx.launch("other", "magicBolt", far, new Vector3(1, 0, 0), 18, "azure", false); // 應為 false
     b = before();
     fx.statusCue("shield", root);
-    r.statusCue = fx.stats().vfx.spawned > b;
+    r.statusCue = fx.stats().budget.granted > b;
     r.essentialCount = fx.stats().essential - s0.essential;
     r.budget = fx.stats().budget;
     return r;

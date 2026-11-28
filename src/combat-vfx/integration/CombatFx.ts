@@ -501,7 +501,7 @@ export class CombatFx {
   }
 
   /** 測試：某個角色拖尾的最新取樣 */
-  trailHead(actorId: string): { base: Vector3; tip: Vector3; emitting: boolean; samples: number } | null {
+  trailHead(actorId: string): { base: Vector3; tip: Vector3; emitting: boolean; samples: number; maxChord: number } | null {
     return this.actors.get(actorId)?.trail?.head() ?? null;
   }
 
