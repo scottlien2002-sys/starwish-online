@@ -40,6 +40,8 @@ async function openField(extra) {
   const t0 = Date.now();
   await page.goto(`${srv.url}/?play=world&seed=11${extra}`, { waitUntil: "load" });
   await page.waitForFunction(() => window.__starwishPlay?.ready === true && !!window.__starwishPlay.world, null, { timeout: 180000 });
+  // 「可以玩」＝遊戲迴圈開始（預熱在迴圈開始前、載入畫面期間完成）
+  await page.waitForFunction(() => window.__starwishPlay.skillState().loop?.started === true && window.__starwishPlay.skillState().loop.frames > 2, null, { timeout: 180000 });
   const loadMs = Date.now() - t0;
   await page.waitForFunction(() => window.__starwishPlay.info().monsters.length >= 20, null, { timeout: 120000 }).catch(() => {});
   return { ctx, page, errors, loadMs };
