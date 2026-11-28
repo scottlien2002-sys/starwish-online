@@ -95,7 +95,9 @@ export const CRANE_SPECS: readonly (CraneRigSpec & { x: number; z: number; y: nu
     swingSpeed: c.speed,
     phase: c.phase,
     liftPeriod: [26, 31, 23][i] ?? 27,
-    groundClear: 0,
+    // 抓斗最低點離塔基地面 2 m＋groundClear；吊鉤掃過範圍內地面最高比塔基高 0.49 m（crane3）。
+    // V3.1：留足玩家（1.25 m）＋擺動的空間：抓斗底在作業範圍內至少離地 2.5 m
+    groundClear: [0.5, 0.5, 1.0][i] ?? 0.5,
   };
 });
 

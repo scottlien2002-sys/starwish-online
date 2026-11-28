@@ -457,6 +457,17 @@ export class JunkyardWorld {
     this.landmarks.push({ mesh, zone, caster });
   }
 
+  /** V3：地標資源釋放時移出陰影與統計清單 */
+  unregisterLandmarkMeshes(meshes: readonly Mesh[]): void {
+    const set = new Set(meshes);
+    for (let i = this.landmarks.length - 1; i >= 0; i--) if (set.has(this.landmarks[i]!.mesh)) this.landmarks.splice(i, 1);
+  }
+
+  /** V3：關閉某標籤的光暈（地標特效釋放時） */
+  disableHalos(tag: string): number {
+    return this.halos?.disableTag(tag) ?? 0;
+  }
+
   /** V3：隱藏某地標的程序化網格（GLB 已取代）；回傳隱藏的網格數 */
   hideProcedural(key: string): number {
     this.halos?.disableTag(key);

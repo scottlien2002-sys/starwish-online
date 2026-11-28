@@ -233,3 +233,18 @@ test("V3 四大地標：等比縮放的最終尺寸合理、不擋主路線／�
   for (let r = 0; r <= 18; r += 3) for (let a = 0; a < 16; a++) assert.ok(!insideLandmark(ARENA.x + Math.cos(a) * r, ARENA.z + Math.sin(a) * r, 0), "Boss 廣場被壓到");
   assert.ok(!insideLandmark(JUNKYARD_ENTRY_PORTAL.x, JUNKYARD_ENTRY_PORTAL.z, 6));
 });
+
+test("V3.1 吊車：抓斗在整個旋轉範圍內，最低點離地至少 2.4 m（玩家 1.25 m＋擺動）", async () => {
+  const { CRANE_SPECS } = await import("../../src/maps/junkyard/landmarkSlots.ts");
+  const { BOOM } = await import("../../src/maps/junkyard/craneSpec.ts");
+  const { groundHeight } = await import("../../src/maps/junkyard/terrain.ts");
+  for (const c of CRANE_SPECS) {
+    const base = groundHeight(c.x, c.z);
+    const reach = Math.abs(BOOM.pulley[2] - BOOM.pivot[2]) * c.boomUnit;
+    let rise = 0;
+    // 保守：整圈取樣（實際只在 swingCenter ± swingAmp 範圍內擺動）
+    for (let a = 0; a < Math.PI * 2; a += 0.01) rise = Math.max(rise, groundHeight(c.x + Math.cos(a) * reach, c.z + Math.sin(a) * reach) - base);
+    const clear = 2 + c.groundClear - rise;
+    assert.ok(clear >= 2.4, `${c.id} 抓斗最低離地 ${clear.toFixed(2)} m`);
+  }
+});

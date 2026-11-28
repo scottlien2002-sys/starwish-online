@@ -4,6 +4,7 @@
  * - 零件先以 MeshBuilder 建立、上頂點色，再依材質合併（Kit.bake），一組地標通常只有 2～4 次繪製
  * - 重複出現的小垃圾（罐子、齒輪、木箱、輪胎…）由 scatter 以 thin instances 實例化
  */
+import { addTriplanarDetail, makeWornPanelTexture } from "../../world/triplanarDetail.ts";
 import {
   Color3,
   Color4,
@@ -187,6 +188,12 @@ export function createJunkMaterials(scene: Scene, tier: "high" | "medium" | "low
   };
   const paint = std("jy_paint", 0.08, 16);
   const metal = std("jy_metal", 0.32, 40);
+  // V3：程序化建築／機械加上世界座標舊金屬板細節（板縫、鉚釘、鏽痕），縮小與 Tripo 地標的質感落差；低畫質不使用
+  if (tier !== "low") {
+    const panel = makeWornPanelTexture(scene, tier === "high" ? 256 : 128);
+    addTriplanarDetail(paint, panel, { scale: 0.42, strength: 0.55, saturation: 0.86 });
+    addTriplanarDetail(metal, panel, { scale: 0.42, strength: 0.75, saturation: 0.86 });
+  }
   const glow = (name: string, c: Color3): StandardMaterial => {
     const m = new StandardMaterial(name, scene);
     m.disableLighting = true;
@@ -214,6 +221,8 @@ export function createJunkMaterials(scene: Scene, tier: "high" | "medium" | "low
   foliage.backFaceCulling = false;
   foliage.emissiveColor = new Color3(0.08, 0.1, 0.06);
   const belt = std("jy_belt", 0.05, 8);
+  // 輸送帶帶面：深色橡膠（原本白色帶面在 Tripo 吊車旁顯得像塑膠玩具）
+  belt.diffuseColor = new Color3(0.3, 0.29, 0.27);
   belt.diffuseTexture = grit.clone();
   (belt.diffuseTexture as Texture).uScale = 6;
   const terrain = new StandardMaterial("jy_terrain", scene);

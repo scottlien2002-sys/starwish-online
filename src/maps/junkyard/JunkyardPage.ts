@@ -695,6 +695,19 @@ class JunkyardPage {
       tier: () => ({ tier: this.tier, source: this.tierSource, lite: this.lite, shadows: !!this.shadows }),
       state: () => ({ x: this.pos.x, y: this.pos.y, z: this.pos.z, yaw: this.yaw, walkable: this.grid.walkable(this.pos.x, this.pos.z), char: this.charStatus, model: this.char?.stats().model ?? null }),
       teleport: (x: number, z: number, yaw = 0) => this.teleport(x, z, yaw),
+      /** 比例檢查：目前玩家模型（含配件）的實際高度（m） */
+      charHeight: () => {
+        const root = this.char?.avatar.root;
+        if (!root) return null;
+        root.computeWorldMatrix(true);
+        const b = root.getHierarchyBoundingVectors(true, (m) => m.isEnabled() && m.isVisible && (m as { getTotalVertices?: () => number }).getTotalVertices?.() !== 0);
+        return +(b.max.y - b.min.y).toFixed(2);
+      },
+      /** 實際遊戲鏡頭（玩家可調範圍內）：俯角 beta、距離 dist，跟隨鏡頭照常運作 */
+      camView: (beta: number, dist: number) => {
+        const c = TUNING.camera;
+        this.camera.snap(this.pos, this.alphaBehind(this.yaw), Math.min(c.maxBeta, Math.max(c.minBeta, beta)), Math.min(c.maxDistance, Math.max(c.minDistance, dist)));
+      },
       stats: () => this.world.stats(),
       streamLog: () => this.world.streamLog.slice(),
       layout: () => ({ zones: ZONES, spawns: SPAWNS, arena: ARENA, reactor: REACTOR, entry: JUNKYARD_ENTRY_PORTAL, arrival: JUNKYARD_ARRIVAL, fieldPortal: FIELD_NORTH_PORTAL_PROPOSAL, fieldArrival: FIELD_NORTH_ARRIVAL, route: MAIN_ROUTE, tourStops: TOUR_STOPS }),
@@ -743,6 +756,45 @@ class JunkyardPage {
       },
       ground: (x: number, z: number) => groundHeight(x, z),
       /** V3：地標 GLB 載入結果與每個擺放的世界包圍盒 */
+      /** 比例檢查用（截圖／測試）：在指定地面位置放一個 GLB（怪物等），等比縮放到指定高度；回傳實際高度 */
+      scaleRef: async (refs: { file: string; h: number; x: number; z: number; yaw?: number }[]) => {
+        const { SceneLoader } = await import("@babylonjs/core");
+        await import("@babylonjs/loaders/glTF");
+        const out: { file: string; h: number; ok: boolean }[] = [];
+        for (const r of refs) {
+          try {
+            const c = await SceneLoader.LoadAssetContainerAsync(`${import.meta.env.BASE_URL}models/`, r.file, this.scene);
+            c.addAllToScene();
+            const root = c.meshes[0]!;
+            root.computeWorldMatrix(true);
+            const b = root.getHierarchyBoundingVectors(true);
+            const k = r.h / Math.max(1e-3, b.max.y - b.min.y);
+            root.scaling.scaleInPlace(k);
+            root.rotationQuaternion = null;
+            root.rotation.y = r.yaw ?? 0;
+            root.position.set(r.x, this.grid.height(r.x, r.z) - b.min.y * k, r.z);
+            c.animationGroups[0]?.start(true);
+            out.push({ file: r.file, h: r.h, ok: true });
+          } catch {
+            out.push({ file: r.file, h: r.h, ok: false });
+          }
+        }
+        return out;
+      },
+      /** 資源釋放測試：釋放地標前後的場景資源數 */
+      disposeLandmarks: () => {
+        const count = (): { meshes: number; materials: number; textures: number; geometries: number; particles: number; engineTextures: number } => ({
+          meshes: this.scene.meshes.length,
+          materials: this.scene.materials.length,
+          textures: this.scene.textures.length,
+          geometries: this.scene.geometries.length,
+          particles: this.scene.particleSystems.length,
+          engineTextures: this.engine.getLoadedTexturesCache().length,
+        });
+        const before = count();
+        const r = this.lmMod ? this.lmMod.disposeLandmarks(this.world) : null;
+        return { before, after: count(), released: r };
+      },
       landmarks: () => {
         const boxes: Record<string, { min: number[]; max: number[] }> = {};
         for (const [k, n] of this.lmNodes ?? []) {

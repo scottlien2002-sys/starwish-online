@@ -41,7 +41,9 @@ function blobUrl(kind: "flame" | "smoke" | "spark" | "mote"): string {
       const y = r + (rnd() - 0.5) * r * 0.7;
       const rr = r * (0.35 + rnd() * 0.35);
       const gr = g.createRadialGradient(x, y, 0, x, y, rr);
-      gr.addColorStop(0, "rgba(255,255,255,0.42)");
+      // V3.1：中心較濃（0.42 → 0.62），亮背景（天空、山壁）前也看得到煙團輪廓
+      gr.addColorStop(0, "rgba(255,255,255,0.62)");
+      gr.addColorStop(0.55, "rgba(255,255,255,0.28)");
       gr.addColorStop(1, "rgba(255,255,255,0)");
       g.fillStyle = gr;
       g.fillRect(0, 0, S, S);
@@ -226,53 +228,61 @@ export class LandmarkFx {
     // 低畫質：省下火星與副煙囪（每座熔爐少 2 次繪製），主煙囪與火焰保留
     if (this.tier === "low") sp.dispose();
     else g.systems.push({ ps: sp, base: 5 });
-    // 煙囪煙霧：從實際開口冒出，慢慢上升、隨高度擴散淡出，帶一點風向飄移
-    const wind = new Vector3(0.28, 0, 0.16);
+    // 煙囪煙霧：從實際開口冒出，慢慢上升、隨高度擴散淡出，隨陣風飄移（V3.1：較濃、灰褐色、一開始就有完整煙柱）
+    const wind = new Vector3(0.32, 0, 0.18);
+    const smokes: { ps: ParticleSystem; k: number; ph: number }[] = [];
     A.chimneys.forEach((c, i) => {
       if (this.tier === "low" && i > 0) return;
-      const sm = this.ps(`${id}_smoke${i}`, i === 0 ? 46 : 30, "smoke");
+      const sm = this.ps(`${id}_smoke${i}`, i === 0 ? 56 : 36, "smoke");
       sm.emitter = W(c.x, c.y + 0.005, c.z);
-      const rr = c.r * unit * 0.6;
+      const rr = c.r * unit * 0.55;
       sm.minEmitBox = new Vector3(-rr, 0, -rr);
       sm.maxEmitBox = new Vector3(rr, 0.1, rr);
-      const gray = 0.32 + rnd() * 0.06;
-      sm.color1 = new Color4(gray, gray * 0.97, gray * 0.95, 0.55);
-      sm.color2 = new Color4(gray + 0.1, gray + 0.1, gray + 0.12, 0.45);
-      sm.colorDead = new Color4(0.62, 0.62, 0.66, 0);
-      sm.minSize = c.r * unit * 1.1;
-      sm.maxSize = c.r * unit * 1.7;
-      sm.addSizeGradient(0, 0.6);
-      sm.addSizeGradient(0.5, 1.6);
-      sm.addSizeGradient(1, 2.8);
-      sm.addColorGradient(0, new Color4(gray, gray, gray, 0));
-      sm.addColorGradient(0.08, new Color4(gray, gray * 0.98, gray * 0.96, 0.5));
-      sm.addColorGradient(0.6, new Color4(gray + 0.12, gray + 0.12, gray + 0.14, 0.28));
-      sm.addColorGradient(1, new Color4(0.62, 0.62, 0.66, 0));
-      sm.minLifeTime = 4.5 + rnd();
-      sm.maxLifeTime = 7.5 + rnd() * 1.5;
-      sm.direction1 = new Vector3(-0.12, 1, -0.12);
-      sm.direction2 = new Vector3(0.12, 1, 0.12);
+      const gray = 0.27 + rnd() * 0.05;
+      const warm = (v: number, a: number): Color4 => new Color4(v * 1.04, v, v * 0.94, a);
+      sm.color1 = warm(gray, 0.8);
+      sm.color2 = warm(gray + 0.06, 0.7);
+      sm.colorDead = warm(0.6, 0);
+      sm.minSize = c.r * unit * 1.2;
+      sm.maxSize = c.r * unit * 1.8;
+      sm.addSizeGradient(0, 0.55);
+      sm.addSizeGradient(0.35, 1.5);
+      sm.addSizeGradient(1, 3.2);
+      // 出口最濃（深灰褐）→ 上升變淡、偏亮灰 → 消散
+      sm.addColorGradient(0, warm(gray, 0));
+      sm.addColorGradient(0.05, warm(gray, 0.82));
+      sm.addColorGradient(0.35, warm(gray + 0.1, 0.6));
+      sm.addColorGradient(0.75, warm(gray + 0.24, 0.26));
+      sm.addColorGradient(1, warm(0.6, 0));
+      sm.minLifeTime = 5 + rnd();
+      sm.maxLifeTime = 8 + rnd() * 1.5;
+      sm.direction1 = new Vector3(-0.1, 1, -0.1);
+      sm.direction2 = new Vector3(0.1, 1, 0.1);
       sm.minEmitPower = 0.9 * k;
       sm.maxEmitPower = 1.5 * k;
-      sm.gravity = wind.scale(0.5 + rnd() * 0.4);
-      sm.minAngularSpeed = -0.35;
-      sm.maxAngularSpeed = 0.35;
+      sm.gravity = wind.clone();
+      sm.minAngularSpeed = -0.3;
+      sm.maxAngularSpeed = 0.3;
       sm.minInitialRotation = 0;
       sm.maxInitialRotation = Math.PI * 2;
-      g.systems.push({ ps: sm, base: i === 0 ? 5.5 : 3.5 });
+      // 進入範圍啟動時直接是完整煙柱（不會從空的煙囪慢慢長出來）
+      sm.preWarmCycles = 70;
+      sm.preWarmStepOffset = 6;
+      smokes.push({ ps: sm, k: 0.55 + rnd() * 0.35, ph: rnd() * 20 });
+      g.systems.push({ ps: sm, base: i === 0 ? 7 : 4.5 });
     });
     // 藍色排氣管：間歇白色蒸氣
-    const st = this.ps(`${id}_steam`, 24, "smoke");
+    const st = this.ps(`${id}_steam`, 30, "smoke");
     st.emitter = W(A.vent.x, A.vent.y + 0.01, A.vent.z);
     st.minEmitBox = new Vector3(-0.08 * k, 0, -0.08 * k);
     st.maxEmitBox = new Vector3(0.08 * k, 0.05, 0.08 * k);
-    st.color1 = new Color4(0.95, 0.96, 1, 0.5);
-    st.color2 = new Color4(0.85, 0.88, 0.95, 0.4);
+    st.color1 = new Color4(0.97, 0.98, 1, 0.85);
+    st.color2 = new Color4(0.9, 0.92, 0.97, 0.75);
     st.colorDead = new Color4(1, 1, 1, 0);
-    st.minSize = 0.35 * k;
-    st.maxSize = 0.6 * k;
-    st.addSizeGradient(0, 0.5);
-    st.addSizeGradient(1, 2.4);
+    st.minSize = 0.4 * k;
+    st.maxSize = 0.7 * k;
+    st.addSizeGradient(0, 0.45);
+    st.addSizeGradient(1, 2.8);
     st.minLifeTime = 1.2;
     st.maxLifeTime = 2;
     st.direction1 = new Vector3(-0.2, 1, -0.2);
@@ -292,8 +302,15 @@ export class LandmarkFx {
       gm.emissiveColor.set(1 * fl, 0.42 * fl, 0.12 * fl);
       // 間歇蒸氣：每 period 秒噴 1.3 秒
       const u = (t + phase) % period;
-      steam.base = u < 1.3 ? 14 : 0;
+      // 噴發開頭 0.3 秒最強（「嘶」一聲的感覺），之後減弱到停
+      steam.base = u < 0.3 ? 26 : u < 1.4 ? 12 : 0;
       if (g.running) st.emitRate = steam.base * this.cap;
+      // 陣風：風向與強度緩慢變化，兩座熔爐不同步
+      for (const sm of smokes) {
+        const gust = sm.k * (0.75 + 0.35 * Math.sin(t * 0.23 + sm.ph) + 0.15 * Math.sin(t * 0.71 + sm.ph * 2));
+        const turn = 0.35 * Math.sin(t * 0.09 + sm.ph);
+        sm.ps.gravity.set((wind.x * Math.cos(turn) - wind.z * Math.sin(turn)) * gust, 0.05, (wind.x * Math.sin(turn) + wind.z * Math.cos(turn)) * gust);
+      }
     };
     this.groups.push(g);
   }
@@ -304,7 +321,7 @@ export class LandmarkFx {
     model.computeWorldMatrix(true);
     const W = (v: readonly number[]): Vector3 => Vector3.TransformCoordinates(new Vector3(v[0]!, v[1]!, v[2]!), model.getWorldMatrix());
     // 雙眼微弱魔導光（往臉外推一點，避免被面罩遮住）
-    for (const e of A.eyes) halo(W([e[0] - 0.012, e[1], e[2]]), 0.065 * unit, [1, 0.62, 0.25], { alpha: 0.55, pulse: { speed: 0.9, amp: 0.3 }, flicker: { phase: e[2] * 30 } });
+    for (const e of A.eyes) halo(W([e[0] - 0.012, e[1], e[2]]), 0.075 * unit, [1, 0.62, 0.25], { alpha: 0.8, pulse: { speed: 0.9, amp: 0.3 }, flicker: { phase: e[2] * 30 } });
     // 胸口核心：緩慢呼吸式發光
     const core = W(A.core);
     halo(W([A.core[0] - 0.01, A.core[1], A.core[2]]), 0.11 * unit, [1, 0.66, 0.24], { alpha: 0.6, pulse: { speed: 0.7, amp: 0.45 } });
@@ -412,11 +429,15 @@ export class LandmarkFx {
     this.groups.push(g);
   }
 
+  /** 釋放：粒子系統、特效網格與它們的材質、共用粒子貼圖 */
   dispose(): void {
     for (const g of this.groups) {
-      for (const s of g.systems) s.ps.dispose();
-      for (const m of g.meshes) m.dispose();
+      for (const s of g.systems) s.ps.dispose(false);
+      for (const m of g.meshes) m.dispose(false, true);
     }
     this.groups.length = 0;
+    const cached = texCache.get(this.scene);
+    if (cached) for (const t of Object.values(cached)) t?.dispose();
+    texCache.delete(this.scene);
   }
 }

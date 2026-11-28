@@ -3,10 +3,10 @@ name: Junkyard map E2E (Stage 6.8+6.9)
 # 星廢垃圾場（Claude B）：只在 feature/render-map-junkyard 執行。
 # 型別檢查 → 單元測試 → 建置 → 端對端測試（Chromium＋WebKit、三段畫質、iPhone 直向＋高畫質橫向）→ 截圖與報告推到 art-map-junkyard-e2e（一般 push，不 force）。
 # 獨立預覽網址由既有的 CI & Deploy 部署到 /preview-map-junkyard/（瘦身部署，只替換自己的資料夾）。
-# dev/junkyard-v2、dev/junkyard-v3、dev/junkyard-v3-lm（後續開發）：不觸發任何部署；結果推到 art-map-junkyard-v2-e2e／-v3-e2e／-v3lm-e2e，不覆蓋已驗收的 art-map-junkyard-e2e。
+# dev/junkyard-v2、dev/junkyard-v3、dev/junkyard-v3-lm、dev/junkyard-v3-lm-integ（與 A 現行版本的試合併）（後續開發）：不觸發任何部署；結果推到 art-map-junkyard-v2-e2e／-v3-e2e／-v3lm-e2e，不覆蓋已驗收的 art-map-junkyard-e2e。
 on:
   push:
-    branches: [feature/render-map-junkyard, dev/junkyard-v2, dev/junkyard-v3, dev/junkyard-v3-lm]
+    branches: [feature/render-map-junkyard, dev/junkyard-v2, dev/junkyard-v3, dev/junkyard-v3-lm, dev/junkyard-v3-lm-integ]
   workflow_dispatch:
 
 permissions:
@@ -45,7 +45,7 @@ jobs:
       - name: Push results to art branch (normal push, no force)
         if: always()
         env:
-          ART_BRANCH: ${{ github.ref_name == 'dev/junkyard-v3-lm' && 'art-map-junkyard-v3lm-e2e' || github.ref_name == 'dev/junkyard-v3' && 'art-map-junkyard-v3-e2e' || github.ref_name == 'dev/junkyard-v2' && 'art-map-junkyard-v2-e2e' || 'art-map-junkyard-e2e' }}
+          ART_BRANCH: ${{ github.ref_name == 'dev/junkyard-v3-lm-integ' && 'art-map-junkyard-v3lm-integ-e2e' || github.ref_name == 'dev/junkyard-v3-lm' && 'art-map-junkyard-v3lm-e2e' || github.ref_name == 'dev/junkyard-v3' && 'art-map-junkyard-v3-e2e' || github.ref_name == 'dev/junkyard-v2' && 'art-map-junkyard-v2-e2e' || 'art-map-junkyard-e2e' }}
         run: |
           mkdir -p out/junkyard
           echo "{\"commit\":\"${GITHUB_SHA}\",\"run\":\"${GITHUB_RUN_ID}\",\"builtAt\":\"$(date -u +%FT%TZ)\"}" > out/junkyard/build.json

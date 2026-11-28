@@ -87,7 +87,8 @@ async function shots(page, prefix) {
 {
   const STOPS = ["entry", "central", "recycle", "factory", "platform", "core"];
   const res = {};
-  for (const [tag, extra] of [["v2look", "&jylight=v2&jyao=0&jyhalo=0"], ["v3look", ""]]) {
+  // 光暈繪製次數比較只看光影設定：兩邊都關閉地標 GLB（地標粒子依時間啟停，例如熔爐間歇蒸氣，會讓 Draw Calls 隨機差 1）
+  for (const [tag, extra] of [["v2look", "&jylight=v2&jyao=0&jyhalo=0&jylm=0"], ["v3look", "&jylm=0"]]) {
     const { ctx, page, errors } = await open(real.url, "high", extra);
     const L = await page.evaluate(() => window.__starwishJunkyard.layout());
     res[tag] = [];
@@ -171,6 +172,23 @@ for (const q of ["high", "medium", "low"]) {
   run.perf = pf;
   check(`${q}：沒有錯誤、沒有 4xx、沒有 Context Lost`, errors.length === 0 && bad.length === 0 && pf.contextLost === 0, { errors: errors.slice(0, 3), bad, glbReq: glbReq.length });
   report.runs.push(run);
+  await ctx.close();
+}
+
+// ---------- 2b：資源釋放（離開地圖、不重新載入頁面時） ----------
+{
+  const { ctx, page, errors } = await open(real.url, "high");
+  await page.evaluate(() => window.__starwishJunkyard.teleport(-62.5, 81.4, 0));
+  await page.waitForFunction(() => (window.__starwishJunkyard.landmarks().fx?.running ?? 0) > 0, null, { timeout: 20000 }).catch(() => {});
+  const d = await page.evaluate(() => window.__starwishJunkyard.disposeLandmarks());
+  await page.waitForTimeout(2500);
+  const after = await page.evaluate(() => ({ fx: window.__starwishJunkyard.landmarks().fx, perf: window.__starwishJunkyard.perf() }));
+  report.dispose = { ...d, fxAfter: after.fx };
+  check(
+    "資源釋放：地標網格、材質、貼圖、粒子全部釋放，之後繼續正常繪製",
+    d.released && d.released.containers >= 6 && d.after.engineTextures <= d.before.engineTextures - 12 && d.after.particles <= d.before.particles - 8 && d.after.meshes < d.before.meshes && after.fx === null && errors.length === 0 && after.perf.contextLost === 0,
+    { ...d, errors: errors.slice(0, 3) },
+  );
   await ctx.close();
 }
 

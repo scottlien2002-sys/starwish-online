@@ -28,7 +28,14 @@ export interface LandmarkLoadReport {
 /** 測試與報告用：每個擺放的根節點、吊車組裝 */
 export const LANDMARK_NODES = new Map<string, TransformNode>();
 export const CRANE_RIGS = new Map<string, CraneRig>();
-export const LANDMARK_STATE: { fx: LandmarkFx | null } = { fx: null };
+export const LANDMARK_STATE: {
+  fx: LandmarkFx | null;
+  /** 釋放用：載入的容器、轉換後的材質、吊車鋼索材質、每幀更新函式、地標光暈標籤 */
+  containers: AssetContainer[];
+  materials: StandardMaterial[];
+  updater: ((dt: number, t: number, px: number, pz: number) => void) | null;
+  haloTags: string[];
+} = { fx: null, containers: [], materials: [], updater: null, haloTags: [] };
 
 function toStandard(scene: Scene, m: Material, cache: Map<Material, StandardMaterial>): StandardMaterial {
   const hit = cache.get(m);
@@ -88,6 +95,7 @@ export async function loadLandmarks(world: JunkyardWorld, opts: { baseUrl: strin
     const t0 = performance.now();
     try {
       const c = await SceneLoader.LoadAssetContainerAsync(opts.baseUrl, file, scene);
+      LANDMARK_STATE.containers.push(c);
       rep.loaded.push({ model: key, file, tris: c.meshes.reduce((a, m) => a + m.getTotalIndices() / 3, 0), materials: c.materials.length, textures: c.textures.length, ms: Math.round(performance.now() - t0), lod: false });
       return c;
     } catch (e) {
@@ -109,9 +117,10 @@ export async function loadLandmarks(world: JunkyardWorld, opts: { baseUrl: strin
   const fx = new LandmarkFx(scene, opts.tier);
   LANDMARK_STATE.fx = fx;
   const haloFn =
-    (tag: string) =>
-    (p: Vector3, size: number, color: [number, number, number], o: object): void =>
-      world.halo(p.x, p.y, p.z, size, color, o as Parameters<JunkyardWorld["halo"]>[5], tag);
+    (tag: string) => {
+      LANDMARK_STATE.haloTags.push(tag);
+      return (p: Vector3, size: number, color: [number, number, number], o: object): void => world.halo(p.x, p.y, p.z, size, color, o as Parameters<JunkyardWorld["halo"]>[5], tag);
+    };
 
   // ---------------- 巨像、熔爐、反應爐 ----------------
   let furnaceSeed = 1;
@@ -169,6 +178,7 @@ export async function loadLandmarks(world: JunkyardWorld, opts: { baseUrl: strin
   const grab = containers.get("grab");
   if (tower && boom && grab) {
     const cableMat = new StandardMaterial("jylm_cable_m", scene);
+    LANDMARK_STATE.materials.push(cableMat);
     cableMat.diffuseColor = new Color3(0.16, 0.15, 0.14);
     cableMat.specularColor = new Color3(0.3, 0.3, 0.3);
     for (const spec of CRANE_SPECS) {
@@ -189,15 +199,58 @@ export async function loadLandmarks(world: JunkyardWorld, opts: { baseUrl: strin
       for (const m of rig.meshes) world.registerLandmarkMesh(m as Mesh, zone, true);
       rep.hidden += world.hideProcedural(`crane:${spec.id}:tower`) + world.hideProcedural(`crane:${spec.id}:jib`) + world.hideProcedural(`crane:${spec.id}:claw`);
       // 塔頂紅色警示燈（旋轉軸心正上方、駕駛室頂，不隨吊臂移動）
+      LANDMARK_STATE.haloTags.push(`fx:${spec.id}`);
       world.halo(spec.x, gy + rig.pivotY + 0.33 * spec.boomUnit, spec.z, 1.6 * (spec.boomUnit / 19), [1, 0.25, 0.2], { alpha: 0.8, pulse: { speed: 4.2, amp: 0.9, phase: spec.phase } }, `fx:${spec.id}`);
       CRANE_RIGS.set(spec.id, rig);
       LANDMARK_NODES.set(`${spec.id}:tower`, rig.root);
       rep.placed.push({ id: spec.id, model: "crane", unit: spec.towerUnit, size: [+(0.385 * spec.towerUnit).toFixed(2), +(rig.pivotY + 0.344 * spec.boomUnit).toFixed(2), +(0.98 * spec.boomUnit).toFixed(2)] });
     }
   }
-  world.updaters.push((dt, t, px, pz) => {
+  const updater = (dt: number, t: number, px: number, pz: number): void => {
     for (const r of CRANE_RIGS.values()) r.update(t);
     fx.update(dt, px, pz, scene.activeCamera);
-  });
+  };
+  LANDMARK_STATE.updater = updater;
+  LANDMARK_STATE.materials.push(...cache.values());
+  world.updaters.push(updater);
   return rep;
+}
+
+/**
+ * 釋放所有地標資源（離開地圖、切換地圖而不重新載入頁面時使用）：
+ * 特效（粒子、熔煉面、反應爐核心與環）、地標網格與吊車、轉換後的材質與貼圖（HQ／Lite）、載入容器、光暈、每幀更新。
+ * 程序化地標不會恢復（呼叫後通常整張地圖一起離開）。回傳釋放的數量。
+ */
+export function disposeLandmarks(world: JunkyardWorld): { nodes: number; containers: number; materials: number } {
+  const st = LANDMARK_STATE;
+  if (st.updater) {
+    const i = world.updaters.indexOf(st.updater);
+    if (i >= 0) world.updaters.splice(i, 1);
+  }
+  st.fx?.dispose();
+  for (const tag of st.haloTags) world.disableHalos(tag);
+  let nodes = 0;
+  for (const r of CRANE_RIGS.values()) {
+    world.unregisterLandmarkMeshes(r.meshes as Mesh[]);
+    r.root.dispose(false, false);
+    nodes++;
+  }
+  for (const [id, n] of LANDMARK_NODES) {
+    if (id.includes(":tower")) continue;
+    world.unregisterLandmarkMeshes(n.getChildMeshes(false) as Mesh[]);
+    n.dispose(false, false);
+    nodes++;
+  }
+  const mats = st.materials.length;
+  for (const m of st.materials) m.dispose(true, true);
+  const cons = st.containers.length;
+  for (const c of st.containers) c.dispose();
+  CRANE_RIGS.clear();
+  LANDMARK_NODES.clear();
+  st.fx = null;
+  st.updater = null;
+  st.containers = [];
+  st.materials = [];
+  st.haloTags = [];
+  return { nodes, containers: cons, materials: mats };
 }
