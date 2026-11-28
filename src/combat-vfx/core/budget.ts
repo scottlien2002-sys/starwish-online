@@ -60,6 +60,13 @@ export class VfxBudget {
   private live = new Map<number, { owner: VfxOwner; particles: number; critical: boolean }>();
   private next = 1;
   readonly stats: BudgetStats = { active: 0, activeRemote: 0, activeCritical: 0, particles: 0, granted: 0, denied: 0, scaled: 0, deniedBy: {} };
+  /** 統計歸零（預熱後呼叫：預熱產生的核准／拒絕不算進測試統計） */
+  resetStats(): void {
+    this.stats.granted = 0;
+    this.stats.denied = 0;
+    this.stats.scaled = 0;
+    this.stats.deniedBy = {};
+  }
 
   constructor(q: VfxQualityConfig, policy: Partial<BudgetPolicy> = {}) {
     this.q = q;

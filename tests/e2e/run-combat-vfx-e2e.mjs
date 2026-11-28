@@ -31,6 +31,9 @@ for (const name of browsers) {
     { id: "rules", url: "?lab=combat&q=low&g=male&mute=1" },
     { id: "perf", url: "?lab=combat&q=medium&g=male&mute=1" },
     { id: "audio", url: "?lab=combat&q=low&g=male&mute=1&ai=0" },
+    // 特效預熱（改善 1% Low）：載入後施放全部技能＋職業特效，不應再編譯新的 shader；cold＝關掉預熱對照
+    { id: "shader-warm", url: "?lab=combat&q=high&g=male&mute=1&ai=0" },
+    { id: "shader-cold", url: "?lab=combat&q=high&g=male&mute=1&ai=0&prewarm=0" },
     // 手機介面：直向／橫向、Safe Area、開發者選單、縮放、統計數字（iPhone 實機回報的問題）
     { id: "ui-portrait", url: "?lab=combat&q=low&g=male&mute=1&ai=0", viewport: { width: 390, height: 844 } },
     { id: "ui-landscape", url: "?lab=combat&q=low&g=female&mute=1&ai=0", viewport: { width: 844, height: 390 } },
@@ -38,7 +41,8 @@ for (const name of browsers) {
     { id: "showcase", url: "?lab=combat&q=high&g=male&mute=1&manual=1&ai=0" },
     { id: "showcase-meadow", url: "?lab=combat&q=high&g=female&mute=1&manual=1&ai=0&env=meadow" },
   ]) {
-    if ((tcase.id.startsWith("showcase") || tcase.id === "perf") && (remote || name !== "chromium")) continue;
+    if ((tcase.id.startsWith("showcase") || tcase.id === "perf" || tcase.id === "shader-cold") && (remote || name !== "chromium")) continue;
+    if (remote && tcase.id === "shader-warm") continue;
     if (!onlyCases.length && name === "webkit" && (tcase.id === "meadow-high" || tcase.id === "rules")) continue;
     if (onlyCases.length && !onlyCases.includes(tcase.id)) continue;
     if (!onlyCases.length && name === "webkit" && tcase.id === "female-high") continue; // WebKit 跑兩組即可（時間）
@@ -283,6 +287,29 @@ for (const name of browsers) {
         const tierOn = await page.evaluate(() => document.querySelector('.cv-dev [data-tier="high"]').classList.contains("on"));
         check("選單：選單內的設定按鈕可以操作", tierOn, tierOn);
         await page.click(".cv-devbtn");
+      } else if (tcase.id.startsWith("shader-")) {
+        const s0 = await page.evaluate(() => window.__cvfx.shaderCount());
+        const pw = await page.evaluate(() => window.__cvfx.prewarm());
+        for (const sk of SKILLS) {
+          await page.evaluate((k) => window.__cvfx.cast(k), sk);
+          await page.waitForFunction(() => !window.__cvfx.busy(), null, { timeout: 30000 }).catch(() => {});
+          await sleep(600);
+        }
+        for (const cls of await page.evaluate(() => window.__cvfx.classes)) {
+          await page.evaluate((c) => window.__cvfx.classDemo(c), cls);
+          await sleep(2500);
+        }
+        await page.evaluate(() => window.__cvfx.setEnv && window.__cvfx.setEnv("meadow"));
+        await page.evaluate(() => window.__cvfx.cast("star_meteor"));
+        await sleep(3000);
+        const s1 = await page.evaluate(() => window.__cvfx.shaderCount());
+        run.results.shaders = { beforeCasts: s0, afterCasts: s1, newDuringPlay: s1 - s0, prewarm: pw };
+        if (tcase.id === "shader-warm") {
+          check("特效預熱：載入時已預先生成全部特效（不受同時上限影響）", pw && pw.spawned >= 60 && pw.shadersAfter > pw.shadersBefore, pw);
+          check("特效預熱：施放 6 個技能＋6 種職業特效＋白天場景後，沒有再編譯新的 shader（第一次施放不卡頓）", s1 - s0 <= 1, run.results.shaders);
+        } else {
+          check("對照（關閉預熱）：記錄施放時才編譯的 shader 數", true, run.results.shaders);
+        }
       } else if (tcase.id === "audio") {
         // 音效 V2：每個音效離線算出波形（星夜／白天兩種殘響），輸出 WAV 試聽檔並檢查音量
         const adir = `${outDir}audio-${name}/`;

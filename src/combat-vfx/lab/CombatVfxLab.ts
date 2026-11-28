@@ -35,6 +35,7 @@ import { ScreenFx } from "../fx/ScreenFx.ts";
 import { ArenaTerrain, type CircleObstacle } from "../core/terrain.ts";
 import { behaviourForLevel, wantsTarget, onDamaged, type AggroState, type MonsterBehaviour } from "../core/monsterRules.ts";
 import { CLASS_VFX, type ClassDemoStep } from "../core/classes.ts";
+import { FX_KEY_LIST } from "../core/classKits.ts";
 import { LAB_MONSTERS } from "./monsterSpecs.ts";
 import { RiggedMonsterVisual, riggedAssetAvailable } from "../../monsters/rigged/RiggedMonsterVisual.ts";
 import { BASE_POSE } from "../../monsters/anim/types.ts";
@@ -1248,6 +1249,16 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
     renderStats.triangles = Math.round(scene.getActiveIndices() / 3);
     renderStats.activeMeshes = scene.getActiveMeshes().length;
   });
+  // 特效預熱（Stage 3.1）：每種特效先生成一次、等 shader 編譯完 → 第一次施放不卡頓（改善 1% Low）。&prewarm=0 可關掉比較
+  const shaderCount = (): number => Object.keys((engine as unknown as { _compiledEffects?: Record<string, unknown> })._compiledEffects ?? {}).length;
+  const prewarmOn = qs.get("prewarm") !== "0";
+  let prewarmStats: { ms: number; spawned: number; materials: number; meshes: number; systems: number; shadersBefore: number; shadersAfter: number } | null = null;
+  if (prewarmOn) {
+    const before = shaderCount();
+    const at = player.pos.add(new Vector3(0, 0, 2.5));
+    const r = await vfx.prewarm(at, FX_KEY_LIST, ["steel"]);
+    prewarmStats = { ...r, shadersBefore: before, shadersAfter: shaderCount() };
+  }
   if (!manual) {
     scene.onBeforeRenderObservable.add(() => frame(engine.getDeltaTime() / 1000));
     engine.runRenderLoop(() => scene.render());
@@ -1286,6 +1297,10 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
     perfSnapshot,
     perfScene,
     perfMode,
+    /** 測試：已編譯的 shader 數、預熱結果 */
+    shaderCount,
+    prewarm: () => prewarmStats,
+    setEnv: (e: "dark" | "meadow") => setEnv(e),
     /** 測試：鏡頭距離、HUD 的開發者選單 */
     camRadius: () => cam.radius,
     setDevMenu: (on: boolean) => hud.setDev(on),
