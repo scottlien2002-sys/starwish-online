@@ -3,6 +3,20 @@
 日期：2026-11-28　作者：Claude C
 依據：Claude A 的 `claude/Starwish_Shared_Assets_Spec.md`（工具 `tools/shared-assets.mjs`、`tools/pages-inventory.mjs`，從 A 的 `tools/pages-capacity` 複製到 C 的分支，沒有修改 A 的分支）
 
+## 0. 部署順序更正（2026-11-28 11:54 使用者補充）
+
+共用資產接入順序統一為 **D → C → B**，由 Claude A 統籌部署時機。
+
+- 本報告的 C 部署（gh-pages `5199435`、`da2420f`、`d74fa05`、`1977d78`，10:07～11:40）是在收到補充指示**之前**完成的，沒有等 D 接入、也沒有經 A 確認。
+- 收到指示後：
+  - **已暫停 C 的所有 gh-pages 部署**：`.github/cvfx-deploy-hold` 存在時，CI 只跑測試、不部署。
+  - 取消了自己一個尚未部署的 CI run（46104310926），gh-pages 沒有再被 C 改動。
+  - Stage 1／2 分支不再推送，所以不會觸發部署。
+- 已部署的內容是否保留，由 A 決定：
+  - **保留**：目前所有預覽驗證正常。D 的 mp81／mp82 引用的 12 個 C 檔案完全沒動，不影響 D 接入。
+  - **還原**：`backup/gh-pages-20261128-pre-c-shared-assets`（`89281e2`）保存了接入前的 C 三個資料夾。還原本身也是一次部署，需由 A 安排時機。
+- A 確認後刪除 `.github/cvfx-deploy-hold` 即可恢復部署。
+
 ## 1. 容量
 
 | 時間點（gh-pages commit） | 合計（`du -sm`） | 說明 |
