@@ -70,8 +70,8 @@ const p = (key: string, stem: string, size: LandmarkPart["size"], o: Partial<Lan
   ...o,
 });
 
-/** 程序化巨像的臉朝本地 −Z；GLB 正面朝 +Z → 多轉半圈 */
-const COLOSSUS_FACE = COLOSSUS.yaw + Math.PI;
+/** GLB 巨像的臉朝向主路線「機械巨像遺骸前」(100, −34)：玩家沿路線走來時正面看到它 */
+const COLOSSUS_FACE = Math.atan2(100 - COLOSSUS.x, -34 - COLOSSUS.z);
 
 export const LANDMARK_SLOTS: readonly LandmarkSlot[] = [
   {
