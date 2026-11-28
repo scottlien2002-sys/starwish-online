@@ -146,7 +146,7 @@ export function slabTexels(N = 256, seed = 23, slabs = 4): Uint8Array {
     const cx = Math.floor(r() * N);
     const cy = Math.floor(r() * N);
     const rad = (N / slabs) * (0.12 + r() * 0.3);
-    const k = 0.1 + r() * 0.14;
+    const k = 0.05 + r() * 0.09;
     stamp(buf, N, cx, cy, rad, (t) => 1 - k + k * t * t, [1, 1.03, 1.08]);
   }
   // 細刮痕
