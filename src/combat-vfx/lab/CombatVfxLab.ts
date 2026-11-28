@@ -1256,10 +1256,10 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
   if (prewarmOn) {
     const before = shaderCount();
     const at = player.pos.add(new Vector3(0, 0, 2.5));
-    // 整體最多 8 秒（再慢也不擋開機）
+    // 整體最多 15 秒（CI 軟體繪圖很慢；手機上不到 1 秒）
     const r = await Promise.race([
       vfx.prewarm(at, FX_KEY_LIST, ["steel"]),
-      new Promise<{ ms: number; spawned: number; timeouts: number; materials: number; meshes: number; systems: number }>((res) => setTimeout(() => res({ ms: 8000, spawned: -1, timeouts: -1, materials: 0, meshes: 0, systems: 0 }), 8000)),
+      new Promise<{ ms: number; spawned: number; timeouts: number; materials: number; meshes: number; systems: number }>((res) => setTimeout(() => res({ ms: 15000, spawned: -1, timeouts: -1, materials: 0, meshes: 0, systems: 0 }), 15000)),
     ]);
     vfx.cancelPrewarm();
     vfx.clear();

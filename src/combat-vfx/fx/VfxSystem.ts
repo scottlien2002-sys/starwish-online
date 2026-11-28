@@ -1030,7 +1030,7 @@ export class VfxSystem {
   /**
    * 預熱（Stage 3.1，改善 1% Low）：載入時把每種特效、投射物都先生成一次並等 shader 編譯完，再收回物件池。
    * 第一次施放某個技能時就不會因為建立網格／粒子系統、編譯 shader 而卡一下。
-   * 一次只放幾個（不受同時特效上限影響），每批都等 scene.whenReadyAsync() 再清掉。
+   * 一次只放幾個（不受同時特效上限影響），每批畫 2 格就清掉；iPhone 上約 30 格、不到 1 秒。
    */
   async prewarm(at: Vector3, keys: readonly FxKey[], palettes: readonly Palette[] = ["steel"]): Promise<{ ms: number; spawned: number; timeouts: number; materials: number; meshes: number; systems: number }> {
     const t0 = performance.now();
@@ -1051,18 +1051,18 @@ export class VfxSystem {
       jobs.push(() => this.hitFx(at, ["hitFlash", "hitSpark"], true, { palette }));
     }
     let spawned = 0;
-    let timeouts = 0;
+    const timeouts = 0;
     this.prewarmCancelled = false;
-    for (let i = 0; i < jobs.length && !this.prewarmCancelled; i += 4) {
-      for (const j of jobs.slice(i, i + 4)) {
+    // 每批 8 個：生成 → 畫 2 格（觸發 shader 編譯與 GPU 上傳）→ 收回物件池。不等 whenReady（場景其他物件可能一直未就緒）
+    for (let i = 0; i < jobs.length && !this.prewarmCancelled; i += 8) {
+      for (const j of jobs.slice(i, i + 8)) {
         j();
         spawned++;
       }
-      // 最多等 1.5 秒（某些物件可能一直回報未就緒 → 不能讓載入卡住）
-      const ready = await Promise.race([this.scene.whenReadyAsync().then(() => true), new Promise<boolean>((r) => setTimeout(() => r(false), 1500))]);
-      if (!ready) timeouts++;
+      this.scene.render();
       this.scene.render();
       this.clear();
+      await new Promise<void>((r) => setTimeout(r, 0));
     }
     this.budget.resetStats();
     return { ms: Math.round(performance.now() - t0), spawned, timeouts, materials: this.mats.size, meshes: this.stats.pooledMeshes, systems: this.stats.pooledSystems };
