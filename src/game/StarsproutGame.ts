@@ -150,7 +150,7 @@ export interface PlayApi {
   /** Stage 7.5：武器掛載測試（Claude C 展示武器）；回傳掛點與手骨世界座標 */
   weaponTest(kind: "sword" | "staff" | null, hand?: "R" | "L"): { attached: boolean; socket: number[] | null; hand: number[] | null; dist: number | null };
   /** Stage 7.5 第二階段：多位玩家共用模型貼圖（載入 n 個共用 n75 Lite，回報貼圖／材質數，之後移除） */
-  sharedAvatarTest(n: number): Promise<{ n: number; texBefore: number; texAfterFirst: number; texAfterAll: number; materials: number; meshes: number; containers: number }>;
+  sharedAvatarTest(n: number): Promise<{ n: number; texBefore: number; texAfterFirst: number; texAfterAll: number; materials: number; usedTextures: number; meshes: number; containers: number }>;
   /** Stage 7.5 第二階段：本地玩家技能（測試用） */
   skill(id: string): { ok: boolean; reason?: string; targetId?: string | null; rate?: number };
   skillState(): { enabled: boolean; busy: boolean; active: string | null; t: number; stats: unknown; cooldowns: Record<string, number>; log: unknown[]; audio: boolean; trail: boolean; fx: unknown } ;
@@ -1714,21 +1714,24 @@ class StarsproutGame {
       skill: (id: string) => self.castSkill(id),
       sharedAvatarTest: async (n: number) => {
         const sc = self.scene;
-        const texBefore = sc.textures.length;
+        // 圖片貼圖（不含骨架的骨骼矩陣貼圖：每個骨架各一張，82 根骨骼約 5 KB）
+        const imageTex = () => sc.textures.filter((t) => t.getClassName() !== "RawTexture").length;
+        const texBefore = imageTex();
         const list: NoviceAvatar[] = [];
         let texAfterFirst = texBefore;
         for (let k = 0; k < n; k++) {
           const a = await NoviceAvatar.load(sc, { gender: "male", lod: "lite", baseUrl: `${import.meta.env.BASE_URL}models/`, version: "n75", shared: true });
           a.root.position.set(self.pos.x + 1.5 * (k + 1), self.pos.y, self.pos.z + 1.5);
           list.push(a);
-          if (k === 0) texAfterFirst = sc.textures.length;
+          if (k === 0) texAfterFirst = imageTex();
         }
-        const texAfterAll = sc.textures.length;
+        const texAfterAll = imageTex();
         const mats = new Set(list.flatMap((a) => a.meshes.map((m) => m.material).filter(Boolean)));
+        const used = new Set(list.flatMap((a) => a.meshes.flatMap((m) => m.material?.getActiveTextures() ?? [])));
         const meshes = list.reduce((x, a) => x + a.meshes.filter((m) => m.getTotalVertices() > 0).length, 0);
         await new Promise((r) => setTimeout(r, 300));
         for (const a of list) a.disposeShared();
-        return { n, texBefore, texAfterFirst, texAfterAll, materials: mats.size, meshes, containers: NoviceAvatar.sharedContainers };
+        return { n, texBefore, texAfterFirst, texAfterAll, materials: mats.size, usedTextures: used.size, meshes, containers: NoviceAvatar.sharedContainers };
       },
       skillState: () => {
         const sk = self.skills;

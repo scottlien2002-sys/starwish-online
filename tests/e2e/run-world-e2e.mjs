@@ -288,7 +288,12 @@ for (const name of browsers) {
             await wait(id === "star_meteor" ? 1100 : 600);
             await shot(skillShots[id]);
           }
-          await wait(2600);
+          // CI 軟體繪製很慢（每幀最多算 0.1 秒遊戲時間）→ 等技能真的結束，不用固定秒數
+          for (let k = 0; k < 120; k++) {
+            if (!(await V(() => window.__starwishPlay.skillState().busy))) break;
+            await wait(250);
+          }
+          await wait(300);
           const pos1 = await V(() => window.__starwishPlay.info().pos);
           castRes[id].moved = Math.hypot(pos1[0] - pos0[0], pos1[2] - pos0[2]);
         }
@@ -300,7 +305,7 @@ for (const name of browsers) {
         check("Stage 7.5 技能：施放結束後回到一般狀態（沒有卡在技能中）", !sk1.busy, sk1.active);
         const shr = await V(() => window.__starwishPlay.sharedAvatarTest(3));
         run.results.stage75Shared = shr;
-        check("Stage 7.5 多人共用貼圖：3 位 n75 共用同一份材質與貼圖（第 2、3 位不增加貼圖）", shr.texAfterAll === shr.texAfterFirst && shr.materials === 1 && shr.meshes === 3, shr);
+        check("Stage 7.5 多人共用貼圖：3 位 n75 共用同一份材質與貼圖（第 2、3 位不增加貼圖）", shr.texAfterAll === shr.texAfterFirst && shr.materials === 1 && shr.usedTextures <= 4 && shr.meshes === 3, shr);
         await V(() => window.__starwishPlay.weaponTest(null, "R"));
       }
       // ---------- Stage 7.3：七種怪物 ----------
