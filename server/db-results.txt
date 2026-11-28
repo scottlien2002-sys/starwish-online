@@ -1,0 +1,21 @@
+PASS schema.sql 套用成功
+PASS 角色 UUID 唯一
+PASS 正確 version＋epoch 可存檔
+PASS 舊 version 寫入被拒
+PASS 被搶走工作階段鎖的舊連線寫入被拒
+PASS 新連線（新 epoch）可寫入
+PASS 加 100 金幣
+PASS 同 request 重送不重複加錢
+PASS 重送後餘額仍為 100
+PASS 扣到負數整筆不生效
+PASS 扣款失敗後餘額不變
+PASS 直接把金幣改成負數被資料庫拒絕
+PASS 不合法 request_id 被拒
+PASS 轉移道具 A→B
+PASS 同 request 重送回傳原結果、不重複轉移
+PASS A 已不是擁有者，不能再轉
+PASS 舊版本號轉移被拒
+PASS 並行 20 筆轉移同一道具：成功筆數
+PASS 道具異動紀錄只有 1 筆
+PASS 20 筆請求都有寫入 request_ledger
+20 passed, 0 failed
