@@ -7,14 +7,14 @@
 
 | 項目 | 位置 |
 |---|---|
-| Stage 3 分支 | `feature/combat-vfx-stage3`（最後驗證 commit 998ca18，CI run 46084174679，225 項全部通過） |
+| Stage 3 分支 | `feature/combat-vfx-stage3`（最後驗證 commit bed1eb5，CI run 46087955797，281 項全部通過） |
 | Stage 2 備份 | `backup/combat-vfx-stage2-final`（= Stage 2 最終版 ecdf80d；`feature/combat-vfx-stage2` 也沒動） |
 | 展示網址 | https://scottlien2002-sys.github.io/starwish-online/preview-combat-vfx-s3/?lab=combat |
 | Stage 1／2 網址（保留） | `/preview-combat-vfx/`、`/preview-combat-vfx-s2/` |
 | Claude A 整合 | `docs/combat-vfx/INTEGRATION_A_STAGE3.md` |
 | Claude D 多人 | `docs/combat-vfx/MULTIPLAYER_D_STAGE3.md` |
 | 怪物交付清單 | `docs/monsters/CLAUDE_C_DELIVERY_M001-M007.md`（M002／M003 更新為 Rig V1.1） |
-| CI 結果 | `results/combat-vfx-46084174679`（report.json、效能截圖、手機介面截圖、音效 WAV 試聽檔、展示畫面序列） |
+| CI 結果 | `results/combat-vfx-46087955797`（report.json、效能截圖、手機介面截圖、音效 WAV 試聽檔、展示畫面序列） |
 
 展示頁新參數：`&multi=32`、`&perf=stage2|legacy`（比較用）、`&lodFar=14`（遠距離切換距離）。
 測試 API：`__cvfx.perfScene(n)`（固定效能場景）、`__cvfx.renderSfx(key, env)`（離線音效）。
@@ -66,6 +66,19 @@
 
 共 4 組，每組 13 項全部通過。iPhone 實機的觸控手感**未驗證**。
 
+### 第二輪（iPhone 實測 Stage 3 早期版本：即時 60、10 秒平均 59.5、1% Low 29.0；使用者實測）
+- 右上按鈕改名「⚙ 測試設定」，畫質、特效、震動、頓幀、自動展示、場景、多人、職業、攻速全部在裡面；收合時顯示「✕ 收合設定」。
+- 左上預設只顯示「FPS｜平均｜1% Low」；點一下才展開 Draw Call、三角面、網格、粒子、預算等。
+- 目標血條自動排在效能列與設定按鈕下方；效能列展開時血條跟著往下，不會重疊。
+- 操作說明改成選單內可展開／收合（預設收合）。
+- 介面高度跟著 visualViewport（Safari 網址列伸縮、LINE／FB 等 App 內嵌瀏覽器沒有 dvh 時也正確）；選單內可垂直捲動（`touch-action: pan-y`、`overscroll-behavior: contain`），整個頁面不捲動。
+- 自動測試新增尺寸：
+  - 直向：375×667、360×640、430×932、390×664（內嵌視窗的矮畫面）。
+  - 橫向：667×375、740×360、932×430。
+  - 直橫向來回切換。
+  - 每個尺寸都檢查控制項在 Safe Area 內、互不重疊；矮畫面的選單內捲動不會帶動頁面；選單內按鈕可操作。
+  - Chromium＋WebKit 手機介面共 108 項全部通過。
+
 ## 3. 效能比較（固定鏡頭、固定站位、同一可見人數）
 
 條件：
@@ -114,7 +127,7 @@
 - M002 附帶改善：Run 最低點 −2.9 → −0.4 mm；Run 腳底滑動最大 29.5 → 15.6 mm。
 - 仍有的拉伸：M002 腿很短、絨毛下緣直接蓋到蹄上；M003 翅膀和身體絨毛黏在同一個網格。要完全消除需要改模型（分開網格），本階段沒有做。
 
-## 6. 自動測試（225 項全部通過，含手機介面 52 項）
+## 6. 自動測試（281 項全部通過，含手機介面 108 項）
 
 - Chromium＋WebKit：
   - 6 個技能 × 男女 × 星夜／白天的命中同步。
@@ -132,7 +145,7 @@
   - 檢查器能抓錯。
   - 音效鍵值與 WAV 格式。
 - 公開網址：資源 HTTP 200；WebKit 實際載入通過。
-- gh-pages 總容量 651 MB（上限 1100 MB），沒有刪除其他預覽。
+- gh-pages 總容量 753 MB（上限 1100 MB），只更新原本的 Stage 3 預覽資料夾，沒有新增預覽、沒有刪除其他預覽。
 
 修正紀錄（本階段 CI 過程中發現並修好）：
 - 遠距離版第一次部署時沒畫出來：切換時把 glTF 的 `__root__` 空節點也關掉了，整個角色跟著消失。已排除空節點，並加 `lodDebug` 檢查。
