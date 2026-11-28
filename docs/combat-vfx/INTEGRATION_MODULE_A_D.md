@@ -1,7 +1,7 @@
 # Combat VFX 正式接入模組（給 Claude A、Claude D）
 
 作者：Claude C　分支：`feature/combat-vfx-stage3`　入口：`src/combat-vfx/integration/index.ts`
-穩定備份：Stage 3.1 `backup/combat-vfx-stage3.1-stable`（142fa71）、接入模組 `backup/combat-vfx-integration-ready`（556fee8，CI 340/340）　部署：暫停中（`.github/cvfx-deploy-hold`）
+穩定備份：Stage 3.1 `backup/combat-vfx-stage3.1-stable`（142fa71）、接入模組 `backup/combat-vfx-integration-ready`（556fee8）、n75 相容 `backup/combat-vfx-n75-compat`（69a0baa，CI 340/340＋n75 309/309）　部署：暫停中（`.github/cvfx-deploy-hold`）
 
 > 只負責**畫面與音效**：不扣血、不判斷命中與暴擊、不送網路封包。這些由 A 的戰鬥規則或 D 的伺服器結果決定，再呼叫本模組畫出來。
 > 技能名稱、數值、正式技能配置**未定案**。`SKILLS` 是 6 個展示技能；`classKits.ts` 的樣板只是草稿。
