@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-11-28T04:28:44.340Z",
+  "startedAt": "2026-11-28T05:35:46.351Z",
   "runs": [
     {
       "browser": "webkit",
@@ -28,7 +28,7 @@
               "count": 0,
               "equipped": null,
               "followerVisible": false,
-              "followerDist": 85.08914224105818
+              "followerDist": 85.08428172463205
             }
           }
         },
@@ -38,10 +38,10 @@
             "p3": true,
             "pipeline": false,
             "charShadow": "blob",
-            "drawCalls": 131,
-            "fps": null,
+            "drawCalls": 125,
+            "fps": 0.640450877417702,
             "contextLost": 0,
-            "triangles": 606725,
+            "triangles": 598949,
             "veg": {
               "trees": 502,
               "smalls": 566,
@@ -109,7 +109,7 @@
           "ok": true,
           "detail": {
             "attacks": 25,
-            "ms": 44560,
+            "ms": 45643,
             "kills": 3,
             "hits": 9,
             "drops": 4,
@@ -137,7 +137,7 @@
           "ok": true,
           "detail": {
             "attacks": 25,
-            "ms": 44560,
+            "ms": 45643,
             "kills": 3,
             "hits": 9,
             "drops": 4,
@@ -177,15 +177,15 @@
             "idle",
             "move",
             "move",
-            "idle",
-            "move",
-            "idle",
-            "idle",
-            "move",
             "move",
             "move",
             "move",
             "idle",
+            "move",
+            "move",
+            "move",
+            "move",
+            "idle",
             "idle",
             "move",
             "idle",
@@ -194,7 +194,7 @@
             "move",
             "move",
             "idle",
-            "idle"
+            "move"
           ]
         },
         "寵物：孵化、餵食、進化、鑑定成功": {
@@ -227,7 +227,7 @@
                 "count": 1,
                 "equipped": 1,
                 "followerVisible": true,
-                "followerDist": 60.97925295871499
+                "followerDist": 60.97461470825596
               },
               "stats": {
                 "attack": 100,
@@ -256,7 +256,7 @@
               "count": 1,
               "equipped": 1,
               "followerVisible": true,
-              "followerDist": 0.41567390415951405
+              "followerDist": 0.41103874802471646
             }
           }
         },
@@ -283,7 +283,7 @@
             "count": 1,
             "equipped": 1,
             "followerVisible": true,
-            "followerDist": 0.41567390415951405
+            "followerDist": 0.41103874802471646
           }
         },
         "寵物加成反映到角色屬性；攻速 ≤ 160 且同步到攻擊動作": {
@@ -336,15 +336,15 @@
         "實玩效能測試流程（自動打怪、報告欄位、Context Lost 0）": {
           "ok": true,
           "detail": {
-            "seconds": 11.3,
-            "avgFps": 0.969675599435825,
-            "low1Fps": 0.9606147934678195,
-            "minFps": 0.9606147934678195,
+            "seconds": 11.5,
+            "avgFps": 0.954944005556038,
+            "low1Fps": 0.9310986964618249,
+            "minFps": 0.9310986964618249,
             "avgDraw": 124,
             "kills": 0,
             "contextLost": 0,
-            "first30": 0.9696755994358252,
-            "last30": 0.969675599435825,
+            "first30": 0.9549440055560379,
+            "last30": 0.9549440055560379,
             "quality": "high",
             "gender": "male",
             "lod": "hq",
@@ -367,7 +367,7 @@
             "count": 0,
             "equipped": null,
             "followerVisible": false,
-            "followerDist": 85.09559150103301
+            "followerDist": 85.09652262739687
           }
         },
         "&charshadow=realtime 可載入": {
@@ -377,7 +377,7 @@
             "pipeline": false,
             "charShadow": "realtime",
             "drawCalls": 150,
-            "fps": 0.8372404554588077,
+            "fps": 0.8315316813570598,
             "contextLost": 0,
             "triangles": 798912,
             "veg": {
@@ -413,7 +413,7 @@
             "pipeline": false,
             "charShadow": "realtime",
             "drawCalls": 150,
-            "fps": 0.8372404554588077,
+            "fps": 0.8315316813570598,
             "contextLost": 0,
             "triangles": 798912,
             "veg": {
@@ -510,7 +510,7 @@
           },
           "kills": 0,
           "hits": 0,
-          "gameTime": 0,
+          "gameTime": 0.5,
           "drops": 0,
           "picked": 0,
           "loot": 0,
@@ -538,7 +538,7 @@
               },
               "tier": "far",
               "stride": 4,
-              "visualUpdates": 1
+              "visualUpdates": 2
             },
             {
               "id": "star_dew_bobo#2",
@@ -563,7 +563,7 @@
               },
               "tier": "far",
               "stride": 4,
-              "visualUpdates": 1
+              "visualUpdates": 2
             },
             {
               "id": "star_dew_bobo#3",
@@ -588,7 +588,7 @@
               },
               "tier": "mid",
               "stride": 2,
-              "visualUpdates": 1
+              "visualUpdates": 3
             },
             {
               "id": "star_dew_bobo#4",
@@ -613,7 +613,7 @@
               },
               "tier": "mid",
               "stride": 2,
-              "visualUpdates": 1
+              "visualUpdates": 3
             },
             {
               "id": "star_dew_bobo#5",
@@ -638,7 +638,7 @@
               },
               "tier": "mid",
               "stride": 2,
-              "visualUpdates": 1
+              "visualUpdates": 3
             },
             {
               "id": "star_dew_bobo#6",
@@ -663,7 +663,7 @@
               },
               "tier": "far",
               "stride": 4,
-              "visualUpdates": 1
+              "visualUpdates": 2
             },
             {
               "id": "moss_horn_beast#1",
@@ -699,11 +699,11 @@
                 "visible": true,
                 "animMode": "manual",
                 "shadow": false,
-                "manualSteps": 2
+                "manualSteps": 3
               },
               "tier": "far",
               "stride": 4,
-              "visualUpdates": 1
+              "visualUpdates": 2
             },
             {
               "id": "moss_horn_beast#2",
@@ -739,11 +739,11 @@
                 "visible": true,
                 "animMode": "manual",
                 "shadow": false,
-                "manualSteps": 2
+                "manualSteps": 3
               },
               "tier": "far",
               "stride": 4,
-              "visualUpdates": 1
+              "visualUpdates": 2
             },
             {
               "id": "moss_horn_beast#3",
@@ -781,8 +781,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "far",
-              "stride": 4,
+              "tier": "offscreen",
+              "stride": 0,
               "visualUpdates": 1
             },
             {
@@ -821,8 +821,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "mid",
-              "stride": 2,
+              "tier": "offscreen",
+              "stride": 0,
               "visualUpdates": 1
             },
             {
@@ -859,11 +859,11 @@
                 "visible": true,
                 "animMode": "manual",
                 "shadow": false,
-                "manualSteps": 2
+                "manualSteps": 4
               },
               "tier": "mid",
               "stride": 2,
-              "visualUpdates": 1
+              "visualUpdates": 3
             },
             {
               "id": "cloud_fluff_bird#6",
@@ -901,8 +901,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "hidden",
-              "stride": 8,
+              "tier": "offscreen",
+              "stride": 0,
               "visualUpdates": 1
             },
             {
@@ -941,8 +941,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "hidden",
-              "stride": 8,
+              "tier": "offscreen",
+              "stride": 0,
               "visualUpdates": 1
             },
             {
@@ -981,8 +981,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "hidden",
-              "stride": 8,
+              "tier": "offscreen",
+              "stride": 0,
               "visualUpdates": 1
             },
             {
@@ -1021,8 +1021,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "hidden",
-              "stride": 8,
+              "tier": "offscreen",
+              "stride": 0,
               "visualUpdates": 1
             },
             {
@@ -1061,8 +1061,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "hidden",
-              "stride": 8,
+              "tier": "offscreen",
+              "stride": 0,
               "visualUpdates": 1
             },
             {
@@ -1101,8 +1101,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "hidden",
-              "stride": 8,
+              "tier": "offscreen",
+              "stride": 0,
               "visualUpdates": 1
             },
             {
@@ -1141,8 +1141,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "hidden",
-              "stride": 8,
+              "tier": "offscreen",
+              "stride": 0,
               "visualUpdates": 1
             },
             {
@@ -1181,8 +1181,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "hidden",
-              "stride": 8,
+              "tier": "offscreen",
+              "stride": 0,
               "visualUpdates": 1
             },
             {
@@ -1221,8 +1221,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "hidden",
-              "stride": 8,
+              "tier": "offscreen",
+              "stride": 0,
               "visualUpdates": 1
             },
             {
@@ -1261,8 +1261,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "hidden",
-              "stride": 8,
+              "tier": "offscreen",
+              "stride": 0,
               "visualUpdates": 1
             },
             {
@@ -1301,8 +1301,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "hidden",
-              "stride": 8,
+              "tier": "offscreen",
+              "stride": 0,
               "visualUpdates": 1
             },
             {
@@ -1341,8 +1341,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "hidden",
-              "stride": 8,
+              "tier": "offscreen",
+              "stride": 0,
               "visualUpdates": 1
             },
             {
@@ -1381,8 +1381,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "hidden",
-              "stride": 8,
+              "tier": "offscreen",
+              "stride": 0,
               "visualUpdates": 1
             },
             {
@@ -1421,8 +1421,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "hidden",
-              "stride": 8,
+              "tier": "offscreen",
+              "stride": 0,
               "visualUpdates": 1
             },
             {
@@ -1461,8 +1461,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "hidden",
-              "stride": 8,
+              "tier": "offscreen",
+              "stride": 0,
               "visualUpdates": 1
             },
             {
@@ -1501,8 +1501,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "hidden",
-              "stride": 8,
+              "tier": "offscreen",
+              "stride": 0,
               "visualUpdates": 1
             }
           ],
@@ -1560,10 +1560,10 @@
           "monsterDetail": {
             "on": true,
             "near": 0,
-            "mid": 5,
-            "far": 6,
-            "hidden": 16,
-            "offscreen": 0
+            "mid": 4,
+            "far": 5,
+            "hidden": 0,
+            "offscreen": 18
           },
           "combatFx": null,
           "pets": {
@@ -1580,16 +1580,16 @@
             "count": 0,
             "equipped": null,
             "followerVisible": false,
-            "followerDist": 85.08914224105818
+            "followerDist": 85.08428172463205
           },
           "render": {
             "p3": true,
             "pipeline": false,
             "charShadow": "blob",
-            "drawCalls": 131,
-            "fps": null,
+            "drawCalls": 125,
+            "fps": 0.640450877417702,
             "contextLost": 0,
-            "triangles": 606725,
+            "triangles": 598949,
             "veg": {
               "trees": 502,
               "smalls": 566,
@@ -1624,7 +1624,7 @@
         },
         "fight": {
           "attacks": 25,
-          "ms": 44560,
+          "ms": 45643,
           "kills": 3,
           "hits": 9,
           "drops": 4,
@@ -1648,15 +1648,15 @@
           "idle",
           "move",
           "move",
-          "idle",
-          "move",
-          "idle",
-          "idle",
-          "move",
           "move",
           "move",
           "move",
           "idle",
+          "move",
+          "move",
+          "move",
+          "move",
+          "idle",
           "idle",
           "move",
           "idle",
@@ -1665,7 +1665,7 @@
           "move",
           "move",
           "idle",
-          "idle"
+          "move"
         ],
         "pet": {
           "id": 1,
@@ -1695,7 +1695,7 @@
               "count": 1,
               "equipped": 1,
               "followerVisible": true,
-              "followerDist": 60.97925295871499
+              "followerDist": 60.97461470825596
             },
             "stats": {
               "attack": 100,
@@ -1724,7 +1724,7 @@
             "count": 1,
             "equipped": 1,
             "followerVisible": true,
-            "followerDist": 0.41567390415951405
+            "followerDist": 0.41103874802471646
           }
         },
         "itemAppraisal": {
@@ -1747,15 +1747,15 @@
           "itemAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]"
         },
         "bench": {
-          "seconds": 11.3,
-          "avgFps": 0.969675599435825,
-          "low1Fps": 0.9606147934678195,
-          "minFps": 0.9606147934678195,
+          "seconds": 11.5,
+          "avgFps": 0.954944005556038,
+          "low1Fps": 0.9310986964618249,
+          "minFps": 0.9310986964618249,
           "avgDraw": 124,
           "kills": 0,
           "contextLost": 0,
-          "first30": 0.9696755994358252,
-          "last30": 0.969675599435825,
+          "first30": 0.9549440055560379,
+          "last30": 0.9549440055560379,
           "quality": "high",
           "gender": "male",
           "lod": "hq",
@@ -1768,7 +1768,7 @@
             "pipeline": false,
             "charShadow": "realtime",
             "drawCalls": 150,
-            "fps": 0.8372404554588077,
+            "fps": 0.8315316813570598,
             "contextLost": 0,
             "triangles": 798912,
             "veg": {
@@ -1908,7 +1908,7 @@
           "ok": true,
           "detail": {
             "attacks": 25,
-            "ms": 16321,
+            "ms": 16706,
             "kills": 3,
             "hits": 9,
             "drops": 4,
@@ -1936,7 +1936,7 @@
           "ok": true,
           "detail": {
             "attacks": 25,
-            "ms": 16321,
+            "ms": 16706,
             "kills": 3,
             "hits": 9,
             "drops": 4,
@@ -2026,7 +2026,7 @@
                 "count": 1,
                 "equipped": 1,
                 "followerVisible": true,
-                "followerDist": 60.975867217677894
+                "followerDist": 60.97527389088709
               },
               "stats": {
                 "attack": 100,
@@ -2055,7 +2055,7 @@
               "count": 1,
               "equipped": 1,
               "followerVisible": true,
-              "followerDist": 0.42119853482468333
+              "followerDist": 0.42252000207046686
             }
           }
         },
@@ -2082,7 +2082,7 @@
             "count": 1,
             "equipped": 1,
             "followerVisible": true,
-            "followerDist": 0.42119853482468333
+            "followerDist": 0.42252000207046686
           }
         },
         "寵物加成反映到角色屬性；攻速 ≤ 160 且同步到攻擊動作": {
@@ -2135,15 +2135,15 @@
         "實玩效能測試流程（自動打怪、報告欄位、Context Lost 0）": {
           "ok": true,
           "detail": {
-            "seconds": 10.2,
-            "avgFps": 3.123779773525967,
-            "low1Fps": 2.7777777777777777,
-            "minFps": 2.7777777777777777,
-            "avgDraw": 104.15625,
+            "seconds": 10.1,
+            "avgFps": 3.06596775788745,
+            "low1Fps": 2.7624309392265194,
+            "minFps": 2.7624309392265194,
+            "avgDraw": 104.3225806451613,
             "kills": 1,
             "contextLost": 0,
-            "first30": 3.123779773525967,
-            "last30": 3.123779773525967,
+            "first30": 3.065967757887449,
+            "last30": 3.065967757887449,
             "quality": "medium",
             "gender": "female",
             "lod": "lite",
@@ -2157,7 +2157,7 @@
             "pipeline": false,
             "charShadow": "blob",
             "drawCalls": 99,
-            "fps": 3.1107424305267517,
+            "fps": 3.062787136294026,
             "contextLost": 0,
             "triangles": 191551,
             "veg": {
@@ -3368,7 +3368,7 @@
         },
         "fight": {
           "attacks": 25,
-          "ms": 16321,
+          "ms": 16706,
           "kills": 3,
           "hits": 9,
           "drops": 4,
@@ -3439,7 +3439,7 @@
               "count": 1,
               "equipped": 1,
               "followerVisible": true,
-              "followerDist": 60.975867217677894
+              "followerDist": 60.97527389088709
             },
             "stats": {
               "attack": 100,
@@ -3468,7 +3468,7 @@
             "count": 1,
             "equipped": 1,
             "followerVisible": true,
-            "followerDist": 0.42119853482468333
+            "followerDist": 0.42252000207046686
           }
         },
         "itemAppraisal": {
@@ -3491,15 +3491,15 @@
           "itemAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]"
         },
         "bench": {
-          "seconds": 10.2,
-          "avgFps": 3.123779773525967,
-          "low1Fps": 2.7777777777777777,
-          "minFps": 2.7777777777777777,
-          "avgDraw": 104.15625,
+          "seconds": 10.1,
+          "avgFps": 3.06596775788745,
+          "low1Fps": 2.7624309392265194,
+          "minFps": 2.7624309392265194,
+          "avgDraw": 104.3225806451613,
           "kills": 1,
           "contextLost": 0,
-          "first30": 3.123779773525967,
-          "last30": 3.123779773525967,
+          "first30": 3.065967757887449,
+          "last30": 3.065967757887449,
           "quality": "medium",
           "gender": "female",
           "lod": "lite",
@@ -3511,7 +3511,7 @@
             "pipeline": false,
             "charShadow": "blob",
             "drawCalls": 99,
-            "fps": 3.1107424305267517,
+            "fps": 3.062787136294026,
             "contextLost": 0,
             "triangles": 191551,
             "veg": {
@@ -3544,7 +3544,7 @@
       "ok": false
     }
   ],
-  "finishedAt": "2026-11-28T04:32:32.145Z",
+  "finishedAt": "2026-11-28T05:39:39.276Z",
   "characterVersion": "c10b5a",
   "failures": 2
 }
