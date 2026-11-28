@@ -20,7 +20,10 @@ const COUNTS = (process.argv[3] ?? "10,20,32,40").split(",").map(Number);
 const PORT = 25000 + Math.floor(Math.random() * 2000);
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 /** 合格標準（測試設定）：伺服器 20 Hz，一個 tick 50 ms；平均 < 10 ms、最大 < 50 ms、全部機器人最後都在線、伺服器沒有當機 */
-const LIMITS = { tickAvgMs: 10, tickMaxMs: 50, maxCorrectionCm: 200 };
+const LIMITS = { tickAvgMs: 10, tickMaxMs: 50, maxCorrectionCm: 200, positionMaxCm: 5 };
+const avg = (a: number[]) => a.reduce((x, y) => x + y, 0) / Math.max(1, a.length);
+/** 輸出檔名標籤（長時間測試：LOAD_TAG=soak → load85-soak.json） */
+const TAG = process.env.LOAD_TAG ? `-${process.env.LOAD_TAG}` : "";
 const SKILLS = ["triple_slash", "leap_slam", "charge_burst", "whirlwind"];
 
 async function startServerProcess(): Promise<ChildProcess> {
@@ -56,6 +59,10 @@ interface Sim {
   nextSkill: number;
   turnAt: number;
   skillIdx: number;
+  /** 收到的戰鬥事件序號（檢查重複） */
+  qSeen: Set<number>;
+  qDup: number;
+  qBase: number;
 }
 
 async function scenario(n: number) {
@@ -63,20 +70,28 @@ async function scenario(n: number) {
   const t0 = performance.now();
   for (let i = 0; i < n; i++) {
     const lagged = i % 5 === 0;
-    const s: Sim = { c: null as unknown as NetClient, dir: { x: 0, z: 0 }, lagged, res: new Map(), errs: new Map(), casts: 0, disp: 0, welcomes: 0, nextAct: 0, nextSkill: 1 + (i % 7) * 0.4, turnAt: 0, skillIdx: i % SKILLS.length };
+    const s: Sim = { c: null as unknown as NetClient, dir: { x: 0, z: 0 }, lagged, res: new Map(), errs: new Map(), casts: 0, disp: 0, welcomes: 0, nextAct: 0, nextSkill: 1 + (i % 7) * 0.4, turnAt: 0, skillIdx: i % SKILLS.length, qSeen: new Set(), qDup: 0, qBase: 0 };
     s.c = new NetClient({
       url: `ws://127.0.0.1:${PORT}/ws`,
       name: `load${n}_${i}`,
       devMap: "starsprout",
       ...(lagged ? { lagMs: 120, jitterMs: 40 } : {}),
       onEvent: (e) => {
-        if (e.type === "welcome") s.welcomes++;
+        if (e.type === "welcome") {
+          s.welcomes++;
+          s.qSeen.clear(); // 重連後序號仍連續，但只檢查同一段連線內的重複
+        }
         if (e.type === "cmd") {
           if (e.ok) s.res.set("ok", (s.res.get("ok") ?? 0) + 1);
           else s.errs.set(e.err ?? "?", (s.errs.get(e.err ?? "?") ?? 0) + 1);
         }
       },
       onCombat: (e: CombatEvent) => {
+        if (e.q !== undefined) {
+          if (s.qSeen.has(e.q)) s.qDup++;
+          s.qSeen.add(e.q);
+          if (s.qSeen.size > 20000) s.qSeen.clear();
+        }
         if (e.k === "cast" && e.p === s.c.pid) {
           s.casts++;
           if (e.md) {
@@ -179,6 +194,23 @@ async function scenario(n: number) {
     for (const s of sims) s.c.update(1 / 60, 0, 0);
     await sleep(16);
   }
+  // 位置一致性：全部停下 1.5 秒後，每位玩家看到的其他玩家位置＝那位玩家自己的位置（同一張地圖）
+  for (let i = 0; i < 90; i++) {
+    for (const s of sims) s.c.update(1 / 60, 0, 0);
+    await sleep(16);
+  }
+  let posPairs = 0;
+  let posMaxCm = 0;
+  for (const v of sims) {
+    if (v.c.state !== "online") continue;
+    for (const o of sims) {
+      if (o === v || o.c.state !== "online" || o.c.stats.map !== v.c.stats.map) continue;
+      const r = v.c.remotes().find((x) => x.id === o.c.pid);
+      if (!r) continue;
+      posPairs++;
+      posMaxCm = Math.max(posMaxCm, Math.hypot(r.x - o.c.renderPos.x, r.z - o.c.renderPos.z) * 100);
+    }
+  }
   const final = await metrics();
   const onlineAtEnd = sims.filter((s) => s.c.state === "online").length;
   const notOnline = sims.filter((s) => s.c.state !== "online").map((s) => ({ name: (s.c as unknown as { opts: { name?: string } }).opts.name ?? null, state: s.c.state, lagged: s.lagged, welcomes: s.welcomes, reconnects: s.c.stats.reconnects, lagQueueErrors: s.c.stats.lagQueueErrors ?? 0, map: s.c.stats.map }));
@@ -200,6 +232,9 @@ async function scenario(n: number) {
       cpuPctAvg: +(cpu.reduce((a, b) => a + b, 0) / Math.max(1, cpu.length)).toFixed(1),
       cpuPctMax: Math.max(0, ...cpu),
       rssMBMax: Math.max(0, ...samples.map((m) => m.process.rssMB)),
+      // 記憶體成長：前 10% 取樣與最後 10% 取樣的平均差（長時間測試用）
+      rssGrowthMB: samples.length >= 10 ? +(avg(samples.slice(-Math.ceil(samples.length / 10)).map((m) => m.process.rssMB)) - avg(samples.slice(0, Math.ceil(samples.length / 10)).map((m) => m.process.rssMB))).toFixed(1) : null,
+      heapGrowthMB: samples.length >= 10 ? +(avg(samples.slice(-Math.ceil(samples.length / 10)).map((m) => m.process.heapUsedMB)) - avg(samples.slice(0, Math.ceil(samples.length / 10)).map((m) => m.process.heapUsedMB))).toFixed(1) : null,
       heapMBMax: Math.max(0, ...samples.map((m) => m.process.heapUsedMB)),
       tickAvgMs: +tickAvg.toFixed(3),
       tickMaxMs: +tickMax.toFixed(3),
@@ -217,12 +252,15 @@ async function scenario(n: number) {
       drops,
       maxCorrectionCm: Math.max(...sims.map((s) => s.c.stats.maxCorrectionCm)),
       snapCorrections: sum((s) => s.c.stats.snapCorrections),
+      duplicateEvents: sum((s) => s.qDup),
+      positionPairs: posPairs,
+      positionMaxCm: +posMaxCm.toFixed(1),
     },
     junk,
     finalStats: final ? { badMessages: (final as unknown as { totals?: Record<string, number> }).totals?.badMessages, kicked: (final as unknown as { totals?: Record<string, number> }).totals?.kicked } : null,
     samples: samples.length,
   };
-  const pass = out.onlineAtEnd === n && out.server.tickAvgMs < LIMITS.tickAvgMs && out.server.tickMaxMs < LIMITS.tickMaxMs && out.clients.castsSeen > 0 && out.clients.displacements > 0 && out.clients.maxCorrectionCm < LIMITS.maxCorrectionCm;
+  const pass = out.onlineAtEnd === n && out.server.tickAvgMs < LIMITS.tickAvgMs && out.server.tickMaxMs < LIMITS.tickMaxMs && out.clients.castsSeen > 0 && out.clients.displacements > 0 && out.clients.maxCorrectionCm < LIMITS.maxCorrectionCm && out.clients.duplicateEvents === 0 && out.clients.positionPairs > 0 && out.clients.positionMaxCm < LIMITS.positionMaxCm;
   for (const s of sims) s.c.close();
   await sleep(500);
   return { ...out, pass };
@@ -247,21 +285,21 @@ try {
 const env = { node: process.version, cpu: cpus()[0]?.model, cores: cpus().length, memGB: +(totalmem() / 1073741824).toFixed(1), ci: !!process.env.CI };
 const report = { note: "CI／本機伺服器數據，不是 iPhone 實機結果（iPhone 畫面效能由實機測試填寫）", limits: LIMITS, env, crashed, scenarios: all };
 mkdirSync(new URL("../test-results/", import.meta.url), { recursive: true });
-writeFileSync(new URL("../test-results/load85.json", import.meta.url), JSON.stringify(report, null, 2));
+writeFileSync(new URL(`../test-results/load85${TAG}.json`, import.meta.url), JSON.stringify(report, null, 2));
 const md = [
-  "# Stage 8.5 多人效能測試（伺服器數據）",
+  `# Stage 8.5 多人效能測試${TAG ? `（長時間，每情境 ${DURATION_S} 秒）` : ""}（伺服器數據）`,
   "",
   `> ${report.note}`,
   "",
   `環境：Node ${env.node}、${env.cpu}（${env.cores} 核）、${env.memGB} GB${env.ci ? "（GitHub Actions）" : ""}；每個情境 ${DURATION_S} 秒；20% 機器人加 120±40 ms 延遲；每 2 秒一位斷線重連；一條連線持續送格式錯誤封包。`,
   "",
-  "| 人數 | 結果 | tick 平均 | tick 最大 | CPU 平均／最高 | 記憶體 | 下行 B/s（每人） | 上行 B/s | 在線 | 重連 | 位移技能 | 最大校正 |",
-  "|---|---|---|---|---|---|---|---|---|---|---|---|",
-  ...all.map((r) => `| ${r.players} | ${r.pass ? "合格" : "不合格"} | ${r.server.tickAvgMs} ms | ${r.server.tickMaxMs} ms | ${r.server.cpuPctAvg}%／${r.server.cpuPctMax}% | ${r.server.rssMBMax} MB | ${r.server.bytesOutPerSecAvg}（${r.server.bytesOutPerPlayerPerSec}） | ${r.server.bytesInPerSecAvg} | ${r.onlineAtEnd}/${r.players} | ${r.clients.reconnects} | ${r.clients.displacements} | ${r.clients.maxCorrectionCm} cm |`),
+  "| 人數 | 結果 | tick 平均 | tick 最大 | CPU 平均／最高 | 記憶體 | 下行 B/s（每人） | 上行 B/s | 在線 | 重連 | 位移技能 | 最大校正 | 位置一致（最大差） | 重複事件 | 記憶體成長 |",
+  "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
+  ...all.map((r) => `| ${r.players} | ${r.pass ? "合格" : "不合格"} | ${r.server.tickAvgMs} ms | ${r.server.tickMaxMs} ms | ${r.server.cpuPctAvg}%／${r.server.cpuPctMax}% | ${r.server.rssMBMax} MB | ${r.server.bytesOutPerSecAvg}（${r.server.bytesOutPerPlayerPerSec}） | ${r.server.bytesInPerSecAvg} | ${r.onlineAtEnd}/${r.players} | ${r.clients.reconnects} | ${r.clients.displacements} | ${r.clients.maxCorrectionCm} cm | ${r.clients.positionMaxCm} cm（${r.clients.positionPairs} 組） | ${r.clients.duplicateEvents} | ${r.server.rssGrowthMB ?? "—"} MB |`),
   "",
-  `合格標準（測試設定）：tick 平均 < ${LIMITS.tickAvgMs} ms、最大 < ${LIMITS.tickMaxMs} ms（20 Hz 一個 tick 50 ms）、結束時全部在線、有技能與位移技能同步、一般校正 < ${LIMITS.maxCorrectionCm / 100} m（重連、換地圖的完整重新同步不算）、伺服器未當機。`,
+  `合格標準（測試設定）：tick 平均 < ${LIMITS.tickAvgMs} ms、最大 < ${LIMITS.tickMaxMs} ms（20 Hz 一個 tick 50 ms）、結束時全部在線、有技能與位移技能同步、一般校正 < ${LIMITS.maxCorrectionCm / 100} m（重連、換地圖的完整重新同步不算）、停下後玩家之間看到的位置差 < ${LIMITS.positionMaxCm} cm、同一連線沒有重複的戰鬥事件、伺服器未當機。`,
 ].join("\n");
-writeFileSync(new URL("../test-results/load85.md", import.meta.url), md + "\n");
+writeFileSync(new URL(`../test-results/load85${TAG}.md`, import.meta.url), md + "\n");
 console.log(md);
 if (crashed || all.some((r) => !r.pass)) process.exit(1);
 process.exit(0);

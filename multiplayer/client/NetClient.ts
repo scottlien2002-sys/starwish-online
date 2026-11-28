@@ -303,6 +303,12 @@ export class NetClient {
     this.lagQueue(this.sendQ, at, go);
   }
 
+  /** Stage 8.5：≥ 20 cm 的位置校正紀錄（最近 20 筆，診斷用） */
+  readonly correctionLog: { at: number; cm: number; map: string; pred: [number, number]; server: [number, number]; pending: number; held: boolean; snap: boolean }[] = [];
+
+  /** 收到 welcome 的次數（第一次連線＋每次重連；Stage 8.5 用戶端事件去重在重連時重設） */
+  welcomeCount = 0;
+
   /** Stage 8.5：技能位移期間暫停移動輸入（毫秒）；位移終點由伺服器決定 */
   private holdUntil = 0;
   holdInput(ms: number): void {
@@ -434,6 +440,7 @@ export class NetClient {
     switch (m.t) {
       case "welcome": {
         const reconnecting = this.state === "reconnecting";
+        this.welcomeCount++;
         this.token = m.token;
         this.pid = m.pid;
         this.characterId = m.cid;
@@ -573,6 +580,11 @@ export class NetClient {
         this.stats.corrections++;
         this.stats.lastCorrectionCm = Math.round(err * 100);
         this.stats.maxCorrectionCm = Math.max(this.stats.maxCorrectionCm, this.stats.lastCorrectionCm);
+        // Stage 8.5：追蹤異常位置（≥ 20 cm 的校正記錄最近 20 筆：時間、地圖、預測位置、伺服器位置、待重播輸入數）
+        if (err >= 0.2) {
+          this.correctionLog.push({ at: Date.now(), cm: Math.round(err * 100), map: this.map?.id ?? "?", pred: [+predX.toFixed(2), +predZ.toFixed(2)], server: [this.server.x, this.server.z], pending: this.pending.length, held: this.now() < this.holdUntil, snap: err > SNAP_CORRECTION_M });
+          if (this.correctionLog.length > 20) this.correctionLog.shift();
+        }
       }
       if (err > SNAP_CORRECTION_M) {
         this.stats.snapCorrections++;

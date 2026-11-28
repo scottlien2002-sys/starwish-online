@@ -147,7 +147,9 @@ export type MonTuple = [number, number, number, number, number, number, number, 
 export const MON_STATES = ["idle", "move", "attack", "hit", "death", "dead", "respawn"] as const;
 
 /** 戰鬥事件（客戶端依事件播放動作、特效、傷害數字；不逐幀同步特效） */
-export type CombatEvent =
+/** Stage 8.5：每個戰鬥事件帶房間內遞增的序號 q（用戶端去重用；重新同步時重送的掉落物沒有 q） */
+export type CombatEvent = CombatEventBody & { q?: number };
+type CombatEventBody =
   | { k: "cast"; c: number; p: number; s: string; t: number; x: number; z: number; y: number; st: number; r: number; dur: number; /** Stage 8.5 技能位移：伺服器驗證後的終點（公分）與位移時間（毫秒）；沒有位移時不送 */ ex?: number; ez?: number; md?: number }
   | { k: "hit"; c: number; h: string; p: number; t: number; d: number; cr: 0 | 1; ms: 0 | 1; hp: number; kl: 0 | 1 }
   | { k: "end"; c: number; p: number }

@@ -94,6 +94,12 @@ export class ServerPlayer implements PlayerView {
   readonly state: MoveState;
   /** 倒地中（Stage 8.2 前由客戶端回報，只影響顯示與移動；復活只能透過伺服器的 respawn） */
   down = false;
+  /** Stage 8.5：位置稽核紀錄（追蹤異常位置；每位玩家最近 20 筆：種類、時間、座標、細節） */
+  readonly audit: { kind: string; at: number; x: number; z: number; detail?: string }[] = [];
+  noteAudit(kind: string, detail?: string): void {
+    this.audit.push({ kind, at: Date.now(), x: this.state.x, z: this.state.z, ...(detail ? { detail } : {}) });
+    if (this.audit.length > 20) this.audit.shift();
+  }
   /** Stage 8.5：技能位移中（伺服器驅動位置；一般移動輸入照算序號但不移動） */
   disp: SkillDisplacement | null = null;
   act = 0;
@@ -194,11 +200,13 @@ export class ServerPlayer implements PlayerView {
     }
     if (m.e !== this.epoch) {
       this.counters.staleEpochInputs++;
+      this.noteAudit("staleEpoch", `e${m.e}≠${this.epoch} s${m.s}`);
       return;
     }
     let seq = m.s;
     if (seq > this.nextSeq) {
       this.counters.seqGaps++;
+      this.noteAudit("seqGap", `${this.nextSeq}→${seq}`);
       this.nextSeq = seq;
     }
     for (const [qx, qz, n] of m.d) {
@@ -208,7 +216,7 @@ export class ServerPlayer implements PlayerView {
           continue;
         }
         if (this.queue.length >= INPUT_QUEUE_MAX_STEPS) {
-          this.counters.stepsDropped++;
+          if (this.counters.stepsDropped++ === 0 || this.counters.stepsDropped % 50 === 0) this.noteAudit("stepsDropped", `total ${this.counters.stepsDropped}`);
         } else {
           this.queue.push([qx, qz]);
         }
@@ -389,9 +397,13 @@ export class Room implements RoomView {
       p.state.yaw = Math.round(p.state.yaw * 1000) / 1000;
       // 稽核：移動距離不可超過速度上限；位置必須在合法區域
       const moved = Math.hypot(p.state.x - x0, p.state.z - z0);
-      if (moved > MOVE_SPEED * n * STEP + 0.02) p.counters.speedViolations++;
+      if (moved > MOVE_SPEED * n * STEP + 0.02) {
+        p.counters.speedViolations++;
+        p.noteAudit("speed", `${moved.toFixed(3)}m/${n}steps from ${x0.toFixed(2)},${z0.toFixed(2)}`);
+      }
       if (n > 0 && !this.auth.legal(p.state.x, p.state.z) && this.auth.legal(x0, z0)) {
         p.counters.illegalPositions++;
+        p.noteAudit("illegal", `reverted to ${x0.toFixed(2)},${z0.toFixed(2)}`);
         p.state.x = x0;
         p.state.z = z0;
       }

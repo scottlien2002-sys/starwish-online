@@ -3,10 +3,10 @@
     "room": "village-1",
     "remoteYawErrRadWhileRunningSouth": 0.001,
     "remoteFinalPosErrCm": 0,
-    "localFinalPosErrCm": 0.03,
+    "localFinalPosErrCm": 0.02,
     "serverPos": [
-      6.2,
-      7.33
+      5.98,
+      6.88
     ],
     "aStats": {
       "state": "online",
@@ -16,34 +16,34 @@
       "rttMs": 0,
       "rttAvgMs": 1,
       "jitterMs": 1,
-      "bytesUpPerSec": 508,
-      "bytesDownPerSec": 2228,
+      "bytesUpPerSec": 503,
+      "bytesDownPerSec": 2204,
       "msgsUpPerSec": 13,
       "msgsDownPerSec": 21,
       "snapsPerSec": 20,
       "players": 2,
       "pendingInputs": 0,
-      "corrections": 16,
-      "lastCorrectionCm": 8,
-      "maxCorrectionCm": 31,
+      "corrections": 13,
+      "lastCorrectionCm": 33,
+      "maxCorrectionCm": 33,
       "snapCorrections": 0,
       "reconnects": 0,
       "lastResyncMs": 0,
       "serverTick": 47,
       "fps": 0,
       "totalBytesUp": 1213,
-      "totalBytesDown": 6176
+      "totalBytesDown": 6175
     },
     "bStats": {
       "state": "online",
       "map": "village",
       "room": "village-1",
       "pid": 2,
-      "rttMs": 0,
-      "rttAvgMs": 0,
+      "rttMs": 1,
+      "rttAvgMs": 1,
       "jitterMs": 0,
-      "bytesUpPerSec": 27,
-      "bytesDownPerSec": 2356,
+      "bytesUpPerSec": 28,
+      "bytesDownPerSec": 2317,
       "msgsUpPerSec": 1,
       "msgsDownPerSec": 21,
       "snapsPerSec": 20,
@@ -57,15 +57,15 @@
       "lastResyncMs": 0,
       "serverTick": 47,
       "fps": 0,
-      "totalBytesUp": 136,
-      "totalBytesDown": 6655
+      "totalBytesUp": 137,
+      "totalBytesDown": 6686
     }
   },
   "prediction": {
     "lagOneWayMs": 120,
     "jitterMs": 40,
-    "rttMs": 281,
-    "localResponseMs": 21,
+    "rttMs": 286,
+    "localResponseMs": 11,
     "corrections": 0,
     "maxCorrectionCm": 0,
     "snapCorrections": 0,
@@ -84,8 +84,8 @@
     }
   },
   "reconnect": {
-    "resyncMsFromDrop": 550,
-    "observerSawDisconnectMs": 103,
+    "resyncMsFromDrop": 549,
+    "observerSawDisconnectMs": 105,
     "samePid": true,
     "finalErrCm": 0,
     "reconnects": 1,
@@ -113,10 +113,10 @@
     "players": 1
   },
   "cheat": {
-    "speedHackSeconds": 3.02,
+    "speedHackSeconds": 3.04,
     "movedM": 15.78,
-    "legitMaxM": 15.12,
-    "limitM": 18.12,
+    "legitMaxM": 15.18,
+    "limitM": 18.18,
     "stepsDropped": 1503,
     "kickedAfterGarbage": true,
     "badMessages": 60,
@@ -129,7 +129,7 @@
     "toRoom": "starsprout-1",
     "fieldPos": [
       -53.52,
-      -64.17
+      -64
     ],
     "errCm": 0,
     "staleEpochInputs": 0,
@@ -139,7 +139,7 @@
     "results": [
       {
         "type": "cmd",
-        "id": "1_mwzvxcnc_0",
+        "id": "1_mx0ddpu5_0",
         "ok": true,
         "dup": false,
         "data": {
@@ -150,7 +150,7 @@
       },
       {
         "type": "cmd",
-        "id": "1_mwzvxcnc_0",
+        "id": "1_mx0ddpu5_0",
         "ok": true,
         "dup": true,
         "data": {
@@ -161,14 +161,14 @@
       },
       {
         "type": "cmd",
-        "id": "1_mwzvxcnc_1",
+        "id": "1_mx0ddpu5_1",
         "ok": false,
         "dup": false,
         "err": "bad_emote"
       },
       {
         "type": "cmd",
-        "id": "1_mwzvxcnc_2",
+        "id": "1_mx0ddpu5_2",
         "ok": false,
         "dup": false,
         "err": "unknown_cmd"
@@ -179,17 +179,17 @@
   "load40": {
     "tick": {
       "count": 161,
-      "avgMs": 1.235,
-      "maxMs": 5.196
+      "avgMs": 1.358,
+      "maxMs": 5.357
     },
     "serverNetPerSec": {
-      "bytesIn": 30192,
-      "bytesOut": 889094,
-      "msgsIn": 682,
-      "msgsOut": 839
+      "bytesIn": 32070,
+      "bytesOut": 925192,
+      "msgsIn": 711,
+      "msgsOut": 837
     },
-    "perClientDownBps": 22376,
-    "perClientUpBps": 778,
+    "perClientDownBps": 23880,
+    "perClientUpBps": 796,
     "roomPlayers": [
       40
     ],

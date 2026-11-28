@@ -314,7 +314,10 @@ export class FieldCombat {
       path.push(t, cx, cz);
     }
     const moved = Math.hypot(cx - sx, cz - sz);
-    if (blocked) this.counters.dispBlocked = (this.counters.dispBlocked ?? 0) + 1;
+    if (blocked) {
+      this.counters.dispBlocked = (this.counters.dispBlocked ?? 0) + 1;
+      p.noteAudit("dispBlocked", `${skillId} ${Math.hypot(cx - sx, cz - sz).toFixed(2)}/${total.toFixed(2)}m end ${cx.toFixed(2)},${cz.toFixed(2)}`);
+    }
     if (moved < DISP.minDistance) return null;
     // 終點之後的取樣點都相同：路徑截到最後一次移動
     let cut = path.length;
@@ -601,8 +604,10 @@ export class FieldCombat {
     }
   }
 
+  /** 房間內戰鬥事件序號（Stage 8.5：用戶端用來去重） */
+  private evSeq = 0;
   emit(e: CombatEvent): void {
-    this.events.push(e);
+    this.events.push({ ...e, q: ++this.evSeq });
   }
 
   takeEvents(): CombatEvent[] {

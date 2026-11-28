@@ -21,7 +21,7 @@ concurrency:
 jobs:
   server:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 50
     defaults:
       run:
         working-directory: multiplayer
@@ -63,11 +63,28 @@ jobs:
           set -o pipefail
           node --test --test-reporter=tap --test-concurrency=1 tests/trade.test.ts | tee reports/trade-tap.txt
           cp test-results/trade.json reports/trade-results.json
+      - name: Stage 8.5 skill displacement vs boundary / river / colliders, landing hit, disconnect / down mid-skill (A's N75 handoff)
+        run: |
+          set -o pipefail
+          node --test --test-reporter=tap --test-concurrency=1 tests/displacement-n75.test.ts | tee reports/displacement-n75-tap.txt
+          cp test-results/displacement-n75.json reports/displacement-n75-results.json
+      - name: Stage 8.5 combat sync audit (cast / hit / damage / crit / cooldown / position; no duplicates; CombatFx bridge)
+        run: |
+          set -o pipefail
+          node --test --test-reporter=tap --test-concurrency=1 tests/combat-sync.test.ts | tee reports/combat-sync-tap.txt
+          cp test-results/combat-sync.json reports/combat-sync-results.json
       - name: Stage 8.5 load test 10/20/32/40 (server child process; CPU / memory / tick / traffic; NOT iPhone data)
         run: |
           set -o pipefail
           node tests/load-stage85.ts 20 10,20,32,40 | tee reports/load85.txt
           cp test-results/load85.json test-results/load85.md reports/
+      - name: Stage 8.5 soak test (24 players x 5 minutes; combat, reconnect churn, position consistency, memory growth; NOT iPhone data)
+        env:
+          LOAD_TAG: soak
+        run: |
+          set -o pipefail
+          node tests/load-stage85.ts 300 24 | tee reports/load85-soak.txt
+          cp test-results/load85-soak.json test-results/load85-soak.md reports/
       - name: WSS test (self-signed TLS)
         run: npm run test:wss
       - name: PostgreSQL schema / atomicity / server restart persistence
@@ -178,6 +195,13 @@ jobs:
         run: npm run typecheck
       - name: Unit tests (game)
         run: npm test
+      - name: CombatFx compatibility (C stable backup 556fee8 must pass; C's current branch recorded)
+        run: |
+          git fetch -q --depth=1 origin 556fee88619418bdbe4813fc4db9f43a22afe5f6
+          git fetch -q --depth=1 origin feature/combat-vfx-stage3:refs/remotes/origin/feature/combat-vfx-stage3 || true
+          refs="556fee88619418bdbe4813fc4db9f43a22afe5f6"
+          git rev-parse -q --verify origin/feature/combat-vfx-stage3 >/dev/null && refs="$refs origin/feature/combat-vfx-stage3"
+          node tests/combatfx-compat/check.mjs $refs
       - name: Build
         env:
           VITE_MP_SERVER: ${{ vars.MP_SERVER_URL }}

@@ -245,7 +245,7 @@ export class GameServer {
       netPerSec: this.rate.perSec,
       totals: { ...this.stats },
       ledgerEntries: this.ledger.size,
-      players_detail: [...this.live.values()].map((l) => ({ pid: l.player.pid, name: l.player.name, room: l.room.key, connected: l.player.connected, queue: l.player.queue.length, ack: l.player.ack, ...l.player.counters })),
+      players_detail: [...this.live.values()].map((l) => ({ pid: l.player.pid, name: l.player.name, room: l.room.key, connected: l.player.connected, queue: l.player.queue.length, ack: l.player.ack, ...l.player.counters, audit: l.player.audit })),
     };
   }
 
@@ -585,6 +585,7 @@ export class GameServer {
     if (!live) return;
     from.remove(p.pid);
     this.cancelTrades(p.characterId, "map_changed");
+    p.noteAudit("transfer", `→ ${to.map}`);
     p.disp = null;
     p.queue.length = 0;
     p.epoch++;

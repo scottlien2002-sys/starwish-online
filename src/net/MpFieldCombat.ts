@@ -22,6 +22,7 @@ import { CombatAudio } from "../combat-vfx/fx/CombatAudio.ts";
 import type { SfxKey } from "../combat-vfx/core/skills.ts";
 import type { FieldCombatFx } from "../game/fieldCombatFx.ts";
 import type { WeaponRig } from "../combat-vfx/weapons.ts";
+import { CombatEventDedupe } from "./mpEventDedupe.ts";
 
 export interface FieldHost {
   scene: Scene;
@@ -91,7 +92,9 @@ export class MpFieldCombat {
   readonly audio: CombatAudio | null;
   private readonly ownsFx: boolean;
   /** 統計（測試介面） */
-  readonly stats = { attacksSent: 0, attacksOk: 0, attacksRejected: 0, skillsSent: 0, skillsOk: 0, hitsShown: 0, castsShown: 0, remoteCastsShown: 0, picksSent: 0, picksOk: 0, picksRejected: 0, monsterHitsTaken: 0, damageDealt: 0, lastReject: "", displacementsShown: 0 };
+  readonly stats = { attacksSent: 0, attacksOk: 0, attacksRejected: 0, skillsSent: 0, skillsOk: 0, hitsShown: 0, castsShown: 0, remoteCastsShown: 0, picksSent: 0, picksOk: 0, picksRejected: 0, monsterHitsTaken: 0, damageDealt: 0, lastReject: "", displacementsShown: 0, duplicateEventsIgnored: 0 };
+  private readonly dedupe = new CombatEventDedupe();
+  private dedupeWelcome = 0;
   private readonly pendingCmd = new Map<string, "atk" | "sk" | "pick">();
   private readonly gender: "male" | "female";
 
@@ -268,6 +271,15 @@ export class MpFieldCombat {
 
   // ---------------- 伺服器事件 ----------------
   private onEvent(e: CombatEvent): void {
+    // Stage 8.5：同一個戰鬥事件只畫一次（重複的事件忽略；扣血一律以伺服器為準）。重連後重設（伺服器可能已重啟）
+    if (this.client.welcomeCount !== this.dedupeWelcome) {
+      this.dedupeWelcome = this.client.welcomeCount;
+      this.dedupe.reset();
+    }
+    if (!this.dedupe.accept(e)) {
+      this.stats.duplicateEventsIgnored++;
+      return;
+    }
     const me = this.client.pid;
     switch (e.k) {
       case "cast": {

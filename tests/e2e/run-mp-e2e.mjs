@@ -59,6 +59,7 @@ const metrics = async () => {
 
 const base = `${site.url}/?play=world&mp=1&lod=lite&quality=low&newgame=1&server=${TLS ? "wss" : "ws"}://127.0.0.1:${PORT}/ws`;
 const players = [];
+const T0 = Date.now();
 let videoT0 = 0;
 const mark = (k) => ((results.videoMarks ??= {})[k] = +((Date.now() - videoT0) / 1000).toFixed(1));
 async function player(name, extra, mobile) {
@@ -68,6 +69,10 @@ async function player(name, extra, mobile) {
   const ctx = await browser.newContext(mobile ? { viewport: vsize, deviceScaleFactor: 2, isMobile: browserName !== "firefox", hasTouch: true, ...video } : { viewport: vsize, ...video });
   const page = await ctx.newPage();
   page.on("pageerror", (e) => results.consoleErrors.push(`${name}: ${e.message}`));
+  // Stage 8.5：時序追蹤（頁面重新載入＝被打倒回村、重新整理等），用來分析 CI 慢速時的時序問題
+  page.on("framenavigated", (f) => {
+    if (f === page.mainFrame()) (results.navLog ??= []).push({ who: name, s: +((Date.now() - T0) / 1000).toFixed(1), url: f.url().replace(/^.*\?/, "?").slice(0, 120) });
+  });
   page.on("response", (r) => {
     const u = r.url();
     if (r.status() >= 400 && !/favicon/.test(u)) results.http404.push(`${r.status()} ${u}`);
@@ -568,7 +573,14 @@ try {
   results.samples.account = { username: uname, first: acct1, reload: acct2, auth: am.auth };
   check("帳號登入（測試視窗）：密碼太短被擋、註冊後進入村莊；憑證只在本機、角色沒有訪客重連憑證", acct1.auth && acct1.token === "" && !!acct1.cid && am.auth.registered >= 1, results.samples.account);
   check("重新整理後用已存憑證自動登入同一角色（不再顯示登入視窗）", acct2.cid === acct1.cid && !acct2.dialog, results.samples.account);
+  // Stage 8.5：位置追蹤（≥ 20 cm 的用戶端校正、伺服器位置稽核紀錄），Chromium／WebKit 分開比對
+  const trace = {};
+  for (const pl of players) {
+    trace[pl.name] = await pl.page.evaluate(() => (window.__mpWorld ? { log: window.__mpWorld.client.correctionLog, max: window.__mpWorld.client.stats.maxCorrectionCm, snaps: window.__mpWorld.client.stats.snapCorrections } : null)).catch(() => null);
+  }
   const m = await metrics();
+  trace.server = m.players_detail.map((p) => ({ name: p.name, audit: p.audit }));
+  results.samples.positionTrace = trace;
   results.serverMetrics = { players: m.players, rooms: m.rooms, totals: m.totals, tick: m.tick, store: m.store };
   check("伺服器沒有加速／非法位置紀錄", m.players_detail.every((p) => p.speedViolations === 0 && p.illegalPositions === 0), m.players_detail);
   results.samples.diag = { A: a.mp.stats, B: b.mp.stats };
