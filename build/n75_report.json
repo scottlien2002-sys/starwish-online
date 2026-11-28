@@ -115,14 +115,79 @@
  "retarget": {
   "leg_ratio": 2.078
  },
+ "native": {
+  "file": "Starwish_Novice_Male_Rigged_V1b_Anim_RAW.glb",
+  "animations": [
+   {
+    "name": "walk",
+    "clip": "Walk",
+    "seconds": 2.333,
+    "channels": 234,
+    "rootMotion_mps": 0.73,
+    "loopGapDeg": 0.05
+   },
+   {
+    "name": "run",
+    "clip": "Run",
+    "seconds": 1.25,
+    "channels": 234,
+    "rootMotion_mps": 2.662,
+    "loopGapDeg": 19.5
+   },
+   {
+    "name": "wait",
+    "clip": "Wait",
+    "seconds": 6.0,
+    "channels": 234,
+    "rootMotion_mps": 0.0,
+    "loopGapDeg": 0.01
+   },
+   {
+    "name": "idle",
+    "clip": "Idle",
+    "seconds": 15.333,
+    "channels": 234,
+    "rootMotion_mps": 0.0,
+    "loopGapDeg": 0.11
+   }
+  ]
+ },
+ "nativeSpeeds": {
+  "Walk": 0.73,
+  "Run": 2.662,
+  "Wait": 0.0,
+  "Idle": 0.0
+ },
+ "offhandIK": {
+  "Attack_2H_Slash": {
+   "grip_along_m": -0.1,
+   "max_error_cm": 7.52,
+   "mean_error_cm": 4.7
+  },
+  "Attack_2H_Smash": {
+   "grip_along_m": -0.1,
+   "max_error_cm": 4.15,
+   "mean_error_cm": 1.37
+  },
+  "Attack_Polearm_Thrust": {
+   "grip_along_m": 0.28,
+   "max_error_cm": 5.15,
+   "mean_error_cm": 1.04
+  },
+  "Attack_Polearm_Swing": {
+   "grip_along_m": 0.28,
+   "max_error_cm": 7.02,
+   "mean_error_cm": 0.54
+  }
+ },
  "clips": {
   "Idle": {
-   "seconds": 3.0,
+   "seconds": 15.333,
    "loop": true,
    "marks": {}
   },
   "Run": {
-   "seconds": 0.733,
+   "seconds": 1.267,
    "loop": true,
    "marks": {}
   },
@@ -235,12 +300,12 @@
    }
   },
   "Walk": {
-   "seconds": 1.167,
+   "seconds": 2.333,
    "loop": true,
    "marks": {}
   },
   "Wait": {
-   "seconds": 4.0,
+   "seconds": 6.0,
    "loop": true,
    "marks": {}
   },
@@ -337,8 +402,14 @@
   }
  },
  "groundSpeed": {
-  "Run": 4.064,
-  "Walk": 1.305
+  "Run": 2.528,
+  "Walk": 0.703,
+  "native_rootMotion": {
+   "Walk": 0.73,
+   "Run": 2.662,
+   "Wait": 0.0,
+   "Idle": 0.0
+  }
  },
  "preview": [
   "clip_Idle.png",
