@@ -1,0 +1,61 @@
+name: "Blender — Stage 7.5 新版男性初心者（檢查／蒙皮／動畫）"
+# 使用者交付的 Tripo 自動綁骨 GLB（art/novice75/source，原檔不修改）→ 解壓 → Blender 檢查與建置。
+# 結果推到 art-novice75 分支（一般推送）。不部署、不影響遊戲網站、main 與其他部門分支。
+on:
+  push:
+    branches: ["rig/novice75"]
+    paths:
+      - "art/novice75/**"
+      - ".github/workflows/blender-novice75.yml"
+permissions:
+  contents: write
+concurrency:
+  group: blender-novice75
+  cancel-in-progress: true
+env:
+  BLENDER_VERSION: "4.2.3"
+  BLENDER_SERIES: "4.2"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Verify source checksum (original kept unchanged)
+        run: cd art/novice75/source && sha256sum -c SHA256SUMS.txt
+      - name: Decode meshopt / quantization
+        run: |
+          mkdir -p /tmp/gt && cd /tmp/gt && npm init -y >/dev/null && npm i --no-save @gltf-transform/core@4 @gltf-transform/extensions@4 @gltf-transform/functions@4 meshoptimizer 2>&1 | tail -2
+          cd "$GITHUB_WORKSPACE" && cp art/novice75/decompress.mjs /tmp/gt/ && node /tmp/gt/decompress.mjs art/novice75/source /tmp/decoded
+      - name: System libraries for Blender (headless)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libsm6 libxkbcommon0 >/dev/null
+      - name: Download Blender
+        run: |
+          URL="https://download.blender.org/release/Blender${BLENDER_SERIES}/blender-${BLENDER_VERSION}-linux-x64.tar.xz"
+          curl -fsSL --retry 5 --retry-delay 10 "$URL" -o /tmp/blender.tar.xz || curl -fsSL --retry 5 "https://mirrors.ocf.berkeley.edu/blender/release/Blender${BLENDER_SERIES}/blender-${BLENDER_VERSION}-linux-x64.tar.xz" -o /tmp/blender.tar.xz
+          mkdir -p /opt/blender && tar -xf /tmp/blender.tar.xz -C /opt/blender --strip-components=1
+      - name: Inspect
+        run: |
+          mkdir -p out/inspect
+          /opt/blender/blender -b --factory-startup -noaudio -P art/novice75/inspect75.py -- /tmp/decoded/Starwish_Novice_Male_Rigged_V1_RAW.glb public/models/novice_c10b5b_male_hq.glb out/inspect 2>&1 | tee out/inspect.log | grep -E "inspected|Error|Traceback|line [0-9]+" | tail -40
+      - name: Build (weights, retarget, export) if present
+        run: |
+          if [ -f art/novice75/build75.py ]; then
+            /opt/blender/blender -b --factory-startup -noaudio -P art/novice75/build75.py -- /tmp/decoded/Starwish_Novice_Male_Rigged_V1_RAW.glb public/models/novice_c10b5b_male_hq.glb public/combat-vfx/novice_combat_male.json out 2>&1 | tee out/build.log | grep -vE "^Fra:|Sample" | tail -80
+          fi
+      - name: Push results to art-novice75 (normal push)
+        if: always()
+        run: |
+          set -e
+          cd out
+          git init -q && git checkout -q -b art-novice75
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          URL="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          if git fetch -q "$URL" art-novice75 2>/dev/null; then git reset -q --soft FETCH_HEAD; fi
+          git add -A && git commit -qm "novice75 ${GITHUB_SHA::7}" || exit 0
+          git push -q "$URL" HEAD:art-novice75
