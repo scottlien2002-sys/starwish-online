@@ -1571,8 +1571,8 @@ class StarsproutGame {
       skill: (id: string) => self.castSkill(id),
       sharedAvatarTest: async (n: number) => {
         const sc = self.scene;
-        // 圖片貼圖（不含骨架的骨骼矩陣貼圖：每個骨架各一張，82 根骨骼約 5 KB）
-        const imageTex = () => sc.textures.filter((t) => t.getClassName() !== "RawTexture").length;
+        // 場景貼圖數（含每個骨架各一張的骨骼矩陣小貼圖）；共用與否看 usedTextures（角色材質實際用到的貼圖）
+        const imageTex = () => sc.textures.length;
         const texBefore = imageTex();
         const list: NoviceAvatar[] = [];
         let texAfterFirst = texBefore;

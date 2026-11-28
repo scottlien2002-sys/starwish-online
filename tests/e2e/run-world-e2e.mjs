@@ -305,7 +305,8 @@ for (const name of browsers) {
         check("Stage 7.5 技能：施放結束後回到一般狀態（沒有卡在技能中）", !sk1.busy, sk1.active);
         const shr = await V(() => window.__starwishPlay.sharedAvatarTest(3));
         run.results.stage75Shared = shr;
-        check("Stage 7.5 多人共用貼圖：3 位 n75 共用同一份材質與貼圖（第 2、3 位不增加貼圖）", shr.texAfterAll === shr.texAfterFirst && shr.materials === 1 && shr.usedTextures <= 4 && shr.meshes === 3, shr);
+        // 3 位共用同一個材質、同一組圖片貼圖（usedTextures）；每多一人只多 1 張骨架的骨骼矩陣小貼圖（82 根骨骼，約 5 KB）
+        check("Stage 7.5 多人共用貼圖：3 位 n75 共用同一份材質與貼圖（每多一人只多骨骼矩陣小貼圖）", shr.materials === 1 && shr.usedTextures <= 4 && shr.texAfterAll - shr.texAfterFirst <= shr.n - 1 && shr.meshes === 3, shr);
         await V(() => window.__starwishPlay.weaponTest(null, "R"));
       }
       // ---------- Stage 7.3：七種怪物 ----------
