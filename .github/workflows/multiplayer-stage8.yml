@@ -2,8 +2,8 @@ name: Multiplayer Stage 8 (Claude D)
 
 # 只在 Claude D 的多人連線分支執行（feature/multiplayer-**、integration/multiplayer-**）。
 # - server：伺服器／網路層測試（型別、單元、整合、WSS、PostgreSQL、2D 雙人頁）
-# - game：正式 3D 遊戲（單機回歸＋3D 雙人 E2E，Chromium＋WebKit）→ 部署多人測試預覽到 gh-pages 的 /preview-mp82/（只替換自己的資料夾）
-# - 測試結果推到 results/mp82-* 分支（JSON＋截圖），方便查看
+# - game：正式 3D 遊戲（單機回歸＋3D 雙人 E2E，Chromium＋WebKit）→ 部署多人測試預覽到 gh-pages 的 /preview-mp84/（只替換自己的資料夾）
+# - 測試結果推到 results/mp84-* 分支（JSON＋截圖），方便查看
 # concurrency 依分支分開，不會取消其他人的 CI；不碰 main。
 on:
   push:
@@ -60,8 +60,8 @@ jobs:
           echo "{\"job\":\"server\",\"commit\":\"${GITHUB_SHA}\",\"run\":\"${GITHUB_RUN_ID}\"}" > /tmp/res/server/meta.json
           cd /tmp/res
           git init -q -b r && git config user.name "github-actions[bot]" && git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A && git commit -qm "mp82 server results ${GITHUB_SHA::7}"
-          git push -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" "HEAD:refs/heads/results/mp82-server-${GITHUB_RUN_ID}"
+          git add -A && git commit -qm "mp84 server results ${GITHUB_SHA::7}"
+          git push -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" "HEAD:refs/heads/results/mp84-server-${GITHUB_RUN_ID}"
 
   game:
     runs-on: ubuntu-24.04
@@ -105,16 +105,38 @@ jobs:
         run: |
           node tools/mp-shared-assets.mjs plan dist test-results/shared-assets-plan.json
           node tools/mp-shared-assets.mjs stage dist /tmp/mig-root v1
-          MP_E2E_ROOT=/tmp/mig-root MP_E2E_PATH=preview-mp82 MP_E2E_TAG=mig_ node tests/e2e/run-mp-e2e.mjs dist chromium
+          MP_E2E_ROOT=/tmp/mig-root MP_E2E_PATH=preview-mp84 MP_E2E_TAG=mig_ node tests/e2e/run-mp-e2e.mjs dist chromium
       - name: Single-player regression (Stage 7.1 world E2E, Chromium + WebKit)
         id: world
         continue-on-error: true
         run: node tests/e2e/run-world-e2e.mjs dist chromium,webkit
-      - name: Deploy multiplayer preview (own folder /preview-mp82/ only)
-        id: deploy
-        if: github.ref_name == 'integration/multiplayer-stage8-2' && steps.mpchromium.outcome == 'success'
+      - name: Client render benchmark (2/4/8/16/32/40 players; merged remote vs Lite; software rendering, relative only)
+        id: render
+        continue-on-error: true
+        run: node tests/e2e/run-mp-render-perf.mjs dist chromium 2,4,8,16,32,40
+      - name: Pages capacity dry run (no push; Stage 8.4 deploys only after Claude A clears capacity)
+        id: capacity
+        continue-on-error: true
         run: |
-          DIR=preview-mp82
+          DIR=preview-mp84
+          rm -rf /tmp/pages
+          git clone -q --depth 1 -b gh-pages "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" /tmp/pages
+          BEFORE=$(du -sm --exclude=.git /tmp/pages | cut -f1)
+          rm -rf "/tmp/pages/$DIR" && mkdir -p "/tmp/pages/$DIR"
+          cp -r dist/. "/tmp/pages/$DIR/"
+          (cd "/tmp/pages/$DIR/models" && rm -f novice_c10b_*.glb novice_c10b1_*.glb novice_c10b2_*.glb novice_c10b3_*.glb novice_c10b4_*.glb novice_c10b5_*.glb novice_c10b5a_*.glb novice_male_v1_*.glb novice_female_v1_*.glb bobo_v3_*.glb bobo_v31_*.glb bobo_v33_*.glb bobo_v34_*.glb bobo_v35_*.glb bobo_v36_*.glb bobo_v37_*.glb bobo_v38_*.glb village-p3/*_s62.glb village-p3/p30_sample_*.glb) || true
+          node tools/mp-asset-remap.mjs /tmp/pages "$DIR"
+          AFTER=$(du -sm --exclude=.git /tmp/pages | cut -f1)
+          PREV=$(du -sm "/tmp/pages/$DIR" | cut -f1)
+          echo "{\"dryRun\":true,\"ghPagesNowMB\":${BEFORE},\"previewMB\":${PREV},\"ghPagesAfterMB\":${AFTER},\"stopLineMB\":1100,\"remapped\":$(node -e "console.log(Object.keys(require('/tmp/pages/$DIR/asset-remap.json').files).length)")}" > /tmp/capacity.json
+          cat /tmp/capacity.json
+          (cd "/tmp/pages/$DIR" && find . -type f -size +200k -printf "%s %p\n" | sort -rn | head -30) > /tmp/capacity-largest.txt || true
+          if [ "$AFTER" -gt 1100 ]; then echo "::warning::部署後 gh-pages 會是 ${AFTER} MB，超過 1100 MB 停止線（目前 ${BEFORE} MB）"; fi
+      - name: Deploy multiplayer preview (own folder /preview-mp84/ only; needs repo variable MP84_DEPLOY=1 after Claude A clears capacity)
+        id: deploy
+        if: github.ref_name == 'integration/multiplayer-stage8-4' && steps.mpchromium.outcome == 'success' && vars.MP84_DEPLOY == '1'
+        run: |
+          DIR=preview-mp84
           for attempt in 1 2 3 4 5; do
             rm -rf /tmp/pages
             git clone -q --depth 1 -b gh-pages "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" /tmp/pages
@@ -146,7 +168,7 @@ jobs:
         if: steps.deploy.outcome == 'success'
         continue-on-error: true
         run: |
-          URL="https://scottlien2002-sys.github.io/starwish-online/preview-mp82"
+          URL="https://scottlien2002-sys.github.io/starwish-online/preview-mp84"
           for i in $(seq 1 40); do
             if curl -fsS "$URL/preview.json" | grep -q "${GITHUB_SHA}"; then echo "pages updated"; break; fi
             sleep 15
@@ -160,13 +182,15 @@ jobs:
           cp -r test-results/mp-e2e /tmp/res/game/ 2>/dev/null || true
           rm -rf /tmp/res/game/mp-e2e/video   # 原始錄影太大：只保留合成後的 mp4
           cp test-results/shared-assets-plan.json /tmp/res/game/ 2>/dev/null || true
+          cp -r test-results/mp-render /tmp/res/game/ 2>/dev/null || true
+          cp /tmp/capacity.json /tmp/capacity-largest.txt /tmp/res/game/ 2>/dev/null || true
           (cd test-results 2>/dev/null && find . -maxdepth 3 -name '*.json' -not -path './mp-*' -exec cp --parents {} /tmp/res/game/ \;) || true
           cp /tmp/preview-meta.json /tmp/asset-remap.json /tmp/res/game/ 2>/dev/null || true
-          echo "{\"job\":\"game\",\"commit\":\"${GITHUB_SHA}\",\"run\":\"${GITHUB_RUN_ID}\",\"mpChromium\":\"${{ steps.mpchromium.outcome }}\",\"mpWebkit\":\"${{ steps.mpwebkit.outcome }}\",\"world\":\"${{ steps.world.outcome }}\",\"migrate\":\"${{ steps.migrate.outcome }}\",\"deploy\":\"${{ steps.deploy.outcome }}\",\"live\":\"${{ steps.live.outcome }}\"}" > /tmp/res/game/meta.json
+          echo "{\"job\":\"game\",\"commit\":\"${GITHUB_SHA}\",\"run\":\"${GITHUB_RUN_ID}\",\"mpChromium\":\"${{ steps.mpchromium.outcome }}\",\"mpWebkit\":\"${{ steps.mpwebkit.outcome }}\",\"world\":\"${{ steps.world.outcome }}\",\"migrate\":\"${{ steps.migrate.outcome }}\",\"render\":\"${{ steps.render.outcome }}\",\"capacity\":\"${{ steps.capacity.outcome }}\",\"deploy\":\"${{ steps.deploy.outcome }}\",\"live\":\"${{ steps.live.outcome }}\"}" > /tmp/res/game/meta.json
           cd /tmp/res
           git init -q -b r && git config user.name "github-actions[bot]" && git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A && git commit -qm "mp82 game results ${GITHUB_SHA::7}"
-          git push -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" "HEAD:refs/heads/results/mp82-game-${GITHUB_RUN_ID}"
+          git add -A && git commit -qm "mp84 game results ${GITHUB_SHA::7}"
+          git push -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" "HEAD:refs/heads/results/mp84-game-${GITHUB_RUN_ID}"
       - name: Fail if tests failed
         if: steps.mpchromium.outcome != 'success' || steps.mpwebkit.outcome != 'success' || steps.world.outcome != 'success' || steps.migrate.outcome != 'success'
         run: exit 1

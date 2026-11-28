@@ -9,27 +9,34 @@ import type { WorldSession } from "../game/worldSession.ts";
 import { parseAppearance } from "../core/gameSave.ts";
 import { MpWorld, mpServerUrl, normalizeServer } from "./MpWorld.ts";
 
-async function installAssetRemap(): Promise<number> {
-  try {
-    const r = await fetch(`${import.meta.env.BASE_URL}asset-remap.json`, { cache: "no-cache" });
-    if (!r.ok) return 0;
-    const map = (await r.json()) as { files?: Record<string, string> };
-    const files = map.files ?? {};
-    const base = new URL(`${import.meta.env.BASE_URL}`, location.href).href;
-    const prev = FileTools.PreprocessUrl;
-    FileTools.PreprocessUrl = (url: string) => {
-      const abs = new URL(url, location.href).href;
-      if (abs.startsWith(base)) {
-        const rel = decodeURIComponent(abs.slice(base.length).split("?")[0]!);
-        const to = files[rel];
-        if (to) return to;
-      }
-      return prev(url);
-    };
-    return Object.keys(files).length;
-  } catch {
-    return 0;
-  }
+/**
+ * Stage 8.4：M002 苔角獸、M003 雲絨鳥 Rig V1.1 候選版（Claude C，待統一視覺驗收）。
+ * 檔案另存為 *_V1_1_*.glb（V1.0 原檔保留）；多人預覽預設讀 V1.1，網址加 &m23=v10 回到 V1.0（回退）。
+ * 只換「讀哪個檔」，Claude A 的規格（關節數、動作名稱與時長）兩版相同，伺服器不受影響。
+ * （預覽站共用其他資料夾模型的 asset-remap.json 由 Claude A 的 core/assetRemap.ts 在所有頁面開機前處理，這裡不再重複載入）
+ */
+export const M23_CANDIDATE: Readonly<Record<string, string>> = Object.freeze({
+  "models/monsters/m002/M002_MossHornBeast_Rig_V1_HQ.glb": "models/monsters/m002/M002_MossHornBeast_Rig_V1_1_HQ.glb",
+  "models/monsters/m002/M002_MossHornBeast_Rig_V1_Lite.glb": "models/monsters/m002/M002_MossHornBeast_Rig_V1_1_Lite.glb",
+  "models/monsters/m003/M003_CloudFluffBird_Rig_V1_HQ.glb": "models/monsters/m003/M003_CloudFluffBird_Rig_V1_1_HQ.glb",
+  "models/monsters/m003/M003_CloudFluffBird_Rig_V1_Lite.glb": "models/monsters/m003/M003_CloudFluffBird_Rig_V1_1_Lite.glb",
+});
+
+function installMonsterCandidates(params: URLSearchParams): "v1.1" | "v1.0" {
+  if (params.get("m23") === "v10") return "v1.0";
+  const base = new URL(`${import.meta.env.BASE_URL}`, location.href).href;
+  const prev = FileTools.PreprocessUrl;
+  // 先換成 V1.1 的路徑，再交給前一層（A 的 asset-remap：V1.1 也可能被共用到別的資料夾）
+  FileTools.PreprocessUrl = (url: string) => {
+    const abs = new URL(url, location.href).href;
+    if (abs.startsWith(base)) {
+      const rel = decodeURIComponent(abs.slice(base.length).split("?")[0]!);
+      const to = M23_CANDIDATE[rel];
+      if (to) return prev(new URL(to, base).href);
+    }
+    return prev(url);
+  };
+  return "v1.1";
 }
 
 function askServer(): Promise<string> {
@@ -56,8 +63,9 @@ function askServer(): Promise<string> {
 }
 
 export async function bootMultiplayer(world: WorldSession, hudRoot: HTMLElement, params: URLSearchParams, status: (s: string) => void): Promise<void> {
-  const remapped = await installAssetRemap();
-  (window as unknown as { __mpAssetRemap?: number }).__mpAssetRemap = remapped;
+  const m23 = installMonsterCandidates(params);
+  (window as unknown as { __mpM23?: string; __mpAssetRemap?: number }).__mpM23 = m23;
+  (window as unknown as { __mpAssetRemap?: number }).__mpAssetRemap = (window as unknown as { __starwishAssetRemap?: number }).__starwishAssetRemap ?? 0;
   const url = mpServerUrl(params) ?? (await askServer());
   const c = world.save.character;
   // 新角色外觀（測試用網址參數；只是造型，伺服器用同一個 parseAppearance 驗證）：&hair=hair01&hairColor=%23c0408a&weapon=staff

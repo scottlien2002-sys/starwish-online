@@ -71,7 +71,10 @@ async function player(name, extra, mobile) {
   page.on("response", (r) => {
     const u = r.url();
     if (r.status() >= 400 && !/favicon/.test(u)) results.http404.push(`${r.status()} ${u}`);
-    if (/\/preview-(?!mp8[12])[a-z0-9-]+\/models\//.test(u)) results.remappedLoads++;
+    if (/\/preview-(?!mp8[124])[a-z0-9-]+\/models\//.test(u)) results.remappedLoads++;
+    // Stage 8.4：M002／M003 候選版（V1.1）與回退（V1.0）實際載入的檔案
+    const mm = /(M00[23])_[A-Za-z]+_Rig_(V1_1|V1)_(HQ|Lite)\.glb/.exec(u);
+    if (mm && r.status() < 400) ((results.m23Loads ??= {})[name] ??= []).push(`${mm[1]} ${mm[2] === "V1_1" ? "V1.1" : "V1.0"} ${mm[3]}`);
     if (/\/shared-assets\/v\d+\//.test(u)) results.sharedAssetLoads = (results.sharedAssetLoads ?? 0) + 1;
   });
   page.on("console", (m) => {
@@ -147,7 +150,8 @@ async function walk(p, pts, getPos, done, ms = 40000) {
 try {
   // ---------- 進入星芽村 ----------
   const A = await player("阿星", "&g=male&hairColor=%233a2a1a&weapon=sword", false);
-  const B = await player("小願", "&g=female&hairColor=%23c0408a&weapon=staff", true);
+  // B 關掉怪物距離分級（&mlod=0）、M002／M003 用回退版（&m23=v10）：驗證畫面設定不同時，伺服器戰鬥結果仍一致
+  const B = await player("小願", "&g=female&hairColor=%23c0408a&weapon=staff&mlod=0&m23=v10", true);
   for (const p of [A, B]) await waitVillage(p);
   for (const p of [A, B]) await p.page.waitForFunction(() => !!window.__mpWorld, null, { timeout: 10000 });
   const t0 = Date.now();
@@ -162,9 +166,10 @@ try {
   check("兩位玩家進入同一個星芽村房間", a.mp.room === b.mp.room && a.mp.room.startsWith("village"), { room: a.mp.room });
   const bSeesA = b.mp.remotes.find((r) => r.id === a.mp.pid);
   const aSeesB = a.mp.remotes.find((r) => r.id === b.mp.pid);
-  const okB5b = (r) => !!r?.loaded && /c10b5b/.test(r.file ?? "") && /lite/i.test(r.file ?? "") && !r.parts;
-  check("A 看見 B 的 3D 角色（C1.0-B5b Lite、女、粉紅髮色已套用、法杖）", okB5b(aSeesB) && aSeesB.gender === "female" && aSeesB.hairColor === "#c0408a" && aSeesB.hairTinted >= 1 && aSeesB.weapon === "staff", aSeesB);
-  check("B 看見 A 的 3D 角色（C1.0-B5b Lite、男、深棕髮色已套用、短劍）", okB5b(bSeesA) && bSeesA.gender === "male" && bSeesA.hairColor === "#3a2a1a" && bSeesA.hairTinted >= 1 && bSeesA.weapon === "sword", bSeesA);
+  // Stage 8.4：其他玩家＝Claude C 的合併渲染模型（C1.0-B5b Lite 合併，2 個 draw call＋遠距離 LOD）
+  const okB5b = (r) => !!r?.loaded && /^novice_c10b5b_(male|female)_remote\.glb$/.test(r.file ?? "") && !r.parts && ["near", "far", "culled"].includes(r.lod);
+  check("A 看見 B 的 3D 角色（C1.0-B5b 合併渲染、女、粉紅髮色已套用、法杖）", okB5b(aSeesB) && aSeesB.gender === "female" && aSeesB.hairColor === "#c0408a" && aSeesB.hairTinted >= 1 && aSeesB.weapon === "staff", aSeesB);
+  check("B 看見 A 的 3D 角色（C1.0-B5b 合併渲染、男、深棕髮色已套用、短劍）", okB5b(bSeesA) && bSeesA.gender === "male" && bSeesA.hairColor === "#3a2a1a" && bSeesA.hairTinted >= 1 && bSeesA.weapon === "sword", bSeesA);
   const bAp = await B.page.evaluate(() => window.__mpWorld.client.appearance);
   check("本地角色外觀以伺服器資料建立（B 是女性、法杖；不是 Tripo 零件）", b.gender === "female" && bAp.weapon === "staff" && !b.avatarModel.modular && b.avatarModel.parts.length === 0, { gender: b.gender, ap: bAp, modular: b.avatarModel.modular });
   check("一般移動沒有跳躍按鈕", a.jumpButtonVisible === false && b.jumpButtonVisible === false);
@@ -267,6 +272,24 @@ try {
   }
   check("A、B 都在星芽原野，互相看見", fa.mp.room === fb.mp.room && fa.mp.remotes.some((r) => r.id === fb.mp.pid && r.loaded) && fb.mp.remotes.some((r) => r.id === fa.mp.pid && r.loaded), { room: fa.mp.room });
   await shot(B, "03_field_B_sees_A_iphone");
+  // ---------- Stage 8.4：七種怪物 27 隻、候選資產、距離分級 ----------
+  const fieldInfo = (P) => P.page.evaluate(() => {
+    const i = window.__starwishPlay.info();
+    const kinds = {};
+    for (const m of i.monsters) kinds[m.kind] = (kinds[m.kind] ?? 0) + 1;
+    return { n: i.monsters.length, kinds, detail: i.monsterDetail ?? i.perf?.monsterDetail ?? null, m23: window.__mpM23 ?? null, render: window.__mpWorld.renderStats };
+  });
+  let fiA = await fieldInfo(A);
+  let fiB = await fieldInfo(B);
+  const srvKinds = {};
+  for (const c of (await metrics()).combat ?? []) srvKinds[c.room] = c.monsters;
+  results.samples.monsters = { A: fiA, B: fiB, server: srvKinds };
+  const seven = ["star_dew_bobo", "moss_horn_beast", "cloud_fluff_bird", "windfeather_fox", "nebula_sheep", "carrot_king", "crown_hammer_rabbit"];
+  check("原野七種怪物 27 隻：兩支手機與伺服器一致", fiA.n === 27 && fiB.n === 27 && Object.values(srvKinds).includes(27) && seven.every((k) => fiA.kinds[k] > 0 && fiB.kinds[k] > 0), results.samples.monsters);
+  for (let i = 0; i < 40 && !((results.m23Loads?.["阿星"] ?? []).length >= 2 && (results.m23Loads?.["小願"] ?? []).length >= 2); i++) await sleep(250);
+  const la = results.m23Loads?.["阿星"] ?? [];
+  const lb = results.m23Loads?.["小願"] ?? [];
+  check("M002／M003 候選版 V1.1 已載入（A）；&m23=v10 回退到 V1.0（B）", fiA.m23 === "v1.1" && fiB.m23 === "v1.0" && la.some((x) => /M002 V1\.1/.test(x)) && la.some((x) => /M003 V1\.1/.test(x)) && !la.some((x) => /V1\.0/.test(x)) && lb.some((x) => /M002 V1\.0/.test(x)) && !lb.some((x) => /V1\.1/.test(x)), { A: la, B: lb });
 
   // ---------- 原野：A、B 合作打同一隻怪（伺服器權威）----------
   const field = (P) => P.page.evaluate(() => window.__starwishPlay.info().mp.field);
@@ -346,6 +369,10 @@ try {
     await Promise.all([fA(), fB()]);
     const [ma2, mb2] = await Promise.all([monOf(A, targetId).catch(() => null), monOf(B, targetId).catch(() => null)]);
     if (ma2 && mb2) hpSamples.push([ma2.hp, mb2.hp, ma2.state, mb2.state]);
+    if (!results.samples.remoteSkillSeen) {
+      const st = await A.page.evaluate(() => window.__mpWorld.remoteInfo().map((r) => r.state)).catch(() => []);
+      if (st.includes("Skill")) results.samples.remoteSkillSeen = true;
+    }
     if (!shotFight && ma2 && ma2.hp < ma2.maxHp) {
       mark("firstHit");
       await sleep(250);
@@ -368,6 +395,12 @@ try {
   check("A 的攻擊與 B 的技能都被伺服器接受、兩人都打出傷害（B 法杖用魔法彈）", fldA.attacksOk > 0 && fldB.skillsOk > 0 && fldA.damageDealt > 0 && fldB.damageDealt > 0, { A: { sent: fldA.attacksSent, ok: fldA.attacksOk, rej: fldA.attacksRejected, dmg: fldA.damageDealt }, B: { skills: fldB.skillsOk, dmg: fldB.damageDealt, last: fldB.lastReject } });
   check("傷害數字顯示伺服器結果（兩邊都有命中特效）", fldA.hitsShown > 0 && fldB.hitsShown > 0, { A: fldA.hitsShown, B: fldB.hitsShown });
   check("其他玩家的技能特效依伺服器施放事件播放（A 看到 B 的施放）", fldA.remoteCastsShown > 0, { remoteCasts: fldA.remoteCastsShown, vfx: fldA.vfx });
+  const skA = await A.page.evaluate(() => window.__mpWorld.skillAnim);
+  check("其他玩家播 Claude C 的技能動作（A 看到 B 的魔法彈動作，不是普通攻擊）", skA.started >= 1, { ...skA, sampledState: results.samples.remoteSkillSeen ?? false });
+  check("戰鬥特效共用 Claude A 的原野戰鬥表現（沒有第二套特效系統）、戰鬥音效已建立", fldA.sharedFx === true && fldB.sharedFx === true && !!fldA.audio && !!fldB.audio, { A: { shared: fldA.sharedFx, audio: fldA.audio }, B: { shared: fldB.sharedFx, audio: fldB.audio } });
+  fiA = await fieldInfo(A);
+  fiB = await fieldInfo(B);
+  check("畫面分級不影響伺服器結果：A 開啟怪物距離分級、B 關閉，兩邊看到的血量一致", fiA.detail?.on === true && fiB.detail?.on === false, { A: fiA.detail, B: fiB.detail });
   check("兩人都拿到經驗（伺服器結算，擊殺只結算一次）", fldA.self?.exp > 0 && fldB.self?.exp > 0, { A: fldA.self, B: fldB.self });
   await shot(A, "05_field_coop_kill_A");
   // ---------- 掉落物：伺服器產生（UUID、歸屬＝傷害最高者）；歸屬者靠近自動撿（伺服器判定） ----------

@@ -18,6 +18,9 @@ import { PALETTES } from "../combat-vfx/fx/palette.ts";
 import { skillById, type FxKey, type SkillDef, type SkillEvent } from "../combat-vfx/core/skills.ts";
 import { SkillTimeline, type ClipTiming } from "../combat-vfx/core/timeline.ts";
 import { VFX_QUALITY, type VfxTier } from "../combat-vfx/core/quality.ts";
+import { CombatAudio } from "../combat-vfx/fx/CombatAudio.ts";
+import type { SfxKey } from "../combat-vfx/core/skills.ts";
+import type { FieldCombatFx } from "../game/fieldCombatFx.ts";
 import type { WeaponRig } from "../combat-vfx/weapons.ts";
 
 export interface FieldHost {
@@ -36,6 +39,13 @@ export interface FieldHost {
   /** 本人的武器（殘影用；沒有時不畫殘影） */
   weapon(): WeaponRig | null;
   lite: boolean;
+  /** Stage 8.4：Claude A 的原野戰鬥表現（命中、受傷紅框、重生光柱）。有的話共用它的特效與傷害數字系統 */
+  fx?: FieldCombatFx | null;
+  /** 其他玩家播技能動作（C 的技能片段）；false＝沒有片段 */
+  remoteSkill?(pid: number, clip: string, t: number): boolean;
+  remoteSkillEnd?(pid: number): void;
+  /** 畫面右方向（音效左右聲道） */
+  rightDir?(): { x: number; z: number };
 }
 
 const ITEM_LABEL: Record<string, string> = { seed: "種子", egg: "孵化蛋", birdEgg: "鳥蛋", monsterMaterial: "怪物材料", shopFeed: "商店飼料", gold: "金幣" };
@@ -78,6 +88,8 @@ export class MpFieldCombat {
   private nextLocalAttack = 0;
   private readonly mats = new Map<string, StandardMaterial>();
   readonly tier: VfxTier;
+  readonly audio: CombatAudio | null;
+  private readonly ownsFx: boolean;
   /** 統計（測試介面） */
   readonly stats = { attacksSent: 0, attacksOk: 0, attacksRejected: 0, skillsSent: 0, skillsOk: 0, hitsShown: 0, castsShown: 0, remoteCastsShown: 0, picksSent: 0, picksOk: 0, picksRejected: 0, monsterHitsTaken: 0, damageDealt: 0, lastReject: "" };
   private readonly pendingCmd = new Map<string, "atk" | "sk" | "pick">();
@@ -87,9 +99,20 @@ export class MpFieldCombat {
     this.client = client;
     this.host = host;
     this.gender = gender;
-    this.tier = host.lite ? "low" : "medium";
-    this.vfx = new VfxSystem(host.scene, this.tier);
-    this.dmg = new DamageNumbers(host.scene, host.hudRoot, VFX_QUALITY[this.tier].damageNumbers);
+    this.tier = host.fx?.tier ?? (host.lite ? "low" : "medium");
+    // A 的戰鬥表現已建立特效與傷害數字系統 → 共用（不建立第二套 GlowLayer／物件池）
+    this.ownsFx = !host.fx;
+    this.vfx = host.fx?.vfx ?? new VfxSystem(host.scene, this.tier);
+    this.dmg = host.fx?.numbers ?? new DamageNumbers(host.scene, host.hudRoot, VFX_QUALITY[this.tier].damageNumbers);
+    // 戰鬥音效（Claude C Stage 3）：第一次觸控後才能播放（瀏覽器規定）；&sfx=0 關閉
+    this.audio = new URLSearchParams(location.search).get("sfx") === "0" ? null : new CombatAudio();
+    if (this.audio) {
+      this.audio.setEnvironment("bright");
+      const unlock = (): void => this.audio?.unlock();
+      window.addEventListener("pointerdown", unlock, { passive: true });
+      window.addEventListener("touchstart", unlock, { passive: true });
+      window.addEventListener("keydown", unlock);
+    }
     for (const m of host.monsters) MON_LABEL[m.instance.definition.monsterId] = m.instance.definition.name;
     client.opts.onCombat = (e) => this.onEvent(e);
     void fetch(`${import.meta.env.BASE_URL}combat-vfx/novice_combat_${gender}.json`)
@@ -134,8 +157,23 @@ export class MpFieldCombat {
     this.updateCasts(dt);
     this.updateProjectiles(dt);
     this.updateLoot(dt);
-    this.vfx.update(dt);
-    this.dmg.update(dt);
+    if (this.ownsFx) {
+      this.vfx.update(dt);
+      this.dmg.update(dt);
+    }
+  }
+
+  /** 音效：自己全音量；其他玩家 0.3、依畫面左右 pan、28 m 以外不播（C 的多人規則） */
+  private sfx(key: SfxKey, self: boolean, x: number, z: number, gain = 1): void {
+    const a = this.audio;
+    if (!a) return;
+    if (self) return a.play(key, gain);
+    const me = this.host.me();
+    const dx = x - me.x;
+    const dz = z - me.z;
+    if (Math.hypot(dx, dz) > 28) return;
+    const r = this.host.rightDir?.() ?? { x: 1, z: 0 };
+    a.play(key, 0.3 * gain, Math.max(-0.8, Math.min(0.8, (dx * r.x + dz * r.z) / 8)));
   }
 
   private applyServerMonster(mc: MonsterController, r: RemoteMonster, now: number): void {
@@ -152,6 +190,7 @@ export class MpFieldCombat {
     } else if (serverAlive && !inst.isAlive) {
       // 伺服器已重生：本機死亡動作播完就重生；還在播就直接回待機（以伺服器為準）
       if (!inst.respawn().accepted) inst.sm.resetToIdle();
+      this.host.fx?.respawn(r.x, this.host.surface(r.x, r.z), r.z, Math.max(0.8, (inst.definition.bodyRadius ?? 0.5) * 1.6));
     }
     inst.currentHp = r.hp;
     if (serverAlive) {
@@ -239,10 +278,12 @@ export class MpFieldCombat {
         this.casts.set(e.c, { c: e.c, pid: e.p, self, def, tl, yaw: e.y / 1000, targetNid: e.t, x: e.x / 100, z: e.z / 100, trail, trailEnd: -1, age: 0, dur: e.dur / 1000 });
         if (self) this.stats.castsShown++;
         else this.stats.remoteCastsShown++;
+        if (!def) this.sfx("swish", self, e.x / 100, e.z / 100, 0.8);
         return;
       }
       case "end": {
         const c = this.casts.get(e.c);
+        if (c && !c.self) this.host.remoteSkillEnd?.(c.pid);
         c?.trail?.dispose();
         this.casts.delete(e.c);
         return;
@@ -263,6 +304,7 @@ export class MpFieldCombat {
         const spec = cast?.def ? findHit(cast.def, e.h) : null;
         const keys: FxKey[] = spec?.fx ?? ["hitFlash", "hitSpark"];
         this.vfx.hitFx(at, keys, self && e.cr === 1, { owner, palette: cast?.def?.palette ?? "steel", distance: dist });
+        this.sfx(e.cr ? "crit" : spec?.sfx ?? (mc.instance.definition.level >= 9 ? "hitHeavy" : "hit"), self, q.x, q.z);
         if (self || dist < 18) this.dmg.show(at.add(new Vector3(0, 0.35, 0)), e.d, e.cr ? "crit" : "normal");
         this.stats.hitsShown++;
         if (self) this.stats.damageDealt += e.d;
@@ -278,7 +320,8 @@ export class MpFieldCombat {
         if (e.p !== me) return;
         this.stats.monsterHitsTaken++;
         const p = this.host.me();
-        this.dmg.show(new Vector3(p.x, this.host.surface(p.x, p.z) + 1.9, p.z), e.b ? "格擋" : e.d, "player");
+        if (this.host.fx && !e.b) this.host.fx.playerHurt(p.x, this.host.surface(p.x, p.z), p.z, e.d);
+        else this.dmg.show(new Vector3(p.x, this.host.surface(p.x, p.z) + 1.9, p.z), e.b ? "格擋" : e.d, "player");
         if (e.d > 0 && e.hp > 0) this.host.playHurt();
         const mc = this.byNid.get(e.m);
         this.host.toast(e.hp === 0 ? "你倒下了…（伺服器判定）" : `受到${mc?.instance.definition.name ?? "怪物"}攻擊 -${e.d}`, 900);
@@ -333,6 +376,8 @@ export class MpFieldCombat {
       }
       if (!c.tl || c.tl.done) continue;
       for (const f of c.tl.advance(dt)) this.runVisual(c, f.event, f.end);
+      // 其他玩家：播 C 的技能動作，時間＝技能時間軸（與伺服器命中時間同一個時鐘）
+      if (!c.self && c.def) this.host.remoteSkill?.(c.pid, c.def.clip, c.tl.t);
     }
   }
 
@@ -360,6 +405,9 @@ export class MpFieldCombat {
         this.vfx.spawn(ev.fx, at, { owner, palette: ev.palette ?? def.palette, yaw: c.yaw, scale: ev.scale, duration: ev.duration, distance: dist });
         return;
       }
+      case "sfx":
+        this.sfx(ev.sfx, c.self, pos.x, pos.z);
+        return;
       case "projectile": {
         let from: Vector3;
         let dir: Vector3;
@@ -466,6 +514,8 @@ export class MpFieldCombat {
       casts: this.casts.size,
       loot: this.lootViews.size,
       vfx: { ...this.vfx.stats },
+      sharedFx: !this.ownsFx,
+      audio: this.audio ? { ready: this.audio.ready, played: this.audio.played } : null,
       self: this.client.self,
       monsterHp: [...this.byNid.entries()].map(([nid, m]) => [nid, m.instance.instanceId, m.instance.currentHp, m.instance.currentState]),
     };
@@ -475,8 +525,10 @@ export class MpFieldCombat {
     for (const c of this.casts.values()) c.trail?.dispose();
     for (const v of this.lootViews.values()) v.mesh.dispose();
     this.lootViews.clear();
-    this.vfx.dispose();
-    this.dmg.dispose();
+    if (this.ownsFx) {
+      this.vfx.dispose();
+      this.dmg.dispose();
+    }
     if (this.client.opts.onCombat) this.client.opts.onCombat = undefined;
   }
 }

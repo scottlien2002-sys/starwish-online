@@ -55,6 +55,11 @@ function placeNear(srv: GameServer, b: Bot, nid: number, dist = 1.2, a = 0): voi
   p.state.x = Math.round((q.x + Math.cos(a) * (dist + br)) * 100) / 100;
   p.state.z = Math.round((q.z + Math.sin(a) * (dist + br)) * 100) / 100;
 }
+/** 依怪物種類找伺服器編號（Stage 8.4：怪物 27 隻，編號依 A 的出生順序） */
+function nidOfKind(srv: GameServer, b: Bot, monsterId: string, k = 0): number {
+  const list = room(srv, b).combat!.monsters.filter((m) => m.ctl.instance.definition.monsterId === monsterId);
+  return list[k]!.nid;
+}
 async function untilT(pred: () => boolean, ms: number, what: string): Promise<void> {
   const t0 = Date.now();
   while (!pred()) {
@@ -232,7 +237,7 @@ test("防作弊：偽造傷害、超過攻速、距離外攻擊、打死掉的�
   try {
     await a.online();
     const cb = room(srv, a).combat!;
-    const nid = 17; // 皇冠錘兔（900 HP）：連打也打不死
+    const nid = nidOfKind(srv, a, "crown_hammer_rabbit"); // 皇冠錘兔（900 HP）：連打也打不死
     const inst = cb.monster(nid)!.ctl.instance;
     // 1) 偽造傷害：payload 裡塞 damage，伺服器忽略
     placeNear(srv, a, nid, 1.0);
@@ -301,7 +306,7 @@ test("技能：三段連擊每段只結算一次（castId＋hitId＋目標），
   try {
     await a.online();
     const cb = room(srv, a).combat!;
-    const nid = 17; // 皇冠錘兔（900 HP）：打不死，方便數命中
+    const nid = nidOfKind(srv, a, "crown_hammer_rabbit"); // 皇冠錘兔（900 HP）：打不死，方便數命中
     placeNear(srv, a, nid, 1.0);
     const r = await cmd(a, "sk", { s: "triple_slash", t: nid });
     assert.equal(r.ok, true, String(r.err));
@@ -514,7 +519,7 @@ test("跨地圖：村莊房間沒有怪物資料；從原野回村莊戰鬥數�
   }
 });
 
-for (const n of [4, 8, 16, 40]) {
+for (const n of [2, 4, 8, 16, 32, 40]) {
   test(`負載：${n} 位機器人在原野同時移動＋攻擊 8 秒`, async () => {
     const srv = await startServer();
     const bots: CombatBot[] = [];
@@ -603,6 +608,38 @@ test("同一件掉落物的兩個撿取要求在資料庫寫入完成前同時�
   } finally {
     a.stop();
     b.stop();
+    await srv.stop();
+  }
+});
+
+test("擊退（Claude A Stage 7.4 規則，由伺服器決定）：第 1 下約 0.225 m、第 2 下一半、第 3 下 0；不會推進障礙物", async () => {
+  const srv = await startServer();
+  const a = new CombatBot(srv, "knock");
+  try {
+    await a.online();
+    const cb = room(srv, a).combat!;
+    const nid = nidOfKind(srv, a, "moss_horn_beast"); // M002 Lv3 被動、一般怪
+    const inst = cb.monster(nid)!.ctl.instance;
+    const tq = room(srv, a).terrainQuery()!;
+    let landed = 0;
+    for (let k = 0; k < 8 && landed < 3; k++) {
+      placeNear(srv, a, nid, 1.0, Math.PI);
+      const n0 = cb.counters.lastKnocks?.length ?? 0;
+      const h0 = cb.counters.hitsResolved;
+      assert.equal((await cmd(a, "atk", { t: nid })).ok, true);
+      await untilT(() => cb.counters.hitsResolved > h0, 2000, "hit");
+      if ((cb.counters.lastKnocks?.length ?? 0) > n0) landed++; // 揮空（5%）不算
+      assert.ok(tq.canStand(inst.currentPosition.x, inst.currentPosition.z, inst.definition.bodyRadius ?? 0.5), "擊退後的位置可以站立");
+      await sleep(Math.ceil(cb.tuning(sp(srv, a)).attackInterval * 1000) + 30);
+    }
+    const ks = cb.counters.lastKnocks ?? [];
+    results.knockback = { monster: "moss_horn_beast", knocks: ks, counter: cb.counters.knockbacks };
+    assert.ok(ks.length >= 3, JSON.stringify(ks));
+    assert.ok(Math.abs(ks[0]! - 0.225) < 0.01, `第 1 下 ${ks[0]}`);
+    assert.ok(ks[1]! <= 0.1125 + 1e-6, `第 2 下 ${ks[1]}（一半，怪物出手中為 0）`);
+    assert.equal(ks[2], 0, "第 3 下起 0");
+  } finally {
+    a.stop();
     await srv.stop();
   }
 });

@@ -552,6 +552,8 @@ class StarsproutGame {
       shadow: `${this.shadows.useContactHardeningShadow ? "PCSS" : "PCF"} ${this.quality.shadows.mapSize}（取樣 ${this.shadows.filteringQuality === ShadowGenerator.QUALITY_HIGH ? "高" : this.shadows.filteringQuality === ShadowGenerator.QUALITY_MEDIUM ? "中" : "低"}）`,
       shadowCasters: this.shadows.getShadowMap()?.renderList?.length ?? 0,
       fx: this.fx ? { ...this.fx.stats, particles: this.fx.vfx.stats.particles } : null,
+      // Stage 8.4：多人資訊一起放進「複製報告」（同場人數、延遲、其他玩家遠近分級、伺服器戰鬥統計）
+      ...(this.ws?.mp ? { mp: { ...this.ws.mp.perfInfo(), field: this.mpField ? { attacksOk: this.mpField.stats.attacksOk, hitsShown: this.mpField.stats.hitsShown, remoteCasts: this.mpField.stats.remoteCastsShown, audio: this.mpField.audio?.played ?? null } : null } } : {}),
     }));
     this.lockRing = MeshBuilder.CreateTorus("PH_lockRing", { diameter: 1.1, thickness: 0.05, tessellation: 40 }, scene);
     const ringMat = new StandardMaterial("PH_lockRingMat", scene);
@@ -608,10 +610,18 @@ class StarsproutGame {
           toast: (m, ms) => this.hud.toast(m, ms),
           weapon: () => this.look?.weapon ?? null,
           lite: this.lod === "lite",
+          fx: this.fx,
+          remoteSkill: (pid, clip, t) => mp.remoteSkill(pid, clip, t),
+          remoteSkillEnd: (pid) => mp.remoteSkillEnd(pid),
+          rightDir: () => {
+            const d = this.camera.camera.getDirection(Vector3.Right());
+            return { x: d.x, z: d.z };
+          },
         },
         this.gender,
       );
       mp.onCommand((id, ok, err) => this.mpField?.onCommandResult(id, ok, err));
+      mp.perf = this.perf;
       this.hud.toast("多人戰鬥（Stage 8.2 測試）：怪物、傷害、經驗、掉落都由伺服器判定", 4000);
     }
     await scene.whenReadyAsync();

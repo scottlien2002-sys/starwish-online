@@ -250,6 +250,9 @@ export class Room implements RoomView {
   get size(): number {
     return this.byPid.size;
   }
+  terrainQuery() {
+    return this.auth.terrainQuery;
+  }
   /** 伺服器不需要地形高度（怪物 y 不同步；客戶端貼地） */
   ground(): number {
     return 0;

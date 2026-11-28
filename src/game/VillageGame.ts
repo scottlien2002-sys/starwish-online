@@ -164,6 +164,12 @@ class VillageGame {
     canvas.addEventListener("contextmenu", block);
     this.keyboard = new KeyboardInput(this.input, () => joystick.active);
     this.perf = new PerfOverlay(this.engine, scene, this.quality, hudRoot);
+    // Stage 8.4：多人資訊放進「複製報告」
+    if (w.mp) {
+      const mp = w.mp;
+      mp.perf = this.perf;
+      this.perf.setExtra(() => ({ mp: mp.perfInfo() }));
+    }
     this.perf.setLabels({ model: MODEL_LOD_LABEL[this.lod], map: "星芽村" });
     this.follower = new PetFollower(scene, w.pets.cfg.visual?.stageSize);
     this.panel = new WorldPanel(hudRoot, w, {

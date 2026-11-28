@@ -6,6 +6,7 @@
  *   傳送陣：worldPortals.ts（村莊南門 ↔ 原野營地）
  */
 import { moveVillage, standable, RESPAWN_SLOTS, groundHeight } from "../../src/maps/village/layout.ts";
+import { FieldTerrainQuery } from "../../src/game/fieldTerrainQuery.ts";
 import { StarsproutTerrain, resolveMove, pushOutOfColliders, type Collider } from "../../src/maps/starsprout/terrain.ts";
 import { MAP_COLLIDERS, PLAYER_RADIUS } from "../../src/maps/starsprout/route.ts";
 import { propColliders, propExclusions } from "../../src/maps/starsprout/props.ts";
@@ -38,6 +39,8 @@ export interface MapAuthority {
   ground(x: number, z: number): number;
   spawn(i: number): SpawnPoint;
   readonly portals: readonly PortalRule[];
+  /** Stage 8.4：原野的地形判定（Claude A FieldTerrainQuery：擊退、技能位移不穿過岩石、溪流、邊界） */
+  readonly terrainQuery?: FieldTerrainQuery;
 }
 
 function villageAuthority(): MapAuthority {
@@ -76,6 +79,7 @@ function starsproutAuthority(given?: { terrain: StarsproutTerrain; colliders: re
       return { x: a.x + (k % 3 - 1) * 0.8, z: a.z + Math.floor(k / 3) * 0.8, yaw: a.yaw };
     },
     portals: [{ id: p.id, x: p.x, z: p.z, triggerR: p.triggerR, armR: p.triggerR + 1, to: { map: p.to.map, x: p.to.x, z: p.to.z, yaw: p.to.yaw } }],
+    terrainQuery: new FieldTerrainQuery(terrain, colliders),
   };
 }
 

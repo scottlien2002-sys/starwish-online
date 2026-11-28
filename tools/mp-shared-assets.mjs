@@ -6,8 +6,8 @@
 //
 //   node tools/mp-shared-assets.mjs plan  <dist> <out.json>        依賴清單＋容量估算（不改任何檔案）
 //   node tools/mp-shared-assets.mjs stage <dist> <root> [v1]       在 <root> 模擬 gh-pages：
-//        <root>/shared-assets/v1/…（共用檔＋manifest.json）＋<root>/preview-mp82/（不含共用檔，asset-remap.json 指向共用目錄）
-//        之後用 MP_E2E_ROOT=<root> MP_E2E_PATH=preview-mp82 跑 E2E＝遷移測試
+//        <root>/shared-assets/v1/…（共用檔＋manifest.json）＋<root>/preview-mp84/（不含共用檔，asset-remap.json 指向共用目錄）
+//        之後用 MP_E2E_ROOT=<root> MP_E2E_PATH=preview-mp84 跑 E2E＝遷移測試
 // 只在暫存目錄操作；不刪除、不修改 gh-pages 上任何其他部門的預覽。
 import { createHash } from "node:crypto";
 import { copyFileSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync, rmSync, cpSync } from "node:fs";
@@ -71,7 +71,8 @@ if (cmd === "plan") {
   const root = out;
   rmSync(root, { recursive: true, force: true });
   const sdir = join(root, "shared-assets", ver);
-  const pdir = join(root, "preview-mp82");
+  const PDIR = process.env.MP_PREVIEW_DIR ?? "preview-mp84";
+  const pdir = join(root, PDIR);
   mkdirSync(sdir, { recursive: true });
   cpSync(dist, pdir, { recursive: true });
   for (const x of unused) rmSync(join(pdir, x.rel), { force: true });
@@ -88,7 +89,7 @@ if (cmd === "plan") {
   writeFileSync(join(sdir, "manifest.json"), JSON.stringify(manifest, null, 1));
   writeFileSync(join(pdir, "asset-remap.json"), JSON.stringify({ note: `Stage 8.3 遷移測試：大型模型改從 /shared-assets/${ver}/ 讀取`, sources: [`shared-assets/${ver}`], files: remap }, null, 1));
   const pBytes = walk(pdir).reduce((s, f) => s + statSync(f).size, 0);
-  console.log(`staged: shared-assets/${ver} ${shared.length} files ${MB(shared.reduce((s, x) => s + x.bytes, 0))} MB; preview-mp82 ${MB(pBytes)} MB`);
+  console.log(`staged: shared-assets/${ver} ${shared.length} files ${MB(shared.reduce((s, x) => s + x.bytes, 0))} MB; ${PDIR} ${MB(pBytes)} MB`);
 } else {
   console.error("unknown command");
   process.exit(2);

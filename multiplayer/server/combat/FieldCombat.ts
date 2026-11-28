@@ -22,6 +22,8 @@ import { expToNext, gainExp } from "../../../src/core/progression.ts";
 import { rollDrops } from "../../../src/pets/petSystem.ts";
 import { rollGold } from "../../../src/economy/economyConfig.ts";
 import { createRng, type Rng } from "../../../src/core/rng.ts";
+import { FieldKnockback } from "../../../src/game/fieldKnockback.ts";
+import type { FieldTerrainQuery } from "../../../src/game/fieldTerrainQuery.ts";
 import { skillById, type HitSpec, type SkillDef } from "../../../src/combat-vfx/core/skills.ts";
 import { SkillTimeline } from "../../../src/combat-vfx/core/timeline.ts";
 import { skillRate } from "../../../src/combat-vfx/core/damage.ts";
@@ -85,6 +87,9 @@ export interface CombatCounters {
   monsterHits: number;
   playersDowned: number;
   hitsOnDeadTarget?: number;
+  knockbacks?: number;
+  /** 最近 8 次擊退距離（公尺；0＝依規則不推） */
+  lastKnocks?: number[];
 }
 
 const STATE_CODE = new Map<string, number>(MON_STATES.map((s, i) => [s, i]));
@@ -95,6 +100,8 @@ export interface CombatHost {
   players(): Iterable<ServerPlayer>;
   get(pid: number): ServerPlayer | undefined;
   ground(x: number, z: number): number;
+  /** Stage 8.4：地形判定（擊退不穿過障礙物）；沒有時不擊退 */
+  terrainQuery?(): FieldTerrainQuery | undefined;
 }
 
 export class FieldCombat {
@@ -109,6 +116,8 @@ export class FieldCombat {
   private readonly store: CharacterStore;
   private readonly data: CombatData;
   private readonly rng: Rng;
+  /** Claude A Stage 7.4 的連擊擊退衰減（第 1 下 100%、第 2 下 50%、之後 0；出手中不推；Boss ×0.25） */
+  private readonly kb = new FieldKnockback();
   readonly counters: CombatCounters = { attacksAccepted: 0, attacksRejected: {}, hitsResolved: 0, duplicateHitsBlocked: 0, kills: 0, killsSettled: 0, duplicateKillsBlocked: 0, lootSpawned: 0, lootPicked: 0, lootPickRejected: {}, monsterHits: 0, playersDowned: 0 };
   /** 送背包更新給玩家（GameServer 提供） */
   onInventory: (p: ServerPlayer) => void = () => {};
@@ -118,7 +127,8 @@ export class FieldCombat {
     this.store = store;
     this.data = loadCombatData();
     this.rng = createRng(seed);
-    const reg = createMonsterRegistry();
+    // 世界模式的規則（Lv1～4 被動、Lv5 以上主動）＝與客戶端 StarsproutGame（ws 模式）相同
+    const reg = createMonsterRegistry({ legacyAggressive: false });
     // 與客戶端 StarsproutGame 相同的出生順序與兩個工廠 → instanceId 相同（star_dew_bobo#1…、windfeather_fox#1…）
     const boboFactory = new MonsterFactory(reg);
     const rigFactory = new MonsterFactory(reg);
@@ -327,8 +337,32 @@ export class FieldCombat {
       }
       this.counters.hitsResolved++;
       this.emit({ k: "hit", c: h.castId, h: h.hitId, p: p.pid, t: m.nid, d: dmg, cr: crit ? 1 : 0, ms: miss ? 1 : 0, hp: inst.currentHp, kl: killed ? 1 : 0 });
-      if (killed) this.onKilled(m, p, nowS);
+      // 普通攻擊的輕微擊退（與單機 Stage 7.4 相同規則；位置由伺服器決定，客戶端用插值顯示）
+      if (!h.skill && dmg > 0 && !killed) this.knock(m, p, nowS);
+      if (killed) {
+        this.kb.reset(inst.instanceId);
+        this.onKilled(m, p, nowS);
+      }
     }
+  }
+
+  private knock(m: ServerMonster, p: ServerPlayer, nowS: number): void {
+    const tq = this.host.terrainQuery?.();
+    if (!tq) return;
+    const inst = m.ctl.instance;
+    const ip = inst.currentPosition;
+    const k = this.kb.distance(inst.instanceId, nowS, { attacking: inst.currentState === "attack", boss: inst.definition.rank === "boss" });
+    const log = (this.counters.lastKnocks ??= []);
+    log.push(+k.toFixed(4));
+    if (log.length > 8) log.shift();
+    if (k <= 0) return;
+    const dx = ip.x - p.x;
+    const dz = ip.z - p.z;
+    const d = Math.hypot(dx, dz) || 1;
+    const to = tq.clampMove({ x: ip.x, z: ip.z }, { x: ip.x + (dx / d) * k, z: ip.z + (dz / d) * k }, inst.definition.bodyRadius ?? 0.5);
+    ip.x = to.x;
+    ip.z = to.z;
+    this.counters.knockbacks = (this.counters.knockbacks ?? 0) + 1;
   }
 
   private addThreat(m: ServerMonster, pid: number, v: number): void {

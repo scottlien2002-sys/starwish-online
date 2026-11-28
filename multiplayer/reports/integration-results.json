@@ -5,8 +5,8 @@
     "remoteFinalPosErrCm": 0,
     "localFinalPosErrCm": 0.03,
     "serverPos": [
-      6.11,
-      7.16
+      6.03,
+      7.03
     ],
     "aStats": {
       "state": "online",
@@ -15,35 +15,35 @@
       "pid": 1,
       "rttMs": 0,
       "rttAvgMs": 1,
-      "jitterMs": 1,
-      "bytesUpPerSec": 461,
-      "bytesDownPerSec": 2194,
+      "jitterMs": 0,
+      "bytesUpPerSec": 463,
+      "bytesDownPerSec": 2204,
       "msgsUpPerSec": 12,
       "msgsDownPerSec": 21,
       "snapsPerSec": 20,
       "players": 2,
       "pendingInputs": 0,
-      "corrections": 13,
-      "lastCorrectionCm": 31,
-      "maxCorrectionCm": 32,
+      "corrections": 14,
+      "lastCorrectionCm": 8,
+      "maxCorrectionCm": 33,
       "snapCorrections": 0,
       "reconnects": 0,
       "lastResyncMs": 0,
-      "serverTick": 45,
+      "serverTick": 47,
       "fps": 0,
-      "totalBytesUp": 1172,
-      "totalBytesDown": 5936
+      "totalBytesUp": 1213,
+      "totalBytesDown": 6166
     },
     "bStats": {
       "state": "online",
       "map": "village",
       "room": "village-1",
       "pid": 2,
-      "rttMs": 1,
-      "rttAvgMs": 1,
+      "rttMs": 0,
+      "rttAvgMs": 0,
       "jitterMs": 0,
       "bytesUpPerSec": 28,
-      "bytesDownPerSec": 2332,
+      "bytesDownPerSec": 2380,
       "msgsUpPerSec": 1,
       "msgsDownPerSec": 21,
       "snapsPerSec": 20,
@@ -55,17 +55,17 @@
       "snapCorrections": 0,
       "reconnects": 0,
       "lastResyncMs": 0,
-      "serverTick": 45,
+      "serverTick": 47,
       "fps": 0,
-      "totalBytesUp": 137,
-      "totalBytesDown": 6400
+      "totalBytesUp": 136,
+      "totalBytesDown": 6675
     }
   },
   "prediction": {
     "lagOneWayMs": 120,
     "jitterMs": 40,
-    "rttMs": 287,
-    "localResponseMs": 10,
+    "rttMs": 281,
+    "localResponseMs": 12,
     "corrections": 0,
     "maxCorrectionCm": 0,
     "snapCorrections": 0,
@@ -84,7 +84,7 @@
     }
   },
   "reconnect": {
-    "resyncMsFromDrop": 545,
+    "resyncMsFromDrop": 551,
     "observerSawDisconnectMs": 102,
     "samePid": true,
     "finalErrCm": 0,
@@ -96,16 +96,16 @@
   "graceExpiry": {
     "savedPos": {
       "x": 6.2,
-      "z": 8.41
+      "z": 8.32
     },
     "dbPos": [
       6.2,
-      8.41
+      8.32
     ],
     "dbVersion": 5,
     "respawnPos": [
       6.2,
-      8.41
+      8.32
     ]
   },
   "sessionLock": {
@@ -113,10 +113,10 @@
     "players": 1
   },
   "cheat": {
-    "speedHackSeconds": 3.01,
+    "speedHackSeconds": 3.02,
     "movedM": 15.78,
-    "legitMaxM": 15.07,
-    "limitM": 18.07,
+    "legitMaxM": 15.09,
+    "limitM": 18.09,
     "stepsDropped": 1503,
     "kickedAfterGarbage": true,
     "badMessages": 60,
@@ -125,11 +125,11 @@
     "foreignOriginRejected": true
   },
   "portal": {
-    "walkSeconds": 13.9,
+    "walkSeconds": 13.8,
     "toRoom": "starsprout-1",
     "fieldPos": [
-      -53.6,
-      -64.08
+      -53.52,
+      -64.17
     ],
     "errCm": 0,
     "staleEpochInputs": 0,
@@ -139,7 +139,7 @@
     "results": [
       {
         "type": "cmd",
-        "id": "1_mwz5lssf_0",
+        "id": "1_mwznfq9m_0",
         "ok": true,
         "dup": false,
         "data": {
@@ -150,7 +150,7 @@
       },
       {
         "type": "cmd",
-        "id": "1_mwz5lssf_0",
+        "id": "1_mwznfq9m_0",
         "ok": true,
         "dup": true,
         "data": {
@@ -161,14 +161,14 @@
       },
       {
         "type": "cmd",
-        "id": "1_mwz5lssf_1",
+        "id": "1_mwznfq9m_1",
         "ok": false,
         "dup": false,
         "err": "bad_emote"
       },
       {
         "type": "cmd",
-        "id": "1_mwz5lssf_2",
+        "id": "1_mwznfq9m_2",
         "ok": false,
         "dup": false,
         "err": "unknown_cmd"
@@ -179,17 +179,17 @@
   "load40": {
     "tick": {
       "count": 161,
-      "avgMs": 1.084,
-      "maxMs": 5.188
+      "avgMs": 0.87,
+      "maxMs": 2.981
     },
     "serverNetPerSec": {
-      "bytesIn": 30666,
-      "bytesOut": 884775,
-      "msgsIn": 680,
-      "msgsOut": 840
+      "bytesIn": 30926,
+      "bytesOut": 878511,
+      "msgsIn": 676,
+      "msgsOut": 839
     },
-    "perClientDownBps": 22027,
-    "perClientUpBps": 774,
+    "perClientDownBps": 21717,
+    "perClientUpBps": 736,
     "roomPlayers": [
       40
     ],

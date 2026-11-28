@@ -14,6 +14,7 @@ import type { ActKind, AppearanceWire, Gender, MapId } from "../../multiplayer/s
 import { NoviceAvatar, type NoviceLod } from "../characters/NoviceAvatar.ts";
 import { NOVICE_VERSION } from "../game/noviceVersion.ts";
 import { applyNoviceLook, type AppliedLook } from "./mpAppearance.ts";
+import { RemoteCombatAvatar } from "./mpRemoteAvatar.ts";
 
 const TOKEN_KEY = "starwish.mp81.token";
 const SERVER_KEY = "starwish.mp81.server";
@@ -64,7 +65,7 @@ export function isMpMode(params: URLSearchParams): boolean {
 interface RemoteView {
   id: number;
   key: string;
-  avatar: NoviceAvatar | null;
+  avatar: NoviceAvatar | RemoteCombatAvatar | null;
   look: AppliedLook | null;
   loading: boolean;
   label: HTMLDivElement;
@@ -89,6 +90,8 @@ export class MpWorld {
   private readonly bar: HTMLDivElement;
   private readonly detail: HTMLDivElement;
   private scene: Scene | null = null;
+  /** 遊戲畫面的效能量測（與「複製報告」同一份；自動測試讀取） */
+  perf: { session(): unknown; resetSession(): void } | null = null;
   private lod: NoviceLod = "lite";
   private ground: (x: number, z: number) => number = () => 0;
   private readonly remotes = new Map<number, RemoteView>();
@@ -99,6 +102,12 @@ export class MpWorld {
   private roanHeld = false;
   private roanSent = 0;
   readonly baseUrl = `${import.meta.env.BASE_URL}models/`;
+  /** Stage 8.4：其他玩家模型（remote＝Claude C 合併渲染＋遠距離 LOD；lite＝Stage 8.2 的 Lite 模型，回退用） */
+  readonly remoteMode: "remote" | "lite" = new URLSearchParams(location.search).get("remote") === "lite" ? "lite" : "remote";
+  /** 畫面統計（測試介面） */
+  readonly renderStats = { near: 0, far: 0, culled: 0, remoteTriangles: 0 };
+  /** 其他玩家技能動作：開始播放的次數／沒有片段改播普通攻擊的次數 */
+  readonly skillAnim = { started: 0, missing: 0 };
   private readonly proj = new Vector3();
   private readonly tmp = new Vector3();
 
@@ -192,6 +201,39 @@ export class MpWorld {
     this.cmdHandler = fn;
   }
 
+  /** 「複製報告」用：多人連線與其他玩家畫面分級（只是畫面資訊，不影響伺服器） */
+  perfInfo(): Record<string, unknown> {
+    const st = this.client.stats;
+    return {
+      server: this.client.opts.url,
+      room: st.room,
+      players: st.players,
+      rttMs: st.rttMs,
+      rttAvgMs: st.rttAvgMs,
+      jitterMs: st.jitterMs,
+      downKBs: Math.round((st.bytesDownPerSec / 1024) * 10) / 10,
+      reconnects: st.reconnects,
+      remoteModel: this.remoteMode,
+      remotes: { ...this.renderStats, loaded: [...this.remotes.values()].filter((v) => v.avatar).length },
+    };
+  }
+
+  /** 伺服器施放事件 → 其他玩家播 Claude C 的技能動作（時間由技能時間軸決定）；false＝沒有片段，改播普通攻擊 */
+  remoteSkill(pid: number, clip: string, t: number): boolean {
+    const a = this.remotes.get(pid)?.avatar;
+    if (!(a instanceof RemoteCombatAvatar)) return false;
+    const was = a.state === "Skill";
+    const ok = a.skillTime(clip, t);
+    if (ok && !was) this.skillAnim.started++;
+    if (!ok && !was) this.skillAnim.missing++;
+    return ok;
+  }
+
+  remoteSkillEnd(pid: number): void {
+    const a = this.remotes.get(pid)?.avatar;
+    if (a instanceof RemoteCombatAvatar) a.skillEnd();
+  }
+
   /** 其他玩家目前畫面上的位置（技能特效錨點用） */
   remotePose(pid: number): { x: number; z: number; yaw: number } | null {
     const v = this.remotes.get(pid);
@@ -270,6 +312,7 @@ export class MpWorld {
     if (!scene) return;
     const list = this.client.remotes();
     const seen = new Set<number>();
+    this.renderStats.near = this.renderStats.far = this.renderStats.culled = this.renderStats.remoteTriangles = 0;
     for (const r of list) {
       seen.add(r.id);
       let v = this.remotes.get(r.id);
@@ -305,7 +348,25 @@ export class MpWorld {
     label.textContent = r.name;
     this.hudRoot.appendChild(label);
     const v: RemoteView = { id: r.id, key, avatar: null, look: null, loading: true, label, lastActSeq: r.actSeq, lastX: r.x, lastZ: r.z, speed: 0, link: r.link, dead: false };
-    // Stage 8.2：其他玩家用已驗收的 C1.0-B5b（優先 Lite），外觀（髮色、武器）與本人同一套
+    // Stage 8.4：其他玩家預設用 C 的合併渲染模型（C1.0-B5b Lite 合併，2 個 draw call＋遠距離 LOD）；&remote=lite 回到 8.2 的 Lite
+    if (this.remoteMode === "remote") {
+      void RemoteCombatAvatar.load(this.scene!, import.meta.env.BASE_URL, r.gender, r.ap)
+        .then((a) => {
+          if (this.remotes.get(r.id) !== v) {
+            a.dispose();
+            return;
+          }
+          a.root.position.set(r.x, this.ground(r.x, r.z), r.z);
+          a.root.rotation.y = r.yaw;
+          v.avatar = a;
+          v.loading = false;
+        })
+        .catch(() => {
+          v.loading = false;
+          label.textContent = `${r.name}（模型載入失敗）`;
+        });
+      return v;
+    }
     void NoviceAvatar.load(this.scene!, { gender: r.gender, lod: "lite", baseUrl: this.baseUrl, version: NOVICE_VERSION })
       .then(async (a) => {
         if (!this.remotes.has(r.id) || this.remotes.get(r.id) !== v) {
@@ -342,6 +403,15 @@ export class MpWorld {
     v.lastZ = r.z;
     const a = v.avatar;
     const gy = this.ground(r.x, r.z);
+    const cam0 = this.scene?.activeCamera;
+    const camD = cam0 ? Math.hypot(cam0.globalPosition.x - r.x, cam0.globalPosition.y - gy - 1, cam0.globalPosition.z - r.z) : 0;
+    if (a instanceof RemoteCombatAvatar) {
+      a.setCameraDistance(camD);
+      if (a.culled) this.renderStats.culled++;
+      else if (a.far) this.renderStats.far++;
+      else this.renderStats.near++;
+      if (!a.culled) this.renderStats.remoteTriangles += a.triangles;
+    }
     if (a) {
       const dead = r.anim === ANIM.Death;
       const newAct = r.actSeq !== v.lastActSeq;
@@ -364,6 +434,10 @@ export class MpWorld {
         setAlpha(a.root.getChildMeshes(), r.link ? 1 : 0.45);
       }
       v.dead = dead;
+    }
+    if (a instanceof RemoteCombatAvatar && a.culled) {
+      v.label.style.display = "none";
+      return;
     }
     // 名牌
     const scene = this.scene!;
@@ -392,7 +466,7 @@ export class MpWorld {
   }
 
   /** 測試用：遠端玩家畫面狀態 */
-  remoteInfo(): { id: number; name: string; loaded: boolean; state: string | null; pos: [number, number] | null; yaw: number | null; link: number; parts: number; file: string | null; weapon: string | null; hairTinted: number; hairColor: string | null; gender: string }[] {
+  remoteInfo(): { id: number; name: string; loaded: boolean; state: string | null; pos: [number, number] | null; yaw: number | null; link: number; parts: number; file: string | null; weapon: string | null; hairTinted: number; lod: string; hairColor: string | null; gender: string }[] {
     const list = this.client.remotes();
     return [...this.remotes.values()].map((v) => {
       const r = list.find((x) => x.id === v.id);
@@ -404,10 +478,11 @@ export class MpWorld {
         pos: v.avatar ? [v.avatar.root.position.x, v.avatar.root.position.z] : null,
         yaw: v.avatar ? v.avatar.root.rotation.y : null,
         link: v.link,
-        parts: v.avatar?.parts.length ?? 0,
+        parts: v.avatar instanceof NoviceAvatar ? v.avatar.parts.length : 0,
         file: v.avatar?.file ?? null,
-        weapon: v.look?.weapon?.kind ?? null,
-        hairTinted: v.look?.hairTinted ?? 0,
+        weapon: v.avatar instanceof RemoteCombatAvatar ? v.avatar.av.weaponRig.kind : v.look?.weapon?.kind ?? null,
+        hairTinted: v.avatar instanceof RemoteCombatAvatar ? v.avatar.hairTinted : v.look?.hairTinted ?? 0,
+        lod: v.avatar instanceof RemoteCombatAvatar ? (v.avatar.culled ? "culled" : v.avatar.far ? "far" : "near") : "lite",
         hairColor: r?.ap.hairColor ?? null,
         gender: r?.gender ?? "",
       };
