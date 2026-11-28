@@ -1,0 +1,1 @@
+function e(e){let t=e>>>0,n=()=>{t=t+0x6d2b79f5>>>0;let e=t;return e=Math.imul(e^e>>>15,e|1),e^=e+Math.imul(e^e>>>7,e|61),((e^e>>>14)>>>0)/4294967296};return{next:n,range:(e,t)=>e+(t-e)*n(),int:(e,t)=>e+Math.floor(n()*(t-e))}}export{e as t};
