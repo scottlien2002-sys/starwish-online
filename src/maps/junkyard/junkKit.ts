@@ -19,6 +19,8 @@ import {
   VertexBuffer,
 } from "@babylonjs/core";
 
+import { groundTexels, slabTexels } from "../../world/texGen.ts";
+
 export type Rgb = readonly [number, number, number];
 
 // ---------------- 調色盤（參考概念圖：暖色鏽鐵、青綠烤漆、木頭、苔蘚、紫粉水晶） ----------------
@@ -60,6 +62,8 @@ export interface JunkMaterials {
   foliage: StandardMaterial;
   belt: StandardMaterial;
   terrain: StandardMaterial;
+  /** 高台鋪面（混凝土／鐵板縫線；頂點透明度讓邊緣自然破損） */
+  pavement: StandardMaterial;
   water: StandardMaterial;
   grit: Texture;
   dot: Texture;
@@ -215,9 +219,26 @@ export function createJunkMaterials(scene: Scene, tier: "high" | "medium" | "low
   const terrain = new StandardMaterial("jy_terrain", scene);
   terrain.diffuseColor = Color3.White();
   terrain.specularColor = new Color3(0.03, 0.03, 0.03);
-  terrain.diffuseTexture = grit.clone();
-  (terrain.diffuseTexture as Texture).uScale = 1;
-  (terrain.diffuseTexture as Texture).vScale = 1;
+  // V2：地面專用貼圖（雲狀明暗＋小石子＋碎斑），比共用顆粒貼圖細緻；低畫質用較小的貼圖
+  const gN = tier === "high" ? 512 : 256;
+  const groundTex = RawTexture.CreateRGBATexture(groundTexels(gN, 11), gN, gN, scene, true, false, Texture.TRILINEAR_SAMPLINGMODE);
+  groundTex.name = "jy_groundTex";
+  groundTex.wrapU = Texture.WRAP_ADDRESSMODE;
+  groundTex.wrapV = Texture.WRAP_ADDRESSMODE;
+  groundTex.anisotropicFilteringLevel = tier === "low" ? 1 : 4;
+  terrain.diffuseTexture = groundTex;
+  const pavement = new StandardMaterial("jy_pavement", scene);
+  pavement.diffuseColor = Color3.White();
+  pavement.specularColor = new Color3(0.06, 0.06, 0.06);
+  pavement.specularPower = 24;
+  const sN = tier === "high" ? 512 : 256;
+  const slabTex = RawTexture.CreateRGBATexture(slabTexels(sN, 23), sN, sN, scene, true, false, Texture.TRILINEAR_SAMPLINGMODE);
+  slabTex.name = "jy_slabTex";
+  slabTex.wrapU = Texture.WRAP_ADDRESSMODE;
+  slabTex.wrapV = Texture.WRAP_ADDRESSMODE;
+  slabTex.anisotropicFilteringLevel = tier === "low" ? 1 : 4;
+  pavement.diffuseTexture = slabTex;
+  pavement.zOffset = -2;
   const water = new StandardMaterial("jy_water", scene);
   water.diffuseColor = new Color3(0.25, 0.62, 0.85);
   water.emissiveColor = new Color3(0.12, 0.34, 0.5);
@@ -228,8 +249,8 @@ export function createJunkMaterials(scene: Scene, tier: "high" | "medium" | "low
   (water.diffuseTexture as Texture).uScale = 0.3;
   (water.diffuseTexture as Texture).vScale = 0.3;
   const flicker = [0, 1, 2].map((i) => glow(`jy_flicker${i}`, new Color3(1, 0.7, 0.3)));
-  for (const m of [paint, metal, belt, terrain, foliage, crystal, cloth]) m.maxSimultaneousLights = 2;
-  return { paint, metal, glowOrange, glowBlue, glowGreen, crystal, cloth, foliage, belt, terrain, water, grit, dot, flicker };
+  for (const m of [paint, metal, belt, terrain, pavement, foliage, crystal, cloth]) m.maxSimultaneousLights = 2;
+  return { paint, metal, glowOrange, glowBlue, glowGreen, crystal, cloth, foliage, belt, terrain, pavement, water, grit, dot, flicker };
 }
 
 // ---------------- 零件與合併 ----------------
@@ -361,8 +382,8 @@ export class Kit {
 }
 
 // ---------------- 小垃圾（thin instance 的來源網格；本地原點在底部） ----------------
-export type JunkType = "can" | "crate" | "barrel" | "tire" | "gear" | "plate" | "tv" | "pipe" | "rock" | "spring";
-export const JUNK_TYPES: readonly JunkType[] = ["can", "crate", "barrel", "tire", "gear", "plate", "tv", "pipe", "rock", "spring"];
+export type JunkType = "can" | "crate" | "barrel" | "tire" | "gear" | "plate" | "tv" | "pipe" | "rock" | "spring" | "pallet" | "cone" | "coil";
+export const JUNK_TYPES: readonly JunkType[] = ["can", "crate", "barrel", "tire", "gear", "plate", "tv", "pipe", "rock", "spring", "pallet", "cone", "coil"];
 
 /** 建立一種小垃圾的來源網格（已合併、有頂點色；材質由呼叫端決定） */
 export function junkSource(scene: Scene, mats: JunkMaterials, type: JunkType, lite: boolean): Mesh {
@@ -419,6 +440,26 @@ export function junkSource(scene: Scene, mats: JunkMaterials, type: JunkType, li
       m.scaling.set(1.3, 0.7, 1);
       m.position.y = 0.3;
       k.add(m, PAL.stone, "paint");
+      break;
+    }
+    case "pallet": {
+      // 木棧板：上層 5 片、下層 3 根橫木（約 1.2 × 1.0 m）
+      for (let i = 0; i < 5; i++) k.box(0.2, 0.05, 1.0, -0.48 + i * 0.24, 0.155, 0, i % 2 ? PAL.wood : [0.68, 0.5, 0.32]);
+      for (let i = 0; i < 3; i++) k.box(1.2, 0.11, 0.14, 0, 0.065, -0.42 + i * 0.42, PAL.woodDark);
+      break;
+    }
+    case "cone": {
+      // 交通錐：橘色錐身＋白色反光帶＋方形底座
+      k.box(0.46, 0.05, 0.46, 0, 0.025, 0, PAL.black);
+      k.cyl(0.06, 0.34, 0.6, 0, 0.35, 0, PAL.orange, "paint", t);
+      k.cyl(0.19, 0.23, 0.1, 0, 0.42, 0, PAL.cream, "paint", t);
+      break;
+    }
+    case "coil": {
+      // 電纜捲盤：兩片圓盤＋中間纏線
+      k.cyl(1.0, 1.0, 0.07, 0, 0.5, -0.3, PAL.wood, "paint", t + 4, [Math.PI / 2, 0, 0]);
+      k.cyl(1.0, 1.0, 0.07, 0, 0.5, 0.3, PAL.wood, "paint", t + 4, [Math.PI / 2, 0, 0]);
+      k.cyl(0.72, 0.72, 0.54, 0, 0.5, 0, PAL.tealDark, "paint", t + 2, [Math.PI / 2, 0, 0]);
       break;
     }
     case "spring": {

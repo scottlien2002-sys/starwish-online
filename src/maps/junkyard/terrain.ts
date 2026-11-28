@@ -29,7 +29,8 @@ import {
 } from "./layout.ts";
 
 import { lerp, polyDist, segDist, smoothstep } from "./geom.ts";
-import { pileColliders } from "./scatter.ts";
+import { pileColliders, propColliders } from "./scatter.ts";
+import { ColliderGrid } from "../../world/colliderGrid.ts";
 export { segDist, smoothstep };
 
 /** 高台內部的「到邊緣距離」（正＝在內部） */
@@ -190,13 +191,24 @@ export const STATIC_COLLIDERS: readonly Collider[] = buildColliders();
 export const COLLIDERS: readonly Collider[] = [
   ...STATIC_COLLIDERS,
   ...pileColliders(groundHeight, (x, z, pad) => insideColliders(STATIC_COLLIDERS, x, z, pad)).map((p): Collider => ({ kind: "circle", ...p })),
+  ...propColliders(groundHeight, (x, z, pad) => insideColliders(STATIC_COLLIDERS, x, z, pad)).map((p): Collider => ({ kind: "circle", ...p })),
 ];
 
-/** 把點推出碰撞物（含玩家半徑） */
+/** V2：全部碰撞物的空間格（每次只檢查附近的碰撞物） */
+const boundOf = (c: Collider): number => (c.kind === "circle" ? c.r : Math.hypot(c.hx, c.hz));
+export const COLLIDER_GRID = new ColliderGrid(COLLIDERS.map((c) => ({ x: c.x, z: c.z, bound: boundOf(c) })), 8);
+const near: number[] = [];
+
+/** 把點推出碰撞物（含玩家半徑）。用預設的 COLLIDERS 時走空間格，結果與逐一檢查相同 */
 export function pushOut(x: number, z: number, radius: number, colliders: readonly Collider[] = COLLIDERS): { x: number; z: number; hit: boolean } {
   let hit = false;
+  const indexed = colliders === COLLIDERS;
   for (let pass = 0; pass < 2; pass++) {
-    for (const c of colliders) {
+    // 碰撞物依外接圓登記到格子；查詢範圍＝本身半徑＋2 m（同一輪內被推開的距離）；第二輪在新位置重新查詢
+    const list = indexed ? COLLIDER_GRID.query(x, z, radius + 2, near) : null;
+    const n = list ? list.length : colliders.length;
+    for (let ii = 0; ii < n; ii++) {
+      const c = list ? colliders[list[ii]!]! : colliders[ii]!;
       if (c.kind === "circle") {
         const dx = x - c.x;
         const dz = z - c.z;

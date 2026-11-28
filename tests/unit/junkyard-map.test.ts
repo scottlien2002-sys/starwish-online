@@ -178,3 +178,28 @@ test("雙向傳送接口（與 Claude A worldPortals 相同格式）：踩入觸
   assert.equal(t.update(0, -120), false);
   assert.equal(t.update(JUNKYARD_ENTRY.x, JUNKYARD_ENTRY.z), false);
 });
+
+test("V2 高台地面道具：在高台頂面、避開主路線、怪物出生區與垃圾堆", async () => {
+  const { scatterAll, SCATTER_TIERS } = await import("../../src/maps/junkyard/scatter.ts");
+  const { groundHeight, insideColliders, STATIC_COLLIDERS } = await import("../../src/maps/junkyard/terrain.ts");
+  const { MAIN_ROUTE, SPAWNS } = await import("../../src/maps/junkyard/layout.ts");
+  const { polyDist } = await import("../../src/maps/junkyard/geom.ts");
+  const r = scatterAll(groundHeight, (x, z, p) => insideColliders(STATIC_COLLIDERS, x, z, p), SCATTER_TIERS.high);
+  assert.ok(r.counts.props >= 100, String(r.counts.props));
+  let n = 0;
+  for (const m of r.junk.values()) {
+    for (const t of ["pallet", "cone", "coil"] as const) {
+      for (const it of m.get(t) ?? []) {
+        n++;
+        assert.ok(it.small, "道具要能依距離漸變");
+        assert.ok(polyDist(it.x, it.z, MAIN_ROUTE) > 2.9, `${t} 在主路線上 (${it.x},${it.z})`);
+        assert.ok(!SPAWNS.some((s) => Math.hypot(it.x - s.x, it.z - s.z) < s.r + 0.9), `${t} 在出生區`);
+        assert.ok(!r.piles.some((p) => Math.hypot(it.x - p.x, it.z - p.z) < p.r + 1), `${t} 與垃圾堆重疊`);
+      }
+    }
+  }
+  assert.equal(n, r.counts.props);
+  // 垃圾堆（碰撞）不受道具影響
+  const r2 = scatterAll(groundHeight, (x, z, p) => insideColliders(STATIC_COLLIDERS, x, z, p), { ...SCATTER_TIERS.high, props: 0 });
+  assert.deepEqual(r.piles.map((p) => [p.x, p.z, p.r]), r2.piles.map((p) => [p.x, p.z, p.r]));
+});

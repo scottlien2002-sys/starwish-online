@@ -105,6 +105,11 @@ for (const name of browsers) {
       check(`各區 Draw Calls ≤ ${B.draws}（最高 ${maxDraw}）`, maxDraw <= B.draws, run.results.stops.map((x) => [x.id, x.draws]));
       check(`各區場景三角面（不含玩家角色）≤ ${B.scene.toLocaleString()}（最高 ${maxScene.toLocaleString()}）`, maxScene <= B.scene, run.results.stops.map((x) => [x.id, x.sceneTris, x.tris]));
 
+      // ---- V2：高台鋪面、地面道具 ----
+      const paveStops = run.results.stops.filter((x) => (x.breakdown["高台鋪面"]?.tris ?? 0) > 0).map((x) => x.id);
+      const sv2 = await V(() => window.__starwishJunkyard.stats());
+      check("V2：高台鋪面有繪製（回收區／工廠／核心）、地面道具 150 件（各畫質相同）", paveStops.length >= 2 && sv2.scatter.props === 150, { paveStops, props: sv2.scatter.props });
+
       // ---- 分區載入／釋放 ----
       const log = await V(() => window.__starwishJunkyard.streamLog());
       run.results.streamLog = log.length;

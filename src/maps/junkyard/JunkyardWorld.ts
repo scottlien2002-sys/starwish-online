@@ -52,6 +52,8 @@ import { polyDist, rng, smoothstep } from "./geom.ts";
 import { createJunkMaterials, type JunkMaterials, Kit, junkSource, type JunkType, PAL, type Rgb } from "./junkKit.ts";
 import { cellOf, type Inst, SCATTER_TIERS, type ScatterResult, STREAM_CELLS, scatterAll } from "./scatter.ts";
 import { compactInto, type FadeRule, type FadeSet, makeFadeSet, selectFade } from "../../world/lodKit.ts";
+import { bladeTuft } from "../../world/foliageKit.ts";
+import { periodicNoise } from "../../world/texGen.ts";
 
 /** 距離密度漸變（草叢、小花、地面碎屑）；網址 &jyfade=0 關閉（對照用） */
 const FADE_RULES: Record<"high" | "medium" | "low", { tuft: FadeRule; flower: FadeRule; debris: FadeRule }> = {
@@ -201,6 +203,7 @@ export class JunkyardWorld {
     this.root = new TransformNode("jy_root", scene);
     this.scatter = scatterAll(groundHeight, (x, z, p) => insideColliders(STATIC_COLLIDERS, x, z, p), this.tierCfg);
     this.buildTerrain();
+    this.buildPavement();
     this.buildWater();
     this.buildLandmarks();
     if (tier !== "low") this.buildAmbient();
@@ -240,8 +243,8 @@ export class JunkyardWorld {
             col[k * 4 + 1] = c[1];
             col[k * 4 + 2] = c[2];
             col[k * 4 + 3] = 1;
-            uv[k * 2] = x / 7;
-            uv[k * 2 + 1] = z / 7;
+            uv[k * 2] = x / 8.5;
+            uv[k * 2 + 1] = z / 8.5;
           }
         }
         const idx = new Uint32Array(per * per * 6);
@@ -278,6 +281,81 @@ export class JunkyardWorld {
         m.parent = this.root;
         this.chunks.push(m);
       }
+    }
+  }
+
+  // ---------------- V2：高台鋪面（混凝土／鐵板縫線；邊緣與破損處透出底下的地面） ----------------
+  readonly pavementTris: number[] = [];
+  private buildPavement(): void {
+    const step = this.tier === "high" ? 2 : 2.5;
+    const breakup = periodicNoise(12, 77);
+    for (const p of PLATEAUS) {
+      const x0 = p.x - p.hx - step;
+      const z0 = p.z - p.hz - step;
+      const nx = Math.ceil((p.hx * 2 + step * 2) / step) + 1;
+      const nz = Math.ceil((p.hz * 2 + step * 2) / step) + 1;
+      const pos: number[] = [];
+      const col: number[] = [];
+      const uv: number[] = [];
+      const alpha = new Float32Array(nx * nz);
+      const ids = new Int32Array(nx * nz).fill(-1);
+      const vid = (i: number, j: number): number => {
+        const k = j * nx + i;
+        if (ids[k]! >= 0) return ids[k]!;
+        const x = x0 + i * step;
+        const z = z0 + j * step;
+        const y = groundHeight(x, z);
+        const c = terrainColor(x, z, y, 0);
+        ids[k] = pos.length / 3;
+        pos.push(x, y + 0.025, z);
+        col.push(c[0], c[1], c[2], alpha[k]!);
+        uv.push(x / 16, z / 16);
+        return ids[k]!;
+      };
+      for (let j = 0; j < nz; j++) {
+        for (let i = 0; i < nx; i++) {
+          const x = x0 + i * step;
+          const z = z0 + j * step;
+          const sdf = plateauInside(p, x, z);
+          const y = groundHeight(x, z);
+          let a = smoothstep(0.4, 3.2, sdf);
+          if (Math.abs(y - p.y) > 0.05) a = 0; // 只鋪在平坦的高台頂面（坡道、懸崖不鋪）
+          if (Math.hypot(x - ARENA.x, z - ARENA.z) < ARENA.r + 2) a = 0; // Boss 廣場有自己的地板
+          if (Math.hypot(x - REACTOR.x, z - REACTOR.z) < REACTOR.r + 2) a = 0;
+          // 破損：少數區塊露出底下的地面
+          a *= smoothstep(0.16, 0.34, breakup((x + 512) / 96, (z + 512) / 96));
+          alpha[j * nx + i] = a;
+        }
+      }
+      const idx: number[] = [];
+      for (let j = 0; j < nz - 1; j++) {
+        for (let i = 0; i < nx - 1; i++) {
+          const k = j * nx + i;
+          if (alpha[k]! + alpha[k + 1]! + alpha[k + nx]! + alpha[k + nx + 1]! < 0.02) continue;
+          const a = vid(i, j);
+          const b = vid(i + 1, j);
+          const c = vid(i, j + 1);
+          const d = vid(i + 1, j + 1);
+          idx.push(a, b, c, b, d, c);
+        }
+      }
+      if (!idx.length) continue;
+      const vd = new VertexData();
+      vd.positions = pos;
+      vd.indices = idx;
+      vd.colors = col;
+      vd.uvs = uv;
+      vd.normals = pos.map((_, i) => (i % 3 === 1 ? 1 : 0));
+      const m = new Mesh(`jy_pavement_${p.id}`, this.scene);
+      vd.applyToMesh(m, false);
+      m.material = this.mats.pavement;
+      m.hasVertexAlpha = true;
+      m.receiveShadows = true;
+      m.isPickable = false;
+      m.parent = this.root;
+      m.freezeWorldMatrix();
+      this.pavementTris.push(idx.length / 3);
+      this.landmarks.push({ mesh: m, zone: p.id, caster: false });
     }
   }
 
@@ -1194,16 +1272,27 @@ export class JunkyardWorld {
   }
 
   private tuftSource(): Mesh {
-    const k = new Kit(this.scene, this.mats, "jy_tuft");
-    for (let i = 0; i < 3; i++) {
-      const p = MeshBuilder.CreatePlane("jy_part", { width: 0.7, height: 0.55 }, this.scene);
-      p.position.y = 0.27;
-      p.rotation.y = (i * Math.PI) / 3;
-      gradientPlane(p, [0.3, 0.48, 0.2], [0.62, 0.82, 0.38]);
-      k.add(p, null, "foliage");
-    }
-    const [m] = k.bake();
-    return m!;
+    // V2：細長尖葉（與星芽原野草叢同一種畫法）；高畫質 6 片、其他 4 片
+    const g = bladeTuft({
+      blades: this.tier === "high" ? 6 : 4,
+      height: 0.5,
+      heightVar: 0.22,
+      width: 0.1,
+      spread: 0.2,
+      base: [0.3, 0.46, 0.2],
+      mid: [0.5, 0.7, 0.32],
+      tip: [0.74, 0.86, 0.44],
+      seed: 5,
+    });
+    const m = new Mesh("jy_tuft", this.scene);
+    const vd = new VertexData();
+    vd.positions = g.positions;
+    vd.normals = g.normals;
+    vd.colors = g.colors;
+    vd.indices = g.indices;
+    vd.applyToMesh(m, false);
+    m.material = this.mats.foliage;
+    return m;
   }
 
   private flowerSource(): Mesh {
@@ -1504,6 +1593,7 @@ export class JunkyardWorld {
     if (name.startsWith("jy_junk")) return "實例化垃圾";
     if (name.startsWith("jy_tufts") || name.startsWith("jy_flowers")) return "草叢小花";
     if (name.startsWith("jy_water")) return "水面";
+    if (name.startsWith("jy_pavement")) return "高台鋪面";
     if (name.startsWith("jy_crystal")) return "漂浮水晶";
     if (name.startsWith("jy_")) return "地標與機械";
     return "其他";

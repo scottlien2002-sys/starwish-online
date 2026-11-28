@@ -8,10 +8,10 @@
  * - 全部避開主路線、坡道、橋、階梯、碰撞物、水面、Boss 戰鬥廣場、入口傳送陣
  * - 依「串流分區」分組：玩家靠近時才建立該區的實例，遠離時釋放
  */
-import { ARENA, BASINS, DECKS, JUNKYARD_ENTRY_PORTAL, MAIN_ROUTE, MOUNDS, RAMPS, REACTOR, SPAWNS, ZONES, type Vec2 } from "./layout.ts";
+import { ARENA, BASINS, DECKS, JUNKYARD_ENTRY_PORTAL, MAIN_ROUTE, MOUNDS, PLATEAUS, RAMPS, REACTOR, SPAWNS, ZONES, type Vec2 } from "./layout.ts";
 import { polyDist, rng, segDist } from "./geom.ts";
 
-export type ScatterJunk = "can" | "crate" | "barrel" | "tire" | "gear" | "plate" | "tv" | "pipe" | "rock" | "spring";
+export type ScatterJunk = "can" | "crate" | "barrel" | "tire" | "gear" | "plate" | "tv" | "pipe" | "rock" | "spring" | "pallet" | "cone" | "coil";
 // 7 種（每區每種 1 次繪製；種類少＝Draw Calls 少）
 const FLAT: readonly ScatterJunk[] = ["plate", "gear", "tire", "rock", "plate"];
 const TALL: readonly ScatterJunk[] = ["crate", "barrel", "can", "crate", "barrel", "tire"];
@@ -69,12 +69,17 @@ export interface ScatterTier {
   debris: number;
   tufts: number;
   flowers: number;
+  /** V2：高台地面道具（棧板、交通錐、電纜捲盤）件數；有碰撞，所以各畫質相同（遠處靠距離漸變減量） */
+  props?: number;
 }
 
+/** 高台地面道具件數（各畫質相同：道具有碰撞，碰撞不能因畫質不同） */
+export const PROP_COUNT = 150;
+
 export const SCATTER_TIERS: Readonly<Record<"high" | "medium" | "low", ScatterTier>> = {
-  high: { mound: 1.3, debris: 520, tufts: 2400, flowers: 700 },
-  medium: { mound: 0.6, debris: 300, tufts: 1300, flowers: 400 },
-  low: { mound: 0.4, debris: 180, tufts: 700, flowers: 200 },
+  high: { mound: 1.3, debris: 520, tufts: 2400, flowers: 700, props: PROP_COUNT },
+  medium: { mound: 0.6, debris: 300, tufts: 1300, flowers: 400, props: PROP_COUNT },
+  low: { mound: 0.4, debris: 180, tufts: 700, flowers: 200, props: PROP_COUNT },
 };
 
 export interface ScatterResult {
@@ -82,7 +87,7 @@ export interface ScatterResult {
   tufts: Map<string, Inst[]>;
   flowers: Map<string, Inst[]>;
   piles: Pile[];
-  counts: { mound: number; debris: number; pileItems: number; tufts: number; flowers: number };
+  counts: { mound: number; debris: number; pileItems: number; tufts: number; flowers: number; props: number };
 }
 
 type HeightFn = (x: number, z: number) => number;
@@ -131,7 +136,7 @@ export function scatterAll(h: HeightFn, blocked: BlockFn, tier: ScatterTier): Sc
   const junk = new Map<string, Map<ScatterJunk, Inst[]>>();
   const tufts = new Map<string, Inst[]>();
   const flowers = new Map<string, Inst[]>();
-  const counts = { mound: 0, debris: 0, pileItems: 0, tufts: 0, flowers: 0 };
+  const counts = { mound: 0, debris: 0, pileItems: 0, tufts: 0, flowers: 0, props: 0 };
   const push = (type: ScatterJunk, inst: Inst): void => {
     const cell = cellOf(inst.x, inst.z);
     let m = junk.get(cell);
@@ -288,7 +293,84 @@ export function scatterAll(h: HeightFn, blocked: BlockFn, tier: ScatterTier): Sc
     counts.flowers++;
   }
 
+  // ---- 5. V2：高台地面道具（工業感細節；成組擺放、可依距離漸變；不擋路、不進怪物出生區） ----
+  const r5 = rng(31337);
+  const wantProps = tier.props ?? 0;
+  const PROP_SETS: Record<string, readonly ScatterJunk[]> = {
+    recycle: ["pallet", "pallet", "coil", "cone", "pallet"],
+    factory: ["pallet", "coil", "cone", "coil", "pallet"],
+    core: ["cone", "cone", "coil"],
+  };
+  const tops = PLATEAUS.filter((p) => PROP_SETS[p.id]);
+  tries = 0;
+  while (counts.props < wantProps && tries++ < wantProps * 40) {
+    const p = tops[Math.floor(r5() * tops.length)]!;
+    const cx = p.x + (r5() * 2 - 1) * p.hx;
+    const cz = p.z + (r5() * 2 - 1) * p.hz;
+    const propOk = (x: number, z: number, pad: number): boolean => {
+      if (plateauSdf(p, x, z) < 2.5 + pad) return false;
+      if (Math.abs(h(x, z) - p.y) > 0.06) return false;
+      if (excluded(x, z, pad, 3)) return false;
+      if (SPAWNS.some((sp) => Math.hypot(x - sp.x, z - sp.z) < sp.r + 1 + pad)) return false;
+      if (piles.some((pl) => Math.hypot(x - pl.x, z - pl.z) < pl.r + 1.2 + pad)) return false;
+      return !blocked(x, z, 0.6 + pad);
+    };
+    if (!propOk(cx, cz, 0.8)) continue;
+    const set = PROP_SETS[p.id]!;
+    const type = set[Math.floor(r5() * set.length)]!;
+    const baseYaw = r5() * Math.PI * 2;
+    if (type === "cone") {
+      // 一排 3～5 個交通錐
+      const n = 3 + Math.floor(r5() * 3);
+      for (let i = 0; i < n && counts.props < wantProps; i++) {
+        const x = cx + Math.cos(baseYaw) * i * 1.1;
+        const z = cz + Math.sin(baseYaw) * i * 1.1;
+        if (!propOk(x, z, 0.2)) break;
+        push("cone", { x, y: h(x, z) - 0.01, z, rx: 0, ry: r5() * Math.PI, rz: 0, s: 0.9 + r5() * 0.2, c: [1, 1, 1], small: true });
+        counts.props++;
+      }
+    } else if (type === "pallet") {
+      // 1～3 層棧板疊放
+      const n = 1 + Math.floor(r5() * 3);
+      for (let i = 0; i < n && counts.props < wantProps; i++) {
+        push("pallet", { x: cx + (r5() - 0.5) * 0.12, y: h(cx, cz) - 0.01 + i * 0.21, z: cz + (r5() - 0.5) * 0.12, rx: 0, ry: baseYaw + (r5() - 0.5) * 0.25, rz: 0, s: 1, c: TINTS[Math.floor(r5() * 3)]!, small: true });
+        counts.props++;
+      }
+    } else {
+      push("coil", { x: cx, y: h(cx, cz) - 0.01, z: cz, rx: 0, ry: baseYaw, rz: 0, s: 0.9 + r5() * 0.4, c: TINTS[Math.floor(r5() * TINTS.length)]!, small: true });
+      counts.props++;
+    }
+  }
+
   return { junk, tufts, flowers, piles, counts };
+}
+
+/** 高台形狀距離（內部為正；與 terrain.plateauInside 相同公式，這裡另寫一份避免循環引用） */
+function plateauSdf(p: (typeof PLATEAUS)[number], x: number, z: number): number {
+  if (p.shape === "circle") return p.hx - Math.hypot(x - p.x, z - p.z);
+  const qx = Math.abs(x - p.x) - (p.hx - p.round);
+  const qz = Math.abs(z - p.z) - (p.hz - p.round);
+  return -(Math.hypot(Math.max(qx, 0), Math.max(qz, 0)) + Math.min(Math.max(qx, qz), 0) - p.round);
+}
+
+/** V2 高台道具碰撞：棧板與電纜捲盤擋人；交通錐很小也擋（不會走穿過去） */
+export function propColliders(h: HeightFn, blocked: BlockFn): { id: string; x: number; z: number; r: number }[] {
+  const r = scatterAll(h, blocked, { mound: 0, debris: 0, tufts: 0, flowers: 0, props: PROP_COUNT });
+  const out: { id: string; x: number; z: number; r: number }[] = [];
+  const seen = new Set<string>();
+  for (const m of r.junk.values()) {
+    for (const [type, list] of m) {
+      for (const it of list) {
+        const rad = type === "pallet" ? 0.62 : type === "coil" ? 0.5 * it.s + 0.08 : type === "cone" ? 0.2 : 0;
+        if (!rad) continue;
+        const key = `${it.x.toFixed(1)},${it.z.toFixed(1)}`;
+        if (seen.has(key)) continue; // 疊放的棧板只算一個
+        seen.add(key);
+        out.push({ id: `prop-${type}-${out.length}`, x: it.x, z: it.z, r: rad });
+      }
+    }
+  }
+  return out;
 }
 
 /** 垃圾堆碰撞（與高畫質擺放相同的垃圾堆位置；畫質只影響垃圾山與植被數量，不影響垃圾堆與碰撞） */
