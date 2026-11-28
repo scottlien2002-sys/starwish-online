@@ -1,0 +1,246 @@
+{
+  "coopKill": {
+    "monster": "star_dew_bobo",
+    "maxHp": 60,
+    "accepted": [
+      2,
+      2
+    ],
+    "rejected": 8,
+    "hits": 3,
+    "killsSettled": 1,
+    "exp": 12,
+    "loot": 4
+  },
+  "respawnSync": {
+    "respawnTime": 10,
+    "observedMs": 12145,
+    "posA": [
+      -22.99,
+      -43.9
+    ],
+    "posB": [
+      -22.99,
+      -43.9
+    ]
+  },
+  "loot": {
+    "loots": 2,
+    "races": [
+      {
+        "defId": "monsterMaterial",
+        "qty": 1,
+        "winner": "lootA",
+        "loserErr": "gone"
+      },
+      {
+        "defId": "gold",
+        "qty": 7,
+        "winner": "lootA",
+        "loserErr": "gone"
+      }
+    ],
+    "goldA": 107,
+    "goldB": 100,
+    "pickedGold": 7,
+    "rejected": {
+      "not_owner": 1,
+      "out_of_range": 1,
+      "gone": 4
+    }
+  },
+  "antiCheat": {
+    "forgedDamageResult": 20,
+    "spam": {
+      "sent": 40,
+      "accepted": 5,
+      "cooldownRejects": 35,
+      "seconds": 2,
+      "interval": 0.5
+    },
+    "rejected": {
+      "busy": 34,
+      "out_of_range": 1,
+      "bad_target": 2,
+      "wrong_weapon": 1,
+      "unknown_skill": 1,
+      "skill_cooldown": 1
+    }
+  },
+  "skill": {
+    "castId": 1,
+    "hits": [
+      "s1",
+      "s2",
+      "s3",
+      "wave"
+    ],
+    "dur": 1683,
+    "rate": 1000,
+    "duplicateHitsBlocked": 0
+  },
+  "reconnectCombat": {
+    "hpAfterOfflineHit": 70,
+    "resyncMs": 533,
+    "keep": {
+      "hp": 100,
+      "exp": 0,
+      "level": 1,
+      "gold": 100
+    }
+  },
+  "monsterAttack": {
+    "monsterHits": 1,
+    "downed": 1,
+    "hpAfterRespawn": {
+      "hp": 100,
+      "maxHp": 100,
+      "level": 1,
+      "exp": 0,
+      "expNext": 100,
+      "gold": 100,
+      "down": false
+    }
+  },
+  "storage": {
+    "gold": 100,
+    "items": [
+      [
+        "test_novice_sword",
+        "bag"
+      ],
+      [
+        "test_novice_staff",
+        "bag"
+      ]
+    ],
+    "equipment": {
+      "weapon": "37afa419-2384-4e76-bb78-6b34d0648eb1"
+    },
+    "weapon": "staff"
+  },
+  "restart": {
+    "before": {
+      "level": 1,
+      "exp": 12,
+      "gold": 104,
+      "items": [
+        "monsterMaterial",
+        "test_novice_staff",
+        "test_novice_sword"
+      ],
+      "weapon": "bfaab7b6-d7d4-41f2-87d4-04fc1724f7f5"
+    },
+    "after": {
+      "level": 1,
+      "exp": 12,
+      "gold": 104,
+      "items": [
+        "monsterMaterial",
+        "test_novice_staff",
+        "test_novice_sword"
+      ],
+      "weapon": "bfaab7b6-d7d4-41f2-87d4-04fc1724f7f5"
+    }
+  },
+  "crossMap": {
+    "from": "starsprout",
+    "to": "village-1",
+    "hp": 37
+  },
+  "load2": {
+    "players": 2,
+    "inField": 2,
+    "seconds": 8,
+    "ticks": 161,
+    "tickAvgMs": 0.187,
+    "tickMaxMs": 0.342,
+    "atkSent": 8,
+    "accepted": 6,
+    "kills": 2,
+    "downKBpsPerClientAvg": 10.66,
+    "downKBpsPerClientMax": 10.66
+  },
+  "load4": {
+    "players": 4,
+    "inField": 4,
+    "seconds": 8,
+    "ticks": 161,
+    "tickAvgMs": 0.29,
+    "tickMaxMs": 0.898,
+    "atkSent": 20,
+    "accepted": 14,
+    "kills": 4,
+    "downKBpsPerClientAvg": 11.74,
+    "downKBpsPerClientMax": 11.76
+  },
+  "load8": {
+    "players": 8,
+    "inField": 8,
+    "seconds": 8,
+    "ticks": 162,
+    "tickAvgMs": 0.301,
+    "tickMaxMs": 0.575,
+    "atkSent": 39,
+    "accepted": 28,
+    "kills": 8,
+    "downKBpsPerClientAvg": 13.84,
+    "downKBpsPerClientMax": 13.9
+  },
+  "load16": {
+    "players": 16,
+    "inField": 16,
+    "seconds": 8,
+    "ticks": 161,
+    "tickAvgMs": 0.631,
+    "tickMaxMs": 1.174,
+    "atkSent": 98,
+    "accepted": 70,
+    "kills": 16,
+    "downKBpsPerClientAvg": 18.33,
+    "downKBpsPerClientMax": 18.41
+  },
+  "load32": {
+    "players": 32,
+    "inField": 32,
+    "seconds": 8,
+    "ticks": 161,
+    "tickAvgMs": 1.027,
+    "tickMaxMs": 1.704,
+    "atkSent": 245,
+    "accepted": 174,
+    "kills": 24,
+    "downKBpsPerClientAvg": 31.06,
+    "downKBpsPerClientMax": 31.13
+  },
+  "load40": {
+    "players": 40,
+    "inField": 40,
+    "seconds": 8,
+    "ticks": 161,
+    "tickAvgMs": 1.151,
+    "tickMaxMs": 1.883,
+    "atkSent": 245,
+    "accepted": 167,
+    "kills": 24,
+    "downKBpsPerClientAvg": 33.93,
+    "downKBpsPerClientMax": 34.05
+  },
+  "inflightPick": {
+    "defId": "monsterMaterial",
+    "winner": "A",
+    "loserErr": "already_claimed",
+    "lootPickRejected": {
+      "already_claimed": 1
+    }
+  },
+  "knockback": {
+    "monster": "moss_horn_beast",
+    "knocks": [
+      0.225,
+      0,
+      0
+    ],
+    "counter": 1
+  }
+}

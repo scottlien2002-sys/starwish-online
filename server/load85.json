@@ -1,0 +1,192 @@
+{
+  "note": "CI／本機伺服器數據，不是 iPhone 實機結果（iPhone 畫面效能由實機測試填寫）",
+  "limits": {
+    "tickAvgMs": 10,
+    "tickMaxMs": 50
+  },
+  "env": {
+    "node": "v22.23.5",
+    "cpu": "AMD EPYC 9V45 96-Core Processor",
+    "cores": 4,
+    "memGB": 15.6,
+    "ci": true
+  },
+  "crashed": false,
+  "scenarios": [
+    {
+      "players": 10,
+      "durationS": 20,
+      "joinMs": 854,
+      "onlineAtStart": 10,
+      "onlineAtEnd": 10,
+      "laggedBots": 2,
+      "server": {
+        "cpuPctAvg": 3.9,
+        "cpuPctMax": 5.9,
+        "rssMBMax": 148,
+        "heapMBMax": 36,
+        "tickAvgMs": 0.646,
+        "tickMaxMs": 2.85,
+        "bytesOutPerSecAvg": 154867,
+        "bytesInPerSecAvg": 15844,
+        "msgsOutPerSecAvg": 227,
+        "bytesOutPerPlayerPerSec": 15487
+      },
+      "clients": {
+        "cmdsOk": 54,
+        "cmdErrors": {
+          "no_combat_here": 5,
+          "busy": 1
+        },
+        "castsSeen": 54,
+        "displacements": 21,
+        "reconnects": 10,
+        "drops": 10,
+        "maxCorrectionCm": 48,
+        "snapCorrections": 0
+      },
+      "junk": {
+        "sent": 195,
+        "reopened": 4
+      },
+      "finalStats": {
+        "badMessages": 195,
+        "kicked": 3
+      },
+      "samples": 19,
+      "pass": true
+    },
+    {
+      "players": 20,
+      "durationS": 20,
+      "joinMs": 547,
+      "onlineAtStart": 20,
+      "onlineAtEnd": 20,
+      "laggedBots": 4,
+      "server": {
+        "cpuPctAvg": 4,
+        "cpuPctMax": 5.8,
+        "rssMBMax": 149,
+        "heapMBMax": 37,
+        "tickAvgMs": 0.778,
+        "tickMaxMs": 3.758,
+        "bytesOutPerSecAvg": 477717,
+        "bytesInPerSecAvg": 19795,
+        "msgsOutPerSecAvg": 463,
+        "bytesOutPerPlayerPerSec": 23886
+      },
+      "clients": {
+        "cmdsOk": 126,
+        "cmdErrors": {
+          "out_of_range": 10,
+          "busy": 20,
+          "no_combat_here": 3
+        },
+        "castsSeen": 126,
+        "displacements": 99,
+        "reconnects": 10,
+        "drops": 10,
+        "maxCorrectionCm": 50,
+        "snapCorrections": 0
+      },
+      "junk": {
+        "sent": 195,
+        "reopened": 4
+      },
+      "finalStats": {
+        "badMessages": 390,
+        "kicked": 6
+      },
+      "samples": 19,
+      "pass": true
+    },
+    {
+      "players": 32,
+      "durationS": 20,
+      "joinMs": 769,
+      "onlineAtStart": 32,
+      "onlineAtEnd": 32,
+      "laggedBots": 7,
+      "server": {
+        "cpuPctAvg": 4.6,
+        "cpuPctMax": 7.8,
+        "rssMBMax": 151,
+        "heapMBMax": 38,
+        "tickAvgMs": 1.147,
+        "tickMaxMs": 2.142,
+        "bytesOutPerSecAvg": 726358,
+        "bytesInPerSecAvg": 28978,
+        "msgsOutPerSecAvg": 736,
+        "bytesOutPerPlayerPerSec": 22699
+      },
+      "clients": {
+        "cmdsOk": 180,
+        "cmdErrors": {
+          "out_of_range": 14,
+          "no_combat_here": 24,
+          "busy": 14
+        },
+        "castsSeen": 180,
+        "displacements": 104,
+        "reconnects": 10,
+        "drops": 10,
+        "maxCorrectionCm": 6095,
+        "snapCorrections": 1
+      },
+      "junk": {
+        "sent": 195,
+        "reopened": 4
+      },
+      "finalStats": {
+        "badMessages": 585,
+        "kicked": 9
+      },
+      "samples": 19,
+      "pass": true
+    },
+    {
+      "players": 40,
+      "durationS": 20,
+      "joinMs": 837,
+      "onlineAtStart": 40,
+      "onlineAtEnd": 40,
+      "laggedBots": 8,
+      "server": {
+        "cpuPctAvg": 4.5,
+        "cpuPctMax": 5.8,
+        "rssMBMax": 152,
+        "heapMBMax": 40,
+        "tickAvgMs": 1.306,
+        "tickMaxMs": 3.296,
+        "bytesOutPerSecAvg": 878945,
+        "bytesInPerSecAvg": 35559,
+        "msgsOutPerSecAvg": 920,
+        "bytesOutPerPlayerPerSec": 21974
+      },
+      "clients": {
+        "cmdsOk": 219,
+        "cmdErrors": {
+          "no_combat_here": 28,
+          "out_of_range": 12,
+          "busy": 18
+        },
+        "castsSeen": 219,
+        "displacements": 103,
+        "reconnects": 10,
+        "drops": 10,
+        "maxCorrectionCm": 8391,
+        "snapCorrections": 1
+      },
+      "junk": {
+        "sent": 195,
+        "reopened": 4
+      },
+      "finalStats": {
+        "badMessages": 780,
+        "kicked": 12
+      },
+      "samples": 19,
+      "pass": true
+    }
+  ]
+}
