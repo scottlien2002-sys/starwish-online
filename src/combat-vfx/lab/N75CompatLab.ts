@@ -485,6 +485,8 @@ export async function startN75CompatLab(canvas: HTMLCanvasElement, hudRoot: HTML
       const ready = await readyWithin(8000);
       const pw = await fx.prewarm();
       castAll();
+      // 投射物緞帶尾跡在撞擊後 250 ms 才釋放：等它釋放完再數資源
+      await new Promise((r) => setTimeout(r, 400));
       out.push({ i, ready, prewarmMs: pw.ms, leftover: pw.leftoverActive, broken: textureCheck(), counts: counts() });
     }
     return out;
