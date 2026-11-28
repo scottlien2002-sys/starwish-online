@@ -150,10 +150,12 @@ import { ArenaTerrain } from "../../src/combat-vfx/core/terrain.ts";
 import { behaviourForLevel, elementForLevel, wantsTarget, onDamaged } from "../../src/combat-vfx/core/monsterRules.ts";
 import { CLASS_VFX } from "../../src/combat-vfx/core/classes.ts";
 
-test("Stage 2 動作檔 V2：版本 2.0，命中標記沒變（動畫、特效、傷害同步的時間來源）", () => {
+test("動作檔 V2.1（Stage 3 旋風斬腳步修正）：命中標記沒變（動畫、特效、傷害同步的時間來源）", () => {
   for (const g of ["male", "female"]) {
     const a = JSON.parse(readFileSync(root + `novice_combat_${g}.json`, "utf8")) as { version?: string; clips: Record<string, { marks: Record<string, number | number[]> }> };
-    assert.equal(a.version, "2.0");
+    assert.equal(a.version, "2.1");
+    assert.deepEqual(a.clips["Skill_Whirlwind"]!.marks["hit1"], 0.48);
+    assert.deepEqual(a.clips["Skill_Whirlwind"]!.marks["hit3"], 1.04);
     assert.deepEqual(a.clips["Skill_TripleSlash"]!.marks["hit1"], 0.17);
     assert.deepEqual(a.clips["Skill_TripleSlash"]!.marks["hit3"], 0.92);
     assert.deepEqual(a.clips["Skill_LeapSlam"]!.marks["hit"], 0.8);
@@ -202,19 +204,109 @@ test("六大職業共用架構：六個職業都有動畫分類、特效家族�
   }
 });
 
-test("其他玩家用的合併模型（remote LOD）：2 個網格、17 關節、動畫與 Lite 相同", () => {
+test("其他玩家用的合併模型（remote LOD）：近距離 2 網格＋遠距離 2 網格、17 關節、動畫與 Lite 相同", () => {
   const glb = (f: string) => {
     const b = readFileSync(new URL(`../../public/models/${f}`, import.meta.url));
     const jl = b.readUInt32LE(12);
-    return JSON.parse(b.subarray(20, 20 + jl).toString("utf8")) as { meshes: unknown[]; skins: { joints: number[] }[]; animations: { name: string }[]; nodes: { name?: string }[] };
+    return JSON.parse(b.subarray(20, 20 + jl).toString("utf8")) as { meshes: { name: string }[]; skins: { joints: number[] }[]; animations: { name: string }[]; nodes: { name?: string; mesh?: number; skin?: number }[]; asset: { extras?: { remoteLod?: { nearTris: number; farTris: number } } } };
   };
   for (const g of ["male", "female"]) {
     const lite = glb(`novice_c10b5b_${g}_lite.glb`);
     const rem = glb(`novice_c10b5b_${g}_remote.glb`);
     assert.equal(lite.meshes.length, 26);
-    assert.equal(rem.meshes.length, 2);
+    assert.deepEqual(rem.meshes.map((m) => m.name), ["face", "body_merged", "face_far", "body_far"]);
+    // 遠近共用同一組骨架；遠距離版三角面不到近距離版的一半
+    assert.ok(rem.nodes.filter((n) => n.mesh !== undefined).every((n) => n.skin === 0));
+    const lod = rem.asset.extras?.remoteLod;
+    assert.ok(lod && lod.farTris < lod.nearTris * 0.5, JSON.stringify(lod));
     assert.equal(rem.skins[0]!.joints.length, 17);
     assert.deepEqual(rem.skins[0]!.joints.map((i) => rem.nodes[i]!.name), lite.skins[0]!.joints.map((i) => lite.nodes[i]!.name));
     assert.deepEqual(rem.animations.map((a) => a.name), lite.animations.map((a) => a.name));
   }
+});
+
+// ---------------------------------------------------------------- Stage 3：六職業共用架構（職業套件＋技能樣板＋檢查器）
+import { CLASS_KITS, REQUIRED_MARKS, ANIM_CATEGORIES, clipName, comboTemplate, chargeTemplate, projectileTemplate, aoeTemplate, buffTemplate, dashTemplate, validateSkillDef, resolveAt as resolveMark, FX_KEY_LIST, SFX_KEY_LIST, TBD } from "../../src/combat-vfx/core/classKits.ts";
+
+test("Stage 3 職業套件：六職業齊全、片段命名一致、武器外觀一律未定案", () => {
+  assert.deepEqual(CLASS_KITS.map((k) => k.id).sort(), ["blacksmith", "clown", "knight", "mage", "priest", "swordsman"]);
+  for (const k of CLASS_KITS) {
+    assert.ok(k.weapons.length >= 1 && k.weapons.every((w) => w.look === TBD), k.id);
+    assert.ok(k.anims.length >= 4, k.id);
+    for (const a of k.anims) {
+      assert.equal(a.clip, clipName(k.id, a.category), `${k.id} ${a.clip}`);
+      assert.match(a.clip, /^[A-Z][a-z]+_[A-Z][A-Za-z]+_\d{2}$/);
+      assert.ok(ANIM_CATEGORIES.includes(a.category));
+    }
+    for (const s of Object.values(k.sfx)) assert.ok(SFX_KEY_LIST.includes(s), `${k.id} sfx ${s}`);
+  }
+  for (const c of ANIM_CATEGORIES) assert.ok(REQUIRED_MARKS[c].length >= 1, c);
+  assert.ok(FX_KEY_LIST.length >= 34);
+});
+
+test("Stage 3 現有 6 個展示技能都通過檢查器（標記存在、拖尾先後、鍵值存在、時間在片段內）", () => {
+  for (const g of ["male", "female"]) {
+    const a = JSON.parse(readFileSync(root + `novice_combat_${g}.json`, "utf8")) as { clips: Record<string, { duration: number; marks: Record<string, number | number[]> }> };
+    for (const s of SKILLS) {
+      const clip = a.clips[s.clip];
+      assert.ok(clip, s.clip);
+      const r = validateSkillDef(s, clip);
+      assert.deepEqual(r.errors, [], `${g} ${s.id}: ${r.errors.join("; ")}`);
+    }
+  }
+  assert.equal(resolveMark("trail2.1", { trail2: [0.4, 0.55] }), 0.55);
+  assert.equal(resolveMark("hit", { hit: 0.8 }), 0.8);
+  assert.equal(resolveMark("nope", { hit: 0.8 }), null);
+});
+
+test("Stage 3 技能樣板：六種樣板產生的草稿可通過檢查，名稱／傷害／冷卻／武器外觀標示未定案", () => {
+  const fake = (marks: Record<string, number | number[]>, duration = 2) => ({ duration, marks });
+  const cases = [
+    { d: comboTemplate({ id: "sw_combo", cls: "swordsman", hits: 4 }), clip: fake({ hit1: 0.2, hit2: 0.45, hit3: 0.7, hit4: 1.0, trail1: [0.1, 0.25], trail2: [0.35, 0.5], trail3: [0.6, 0.75], trail4: [0.88, 1.05] }) },
+    { d: chargeTemplate({ id: "bs_charge", cls: "blacksmith" }), clip: fake({ charge: [0.05, 1.0], release: 1.0, hit: 1.15 }) },
+    { d: projectileTemplate({ id: "mg_bolt", cls: "mage" }), clip: fake({ cast: 0.1, release: 0.6 }) },
+    { d: aoeTemplate({ id: "pr_aoe", cls: "priest", radius: 4 }), clip: fake({ cast: 0.1, impact: 1.1 }) },
+    { d: buffTemplate({ id: "kn_guard", cls: "knight", look: "shield" }), clip: fake({ cast: 0.1, apply: 0.5 }) },
+    { d: dashTemplate({ id: "cl_dash", cls: "clown", distance: 3 }), clip: fake({ start: 0.1, hit: 0.3, end: 0.6 }) },
+  ];
+  for (const { d, clip } of cases) {
+    const r = validateSkillDef(d, clip);
+    assert.deepEqual(r.errors, [], `${d.id}: ${r.errors.join("; ")}`);
+    assert.ok(d.draft.tbd.includes("name") && d.draft.tbd.includes("cooldown") && d.draft.tbd.includes("weaponLook"), d.id);
+    assert.ok(r.warnings.some((w) => w.includes(TBD)), d.id);
+    assert.ok(d.label.includes(TBD), d.label);
+    assert.equal(d.classTags[0], d.draft.kit);
+  }
+  // 定案後覆寫：給了名稱與數值就不再標未定案（武器外觀仍未定案）
+  const fixed = comboTemplate({ id: "sw_fixed", cls: "swordsman", hits: 3, label: "測試名", mult: 1.2, cooldown: 0 });
+  assert.deepEqual([...fixed.draft.tbd], ["weaponLook"]);
+});
+
+test("Stage 3 檢查器：抓得到常見錯誤（缺標記、拖尾倒置、未知特效、重複命中 id、數值超範圍）", () => {
+  const d = comboTemplate({ id: "bad_combo", cls: "swordsman", hits: 2 });
+  const r1 = validateSkillDef(d, { duration: 1.5, marks: { hit1: 0.2, trail1: [0.3, 0.1] } });
+  assert.ok(r1.errors.some((e) => e.includes("hit2")), r1.errors.join("; "));
+  assert.ok(r1.errors.some((e) => e.includes("拖尾結束要晚於開始")), r1.errors.join("; "));
+  const bad = { ...d, id: "Bad Id", range: -1, events: [...d.events, { kind: "fx" as const, at: 0.1, fx: "nope" as never, anchor: "self" as const }, d.events.find((e) => e.kind === "hit")!] };
+  const r2 = validateSkillDef(bad);
+  assert.ok(r2.errors.some((e) => e.includes("id 格式")));
+  assert.ok(r2.errors.some((e) => e.includes("range")));
+  assert.ok(r2.errors.some((e) => e.includes("未知特效")));
+  assert.ok(r2.errors.some((e) => e.includes("命中 id 重複")));
+  const r3 = validateSkillDef(chargeTemplate({ id: "late", cls: "swordsman" }), { duration: 0.5, marks: { charge: [0.0, 0.4], release: 0.4, hit: 0.9 } });
+  assert.ok(r3.errors.some((e) => e.includes("超出片段長度")), r3.errors.join("; "));
+});
+
+import { SFX_KEYS, SFX_LENGTH, encodeWav, seeded } from "../../src/combat-vfx/fx/CombatAudio.ts";
+test("Stage 3 音效 V2：18 種音效都有合成與長度設定、WAV 輸出格式正確、亂數可重現", () => {
+  assert.deepEqual([...SFX_KEYS].sort(), [...SFX_KEY_LIST].sort());
+  for (const k of SFX_KEYS) assert.ok(SFX_LENGTH[k] > 0.1 && SFX_LENGTH[k] < 2, k);
+  const w = encodeWav(new Float32Array([0, 1, -1, 2]), new Float32Array([0, 0.5, -0.5, -2]), 44100);
+  assert.equal(w.length, 44 + 4 * 4);
+  assert.equal(String.fromCharCode(...w.subarray(0, 4)), "RIFF");
+  const dv = new DataView(w.buffer);
+  assert.equal(dv.getInt16(44 + 4 * 3, true), 32767);      // 超過 1 會被夾住（不會溢位成雜音）
+  assert.equal(dv.getInt16(46 + 4 * 3, true), -32767);
+  const a = seeded(7), b = seeded(7);
+  assert.equal(a(), b());
 });

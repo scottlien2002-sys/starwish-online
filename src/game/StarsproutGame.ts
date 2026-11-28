@@ -77,10 +77,6 @@ import { nextLootUid } from "../core/gameSave.ts";
 import { rollGold } from "../economy/economyConfig.ts";
 import { FieldSkills, type SkillHost, type SkillTarget } from "./fieldSkills.ts";
 import type { ClipTiming } from "../combat-vfx/core/timeline.ts";
-import { WeaponTrail } from "../combat-vfx/fx/WeaponTrail.ts";
-import { CameraFx } from "../combat-vfx/fx/CameraFx.ts";
-import { PALETTES } from "../combat-vfx/fx/palette.ts";
-import { VFX_QUALITY } from "../combat-vfx/core/quality.ts";
 import { FileTools } from "@babylonjs/core";
 
 /**
@@ -150,7 +146,12 @@ export interface PlayApi {
   sharedAvatarTest(n: number): Promise<{ n: number; texBefore: number; texAfterFirst: number; texAfterAll: number; materials: number; usedTextures: number; meshes: number; containers: number }>;
   /** Stage 7.5 第二階段：本地玩家技能（測試用） */
   skill(id: string): { ok: boolean; reason?: string; targetId?: string | null; rate?: number };
-  skillState(): { enabled: boolean; busy: boolean; active: string | null; t: number; stats: unknown; cooldowns: Record<string, number>; log: unknown[]; audio: boolean; trail: boolean; fx: unknown } ;
+  skillState(): { enabled: boolean; busy: boolean; active: string | null; t: number; stats: unknown; cooldowns: Record<string, number>; log: unknown[]; audio: boolean; trail: boolean; fx: unknown; combatFx: unknown; prewarmMs: number | null };
+  /** 戰鬥 HUD 設定（暫定）：畫面閃光、鏡頭震動倍率、傷害數字；以及預留的戰鬥文字樣式測試 */
+  combatHud(p?: { flash?: boolean; shake?: number; numbers?: boolean }): unknown;
+  combatText(kind: "damage" | "crit" | "heal" | "miss" | "block" | "hurt", value: number | string): boolean;
+  /** 切換畫質 high → low → medium → 原畫質：回報貼圖／材質數變化、是否有材質引用到已刪除的貼圖 */
+  combatFxQualityCycle(): Promise<unknown>;
   setAttackStyle(style: string): boolean;
   previewClip(name: string): boolean;
   secondary(): Record<string, { pitch: number; roll: number }>;
@@ -543,15 +544,29 @@ class StarsproutGame {
     }
     await Promise.all(this.monsters.map((m) => m.visual?.load() ?? Promise.resolve()));
     // Stage 7.3：戰鬥特效（Claude C Combat VFX Stage 2）：命中火花、傷害數字、受傷紅框、重生光柱。完整遊戲才開；&fx=0 關閉（比較用）
-    if (this.ws && this.params.get("fx") !== "0") this.fx = new FieldCombatFx(scene, this.hudRoot, this.lod === "hq" ? "high" : "medium");
+    // Claude C 正式接入模組 CombatFx：一張地圖一個實例（FieldCombatFx 轉接）。&fx=0 關閉（比較用）
+    if (this.ws && this.params.get("fx") !== "0") {
+      this.fx = new FieldCombatFx(scene, this.camera.camera, this.hudRoot, this.lod === "hq" ? "high" : "medium", (x, z) => this.terrain.surface(x, z));
+      // 離開地圖（換頁）時釋放
+      window.addEventListener("pagehide", () => this.fx?.dispose(), { once: true });
+    }
     // Stage 7.5 第二階段：C 的六段展示技能接到本地玩家（新版男性初心者 n75 才有 Skill_* 動作）。&skills=0 關閉
     if (this.fx && this.params.get("skills") !== "0" && this.avatar.clips.has("Skill_TripleSlash")) await this.setupSkills();
+    if (this.fx) {
+      this.registerSelfFx();
+      // 預熱：地圖載入期間（載入畫面還沒關掉前）。&prewarm=0 關閉（比較用）
+      if (this.params.get("prewarm") !== "0") {
+        const t0 = performance.now();
+        await this.fx.prewarm();
+        this.prewarmMs = Math.round(performance.now() - t0);
+      }
+    }
     this.perf.setExtra(() => ({
       monsterDetail: this.detailOn ? { ...this.tierCount } : "關閉（&mlod=0）",
       monsters: this.monsters.length,
       shadow: `${this.shadows.useContactHardeningShadow ? "PCSS" : "PCF"} ${this.quality.shadows.mapSize}（取樣 ${this.shadows.filteringQuality === ShadowGenerator.QUALITY_HIGH ? "高" : this.shadows.filteringQuality === ShadowGenerator.QUALITY_MEDIUM ? "中" : "低"}）`,
       shadowCasters: this.shadows.getShadowMap()?.renderList?.length ?? 0,
-      fx: this.fx ? { ...this.fx.stats, particles: this.fx.vfx.stats.particles } : null,
+      fx: this.fx ? { ...this.fx.stats, texts: { ...this.fx.stats.texts }, particles: this.fx.vfx.stats.particles, prewarmMs: this.prewarmMs, prewarm: this.params.get("prewarm") !== "0" } : null,
     }));
     this.lockRing = MeshBuilder.CreateTorus("PH_lockRing", { diameter: 1.1, thickness: 0.05, tessellation: 40 }, scene);
     const ringMat = new StandardMaterial("PH_lockRingMat", scene);
@@ -639,9 +654,10 @@ class StarsproutGame {
       this.yaw = turnTowards(this.yaw, p.x - this.pos.x, p.z - this.pos.z, 24, dt);
     }
     // 技能：時間軸（動作、命中、特效、音效同一個時鐘）＋技能位移（經地形碰撞）
+    // C 的 CombatFx 先推進（技能時間軸、命中事件、特效），FieldSkills 再讀同一個時間軸（動作時間、技能位移）
+    if (this.fx) this.camera.shakeOffset = this.fx.update(dt, this.pos);
     if (this.skills) {
       this.skills.update(dt);
-      this.skillTrail?.update(dt);
       this.updateSkillBar();
     }
     const groundY = this.terrain.surface(this.pos.x, this.pos.z);
@@ -660,7 +676,6 @@ class StarsproutGame {
     this.camera.update(dt, this.pos, this.input.consumeCamera());
     this.sun.position.copyFrom(this.pos).subtractInPlace(this.sun.direction.scale(45));
     this.updateMonsters(dt);
-    this.fx?.update(dt);
     this.updateLoot(dt);
     this.follower.update(dt, this.avatar.petAnchor(this.earTmp), this.yaw, this.avatar.headHalfWidth);
     if (this.ws) this.worldFrame(dt);
@@ -693,6 +708,8 @@ class StarsproutGame {
     if (r.ok) {
       this.attackTargetId = r.targetId;
       this.pending.attack = true;
+      // 普通攻擊：C 的揮擊拖尾（有武器時）＋揮擊音效，到命中後一點點結束
+      this.fx?.basicSwing(this.testWeapon?.kind === "staff", t.hitAt + 0.08);
       return true;
     }
     if (fromPlayer && r.reason === "no-target") this.hud.toast("攻擊範圍內沒有怪物，請再靠近一點", 1000);
@@ -707,6 +724,8 @@ class StarsproutGame {
     const i = mc.instance;
     const ip = i.currentPosition;
     if (!fromSkill) this.fx?.playerHit(ip.x, this.terrain.surface(ip.x, ip.z), ip.z, i.definition.height ?? 1, r.damage, r.killed);
+    // 怪物死亡：C 的塵環＋星光碎片（死亡動作、淡出由怪物模組自己播）
+    if (r.killed) this.fx?.death(ip.x, ip.z, Math.max(0.8, Math.min(1.8, (i.definition.height ?? 1) / 0.9)));
     // Stage 7.3：普通攻擊的輕微擊退（Claude C 受擊反應 V2：0.12＋震動×0.75，普通攻擊震動 0.14 → 約 0.22 m；Boss ×0.25）。
     // 用 FieldTerrainQuery：撞到岩石、溪流、地圖邊界就停在前面
     if (this.ws && !r.killed && this.params.get("fx") !== "0") {
@@ -810,7 +829,7 @@ class StarsproutGame {
       p.y = this.terrain.surface(p.x, p.z);
       const before = m.instance.currentState;
       const frame = m.update(dt, this.now, target);
-      if (before !== "respawn" && m.instance.currentState === "respawn") this.fx?.respawn(p.x, this.terrain.surface(p.x, p.z), p.z, Math.max(0.8, (m.instance.definition.bodyRadius ?? 0.5) * 1.6));
+      if (before !== "respawn" && m.instance.currentState === "respawn") this.fx?.respawn(p.x, this.terrain.surface(p.x, p.z), p.z, Math.max(0.8, (m.instance.definition.bodyRadius ?? 0.5) * 1.6), m.instance.definition.rank === "boss");
       p.y = this.terrain.surface(p.x, p.z);
       if (frame.effects.includes("attackImpact") && m.instance.claimAttackImpact() !== null) {
         const dmg = this.combat.monsterImpact(this.now, m.instance, this.pos.x, this.pos.z);
@@ -980,12 +999,14 @@ class StarsproutGame {
   private toVillage(): void {
     if (!this.ws || this.leaving || this.ws.leaving) return;
     this.leaving = true;
+    this.fx?.dispose();
     this.ws.travelTo({ ...FIELD_CAMP_PORTAL.to }, this.combat.hp);
   }
 
   private respawnInVillage(): void {
     if (!this.ws || this.leaving) return;
     this.leaving = true;
+    this.fx?.dispose();
     this.ws.save.character.deaths += 1;
     const slot = RESPAWN_SLOTS[this.ws.save.character.deaths % RESPAWN_SLOTS.length]!;
     this.ws.travelTo({ map: "village", x: slot.x, z: slot.z, yaw: slot.yaw }, null);
@@ -1021,7 +1042,10 @@ class StarsproutGame {
       this.testWeapon.root.dispose();
       this.testWeapon = null;
     }
-    if (!kind) return { attached: false, socket: null, hand: null, dist: null };
+    if (!kind) {
+      this.registerSelfFx();
+      return { attached: false, socket: null, hand: null, dist: null };
+    }
     const rig = kind === "sword" ? buildSword(this.scene, "test75") : buildStaff(this.scene, "test75");
     const ok = this.avatar.attachWeapon(rig.root, hand);
     if (!ok) {
@@ -1031,6 +1055,8 @@ class StarsproutGame {
     }
     this.testWeapon = rig;
     for (const m of rig.meshes) m.isPickable = false;
+    // 武器換了 → CombatFx 重新登記（拖尾取樣點跟新武器）
+    this.registerSelfFx();
     const sk = this.avatar.sockets[hand]!;
     sk.computeWorldMatrix(true);
     const sp = sk.getAbsolutePosition();
@@ -1041,8 +1067,8 @@ class StarsproutGame {
 
   // ---------------- Stage 7.5 第二階段：本地玩家技能（Claude C 六段展示技能） ----------------
   private skills: FieldSkills | null = null;
-  private skillTrail: WeaponTrail | null = null;
-  private skillTrailFor: WeaponRig | null = null;
+  /** 預熱花費（毫秒；&prewarm=0 時為 null） */
+  prewarmMs: number | null = null;
   private skillBtns: { id: string; el: HTMLButtonElement; cd: HTMLElement; last: string }[] = [];
   private skillBarT = 0;
   readonly skillLog: { skill: string; ok: boolean; reason?: string; t: number }[] = [];
@@ -1057,10 +1083,6 @@ class StarsproutGame {
     } catch {
       return;
     }
-    fx.enableSkills(this.hudRoot);
-    const shake = new CameraFx();
-    shake.scale = VFX_QUALITY[fx.tier].shake ?? 1;
-    this.camera.shakeFx = shake;
     const targets: SkillTarget[] = [];
     const host: SkillHost = {
       now: () => this.now,
@@ -1084,16 +1106,23 @@ class StarsproutGame {
         }
         return targets;
       },
-      damage: (id, mult, crit, keys) => {
+      damage: (id, mult, crit, hit) => {
         const mc = this.monsters.find((x) => x.instance.instanceId === id);
         if (!mc || !mc.instance.isAlive) return false;
-        // 傷害＝目前普通攻擊傷害 × C 的展示倍率（測試值，不是正式技能數值）
+        // 單人模式：傷害由遊戲戰鬥規則決定＝目前普通攻擊傷害 × C 的展示倍率（測試值，不是正式技能數值）
         const dmg = Math.max(1, Math.round(this.combat.tuning.attackDamage * mult));
         const r = mc.instance.receiveDamage(dmg, this.now, "normal");
         if (!r.applied) return false;
         const ip = mc.instance.currentPosition;
         const h = mc.instance.definition.height ?? 1;
-        fx.skillHit(keys, ip.x, this.terrain.surface(ip.x, ip.z) + Math.max(0.35, h * 0.55), ip.z, h, dmg, crit);
+        const gy = this.terrain.surface(ip.x, ip.z);
+        fx.hit(new Vector3(ip.x, gy + Math.max(0.35, h * 0.55), ip.z), hit.fx, {
+          damage: dmg,
+          crit,
+          sfx: hit.sfx,
+          shake: hit.shake,
+          ground: hit.ground ? new Vector3(hit.ground.x, this.terrain.surface(hit.ground.x, hit.ground.z), hit.ground.z) : undefined,
+        });
         this.onHit({ ok: true, targetId: id, killed: r.killed, damage: dmg }, true);
         return true;
       },
@@ -1101,34 +1130,39 @@ class StarsproutGame {
       playClip: (name) => this.avatar.playSkill(name, clips[name]?.duration ?? 1),
       clipTime: (t) => this.avatar.setSkillTime(t),
       endClip: () => this.avatar.stopClip(),
-      fx: (key, x, y, z, opt) => fx.skillFx(key, x, y, z, { yaw: opt.yaw, scale: opt.scale, duration: opt.duration, palette: opt.palette, follow: opt.follow ? this.avatar.root : undefined }),
-      trail: (on, palette) => {
-        const w = this.testWeapon;
-        if (!w) return;
-        if (this.skillTrailFor !== w) {
-          this.skillTrail?.dispose();
-          const q = VFX_QUALITY[fx.tier];
-          this.skillTrail = new WeaponTrail(this.scene, w.base, w.tip, q.trailSegments, q.trailLife, null);
-          this.skillTrail.setBright(true);
-          this.skillTrailFor = w;
-        }
-        if (on) {
-          this.skillTrail!.setColor(PALETTES[palette ?? "steel"].main);
-          this.skillTrail!.start();
-        } else this.skillTrail!.stop();
-      },
-      launch: (kind, x, y, z, dx, dz, speed, palette) => fx.launch(kind, x, y, z, dx, dz, speed, palette),
-      projPos: (h) => fx.projPos(h),
-      projSteer: (h, x, y, z) => fx.projSteer(h, x, y, z),
-      projEnd: (h, burst) => fx.projEnd(h, burst),
-      sfx: (k) => fx.sfx(k),
-      shake: (a) => shake.shake(a),
       equipWeapon: (kind) => {
         if (this.testWeapon?.kind !== kind) this.equipTestWeapon(kind, "R");
+      },
+      // C 的 CombatFx：依動作檔時間播放特效、拖尾、投射物外觀、施放音效、震動；命中時間通知 FieldSkills 判定
+      startFx: (def, clip, rate, hooks) => fx.playSkill(def, clip, rate, { onHit: hooks.onHit, onProjectile: (ev, vis, t) => hooks.onProjectile(ev, vis, t), onEnd: hooks.onEnd }),
+      focus: () => {
+        const f = this.testWeapon?.focus;
+        if (!f) return null;
+        const p = f.getAbsolutePosition();
+        return { x: p.x, y: p.y, z: p.z };
       },
     };
     this.skills = new FieldSkills(host, clips);
     this.buildSkillBar();
+  }
+
+  /** 本地玩家登記到 CombatFx（武器拖尾取樣點：C 的展示武器 base／tip；法杖頭 focus） */
+  private registerSelfFx(): void {
+    if (!this.fx) return;
+    const w = this.testWeapon;
+    const tgtPos = new Vector3();
+    this.fx.registerSelf(
+      this.avatar.root,
+      () => this.pos,
+      () => this.yaw,
+      w ? { base: w.base, tip: w.tip, focus: w.focus } : null,
+      () => {
+        const mc = this.attackTargetId ? this.monsters.find((x) => x.instance.instanceId === this.attackTargetId && x.instance.isAlive) : undefined;
+        if (!mc) return null;
+        const p = mc.instance.currentPosition;
+        return tgtPos.set(p.x, this.terrain.surface(p.x, p.z) + Math.max(0.35, (mc.instance.definition.height ?? 1) * 0.55), p.z);
+      },
+    );
   }
 
   /** 施放技能（技能列、鍵盤 1–6、測試 API 共用） */
@@ -1356,6 +1390,24 @@ class StarsproutGame {
     btn(sw, this.gender === "male" ? "換女生" : "換男生", () => go("g", this.gender === "male" ? "female" : null));
     btn(sw, this.lod === "hq" ? "換 Lite" : "換 HQ", () => go("lod", this.lod === "hq" ? "lite" : null));
     btn(sw, this.charShadow === "blob" ? "角色即時陰影" : "腳下柔邊陰影", () => go("charshadow", this.charShadow === "blob" ? "realtime" : null));
+    // 戰鬥畫面（暫定，不是正式 UI）：畫面閃光、鏡頭震動、傷害數字可調整或關閉；預熱開關（比較用，會重新載入）
+    if (this.fx) {
+      const h = this.fx.hud;
+      const cr = row();
+      btn(cr, `畫面閃光：${h.flash ? "開" : "關"}`, () => {
+        this.fx?.setHud({ flash: !h.flash });
+        this.renderPanel();
+      });
+      btn(cr, `鏡頭震動：${h.shake >= 1 ? "100%" : h.shake > 0 ? "50%" : "關"}`, () => {
+        this.fx?.setHud({ shake: h.shake >= 1 ? 0.5 : h.shake > 0 ? 0 : 1 });
+        this.renderPanel();
+      });
+      btn(cr, `傷害數字：${h.numbers ? "開" : "關"}`, () => {
+        this.fx?.setHud({ numbers: !h.numbers });
+        this.renderPanel();
+      });
+      btn(cr, `特效預熱：${this.params.get("prewarm") === "0" ? "關" : "開"}${this.prewarmMs !== null ? `（${this.prewarmMs} ms）` : ""}`, () => go("prewarm", this.params.get("prewarm") === "0" ? null : "0"));
+    }
     const pr = row();
     btn(pr, "傳送到星露草坪", () => this.toZone01());
     btn(pr, "回營地", () => this.teleport(START.x, START.z));
@@ -1548,7 +1600,7 @@ class StarsproutGame {
           foxStatus: self.foxStatus,
           fieldMonsters: self.fieldStatus.map((x) => ({ ...x })),
           monsterDetail: { on: self.detailOn, ...self.tierCount },
-          combatFx: self.fx ? { tier: self.fx.tier, ...self.fx.stats, damageShown: self.fx.numbers.shown, knockbacks: self.knockbacks, knockSkipped: self.knockSkipped } : null,
+          combatFx: self.fx ? { tier: self.fx.tier, ...self.fx.stats, damageShown: self.fx.fx.damage.shown, audioPlayed: self.fx.audio?.played ?? 0, module: "CombatFx", texts: { ...self.fx.stats.texts }, knockbacks: self.knockbacks, knockSkipped: self.knockSkipped } : null,
           pets: {
             enabled: p.enabled,
             mode: p.mode,
@@ -1603,9 +1655,43 @@ class StarsproutGame {
           cooldowns: cds,
           log: self.skillLog.slice(-20),
           audio: !!self.fx?.audio,
-          trail: !!self.skillTrail,
-          fx: self.fx ? { ...self.fx.stats } : null,
+          trail: !!self.testWeapon,
+          combatFx: self.fx ? self.fx.diag() : null,
+          prewarmMs: self.prewarmMs,
+          fx: self.fx ? { ...self.fx.stats, texts: { ...self.fx.stats.texts } } : null,
         };
+      },
+      combatHud: (p) => {
+        if (!self.fx) return null;
+        if (p) self.fx.setHud(p);
+        return { ...self.fx.hud, screenEnabled: self.fx.fx.screen.enabled, shakeEnabled: self.fx.fx.shake.enabled, shakeScale: self.fx.fx.shake.scale };
+      },
+      combatFxQualityCycle: async () => {
+        const fx = self.fx;
+        if (!fx) return null;
+        const sc = self.scene;
+        const count = () => ({ textures: sc.textures.length, materials: sc.materials.length, meshes: sc.meshes.length, particleSystems: sc.particleSystems.length });
+        const broken = () =>
+          sc.materials.reduce((n, m) => n + m.getActiveTextures().filter((t) => !t.getInternalTexture()).length, 0);
+        const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+        const tier0 = fx.fx.tier;
+        fx.basicSwing(false, 0.3);
+        await wait(400);
+        const before = count();
+        const rounds: unknown[] = [];
+        for (const t of ["high", "low", "medium", tier0] as const) {
+          fx.setQuality(t);
+          fx.basicSwing(false, 0.3);
+          await wait(400);
+          rounds.push({ tier: t, ...count(), broken: broken() });
+        }
+        const after = count();
+        return { tier0, before, after, rounds, brokenAfter: broken(), trail: !!self.testWeapon };
+      },
+      combatText: (kind, value) => {
+        if (!self.fx) return false;
+        self.fx.text(kind, new Vector3(self.pos.x, self.pos.y + 1.4, self.pos.z), value);
+        return true;
       },
       setAttackStyle: (style: string) => self.avatar.setAttackStyle(style),
       previewClip: (name: string) => self.avatar.previewClip(name),

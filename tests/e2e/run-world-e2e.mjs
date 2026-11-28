@@ -270,6 +270,13 @@ for (const name of browsers) {
         // ---------- Stage 7.5 第二階段：C 的六段展示技能接到本地玩家 ----------
         const sk0 = await V(() => window.__starwishPlay.skillState());
         check("Stage 7.5 技能：本地玩家技能已啟用（技能列、音效、六段技能）", sk0.enabled && Object.keys(sk0.cooldowns).length === 6 && sk0.audio, sk0);
+        // ---------- C 正式接入模組 CombatFx：一張地圖一個實例、預熱、沒有第二套特效系統 ----------
+        const cf0 = sk0.combatFx;
+        const layers = await V(() => ({ dmg: document.querySelectorAll(".cvfx-dmg-layer").length }));
+        check("CombatFx：一張地圖一個實例（傷害數字層只有 1 個，沒有舊版特效系統同時執行）", !!cf0 && layers.dmg === 1 && cf0.actors >= 1, { layers, actors: cf0?.actors });
+        check("CombatFx：地圖載入期間已預熱（不扣血、不播音效、不顯示數字、沒有殘留特效）", !!cf0?.prewarm && cf0.prewarm.audioPlayed === 0 && cf0.prewarm.damageShown === 0 && cf0.prewarm.leftoverActive === 0 && cf0.prewarm.leftoverProjectiles === 0 && sk0.prewarmMs !== null, { prewarm: cf0?.prewarm, ms: sk0.prewarmMs });
+        // 音效需要使用者手勢（iPhone 規定）：點一下畫面
+        await page.mouse.click(426, 70).catch(() => {});
         const skillShots = { whirlwind: "n75_skill_whirlwind", star_meteor: "n75_skill_meteor", triple_slash: "n75_skill_triple" };
         const castRes = {};
         for (const id of ["triple_slash", "staff_cast", "leap_slam", "whirlwind", "star_meteor", "charge_burst"]) {
@@ -300,9 +307,27 @@ for (const name of browsers) {
         const sk1 = await V(() => window.__starwishPlay.skillState());
         run.results.stage75Skills = { castRes, state: sk1 };
         check("Stage 7.5 技能：六段技能都能施放，播放 C 的 Skill_* 動作", Object.values(castRes).every((r) => r.ok) && sk1.stats.casts >= 6 && Object.keys(sk1.stats.bySkill).length === 6, castRes);
-        check("Stage 7.5 技能：命中時有傷害、命中特效、技能特效、音效；魔法彈／劍氣／流星有投射物", sk1.stats.hits >= 3 && sk1.fx.skillFx >= 6 && sk1.fx.sfx >= 6 && sk1.stats.projectiles >= 2, sk1);
+        const cf1 = sk1.combatFx;
+        check("Stage 7.5 技能（CombatFx）：命中時有傷害、命中特效、傷害數字；投射物有判定", sk1.stats.hits >= 3 && sk1.stats.viaCombatFx >= 6 && sk1.fx.hitFx >= 3 && cf1.damageShown > cf0.damageShown && sk1.stats.projectiles >= 2, { stats: sk1.stats, fx: sk1.fx, damageShown: cf1.damageShown });
+        check("Stage 7.5 技能（CombatFx）：技能特效、武器拖尾、投射物外觀都由 CombatFx 播放", cf1.vfx.spawned > (cf0.vfx.spawned ?? 0) && sk1.stats.projectileVisuals >= 1, { vfx: cf1.vfx, budget: cf1.budget });
+        if (name === "chromium") check("Stage 7.5 技能（CombatFx）：戰鬥音效有播放（點擊後解鎖）", cf1.audioPlayed > 0, { audioPlayed: cf1.audioPlayed });
         check("Stage 7.5 技能：跳斬、蓄力衝刺有技能位移（經地形碰撞），原地技能不移動", castRes.leap_slam.moved > 0.3 && castRes.charge_burst.moved > 0.3 && castRes.staff_cast.moved < 0.2 && castRes.star_meteor.moved < 0.2, Object.fromEntries(Object.entries(castRes).map(([k, v]) => [k, v.moved])));
         check("Stage 7.5 技能：施放結束後回到一般狀態（沒有卡在技能中）", !sk1.busy, sk1.active);
+        // ---------- HUD（暫定）：預留樣式、閃光與震動可關閉 ----------
+        const txt = await V(() => {
+          const api = window.__starwishPlay;
+          const r = ["heal", "crit", "miss", "block"].map((k) => api.combatText(k, k === "heal" ? 25 : 99));
+          return { r, state: api.skillState().fx.texts };
+        });
+        check("HUD 暫定：預留治療、暴擊、未命中、格擋樣式", txt.r.every(Boolean) && ["heal", "crit", "miss", "block"].every((k) => (txt.state[k] ?? 0) >= 1), txt);
+        const hudOff = await V(() => window.__starwishPlay.combatHud({ flash: false, shake: 0 }));
+        const hudHalf = await V(() => window.__starwishPlay.combatHud({ flash: true, shake: 0.5 }));
+        const hudOn = await V(() => window.__starwishPlay.combatHud({ flash: true, shake: 1 }));
+        await V(() => window.__starwishPlay.weaponTest("sword", "R"));
+        const qc = await V(() => window.__starwishPlay.combatFxQualityCycle());
+        run.results.combatFxQualityCycle = qc;
+        check("CombatFx：切換畫質後沒有材質引用到已刪除的貼圖、貼圖／材質數沒有累積", !!qc && qc.brokenAfter === 0 && qc.after.textures <= qc.before.textures + 2 && qc.after.materials <= qc.before.materials + 2, qc);
+        check("HUD 暫定：畫面閃光、鏡頭震動可以關閉／減弱／恢復", !hudOff.screenEnabled && !hudOff.shakeEnabled && hudHalf.shakeEnabled && hudHalf.shakeScale < hudOn.shakeScale && hudOn.screenEnabled, { hudOff, hudHalf, hudOn });
         const shr = await V(() => window.__starwishPlay.sharedAvatarTest(3));
         run.results.stage75Shared = shr;
         // 3 位共用同一個材質、同一組圖片貼圖（usedTextures）；每多一人只多 1 張骨架的骨骼矩陣小貼圖（82 根骨骼，約 5 KB）

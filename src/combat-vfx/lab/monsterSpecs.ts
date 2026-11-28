@@ -14,7 +14,7 @@ const RIG_COMMON = { fades: { normal: 0.15, locomotion: 0.12, urgent: 0.05 }, de
 export const M002_MOSS_HORN_BEAST: RiggedMonsterSpec = Object.freeze({
   modelId: "m002_moss_horn_beast_v10",
   monsterId: "moss_horn_beast",
-  label: "M002 苔角獸 Rig V1.0",
+  label: "M002 苔角獸 Rig V1.1",
   files: { hq: "monsters/m002/M002_MossHornBeast_Rig_V1_HQ.glb", lite: "monsters/m002/M002_MossHornBeast_Rig_V1_Lite.glb" },
   clips: STD_CLIPS,
   expect: { joints: 26, durations: { idle: 2.8, move: 0.64, run: 0.44, attack: 1.3, hurt: 0.45, death: 0.8, respawn: 0.7 } },
@@ -30,7 +30,7 @@ export const M002_MOSS_HORN_BEAST: RiggedMonsterSpec = Object.freeze({
 export const M003_CLOUD_FLUFF_BIRD: RiggedMonsterSpec = Object.freeze({
   modelId: "m003_cloud_fluff_bird_v10",
   monsterId: "cloud_fluff_bird",
-  label: "M003 雲絨鳥 Rig V1.0",
+  label: "M003 雲絨鳥 Rig V1.1",
   files: { hq: "monsters/m003/M003_CloudFluffBird_Rig_V1_HQ.glb", lite: "monsters/m003/M003_CloudFluffBird_Rig_V1_Lite.glb" },
   clips: STD_CLIPS,
   expect: { joints: 19, durations: { idle: 1.25, move: 0.8, run: 0.5, attack: 1.1, hurt: 0.45, death: 1.0, respawn: 0.9 } },

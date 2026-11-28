@@ -17,7 +17,7 @@ export type FxKey =
   | "hitRing" | "starShards" | "debris" | "groundCrack" | "chargeRings" | "chargeFlash" | "lightPillar"
   // 六職業共用架構預留（展示方向，非正式技能）：騎士光盾／盾擊／突刺、鐵匠鍛造火花、祭司治療／增益、小丑道具
   | "lightShield" | "shieldBash" | "thrustLine" | "forgeSparks" | "healAura" | "buffOrbit" | "propBurst";
-export type SfxKey = "swish" | "swishHeavy" | "hit" | "hitHeavy" | "crit" | "cast" | "bolt" | "magicHit" | "explosion" | "charge" | "release" | "jump" | "land" | "whirl";
+export type SfxKey = "swish" | "swishHeavy" | "staffSwing" | "hit" | "hitHeavy" | "crit" | "cast" | "bolt" | "magicHit" | "explosion" | "groundImpact" | "charge" | "release" | "jump" | "land" | "whirl" | "shieldBash" | "heal";
 export type Palette = "steel" | "azure" | "star" | "gold" | "rose";
 
 export type HitShape =
@@ -111,7 +111,7 @@ export const SKILLS: readonly SkillDef[] = Object.freeze([
       { kind: "fx", at: "hit", fx: "dustRing", anchor: "front", forward: 0.5, scale: 1.3 },
       { kind: "fx", at: "hit", fx: "starBurst", anchor: "front", forward: 0.5 },
       { kind: "fx", at: "hit", fx: "groundCrack", anchor: "front", forward: 0.55, scale: 1.0 },
-      { kind: "hit", at: "hit", hit: H("slam", 2.0, { type: "circle", radius: 2.6, center: "self" }, ["hitFlash", "hitSpark"], "hitHeavy", 0.55, 90) },
+      { kind: "hit", at: "hit", hit: H("slam", 2.0, { type: "circle", radius: 2.6, center: "self" }, ["hitFlash", "hitSpark"], "groundImpact", 0.55, 90) },
       { kind: "sfx", at: "land", sfx: "land" },
     ],
   },

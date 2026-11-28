@@ -45,6 +45,8 @@ export const DEFAULT_POLICY: Readonly<BudgetPolicy> = Object.freeze({ remoteShar
 export interface BudgetStats {
   active: number;
   activeRemote: number;
+  /** 其中「自己的 critical」（命中閃光、暴擊；不受上限限制）的數量 */
+  activeCritical: number;
   particles: number;
   granted: number;
   denied: number;
@@ -55,9 +57,16 @@ export interface BudgetStats {
 export class VfxBudget {
   private q: VfxQualityConfig;
   readonly policy: BudgetPolicy;
-  private live = new Map<number, { owner: VfxOwner; particles: number }>();
+  private live = new Map<number, { owner: VfxOwner; particles: number; critical: boolean }>();
   private next = 1;
-  readonly stats: BudgetStats = { active: 0, activeRemote: 0, particles: 0, granted: 0, denied: 0, scaled: 0, deniedBy: {} };
+  readonly stats: BudgetStats = { active: 0, activeRemote: 0, activeCritical: 0, particles: 0, granted: 0, denied: 0, scaled: 0, deniedBy: {} };
+  /** 統計歸零（預熱後呼叫：預熱產生的核准／拒絕不算進測試統計） */
+  resetStats(): void {
+    this.stats.granted = 0;
+    this.stats.denied = 0;
+    this.stats.scaled = 0;
+    this.stats.deniedBy = {};
+  }
 
   constructor(q: VfxQualityConfig, policy: Partial<BudgetPolicy> = {}) {
     this.q = q;
@@ -82,7 +91,8 @@ export class VfxBudget {
     if (r.priority !== "critical" || remote) {
       if (remote && (r.distance ?? 0) > P.cullDistance) return this.deny("distance");
       const fill = this.live.size / q.maxActiveEffects;
-      if (this.live.size >= q.maxActiveEffects && remote) return this.deny("effect-cap");
+      // Stage 3：上限也套用在自己的一般特效（只有自己的 critical 例外）；多人＋低畫質時同時特效數才真的有上限
+      if (this.live.size - this.stats.activeCritical >= q.maxActiveEffects) return this.deny("effect-cap");
       if (remote && this.stats.activeRemote >= Math.floor(q.maxActiveEffects * P.remoteShare)) return this.deny("remote-share");
       if (r.priority === "secondary" && (fill >= P.secondaryPressure || (!q.secondary))) return this.deny("secondary-pressure");
     }
@@ -98,7 +108,7 @@ export class VfxBudget {
     }
     const particles = Math.round(r.particles * q.particleScale * scale);
     const handle = this.next++;
-    this.live.set(handle, { owner: r.owner, particles });
+    this.live.set(handle, { owner: r.owner, particles, critical: r.priority === "critical" && !remote });
     this.stats.granted++;
     this.recount();
     return { allowed: true, scale, handle };
@@ -111,10 +121,13 @@ export class VfxBudget {
   private recount(): void {
     let p = 0;
     let rem = 0;
+    let crit = 0;
     for (const v of this.live.values()) {
       p += v.particles;
       if (v.owner !== "self") rem++;
+      if (v.critical) crit++;
     }
+    this.stats.activeCritical = crit;
     this.stats.active = this.live.size;
     this.stats.activeRemote = rem;
     this.stats.particles = p;

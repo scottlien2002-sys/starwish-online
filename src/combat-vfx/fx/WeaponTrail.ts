@@ -151,6 +151,10 @@ export class WeaponTrail {
   }
 
   dispose(): void {
-    for (const l of this.layers) l.mesh.dispose(false, true);
+    // 材質是拖尾自己的，但貼圖是共用快取（textures.ts）：只刪材質、不刪貼圖（否則其他角色的拖尾會失去貼圖）
+    for (const l of this.layers) {
+      l.mesh.material?.dispose(false, false);
+      l.mesh.dispose(false, false);
+    }
   }
 }

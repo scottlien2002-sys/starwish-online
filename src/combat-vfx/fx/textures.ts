@@ -310,7 +310,7 @@ const cache = new Map<string, Texture>();
 export function fxTexture(scene: Scene, key: TexKey, size: number): Texture {
   const id = `${scene.uid}|${key}|${size}`;
   const hit = cache.get(id);
-  if (hit) return hit;
+  if (hit && hit.getInternalTexture()) return hit;
   const s = key === "rune" || key === "runeBig" || key === "glyphRing" || key === "crack" || key === "hex" ? Math.min(512, size * 2) : size;
   const tex = new DynamicTexture(`fx_${key}_${s}`, { width: s, height: s }, scene, true);
   const ctx = tex.getContext() as unknown as CanvasRenderingContext2D;

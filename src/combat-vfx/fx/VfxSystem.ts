@@ -1027,6 +1027,52 @@ export class VfxSystem {
     }));
   }
 
+  /**
+   * 預熱（Stage 3.1，改善 1% Low）：載入時把每種特效、投射物都先生成一次並等 shader 編譯完，再收回物件池。
+   * 第一次施放某個技能時就不會因為建立網格／粒子系統、編譯 shader 而卡一下。
+   * 一次只放幾個（不受同時特效上限影響），每批畫 1 格就清掉；全部約 5 格。
+   */
+  async prewarm(at: Vector3, keys: readonly FxKey[], palettes: readonly Palette[] = ["steel"]): Promise<{ ms: number; spawned: number; timeouts: number; materials: number; meshes: number; systems: number }> {
+    const t0 = performance.now();
+    const projectile = new Set<FxKey>(["magicBolt", "swordWave", "meteor"]);
+    const jobs: (() => void)[] = [];
+    for (const palette of palettes) {
+      for (const key of keys) {
+        if (projectile.has(key)) {
+          jobs.push(() => {
+            const p = this.launch(key as "magicBolt" | "swordWave" | "meteor", at.add(new Vector3(0, 1, 0)), new Vector3(0, 0, 1), 0.01, { palette });
+            void p;
+          });
+        } else {
+          jobs.push(() => this.spawn(key, at, { palette, duration: 1 }));
+          jobs.push(() => this.spawn(key, at, { palette, duration: 1, owner: "other", distance: 6 }));
+        }
+      }
+      jobs.push(() => this.hitFx(at, ["hitFlash", "hitSpark"], true, { palette }));
+    }
+    let spawned = 0;
+    const timeouts = 0;
+    this.prewarmCancelled = false;
+    // 每批 16 個：生成 → 畫 1 格（觸發 shader 編譯與 GPU 上傳）→ 收回物件池。不等 whenReady（場景其他物件可能一直未就緒）
+    for (let i = 0; i < jobs.length && !this.prewarmCancelled; i += 16) {
+      for (const j of jobs.slice(i, i + 16)) {
+        j();
+        spawned++;
+      }
+      this.scene.render();
+      this.clear();
+      await new Promise<void>((r) => setTimeout(r, 0));
+    }
+    this.budget.resetStats();
+    return { ms: Math.round(performance.now() - t0), spawned, timeouts, materials: this.mats.size, meshes: this.stats.pooledMeshes, systems: this.stats.pooledSystems };
+  }
+
+  private prewarmCancelled = false;
+  /** 預熱超時時由呼叫端中止 */
+  cancelPrewarm(): void {
+    this.prewarmCancelled = true;
+  }
+
   /** 全部清除（換場景、測試用） */
   clear(): void {
     for (const p of [...this.projectiles]) p.dispose(false);
@@ -1052,9 +1098,13 @@ export class VfxSystem {
       f.mesh.dispose(false, false);
       for (const m of f.layers) m.dispose(false, false);
     }
-    for (const l of this.psPool.values()) for (const f of l) f.ps.dispose();
-    for (const { mat } of this.mats.values()) mat.dispose();
+    // 粒子貼圖是共用快取（textures.ts），不能跟著粒子系統一起刪（第二次進地圖會拿到已刪除的貼圖）
+    for (const l of this.psPool.values()) for (const f of l) f.ps.dispose(false);
+    for (const { mat } of this.mats.values()) mat.dispose(false, false);
     this.mats.clear();
+    this.meshPool.clear();
+    this.psPool.clear();
     this.glow?.dispose();
+    this.glow = null;
   }
 }

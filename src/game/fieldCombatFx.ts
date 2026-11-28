@@ -1,152 +1,215 @@
 /**
- * Stage 7.3：星芽原野的戰鬥特效（接 Claude C Combat VFX Stage 2 的 VfxSystem、DamageNumbers、ScreenFx）。
- * 普通攻擊：命中火花、傷害數字、受傷紅框、怪物重生魔法陣＋光柱。
- * Stage 7.5 第二階段：C 的六段「展示技能」接到本地玩家（fieldSkills.ts），這裡提供技能特效、投射物、音效（CombatAudio）。
- * 六大職業的正式技能與數值尚未定案；展示技能只在 Stage 7.5 預覽開啟。
+ * 星芽原野的戰鬥畫面與音效：Claude C 正式接入模組 CombatFx 的轉接層（一張地圖一個 CombatFx 實例）。
+ *
+ * - 這裡不再自己建立 VfxSystem／DamageNumbers／ScreenFx／CombatAudio：全部交給 CombatFx，
+ *   避免舊版與新版特效系統同時執行（重複特效、重複音效、重複傷害數字）。
+ * - 只負責畫面與聲音；傷害由遊戲戰鬥規則（單人）或 D 的伺服器（多人）決定後再傳進來。
+ * - 原本的方法名稱（playerHit／playerHurt／respawn／update／dispose）保留，D 的多人程式可以照常呼叫。
+ * - HUD（暫定，不是正式 UI）：沿用 C 的傷害數字與畫面效果；只顯示自己打出的與自己受到的傷害；
+ *   預留治療、暴擊、格擋、未命中樣式；畫面閃光、鏡頭震動可調整或關閉（設定會保存）。
  */
-import { Vector3, type Scene } from "@babylonjs/core";
-import { VfxSystem } from "../combat-vfx/fx/VfxSystem.ts";
-import { DamageNumbers } from "../combat-vfx/fx/DamageNumbers.ts";
-import { ScreenFx } from "../combat-vfx/fx/ScreenFx.ts";
-import { VFX_QUALITY, type VfxTier } from "../combat-vfx/core/quality.ts";
-import { CombatAudio } from "../combat-vfx/fx/CombatAudio.ts";
-import type { Projectile } from "../combat-vfx/fx/VfxSystem.ts";
-import type { FxKey, Palette, SfxKey } from "../combat-vfx/core/skills.ts";
-import type { TransformNode } from "@babylonjs/core";
+import { Vector3, type Camera, type Scene, type TransformNode, type Mesh } from "@babylonjs/core";
+import { CombatFx, type FxActor, type PrewarmReport, type SkillDef, type SkillHooks, type SkillFxHandle, type ClipTiming, type FxKey, type Palette, type SfxKey, type VfxTier } from "../combat-vfx/integration/index.ts";
+import { VFX_QUALITY } from "../combat-vfx/core/quality.ts";
+
+/** 戰鬥文字種類（HUD 暫定）。block 在 C 的樣式表還沒有專用樣式，暫時用「未命中」樣式顯示「格擋」 */
+export type CombatTextKind = "damage" | "crit" | "heal" | "miss" | "block" | "hurt";
+
+export interface CombatHudSettings {
+  /** 畫面閃光（暴擊金光、受傷紅框） */
+  flash: boolean;
+  /** 鏡頭震動倍率：0＝關閉，0.5＝減弱，1＝C 的預設 */
+  shake: number;
+  /** 傷害數字 */
+  numbers: boolean;
+}
+
+const HUD_KEY = "starwish.combatHud.v1";
+
+export function loadHudSettings(): CombatHudSettings {
+  const d: CombatHudSettings = { flash: true, shake: 1, numbers: true };
+  try {
+    const s = JSON.parse(localStorage.getItem(HUD_KEY) ?? "null") as Partial<CombatHudSettings> | null;
+    if (s) return { flash: s.flash !== false, shake: typeof s.shake === "number" ? Math.max(0, Math.min(1, s.shake)) : 1, numbers: s.numbers !== false };
+  } catch {
+    // 私密瀏覽等情況：用預設值
+  }
+  return d;
+}
+
+export const SELF_ID = "self";
 
 export class FieldCombatFx {
-  readonly vfx: VfxSystem;
-  readonly numbers: DamageNumbers;
-  readonly screen: ScreenFx;
+  readonly fx: CombatFx;
   readonly tier: VfxTier;
-  /** 測試用計數 */
-  readonly stats = { hitFx: 0, numbers: 0, hurt: 0, respawnFx: 0, skillFx: 0, sfx: 0, projectiles: 0 };
-  /** 技能音效（WebAudio 即時合成；iPhone 第一次點擊時 unlock） */
-  audio: CombatAudio | null = null;
-  private readonly projs = new Map<number, Projectile>();
-  private projSeq = 0;
+  readonly hud: CombatHudSettings;
+  readonly stats = { hitFx: 0, numbers: 0, hurt: 0, respawnFx: 0, deathFx: 0, skillCasts: 0, swings: 0, texts: {} as Record<string, number> };
+  prewarmReport: PrewarmReport | null = null;
+  private readonly ground: (x: number, z: number) => number;
+  private disposed = false;
 
-  constructor(scene: Scene, hudRoot: HTMLElement, tier: VfxTier) {
+  constructor(scene: Scene, camera: Camera, hudRoot: HTMLElement, tier: VfxTier, ground: (x: number, z: number) => number) {
     this.tier = tier;
-    this.vfx = new VfxSystem(scene, tier);
-    // 星芽原野是白天地圖：彩色層改一般混合（C 的建議），白色核心維持發光
-    this.vfx.setEnvironment("bright");
-    this.numbers = new DamageNumbers(scene, hudRoot, VFX_QUALITY[tier].damageNumbers);
-    this.screen = new ScreenFx(hudRoot);
-    this.prewarm();
+    this.ground = ground;
+    // 星芽原野是白天地圖 → bright（C 的建議）
+    this.fx = new CombatFx({ scene, camera, hudRoot, tier, env: "bright", ground });
+    this.hud = loadHudSettings();
+    this.applyHud();
+    // iPhone：第一次點擊／按鍵才能出聲
+    const unlock = (): void => this.fx.unlockAudio();
+    hudRoot.addEventListener("pointerdown", unlock, { capture: true });
+    scene.getEngine().getRenderingCanvas()?.addEventListener("pointerdown", unlock, { capture: true });
+    window.addEventListener("keydown", unlock, { capture: true });
   }
 
-  /**
-   * Stage 7.4：先在地底下各播一次（建立粒子系統、編譯著色器），第一次命中時不會因為編譯而卡一下。
-   * 數字層也先建立元素。
-   */
-  private prewarm(): void {
-    const at = new Vector3(0, -500, 0);
-    this.vfx.hitFx(at, ["hitFlash", "hitSpark", "starBurst"], false, { owner: "self" });
-    this.vfx.spawn("lightPillar", at, { owner: "self" });
-    this.vfx.update(5);
-    this.vfx.update(5);
+  /** 相容舊程式（D 的多人程式讀 fx.vfx.stats 等） */
+  get vfx() {
+    return this.fx.vfx;
+  }
+
+  get audio() {
+    return this.fx.audio;
+  }
+
+  /** 地圖載入期間呼叫（載入畫面還沒關掉前）。&prewarm=0 關閉 */
+  async prewarm(): Promise<PrewarmReport> {
+    this.prewarmReport = await this.fx.prewarm();
+    return this.prewarmReport;
+  }
+
+  // ---------------- HUD 設定（暫定） ----------------
+
+  setHud(p: Partial<CombatHudSettings>): void {
+    Object.assign(this.hud, p);
+    this.applyHud();
+    try {
+      localStorage.setItem(HUD_KEY, JSON.stringify(this.hud));
+    } catch {
+      // 無法保存就只套用這次
+    }
+  }
+
+  private applyHud(): void {
+    this.fx.screen.enabled = this.hud.flash;
+    this.fx.shake.enabled = this.hud.shake > 0;
+    this.fx.shake.scale = VFX_QUALITY[this.fx.tier].shake * this.hud.shake;
+  }
+
+  setQuality(tier: VfxTier): void {
+    this.fx.setQuality(tier);
+    this.applyHud();
+  }
+
+  // ---------------- 角色 ----------------
+
+  /** 本地玩家登記（換武器時重新登記，拖尾跟著新武器） */
+  registerSelf(root: TransformNode, position: () => Vector3, yaw: () => number, weapon: { base: TransformNode; tip: TransformNode; focus?: Mesh } | null, target: () => Vector3 | null): void {
+    if (this.disposed) return;
+    const a: FxActor = { id: SELF_ID, owner: "self", root, position, yaw, weaponBase: weapon?.base, weaponTip: weapon?.tip, weaponFocus: weapon?.focus, target };
+    this.fx.register(a);
+  }
+
+  playSkill(skill: SkillDef, clip: ClipTiming, rate: number, hooks: SkillHooks): SkillFxHandle | null {
+    if (this.disposed) return null;
+    this.stats.skillCasts++;
+    return this.fx.playSkill(SELF_ID, skill, clip, rate, hooks);
+  }
+
+  /** 普通攻擊揮擊：拖尾＋揮擊音效（法杖用法杖揮擊音） */
+  basicSwing(staff: boolean, seconds: number): void {
+    if (this.disposed) return;
+    this.stats.swings++;
+    this.fx.basicSwing(SELF_ID, staff ? "azure" : "steel", seconds, staff ? "staffSwing" : "swish");
+  }
+
+  // ---------------- 戰鬥文字（只顯示自己打出的與自己受到的） ----------------
+
+  /** 預留樣式：治療、未命中、格擋（目前遊戲規則還沒有這些結果） */
+  text(kind: CombatTextKind, at: Vector3, value: number | string): void {
+    if (this.disposed) return;
+    if (!this.hud.numbers) return;
+    this.stats.texts[kind] = (this.stats.texts[kind] ?? 0) + 1;
+    const p = at.add(new Vector3(0, 0.35, 0));
+    switch (kind) {
+      case "heal":
+        this.fx.damage.show(p, typeof value === "number" ? `+${value}` : value, "heal");
+        break;
+      case "miss":
+        this.fx.damage.show(p, typeof value === "string" ? value : "未命中", "miss");
+        break;
+      case "block":
+        this.fx.damage.show(p, typeof value === "string" ? value : "格擋", "miss");
+        break;
+      case "hurt":
+        this.fx.damage.show(p, value, "player");
+        break;
+      default:
+        this.fx.damage.show(p, value, kind === "crit" ? "crit" : "normal");
+    }
+  }
+
+  /** 自己的攻擊／技能命中怪物：特效＋音效＋傷害數字（數值由遊戲或伺服器決定） */
+  hit(at: Vector3, keys: readonly FxKey[], o: { damage?: number; crit?: boolean; palette?: Palette; sfx?: SfxKey; shake?: number; ground?: Vector3 }): void {
+    if (this.disposed) return;
+    this.fx.hit(at, keys, { owner: "self", ...o, damage: this.hud.numbers ? o.damage : undefined });
+    this.stats.hitFx++;
+    if (o.damage !== undefined && this.hud.numbers) this.stats.numbers++;
   }
 
   /** 玩家普通攻擊命中怪物（位置在地面；height = 怪物身高） */
-  playerHit(x: number, groundY: number, z: number, height: number, damage: number, killed: boolean): void {
+  playerHit(x: number, groundY: number, z: number, height: number, damage: number, killed: boolean, crit = false): void {
     const at = new Vector3(x, groundY + Math.max(0.35, height * 0.55), z);
-    this.vfx.hitFx(at, killed ? ["hitFlash", "hitSpark", "starBurst"] : ["hitFlash", "hitSpark"], false, { owner: "self" });
-    this.numbers.show(at.add(new Vector3(0, Math.max(0.3, height * 0.5), 0)), damage, "normal");
-    this.stats.hitFx++;
-    this.stats.numbers++;
+    this.hit(at, killed ? ["hitFlash", "hitSpark", "starBurst"] : ["hitFlash", "hitSpark"], { damage, crit, sfx: "hit", shake: 0.06 });
   }
 
-  /** 怪物命中玩家 */
+  /** 其他玩家打怪（多人）：只畫輕微受擊，不顯示數字 */
+  otherHit(x: number, groundY: number, z: number, height: number): void {
+    if (this.disposed) return;
+    this.fx.monsterHurt(new Vector3(x, groundY + Math.max(0.35, height * 0.55), z), "other");
+  }
+
+  /** 怪物命中玩家：受傷數字、紅框、震動 */
   playerHurt(x: number, groundY: number, z: number, damage: number): void {
-    this.numbers.show(new Vector3(x, groundY + 1.5, z), damage, "player");
-    this.screen.flashHurt();
-    this.stats.numbers++;
+    if (this.disposed) return;
+    const chest = new Vector3(x, groundY + 0.85, z);
+    if (this.hud.numbers) this.fx.playerHurt(chest, damage, 0.15);
+    else {
+      this.fx.shake.shake(0.15);
+      this.fx.screen.flashHurt();
+    }
     this.stats.hurt++;
+    if (this.hud.numbers) this.stats.numbers++;
   }
 
-  /** 怪物重生：腳下魔法陣＋光柱（C 的死亡重生介面第 3 步） */
-  respawn(x: number, groundY: number, z: number, scale: number): void {
-    this.vfx.spawn("lightPillar", new Vector3(x, groundY + 0.02, z), { owner: "self", scale });
+  /** 怪物死亡：塵環＋星光碎片（死亡動作與淡出由怪物模組自己播） */
+  death(x: number, z: number, scale: number): void {
+    if (this.disposed) return;
+    this.fx.monsterDeath(new Vector3(x, this.ground(x, z), z), scale);
+    this.stats.deathFx++;
+  }
+
+  /** 怪物重生：魔法陣＋光柱 */
+  respawn(x: number, _groundY: number, z: number, scale: number, boss = false): void {
+    if (this.disposed) return;
+    this.fx.monsterRespawn(new Vector3(x, this.ground(x, z), z), scale, boss);
     this.stats.respawnFx++;
   }
 
-  /** 開啟技能：建立音效、預先建立技能特效（第一次施放不卡頓） */
-  enableSkills(unlockRoot: HTMLElement): void {
-    if (this.audio) return;
-    const audio = new CombatAudio();
-    this.audio = audio;
-    unlockRoot.addEventListener("pointerdown", () => audio.unlock(), { capture: true });
-    window.addEventListener("keydown", () => audio.unlock(), { capture: true });
-    const at = new Vector3(0, -500, 0);
-    for (const k of ["slashArc", "slashArcBig", "whirlRing", "magicCircle", "chargeAura", "chargeRings", "shockwave", "groundCrack", "areaBlast", "dustRing", "critBurst"] as FxKey[]) {
-      try {
-        this.vfx.spawn(k, at, { owner: "self" });
-      } catch {
-        // C 的特效清單若沒有這個鍵就略過（只是預熱）
-      }
-    }
-    this.vfx.update(5);
-    this.vfx.update(5);
+  /** 每格：本地玩家位置（距離預算、音效左右聲道）；回傳鏡頭震動位移 */
+  update(dt: number, listener?: Vector3): Vector3 {
+    if (this.disposed) return Vector3.ZeroReadOnly as Vector3;
+    if (listener) this.fx.listener.copyFrom(listener);
+    return this.fx.update(dt);
   }
 
-  skillFx(key: FxKey, x: number, y: number, z: number, opt: { yaw: number; scale?: number; duration?: number; palette?: Palette; follow?: TransformNode }): void {
-    this.vfx.spawn(key, new Vector3(x, y, z), { owner: "self", ...opt });
-    this.stats.skillFx++;
+  diag() {
+    return { ...this.fx.stats(), field: { ...this.stats, texts: { ...this.stats.texts } }, hud: { ...this.hud }, prewarm: this.prewarmReport };
   }
 
-  /** 技能命中：火花＋傷害數字（爆擊用 C 的爆擊樣式） */
-  skillHit(keys: readonly FxKey[], x: number, y: number, z: number, height: number, damage: number, crit: boolean): void {
-    const at = new Vector3(x, y, z);
-    this.vfx.hitFx(at, keys, crit, { owner: "self" });
-    this.numbers.show(at.add(new Vector3(0, Math.max(0.3, height * 0.5), 0)), damage, crit ? "crit" : "normal");
-    if (crit) this.screen.flashCrit();
-    this.stats.hitFx++;
-    this.stats.numbers++;
-  }
-
-  sfx(key: SfxKey): void {
-    if (!this.audio) return;
-    this.audio.play(key);
-    this.stats.sfx++;
-  }
-
-  launch(kind: "magicBolt" | "swordWave" | "meteor", x: number, y: number, z: number, dx: number, dz: number, speed: number, palette?: Palette): number | null {
-    const p = this.vfx.launch(kind, new Vector3(x, y, z), new Vector3(dx, kind === "meteor" ? -0.9 : 0, dz).normalize(), speed, { owner: "self", palette });
-    if (!p) return null;
-    const h = ++this.projSeq;
-    this.projs.set(h, p);
-    this.stats.projectiles++;
-    return h;
-  }
-
-  projPos(h: number): { x: number; y: number; z: number; travelled: number } | null {
-    const p = this.projs.get(h);
-    if (!p || !p.alive) {
-      this.projs.delete(h);
-      return null;
-    }
-    return { x: p.pos.x, y: p.pos.y, z: p.pos.z, travelled: p.travelled };
-  }
-
-  projSteer(h: number, x: number, y: number, z: number): void {
-    this.projs.get(h)?.steer(new Vector3(x, y, z), 0.18);
-  }
-
-  projEnd(h: number, burst: boolean): void {
-    const p = this.projs.get(h);
-    if (p?.alive) p.dispose(burst);
-    this.projs.delete(h);
-  }
-
-  update(dt: number): void {
-    this.vfx.update(dt);
-    this.numbers.update(dt);
-    this.screen.update(dt);
-  }
-
+  /** 離開地圖 */
   dispose(): void {
-    this.vfx.dispose();
-    this.numbers.dispose();
+    if (this.disposed) return;
+    this.disposed = true;
+    this.fx.dispose();
   }
 }
