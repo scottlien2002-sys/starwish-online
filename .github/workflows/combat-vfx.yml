@@ -45,7 +45,7 @@ jobs:
         id: unit
         continue-on-error: true
         run: |
-          node --test tests/unit/combat-vfx.test.ts tests/unit/stage72.test.ts 2>&1 | tee test-results/combat-vfx/unit.txt
+          node --test tests/unit/combat-vfx.test.ts tests/unit/stage72.test.ts tests/unit/shared-assets-compat.test.ts 2>&1 | tee test-results/combat-vfx/unit.txt
           exit ${PIPESTATUS[0]}
 
       - name: Build
