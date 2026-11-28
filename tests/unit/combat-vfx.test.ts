@@ -310,3 +310,27 @@ test("Stage 3 音效 V2：18 種音效都有合成與長度設定、WAV 輸出�
   const a = seeded(7), b = seeded(7);
   assert.equal(a(), b());
 });
+
+// ---------------------------------------------------------------- 重要戰鬥特效例外（essential）
+import { VfxBudget as Budget2 } from "../../src/combat-vfx/core/budget.ts";
+import { VFX_QUALITY as Q2 } from "../../src/combat-vfx/core/quality.ts";
+test("重要戰鬥特效：影響本地玩家的其他玩家特效不受距離／份額／上限限制，但裝飾層照樣簡化", () => {
+  const b = new Budget2(Q2.low);
+  // 先把其他玩家份額塞滿（低畫質上限 18 × 45% = 8）
+  let n = 0;
+  while (b.request({ owner: "other", priority: "primary", particles: 0, distance: 5 }).allowed) n++;
+  assert.equal(n, Math.floor(18 * 0.45));
+  // 一般：太遠、份額滿 → 拒絕
+  assert.equal(b.request({ owner: "other", priority: "primary", particles: 0, distance: 60 }).allowed, false);
+  assert.equal(b.request({ owner: "other", priority: "primary", particles: 0, distance: 5 }).allowed, false);
+  // 重要：60 m 外、份額滿也允許
+  assert.equal(b.request({ owner: "other", priority: "primary", particles: 10, distance: 60, essential: true }).allowed, true);
+  assert.equal(b.request({ owner: "other", priority: "critical", particles: 10, distance: 60, essential: true }).allowed, true);
+  // 重要特效的裝飾層（secondary）仍照一般規則
+  assert.equal(b.request({ owner: "other", priority: "secondary", particles: 10, distance: 60, essential: true }).allowed, false);
+  // 把自己的一般特效塞到上限，重要特效仍可生成
+  while (b.request({ owner: "self", priority: "primary", particles: 0 }).allowed);
+  assert.equal(b.request({ owner: "other", priority: "primary", particles: 0, distance: 5, essential: true }).allowed, true);
+  // 重要特效不佔其他玩家份額
+  assert.equal(b.stats.activeRemote, Math.floor(18 * 0.45));
+});

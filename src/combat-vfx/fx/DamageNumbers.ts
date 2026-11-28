@@ -4,7 +4,8 @@
  */
 import { Matrix, type Scene, Vector3 } from "@babylonjs/core";
 
-export type DamageStyle = "normal" | "crit" | "player" | "heal" | "miss";
+/** 傷害數字類型（樣式暫定；正式數值由遊戲決定）。block＝格擋（預留） */
+export type DamageStyle = "normal" | "crit" | "player" | "heal" | "miss" | "block";
 
 interface Item {
   el: HTMLDivElement;
@@ -25,6 +26,7 @@ const CSS = `
 .cvfx-dmg.crit::before{content:"CRITICAL";display:block;font-size:13px;letter-spacing:2px;color:#fff6c9;-webkit-text-stroke:1px #a3460c;text-align:center;margin-bottom:2px}
 .cvfx-dmg.player{color:#ff8a8a;-webkit-text-stroke:1.5px #6e1020;text-shadow:0 2px 0 #4a0a14}
 .cvfx-dmg.heal{color:#9dffb5;-webkit-text-stroke:1.5px #135e2c}
+.cvfx-dmg.block{color:#bfe3ff;font-size:20px;-webkit-text-stroke:1.5px #1d4f80}
 .cvfx-dmg.miss{color:#d8deea;font-size:18px;-webkit-text-stroke:1px #4a5468}
 `;
 

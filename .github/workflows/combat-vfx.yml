@@ -48,6 +48,18 @@ jobs:
           node --test tests/unit/combat-vfx.test.ts tests/unit/stage72.test.ts tests/unit/shared-assets-compat.test.ts 2>&1 | tee test-results/combat-vfx/unit.txt
           exit ${PIPESTATUS[0]}
 
+      # A 的新版男性初心者 n75（Stage 7.5）：只在 CI 唯讀取出，用於 C 的相容性測試；不提交到 C 的分支、不部署
+      - name: Fetch A's n75 assets (read-only)
+        id: n75
+        continue-on-error: true
+        run: |
+          git fetch -q --depth 1 origin feature/render-stage75-novice
+          for f in novice_n75_male_lite.glb novice_n75_male_hq.glb novice_n75_male.json; do
+            git show "FETCH_HEAD:public/models/$f" > "public/models/$f"
+          done
+          echo "A n75 @ $(git rev-parse --short FETCH_HEAD)" | tee test-results/combat-vfx/n75-source.txt
+          ls -la public/models/novice_n75_*
+
       - name: Build
         id: build
         continue-on-error: true
@@ -72,6 +84,14 @@ jobs:
           if [ -f .github/cvfx-cases ]; then export CVFX_CASES=$(cat .github/cvfx-cases); fi
           node tests/e2e/run-combat-vfx-e2e.mjs dist ${{ contains(github.event.head_commit.message, '[perf-only]') && 'chromium' || 'chromium,webkit' }} 2>&1 | tee test-results/combat-vfx/e2e.txt; exit ${PIPESTATUS[0]}
 
+      - name: n75 compatibility E2E (A's new novice × Combat VFX)
+        id: e2e_n75
+        if: steps.build.outcome == 'success' && steps.n75.outcome == 'success'
+        continue-on-error: true
+        run: |
+          if [ -f .github/cvfx-cases ] && ! grep -q n75 .github/cvfx-cases; then echo "skip (cvfx-cases)"; exit 0; fi
+          node tests/e2e/run-n75-compat-e2e.mjs dist chromium,webkit 2>&1 | tee test-results/combat-vfx/e2e-n75.txt; exit ${PIPESTATUS[0]}
+
       - name: Deploy preview (own folder only)
         id: deploy
         # 部署暫停：共用資產接入順序 D → C → B，由 A 統籌部署時機。.github/cvfx-deploy-hold 存在時只跑測試、不部署 gh-pages
@@ -80,6 +100,7 @@ jobs:
           DIR="$PREVIEW_DIR"
           # 預覽只放這頁需要的檔案：C1.0-B5b 男女、M004～M007、動作檔（其他舊版模型不放，控制 Pages 容量）
           find dist/models -maxdepth 1 -type f -name '*.glb' ! -name 'novice_c10b5b_*' -delete
+          rm -f dist/models/novice_n75_*
           find dist/models -mindepth 1 -maxdepth 1 -type d ! -name monsters -exec rm -rf {} +
           du -sh dist
           # 共用資產（Claude A 規格 claude/Starwish_Shared_Assets_Spec.md）：大型模型搬進 /shared-assets/（內容雜湊命名、已發布不覆寫）
@@ -142,7 +163,7 @@ jobs:
         run: |
           mkdir -p /tmp/res && cp -r test-results/. /tmp/res/ 2>/dev/null || true
           cat > /tmp/res/outcome.json <<EOF
-          {"commit":"${GITHUB_SHA}","run":"${GITHUB_RUN_ID}","typecheck":"${{ steps.typecheck.outcome }}","unit":"${{ steps.unit.outcome }}","build":"${{ steps.build.outcome }}","e2e":"${{ steps.e2e.outcome }}","deploy":"${{ steps.deploy.outcome }}","verify":"${{ steps.verify.outcome }}","pagesBeforeMb":"${{ steps.deploy.outputs.pages_before_mb }}","pagesTotalMb":"${{ steps.deploy.outputs.pages_total_mb }}"}
+          {"commit":"${GITHUB_SHA}","run":"${GITHUB_RUN_ID}","typecheck":"${{ steps.typecheck.outcome }}","unit":"${{ steps.unit.outcome }}","build":"${{ steps.build.outcome }}","e2e":"${{ steps.e2e.outcome }}","n75":"${{ steps.n75.outcome }}","e2eN75":"${{ steps.e2e_n75.outcome }}","deploy":"${{ steps.deploy.outcome }}","verify":"${{ steps.verify.outcome }}","pagesBeforeMb":"${{ steps.deploy.outputs.pages_before_mb }}","pagesTotalMb":"${{ steps.deploy.outputs.pages_total_mb }}"}
           EOF
           cd /tmp/res
           git init -q -b "results/combat-vfx-${GITHUB_RUN_ID}"
@@ -152,5 +173,5 @@ jobs:
           git push -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" "HEAD:refs/heads/results/combat-vfx-${GITHUB_RUN_ID}"
 
       - name: Fail if checks failed
-        if: steps.typecheck.outcome != 'success' || steps.unit.outcome != 'success' || steps.build.outcome != 'success' || steps.e2e.outcome != 'success'
+        if: steps.typecheck.outcome != 'success' || steps.unit.outcome != 'success' || steps.build.outcome != 'success' || steps.e2e.outcome != 'success' || steps.e2e_n75.outcome == 'failure'
         run: exit 1

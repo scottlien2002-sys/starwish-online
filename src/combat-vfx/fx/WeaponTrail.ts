@@ -150,6 +150,11 @@ export class WeaponTrail {
     }
   }
 
+  /** 測試：最新一筆取樣（刀根、刀尖）與是否正在發射 */
+  head(): { base: Vector3; tip: Vector3; emitting: boolean; samples: number } {
+    return { base: this.base[0]!.clone(), tip: this.tip[0]!.clone(), emitting: this.emitting, samples: this.count };
+  }
+
   dispose(): void {
     // 材質是拖尾自己的，但貼圖是共用快取（textures.ts）：只刪材質、不刪貼圖（否則其他角色的拖尾會失去貼圖）
     for (const l of this.layers) {

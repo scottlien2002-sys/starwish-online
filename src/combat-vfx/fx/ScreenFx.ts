@@ -13,6 +13,8 @@ export class ScreenFx {
   private critT = 9;
   private hurtT = 9;
   enabled = true;
+  /** 閃光強度倍率（0～1；可調整、可關閉） */
+  intensity = 1;
 
   constructor(parent: HTMLElement) {
     if (!document.getElementById("cvfx-screen-style")) {
@@ -47,7 +49,7 @@ export class ScreenFx {
     this.hurtT += dt;
     const c = this.critT < 0.04 ? this.critT / 0.04 : Math.max(0, 1 - (this.critT - 0.04) / 0.22);
     const h = this.hurtT < 0.05 ? this.hurtT / 0.05 : Math.max(0, 1 - (this.hurtT - 0.05) / 0.35);
-    this.crit.style.opacity = c.toFixed(3);
-    this.hurt.style.opacity = h.toFixed(3);
+    this.crit.style.opacity = (c * this.intensity).toFixed(3);
+    this.hurt.style.opacity = (h * this.intensity).toFixed(3);
   }
 }

@@ -21,6 +21,11 @@ export interface VfxRequest {
   particles: number;
   /** 與鏡頭／自己角色的距離（公尺） */
   distance?: number;
+  /**
+   * 重要戰鬥特效（會影響本地玩家：Boss 範圍預警、敵方危險範圍、治療範圍、飛向自己的投射物、必要狀態提示）。
+   * 不受距離、其他玩家份額、同時上限限制（與自己的 critical 相同）；secondary（裝飾層）仍照一般規則簡化。
+   */
+  essential?: boolean;
 }
 
 export interface VfxGrant {
@@ -87,8 +92,9 @@ export class VfxBudget {
     const q = this.q;
     const P = this.policy;
     const remote = r.owner !== "self";
-    // critical（命中閃光等）只對自己的角色免檢查；其他玩家的 critical 一樣受份額／上限限制
-    if (r.priority !== "critical" || remote) {
+    const exempt = (r.priority === "critical" && !remote) || (!!r.essential && r.priority !== "secondary");
+    // critical（命中閃光等）只對自己的角色免檢查；其他玩家的 critical 一樣受份額／上限限制。重要戰鬥特效（essential）也免檢查
+    if (!exempt) {
       if (remote && (r.distance ?? 0) > P.cullDistance) return this.deny("distance");
       const fill = this.live.size / q.maxActiveEffects;
       // Stage 3：上限也套用在自己的一般特效（只有自己的 critical 例外）；多人＋低畫質時同時特效數才真的有上限
@@ -108,7 +114,8 @@ export class VfxBudget {
     }
     const particles = Math.round(r.particles * q.particleScale * scale);
     const handle = this.next++;
-    this.live.set(handle, { owner: r.owner, particles, critical: r.priority === "critical" && !remote });
+    // essential 一律計入「不受上限」組（不擠掉別人，也不被別人擠掉）；份額只算一般的其他玩家特效
+    this.live.set(handle, { owner: exempt && r.essential ? "self" : r.owner, particles, critical: exempt });
     this.stats.granted++;
     this.recount();
     return { allowed: true, scale, handle };

@@ -47,6 +47,8 @@ export interface SpawnOptions {
   emitterMesh?: Mesh;
   /** 與鏡頭的距離（預算用） */
   distance?: number;
+  /** 重要戰鬥特效（影響本地玩家）：主層不受距離／份額／上限限制（見 VfxRequest.essential） */
+  essential?: boolean;
 }
 
 interface MeshFx {
@@ -260,10 +262,10 @@ export class VfxSystem {
       count: number; tex: TexKey; pal: PaletteColors; life: [number, number]; size: [number, number]; power: [number, number];
       emitter: (ps: ParticleSystem) => void; gravity?: number; blend?: number; rate?: number; duration?: number; stretched?: boolean;
       sizeEnd?: number; spin?: number; owner?: VfxOwner; priority?: VfxPriority; distance?: number; colors?: [Color4, Color4, Color4];
-      keepAdd?: boolean; drag?: number;
+      keepAdd?: boolean; drag?: number; essential?: boolean;
     },
   ): void {
-    const g = this.budget.request({ owner: o.owner ?? "self", priority: o.priority ?? "primary", particles: o.count, distance: o.distance });
+    const g = this.budget.request({ owner: o.owner ?? "self", priority: o.priority ?? "primary", particles: o.count, distance: o.distance, essential: o.essential });
     if (!g.allowed) return;
     const remoteScale = (o.owner ?? "self") === "self" || !this.remoteSimplify ? 1 : 0.6;
     const n = Math.max(2, particleCount(o.count, this.q, g.scale * remoteScale));
@@ -327,8 +329,8 @@ export class VfxSystem {
     const lite = (owner !== "self" && this.remoteSimplify) || !this.q.secondary;   // 其他玩家／低畫質：只畫主層
     const yaw = opt.yaw ?? 0;
     const sc = opt.scale ?? 1;
-    const req = (priority: VfxPriority, particles: number) => this.budget.request({ owner, priority, particles, distance: opt.distance });
-    const common = { owner, distance: opt.distance };
+    const req = (priority: VfxPriority, particles: number) => this.budget.request({ owner, priority, particles, distance: opt.distance, essential: opt.essential });
+    const common = { owner, distance: opt.distance, essential: opt.essential };
     switch (key) {
       // ---------------------------------------------------------------- 劍氣：主色弧＋白色核心＋外層柔光（三層）＋火花
       case "slashArc":
@@ -837,7 +839,7 @@ export class VfxSystem {
 
   launch(kind: "magicBolt" | "swordWave" | "meteor", from: Vector3, dir: Vector3, speed: number, opt: SpawnOptions = {}): Projectile | null {
     const owner = opt.owner ?? "self";
-    const g = this.budget.request({ owner, priority: "primary", particles: 40, distance: opt.distance });
+    const g = this.budget.request({ owner, priority: "primary", particles: 40, distance: opt.distance, essential: opt.essential });
     if (!g.allowed) return null;
     const lite = (owner !== "self" && this.remoteSimplify) || !this.q.secondary;
     const pal = PALETTES[opt.palette ?? (kind === "magicBolt" ? "azure" : kind === "meteor" ? "star" : "azure")];

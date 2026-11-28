@@ -89,6 +89,7 @@ interface ActorState {
 }
 
 interface Playing {
+  essential: boolean;
   actorId: string;
   skill: SkillDef;
   tl: SkillTimeline;
@@ -111,6 +112,13 @@ export interface PrewarmReport {
   materials: number;
   pooledMeshes: number;
   particleSystems: number;
+}
+
+/** 由根到這個節點依序強制更新世界矩陣（動作剛被設定時，拖尾才拿得到這一格的位置） */
+function syncWorld(n: TransformNode): void {
+  const chain: TransformNode[] = [];
+  for (let p: TransformNode | null = n; p; p = (p.parent as TransformNode | null) ?? null) chain.push(p);
+  for (let i = chain.length - 1; i >= 0; i--) chain[i]!.computeWorldMatrix(true);
 }
 
 const FOLLOW_FX = new Set<FxKey>(["magicCircle", "whirlRing", "chargeAura", "groundGlow", "lightShield", "healAura", "buffOrbit"]);
@@ -138,6 +146,8 @@ export class CombatFx {
   private disposed = false;
   /** 統計：因距離或不在畫面內而略過的其他玩家特效 */
   readonly culled = { distance: 0, offscreen: 0 };
+  /** 統計：重要戰鬥特效（不省略）的次數 */
+  private essentialCount = 0;
 
   constructor(cfg: CombatFxConfig) {
     this.scene = cfg.scene;
@@ -210,12 +220,16 @@ export class CombatFx {
    * clip：動作檔片段（novice_combat_<g>.json 的 clips[skill.clip]：duration、marks）。
    * rate：攻速播放倍率（core/attackSpeed.ts，上限 1.6）。命中、投射物交給 hooks，由遊戲判定。
    */
-  playSkill(actorId: string, skill: SkillDef, clip: ClipTiming, rate = 1, hooks: SkillHooks = {}): SkillFxHandle | null {
+  /**
+   * essential：整個技能都是重要戰鬥特效（例如敵方 Boss 技能），不因距離或畫面外省略。
+   * 另外：投射物或「目標處」特效如果落在本地玩家附近（1.5 m 內），自動視為重要特效。
+   */
+  playSkill(actorId: string, skill: SkillDef, clip: ClipTiming, rate = 1, hooks: SkillHooks = {}, o: { essential?: boolean } = {}): SkillFxHandle | null {
     const st = this.actors.get(actorId);
     if (!st) return null;
     for (const p of this.playing) if (p.actorId === actorId) p.cancelled = true;
     const tl = new SkillTimeline(skill, clip, rate);
-    const p: Playing = { actorId, skill, tl, hooks, cancelled: false };
+    const p: Playing = { actorId, skill, tl, hooks, cancelled: false, essential: !!o.essential };
     this.playing.push(p);
     return {
       timeline: tl,
@@ -274,7 +288,8 @@ export class CombatFx {
         const at = this.anchor(a, ev);
         if (GROUND_FX.has(ev.fx)) at.y = 0;
         const follow = ev.anchor === "self" && FOLLOW_FX.has(ev.fx) ? a.root : undefined;
-        this.spawnFor(a.owner, ev.fx, at, { palette: pal, yaw: a.yaw(), scale: ev.scale, duration: ev.duration, follow, emitterMesh: ev.anchor === "weapon" ? a.weaponFocus : undefined });
+        const nearMe = ev.anchor === "target" && Math.hypot(at.x - this.listener.x, at.z - this.listener.z) < 1.5;
+        this.spawnFor(a.owner, ev.fx, at, { palette: pal, yaw: a.yaw(), scale: ev.scale, duration: ev.duration, follow, emitterMesh: ev.anchor === "weapon" ? a.weaponFocus : undefined, essential: a.owner !== "self" && (p.essential || nearMe) });
         break;
       }
       case "sfx":
@@ -300,7 +315,10 @@ export class CombatFx {
           from = ev.from === "weapon" && a.weaponFocus ? a.weaponFocus.getAbsolutePosition().clone() : a.position().add(f.scale(0.6)).addInPlaceFromFloats(0, 0.55, 0);
           dir = ev.fx === "swordWave" || !tgt ? f.clone() : tgt.subtract(from);
         }
-        const vis = this.cullRemote(a.owner, from) ? null : this.vfx.launch(ev.fx, from, dir, ev.speed, { owner: a.owner, palette: pal, distance: Vector3.Distance(from, this.listener) });
+        // 飛向本地玩家的投射物一定要看得到
+        const towardMe = a.owner !== "self" && (p.essential || (!!tgt && Vector3.Distance(new Vector3(tgt.x, 0, tgt.z), new Vector3(this.listener.x, 0, this.listener.z)) < 1.5));
+        if (towardMe) this.essentialCount++;
+        const vis = !towardMe && this.cullRemote(a.owner, from) ? null : this.vfx.launch(ev.fx, from, dir, ev.speed, { owner: a.owner, palette: pal, distance: Vector3.Distance(from, this.listener), essential: towardMe });
         p.hooks.onProjectile?.(ev, vis, t);
         break;
       }
@@ -314,9 +332,53 @@ export class CombatFx {
     this.spawnFor(owner, key, at, opt);
   }
 
-  launch(owner: VfxOwner, kind: "magicBolt" | "swordWave" | "meteor", from: Vector3, dir: Vector3, speed: number, palette: Palette = "azure"): Projectile | null {
-    if (this.cullRemote(owner, from)) return null;
-    return this.vfx.launch(kind, from, dir, speed, { owner, palette, distance: Vector3.Distance(from, this.listener) });
+  /** essential：會影響本地玩家（例如飛向自己的投射物）→ 不因距離或畫面外而省略 */
+  launch(owner: VfxOwner, kind: "magicBolt" | "swordWave" | "meteor", from: Vector3, dir: Vector3, speed: number, palette: Palette = "azure", essential = false): Projectile | null {
+    if (!essential && this.cullRemote(owner, from)) return null;
+    if (essential) this.essentialCount++;
+    return this.vfx.launch(kind, from, dir, speed, { owner, palette, distance: Vector3.Distance(from, this.listener), essential });
+  }
+
+  /**
+   * 範圍提示（重要戰鬥特效）：Boss 範圍攻擊預警、敵方危險技能範圍、治療範圍。
+   * 本地玩家在範圍內（或範圍邊緣 margin 內）時一定顯示，不因施放者距離過遠、不在畫面內、其他玩家份額而省略。
+   * 本地玩家不在範圍內時，依一般規則（遠、畫面外會略過）。只用現有特效美術：預警／危險＝大魔法陣（玫瑰色）、治療＝治療光環（金色）。
+   */
+  zone(kind: "bossWarning" | "danger" | "heal", center: Vector3, radius: number, o: { owner?: VfxOwner; duration?: number; margin?: number } = {}): boolean {
+    const owner = o.owner ?? "other";
+    const g = new Vector3(center.x, 0, center.z);
+    const flat = Math.hypot(this.listener.x - g.x, this.listener.z - g.z);
+    const affects = flat <= radius + (o.margin ?? 3);
+    const essential = affects || kind === "bossWarning";
+    if (!essential && this.cullRemote(owner, g)) return false;
+    if (essential) this.essentialCount++;
+    const scale = radius / 3;
+    const dur = o.duration ?? 1.2;
+    if (kind === "heal") this.vfx.spawn("healAura", g, { owner, palette: "gold", scale, duration: dur, essential, distance: flat });
+    else {
+      this.vfx.spawn("magicCircleBig", g, { owner, palette: "rose", scale, duration: dur, essential, distance: flat });
+      if (kind === "bossWarning") this.vfx.spawn("groundGlow", g, { owner, palette: "rose", scale, duration: dur, essential, distance: flat });
+    }
+    return true;
+  }
+
+  /** 必要的戰鬥狀態提示（例：自己被標記、護盾）：跟隨角色，一律顯示 */
+  statusCue(kind: "shield" | "buff" | "heal", follow: TransformNode, o: { owner?: VfxOwner; duration?: number; palette?: Palette } = {}): void {
+    const fx: FxKey = kind === "shield" ? "lightShield" : kind === "heal" ? "healAura" : "buffOrbit";
+    this.essentialCount++;
+    this.vfx.spawn(fx, follow.getAbsolutePosition(), { owner: o.owner ?? "self", palette: o.palette ?? "gold", duration: o.duration ?? 2, follow, essential: true });
+  }
+
+  /** 畫面閃光（暴擊、受傷）：可調整強度或關閉 */
+  setScreenFlash(enabled: boolean, intensity = 1): void {
+    this.screen.enabled = enabled;
+    this.screen.intensity = Math.max(0, Math.min(1, intensity));
+  }
+
+  /** 鏡頭震動：可調整倍率或關閉（暈眩敏感的玩家） */
+  setCameraShake(enabled: boolean, scale = VFX_QUALITY[this.tier].shake): void {
+    this.shake.enabled = enabled;
+    this.shake.scale = Math.max(0, scale);
   }
 
   /**
@@ -326,15 +388,17 @@ export class CombatFx {
   hit(
     at: Vector3,
     keys: readonly FxKey[],
-    o: { owner: VfxOwner; damage?: number | string; crit?: boolean; palette?: Palette; shake?: number; sfx?: SfxKey; ground?: Vector3; style?: DamageStyle; actorId?: string } = { owner: "self" },
+    o: { owner: VfxOwner; damage?: number | string; crit?: boolean; palette?: Palette; shake?: number; sfx?: SfxKey; ground?: Vector3; style?: DamageStyle; actorId?: string; essential?: boolean } = { owner: "self" },
   ): void {
-    const opt = { owner: o.owner, palette: o.palette ?? "steel", distance: Vector3.Distance(at, this.listener) };
+    const ess = !!o.essential;
+    const opt = { owner: o.owner, palette: o.palette ?? "steel", distance: Vector3.Distance(at, this.listener), essential: ess };
+    if (ess) this.essentialCount++;
     if (o.ground) {
       const g = keys.filter((k) => IMPACT_FX.has(k));
-      if (g.length && !this.cullRemote(o.owner, o.ground)) this.vfx.hitFx(o.ground, g, false, opt);
+      if (g.length && (ess || !this.cullRemote(o.owner, o.ground))) this.vfx.hitFx(o.ground, g, false, opt);
       keys = keys.filter((k) => !IMPACT_FX.has(k));
     }
-    if (!this.cullRemote(o.owner, at)) this.vfx.hitFx(at, keys, o.owner === "self" && !!o.crit, opt);
+    if (ess || !this.cullRemote(o.owner, at)) this.vfx.hitFx(at, keys, o.owner === "self" && !!o.crit, opt);
     // 傷害數字：自己打出的、或打在自己身上的才顯示（其他玩家的數字不顯示，避免畫面被數字淹沒）
     if (o.damage !== undefined && (o.owner === "self" || o.style === "player")) this.damage.show(at.add(new Vector3(0, 0.35, 0)), o.damage, o.style ?? (o.crit ? "crit" : "normal"));
     if (o.owner === "self") {
@@ -382,9 +446,20 @@ export class CombatFx {
 
   // ------------------------------------------------------------------ 每格
 
-  /** 回傳鏡頭震動位移（加到鏡頭目標上；不影響判定） */
+  /**
+   * 每格（簡單用法）：advance＋updateVisuals。
+   * 角色動作由技能時間軸驅動時（handle.timeline.t → 動作時間），請改用分兩段：
+   *   fx.advance(dt) → 依 handle.timeline.t 設定動作 → fx.updateVisuals(dt)
+   * 這樣武器拖尾取樣的是「這一格的」武器位置，不會落後一格。
+   */
   update(dt: number): Vector3 {
-    if (this.disposed) return Vector3.ZeroReadOnly as Vector3;
+    this.advance(dt);
+    return this.updateVisuals(dt);
+  }
+
+  /** 第一段：推進技能時間軸、觸發事件（特效、音效、命中 hook） */
+  advance(dt: number): void {
+    if (this.disposed) return;
     this.now += dt;
     const cam = this.camera as Camera & { target?: Vector3 };
     if (cam.target && this.listener.lengthSquared() === 0) this.listener.copyFrom(cam.target);
@@ -403,10 +478,19 @@ export class CombatFx {
         p.hooks.onEnd?.();
       }
     }
+  }
+
+  /** 第二段：武器拖尾（強制更新武器節點的世界座標）、特效、傷害數字、畫面閃光；回傳鏡頭震動位移 */
+  updateVisuals(dt: number): Vector3 {
+    if (this.disposed) return Vector3.ZeroReadOnly as Vector3;
     for (const st of this.actors.values()) {
       if (st.trail && st.trailEnd >= 0 && this.now >= st.trailEnd) {
         st.trail.stop();
         st.trailEnd = -1;
+      }
+      if (st.trail && st.actor.weaponTip && st.actor.weaponBase) {
+        syncWorld(st.actor.weaponTip);
+        syncWorld(st.actor.weaponBase);
       }
       st.trail?.update(dt);
     }
@@ -414,6 +498,11 @@ export class CombatFx {
     this.damage.update(dt);
     this.screen.update(dt);
     return this.shake.update(dt, this.camera as never);
+  }
+
+  /** 測試：某個角色拖尾的最新取樣 */
+  trailHead(actorId: string): { base: Vector3; tip: Vector3; emitting: boolean; samples: number } | null {
+    return this.actors.get(actorId)?.trail?.head() ?? null;
   }
 
   // ------------------------------------------------------------------ 預熱與診斷
@@ -480,6 +569,7 @@ export class CombatFx {
       vfx: { ...this.vfx.stats },
       budget: { ...this.vfx.budget.stats },
       culled: { ...this.culled },
+      essential: this.essentialCount,
       damageShown: this.damage.shown,
       audioPlayed: this.audio?.played ?? 0,
     };
@@ -501,7 +591,8 @@ export class CombatFx {
   // ------------------------------------------------------------------ 內部
 
   private spawnFor(owner: VfxOwner, key: FxKey, at: Vector3, opt: Omit<SpawnOptions, "owner" | "distance">): void {
-    if (this.cullRemote(owner, at)) return;
+    if (opt.essential) this.essentialCount++;
+    else if (this.cullRemote(owner, at)) return;
     this.vfx.spawn(key, at, { ...opt, owner, distance: Vector3.Distance(at, this.listener) });
   }
 

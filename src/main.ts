@@ -178,6 +178,18 @@ function main(): void {
         });
       return;
     }
+    // ?lab=n75compat：A 的新版男性初心者 × Combat VFX 相容性測試（Claude C；只讀 A 的資產，CI 才取得）
+    if (lab === "n75compat") {
+      document.body.classList.add("lab-mode");
+      void import("./combat-vfx/lab/N75CompatLab.ts")
+        .then((m) => m.startN75CompatLab(canvas, hudRoot))
+        .then(() => hideBoot())
+        .catch((err: unknown) => {
+          console.error(err);
+          fail(`n75 相容性測試載入失敗：${err instanceof Error ? err.message : String(err)}`);
+        });
+      return;
+    }
     if (lab === "rigged") {
       document.body.classList.add("lab-mode");
       void import("./lab/RiggedMonsterLab.ts")
