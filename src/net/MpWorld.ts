@@ -103,7 +103,11 @@ export class MpWorld {
   private roanSent = 0;
   readonly baseUrl = `${import.meta.env.BASE_URL}models/`;
   /** Stage 8.4：其他玩家模型（remote＝Claude C 合併渲染＋遠距離 LOD；lite＝Stage 8.2 的 Lite 模型，回退用） */
-  readonly remoteMode: "remote" | "lite" = new URLSearchParams(location.search).get("remote") === "lite" ? "lite" : "remote";
+  /**
+   * 其他玩家模型：remote＝C 合併模型（8.4 已驗收，預設）；lite＝8.2 Lite；
+   * n75＝Stage 7.5 候選（Claude A）：男性用新版 n75 Lite，多人共用同一份網格／材質／貼圖（女性維持合併模型）
+   */
+  readonly remoteMode: "remote" | "lite" | "n75" = ((m) => (m === "lite" || m === "n75" ? m : "remote"))(new URLSearchParams(location.search).get("remote"));
   /** 畫面統計（測試介面） */
   readonly renderStats = { near: 0, far: 0, culled: 0, remoteTriangles: 0 };
   /** 其他玩家技能動作：開始播放的次數／沒有片段改播普通攻擊的次數 */
@@ -221,6 +225,17 @@ export class MpWorld {
   /** 伺服器施放事件 → 其他玩家播 Claude C 的技能動作（時間由技能時間軸決定）；false＝沒有片段，改播普通攻擊 */
   remoteSkill(pid: number, clip: string, t: number): boolean {
     const a = this.remotes.get(pid)?.avatar;
+    if (a instanceof NoviceAvatar && a.version === "n75") {
+      const g = a.clips.get(clip);
+      if (!g) return false;
+      const was = a.previewing === clip;
+      if (!was) {
+        a.playSkill(clip, (g.to - g.from) / 60);
+        this.skillAnim.started++;
+      }
+      a.setSkillTime(t);
+      return true;
+    }
     if (!(a instanceof RemoteCombatAvatar)) return false;
     const was = a.state === "Skill";
     const ok = a.skillTime(clip, t);
@@ -232,6 +247,7 @@ export class MpWorld {
   remoteSkillEnd(pid: number): void {
     const a = this.remotes.get(pid)?.avatar;
     if (a instanceof RemoteCombatAvatar) a.skillEnd();
+    else if (a instanceof NoviceAvatar && a.previewing?.startsWith("Skill_")) a.stopClip();
   }
 
   /** 其他玩家目前畫面上的位置（技能特效錨點用） */
@@ -349,7 +365,26 @@ export class MpWorld {
     this.hudRoot.appendChild(label);
     const v: RemoteView = { id: r.id, key, avatar: null, look: null, loading: true, label, lastActSeq: r.actSeq, lastX: r.x, lastZ: r.z, speed: 0, link: r.link, dead: false };
     // Stage 8.4：其他玩家預設用 C 的合併渲染模型（C1.0-B5b Lite 合併，2 個 draw call＋遠距離 LOD）；&remote=lite 回到 8.2 的 Lite
-    if (this.remoteMode === "remote") {
+    if (this.remoteMode === "n75" && r.gender === "male") {
+      void NoviceAvatar.load(this.scene!, { gender: "male", lod: "lite", baseUrl: this.baseUrl, version: "n75", shared: true })
+        .then((a) => {
+          if (this.remotes.get(r.id) !== v) {
+            a.disposeShared();
+            return;
+          }
+          a.setupShadow("blob", this.scene!, null);
+          a.root.position.set(r.x, this.ground(r.x, r.z), r.z);
+          a.root.rotation.y = r.yaw;
+          v.avatar = a;
+          v.loading = false;
+        })
+        .catch(() => {
+          v.loading = false;
+          label.textContent = `${r.name}（模型載入失敗）`;
+        });
+      return v;
+    }
+    if (this.remoteMode !== "lite") {
       void RemoteCombatAvatar.load(this.scene!, import.meta.env.BASE_URL, r.gender, r.ap)
         .then((a) => {
           if (this.remotes.get(r.id) !== v) {

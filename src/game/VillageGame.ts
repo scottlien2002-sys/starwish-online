@@ -26,7 +26,7 @@ import { PortalTrigger } from "./portalTrigger.ts";
 import { VILLAGE_SOUTH_PORTAL } from "./worldPortals.ts";
 import { FIELD_TEST } from "./fieldRules.ts";
 import { combatTuningFromStats } from "./fieldRules.ts";
-import { NOVICE_VERSION } from "./noviceVersion.ts";
+import { noviceVersionFor } from "./noviceVersion.ts";
 import { applyNoviceLook } from "../net/mpAppearance.ts";
 
 /**
@@ -211,10 +211,10 @@ class VillageGame {
     const useNew = this.params.get("nv72") === "1" && (await modularAvailable(modelsUrl, w.gender, this.lod));
     this.avatar = useNew
       ? await NoviceAvatar.loadModular(scene, { gender: w.gender, lod: this.lod, baseUrl: modelsUrl, appearance: w.save.character.appearance })
-      : await NoviceAvatar.load(scene, { gender: w.gender, lod: this.lod, baseUrl: `${import.meta.env.BASE_URL}models/`, version: NOVICE_VERSION });
+      : await NoviceAvatar.load(scene, { gender: w.gender, lod: this.lod, baseUrl: `${import.meta.env.BASE_URL}models/`, version: noviceVersionFor(w.gender, this.params) });
     this.avatar.setupShadow(this.charShadow, scene, this.shadows);
     // Stage 8.2：多人模式套用伺服器保存的外觀（髮色、武器）
-    if (w.mp && !useNew) await applyNoviceLook(scene, this.avatar, w.gender, w.save.character.appearance);
+    if (w.mp && !useNew && this.avatar.version !== "n75") await applyNoviceLook(scene, this.avatar, w.gender, w.save.character.appearance);
     const sky = scene.getMeshByName("PH_skyDome");
     if (sky) {
       const probe = new ReflectionProbe("villageEnv", 128, scene, true, true);

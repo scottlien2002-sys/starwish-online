@@ -149,9 +149,12 @@ async function walk(p, pts, getPos, done, ms = 40000) {
 
 try {
   // ---------- 進入星芽村 ----------
-  const A = await player("阿星", "&g=male&hairColor=%233a2a1a&weapon=sword", false);
+  // Stage 7.5 候選（Claude A）：MP_E2E_N75=1 時 A 用新版男性 n75（本人技能動作）、B 用 &remote=n75（共用貼圖的 n75 其他玩家）；
+  // 沒設定時 A 加 &nv=c10b5b，與 8.4 已驗收的流程完全相同（回歸）
+  const N75 = process.env.MP_E2E_N75 === "1";
+  const A = await player("阿星", `&g=male&hairColor=%233a2a1a&weapon=sword${N75 ? "" : "&nv=c10b5b"}`, false);
   // B 關掉怪物距離分級（&mlod=0）、M002／M003 用回退版（&m23=v10）：驗證畫面設定不同時，伺服器戰鬥結果仍一致
-  const B = await player("小願", "&g=female&hairColor=%23c0408a&weapon=staff&mlod=0&m23=v10", true);
+  const B = await player("小願", `&g=female&hairColor=%23c0408a&weapon=staff&mlod=0&m23=v10${N75 ? "&remote=n75" : ""}`, true);
   for (const p of [A, B]) await waitVillage(p);
   for (const p of [A, B]) await p.page.waitForFunction(() => !!window.__mpWorld, null, { timeout: 10000 });
   const t0 = Date.now();
@@ -169,7 +172,8 @@ try {
   // Stage 8.4：其他玩家＝Claude C 的合併渲染模型（C1.0-B5b Lite 合併，2 個 draw call＋遠距離 LOD）
   const okB5b = (r) => !!r?.loaded && /^novice_c10b5b_(male|female)_remote\.glb$/.test(r.file ?? "") && !r.parts && ["near", "far", "culled"].includes(r.lod);
   check("A 看見 B 的 3D 角色（C1.0-B5b 合併渲染、女、粉紅髮色已套用、法杖）", okB5b(aSeesB) && aSeesB.gender === "female" && aSeesB.hairColor === "#c0408a" && aSeesB.hairTinted >= 1 && aSeesB.weapon === "staff", aSeesB);
-  check("B 看見 A 的 3D 角色（C1.0-B5b 合併渲染、男、深棕髮色已套用、短劍）", okB5b(bSeesA) && bSeesA.gender === "male" && bSeesA.hairColor === "#3a2a1a" && bSeesA.hairTinted >= 1 && bSeesA.weapon === "sword", bSeesA);
+  if (N75) check("Stage 7.5 候選：B 看見 A 是新版 n75（Lite、多人共用網格／材質／貼圖）", !!bSeesA?.loaded && /^novice_n75_male_lite\.glb$/.test(bSeesA.file ?? "") && bSeesA.gender === "male", bSeesA);
+  else check("B 看見 A 的 3D 角色（C1.0-B5b 合併渲染、男、深棕髮色已套用、短劍）", okB5b(bSeesA) && bSeesA.gender === "male" && bSeesA.hairColor === "#3a2a1a" && bSeesA.hairTinted >= 1 && bSeesA.weapon === "sword", bSeesA);
   const bAp = await B.page.evaluate(() => window.__mpWorld.client.appearance);
   check("本地角色外觀以伺服器資料建立（B 是女性、法杖；不是 Tripo 零件）", b.gender === "female" && bAp.weapon === "staff" && !b.avatarModel.modular && b.avatarModel.parts.length === 0, { gender: b.gender, ap: bAp, modular: b.avatarModel.modular });
   check("一般移動沒有跳躍按鈕", a.jumpButtonVisible === false && b.jumpButtonVisible === false);
@@ -260,7 +264,8 @@ try {
   await sleep(800);
   b = await vinfo(B);
   check("留在村莊的 B 看不到已到原野的 A（不同地圖互不可見）", !b.mp.remotes.some((r) => r.id === a.mp.pid), { remotes: b.mp.remotes.map((r) => r.id) });
-  check("換地圖後 A 外觀與角色保留（同一玩家、髮色與短劍套用）", fa.mp.pid === a.mp.pid && fa.mp.look?.weapon === "sword" && fa.mp.look?.hairTinted >= 1 && !fa.avatarModel.modular, { pid: fa.mp.pid, look: fa.mp.look });
+  if (N75) check("Stage 7.5 候選：換地圖後 A 仍是 n75（同一玩家、骨骼掛點短劍）", fa.mp.pid === a.mp.pid && fa.avatarModel.version === "n75" && fa.avatarModel.sockets.R, { pid: fa.mp.pid, version: fa.avatarModel.version });
+  else check("換地圖後 A 外觀與角色保留（同一玩家、髮色與短劍套用）", fa.mp.pid === a.mp.pid && fa.mp.look?.weapon === "sword" && fa.mp.look?.hairTinted >= 1 && !fa.avatarModel.modular, { pid: fa.mp.pid, look: fa.mp.look });
   await toSouth(B);
   await waitField(B);
   // 原野互相看見
@@ -356,7 +361,7 @@ try {
   }
   // 戰鬥音效：瀏覽器規定要先有使用者點擊才能出聲 → 點一下畫面上方空白處（不影響遊戲操作）
   await A.page.mouse.click(300, 160).catch(() => {});
-  const fA = fighter(A, false, async () => ((await field(B).catch(() => null))?.skillsOk ?? 0) > 0, "A");
+  const fA = fighter(A, N75, async () => ((await field(B).catch(() => null))?.skillsOk ?? 0) > 0, "A");
   // B 第一發之後要等 A 真的打出傷害（伺服器 hit 事件）才繼續，確保兩人都有貢獻
   const fB = fighter(B, true, async () => {
     if (!ready.A) return false;
@@ -394,11 +399,17 @@ try {
   results.samples.coop = { targetId, seconds: (Date.now() - tFight) / 1000, samples: hpSamples.length, sameHpRatio: +(same / Math.max(1, hpSamples.length)).toFixed(3), hpTrailA: hpSamples.slice(-12).map((x) => x[0]), A: fldA, B: { ...fldB, monsterHp: undefined } };
   check("A、B 合作把同一隻怪打倒（兩邊都看到 HP 0、死亡）", mA?.hp === 0 && mB?.hp === 0 && ["death", "dead"].includes(mA.state) && ["death", "dead"].includes(mB.state), { mA, mB });
   check("戰鬥中兩邊看到的怪物 HP 一致（同一份伺服器狀態；≥ 85% 取樣相同）", same / Math.max(1, hpSamples.length) >= 0.85, { same, total: hpSamples.length });
-  check("A 的攻擊與 B 的技能都被伺服器接受、兩人都打出傷害（B 法杖用魔法彈）", fldA.attacksOk > 0 && fldB.skillsOk > 0 && fldA.damageDealt > 0 && fldB.damageDealt > 0, { A: { sent: fldA.attacksSent, ok: fldA.attacksOk, rej: fldA.attacksRejected, dmg: fldA.damageDealt }, B: { skills: fldB.skillsOk, dmg: fldB.damageDealt, last: fldB.lastReject } });
+  check("A 的攻擊與 B 的技能都被伺服器接受、兩人都打出傷害（B 法杖用魔法彈）", (N75 ? fldA.skillsOk > 0 : fldA.attacksOk > 0) && fldB.skillsOk > 0 && fldA.damageDealt > 0 && fldB.damageDealt > 0, { A: { sent: fldA.attacksSent, ok: fldA.attacksOk, rej: fldA.attacksRejected, dmg: fldA.damageDealt }, B: { skills: fldB.skillsOk, dmg: fldB.damageDealt, last: fldB.lastReject } });
   check("傷害數字顯示伺服器結果（兩邊都有命中特效）", fldA.hitsShown > 0 && fldB.hitsShown > 0, { A: fldA.hitsShown, B: fldB.hitsShown });
   check("其他玩家的技能特效依伺服器施放事件播放（A 看到 B 的施放）", fldA.remoteCastsShown > 0, { remoteCasts: fldA.remoteCastsShown, vfx: fldA.vfx });
   const skA = await A.page.evaluate(() => window.__mpWorld.skillAnim);
   check("其他玩家播 Claude C 的技能動作（A 看到 B 的魔法彈動作，不是普通攻擊）", skA.started >= 1, { ...skA, sampledState: results.samples.remoteSkillSeen ?? false });
+  if (N75) {
+    const fa75 = await finfo(A);
+    check("Stage 7.5 候選：A 本人播 C 的技能動作（伺服器施放事件驅動，三連斬）、技能被伺服器接受", (fa75.avatarModel.selfSkillStarts ?? 0) >= 1 && fldA.skillsOk > 0, { selfSkillStarts: fa75.avatarModel.selfSkillStarts, skillsOk: fldA.skillsOk });
+    const skB = await B.page.evaluate(() => window.__mpWorld.skillAnim);
+    check("Stage 7.5 候選：B 看到 A（n75 其他玩家）播技能動作", skB.started >= 1, skB);
+  }
   results.samples.audio = { A: fldA.audio, B: fldB.audio };
   if (browserName === "chromium") check("戰鬥音效：點擊畫面後 A 的攻擊／命中有播放（Claude C Stage 3 音效）", (fldA.audio?.played ?? 0) > 0, fldA.audio);
   check("戰鬥特效共用 Claude A 的原野戰鬥表現（沒有第二套特效系統）、戰鬥音效已建立", fldA.sharedFx === true && fldB.sharedFx === true && !!fldA.audio && !!fldB.audio, { A: { shared: fldA.sharedFx, audio: fldA.audio }, B: { shared: fldB.sharedFx, audio: fldB.audio } });

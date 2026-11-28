@@ -44,6 +44,10 @@ export interface FieldHost {
   /** 其他玩家播技能動作（C 的技能片段）；false＝沒有片段 */
   remoteSkill?(pid: number, clip: string, t: number): boolean;
   remoteSkillEnd?(pid: number): void;
+  /** Stage 7.5 候選（Claude A）：本人播技能動作（新版 n75 有 Skill_* 片段）；時間＝伺服器施放事件的技能時間軸。false＝沒有片段 */
+  selfSkill?(clip: string, t: number): boolean;
+  selfSkillEnd?(): void;
+  hasSkillClip?(clip: string): boolean;
   /** 畫面右方向（音效左右聲道） */
   rightDir?(): { x: number; z: number };
 }
@@ -233,7 +237,8 @@ export class MpFieldCombat {
     const id = this.client.command("sk", { s: def.id, t: t?.nid ?? 0, y: Math.round(Math.atan2(Math.sin(me.yaw), Math.cos(me.yaw)) * 1000) });
     this.pendingCmd.set(id, "sk");
     this.stats.skillsSent++;
-    this.host.playAttack(t?.mc.instance.instanceId ?? null);
+    // 本人有技能動作（n75）時，等伺服器的施放事件再播技能動作；沒有時維持原本的普通攻擊動作
+    if (!this.host.hasSkillClip?.(def.clip)) this.host.playAttack(t?.mc.instance.instanceId ?? null);
     return true;
   }
 
@@ -284,6 +289,7 @@ export class MpFieldCombat {
       case "end": {
         const c = this.casts.get(e.c);
         if (c && !c.self) this.host.remoteSkillEnd?.(c.pid);
+        if (c?.self && c.def) this.host.selfSkillEnd?.();
         c?.trail?.dispose();
         this.casts.delete(e.c);
         return;
@@ -378,6 +384,8 @@ export class MpFieldCombat {
       for (const f of c.tl.advance(dt)) this.runVisual(c, f.event, f.end);
       // 其他玩家：播 C 的技能動作，時間＝技能時間軸（與伺服器命中時間同一個時鐘）
       if (!c.self && c.def) this.host.remoteSkill?.(c.pid, c.def.clip, c.tl.t);
+      if (c.self && c.def) this.host.selfSkill?.(c.def.clip, c.tl.t);
+      if (c.self && c.def && c.tl.done) this.host.selfSkillEnd?.();
     }
   }
 

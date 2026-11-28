@@ -99,6 +99,16 @@ jobs:
         id: mpwebkit
         continue-on-error: true
         run: node tests/e2e/run-mp-e2e.mjs dist webkit
+      - name: Stage 7.5 candidate — new male n75 in multiplayer (Chromium + WebKit, Claude A)
+        id: mpn75
+        if: always()
+        continue-on-error: true
+        env:
+          MP_E2E_N75: "1"
+          MP_E2E_TAG: n75_
+        run: |
+          node tests/e2e/run-mp-e2e.mjs dist chromium
+          MP_E2E_TAG=n75wk_ node tests/e2e/run-mp-e2e.mjs dist webkit
       - name: Shared asset plan + migration test (/shared-assets/v1 simulated, Chromium)
         id: migrate
         continue-on-error: true
@@ -186,11 +196,11 @@ jobs:
           cp /tmp/capacity.json /tmp/capacity-largest.txt /tmp/res/game/ 2>/dev/null || true
           (cd test-results 2>/dev/null && find . -maxdepth 3 -name '*.json' -not -path './mp-*' -exec cp --parents {} /tmp/res/game/ \;) || true
           cp /tmp/preview-meta.json /tmp/asset-remap.json /tmp/res/game/ 2>/dev/null || true
-          echo "{\"job\":\"game\",\"commit\":\"${GITHUB_SHA}\",\"run\":\"${GITHUB_RUN_ID}\",\"mpChromium\":\"${{ steps.mpchromium.outcome }}\",\"mpWebkit\":\"${{ steps.mpwebkit.outcome }}\",\"world\":\"${{ steps.world.outcome }}\",\"migrate\":\"${{ steps.migrate.outcome }}\",\"render\":\"${{ steps.render.outcome }}\",\"capacity\":\"${{ steps.capacity.outcome }}\",\"deploy\":\"${{ steps.deploy.outcome }}\",\"live\":\"${{ steps.live.outcome }}\"}" > /tmp/res/game/meta.json
+          echo "{\"job\":\"game\",\"commit\":\"${GITHUB_SHA}\",\"run\":\"${GITHUB_RUN_ID}\",\"mpChromium\":\"${{ steps.mpchromium.outcome }}\",\"mpWebkit\":\"${{ steps.mpwebkit.outcome }}\",\"mpN75\":\"${{ steps.mpn75.outcome }}\",\"world\":\"${{ steps.world.outcome }}\",\"migrate\":\"${{ steps.migrate.outcome }}\",\"render\":\"${{ steps.render.outcome }}\",\"capacity\":\"${{ steps.capacity.outcome }}\",\"deploy\":\"${{ steps.deploy.outcome }}\",\"live\":\"${{ steps.live.outcome }}\"}" > /tmp/res/game/meta.json
           cd /tmp/res
           git init -q -b r && git config user.name "github-actions[bot]" && git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A && git commit -qm "mp84 game results ${GITHUB_SHA::7}"
           git push -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" "HEAD:refs/heads/results/mp84-game-${GITHUB_RUN_ID}"
       - name: Fail if tests failed
-        if: steps.mpchromium.outcome != 'success' || steps.mpwebkit.outcome != 'success' || steps.world.outcome != 'success' || steps.migrate.outcome != 'success'
+        if: steps.mpchromium.outcome != 'success' || steps.mpwebkit.outcome != 'success' || steps.mpn75.outcome != 'success' || steps.world.outcome != 'success' || steps.migrate.outcome != 'success'
         run: exit 1

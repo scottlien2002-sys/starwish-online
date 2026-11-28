@@ -60,7 +60,8 @@ for (const name of browsers) {
       // Stage 6.7（Claude B）NPC：等 NPC 全部載入（美術在背景載入）
       const vn = await V(() => window.__starwishWorld.info().npcs);
       check("村莊 NPC（Claude B Stage 6.7）：七位 NPC＋洛恩＋N008 委託佈告欄已載入", !!vn && vn.ids.length >= 7 && vn.merchant && vn.board, vn);
-      check("角色模型：使用已驗收的初心者 C1.0-B5b（不是封存的 Tripo 新版）", !!am && am.modular === false && /^novice_c10b5b_(male|female)_(hq|lite)\.glb$/.test(vi.file), { file: vi.file, modular: am?.modular });
+      // Stage 7.5：男性改用新版 n75（Tripo 單一模型＋蒙皮修正），女性維持已驗收的 C1.0-B5b；都不是封存的 Stage 7.2 模組化版本
+      check("角色模型：男性 Stage 7.5 新版 n75、女性 C1.0-B5b（不是封存的 Stage 7.2 Tripo 模組化版）", !!am && am.modular === false && (g === "male" ? /^novice_n75_male_(hq|lite)\.glb$/ : /^novice_c10b5b_female_(hq|lite)\.glb$/).test(vi.file), { file: vi.file, modular: am?.modular });
       check("角色動作：Idle／Run／Attack／Hurt／Death 齊全；Jump 只給技能（一般移動沒有跳躍鍵）", !!am && ["Idle", "Run", "Attack", "Hurt", "Death", "Jump"].every((c) => am.clips.includes(c)) && vi.jumpButtonVisible === false, am && { clips: am.clips });
       check("Stage 7.2：存檔有等級、經驗、外觀（髮型、髮色、武器）", vi.level === 1 && vi.exp === 0 && vi.appearance?.hair === "hair01" && vi.appearance?.weapon === "sword", { level: vi.level, exp: vi.exp, appearance: vi.appearance });
       await shot("village_start");
@@ -244,6 +245,64 @@ for (const name of browsers) {
       check("原野與村莊用同一個角色模型（C1.0-B5b，沒有變回其他版本）", fp.avatarModel?.modular === false && fp.file === vi.file, { village: vi.file, field: fp.file });
       check("切換地圖後寵物仍裝備、在頭部側邊 15～25 cm", fi.pets.length >= 1 && fi.petGap >= 0.15 && fi.petGap <= 0.25, { gap: fi.petGap, pets: fi.pets });
       await shot("field_arrive");
+      // ---------- Stage 7.5：新版男性初心者 ----------
+      if (g === "male") {
+        const am75 = fp.avatarModel;
+        check("Stage 7.5：男性使用新版初心者（n75）、HQ／Lite 對應檔案，27 段動作、雙手武器掛點、頭髮／兜帽次級動態", am75?.version === "n75" && /novice_n75_male_(hq|lite)\.glb/.test(fp.file) && am75.allClips.length >= 27 && ["Walk", "Wait", "Attack_Unarmed", "Attack_2H_Smash", "Cast_Heal", "Block", "Jump_Land"].every((c) => am75.allClips.includes(c)) && am75.sockets.R && am75.sockets.L && am75.secondary.includes("Hair_Back") && am75.secondary.includes("Hood"), { file: fp.file, am75 });
+        const wt = await V(() => window.__starwishPlay.weaponTest("sword", "R"));
+        check("Stage 7.5：右手掛上展示短劍（掛點在右手骨附近 8 cm 內）", wt.attached && wt.dist !== null && wt.dist < 0.08, wt);
+        const wl = await V(() => window.__starwishPlay.weaponTest("staff", "L"));
+        check("Stage 7.5：左手掛點可用（法杖）", wl.attached && wl.dist !== null && wl.dist < 0.08, wl);
+        await V(() => window.__starwishPlay.weaponTest("sword", "R"));
+        const styles = await V(() => ["twoHandSmash", "polearm", "staff", "oneHand"].map((s) => window.__starwishPlay.setAttackStyle(s)));
+        check("Stage 7.5：依武器類型切換普通攻擊動作（雙手重擊、長柄突刺、法杖、單手）", styles.every(Boolean), styles);
+        // 動作預覽：重擊（截圖）
+        await V(() => window.__starwishPlay.previewClip("Attack_2H_Smash"));
+        await wait(300);
+        await shot("n75_preview_smash");
+        await wait(800);
+        await V(() => window.__starwishPlay.previewClip("Attack_1H_Chop"));
+        await wait(250);
+        await shot("n75_sword_chop");
+        await wait(800);
+        const sec = await V(() => window.__starwishPlay.secondary());
+        check("Stage 7.5：次級動態數值有限且在上限內", Object.values(sec).every((v) => Number.isFinite(v.pitch) && Math.abs(v.pitch) <= 0.23 && Math.abs(v.roll) <= 0.23), sec);
+        // ---------- Stage 7.5 第二階段：C 的六段展示技能接到本地玩家 ----------
+        const sk0 = await V(() => window.__starwishPlay.skillState());
+        check("Stage 7.5 技能：本地玩家技能已啟用（技能列、音效、六段技能）", sk0.enabled && Object.keys(sk0.cooldowns).length === 6 && sk0.audio, sk0);
+        const skillShots = { whirlwind: "n75_skill_whirlwind", star_meteor: "n75_skill_meteor", triple_slash: "n75_skill_triple" };
+        const castRes = {};
+        for (const id of ["triple_slash", "staff_cast", "leap_slam", "whirlwind", "star_meteor", "charge_burst"]) {
+          // 每次施放前站到最近一隻活著的怪物旁邊 1.4 m、補滿 HP
+          await V(() => {
+            const api = window.__starwishPlay;
+            api.heal();
+            const i = api.info();
+            const alive = i.monsters.filter((m) => m.state !== "death" && m.hp > 0).sort((a, b) => Math.hypot(a.x - i.pos[0], a.z - i.pos[2]) - Math.hypot(b.x - i.pos[0], b.z - i.pos[2]));
+            if (alive[0]) api.teleport(alive[0].x, alive[0].z - 1.4, 0);
+          });
+          await wait(400);
+          const pos0 = await V(() => window.__starwishPlay.info().pos);
+          castRes[id] = await V((id) => window.__starwishPlay.skill(id), id);
+          if (skillShots[id]) {
+            await wait(id === "star_meteor" ? 1100 : 600);
+            await shot(skillShots[id]);
+          }
+          await wait(2600);
+          const pos1 = await V(() => window.__starwishPlay.info().pos);
+          castRes[id].moved = Math.hypot(pos1[0] - pos0[0], pos1[2] - pos0[2]);
+        }
+        const sk1 = await V(() => window.__starwishPlay.skillState());
+        run.results.stage75Skills = { castRes, state: sk1 };
+        check("Stage 7.5 技能：六段技能都能施放，播放 C 的 Skill_* 動作", Object.values(castRes).every((r) => r.ok) && sk1.stats.casts >= 6 && Object.keys(sk1.stats.bySkill).length === 6, castRes);
+        check("Stage 7.5 技能：命中時有傷害、命中特效、技能特效、音效；魔法彈／劍氣／流星有投射物", sk1.stats.hits >= 3 && sk1.fx.skillFx >= 6 && sk1.fx.sfx >= 6 && sk1.stats.projectiles >= 2, sk1);
+        check("Stage 7.5 技能：跳斬、蓄力衝刺有技能位移（經地形碰撞），原地技能不移動", castRes.leap_slam.moved > 0.3 && castRes.charge_burst.moved > 0.3 && castRes.staff_cast.moved < 0.2 && castRes.star_meteor.moved < 0.2, Object.fromEntries(Object.entries(castRes).map(([k, v]) => [k, v.moved])));
+        check("Stage 7.5 技能：施放結束後回到一般狀態（沒有卡在技能中）", !sk1.busy, sk1.active);
+        const shr = await V(() => window.__starwishPlay.sharedAvatarTest(3));
+        run.results.stage75Shared = shr;
+        check("Stage 7.5 多人共用貼圖：3 位 n75 共用同一份材質與貼圖（第 2、3 位不增加貼圖）", shr.texAfterAll === shr.texAfterFirst && shr.materials === 1 && shr.meshes === 3, shr);
+        await V(() => window.__starwishPlay.weaponTest(null, "R"));
+      }
       // ---------- Stage 7.3：七種怪物 ----------
       const fm = fp.fieldMonsters ?? [];
       const mk = {};

@@ -20,7 +20,8 @@ export const ANIM_TIMING = Object.freeze({
       c10b5: Object.freeze({ male: 1.66, female: 1.79 }),
       c10b5a: Object.freeze({ male: 2.26, female: 2.41 }),
       c10b5b: Object.freeze({ male: 2.26, female: 2.41 }), // 跑步動作與 B5a 相同
-      tripo72: Object.freeze({ male: 2.25, female: 2.25 }), // Stage 7.2 新版（Tripo）：跑步循環 0.5 秒、大腿擺幅 ±42°、腿長約 0.42 m 推算的支撐腳速度
+      tripo72: Object.freeze({ male: 2.25, female: 2.25 }),
+      n75: Object.freeze({ male: 2.66, female: 2.66 }), // Stage 7.5 第二階段：Tripo 原生跑步（根運動 2.66 m/s、支撐腳 2.53 m/s；走路 0.73 m/s） // Stage 7.2 新版（Tripo）：跑步循環 0.5 秒、大腿擺幅 ±42°、腿長約 0.42 m 推算的支撐腳速度
     }) as Readonly<Record<string, Readonly<Record<"male" | "female", number>>>>,
     /** 播放倍率限制：太慢看起來像慢動作、太快腳會糊在一起；超過上限的部分仍會滑步 */
     minRate: 0.8,
