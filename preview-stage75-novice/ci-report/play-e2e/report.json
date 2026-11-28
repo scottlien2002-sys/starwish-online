@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-11-28T02:56:39.709Z",
+  "startedAt": "2026-11-28T04:28:44.340Z",
   "runs": [
     {
       "browser": "webkit",
@@ -28,7 +28,7 @@
               "count": 0,
               "equipped": null,
               "followerVisible": false,
-              "followerDist": 85.09475166556066
+              "followerDist": 85.08914224105818
             }
           }
         },
@@ -38,9 +38,34 @@
             "p3": true,
             "pipeline": false,
             "charShadow": "blob",
-            "drawCalls": 138,
-            "fps": 0.2968239833778569,
-            "contextLost": 0
+            "drawCalls": 131,
+            "fps": null,
+            "contextLost": 0,
+            "triangles": 606725,
+            "veg": {
+              "trees": 502,
+              "smalls": 566,
+              "grass": 25105,
+              "flowers": 4297,
+              "hiChunks": 29,
+              "grassCells": 1,
+              "flowerCells": 1,
+              "shadowChunks": 6,
+              "lod": {
+                "mode": "lod",
+                "hi": 29,
+                "mid": 86,
+                "lo": 697,
+                "culled": 256,
+                "grassShown": 1274,
+                "flowersShown": 398,
+                "tris": 152112,
+                "meshes": 17,
+                "casters": 6,
+                "drawnMeshes": 16,
+                "drawnTris": 150744
+              }
+            }
           }
         },
         "移動 5 m/s、Run 動作、跑步倍率依速度": {
@@ -84,7 +109,7 @@
           "ok": true,
           "detail": {
             "attacks": 25,
-            "ms": 46249,
+            "ms": 44560,
             "kills": 3,
             "hits": 9,
             "drops": 4,
@@ -112,7 +137,7 @@
           "ok": true,
           "detail": {
             "attacks": 25,
-            "ms": 46249,
+            "ms": 44560,
             "kills": 3,
             "hits": 9,
             "drops": 4,
@@ -202,7 +227,7 @@
                 "count": 1,
                 "equipped": 1,
                 "followerVisible": true,
-                "followerDist": 60.97524701603968
+                "followerDist": 60.97925295871499
               },
               "stats": {
                 "attack": 100,
@@ -231,7 +256,7 @@
               "count": 1,
               "equipped": 1,
               "followerVisible": true,
-              "followerDist": 0.4050686911750624
+              "followerDist": 0.41567390415951405
             }
           }
         },
@@ -258,7 +283,7 @@
             "count": 1,
             "equipped": 1,
             "followerVisible": true,
-            "followerDist": 0.4050686911750624
+            "followerDist": 0.41567390415951405
           }
         },
         "寵物加成反映到角色屬性；攻速 ≤ 160 且同步到攻擊動作": {
@@ -311,15 +336,15 @@
         "實玩效能測試流程（自動打怪、報告欄位、Context Lost 0）": {
           "ok": true,
           "detail": {
-            "seconds": 11.5,
-            "avgFps": 0.8666262241095416,
-            "low1Fps": 0.8064516129032259,
-            "minFps": 0.8064516129032259,
-            "avgDraw": 130.5,
+            "seconds": 11.3,
+            "avgFps": 0.969675599435825,
+            "low1Fps": 0.9606147934678195,
+            "minFps": 0.9606147934678195,
+            "avgDraw": 124,
             "kills": 0,
             "contextLost": 0,
-            "first30": 0.8666262241095416,
-            "last30": 0.8666262241095416,
+            "first30": 0.9696755994358252,
+            "last30": 0.969675599435825,
             "quality": "high",
             "gender": "male",
             "lod": "hq",
@@ -342,7 +367,7 @@
             "count": 0,
             "equipped": null,
             "followerVisible": false,
-            "followerDist": 85.0971710225571
+            "followerDist": 85.09559150103301
           }
         },
         "&charshadow=realtime 可載入": {
@@ -351,9 +376,34 @@
             "p3": true,
             "pipeline": false,
             "charShadow": "realtime",
-            "drawCalls": 163,
-            "fps": 0.7983394539358135,
-            "contextLost": 0
+            "drawCalls": 150,
+            "fps": 0.8372404554588077,
+            "contextLost": 0,
+            "triangles": 798912,
+            "veg": {
+              "trees": 502,
+              "smalls": 566,
+              "grass": 25105,
+              "flowers": 4297,
+              "hiChunks": 29,
+              "grassCells": 1,
+              "flowerCells": 1,
+              "shadowChunks": 6,
+              "lod": {
+                "mode": "lod",
+                "hi": 29,
+                "mid": 86,
+                "lo": 697,
+                "culled": 256,
+                "grassShown": 1274,
+                "flowersShown": 398,
+                "tris": 152112,
+                "meshes": 17,
+                "casters": 6,
+                "drawnMeshes": 16,
+                "drawnTris": 150744
+              }
+            }
           }
         },
         "沒有 WebGL Context Lost": {
@@ -362,9 +412,34 @@
             "p3": true,
             "pipeline": false,
             "charShadow": "realtime",
-            "drawCalls": 163,
-            "fps": 0.7983394539358135,
-            "contextLost": 0
+            "drawCalls": 150,
+            "fps": 0.8372404554588077,
+            "contextLost": 0,
+            "triangles": 798912,
+            "veg": {
+              "trees": 502,
+              "smalls": 566,
+              "grass": 25105,
+              "flowers": 4297,
+              "hiChunks": 29,
+              "grassCells": 1,
+              "flowerCells": 1,
+              "shadowChunks": 6,
+              "lod": {
+                "mode": "lod",
+                "hi": 29,
+                "mid": 86,
+                "lo": 697,
+                "culled": 256,
+                "grassShown": 1274,
+                "flowersShown": 398,
+                "tris": 152112,
+                "meshes": 17,
+                "casters": 6,
+                "drawnMeshes": 16,
+                "drawnTris": 150744
+              }
+            }
           }
         }
       },
@@ -435,7 +510,7 @@
           },
           "kills": 0,
           "hits": 0,
-          "gameTime": 0.1,
+          "gameTime": 0,
           "drops": 0,
           "picked": 0,
           "loot": 0,
@@ -706,8 +781,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "offscreen",
-              "stride": 0,
+              "tier": "far",
+              "stride": 4,
               "visualUpdates": 1
             },
             {
@@ -746,8 +821,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "offscreen",
-              "stride": 0,
+              "tier": "mid",
+              "stride": 2,
               "visualUpdates": 1
             },
             {
@@ -826,8 +901,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "offscreen",
-              "stride": 0,
+              "tier": "hidden",
+              "stride": 8,
               "visualUpdates": 1
             },
             {
@@ -866,8 +941,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "offscreen",
-              "stride": 0,
+              "tier": "hidden",
+              "stride": 8,
               "visualUpdates": 1
             },
             {
@@ -906,8 +981,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "offscreen",
-              "stride": 0,
+              "tier": "hidden",
+              "stride": 8,
               "visualUpdates": 1
             },
             {
@@ -946,8 +1021,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "offscreen",
-              "stride": 0,
+              "tier": "hidden",
+              "stride": 8,
               "visualUpdates": 1
             },
             {
@@ -986,8 +1061,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "offscreen",
-              "stride": 0,
+              "tier": "hidden",
+              "stride": 8,
               "visualUpdates": 1
             },
             {
@@ -1026,8 +1101,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "offscreen",
-              "stride": 0,
+              "tier": "hidden",
+              "stride": 8,
               "visualUpdates": 1
             },
             {
@@ -1066,8 +1141,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "offscreen",
-              "stride": 0,
+              "tier": "hidden",
+              "stride": 8,
               "visualUpdates": 1
             },
             {
@@ -1106,8 +1181,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "offscreen",
-              "stride": 0,
+              "tier": "hidden",
+              "stride": 8,
               "visualUpdates": 1
             },
             {
@@ -1146,8 +1221,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "offscreen",
-              "stride": 0,
+              "tier": "hidden",
+              "stride": 8,
               "visualUpdates": 1
             },
             {
@@ -1186,8 +1261,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "offscreen",
-              "stride": 0,
+              "tier": "hidden",
+              "stride": 8,
               "visualUpdates": 1
             },
             {
@@ -1226,8 +1301,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "offscreen",
-              "stride": 0,
+              "tier": "hidden",
+              "stride": 8,
               "visualUpdates": 1
             },
             {
@@ -1266,8 +1341,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "offscreen",
-              "stride": 0,
+              "tier": "hidden",
+              "stride": 8,
               "visualUpdates": 1
             },
             {
@@ -1306,8 +1381,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "offscreen",
-              "stride": 0,
+              "tier": "hidden",
+              "stride": 8,
               "visualUpdates": 1
             },
             {
@@ -1346,8 +1421,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "offscreen",
-              "stride": 0,
+              "tier": "hidden",
+              "stride": 8,
               "visualUpdates": 1
             },
             {
@@ -1386,8 +1461,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "offscreen",
-              "stride": 0,
+              "tier": "hidden",
+              "stride": 8,
               "visualUpdates": 1
             },
             {
@@ -1426,8 +1501,8 @@
                 "shadow": false,
                 "manualSteps": 2
               },
-              "tier": "offscreen",
-              "stride": 0,
+              "tier": "hidden",
+              "stride": 8,
               "visualUpdates": 1
             }
           ],
@@ -1485,10 +1560,10 @@
           "monsterDetail": {
             "on": true,
             "near": 0,
-            "mid": 4,
-            "far": 5,
-            "hidden": 0,
-            "offscreen": 18
+            "mid": 5,
+            "far": 6,
+            "hidden": 16,
+            "offscreen": 0
           },
           "combatFx": null,
           "pets": {
@@ -1505,15 +1580,40 @@
             "count": 0,
             "equipped": null,
             "followerVisible": false,
-            "followerDist": 85.09475166556066
+            "followerDist": 85.08914224105818
           },
           "render": {
             "p3": true,
             "pipeline": false,
             "charShadow": "blob",
-            "drawCalls": 138,
-            "fps": 0.2968239833778569,
-            "contextLost": 0
+            "drawCalls": 131,
+            "fps": null,
+            "contextLost": 0,
+            "triangles": 606725,
+            "veg": {
+              "trees": 502,
+              "smalls": 566,
+              "grass": 25105,
+              "flowers": 4297,
+              "hiChunks": 29,
+              "grassCells": 1,
+              "flowerCells": 1,
+              "shadowChunks": 6,
+              "lod": {
+                "mode": "lod",
+                "hi": 29,
+                "mid": 86,
+                "lo": 697,
+                "culled": 256,
+                "grassShown": 1274,
+                "flowersShown": 398,
+                "tris": 152112,
+                "meshes": 17,
+                "casters": 6,
+                "drawnMeshes": 16,
+                "drawnTris": 150744
+              }
+            }
           }
         },
         "move": {
@@ -1524,7 +1624,7 @@
         },
         "fight": {
           "attacks": 25,
-          "ms": 46249,
+          "ms": 44560,
           "kills": 3,
           "hits": 9,
           "drops": 4,
@@ -1595,7 +1695,7 @@
               "count": 1,
               "equipped": 1,
               "followerVisible": true,
-              "followerDist": 60.97524701603968
+              "followerDist": 60.97925295871499
             },
             "stats": {
               "attack": 100,
@@ -1624,7 +1724,7 @@
             "count": 1,
             "equipped": 1,
             "followerVisible": true,
-            "followerDist": 0.4050686911750624
+            "followerDist": 0.41567390415951405
           }
         },
         "itemAppraisal": {
@@ -1647,29 +1747,54 @@
           "itemAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]"
         },
         "bench": {
-          "seconds": 11.5,
-          "avgFps": 0.8666262241095416,
-          "low1Fps": 0.8064516129032259,
-          "minFps": 0.8064516129032259,
-          "avgDraw": 130.5,
+          "seconds": 11.3,
+          "avgFps": 0.969675599435825,
+          "low1Fps": 0.9606147934678195,
+          "minFps": 0.9606147934678195,
+          "avgDraw": 124,
           "kills": 0,
           "contextLost": 0,
-          "first30": 0.8666262241095416,
-          "last30": 0.8666262241095416,
+          "first30": 0.9696755994358252,
+          "last30": 0.969675599435825,
           "quality": "high",
           "gender": "male",
           "lod": "hq",
           "charShadow": "blob"
         },
-        "drawRealtime": 163,
+        "drawRealtime": 150,
         "end": {
           "render": {
             "p3": true,
             "pipeline": false,
             "charShadow": "realtime",
-            "drawCalls": 163,
-            "fps": 0.7983394539358135,
-            "contextLost": 0
+            "drawCalls": 150,
+            "fps": 0.8372404554588077,
+            "contextLost": 0,
+            "triangles": 798912,
+            "veg": {
+              "trees": 502,
+              "smalls": 566,
+              "grass": 25105,
+              "flowers": 4297,
+              "hiChunks": 29,
+              "grassCells": 1,
+              "flowerCells": 1,
+              "shadowChunks": 6,
+              "lod": {
+                "mode": "lod",
+                "hi": 29,
+                "mid": 86,
+                "lo": 697,
+                "culled": 256,
+                "grassShown": 1274,
+                "flowersShown": 398,
+                "tris": 152112,
+                "meshes": 17,
+                "casters": 6,
+                "drawnMeshes": 16,
+                "drawnTris": 150744
+              }
+            }
           }
         }
       },
@@ -1714,7 +1839,32 @@
             "charShadow": "blob",
             "drawCalls": 1,
             "fps": 60,
-            "contextLost": 0
+            "contextLost": 0,
+            "triangles": 0,
+            "veg": {
+              "trees": 502,
+              "smalls": 566,
+              "grass": 11457,
+              "flowers": 2580,
+              "hiChunks": 0,
+              "grassCells": 0,
+              "flowerCells": 0,
+              "shadowChunks": 0,
+              "lod": {
+                "mode": "lod",
+                "hi": 0,
+                "mid": 0,
+                "lo": 0,
+                "culled": 0,
+                "grassShown": 0,
+                "flowersShown": 0,
+                "tris": 0,
+                "meshes": 0,
+                "casters": 0,
+                "drawnMeshes": 0,
+                "drawnTris": 0
+              }
+            }
           }
         },
         "移動 5 m/s、Run 動作、跑步倍率依速度": {
@@ -1758,7 +1908,7 @@
           "ok": true,
           "detail": {
             "attacks": 25,
-            "ms": 17149,
+            "ms": 16321,
             "kills": 3,
             "hits": 9,
             "drops": 4,
@@ -1786,7 +1936,7 @@
           "ok": true,
           "detail": {
             "attacks": 25,
-            "ms": 17149,
+            "ms": 16321,
             "kills": 3,
             "hits": 9,
             "drops": 4,
@@ -1876,7 +2026,7 @@
                 "count": 1,
                 "equipped": 1,
                 "followerVisible": true,
-                "followerDist": 60.9748278646892
+                "followerDist": 60.975867217677894
               },
               "stats": {
                 "attack": 100,
@@ -1905,7 +2055,7 @@
               "count": 1,
               "equipped": 1,
               "followerVisible": true,
-              "followerDist": 0.4230523749993351
+              "followerDist": 0.42119853482468333
             }
           }
         },
@@ -1932,7 +2082,7 @@
             "count": 1,
             "equipped": 1,
             "followerVisible": true,
-            "followerDist": 0.4230523749993351
+            "followerDist": 0.42119853482468333
           }
         },
         "寵物加成反映到角色屬性；攻速 ≤ 160 且同步到攻擊動作": {
@@ -1985,15 +2135,15 @@
         "實玩效能測試流程（自動打怪、報告欄位、Context Lost 0）": {
           "ok": true,
           "detail": {
-            "seconds": 10.5,
-            "avgFps": 2.952943417793866,
-            "low1Fps": 2.6109660574412534,
-            "minFps": 2.6109660574412534,
-            "avgDraw": 114,
+            "seconds": 10.2,
+            "avgFps": 3.123779773525967,
+            "low1Fps": 2.7777777777777777,
+            "minFps": 2.7777777777777777,
+            "avgDraw": 104.15625,
             "kills": 1,
             "contextLost": 0,
-            "first30": 2.952943417793865,
-            "last30": 2.9529434177938656,
+            "first30": 3.123779773525967,
+            "last30": 3.123779773525967,
             "quality": "medium",
             "gender": "female",
             "lod": "lite",
@@ -2006,9 +2156,34 @@
             "p3": true,
             "pipeline": false,
             "charShadow": "blob",
-            "drawCalls": 109,
-            "fps": 2.9542097488921715,
-            "contextLost": 0
+            "drawCalls": 99,
+            "fps": 3.1107424305267517,
+            "contextLost": 0,
+            "triangles": 191551,
+            "veg": {
+              "trees": 502,
+              "smalls": 566,
+              "grass": 11457,
+              "flowers": 2580,
+              "hiChunks": 2,
+              "grassCells": 1,
+              "flowerCells": 1,
+              "shadowChunks": 0,
+              "lod": {
+                "mode": "lod",
+                "hi": 2,
+                "mid": 64,
+                "lo": 427,
+                "culled": 575,
+                "grassShown": 314,
+                "flowersShown": 99,
+                "tris": 74736,
+                "meshes": 14,
+                "casters": 0,
+                "drawnMeshes": 14,
+                "drawnTris": 74736
+              }
+            }
           }
         }
       },
@@ -3157,7 +3332,32 @@
             "charShadow": "blob",
             "drawCalls": 1,
             "fps": 60,
-            "contextLost": 0
+            "contextLost": 0,
+            "triangles": 0,
+            "veg": {
+              "trees": 502,
+              "smalls": 566,
+              "grass": 11457,
+              "flowers": 2580,
+              "hiChunks": 0,
+              "grassCells": 0,
+              "flowerCells": 0,
+              "shadowChunks": 0,
+              "lod": {
+                "mode": "lod",
+                "hi": 0,
+                "mid": 0,
+                "lo": 0,
+                "culled": 0,
+                "grassShown": 0,
+                "flowersShown": 0,
+                "tris": 0,
+                "meshes": 0,
+                "casters": 0,
+                "drawnMeshes": 0,
+                "drawnTris": 0
+              }
+            }
           }
         },
         "move": {
@@ -3168,7 +3368,7 @@
         },
         "fight": {
           "attacks": 25,
-          "ms": 17149,
+          "ms": 16321,
           "kills": 3,
           "hits": 9,
           "drops": 4,
@@ -3239,7 +3439,7 @@
               "count": 1,
               "equipped": 1,
               "followerVisible": true,
-              "followerDist": 60.9748278646892
+              "followerDist": 60.975867217677894
             },
             "stats": {
               "attack": 100,
@@ -3268,7 +3468,7 @@
             "count": 1,
             "equipped": 1,
             "followerVisible": true,
-            "followerDist": 0.4230523749993351
+            "followerDist": 0.42119853482468333
           }
         },
         "itemAppraisal": {
@@ -3291,15 +3491,15 @@
           "itemAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]"
         },
         "bench": {
-          "seconds": 10.5,
-          "avgFps": 2.952943417793866,
-          "low1Fps": 2.6109660574412534,
-          "minFps": 2.6109660574412534,
-          "avgDraw": 114,
+          "seconds": 10.2,
+          "avgFps": 3.123779773525967,
+          "low1Fps": 2.7777777777777777,
+          "minFps": 2.7777777777777777,
+          "avgDraw": 104.15625,
           "kills": 1,
           "contextLost": 0,
-          "first30": 2.952943417793865,
-          "last30": 2.9529434177938656,
+          "first30": 3.123779773525967,
+          "last30": 3.123779773525967,
           "quality": "medium",
           "gender": "female",
           "lod": "lite",
@@ -3310,16 +3510,41 @@
             "p3": true,
             "pipeline": false,
             "charShadow": "blob",
-            "drawCalls": 109,
-            "fps": 2.9542097488921715,
-            "contextLost": 0
+            "drawCalls": 99,
+            "fps": 3.1107424305267517,
+            "contextLost": 0,
+            "triangles": 191551,
+            "veg": {
+              "trees": 502,
+              "smalls": 566,
+              "grass": 11457,
+              "flowers": 2580,
+              "hiChunks": 2,
+              "grassCells": 1,
+              "flowerCells": 1,
+              "shadowChunks": 0,
+              "lod": {
+                "mode": "lod",
+                "hi": 2,
+                "mid": 64,
+                "lo": 427,
+                "culled": 575,
+                "grassShown": 314,
+                "flowersShown": 99,
+                "tris": 74736,
+                "meshes": 14,
+                "casters": 0,
+                "drawnMeshes": 14,
+                "drawnTris": 74736
+              }
+            }
           }
         }
       },
       "ok": false
     }
   ],
-  "finishedAt": "2026-11-28T03:00:35.908Z",
+  "finishedAt": "2026-11-28T04:32:32.145Z",
   "characterVersion": "c10b5a",
   "failures": 2
 }

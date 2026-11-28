@@ -1,8 +1,8 @@
 {
  "note": "星願物語版本化共用資產。檔名＝內容 SHA-1，已發布不覆寫；users＝引用此檔案的「預覽/原路徑」。orphans＝沒有任何預覽引用的檔案與開始時間（超過 7 天且經使用者確認後才可清理）。",
  "version": "v1",
- "updatedAt": "2026-11-28T03:44:05.347Z",
- "totalBytes": 135623394,
+ "updatedAt": "2026-11-28T05:07:01.433Z",
+ "totalBytes": 141927194,
  "previews": {
   "preview-combat-vfx-s2": {
    "files": 18,
@@ -22,7 +22,7 @@
   },
   "preview-stage75-novice": {
    "files": 123,
-   "bytes": 124072698
+   "bytes": 124336998
   }
  },
  "files": {
@@ -383,9 +383,7 @@
   "3d591f6fd726d14a214437575cc00af82bcf5296.glb": {
    "path": "shared-assets/v1/3d/3d591f6fd726d14a214437575cc00af82bcf5296.glb",
    "bytes": 4160888,
-   "users": [
-    "preview-stage75-novice/models/novice_n75_male_hq.glb"
-   ],
+   "users": [],
    "firstSeen": "2026-11-28T03:44:05.341Z"
   },
   "3d7bf93487d2c77b6b058d0548ea197d32dda39b.png": {
@@ -411,9 +409,7 @@
   "3f85f347e59d0297200e3785f61c77f322cb8d50.glb": {
    "path": "shared-assets/v1/3f/3f85f347e59d0297200e3785f61c77f322cb8d50.glb",
    "bytes": 1878612,
-   "users": [
-    "preview-stage75-novice/models/novice_n75_male_lite.glb"
-   ],
+   "users": [],
    "firstSeen": "2026-11-28T03:44:05.341Z"
   },
   "4151d9a3f8c36f3b002f213c2029b104447d761f.glb": {
@@ -1276,6 +1272,14 @@
    ],
    "firstSeen": "2026-11-28T00:42:40.738Z"
   },
+  "f5e59606a5ca23e63b479d8a2368d9e17a307810.glb": {
+   "path": "shared-assets/v1/f5/f5e59606a5ca23e63b479d8a2368d9e17a307810.glb",
+   "bytes": 2711896,
+   "users": [
+    "preview-stage75-novice/models/novice_n75_male_lite.glb"
+   ],
+   "firstSeen": "2026-11-28T05:07:01.429Z"
+  },
   "f625215a0bd85533e1ed4f35d7e8adf50289f2d3.glb": {
    "path": "shared-assets/v1/f6/f625215a0bd85533e1ed4f35d7e8adf50289f2d3.glb",
    "bytes": 1921476,
@@ -1314,6 +1318,14 @@
    ],
    "firstSeen": "2026-11-28T00:42:40.738Z"
   },
+  "f869324c34debeb65a8682a67cd635c5920e7bf4.glb": {
+   "path": "shared-assets/v1/f8/f869324c34debeb65a8682a67cd635c5920e7bf4.glb",
+   "bytes": 3591904,
+   "users": [
+    "preview-stage75-novice/models/novice_n75_male_hq.glb"
+   ],
+   "firstSeen": "2026-11-28T05:07:01.429Z"
+  },
   "fd5bbcba1515bab5112227727f3d17f1fa614562.glb": {
    "path": "shared-assets/v1/fd/fd5bbcba1515bab5112227727f3d17f1fa614562.glb",
    "bytes": 752968,
@@ -1331,5 +1343,8 @@
    "firstSeen": "2026-11-28T02:43:53.544Z"
   }
  },
- "orphans": {}
+ "orphans": {
+  "3d591f6fd726d14a214437575cc00af82bcf5296.glb": "2026-11-28T05:07:01.433Z",
+  "3f85f347e59d0297200e3785f61c77f322cb8d50.glb": "2026-11-28T05:07:01.433Z"
+ }
 }

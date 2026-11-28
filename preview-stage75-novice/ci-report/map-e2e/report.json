@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-11-28T03:06:38.760Z",
+  "startedAt": "2026-11-28T04:37:49.402Z",
   "runs": [
     {
       "browser": "chromium",
@@ -32,7 +32,7 @@
               false
             ],
             "casters": 1,
-            "buildMs": 55
+            "buildMs": 39
           }
         },
         "植被：樹 ≥ 400、草叢與花有建立": {
@@ -42,11 +42,25 @@
             "smalls": 566,
             "grass": 25105,
             "flowers": 4297,
-            "hiChunks": 4,
-            "grassCells": 13,
-            "flowerCells": 4,
-            "shadowChunks": 3,
-            "buildMs": 300,
+            "hiChunks": 29,
+            "grassCells": 1,
+            "flowerCells": 1,
+            "shadowChunks": 6,
+            "lod": {
+              "mode": "lod",
+              "hi": 29,
+              "mid": 86,
+              "lo": 697,
+              "culled": 256,
+              "grassShown": 1274,
+              "flowersShown": 398,
+              "tris": 152112,
+              "meshes": 17,
+              "casters": 6,
+              "drawnMeshes": 16,
+              "drawnTris": 150744
+            },
+            "buildMs": 228,
             "colliders": 794
           }
         },
@@ -54,7 +68,7 @@
           "ok": true,
           "detail": {
             "samples": 6348,
-            "distinctColors": 645,
+            "distinctColors": 641,
             "opaqueRatio": 1
           }
         },
@@ -68,10 +82,10 @@
               "yaw": 0.7266423406817256
             },
             "p1": {
-              "x": -55.66781808058504,
+              "x": -55.335636161170086,
               "y": 2,
-              "z": -63.62629534065817,
-              "yaw": 0.7266423406817258
+              "z": -63.252590681316335,
+              "yaw": 0.726642340681726
             },
             "ground": 2
           }
@@ -97,7 +111,7 @@
           "detail": {
             "target": "hud-joystick-zone",
             "dAlpha": 0,
-            "moved": 7.21295726377093
+            "moved": 6.733767762990911
           }
         },
         "鏡頭：技能鍵／面板按鈕不會觸發鏡頭（不是 canvas）": {
@@ -111,15 +125,15 @@
           "ok": true,
           "detail": {
             "r0": 9,
-            "r1": 5.0000000000503295,
+            "r1": 5.000000000167099,
             "dAlpha": 0
           }
         },
         "鏡頭：俯角限制內、鏡頭不鑽進地面": {
           "ok": true,
           "detail": {
-            "beta": 0.5500000000000008,
-            "aboveGround": 5.119519265636843
+            "beta": 0.5500000000000047,
+            "aboveGround": 5.082164495753984
           }
         },
         "鏡頭避障：對照組（關閉）鏡頭維持 9 m（視線穿過帳篷）": {
@@ -188,14 +202,14 @@
             "st": {
               "phase": "running",
               "loop": 0,
-              "t": 1.0999999999999999,
+              "t": 1.3,
               "result": null
             },
             "pl": {
-              "x": -52.013816967020475,
+              "x": -51.349453128190554,
               "y": 2,
-              "z": -59.51554408789803,
-              "yaw": 0.7266423406817272
+              "z": -58.76813476921436,
+              "yaw": 0.7266423406817258
             }
           }
         },
@@ -224,23 +238,23 @@
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 193.2819877401393
+              "meanLuma": 193.21785271704343
             },
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 201.27809322496518
+              "meanLuma": 201.25967551002609
             },
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 207.08331692837393
+              "meanLuma": 207.093420405878
             }
           ]
         },
         "報告文字（含模式）": {
           "ok": true,
-          "detail": "星願物語 Stage 6 P2-2 星芽原野 營地與胡蘿蔔園測試報告\n時間 2026/11/28 03:31:56\n網址參數 ?map=starsprout&quality=high&lod=hq\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 HQ：渲染畫質 high（解析度上限 2x、後製 開、陰影 柔和 PCSS 2048）／地圖 HQ／載入 865 ms\n發光效果 修正後；診斷 無\n對照設定：陰影"
+          "detail": "星願物語 Stage 6 P2-2 星芽原野 營地與胡蘿蔔園測試報告\n時間 2026/11/28 04:57:17\n網址參數 ?map=starsprout&quality=high&lod=hq\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 HQ：渲染畫質 high（解析度上限 2x、後製 開、陰影 柔和 PCSS 2048）／地圖 HQ／載入 722 ms\n發光效果 修正後；診斷 無\n對照設定：陰影"
         },
         "沒有 WebGL Context Lost": {
           "ok": true,
@@ -274,14 +288,14 @@
         "info": {
           "quality": "high",
           "lod": "hq",
-          "loadMs": 865.4000000000233,
+          "loadMs": 721.8000000000466,
           "chunks": 16,
           "terrainVerts": 33856,
           "terrainTris": 64800,
-          "drawCalls": 98,
-          "activeMeshes": 67,
-          "trianglesActive": 488993.3333333333,
-          "meshes": 157,
+          "drawCalls": 85,
+          "activeMeshes": 51,
+          "trianglesActive": 283153.3333333333,
+          "meshes": 62,
           "materials": 18,
           "textures": 10,
           "labels": true,
@@ -294,18 +308,32 @@
               false
             ],
             "casters": 1,
-            "buildMs": 55
+            "buildMs": 39
           },
           "veg": {
             "trees": 502,
             "smalls": 566,
             "grass": 25105,
             "flowers": 4297,
-            "hiChunks": 4,
-            "grassCells": 13,
-            "flowerCells": 4,
-            "shadowChunks": 3,
-            "buildMs": 300,
+            "hiChunks": 29,
+            "grassCells": 1,
+            "flowerCells": 1,
+            "shadowChunks": 6,
+            "lod": {
+              "mode": "lod",
+              "hi": 29,
+              "mid": 86,
+              "lo": 697,
+              "culled": 256,
+              "grassShown": 1274,
+              "flowersShown": 398,
+              "tris": 152112,
+              "meshes": 17,
+              "casters": 6,
+              "drawnMeshes": 16,
+              "drawnTris": 150744
+            },
+            "buildMs": 228,
             "colliders": 794
           },
           "nav": false,
@@ -343,7 +371,7 @@
           "joystick": {
             "target": "hud-joystick-zone",
             "dAlpha": 0,
-            "moved": 7.21295726377093
+            "moved": 6.733767762990911
           },
           "buttons": [
             "BUTTON",
@@ -351,12 +379,12 @@
           ],
           "pinch": {
             "r0": 9,
-            "r1": 5.0000000000503295,
+            "r1": 5.000000000167099,
             "dAlpha": 0
           },
           "pitch": {
-            "beta": 0.5500000000000008,
-            "aboveGround": 5.119519265636843
+            "beta": 0.5500000000000047,
+            "aboveGround": 5.082164495753984
           }
         },
         "cameraAvoid": {
@@ -389,52 +417,52 @@
             "maxStep": 0.08814188909741283
           },
           "drawCalls": {
-            "on": 73,
-            "off": 78
+            "on": 75,
+            "off": 76
           }
         },
         "route": {
           "st": {
             "phase": "running",
             "loop": 0,
-            "t": 1.0999999999999999,
+            "t": 1.3,
             "result": null
           },
           "pl": {
-            "x": -52.013816967020475,
+            "x": -51.349453128190554,
             "y": 2,
-            "z": -59.51554408789803,
-            "yaw": 0.7266423406817272
+            "z": -58.76813476921436,
+            "yaw": 0.7266423406817258
           }
         },
         "exposure": [
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 193.2819877401393
+            "meanLuma": 193.21785271704343
           },
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 201.27809322496518
+            "meanLuma": 201.25967551002609
           },
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 207.08331692837393
+            "meanLuma": 207.093420405878
           }
         ],
         "after": {
           "quality": "high",
           "lod": "hq",
-          "loadMs": 865.4000000000233,
+          "loadMs": 721.8000000000466,
           "chunks": 16,
           "terrainVerts": 33856,
           "terrainTris": 64800,
-          "drawCalls": 98,
-          "activeMeshes": 67,
-          "trianglesActive": 415245.3333333333,
-          "meshes": 157,
+          "drawCalls": 88,
+          "activeMeshes": 54,
+          "trianglesActive": 279069.3333333333,
+          "meshes": 62,
           "materials": 18,
           "textures": 10,
           "labels": true,
@@ -447,7 +475,7 @@
               true
             ],
             "casters": 1,
-            "buildMs": 55
+            "buildMs": 39
           },
           "veg": {
             "trees": 502,
@@ -455,10 +483,24 @@
             "grass": 25105,
             "flowers": 4297,
             "hiChunks": 6,
-            "grassCells": 14,
-            "flowerCells": 6,
-            "shadowChunks": 4,
-            "buildMs": 300,
+            "grassCells": 1,
+            "flowerCells": 1,
+            "shadowChunks": 7,
+            "lod": {
+              "mode": "lod",
+              "hi": 6,
+              "mid": 107,
+              "lo": 791,
+              "culled": 164,
+              "grassShown": 848,
+              "flowersShown": 148,
+              "tris": 134940,
+              "meshes": 18,
+              "casters": 7,
+              "drawnMeshes": 16,
+              "drawnTris": 133936
+            },
+            "buildMs": 228,
             "colliders": 794
           },
           "nav": false,
@@ -516,7 +558,7 @@
               false
             ],
             "casters": 0,
-            "buildMs": 53
+            "buildMs": 43
           }
         },
         "植被：樹 ≥ 400、草叢與花有建立": {
@@ -526,11 +568,25 @@
             "smalls": 566,
             "grass": 11457,
             "flowers": 2580,
-            "hiChunks": 4,
-            "grassCells": 9,
-            "flowerCells": 4,
+            "hiChunks": 8,
+            "grassCells": 1,
+            "flowerCells": 1,
             "shadowChunks": 0,
-            "buildMs": 255,
+            "lod": {
+              "mode": "lod",
+              "hi": 8,
+              "mid": 57,
+              "lo": 384,
+              "culled": 619,
+              "grassShown": 294,
+              "flowersShown": 130,
+              "tris": 77962,
+              "meshes": 16,
+              "casters": 0,
+              "drawnMeshes": 16,
+              "drawnTris": 77962
+            },
+            "buildMs": 192,
             "colliders": 794
           }
         },
@@ -538,7 +594,7 @@
           "ok": true,
           "detail": {
             "samples": 3568,
-            "distinctColors": 462,
+            "distinctColors": 454,
             "opaqueRatio": 1
           }
         },
@@ -552,9 +608,9 @@
               "yaw": 0.7266423406817256
             },
             "p1": {
-              "x": -53.6747265640953,
+              "x": -52.345998886435474,
               "y": 2,
-              "z": -61.38406738460717,
+              "z": -59.88924874723984,
               "yaw": 0.726642340681726
             },
             "ground": 2
@@ -581,7 +637,7 @@
           "detail": {
             "target": "hud-joystick-zone",
             "dAlpha": 0,
-            "moved": 8.710840111043426
+            "moved": 8.722582379306276
           }
         },
         "鏡頭：技能鍵／面板按鈕不會觸發鏡頭（不是 canvas）": {
@@ -595,15 +651,15 @@
           "ok": true,
           "detail": {
             "r0": 9,
-            "r1": 5.000000000001375,
+            "r1": 5.000000000000506,
             "dAlpha": 0
           }
         },
         "鏡頭：俯角限制內、鏡頭不鑽進地面": {
           "ok": true,
           "detail": {
-            "beta": 0.55,
-            "aboveGround": 5.164965020590799
+            "beta": 0.5500000000000003,
+            "aboveGround": 5.165117414603353
           }
         },
         "鏡頭避障：對照組（關閉）鏡頭維持 9 m（視線穿過帳篷）": {
@@ -672,23 +728,23 @@
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 193.78123614553002
+              "meanLuma": 193.97512483177664
             },
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 201.31134665855598
+              "meanLuma": 201.5371400242522
             },
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 207.90174014544257
+              "meanLuma": 207.83364674314896
             }
           ]
         },
         "報告文字（含模式）": {
           "ok": true,
-          "detail": "星願物語 Stage 6 P2-2 星芽原野 營地與胡蘿蔔園測試報告\n時間 2026/11/28 03:35:15\n網址參數 ?map=starsprout&quality=medium&lod=lite\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 Lite 中畫質：渲染畫質 medium（解析度上限 1.5x、後製 開、陰影 PCF 1024）／地圖 Lite／載入 738 ms\n發光效果 修正後；"
+          "detail": "星願物語 Stage 6 P2-2 星芽原野 營地與胡蘿蔔園測試報告\n時間 2026/11/28 04:59:45\n網址參數 ?map=starsprout&quality=medium&lod=lite\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 Lite 中畫質：渲染畫質 medium（解析度上限 1.5x、後製 開、陰影 PCF 1024）／地圖 Lite／載入 607 ms\n發光效果 修正後；"
         },
         "沒有 WebGL Context Lost": {
           "ok": true,
@@ -721,14 +777,14 @@
         "info": {
           "quality": "medium",
           "lod": "lite",
-          "loadMs": 737.6000000000931,
+          "loadMs": 607,
           "chunks": 16,
           "terrainVerts": 15376,
           "terrainTris": 28800,
-          "drawCalls": 86,
-          "activeMeshes": 63,
-          "trianglesActive": 284653.3333333333,
-          "meshes": 157,
+          "drawCalls": 74,
+          "activeMeshes": 51,
+          "trianglesActive": 128123.33333333333,
+          "meshes": 62,
           "materials": 18,
           "textures": 10,
           "labels": true,
@@ -741,18 +797,32 @@
               false
             ],
             "casters": 0,
-            "buildMs": 53
+            "buildMs": 43
           },
           "veg": {
             "trees": 502,
             "smalls": 566,
             "grass": 11457,
             "flowers": 2580,
-            "hiChunks": 4,
-            "grassCells": 9,
-            "flowerCells": 4,
+            "hiChunks": 8,
+            "grassCells": 1,
+            "flowerCells": 1,
             "shadowChunks": 0,
-            "buildMs": 255,
+            "lod": {
+              "mode": "lod",
+              "hi": 8,
+              "mid": 57,
+              "lo": 384,
+              "culled": 619,
+              "grassShown": 294,
+              "flowersShown": 130,
+              "tris": 77962,
+              "meshes": 16,
+              "casters": 0,
+              "drawnMeshes": 16,
+              "drawnTris": 77962
+            },
+            "buildMs": 192,
             "colliders": 794
           },
           "nav": false,
@@ -790,7 +860,7 @@
           "joystick": {
             "target": "hud-joystick-zone",
             "dAlpha": 0,
-            "moved": 8.710840111043426
+            "moved": 8.722582379306276
           },
           "buttons": [
             "BUTTON",
@@ -798,12 +868,12 @@
           ],
           "pinch": {
             "r0": 9,
-            "r1": 5.000000000001375,
+            "r1": 5.000000000000506,
             "dAlpha": 0
           },
           "pitch": {
-            "beta": 0.55,
-            "aboveGround": 5.164965020590799
+            "beta": 0.5500000000000003,
+            "aboveGround": 5.165117414603353
           }
         },
         "cameraAvoid": {
@@ -836,38 +906,38 @@
             "maxStep": 0.08814188909741283
           },
           "drawCalls": {
-            "on": 61,
-            "off": 65
+            "on": 62,
+            "off": 63
           }
         },
         "exposure": [
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 193.78123614553002
+            "meanLuma": 193.97512483177664
           },
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 201.31134665855598
+            "meanLuma": 201.5371400242522
           },
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 207.90174014544257
+            "meanLuma": 207.83364674314896
           }
         ],
         "after": {
           "quality": "medium",
           "lod": "lite",
-          "loadMs": 737.6000000000931,
+          "loadMs": 607,
           "chunks": 16,
           "terrainVerts": 15376,
           "terrainTris": 28800,
-          "drawCalls": 86,
-          "activeMeshes": 64,
-          "trianglesActive": 252759.33333333334,
-          "meshes": 157,
+          "drawCalls": 74,
+          "activeMeshes": 52,
+          "trianglesActive": 164777.33333333334,
+          "meshes": 62,
           "materials": 18,
           "textures": 10,
           "labels": true,
@@ -880,18 +950,32 @@
               true
             ],
             "casters": 0,
-            "buildMs": 53
+            "buildMs": 43
           },
           "veg": {
             "trees": 502,
             "smalls": 566,
             "grass": 11457,
             "flowers": 2580,
-            "hiChunks": 4,
-            "grassCells": 10,
-            "flowerCells": 4,
+            "hiChunks": 0,
+            "grassCells": 1,
+            "flowerCells": 1,
             "shadowChunks": 0,
-            "buildMs": 255,
+            "lod": {
+              "mode": "lod",
+              "hi": 0,
+              "mid": 56,
+              "lo": 578,
+              "culled": 434,
+              "grassShown": 134,
+              "flowersShown": 31,
+              "tris": 80498,
+              "meshes": 14,
+              "casters": 0,
+              "drawnMeshes": 14,
+              "drawnTris": 80498
+            },
+            "buildMs": 192,
             "colliders": 794
           },
           "nav": false,
@@ -949,7 +1033,7 @@
               false
             ],
             "casters": 0,
-            "buildMs": 50
+            "buildMs": 40
           }
         },
         "植被：樹 ≥ 400、草叢與花有建立": {
@@ -959,11 +1043,25 @@
             "smalls": 566,
             "grass": 11457,
             "flowers": 2580,
-            "hiChunks": 4,
-            "grassCells": 9,
-            "flowerCells": 4,
+            "hiChunks": 8,
+            "grassCells": 1,
+            "flowerCells": 1,
             "shadowChunks": 0,
-            "buildMs": 251,
+            "lod": {
+              "mode": "lod",
+              "hi": 8,
+              "mid": 57,
+              "lo": 384,
+              "culled": 619,
+              "grassShown": 294,
+              "flowersShown": 130,
+              "tris": 77962,
+              "meshes": 16,
+              "casters": 0,
+              "drawnMeshes": 16,
+              "drawnTris": 77962
+            },
+            "buildMs": 183,
             "colliders": 794
           }
         },
@@ -971,7 +1069,7 @@
           "ok": true,
           "detail": {
             "samples": 2479,
-            "distinctColors": 410,
+            "distinctColors": 405,
             "opaqueRatio": 1
           }
         },
@@ -985,9 +1083,9 @@
               "yaw": 0.7266423406817256
             },
             "p1": {
-              "x": -52.67818080585043,
+              "x": -50.021057632449725,
               "y": 2,
-              "z": -60.26295340658167,
+              "z": -57.27368983650583,
               "yaw": 0.726642340681726
             },
             "ground": 2
@@ -1014,7 +1112,7 @@
           "detail": {
             "target": "hud-joystick-zone",
             "dAlpha": 0,
-            "moved": 8.652764022687471
+            "moved": 7.987776135792903
           }
         },
         "鏡頭：技能鍵／面板按鈕不會觸發鏡頭（不是 canvas）": {
@@ -1028,15 +1126,15 @@
           "ok": true,
           "detail": {
             "r0": 9,
-            "r1": 5.000000000000414,
+            "r1": 5.00000000000081,
             "dAlpha": 0
           }
         },
         "鏡頭：俯角限制內、鏡頭不鑽進地面": {
           "ok": true,
           "detail": {
-            "beta": 0.55,
-            "aboveGround": 5.164486803637301
+            "beta": 0.5500000000000688,
+            "aboveGround": 5.151607117162156
           }
         },
         "鏡頭避障：對照組（關閉）鏡頭維持 9 m（視線穿過帳篷）": {
@@ -1105,23 +1203,23 @@
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 190.68484110337076
+              "meanLuma": 190.94596399726188
             },
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 199.38504163895118
+              "meanLuma": 199.63210573541858
             },
             {
-              "whiteAll": 0.004690431519699813,
+              "whiteAll": 0.004576030750926646,
               "whiteCenter": 0,
-              "meanLuma": 206.6910155815951
+              "meanLuma": 206.6232719003306
             }
           ]
         },
         "報告文字（含模式）": {
           "ok": true,
-          "detail": "星願物語 Stage 6 P2-2 星芽原野 營地與胡蘿蔔園測試報告\n時間 2026/11/28 03:37:43\n網址參數 ?map=starsprout&quality=low&lod=lite\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 Lite 低畫質：渲染畫質 low（解析度上限 1.25x、後製 關、陰影 PCF 512）／地圖 Lite／載入 728 ms\n發光效果 修正後；診斷 無\n對"
+          "detail": "星願物語 Stage 6 P2-2 星芽原野 營地與胡蘿蔔園測試報告\n時間 2026/11/28 05:01:30\n網址參數 ?map=starsprout&quality=low&lod=lite\n裝置 Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n模式 Lite 低畫質：渲染畫質 low（解析度上限 1.25x、後製 關、陰影 PCF 512）／地圖 Lite／載入 592 ms\n發光效果 修正後；診斷 無\n對"
         },
         "沒有 WebGL Context Lost": {
           "ok": true,
@@ -1154,14 +1252,14 @@
         "info": {
           "quality": "low",
           "lod": "lite",
-          "loadMs": 727.6000000000931,
+          "loadMs": 591.8000000000466,
           "chunks": 16,
           "terrainVerts": 15376,
           "terrainTris": 28800,
-          "drawCalls": 79,
-          "activeMeshes": 63,
-          "trianglesActive": 284653.3333333333,
-          "meshes": 157,
+          "drawCalls": 67,
+          "activeMeshes": 51,
+          "trianglesActive": 128123.33333333333,
+          "meshes": 62,
           "materials": 18,
           "textures": 7,
           "labels": true,
@@ -1174,18 +1272,32 @@
               false
             ],
             "casters": 0,
-            "buildMs": 50
+            "buildMs": 40
           },
           "veg": {
             "trees": 502,
             "smalls": 566,
             "grass": 11457,
             "flowers": 2580,
-            "hiChunks": 4,
-            "grassCells": 9,
-            "flowerCells": 4,
+            "hiChunks": 8,
+            "grassCells": 1,
+            "flowerCells": 1,
             "shadowChunks": 0,
-            "buildMs": 251,
+            "lod": {
+              "mode": "lod",
+              "hi": 8,
+              "mid": 57,
+              "lo": 384,
+              "culled": 619,
+              "grassShown": 294,
+              "flowersShown": 130,
+              "tris": 77962,
+              "meshes": 16,
+              "casters": 0,
+              "drawnMeshes": 16,
+              "drawnTris": 77962
+            },
+            "buildMs": 183,
             "colliders": 794
           },
           "nav": false,
@@ -1223,7 +1335,7 @@
           "joystick": {
             "target": "hud-joystick-zone",
             "dAlpha": 0,
-            "moved": 8.652764022687471
+            "moved": 7.987776135792903
           },
           "buttons": [
             "BUTTON",
@@ -1231,12 +1343,12 @@
           ],
           "pinch": {
             "r0": 9,
-            "r1": 5.000000000000414,
+            "r1": 5.00000000000081,
             "dAlpha": 0
           },
           "pitch": {
-            "beta": 0.55,
-            "aboveGround": 5.164486803637301
+            "beta": 0.5500000000000688,
+            "aboveGround": 5.151607117162156
           }
         },
         "cameraAvoid": {
@@ -1269,38 +1381,38 @@
             "maxStep": 0.08814188909741283
           },
           "drawCalls": {
-            "on": 54,
-            "off": 58
+            "on": 55,
+            "off": 56
           }
         },
         "exposure": [
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 190.68484110337076
+            "meanLuma": 190.94596399726188
           },
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 199.38504163895118
+            "meanLuma": 199.63210573541858
           },
           {
-            "whiteAll": 0.004690431519699813,
+            "whiteAll": 0.004576030750926646,
             "whiteCenter": 0,
-            "meanLuma": 206.6910155815951
+            "meanLuma": 206.6232719003306
           }
         ],
         "after": {
           "quality": "low",
           "lod": "lite",
-          "loadMs": 727.6000000000931,
+          "loadMs": 591.8000000000466,
           "chunks": 16,
           "terrainVerts": 15376,
           "terrainTris": 28800,
-          "drawCalls": 79,
-          "activeMeshes": 64,
-          "trianglesActive": 252759.33333333334,
-          "meshes": 157,
+          "drawCalls": 67,
+          "activeMeshes": 52,
+          "trianglesActive": 164777.33333333334,
+          "meshes": 62,
           "materials": 18,
           "textures": 7,
           "labels": true,
@@ -1313,18 +1425,32 @@
               true
             ],
             "casters": 0,
-            "buildMs": 50
+            "buildMs": 40
           },
           "veg": {
             "trees": 502,
             "smalls": 566,
             "grass": 11457,
             "flowers": 2580,
-            "hiChunks": 4,
-            "grassCells": 10,
-            "flowerCells": 4,
+            "hiChunks": 0,
+            "grassCells": 1,
+            "flowerCells": 1,
             "shadowChunks": 0,
-            "buildMs": 251,
+            "lod": {
+              "mode": "lod",
+              "hi": 0,
+              "mid": 56,
+              "lo": 578,
+              "culled": 434,
+              "grassShown": 134,
+              "flowersShown": 31,
+              "tris": 80498,
+              "meshes": 14,
+              "casters": 0,
+              "drawnMeshes": 14,
+              "drawnTris": 80498
+            },
+            "buildMs": 183,
             "colliders": 794
           },
           "nav": false,
@@ -1382,7 +1508,7 @@
               false
             ],
             "casters": 1,
-            "buildMs": 68
+            "buildMs": 55
           }
         },
         "植被：樹 ≥ 400、草叢與花有建立": {
@@ -1392,11 +1518,25 @@
             "smalls": 566,
             "grass": 25105,
             "flowers": 4297,
-            "hiChunks": 4,
-            "grassCells": 13,
-            "flowerCells": 4,
-            "shadowChunks": 3,
-            "buildMs": 344,
+            "hiChunks": 29,
+            "grassCells": 1,
+            "flowerCells": 1,
+            "shadowChunks": 6,
+            "lod": {
+              "mode": "lod",
+              "hi": 29,
+              "mid": 86,
+              "lo": 697,
+              "culled": 256,
+              "grassShown": 1274,
+              "flowersShown": 398,
+              "tris": 152112,
+              "meshes": 17,
+              "casters": 6,
+              "drawnMeshes": 16,
+              "drawnTris": 150744
+            },
+            "buildMs": 240,
             "colliders": 794
           }
         },
@@ -1404,7 +1544,7 @@
           "ok": true,
           "detail": {
             "samples": 6348,
-            "distinctColors": 652,
+            "distinctColors": 647,
             "opaqueRatio": 1
           }
         },
@@ -1418,9 +1558,9 @@
               "yaw": 0.7266423406817256
             },
             "p1": {
-              "x": -54.67127232234017,
+              "x": -54.339090402925216,
               "y": 2,
-              "z": -62.50518136263267,
+              "z": -62.131476703290836,
               "yaw": 0.726642340681726
             },
             "ground": 2
@@ -1437,7 +1577,7 @@
         "鏡頭：iOS 漏送 pointerup 後，下一次單指拖曳仍是旋轉（不會誤判成縮放）": {
           "ok": true,
           "detail": {
-            "dAlpha": 0.7800000000000002,
+            "dAlpha": 0.7800000000000007,
             "dRadius": 0,
             "touches": 0
           }
@@ -1447,7 +1587,7 @@
           "detail": {
             "target": "hud-joystick-zone",
             "dAlpha": 0,
-            "moved": 2.6883116883116873
+            "moved": 2.944805194805199
           }
         },
         "鏡頭：技能鍵／面板按鈕不會觸發鏡頭（不是 canvas）": {
@@ -1461,15 +1601,15 @@
           "ok": true,
           "detail": {
             "r0": 9,
-            "r1": 5.00000029837558,
+            "r1": 5.000000100180607,
             "dAlpha": 0
           }
         },
         "鏡頭：俯角限制內、鏡頭不鑽進地面": {
           "ok": true,
           "detail": {
-            "beta": 0.550000010835528,
-            "aboveGround": 5.07017428606453
+            "beta": 0.5500000125841298,
+            "aboveGround": 5.054431556545335
           }
         },
         "鏡頭避障：對照組（關閉）鏡頭維持 9 m（視線穿過帳篷）": {
@@ -1538,14 +1678,14 @@
             "st": {
               "phase": "running",
               "loop": 0,
-              "t": 5.1999999999999975,
+              "t": 6.199999999999994,
               "result": null
             },
             "pl": {
-              "x": -39.48778993398244,
-              "y": 2.425615083258566,
-              "z": -43.93393903975834,
-              "yaw": 0.6557580050865259
+              "x": -39.597158689382866,
+              "y": 2.76838455433919,
+              "z": -39.22011905641695,
+              "yaw": -0.36312759211409334
             }
           }
         },
@@ -1574,23 +1714,23 @@
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 193.3071383404241
+              "meanLuma": 193.2346437317343
             },
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 201.28509971469427
+              "meanLuma": 201.2613144932746
             },
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 207.0637061600942
+              "meanLuma": 207.07200493499823
             }
           ]
         },
         "報告文字（含模式）": {
           "ok": true,
-          "detail": "星願物語 Stage 6 P2-2 星芽原野 營地與胡蘿蔔園測試報告\n時間 2026/11/28 03:42:05\n網址參數 ?map=starsprout&quality=high&lod=hq\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 HQ：渲染畫質 high（解析度上限 2x、後製 開、陰影 柔和 PCSS 2048）／地圖 HQ／載入 1059 ms\n發光效果 修正後；診斷 無\n對照"
+          "detail": "星願物語 Stage 6 P2-2 星芽原野 營地與胡蘿蔔園測試報告\n時間 2026/11/28 05:05:15\n網址參數 ?map=starsprout&quality=high&lod=hq\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 HQ：渲染畫質 high（解析度上限 2x、後製 開、陰影 柔和 PCSS 2048）／地圖 HQ／載入 891 ms\n發光效果 修正後；診斷 無\n對照設"
         },
         "沒有 WebGL Context Lost": {
           "ok": true,
@@ -1624,14 +1764,14 @@
         "info": {
           "quality": "high",
           "lod": "hq",
-          "loadMs": 1059,
+          "loadMs": 891,
           "chunks": 16,
           "terrainVerts": 33856,
           "terrainTris": 64800,
-          "drawCalls": 98,
-          "activeMeshes": 67,
-          "trianglesActive": 488993.3333333333,
-          "meshes": 157,
+          "drawCalls": 85,
+          "activeMeshes": 51,
+          "trianglesActive": 283153.3333333333,
+          "meshes": 62,
           "materials": 18,
           "textures": 10,
           "labels": true,
@@ -1644,18 +1784,32 @@
               false
             ],
             "casters": 1,
-            "buildMs": 68
+            "buildMs": 55
           },
           "veg": {
             "trees": 502,
             "smalls": 566,
             "grass": 25105,
             "flowers": 4297,
-            "hiChunks": 4,
-            "grassCells": 13,
-            "flowerCells": 4,
-            "shadowChunks": 3,
-            "buildMs": 344,
+            "hiChunks": 29,
+            "grassCells": 1,
+            "flowerCells": 1,
+            "shadowChunks": 6,
+            "lod": {
+              "mode": "lod",
+              "hi": 29,
+              "mid": 86,
+              "lo": 697,
+              "culled": 256,
+              "grassShown": 1274,
+              "flowersShown": 398,
+              "tris": 152112,
+              "meshes": 17,
+              "casters": 6,
+              "drawnMeshes": 16,
+              "drawnTris": 150744
+            },
+            "buildMs": 240,
             "colliders": 794
           },
           "nav": false,
@@ -1686,14 +1840,14 @@
             "touches": 0
           },
           "stale": {
-            "dAlpha": 0.7800000000000002,
+            "dAlpha": 0.7800000000000007,
             "dRadius": 0,
             "touches": 0
           },
           "joystick": {
             "target": "hud-joystick-zone",
             "dAlpha": 0,
-            "moved": 2.6883116883116873
+            "moved": 2.944805194805199
           },
           "buttons": [
             "BUTTON",
@@ -1701,12 +1855,12 @@
           ],
           "pinch": {
             "r0": 9,
-            "r1": 5.00000029837558,
+            "r1": 5.000000100180607,
             "dAlpha": 0
           },
           "pitch": {
-            "beta": 0.550000010835528,
-            "aboveGround": 5.07017428606453
+            "beta": 0.5500000125841298,
+            "aboveGround": 5.054431556545335
           }
         },
         "cameraAvoid": {
@@ -1739,52 +1893,52 @@
             "maxStep": 0.08814188909741283
           },
           "drawCalls": {
-            "on": 73,
-            "off": 78
+            "on": 75,
+            "off": 76
           }
         },
         "route": {
           "st": {
             "phase": "running",
             "loop": 0,
-            "t": 5.1999999999999975,
+            "t": 6.199999999999994,
             "result": null
           },
           "pl": {
-            "x": -39.48778993398244,
-            "y": 2.425615083258566,
-            "z": -43.93393903975834,
-            "yaw": 0.6557580050865259
+            "x": -39.597158689382866,
+            "y": 2.76838455433919,
+            "z": -39.22011905641695,
+            "yaw": -0.36312759211409334
           }
         },
         "exposure": [
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 193.3071383404241
+            "meanLuma": 193.2346437317343
           },
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 201.28509971469427
+            "meanLuma": 201.2613144932746
           },
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 207.0637061600942
+            "meanLuma": 207.07200493499823
           }
         ],
         "after": {
           "quality": "high",
           "lod": "hq",
-          "loadMs": 1059,
+          "loadMs": 891,
           "chunks": 16,
           "terrainVerts": 33856,
           "terrainTris": 64800,
-          "drawCalls": 99,
-          "activeMeshes": 68,
-          "trianglesActive": 421917.3333333333,
-          "meshes": 157,
+          "drawCalls": 87,
+          "activeMeshes": 54,
+          "trianglesActive": 280461.3333333333,
+          "meshes": 62,
           "materials": 18,
           "textures": 10,
           "labels": true,
@@ -1797,18 +1951,32 @@
               true
             ],
             "casters": 1,
-            "buildMs": 68
+            "buildMs": 55
           },
           "veg": {
             "trees": 502,
             "smalls": 566,
             "grass": 25105,
             "flowers": 4297,
-            "hiChunks": 6,
-            "grassCells": 14,
-            "flowerCells": 6,
-            "shadowChunks": 4,
-            "buildMs": 344,
+            "hiChunks": 5,
+            "grassCells": 1,
+            "flowerCells": 1,
+            "shadowChunks": 6,
+            "lod": {
+              "mode": "lod",
+              "hi": 5,
+              "mid": 111,
+              "lo": 804,
+              "culled": 148,
+              "grassShown": 818,
+              "flowersShown": 138,
+              "tris": 136292,
+              "meshes": 17,
+              "casters": 6,
+              "drawnMeshes": 16,
+              "drawnTris": 136022
+            },
+            "buildMs": 240,
             "colliders": 794
           },
           "nav": false,
@@ -1866,7 +2034,7 @@
               false
             ],
             "casters": 0,
-            "buildMs": 70
+            "buildMs": 65
           }
         },
         "植被：樹 ≥ 400、草叢與花有建立": {
@@ -1876,11 +2044,25 @@
             "smalls": 566,
             "grass": 11457,
             "flowers": 2580,
-            "hiChunks": 4,
-            "grassCells": 9,
-            "flowerCells": 4,
+            "hiChunks": 8,
+            "grassCells": 1,
+            "flowerCells": 1,
             "shadowChunks": 0,
-            "buildMs": 238,
+            "lod": {
+              "mode": "lod",
+              "hi": 8,
+              "mid": 57,
+              "lo": 384,
+              "culled": 619,
+              "grassShown": 294,
+              "flowersShown": 130,
+              "tris": 77962,
+              "meshes": 16,
+              "casters": 0,
+              "drawnMeshes": 16,
+              "drawnTris": 77962
+            },
+            "buildMs": 187,
             "colliders": 794
           }
         },
@@ -1888,7 +2070,7 @@
           "ok": true,
           "detail": {
             "samples": 3568,
-            "distinctColors": 461,
+            "distinctColors": 453,
             "opaqueRatio": 1
           }
         },
@@ -1902,9 +2084,9 @@
               "yaw": 0.7266423406817256
             },
             "p1": {
-              "x": -49.33975251573006,
+              "x": -49.117190629722046,
               "y": 2,
-              "z": -56.50722158019633,
+              "z": -56.256839458437284,
               "yaw": 0.726642340681726
             },
             "ground": 2
@@ -1914,14 +2096,14 @@
           "ok": true,
           "detail": {
             "target": "CANVAS",
-            "dAlpha": -0.7800000000000007,
+            "dAlpha": -0.7800000000000002,
             "touches": 0
           }
         },
         "鏡頭：iOS 漏送 pointerup 後，下一次單指拖曳仍是旋轉（不會誤判成縮放）": {
           "ok": true,
           "detail": {
-            "dAlpha": 0.7800000000000002,
+            "dAlpha": 0.7800000000000007,
             "dRadius": 0,
             "touches": 0
           }
@@ -1931,7 +2113,7 @@
           "detail": {
             "target": "hud-joystick-zone",
             "dAlpha": 0,
-            "moved": 4.184780844155841
+            "moved": 4.070487012987002
           }
         },
         "鏡頭：技能鍵／面板按鈕不會觸發鏡頭（不是 canvas）": {
@@ -1945,15 +2127,15 @@
           "ok": true,
           "detail": {
             "r0": 9,
-            "r1": 5.000001209973528,
+            "r1": 5.00000073927594,
             "dAlpha": 0
           }
         },
         "鏡頭：俯角限制內、鏡頭不鑽進地面": {
           "ok": true,
           "detail": {
-            "beta": 0.5500000261129682,
-            "aboveGround": 4.972311327907848
+            "beta": 0.5500000145242627,
+            "aboveGround": 4.975360029677542
           }
         },
         "鏡頭避障：對照組（關閉）鏡頭維持 9 m（視線穿過帳篷）": {
@@ -1971,27 +2153,27 @@
         "鏡頭避障：帳篷擋住時鏡頭拉近、在帳篷外": {
           "ok": true,
           "detail": {
-            "radius": 3.3866979799261743,
+            "radius": 3.3866979860875435,
             "desired": 9,
             "allowed": 3.3866979762480427,
-            "horiz": 0.7860757066474279,
-            "coneR": 0.45865132459219593,
+            "horiz": 0.7860757008003816,
+            "coneR": 0.4586513236287104,
             "aboveTop": false
           }
         },
         "鏡頭避障：停住時距離不抖動（40 幀變化 < 2 公分）": {
           "ok": true,
-          "detail": 2.7316264805676838e-9
+          "detail": 7.462411133474234e-9
         },
         "鏡頭避障：轉開後平滑回到玩家設定距離、角度不重置": {
           "ok": true,
           "detail": {
             "dAlpha": -1.5600000000000005,
-            "start": 8.791567224783304,
+            "start": 8.680089667418699,
             "end": 9,
             "desired": 9,
             "maxDrop": 0,
-            "maxStep": 0.09781104248900618
+            "maxStep": 0.13717465099197312
           }
         },
         "溪流河道不可走、岸邊可走": {
@@ -2022,23 +2204,23 @@
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 193.67978237931476
+              "meanLuma": 193.9496651336246
             },
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 201.25321512994768
+              "meanLuma": 201.51029154701962
             },
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 207.84770989901835
+              "meanLuma": 207.78000196766902
             }
           ]
         },
         "報告文字（含模式）": {
           "ok": true,
-          "detail": "星願物語 Stage 6 P2-2 星芽原野 營地與胡蘿蔔園測試報告\n時間 2026/11/28 03:42:56\n網址參數 ?map=starsprout&quality=medium&lod=lite\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 Lite 中畫質：渲染畫質 medium（解析度上限 1.5x、後製 開、陰影 PCF 1024）／地圖 Lite／載入 915 ms\n發光效果 "
+          "detail": "星願物語 Stage 6 P2-2 星芽原野 營地與胡蘿蔔園測試報告\n時間 2026/11/28 05:06:02\n網址參數 ?map=starsprout&quality=medium&lod=lite\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 Lite 中畫質：渲染畫質 medium（解析度上限 1.5x、後製 開、陰影 PCF 1024）／地圖 Lite／載入 801 ms\n發光效果 "
         },
         "沒有 WebGL Context Lost": {
           "ok": true,
@@ -2071,14 +2253,14 @@
         "info": {
           "quality": "medium",
           "lod": "lite",
-          "loadMs": 915,
+          "loadMs": 801,
           "chunks": 16,
           "terrainVerts": 15376,
           "terrainTris": 28800,
-          "drawCalls": 86,
-          "activeMeshes": 63,
-          "trianglesActive": 284653.3333333333,
-          "meshes": 157,
+          "drawCalls": 74,
+          "activeMeshes": 51,
+          "trianglesActive": 128123.33333333333,
+          "meshes": 62,
           "materials": 18,
           "textures": 10,
           "labels": true,
@@ -2091,18 +2273,32 @@
               false
             ],
             "casters": 0,
-            "buildMs": 70
+            "buildMs": 65
           },
           "veg": {
             "trees": 502,
             "smalls": 566,
             "grass": 11457,
             "flowers": 2580,
-            "hiChunks": 4,
-            "grassCells": 9,
-            "flowerCells": 4,
+            "hiChunks": 8,
+            "grassCells": 1,
+            "flowerCells": 1,
             "shadowChunks": 0,
-            "buildMs": 238,
+            "lod": {
+              "mode": "lod",
+              "hi": 8,
+              "mid": 57,
+              "lo": 384,
+              "culled": 619,
+              "grassShown": 294,
+              "flowersShown": 130,
+              "tris": 77962,
+              "meshes": 16,
+              "casters": 0,
+              "drawnMeshes": 16,
+              "drawnTris": 77962
+            },
+            "buildMs": 187,
             "colliders": 794
           },
           "nav": false,
@@ -2129,18 +2325,18 @@
         "cameraTouch": {
           "rotate": {
             "target": "CANVAS",
-            "dAlpha": -0.7800000000000007,
+            "dAlpha": -0.7800000000000002,
             "touches": 0
           },
           "stale": {
-            "dAlpha": 0.7800000000000002,
+            "dAlpha": 0.7800000000000007,
             "dRadius": 0,
             "touches": 0
           },
           "joystick": {
             "target": "hud-joystick-zone",
             "dAlpha": 0,
-            "moved": 4.184780844155841
+            "moved": 4.070487012987002
           },
           "buttons": [
             "BUTTON",
@@ -2148,12 +2344,12 @@
           ],
           "pinch": {
             "r0": 9,
-            "r1": 5.000001209973528,
+            "r1": 5.00000073927594,
             "dAlpha": 0
           },
           "pitch": {
-            "beta": 0.5500000261129682,
-            "aboveGround": 4.972311327907848
+            "beta": 0.5500000145242627,
+            "aboveGround": 4.975360029677542
           }
         },
         "cameraAvoid": {
@@ -2169,55 +2365,55 @@
             "aboveTop": true
           },
           "on": {
-            "radius": 3.3866979799261743,
+            "radius": 3.3866979860875435,
             "desired": 9,
             "allowed": 3.3866979762480427,
-            "horiz": 0.7860757066474279,
-            "coneR": 0.45865132459219593,
+            "horiz": 0.7860757008003816,
+            "coneR": 0.4586513236287104,
             "aboveTop": false
           },
-          "jitter": 2.7316264805676838e-9,
+          "jitter": 7.462411133474234e-9,
           "recover": {
             "dAlpha": -1.5600000000000005,
-            "start": 8.791567224783304,
+            "start": 8.680089667418699,
             "end": 9,
             "desired": 9,
             "maxDrop": 0,
-            "maxStep": 0.09781104248900618
+            "maxStep": 0.13717465099197312
           },
           "drawCalls": {
-            "on": 61,
-            "off": 65
+            "on": 62,
+            "off": 63
           }
         },
         "exposure": [
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 193.67978237931476
+            "meanLuma": 193.9496651336246
           },
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 201.25321512994768
+            "meanLuma": 201.51029154701962
           },
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 207.84770989901835
+            "meanLuma": 207.78000196766902
           }
         ],
         "after": {
           "quality": "medium",
           "lod": "lite",
-          "loadMs": 915,
+          "loadMs": 801,
           "chunks": 16,
           "terrainVerts": 15376,
           "terrainTris": 28800,
-          "drawCalls": 86,
-          "activeMeshes": 64,
-          "trianglesActive": 252759.33333333334,
-          "meshes": 157,
+          "drawCalls": 74,
+          "activeMeshes": 52,
+          "trianglesActive": 164777.33333333334,
+          "meshes": 62,
           "materials": 18,
           "textures": 10,
           "labels": true,
@@ -2230,18 +2426,32 @@
               true
             ],
             "casters": 0,
-            "buildMs": 70
+            "buildMs": 65
           },
           "veg": {
             "trees": 502,
             "smalls": 566,
             "grass": 11457,
             "flowers": 2580,
-            "hiChunks": 4,
-            "grassCells": 10,
-            "flowerCells": 4,
+            "hiChunks": 0,
+            "grassCells": 1,
+            "flowerCells": 1,
             "shadowChunks": 0,
-            "buildMs": 238,
+            "lod": {
+              "mode": "lod",
+              "hi": 0,
+              "mid": 56,
+              "lo": 578,
+              "culled": 434,
+              "grassShown": 134,
+              "flowersShown": 31,
+              "tris": 80498,
+              "meshes": 14,
+              "casters": 0,
+              "drawnMeshes": 14,
+              "drawnTris": 80498
+            },
+            "buildMs": 187,
             "colliders": 794
           },
           "nav": false,
@@ -2299,7 +2509,7 @@
               false
             ],
             "casters": 0,
-            "buildMs": 70
+            "buildMs": 63
           }
         },
         "植被：樹 ≥ 400、草叢與花有建立": {
@@ -2309,11 +2519,25 @@
             "smalls": 566,
             "grass": 11457,
             "flowers": 2580,
-            "hiChunks": 4,
-            "grassCells": 9,
-            "flowerCells": 4,
+            "hiChunks": 8,
+            "grassCells": 1,
+            "flowerCells": 1,
             "shadowChunks": 0,
-            "buildMs": 255,
+            "lod": {
+              "mode": "lod",
+              "hi": 8,
+              "mid": 57,
+              "lo": 384,
+              "culled": 619,
+              "grassShown": 294,
+              "flowersShown": 130,
+              "tris": 77962,
+              "meshes": 16,
+              "casters": 0,
+              "drawnMeshes": 16,
+              "drawnTris": 77962
+            },
+            "buildMs": 159,
             "colliders": 794
           }
         },
@@ -2321,7 +2545,7 @@
           "ok": true,
           "detail": {
             "samples": 2479,
-            "distinctColors": 409,
+            "distinctColors": 408,
             "opaqueRatio": 1
           }
         },
@@ -2335,9 +2559,9 @@
               "yaw": 0.7266423406817256
             },
             "p1": {
-              "x": -49.70847444628071,
+              "x": -49.28660340862366,
               "y": 2,
-              "z": -56.92203375206569,
+              "z": -56.44742883470161,
               "yaw": 0.726642340681726
             },
             "ground": 2
@@ -2347,7 +2571,7 @@
           "ok": true,
           "detail": {
             "target": "CANVAS",
-            "dAlpha": -0.7800000000000002,
+            "dAlpha": -0.7799999999999994,
             "touches": 0
           }
         },
@@ -2364,7 +2588,7 @@
           "detail": {
             "target": "hud-joystick-zone",
             "dAlpha": 0,
-            "moved": 4.2612337662337705
+            "moved": 4.561810064935061
           }
         },
         "鏡頭：技能鍵／面板按鈕不會觸發鏡頭（不是 canvas）": {
@@ -2378,15 +2602,15 @@
           "ok": true,
           "detail": {
             "r0": 9,
-            "r1": 5.000000112964824,
+            "r1": 5.000000086039643,
             "dAlpha": 0
           }
         },
         "鏡頭：俯角限制內、鏡頭不鑽進地面": {
           "ok": true,
           "detail": {
-            "beta": 0.550000022994207,
-            "aboveGround": 4.9704081065905985
+            "beta": 0.55000000768468,
+            "aboveGround": 4.963907574735154
           }
         },
         "鏡頭避障：對照組（關閉）鏡頭維持 9 m（視線穿過帳篷）": {
@@ -2404,27 +2628,27 @@
         "鏡頭避障：帳篷擋住時鏡頭拉近、在帳篷外": {
           "ok": true,
           "detail": {
-            "radius": 3.386697976548757,
+            "radius": 3.3866979774314587,
             "desired": 9,
             "allowed": 3.3866979762480427,
-            "horiz": 0.7860757098525439,
-            "coneR": 0.4586513251203399,
+            "horiz": 0.7860757090148752,
+            "coneR": 0.4586513249823072,
             "aboveTop": false
           }
         },
         "鏡頭避障：停住時距離不抖動（40 幀變化 < 2 公分）": {
           "ok": true,
-          "detail": 2.1190915688862333e-10
+          "detail": 8.576166443674538e-10
         },
         "鏡頭避障：轉開後平滑回到玩家設定距離、角度不重置": {
           "ok": true,
           "detail": {
             "dAlpha": -1.5600000000000005,
-            "start": 8.824911966692186,
+            "start": 8.78270559821963,
             "end": 9,
             "desired": 9,
             "maxDrop": 0,
-            "maxStep": 0.08814188909741283
+            "maxStep": 0.09786169085346685
           }
         },
         "溪流河道不可走、岸邊可走": {
@@ -2455,23 +2679,23 @@
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 190.05222045783938
+              "meanLuma": 190.87024884754695
             },
             {
               "whiteAll": 0,
               "whiteCenter": 0,
-              "meanLuma": 199.12679389417164
+              "meanLuma": 199.59288303068098
             },
             {
-              "whiteAll": 0.004507390289662747,
+              "whiteAll": 0.004423496392562424,
               "whiteCenter": 0,
-              "meanLuma": 206.64346357195484
+              "meanLuma": 206.58308743595566
             }
           ]
         },
         "報告文字（含模式）": {
           "ok": true,
-          "detail": "星願物語 Stage 6 P2-2 星芽原野 營地與胡蘿蔔園測試報告\n時間 2026/11/28 03:43:58\n網址參數 ?map=starsprout&quality=low&lod=lite\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 Lite 低畫質：渲染畫質 low（解析度上限 1.25x、後製 關、陰影 PCF 512）／地圖 Lite／載入 899 ms\n發光效果 修正後；診斷"
+          "detail": "星願物語 Stage 6 P2-2 星芽原野 營地與胡蘿蔔園測試報告\n時間 2026/11/28 05:06:53\n網址參數 ?map=starsprout&quality=low&lod=lite\n裝置 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n模式 Lite 低畫質：渲染畫質 low（解析度上限 1.25x、後製 關、陰影 PCF 512）／地圖 Lite／載入 768 ms\n發光效果 修正後；診斷"
         },
         "沒有 WebGL Context Lost": {
           "ok": true,
@@ -2504,14 +2728,14 @@
         "info": {
           "quality": "low",
           "lod": "lite",
-          "loadMs": 899,
+          "loadMs": 768,
           "chunks": 16,
           "terrainVerts": 15376,
           "terrainTris": 28800,
-          "drawCalls": 79,
-          "activeMeshes": 63,
-          "trianglesActive": 284653.3333333333,
-          "meshes": 157,
+          "drawCalls": 67,
+          "activeMeshes": 51,
+          "trianglesActive": 128123.33333333333,
+          "meshes": 62,
           "materials": 18,
           "textures": 7,
           "labels": true,
@@ -2524,18 +2748,32 @@
               false
             ],
             "casters": 0,
-            "buildMs": 70
+            "buildMs": 63
           },
           "veg": {
             "trees": 502,
             "smalls": 566,
             "grass": 11457,
             "flowers": 2580,
-            "hiChunks": 4,
-            "grassCells": 9,
-            "flowerCells": 4,
+            "hiChunks": 8,
+            "grassCells": 1,
+            "flowerCells": 1,
             "shadowChunks": 0,
-            "buildMs": 255,
+            "lod": {
+              "mode": "lod",
+              "hi": 8,
+              "mid": 57,
+              "lo": 384,
+              "culled": 619,
+              "grassShown": 294,
+              "flowersShown": 130,
+              "tris": 77962,
+              "meshes": 16,
+              "casters": 0,
+              "drawnMeshes": 16,
+              "drawnTris": 77962
+            },
+            "buildMs": 159,
             "colliders": 794
           },
           "nav": false,
@@ -2562,7 +2800,7 @@
         "cameraTouch": {
           "rotate": {
             "target": "CANVAS",
-            "dAlpha": -0.7800000000000002,
+            "dAlpha": -0.7799999999999994,
             "touches": 0
           },
           "stale": {
@@ -2573,7 +2811,7 @@
           "joystick": {
             "target": "hud-joystick-zone",
             "dAlpha": 0,
-            "moved": 4.2612337662337705
+            "moved": 4.561810064935061
           },
           "buttons": [
             "BUTTON",
@@ -2581,12 +2819,12 @@
           ],
           "pinch": {
             "r0": 9,
-            "r1": 5.000000112964824,
+            "r1": 5.000000086039643,
             "dAlpha": 0
           },
           "pitch": {
-            "beta": 0.550000022994207,
-            "aboveGround": 4.9704081065905985
+            "beta": 0.55000000768468,
+            "aboveGround": 4.963907574735154
           }
         },
         "cameraAvoid": {
@@ -2602,55 +2840,55 @@
             "aboveTop": true
           },
           "on": {
-            "radius": 3.386697976548757,
+            "radius": 3.3866979774314587,
             "desired": 9,
             "allowed": 3.3866979762480427,
-            "horiz": 0.7860757098525439,
-            "coneR": 0.4586513251203399,
+            "horiz": 0.7860757090148752,
+            "coneR": 0.4586513249823072,
             "aboveTop": false
           },
-          "jitter": 2.1190915688862333e-10,
+          "jitter": 8.576166443674538e-10,
           "recover": {
             "dAlpha": -1.5600000000000005,
-            "start": 8.824911966692186,
+            "start": 8.78270559821963,
             "end": 9,
             "desired": 9,
             "maxDrop": 0,
-            "maxStep": 0.08814188909741283
+            "maxStep": 0.09786169085346685
           },
           "drawCalls": {
-            "on": 54,
-            "off": 58
+            "on": 55,
+            "off": 56
           }
         },
         "exposure": [
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 190.05222045783938
+            "meanLuma": 190.87024884754695
           },
           {
             "whiteAll": 0,
             "whiteCenter": 0,
-            "meanLuma": 199.12679389417164
+            "meanLuma": 199.59288303068098
           },
           {
-            "whiteAll": 0.004507390289662747,
+            "whiteAll": 0.004423496392562424,
             "whiteCenter": 0,
-            "meanLuma": 206.64346357195484
+            "meanLuma": 206.58308743595566
           }
         ],
         "after": {
           "quality": "low",
           "lod": "lite",
-          "loadMs": 899,
+          "loadMs": 768,
           "chunks": 16,
           "terrainVerts": 15376,
           "terrainTris": 28800,
-          "drawCalls": 79,
-          "activeMeshes": 64,
-          "trianglesActive": 252759.33333333334,
-          "meshes": 157,
+          "drawCalls": 67,
+          "activeMeshes": 52,
+          "trianglesActive": 164777.33333333334,
+          "meshes": 62,
           "materials": 18,
           "textures": 7,
           "labels": true,
@@ -2663,18 +2901,32 @@
               true
             ],
             "casters": 0,
-            "buildMs": 70
+            "buildMs": 63
           },
           "veg": {
             "trees": 502,
             "smalls": 566,
             "grass": 11457,
             "flowers": 2580,
-            "hiChunks": 4,
-            "grassCells": 10,
-            "flowerCells": 4,
+            "hiChunks": 0,
+            "grassCells": 1,
+            "flowerCells": 1,
             "shadowChunks": 0,
-            "buildMs": 255,
+            "lod": {
+              "mode": "lod",
+              "hi": 0,
+              "mid": 56,
+              "lo": 578,
+              "culled": 434,
+              "grassShown": 134,
+              "flowersShown": 31,
+              "tris": 80498,
+              "meshes": 14,
+              "casters": 0,
+              "drawnMeshes": 14,
+              "drawnTris": 80498
+            },
+            "buildMs": 159,
             "colliders": 794
           },
           "nav": false,
@@ -2702,6 +2954,6 @@
       "ok": true
     }
   ],
-  "finishedAt": "2026-11-28T03:43:58.206Z",
+  "finishedAt": "2026-11-28T05:06:53.984Z",
   "failures": 0
 }
