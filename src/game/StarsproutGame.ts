@@ -61,12 +61,13 @@ import { FieldCombatFx } from "./fieldCombatFx.ts";
 import { contactShadowQuality, renderExperimentsFromSearch } from "../render/renderExperiments.ts";
 import { type DetailTier, detailFor, pickTier, sphereInFrustum } from "./monsterDetail.ts";
 import { FieldKnockback } from "./fieldKnockback.ts";
+import { buildStaff, buildSword, type WeaponRig } from "../combat-vfx/weapons.ts";
 import { FieldTerrainQuery } from "./fieldTerrainQuery.ts";
 import { isAggressive } from "../monsters/framework/types.ts";
 import { defaultAppearance } from "../core/gameSave.ts";
 import { FIELD_RIGGED_SPAWNS } from "../monsters/rigged/riggedSpec.ts";
 import { riggedAssetAvailable, RiggedMonsterVisual } from "../monsters/rigged/RiggedMonsterVisual.ts";
-import { NOVICE_VERSION } from "./noviceVersion.ts";
+import { noviceVersionFor } from "./noviceVersion.ts";
 import { FIELD_CAMP_ARRIVAL } from "../maps/village/mapLinks.ts";
 import { PortalTrigger } from "./portalTrigger.ts";
 import { FIELD_CAMP_PORTAL } from "./worldPortals.ts";
@@ -100,7 +101,7 @@ export interface PlayApi {
     lod: NoviceLod;
     file: string;
     /** Stage 7.2：角色模型（新版 Tripo 模組化／上一版） */
-    avatarModel: { modular: boolean; weapon: string | null; bones: number; triangles: number; parts: { kind: string; file: string; meshes: number; remapped: boolean }[]; clips: string[]; attackClips: string[] };
+    avatarModel: { modular: boolean; weapon: string | null; bones: number; triangles: number; parts: { kind: string; file: string; meshes: number; remapped: boolean }[]; clips: string[]; attackClips: string[]; allClips: string[]; version: string; sockets: { R: boolean; L: boolean }; secondary: string[]; loco: string };
     state: string;
     pos: number[];
     hp: number;
@@ -136,6 +137,11 @@ export interface PlayApi {
   toZone01(): void;
   /** 測試用：玩家生命回滿（解除倒地以外的狀態不變） */
   heal(): void;
+  /** Stage 7.5：武器掛載測試（Claude C 展示武器）；回傳掛點與手骨世界座標 */
+  weaponTest(kind: "sword" | "staff" | null, hand?: "R" | "L"): { attached: boolean; socket: number[] | null; hand: number[] | null; dist: number | null };
+  setAttackStyle(style: string): boolean;
+  previewClip(name: string): boolean;
+  secondary(): Record<string, { pitch: number; roll: number }>;
   /** 測試用（Stage 7.4 持續普攻測試）：設定某隻怪物的血量（不改上限、不影響其他規則） */
   setMonsterHp(id: string, hp: number): boolean;
   pet: {
@@ -193,7 +199,7 @@ class StarsproutGame {
   private lod: NoviceLod & MapLod = this.params.get("lod") === "lite" ? "lite" : "hq";
   private readonly charShadow: CharShadowMode = this.params.get("charshadow") === "realtime" ? "realtime" : "blob";
   private readonly p3 = this.params.get("p3") !== "0";
-  private version = this.params.get("ver") === "c10b5" ? "c10b5" : "c10b5a";
+  private version: string = this.params.get("ver") === "c10b5" ? "c10b5" : "c10b5a";
   /** Stage 7 完整遊戲的共用存檔（null = Stage 5.6 測試頁） */
   private readonly ws: WorldSession | null;
   private wpanel: WorldPanel | null = null;
@@ -294,7 +300,7 @@ class StarsproutGame {
     this.ws = ws;
     if (ws) {
       this.gender = ws.gender;
-      this.version = NOVICE_VERSION;
+      this.version = noviceVersionFor(this.gender, this.params);
       this.lod = pickModelLod(this.params);
     }
     const base = pickQuality();
@@ -480,6 +486,7 @@ class StarsproutGame {
       ? await NoviceAvatar.loadModular(scene, { gender: this.gender, lod: this.lod, baseUrl: modelsUrl, appearance: this.ws?.save.character.appearance ?? defaultAppearance() })
       : await NoviceAvatar.load(scene, { gender: this.gender, lod: this.lod, baseUrl: `${import.meta.env.BASE_URL}models/`, version: this.version });
     this.avatar.setupShadow(this.charShadow, scene, this.shadows);
+    this.setupStage75(scene);
     const sky = scene.getMeshByName("PH_skyDome");
     if (sky) {
       const probe = new ReflectionProbe("playEnv", 128, scene, true, true);
@@ -970,6 +977,60 @@ class StarsproutGame {
     }
   }
 
+  // ---------------- Stage 7.5：新版男性初心者驗收工具 ----------------
+  private testWeapon: WeaponRig | null = null;
+
+  /** &weapon=sword|staff：手上拿展示武器（Claude C 程式建模，不是正式裝備美術）；&atk=<類型>：普通攻擊動作；&anim=1：動作預覽面板 */
+  private setupStage75(scene: Scene): void {
+    const w = this.params.get("weapon");
+    if (w === "sword" || w === "staff") this.equipTestWeapon(w, "R");
+    const atk = this.params.get("atk");
+    if (atk) this.avatar.setAttackStyle(atk);
+    if (this.params.get("anim") === "1" && this.avatar.clips.size) this.buildClipPanel();
+    void scene;
+  }
+
+  equipTestWeapon(kind: "sword" | "staff" | null, hand: "R" | "L"): { attached: boolean; socket: number[] | null; hand: number[] | null; dist: number | null } {
+    if (this.testWeapon) {
+      for (const m of this.testWeapon.meshes) m.dispose();
+      this.testWeapon.root.dispose();
+      this.testWeapon = null;
+    }
+    if (!kind) return { attached: false, socket: null, hand: null, dist: null };
+    const rig = kind === "sword" ? buildSword(this.scene, "test75") : buildStaff(this.scene, "test75");
+    const ok = this.avatar.attachWeapon(rig.root, hand);
+    if (!ok) {
+      for (const m of rig.meshes) m.dispose();
+      rig.root.dispose();
+      return { attached: false, socket: null, hand: null, dist: null };
+    }
+    this.testWeapon = rig;
+    for (const m of rig.meshes) m.isPickable = false;
+    const sk = this.avatar.sockets[hand]!;
+    sk.computeWorldMatrix(true);
+    const sp = sk.getAbsolutePosition();
+    const hb = this.avatar.skinnedRef?.skeleton?.bones.find((b) => b.name === `${hand}_Hand`);
+    const hp = hb && this.avatar.skinnedRef ? hb.getAbsolutePosition(this.avatar.skinnedRef) : null;
+    return { attached: true, socket: [sp.x, sp.y, sp.z], hand: hp ? [hp.x, hp.y, hp.z] : null, dist: hp ? Vector3.Distance(sp, hp) : null };
+  }
+
+  private buildClipPanel(): void {
+    const box = document.createElement("div");
+    box.style.cssText = "position:absolute;left:8px;top:56px;max-height:60vh;overflow:auto;z-index:40;display:flex;flex-direction:column;gap:4px;background:rgba(20,26,60,.72);padding:6px;border-radius:10px;font:12px -apple-system,'PingFang TC',sans-serif";
+    const title = document.createElement("div");
+    title.textContent = "動作預覽（Stage 7.5）";
+    title.style.cssText = "color:#fbf6ea;font-weight:700;padding:2px 4px";
+    box.appendChild(title);
+    for (const name of [...this.avatar.clips.keys()].sort()) {
+      const b = document.createElement("button");
+      b.textContent = name;
+      b.style.cssText = "pointer-events:auto;padding:6px 8px;border:0;border-radius:8px;background:#e8c46e;color:#2a2340;text-align:left";
+      b.onclick = () => this.avatar.previewClip(name);
+      box.appendChild(b);
+    }
+    this.hudRoot.appendChild(box);
+  }
+
   // ---------------- 介面 ----------------
   private buildPanel(): void {
     const toggle = document.createElement("button");
@@ -1273,7 +1334,7 @@ class StarsproutGame {
           gender: self.gender,
           lod: self.lod,
           file: self.avatar.file,
-          avatarModel: { modular: self.avatar.parts.length > 0, weapon: self.avatar.weapon, bones: self.avatar.bones, triangles: self.avatar.triangles, parts: self.avatar.parts.map((x) => ({ kind: x.kind, file: x.file, meshes: x.meshes.length, remapped: x.remapped })), clips: [...self.avatar.groups.keys()], attackClips: [...self.avatar.attackClips.keys()] },
+          avatarModel: { modular: self.avatar.parts.length > 0, weapon: self.avatar.weapon, bones: self.avatar.bones, triangles: self.avatar.triangles, parts: self.avatar.parts.map((x) => ({ kind: x.kind, file: x.file, meshes: x.meshes.length, remapped: x.remapped })), clips: [...self.avatar.groups.keys()], attackClips: [...self.avatar.attackClips.keys()], allClips: [...self.avatar.clips.keys()], version: self.avatar.version, sockets: { R: !!self.avatar.sockets.R, L: !!self.avatar.sockets.L }, secondary: self.avatar.secondaryBones, loco: self.avatar.loco },
           state: self.avatar.state,
           pos: [self.pos.x, self.pos.y, self.pos.z],
           hp: self.combat.hp,
@@ -1333,6 +1394,11 @@ class StarsproutGame {
       press: (a) => (a === "attack" ? void self.tryAttack(false) : (self.pending.jump = true)),
       teleport: (x, z) => self.teleport(x, z),
       toZone01: () => self.toZone01(),
+      // Stage 7.5 驗收／測試：武器掛載、攻擊動作類型、動作預覽
+      weaponTest: (kind: "sword" | "staff" | null, hand: "R" | "L" = "R") => self.equipTestWeapon(kind, hand),
+      setAttackStyle: (style: string) => self.avatar.setAttackStyle(style),
+      previewClip: (name: string) => self.avatar.previewClip(name),
+      secondary: () => self.avatar.secondaryState(),
       heal: () => {
         if (!self.combat.isDown) self.combat.hp = self.combat.tuning.maxHp;
       },

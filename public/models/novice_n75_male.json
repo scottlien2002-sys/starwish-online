@@ -1,0 +1,275 @@
+{
+ "version": "n75",
+ "note": "Stage 7.5 新版男性初心者（Tripo 模型＋蒙皮修正＋重定向／程式化動作）",
+ "files": {
+  "hq": "novice_n75_male_hq.glb",
+  "lite": "novice_n75_male_lite.glb"
+ },
+ "clips": {
+  "Idle": {
+   "seconds": 3,
+   "loop": true,
+   "marks": {}
+  },
+  "Run": {
+   "seconds": 0.7333333333333333,
+   "loop": true,
+   "marks": {}
+  },
+  "Attack": {
+   "seconds": 0.6333333333333333,
+   "loop": false,
+   "marks": {
+    "hit": 0.25333333333333335
+   }
+  },
+  "Hurt": {
+   "seconds": 0.6333333333333333,
+   "loop": false,
+   "marks": {}
+  },
+  "Death": {
+   "seconds": 2,
+   "loop": false,
+   "marks": {}
+  },
+  "Jump": {
+   "seconds": 1.2666666666666666,
+   "loop": false,
+   "marks": {}
+  },
+  "Skill_TripleSlash": {
+   "seconds": 1.5,
+   "loop": false,
+   "marks": {
+    "hit1": 0.17,
+    "hit2": 0.5,
+    "hit3": 0.92,
+    "trail1": [
+     0.1,
+     0.27
+    ],
+    "trail2": [
+     0.4,
+     0.6
+    ],
+    "trail3": [
+     0.82,
+     1.04
+    ],
+    "wave": 0.9
+   }
+  },
+  "Skill_StaffCast": {
+   "seconds": 1.3,
+   "loop": false,
+   "marks": {
+    "circle": 0.05,
+    "gather": [
+     0.12,
+     0.55
+    ],
+    "release": 0.58
+   }
+  },
+  "Skill_LeapSlam": {
+   "seconds": 1.5,
+   "loop": false,
+   "marks": {
+    "takeoff": 0.28,
+    "apex": 0.54,
+    "hit": 0.8,
+    "trail": [
+     0.6,
+     0.84
+    ],
+    "land": 0.8
+   }
+  },
+  "Skill_Whirlwind": {
+   "seconds": 1.6,
+   "loop": false,
+   "marks": {
+    "hit1": 0.48,
+    "hit2": 0.76,
+    "hit3": 1.04,
+    "trail": [
+     0.22,
+     1.3
+    ]
+   }
+  },
+  "Skill_StarMeteor": {
+   "seconds": 1.7,
+   "loop": false,
+   "marks": {
+    "circle": 0.08,
+    "release": 0.72,
+    "impact": 1.2
+   }
+  },
+  "Skill_ChargeBurst": {
+   "seconds": 2.1,
+   "loop": false,
+   "marks": {
+    "charge": [
+     0.05,
+     1.1
+    ],
+    "release": 1.1,
+    "hit": 1.22,
+    "trail": [
+     1.08,
+     1.32
+    ]
+   }
+  },
+  "Walk": {
+   "seconds": 1.1666666666666667,
+   "loop": true,
+   "marks": {}
+  },
+  "Wait": {
+   "seconds": 4,
+   "loop": true,
+   "marks": {}
+  },
+  "Attack_Unarmed": {
+   "seconds": 0.6333333333333333,
+   "loop": false,
+   "marks": {
+    "hit": 0.248
+   }
+  },
+  "Attack_1H_Chop": {
+   "seconds": 0.6333333333333333,
+   "loop": false,
+   "marks": {
+    "hit": 0.248
+   }
+  },
+  "Attack_1H_Thrust": {
+   "seconds": 0.6333333333333333,
+   "loop": false,
+   "marks": {
+    "hit": 0.248
+   }
+  },
+  "Attack_2H_Slash": {
+   "seconds": 0.6333333333333333,
+   "loop": false,
+   "marks": {
+    "hit": 0.248
+   }
+  },
+  "Attack_2H_Smash": {
+   "seconds": 0.7333333333333333,
+   "loop": false,
+   "marks": {
+    "hit": 0.34
+   }
+  },
+  "Attack_Polearm_Thrust": {
+   "seconds": 0.6333333333333333,
+   "loop": false,
+   "marks": {
+    "hit": 0.248
+   }
+  },
+  "Attack_Polearm_Swing": {
+   "seconds": 0.8,
+   "loop": false,
+   "marks": {
+    "hit": 0.38
+   }
+  },
+  "Attack_Hammer_Smash": {
+   "seconds": 0.8,
+   "loop": false,
+   "marks": {
+    "hit": 0.42
+   }
+  },
+  "Cast_Staff": {
+   "seconds": 0.6333333333333333,
+   "loop": false,
+   "marks": {
+    "release": 0.248
+   }
+  },
+  "Cast_Heal": {
+   "seconds": 0.9,
+   "loop": false,
+   "marks": {
+    "release": 0.5
+   }
+  },
+  "Attack_Throw": {
+   "seconds": 0.6333333333333333,
+   "loop": false,
+   "marks": {
+    "release": 0.248
+   }
+  },
+  "Block": {
+   "seconds": 0.4,
+   "loop": false,
+   "marks": {
+    "guard": 0.18
+   }
+  },
+  "Jump_Land": {
+   "seconds": 0.4,
+   "loop": false,
+   "marks": {
+    "land": 0
+   }
+  }
+ },
+ "sockets": [
+  {
+   "name": "Weapon_R",
+   "parent": "R_Hand",
+   "axes": "+Y 刀身／杖身方向、+Z 手指方向、+X 掌心法線"
+  },
+  {
+   "name": "Weapon_L",
+   "parent": "L_Hand",
+   "axes": "+Y 刀身／杖身方向、+Z 手指方向、+X 掌心法線"
+  }
+ ],
+ "helpers": [
+  {
+   "name": "Hair_Back",
+   "parent": "Head"
+  },
+  {
+   "name": "Hood",
+   "parent": "Spine02"
+  },
+  {
+   "name": "Hem_F",
+   "parent": "Pelvis"
+  },
+  {
+   "name": "Hem_B",
+   "parent": "Pelvis"
+  }
+ ],
+ "stats": {
+  "hq": {
+   "file": "out/glb/novice_n75_male_hq.glb",
+   "bytes": 4160888,
+   "triangles": 9609,
+   "joints": 82,
+   "clips": 27
+  },
+  "lite": {
+   "file": "out/glb/novice_n75_male_lite.glb",
+   "bytes": 1878612,
+   "triangles": 9609,
+   "joints": 82,
+   "clips": 27
+  }
+ }
+}

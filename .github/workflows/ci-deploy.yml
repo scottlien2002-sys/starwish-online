@@ -85,7 +85,7 @@ jobs:
             (cd "/tmp/pages/$DIR/models" 2>/dev/null && rm -f novice_c10b_*.glb novice_c10b1_*.glb novice_c10b2_*.glb novice_c10b3_*.glb novice_c10b4_*.glb novice_c10b5_*.glb village-p3/*_s62.glb village-p3/p30_sample_*.glb) || true
             node tools/shared-assets.mjs preserve-restore /tmp/pages "$DIR" /tmp/keep-assets
             # 版本化共用資產（/shared-assets/v1/<sha1>，已發布不覆寫）：A 的預覽先行（2026-11-28 使用者核准）
-            case "$DIR" in preview-stage73-world|preview-stage74-perf)
+            case "$DIR" in preview-stage73-world|preview-stage74-perf|preview-stage75-novice)
               node tools/shared-assets.mjs publish /tmp/pages "$DIR"
               node tools/shared-assets.mjs verify /tmp/pages || { echo "::error::共用資產檢查失敗，取消發布"; exit 1; } ;;
             esac

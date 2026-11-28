@@ -26,7 +26,7 @@ import { PortalTrigger } from "./portalTrigger.ts";
 import { VILLAGE_SOUTH_PORTAL } from "./worldPortals.ts";
 import { FIELD_TEST } from "./fieldRules.ts";
 import { combatTuningFromStats } from "./fieldRules.ts";
-import { NOVICE_VERSION } from "./noviceVersion.ts";
+import { noviceVersionFor } from "./noviceVersion.ts";
 
 /**
  * Stage 7：星芽村（完整遊戲循環的起點）。?play=world
@@ -204,7 +204,7 @@ class VillageGame {
     const useNew = this.params.get("nv72") === "1" && (await modularAvailable(modelsUrl, w.gender, this.lod));
     this.avatar = useNew
       ? await NoviceAvatar.loadModular(scene, { gender: w.gender, lod: this.lod, baseUrl: modelsUrl, appearance: w.save.character.appearance })
-      : await NoviceAvatar.load(scene, { gender: w.gender, lod: this.lod, baseUrl: `${import.meta.env.BASE_URL}models/`, version: NOVICE_VERSION });
+      : await NoviceAvatar.load(scene, { gender: w.gender, lod: this.lod, baseUrl: `${import.meta.env.BASE_URL}models/`, version: noviceVersionFor(w.gender, this.params) });
     this.avatar.setupShadow(this.charShadow, scene, this.shadows);
     const sky = scene.getMeshByName("PH_skyDome");
     if (sky) {

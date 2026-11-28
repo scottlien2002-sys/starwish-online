@@ -244,6 +244,30 @@ for (const name of browsers) {
       check("原野與村莊用同一個角色模型（C1.0-B5b，沒有變回其他版本）", fp.avatarModel?.modular === false && fp.file === vi.file, { village: vi.file, field: fp.file });
       check("切換地圖後寵物仍裝備、在頭部側邊 15～25 cm", fi.pets.length >= 1 && fi.petGap >= 0.15 && fi.petGap <= 0.25, { gap: fi.petGap, pets: fi.pets });
       await shot("field_arrive");
+      // ---------- Stage 7.5：新版男性初心者 ----------
+      if (g === "male") {
+        const am75 = fp.avatarModel;
+        check("Stage 7.5：男性使用新版初心者（n75）、HQ／Lite 對應檔案，27 段動作、雙手武器掛點、頭髮／兜帽次級動態", am75?.version === "n75" && /novice_n75_male_(hq|lite)\.glb/.test(fp.file) && am75.allClips.length >= 27 && ["Walk", "Wait", "Attack_Unarmed", "Attack_2H_Smash", "Cast_Heal", "Block", "Jump_Land"].every((c) => am75.allClips.includes(c)) && am75.sockets.R && am75.sockets.L && am75.secondary.includes("Hair_Back") && am75.secondary.includes("Hood"), { file: fp.file, am75 });
+        const wt = await V(() => window.__starwishPlay.weaponTest("sword", "R"));
+        check("Stage 7.5：右手掛上展示短劍（掛點在右手骨附近 8 cm 內）", wt.attached && wt.dist !== null && wt.dist < 0.08, wt);
+        const wl = await V(() => window.__starwishPlay.weaponTest("staff", "L"));
+        check("Stage 7.5：左手掛點可用（法杖）", wl.attached && wl.dist !== null && wl.dist < 0.08, wl);
+        await V(() => window.__starwishPlay.weaponTest("sword", "R"));
+        const styles = await V(() => ["twoHandSmash", "polearm", "staff", "oneHand"].map((s) => window.__starwishPlay.setAttackStyle(s)));
+        check("Stage 7.5：依武器類型切換普通攻擊動作（雙手重擊、長柄突刺、法杖、單手）", styles.every(Boolean), styles);
+        // 動作預覽：重擊（截圖）
+        await V(() => window.__starwishPlay.previewClip("Attack_2H_Smash"));
+        await wait(300);
+        await shot("n75_preview_smash");
+        await wait(800);
+        await V(() => window.__starwishPlay.previewClip("Attack_1H_Chop"));
+        await wait(250);
+        await shot("n75_sword_chop");
+        await wait(800);
+        const sec = await V(() => window.__starwishPlay.secondary());
+        check("Stage 7.5：次級動態數值有限且在上限內", Object.values(sec).every((v) => Number.isFinite(v.pitch) && Math.abs(v.pitch) <= 0.23 && Math.abs(v.roll) <= 0.23), sec);
+        await V(() => window.__starwishPlay.weaponTest(null, "R"));
+      }
       // ---------- Stage 7.3：七種怪物 ----------
       const fm = fp.fieldMonsters ?? [];
       const mk = {};
