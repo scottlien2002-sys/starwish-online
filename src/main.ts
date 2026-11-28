@@ -213,4 +213,8 @@ function main(): void {
   }
 }
 
-main();
+// Stage 7.4：預覽站共用其他預覽資料夾的大型模型（asset-remap.json；本機與一般建置為空清單）→ 所有頁面開機前先設定
+void import("./core/assetRemap.ts")
+  .then((m) => m.installAssetRemap())
+  .catch(() => 0)
+  .then(() => main());
