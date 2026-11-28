@@ -1,0 +1,1086 @@
+{
+  "startedAt": "2026-11-28T02:56:04.234Z",
+  "browser": "chromium",
+  "benchSeconds": 45,
+  "note": "CI 軟體繪製，不是 iPhone；只比較相對變化",
+  "runs": [
+    {
+      "label": "old_c10b5b_hq",
+      "url": "&nv=c10b5b&lod=hq",
+      "ok": true,
+      "bench": {
+        "seconds": 45.5,
+        "avgFps": 1.0106180808362641,
+        "low1Fps": 0.6974473427256228,
+        "minFps": 0.6974473427256228,
+        "avgDraw": 128.34782608695653,
+        "kills": 2,
+        "contextLost": 0,
+        "first30": 0.9844134536505333,
+        "last30": 1.0491356106133183,
+        "quality": "high",
+        "gender": "male",
+        "lod": "hq",
+        "charShadow": "blob"
+      },
+      "info": {
+        "monsters": 27,
+        "tiers": {
+          "on": true,
+          "near": 6,
+          "mid": 0,
+          "far": 0,
+          "hidden": 0,
+          "offscreen": 21
+        },
+        "file": "novice_c10b5b_male_hq.glb",
+        "avatarTriangles": 199965,
+        "avatarBones": 17
+      },
+      "session": {
+        "seconds": 49.7,
+        "frames": 49,
+        "avgFps": 1,
+        "low1": 0.6,
+        "minFps": 0.6,
+        "hitches": 49,
+        "pixelRatio": 1,
+        "quality": "high",
+        "model": "HQ",
+        "map": "星芽原野",
+        "hitchRule": "卡頓＝單幀超過 50 ms（低於 20 FPS）；另列 >33 ms、>100 ms",
+        "frames33": 49,
+        "frames100": 49,
+        "drawCalls": {
+          "avg": 129,
+          "max": 146
+        },
+        "triangles": {
+          "avgK": 788,
+          "maxK": 806
+        },
+        "cpuMs": {
+          "frame": 8.64,
+          "render": 4.45,
+          "animations": 0.42,
+          "activeMeshes": 1.63,
+          "renderTargets": 0.6
+        },
+        "memory": {
+          "jsHeapMB": 134.7,
+          "meshes": 303,
+          "materials": 99,
+          "textures": 119,
+          "gpuTextures": 74,
+          "textureMB": 127,
+          "skeletons": 22,
+          "animationGroups": 153,
+          "particleSystems": 3
+        },
+        "extra": {
+          "monsterDetail": {
+            "near": 6,
+            "mid": 0,
+            "far": 0,
+            "hidden": 0,
+            "offscreen": 21
+          },
+          "monsters": 27,
+          "shadow": "PCSS 2048（取樣 中）",
+          "shadowCasters": 10,
+          "fx": {
+            "hitFx": 6,
+            "numbers": 8,
+            "hurt": 2,
+            "respawnFx": 0,
+            "particles": 0
+          }
+        },
+        "heavy": {
+          "meshes": [
+            {
+              "name": "PH_vegHi",
+              "triK": 144.3,
+              "instances": 5,
+              "skinned": false
+            },
+            {
+              "name": "PH_flowers",
+              "triK": 69.3,
+              "instances": 2475,
+              "skinned": false
+            },
+            {
+              "name": "PH_grass",
+              "triK": 54,
+              "instances": 4497,
+              "skinned": false
+            },
+            {
+              "name": "hair__male_hair",
+              "triK": 46.8,
+              "instances": 1,
+              "skinned": true
+            },
+            {
+              "name": "PH_vegLo",
+              "triK": 42.2,
+              "instances": 7,
+              "skinned": false
+            },
+            {
+              "name": "Body_high",
+              "triK": 35,
+              "instances": 5,
+              "skinned": false
+            },
+            {
+              "name": "face__face_male",
+              "triK": 24.9,
+              "instances": 1,
+              "skinned": true
+            },
+            {
+              "name": "outfit__male_tabard",
+              "triK": 17.8,
+              "instances": 1,
+              "skinned": true
+            },
+            {
+              "name": "body__male_skin",
+              "triK": 17.5,
+              "instances": 1,
+              "skinned": true
+            },
+            {
+              "name": "PH_mapGround_2",
+              "triK": 16.2,
+              "instances": 4,
+              "skinned": false
+            },
+            {
+              "name": "PH_mapGround_3",
+              "triK": 16.2,
+              "instances": 4,
+              "skinned": false
+            },
+            {
+              "name": "feet__male_boot",
+              "triK": 15.9,
+              "instances": 1,
+              "skinned": true
+            }
+          ],
+          "textures": [
+            {
+              "name": "sun_shadowMap",
+              "size": "2048x2048",
+              "mb": 21.3
+            },
+            {
+              "name": "face_male (Base Color)",
+              "size": "2048x2048",
+              "mb": 21.3
+            },
+            {
+              "name": "M004_WindfeatherFox_Mat (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M004_WindfeatherFox_Mat (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M005_NebulaSheep_Mat (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M005_NebulaSheep_Mat (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M003_CloudFluffBird_Mat (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M003_CloudFluffBird_Mat (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M002_MossHornBeast_Mat (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M002_MossHornBeast_Mat (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "m006_carrot_king_Mat (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "m006_carrot_king_Mat (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            }
+          ]
+        }
+      },
+      "errors": []
+    },
+    {
+      "label": "n75_hq",
+      "url": "&lod=hq",
+      "ok": true,
+      "bench": {
+        "seconds": 45.7,
+        "avgFps": 1.33437166407084,
+        "low1Fps": 1.2074378169524524,
+        "minFps": 1.2074378169524524,
+        "avgDraw": 101.24590163934427,
+        "kills": 2,
+        "contextLost": 0,
+        "first30": 1.3147515119642386,
+        "last30": 1.3526799559224283,
+        "quality": "high",
+        "gender": "male",
+        "lod": "hq",
+        "charShadow": "blob"
+      },
+      "info": {
+        "monsters": 27,
+        "tiers": {
+          "on": true,
+          "near": 5,
+          "mid": 0,
+          "far": 0,
+          "hidden": 0,
+          "offscreen": 22
+        },
+        "file": "novice_n75_male_hq.glb",
+        "avatarTriangles": 9609,
+        "avatarBones": 82
+      },
+      "session": {
+        "seconds": 49.2,
+        "frames": 65,
+        "avgFps": 1.3,
+        "low1": 1,
+        "minFps": 1,
+        "hitches": 65,
+        "pixelRatio": 1,
+        "quality": "high",
+        "model": "HQ",
+        "map": "星芽原野",
+        "hitchRule": "卡頓＝單幀超過 50 ms（低於 20 FPS）；另列 >33 ms、>100 ms",
+        "frames33": 65,
+        "frames100": 65,
+        "drawCalls": {
+          "avg": 102,
+          "max": 121
+        },
+        "triangles": {
+          "avgK": 592,
+          "maxK": 615
+        },
+        "cpuMs": {
+          "frame": 6.28,
+          "render": 2.95,
+          "animations": 0.22,
+          "activeMeshes": 1.39,
+          "renderTargets": 0.44
+        },
+        "memory": {
+          "jsHeapMB": 135.1,
+          "meshes": 278,
+          "materials": 74,
+          "textures": 121,
+          "gpuTextures": 76,
+          "textureMB": 170,
+          "skeletons": 22,
+          "animationGroups": 174,
+          "particleSystems": 3
+        },
+        "extra": {
+          "monsterDetail": {
+            "near": 5,
+            "mid": 0,
+            "far": 0,
+            "hidden": 0,
+            "offscreen": 22
+          },
+          "monsters": 27,
+          "shadow": "PCSS 2048（取樣 中）",
+          "shadowCasters": 10,
+          "fx": {
+            "hitFx": 7,
+            "numbers": 9,
+            "hurt": 2,
+            "respawnFx": 0,
+            "particles": 0
+          }
+        },
+        "heavy": {
+          "meshes": [
+            {
+              "name": "PH_vegHi",
+              "triK": 144.3,
+              "instances": 5,
+              "skinned": false
+            },
+            {
+              "name": "PH_flowers",
+              "triK": 59.3,
+              "instances": 2119,
+              "skinned": false
+            },
+            {
+              "name": "PH_grass",
+              "triK": 45.4,
+              "instances": 3787,
+              "skinned": false
+            },
+            {
+              "name": "PH_vegLo",
+              "triK": 42.2,
+              "instances": 7,
+              "skinned": false
+            },
+            {
+              "name": "Body_high",
+              "triK": 28,
+              "instances": 4,
+              "skinned": false
+            },
+            {
+              "name": "PH_mapGround_2",
+              "triK": 16.2,
+              "instances": 4,
+              "skinned": false
+            },
+            {
+              "name": "PH_mapGround_3",
+              "triK": 16.2,
+              "instances": 4,
+              "skinned": false
+            },
+            {
+              "name": "PH_mapGround_1",
+              "triK": 12.2,
+              "instances": 3,
+              "skinned": false
+            },
+            {
+              "name": "tripo_node_0eab079b-7220-45ca-ac90-6d308da",
+              "triK": 9.6,
+              "instances": 1,
+              "skinned": true
+            },
+            {
+              "name": "Eyes",
+              "triK": 4.6,
+              "instances": 4,
+              "skinned": false
+            },
+            {
+              "name": "PH_mapGround_0",
+              "triK": 4.1,
+              "instances": 1,
+              "skinned": false
+            },
+            {
+              "name": "Stars",
+              "triK": 3.5,
+              "instances": 4,
+              "skinned": false
+            }
+          ],
+          "textures": [
+            {
+              "name": "sun_shadowMap",
+              "size": "2048x2048",
+              "mb": 21.3
+            },
+            {
+              "name": "novice_n75_male (Normal)",
+              "size": "2048x2048",
+              "mb": 21.3
+            },
+            {
+              "name": "novice_n75_male (Base Color)",
+              "size": "2048x2048",
+              "mb": 21.3
+            },
+            {
+              "name": "novice_n75_male (Metallic Roughness)",
+              "size": "2048x2048",
+              "mb": 21.3
+            },
+            {
+              "name": "M003_CloudFluffBird_Mat (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M003_CloudFluffBird_Mat (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M005_NebulaSheep_Mat (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M005_NebulaSheep_Mat (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M002_MossHornBeast_Mat (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M002_MossHornBeast_Mat (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "m006_carrot_king_Mat (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "m006_carrot_king_Mat (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            }
+          ]
+        }
+      },
+      "errors": []
+    },
+    {
+      "label": "old_c10b5b_lite",
+      "url": "&nv=c10b5b&lod=lite",
+      "ok": true,
+      "bench": {
+        "seconds": 45.6,
+        "avgFps": 2.675966747823036,
+        "low1Fps": 2.295684113866055,
+        "minFps": 1.9402405898330517,
+        "avgDraw": 103.91803278688525,
+        "kills": 5,
+        "contextLost": 0,
+        "first30": 2.613142452649198,
+        "last30": 2.7322222296266174,
+        "quality": "high",
+        "gender": "male",
+        "lod": "lite",
+        "charShadow": "blob"
+      },
+      "info": {
+        "monsters": 27,
+        "tiers": {
+          "on": true,
+          "near": 4,
+          "mid": 0,
+          "far": 0,
+          "hidden": 0,
+          "offscreen": 23
+        },
+        "file": "novice_c10b5b_male_lite.glb",
+        "avatarTriangles": 40381,
+        "avatarBones": 17
+      },
+      "session": {
+        "seconds": 48,
+        "frames": 128,
+        "avgFps": 2.7,
+        "low1": 1.9,
+        "minFps": 1.9,
+        "hitches": 128,
+        "pixelRatio": 1,
+        "quality": "high",
+        "model": "Lite",
+        "map": "星芽原野",
+        "hitchRule": "卡頓＝單幀超過 50 ms（低於 20 FPS）；另列 >33 ms、>100 ms",
+        "frames33": 128,
+        "frames100": 128,
+        "drawCalls": {
+          "avg": 104,
+          "max": 133
+        },
+        "triangles": {
+          "avgK": 353,
+          "maxK": 442
+        },
+        "cpuMs": {
+          "frame": 5.75,
+          "render": 2.92,
+          "animations": 0.19,
+          "activeMeshes": 1.37,
+          "renderTargets": 0.37
+        },
+        "memory": {
+          "jsHeapMB": 114.1,
+          "meshes": 304,
+          "materials": 99,
+          "textures": 119,
+          "gpuTextures": 74,
+          "textureMB": 123,
+          "skeletons": 22,
+          "animationGroups": 153,
+          "particleSystems": 3
+        },
+        "extra": {
+          "monsterDetail": {
+            "near": 4,
+            "mid": 0,
+            "far": 0,
+            "hidden": 0,
+            "offscreen": 23
+          },
+          "monsters": 27,
+          "shadow": "PCSS 2048（取樣 中）",
+          "shadowCasters": 0,
+          "fx": {
+            "hitFx": 15,
+            "numbers": 20,
+            "hurt": 5,
+            "respawnFx": 0,
+            "particles": 0
+          }
+        },
+        "heavy": {
+          "meshes": [
+            {
+              "name": "PH_vegHi",
+              "triK": 104.6,
+              "instances": 4,
+              "skinned": false
+            },
+            {
+              "name": "PH_vegLo",
+              "triK": 39.2,
+              "instances": 6,
+              "skinned": false
+            },
+            {
+              "name": "PH_flowers",
+              "triK": 29.3,
+              "instances": 1045,
+              "skinned": false
+            },
+            {
+              "name": "PH_grass",
+              "triK": 20.6,
+              "instances": 1714,
+              "skinned": false
+            },
+            {
+              "name": "hair__male_hair",
+              "triK": 15.2,
+              "instances": 1,
+              "skinned": true
+            },
+            {
+              "name": "Body_high",
+              "triK": 14,
+              "instances": 2,
+              "skinned": false
+            },
+            {
+              "name": "PH_mapGround_2",
+              "triK": 7.2,
+              "instances": 4,
+              "skinned": false
+            },
+            {
+              "name": "PH_mapGround_3",
+              "triK": 7.2,
+              "instances": 4,
+              "skinned": false
+            },
+            {
+              "name": "face__face_male",
+              "triK": 5.9,
+              "instances": 1,
+              "skinned": true
+            },
+            {
+              "name": "PH_mapGround_1",
+              "triK": 5.4,
+              "instances": 3,
+              "skinned": false
+            },
+            {
+              "name": "outfit__male_tabard",
+              "triK": 2.6,
+              "instances": 1,
+              "skinned": true
+            },
+            {
+              "name": "body__male_skin",
+              "triK": 2.6,
+              "instances": 1,
+              "skinned": true
+            }
+          ],
+          "textures": [
+            {
+              "name": "sun_shadowMap",
+              "size": "2048x2048",
+              "mb": 21.3
+            },
+            {
+              "name": "face_male (Base Color)",
+              "size": "2048x2048",
+              "mb": 21.3
+            },
+            {
+              "name": "M002_MossHornBeast_Mat (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M002_MossHornBeast_Mat (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M003_CloudFluffBird_Mat (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M003_CloudFluffBird_Mat (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M004_WindfeatherFox_Mat (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M004_WindfeatherFox_Mat (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "m006_carrot_king_Mat (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "m006_carrot_king_Mat (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M005_NebulaSheep_Mat (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M005_NebulaSheep_Mat (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            }
+          ]
+        }
+      },
+      "errors": []
+    },
+    {
+      "label": "n75_lite",
+      "url": "&lod=lite",
+      "ok": true,
+      "bench": {
+        "seconds": 45.4,
+        "avgFps": 2.9717551185730327,
+        "low1Fps": 2.249718785151856,
+        "minFps": 2.092050209205021,
+        "avgDraw": 77.36296296296297,
+        "kills": 5,
+        "contextLost": 0,
+        "first30": 2.865682782244764,
+        "last30": 3.056133194257131,
+        "quality": "high",
+        "gender": "male",
+        "lod": "lite",
+        "charShadow": "blob"
+      },
+      "info": {
+        "monsters": 27,
+        "tiers": {
+          "on": true,
+          "near": 4,
+          "mid": 0,
+          "far": 0,
+          "hidden": 0,
+          "offscreen": 23
+        },
+        "file": "novice_n75_male_lite.glb",
+        "avatarTriangles": 9609,
+        "avatarBones": 82
+      },
+      "session": {
+        "seconds": 47.9,
+        "frames": 142,
+        "avgFps": 3,
+        "low1": 2.1,
+        "minFps": 2.1,
+        "hitches": 142,
+        "pixelRatio": 1,
+        "quality": "high",
+        "model": "Lite",
+        "map": "星芽原野",
+        "hitchRule": "卡頓＝單幀超過 50 ms（低於 20 FPS）；另列 >33 ms、>100 ms",
+        "frames33": 142,
+        "frames100": 142,
+        "drawCalls": {
+          "avg": 78,
+          "max": 108
+        },
+        "triangles": {
+          "avgK": 316,
+          "maxK": 411
+        },
+        "cpuMs": {
+          "frame": 5.1,
+          "render": 2.34,
+          "animations": 0.37,
+          "activeMeshes": 1.22,
+          "renderTargets": 0.31
+        },
+        "memory": {
+          "jsHeapMB": 108.6,
+          "meshes": 280,
+          "materials": 75,
+          "textures": 121,
+          "gpuTextures": 76,
+          "textureMB": 118,
+          "skeletons": 22,
+          "animationGroups": 174,
+          "particleSystems": 3
+        },
+        "extra": {
+          "monsterDetail": {
+            "near": 4,
+            "mid": 0,
+            "far": 0,
+            "hidden": 0,
+            "offscreen": 23
+          },
+          "monsters": 27,
+          "shadow": "PCSS 2048（取樣 中）",
+          "shadowCasters": 0,
+          "fx": {
+            "hitFx": 15,
+            "numbers": 19,
+            "hurt": 4,
+            "respawnFx": 1,
+            "particles": 0
+          }
+        },
+        "heavy": {
+          "meshes": [
+            {
+              "name": "PH_vegHi",
+              "triK": 104.6,
+              "instances": 4,
+              "skinned": false
+            },
+            {
+              "name": "PH_vegLo",
+              "triK": 42.2,
+              "instances": 7,
+              "skinned": false
+            },
+            {
+              "name": "PH_flowers",
+              "triK": 29.3,
+              "instances": 1045,
+              "skinned": false
+            },
+            {
+              "name": "PH_grass",
+              "triK": 18.5,
+              "instances": 1543,
+              "skinned": false
+            },
+            {
+              "name": "tripo_node_0eab079b-7220-45ca-ac90-6d308da",
+              "triK": 9.6,
+              "instances": 1,
+              "skinned": true
+            },
+            {
+              "name": "PH_mapGround_2",
+              "triK": 7.2,
+              "instances": 4,
+              "skinned": false
+            },
+            {
+              "name": "PH_mapGround_3",
+              "triK": 7.2,
+              "instances": 4,
+              "skinned": false
+            },
+            {
+              "name": "Body_high",
+              "triK": 7,
+              "instances": 1,
+              "skinned": false
+            },
+            {
+              "name": "PH_mapGround_1",
+              "triK": 5.4,
+              "instances": 3,
+              "skinned": false
+            },
+            {
+              "name": "PH_skyDome",
+              "triK": 1.3,
+              "instances": 1,
+              "skinned": false
+            },
+            {
+              "name": "Eyes",
+              "triK": 1.2,
+              "instances": 1,
+              "skinned": false
+            },
+            {
+              "name": "Stars",
+              "triK": 0.9,
+              "instances": 1,
+              "skinned": false
+            }
+          ],
+          "textures": [
+            {
+              "name": "sun_shadowMap",
+              "size": "2048x2048",
+              "mb": 21.3
+            },
+            {
+              "name": "novice_n75_male (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "novice_n75_male (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "novice_n75_male (Metallic Roughness)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M002_MossHornBeast_Mat (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M002_MossHornBeast_Mat (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M003_CloudFluffBird_Mat (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M003_CloudFluffBird_Mat (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M005_NebulaSheep_Mat (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "M005_NebulaSheep_Mat (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "m006_carrot_king_Mat (Base Color)",
+              "size": "1024x1024",
+              "mb": 5.3
+            },
+            {
+              "name": "m006_carrot_king_Mat (Normal)",
+              "size": "1024x1024",
+              "mb": 5.3
+            }
+          ]
+        }
+      },
+      "errors": []
+    }
+  ],
+  "soak": {
+    "seconds": 180,
+    "ok": true,
+    "samples": [
+      {
+        "t": 1,
+        "mem": {
+          "jsHeapMB": 150.3,
+          "meshes": 278,
+          "materials": 73,
+          "textures": 121,
+          "gpuTextures": 76,
+          "textureMB": 170,
+          "skeletons": 22,
+          "animationGroups": 174,
+          "particleSystems": 3
+        },
+        "kills": 0,
+        "monsters": 27
+      },
+      {
+        "t": 31.9,
+        "mem": {
+          "jsHeapMB": 127.5,
+          "meshes": 278,
+          "materials": 74,
+          "textures": 121,
+          "gpuTextures": 76,
+          "textureMB": 170,
+          "skeletons": 22,
+          "animationGroups": 174,
+          "particleSystems": 3
+        },
+        "kills": 1,
+        "monsters": 27
+      },
+      {
+        "t": 62.7,
+        "mem": {
+          "jsHeapMB": 114.8,
+          "meshes": 279,
+          "materials": 75,
+          "textures": 121,
+          "gpuTextures": 76,
+          "textureMB": 170,
+          "skeletons": 22,
+          "animationGroups": 174,
+          "particleSystems": 3
+        },
+        "kills": 3,
+        "monsters": 27
+      },
+      {
+        "t": 93,
+        "mem": {
+          "jsHeapMB": 116.1,
+          "meshes": 280,
+          "materials": 74,
+          "textures": 121,
+          "gpuTextures": 76,
+          "textureMB": 170,
+          "skeletons": 22,
+          "animationGroups": 174,
+          "particleSystems": 3
+        },
+        "kills": 5,
+        "monsters": 27
+      },
+      {
+        "t": 123.4,
+        "mem": {
+          "jsHeapMB": 114.7,
+          "meshes": 279,
+          "materials": 75,
+          "textures": 121,
+          "gpuTextures": 76,
+          "textureMB": 170,
+          "skeletons": 22,
+          "animationGroups": 174,
+          "particleSystems": 3
+        },
+        "kills": 6,
+        "monsters": 27
+      },
+      {
+        "t": 154.2,
+        "mem": {
+          "jsHeapMB": 115.8,
+          "meshes": 279,
+          "materials": 74,
+          "textures": 121,
+          "gpuTextures": 76,
+          "textureMB": 170,
+          "skeletons": 22,
+          "animationGroups": 174,
+          "particleSystems": 3
+        },
+        "kills": 7,
+        "monsters": 27
+      },
+      {
+        "t": 184.3,
+        "mem": {
+          "jsHeapMB": 117.8,
+          "meshes": 279,
+          "materials": 74,
+          "textures": 121,
+          "gpuTextures": 76,
+          "textureMB": 170,
+          "skeletons": 22,
+          "animationGroups": 174,
+          "particleSystems": 3
+        },
+        "kills": 9,
+        "monsters": 27
+      }
+    ],
+    "bench": {
+      "seconds": 180.6,
+      "avgFps": 1.3845575314114575,
+      "low1Fps": 1.200912693647155,
+      "minFps": 1.1538017768547983,
+      "avgDraw": 86.264,
+      "kills": 9,
+      "contextLost": 0,
+      "first30": 1.316837745837147,
+      "last30": 1.4257388974727951,
+      "quality": "high",
+      "gender": "male",
+      "lod": "hq",
+      "charShadow": "blob"
+    },
+    "growth": {
+      "meshes": 1,
+      "materials": 0,
+      "textures": 0
+    },
+    "errors": []
+  },
+  "delta": {
+    "avgFps": 0.3,
+    "low1Fps": 0.5,
+    "avgDraw": -27,
+    "ratio": 1.32
+  },
+  "finishedAt": "2026-11-28T03:03:33.338Z"
+}
