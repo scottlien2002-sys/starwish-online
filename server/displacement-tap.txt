@@ -1,0 +1,52 @@
+TAP version 13
+# Subtest: 跳斬（測試設定）：開闊地前進根運動距離；伺服器、施放者、旁觀者三方最後位置一致；路徑沒有穿過障礙物
+ok 1 - 跳斬（測試設定）：開闊地前進根運動距離；伺服器、施放者、旁觀者三方最後位置一致；路徑沒有穿過障礙物
+  ---
+  duration_ms: 1650.922439
+  type: 'test'
+  ...
+# Subtest: 跳斬遇到岩石／樹／邊界：停在障礙物前（距離 < 根運動）、不穿過；之後再往前一點就是不能站的位置
+ok 2 - 跳斬遇到岩石／樹／邊界：停在障礙物前（距離 < 根運動）、不穿過；之後再往前一點就是不能站的位置
+  ---
+  duration_ms: 983.571034
+  type: 'test'
+  ...
+# Subtest: 位移中的一般移動輸入：照算序號、不移動（不能邊跳斬邊走、也不會結束後補走）；結束後恢復移動
+not ok 3 - 位移中的一般移動輸入：照算序號、不移動（不能邊跳斬邊走、也不會結束後補走）；結束後恢復移動
+  ---
+  duration_ms: 1822.491356
+  type: 'test'
+  location: '/home/runner/work/starwish-online/starwish-online/multiplayer/tests/displacement.test.ts:166:1'
+  failureType: 'testCodeFailure'
+  error: '側移 0.32999997262136754'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///home/runner/work/starwish-online/starwish-online/multiplayer/tests/displacement.test.ts:190:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: 各展示技能位移量（測試設定）：三段連擊、突進、旋風斬照根運動；距離不超過上限；施放中不能再施放
+ok 4 - 各展示技能位移量（測試設定）：三段連擊、突進、旋風斬照根運動；距離不超過上限；施放中不能再施放
+  ---
+  duration_ms: 6203.355489
+  type: 'test'
+  ...
+# Subtest: 一般移動沒有跳躍：用移動輸入無法越過障礙物（只有伺服器驗證的技能位移會移動，且同樣不能越過）
+ok 5 - 一般移動沒有跳躍：用移動輸入無法越過障礙物（只有伺服器驗證的技能位移會移動，且同樣不能越過）
+  ---
+  duration_ms: 2067.541376
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 4
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 15943.243207
