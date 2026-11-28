@@ -1,0 +1,1997 @@
+{
+  "startedAt": "2026-11-28T06:18:23.447Z",
+  "note": "FPS 為 CI 軟體繪圖（無 GPU）數字，不代表 iPhone 效能",
+  "runs": [
+    {
+      "browser": "chromium",
+      "case": "shader-warm",
+      "checks": {
+        "載入：6 隻骨骼動畫怪物（M002～M007）且檔案檢查通過": {
+          "ok": true,
+          "detail": [
+            {
+              "l": "M002 苔角獸",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M003 雲絨鳥",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M004 風羽狐",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M005 星雲咩咩",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M006 胡蘿蔔大王",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M007 王冠重錘兔",
+              "ok": true,
+              "e": []
+            }
+          ]
+        },
+        "載入：初心者 C1.0-B5b（非 Tripo 組裝）": {
+          "ok": true,
+          "detail": {
+            "triangles": 199965,
+            "gender": "male"
+          }
+        },
+        "特效預熱：載入時已預先生成全部特效與投射物（沒有超時）": {
+          "ok": true,
+          "detail": {
+            "ms": 6860,
+            "spawned": 66,
+            "timeouts": 0,
+            "materials": 27,
+            "meshes": 43,
+            "systems": 46,
+            "shadersBefore": 1,
+            "shadersAfter": 17
+          }
+        },
+        "特效預熱：施放 6 個技能＋6 種職業特效＋白天場景時，新編譯的 shader ≤ 3（關閉預熱時約 10）": {
+          "ok": false,
+          "detail": {
+            "beforeCasts": 17,
+            "afterCasts": 21,
+            "newDuringPlay": 4,
+            "prewarm": {
+              "ms": 6860,
+              "spawned": 66,
+              "timeouts": 0,
+              "materials": 27,
+              "meshes": 43,
+              "systems": 46,
+              "shadersBefore": 1,
+              "shadersAfter": 17
+            },
+            "newKeys": [
+              "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define MAINUV1\n#define UV1\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_I",
+              "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_INDEX -1\n#define PREPASS_DEPT",
+              "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_INDEX -1\n#define PREPASS_DEPT",
+              "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define MAINUV1\n#define UV1\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_I"
+            ]
+          }
+        },
+        "沒有頁面錯誤": {
+          "ok": true,
+          "detail": []
+        },
+        "沒有失敗的網路請求（模型、貼圖、動作檔全部載入）": {
+          "ok": true,
+          "detail": []
+        }
+      },
+      "errors": [],
+      "results": {
+        "loadMs": 10189,
+        "loaded": {
+          "tier": "high",
+          "gender": "male",
+          "monsters": [
+            {
+              "idx": 0,
+              "label": "M002 苔角獸",
+              "level": 3,
+              "behaviour": "passive",
+              "angry": 0,
+              "moving": false,
+              "hp": 600,
+              "state": "idle",
+              "pos": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "home": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "check": {
+                "file": "monsters/m002/M002_MossHornBeast_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 0.64,
+                  "Run": 0.44,
+                  "Attack": 1.3,
+                  "Hurt": 0.45,
+                  "Death": 0.8,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1882
+              }
+            },
+            {
+              "idx": 1,
+              "label": "M003 雲絨鳥",
+              "level": 5,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 750,
+              "state": "idle",
+              "pos": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "home": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "check": {
+                "file": "monsters/m003/M003_CloudFluffBird_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 19,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 1.25,
+                  "Move": 0.8,
+                  "Run": 0.5,
+                  "Attack": 1.1,
+                  "Hurt": 0.45,
+                  "Death": 1,
+                  "Respawn": 0.9
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1882
+              }
+            },
+            {
+              "idx": 2,
+              "label": "M004 風羽狐",
+              "level": 7,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 900,
+              "state": "idle",
+              "pos": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "home": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "check": {
+                "file": "monsters/m004/M004_WindfeatherFox_Rig_V1_1_HQ.glb",
+                "ok": true,
+                "joints": 32,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2,
+                  "Move": 0.8,
+                  "Run": 0.38,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.7,
+                  "Respawn": 0.5
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1882
+              }
+            },
+            {
+              "idx": 3,
+              "label": "M005 星雲咩咩",
+              "level": 8,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1100,
+              "state": "idle",
+              "pos": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "home": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "check": {
+                "file": "monsters/m005/M005_NebulaSheep_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.6,
+                  "Run": 0.42,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.75,
+                  "Respawn": 0.6
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1881
+              }
+            },
+            {
+              "idx": 4,
+              "label": "M006 胡蘿蔔大王",
+              "level": 9,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1800,
+              "state": "idle",
+              "pos": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "home": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "check": {
+                "file": "monsters/m006/M006_CarrotKing_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.9,
+                  "Run": 0.5,
+                  "Attack": 1.3,
+                  "Hurt": 0.5,
+                  "Death": 0.9,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1881
+              }
+            },
+            {
+              "idx": 5,
+              "label": "M007 王冠重錘兔",
+              "level": 10,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 4200,
+              "state": "idle",
+              "pos": [
+                0,
+                10
+              ],
+              "home": [
+                0,
+                10
+              ],
+              "check": {
+                "file": "monsters/m007/M007_CrownHammerRabbit_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 29,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 1.1,
+                  "Run": 0.62,
+                  "Attack": 2,
+                  "Hurt": 0.6,
+                  "Death": 1.6,
+                  "Respawn": 1.1
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1881
+              }
+            }
+          ],
+          "vfx": {
+            "meshFx": 0,
+            "particles": 0,
+            "projectiles": 0,
+            "spawned": 62,
+            "materials": 27,
+            "pooledMeshes": 43,
+            "pooledSystems": 46
+          },
+          "budget": {
+            "active": 0,
+            "activeRemote": 0,
+            "activeCritical": 0,
+            "particles": 0,
+            "granted": 0,
+            "denied": 0,
+            "scaled": 0,
+            "deniedBy": {}
+          },
+          "damageShown": 0,
+          "audioPlayed": 0,
+          "triangles": 199965,
+          "ghosts": 0,
+          "player": {
+            "x": 0,
+            "z": 0,
+            "yaw": 0
+          },
+          "demoStats": {
+            "attack": 40,
+            "critRate": 0.2,
+            "critMult": 1.6,
+            "spread": 0.1,
+            "note": "展示用測試值（不是正式平衡）"
+          }
+        },
+        "shaders": {
+          "beforeCasts": 17,
+          "afterCasts": 21,
+          "newDuringPlay": 4,
+          "prewarm": {
+            "ms": 6860,
+            "spawned": 66,
+            "timeouts": 0,
+            "materials": 27,
+            "meshes": 43,
+            "systems": 46,
+            "shadersBefore": 1,
+            "shadersAfter": 17
+          },
+          "newKeys": [
+            "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define MAINUV1\n#define UV1\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_I",
+            "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_INDEX -1\n#define PREPASS_DEPT",
+            "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_INDEX -1\n#define PREPASS_DEPT",
+            "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define MAINUV1\n#define UV1\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_I"
+          ]
+        },
+        "final": {
+          "tier": "high",
+          "gender": "male",
+          "monsters": [
+            {
+              "idx": 0,
+              "label": "M002 苔角獸",
+              "level": 3,
+              "behaviour": "passive",
+              "angry": 4.500000000000012,
+              "moving": false,
+              "hp": 181,
+              "state": "idle",
+              "pos": [
+                -5.86532697530631,
+                2.9327123849480143
+              ],
+              "home": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "check": {
+                "file": "monsters/m002/M002_MossHornBeast_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 0.64,
+                  "Run": 0.44,
+                  "Attack": 1.3,
+                  "Hurt": 0.45,
+                  "Death": 0.8,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1882
+              }
+            },
+            {
+              "idx": 1,
+              "label": "M003 雲絨鳥",
+              "level": 5,
+              "behaviour": "aggressive",
+              "angry": 2.7500000000000187,
+              "moving": false,
+              "hp": 601,
+              "state": "idle",
+              "pos": [
+                -3.288975693546466,
+                5.66823295108421
+              ],
+              "home": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "check": {
+                "file": "monsters/m003/M003_CloudFluffBird_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 19,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 1.25,
+                  "Move": 0.8,
+                  "Run": 0.5,
+                  "Attack": 1.1,
+                  "Hurt": 0.45,
+                  "Death": 1,
+                  "Respawn": 0.9
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1882
+              }
+            },
+            {
+              "idx": 2,
+              "label": "M004 風羽狐",
+              "level": 7,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 900,
+              "state": "idle",
+              "pos": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "home": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "check": {
+                "file": "monsters/m004/M004_WindfeatherFox_Rig_V1_1_HQ.glb",
+                "ok": true,
+                "joints": 32,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2,
+                  "Move": 0.8,
+                  "Run": 0.38,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.7,
+                  "Respawn": 0.5
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1882
+              }
+            },
+            {
+              "idx": 3,
+              "label": "M005 星雲咩咩",
+              "level": 8,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1100,
+              "state": "idle",
+              "pos": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "home": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "check": {
+                "file": "monsters/m005/M005_NebulaSheep_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.6,
+                  "Run": 0.42,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.75,
+                  "Respawn": 0.6
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1881
+              }
+            },
+            {
+              "idx": 4,
+              "label": "M006 胡蘿蔔大王",
+              "level": 9,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1800,
+              "state": "idle",
+              "pos": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "home": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "check": {
+                "file": "monsters/m006/M006_CarrotKing_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.9,
+                  "Run": 0.5,
+                  "Attack": 1.3,
+                  "Hurt": 0.5,
+                  "Death": 0.9,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1881
+              }
+            },
+            {
+              "idx": 5,
+              "label": "M007 王冠重錘兔",
+              "level": 10,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 4200,
+              "state": "idle",
+              "pos": [
+                0,
+                10
+              ],
+              "home": [
+                0,
+                10
+              ],
+              "check": {
+                "file": "monsters/m007/M007_CrownHammerRabbit_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 29,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 1.1,
+                  "Run": 0.62,
+                  "Attack": 2,
+                  "Hurt": 0.6,
+                  "Death": 1.6,
+                  "Respawn": 1.1
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1881
+              }
+            }
+          ],
+          "vfx": {
+            "meshFx": 6,
+            "particles": 0,
+            "projectiles": 0,
+            "spawned": 150,
+            "materials": 81,
+            "pooledMeshes": 44,
+            "pooledSystems": 62
+          },
+          "budget": {
+            "active": 19,
+            "activeRemote": 0,
+            "activeCritical": 0,
+            "particles": 706,
+            "granted": 175,
+            "denied": 1,
+            "scaled": 0,
+            "deniedBy": {
+              "secondary-pressure": 1
+            }
+          },
+          "damageShown": 5,
+          "audioPlayed": 0,
+          "triangles": 199965,
+          "ghosts": 0,
+          "player": {
+            "x": -2.2840065002098138,
+            "z": 1.2496801660276824,
+            "yaw": -1.1314785295108143
+          },
+          "demoStats": {
+            "attack": 40,
+            "critRate": 0.2,
+            "critMult": 1.6,
+            "spread": 0.1,
+            "note": "展示用測試值（不是正式平衡）"
+          }
+        }
+      }
+    },
+    {
+      "browser": "chromium",
+      "case": "shader-cold",
+      "checks": {
+        "載入：6 隻骨骼動畫怪物（M002～M007）且檔案檢查通過": {
+          "ok": true,
+          "detail": [
+            {
+              "l": "M002 苔角獸",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M003 雲絨鳥",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M004 風羽狐",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M005 星雲咩咩",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M006 胡蘿蔔大王",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M007 王冠重錘兔",
+              "ok": true,
+              "e": []
+            }
+          ]
+        },
+        "載入：初心者 C1.0-B5b（非 Tripo 組裝）": {
+          "ok": true,
+          "detail": {
+            "triangles": 199965,
+            "gender": "male"
+          }
+        },
+        "對照（關閉預熱）：記錄施放時才編譯的 shader 數": {
+          "ok": true,
+          "detail": {
+            "beforeCasts": 15,
+            "afterCasts": 25,
+            "newDuringPlay": 10,
+            "prewarm": null,
+            "newKeys": [
+              "glowMapGeneration+glowMapGeneration@#define DIFFUSE\n#define DIFFUSEUV1\n#define VERTEXALPHA\n#define UV1\n#define NUM_BONE_INFLUENCERS 0\n#define GLOW",
+              "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define MAINUV1\n#define UV1\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_I",
+              "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define MAINUV1\n#define UV1\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_I",
+              "particles+particles@#define BILLBOARD\n#define BILLBOARDSTRETCHED\n#define VIGNETTEBLENDMODEMULTIPLY\n#define TONEMAPPING 0\n#define SAMPLER3DGREENDEPTH\n#define SAMPLER3DBGRMAP\n",
+              "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define MAINUV1\n#define UV1\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_I",
+              "particles+particles@#define BILLBOARD\n#define BILLBOARDMODE_ALL\n#define VIGNETTEBLENDMODEMULTIPLY\n#define TONEMAPPING 0\n#define SAMPLER3DGREENDEPTH\n#define SAMPLER3DBGRMAP\n",
+              "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_INDEX -1\n#define PREPASS_DEPT",
+              "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_INDEX -1\n#define PREPASS_DEPT",
+              "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_INDEX -1\n#define PREPASS_DEPT",
+              "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define MAINUV1\n#define UV1\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_I"
+            ]
+          }
+        },
+        "沒有頁面錯誤": {
+          "ok": true,
+          "detail": []
+        },
+        "沒有失敗的網路請求（模型、貼圖、動作檔全部載入）": {
+          "ok": true,
+          "detail": []
+        }
+      },
+      "errors": [],
+      "results": {
+        "loadMs": 3652,
+        "loaded": {
+          "tier": "high",
+          "gender": "male",
+          "monsters": [
+            {
+              "idx": 0,
+              "label": "M002 苔角獸",
+              "level": 3,
+              "behaviour": "passive",
+              "angry": 0,
+              "moving": false,
+              "hp": 600,
+              "state": "idle",
+              "pos": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "home": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "check": {
+                "file": "monsters/m002/M002_MossHornBeast_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 0.64,
+                  "Run": 0.44,
+                  "Attack": 1.3,
+                  "Hurt": 0.45,
+                  "Death": 0.8,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1866
+              }
+            },
+            {
+              "idx": 1,
+              "label": "M003 雲絨鳥",
+              "level": 5,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 750,
+              "state": "idle",
+              "pos": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "home": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "check": {
+                "file": "monsters/m003/M003_CloudFluffBird_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 19,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 1.25,
+                  "Move": 0.8,
+                  "Run": 0.5,
+                  "Attack": 1.1,
+                  "Hurt": 0.45,
+                  "Death": 1,
+                  "Respawn": 0.9
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1866
+              }
+            },
+            {
+              "idx": 2,
+              "label": "M004 風羽狐",
+              "level": 7,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 900,
+              "state": "idle",
+              "pos": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "home": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "check": {
+                "file": "monsters/m004/M004_WindfeatherFox_Rig_V1_1_HQ.glb",
+                "ok": true,
+                "joints": 32,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2,
+                  "Move": 0.8,
+                  "Run": 0.38,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.7,
+                  "Respawn": 0.5
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1866
+              }
+            },
+            {
+              "idx": 3,
+              "label": "M005 星雲咩咩",
+              "level": 8,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1100,
+              "state": "idle",
+              "pos": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "home": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "check": {
+                "file": "monsters/m005/M005_NebulaSheep_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.6,
+                  "Run": 0.42,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.75,
+                  "Respawn": 0.6
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1865
+              }
+            },
+            {
+              "idx": 4,
+              "label": "M006 胡蘿蔔大王",
+              "level": 9,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1800,
+              "state": "idle",
+              "pos": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "home": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "check": {
+                "file": "monsters/m006/M006_CarrotKing_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.9,
+                  "Run": 0.5,
+                  "Attack": 1.3,
+                  "Hurt": 0.5,
+                  "Death": 0.9,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1865
+              }
+            },
+            {
+              "idx": 5,
+              "label": "M007 王冠重錘兔",
+              "level": 10,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 4200,
+              "state": "idle",
+              "pos": [
+                0,
+                10
+              ],
+              "home": [
+                0,
+                10
+              ],
+              "check": {
+                "file": "monsters/m007/M007_CrownHammerRabbit_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 29,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 1.1,
+                  "Run": 0.62,
+                  "Attack": 2,
+                  "Hurt": 0.6,
+                  "Death": 1.6,
+                  "Respawn": 1.1
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1865
+              }
+            }
+          ],
+          "vfx": {
+            "meshFx": 0,
+            "particles": 0,
+            "projectiles": 0,
+            "spawned": 0,
+            "materials": 0,
+            "pooledMeshes": 0,
+            "pooledSystems": 0
+          },
+          "budget": {
+            "active": 0,
+            "activeRemote": 0,
+            "activeCritical": 0,
+            "particles": 0,
+            "granted": 0,
+            "denied": 0,
+            "scaled": 0,
+            "deniedBy": {}
+          },
+          "damageShown": 0,
+          "audioPlayed": 0,
+          "triangles": 199965,
+          "ghosts": 0,
+          "player": {
+            "x": 0,
+            "z": 0,
+            "yaw": 0
+          },
+          "demoStats": {
+            "attack": 40,
+            "critRate": 0.2,
+            "critMult": 1.6,
+            "spread": 0.1,
+            "note": "展示用測試值（不是正式平衡）"
+          }
+        },
+        "shaders": {
+          "beforeCasts": 15,
+          "afterCasts": 25,
+          "newDuringPlay": 10,
+          "prewarm": null,
+          "newKeys": [
+            "glowMapGeneration+glowMapGeneration@#define DIFFUSE\n#define DIFFUSEUV1\n#define VERTEXALPHA\n#define UV1\n#define NUM_BONE_INFLUENCERS 0\n#define GLOW",
+            "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define MAINUV1\n#define UV1\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_I",
+            "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define MAINUV1\n#define UV1\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_I",
+            "particles+particles@#define BILLBOARD\n#define BILLBOARDSTRETCHED\n#define VIGNETTEBLENDMODEMULTIPLY\n#define TONEMAPPING 0\n#define SAMPLER3DGREENDEPTH\n#define SAMPLER3DBGRMAP\n",
+            "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define MAINUV1\n#define UV1\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_I",
+            "particles+particles@#define BILLBOARD\n#define BILLBOARDMODE_ALL\n#define VIGNETTEBLENDMODEMULTIPLY\n#define TONEMAPPING 0\n#define SAMPLER3DGREENDEPTH\n#define SAMPLER3DBGRMAP\n",
+            "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_INDEX -1\n#define PREPASS_DEPT",
+            "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_INDEX -1\n#define PREPASS_DEPT",
+            "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_INDEX -1\n#define PREPASS_DEPT",
+            "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define MAINUV1\n#define UV1\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_I"
+          ]
+        },
+        "final": {
+          "tier": "high",
+          "gender": "male",
+          "monsters": [
+            {
+              "idx": 0,
+              "label": "M002 苔角獸",
+              "level": 3,
+              "behaviour": "passive",
+              "angry": 4.550000000000012,
+              "moving": false,
+              "hp": 181,
+              "state": "idle",
+              "pos": [
+                -5.86532697530631,
+                2.9327123849480143
+              ],
+              "home": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "check": {
+                "file": "monsters/m002/M002_MossHornBeast_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 0.64,
+                  "Run": 0.44,
+                  "Attack": 1.3,
+                  "Hurt": 0.45,
+                  "Death": 0.8,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1866
+              }
+            },
+            {
+              "idx": 1,
+              "label": "M003 雲絨鳥",
+              "level": 5,
+              "behaviour": "aggressive",
+              "angry": 2.8000000000000185,
+              "moving": false,
+              "hp": 601,
+              "state": "idle",
+              "pos": [
+                -3.288975693546466,
+                5.66823295108421
+              ],
+              "home": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "check": {
+                "file": "monsters/m003/M003_CloudFluffBird_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 19,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 1.25,
+                  "Move": 0.8,
+                  "Run": 0.5,
+                  "Attack": 1.1,
+                  "Hurt": 0.45,
+                  "Death": 1,
+                  "Respawn": 0.9
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1866
+              }
+            },
+            {
+              "idx": 2,
+              "label": "M004 風羽狐",
+              "level": 7,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 900,
+              "state": "idle",
+              "pos": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "home": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "check": {
+                "file": "monsters/m004/M004_WindfeatherFox_Rig_V1_1_HQ.glb",
+                "ok": true,
+                "joints": 32,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2,
+                  "Move": 0.8,
+                  "Run": 0.38,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.7,
+                  "Respawn": 0.5
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1866
+              }
+            },
+            {
+              "idx": 3,
+              "label": "M005 星雲咩咩",
+              "level": 8,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1100,
+              "state": "idle",
+              "pos": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "home": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "check": {
+                "file": "monsters/m005/M005_NebulaSheep_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.6,
+                  "Run": 0.42,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.75,
+                  "Respawn": 0.6
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1865
+              }
+            },
+            {
+              "idx": 4,
+              "label": "M006 胡蘿蔔大王",
+              "level": 9,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1800,
+              "state": "idle",
+              "pos": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "home": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "check": {
+                "file": "monsters/m006/M006_CarrotKing_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.9,
+                  "Run": 0.5,
+                  "Attack": 1.3,
+                  "Hurt": 0.5,
+                  "Death": 0.9,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1865
+              }
+            },
+            {
+              "idx": 5,
+              "label": "M007 王冠重錘兔",
+              "level": 10,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 4200,
+              "state": "idle",
+              "pos": [
+                0,
+                10
+              ],
+              "home": [
+                0,
+                10
+              ],
+              "check": {
+                "file": "monsters/m007/M007_CrownHammerRabbit_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 29,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 1.1,
+                  "Run": 0.62,
+                  "Attack": 2,
+                  "Hurt": 0.6,
+                  "Death": 1.6,
+                  "Respawn": 1.1
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1865
+              }
+            }
+          ],
+          "vfx": {
+            "meshFx": 6,
+            "particles": 5,
+            "projectiles": 0,
+            "spawned": 88,
+            "materials": 62,
+            "pooledMeshes": 32,
+            "pooledSystems": 45
+          },
+          "budget": {
+            "active": 20,
+            "activeRemote": 0,
+            "activeCritical": 0,
+            "particles": 746,
+            "granted": 175,
+            "denied": 1,
+            "scaled": 0,
+            "deniedBy": {
+              "secondary-pressure": 1
+            }
+          },
+          "damageShown": 5,
+          "audioPlayed": 0,
+          "triangles": 199965,
+          "ghosts": 0,
+          "player": {
+            "x": -2.2840065002098138,
+            "z": 1.2496801660276824,
+            "yaw": -1.1314785295108143
+          },
+          "demoStats": {
+            "attack": 40,
+            "critRate": 0.2,
+            "critMult": 1.6,
+            "spread": 0.1,
+            "note": "展示用測試值（不是正式平衡）"
+          }
+        }
+      }
+    },
+    {
+      "browser": "webkit",
+      "case": "shader-warm",
+      "checks": {
+        "載入：6 隻骨骼動畫怪物（M002～M007）且檔案檢查通過": {
+          "ok": true,
+          "detail": [
+            {
+              "l": "M002 苔角獸",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M003 雲絨鳥",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M004 風羽狐",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M005 星雲咩咩",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M006 胡蘿蔔大王",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M007 王冠重錘兔",
+              "ok": true,
+              "e": []
+            }
+          ]
+        },
+        "載入：初心者 C1.0-B5b（非 Tripo 組裝）": {
+          "ok": true,
+          "detail": {
+            "triangles": 199965,
+            "gender": "male"
+          }
+        },
+        "特效預熱：載入時已預先生成全部特效與投射物（沒有超時）": {
+          "ok": false,
+          "detail": {
+            "ms": 15000,
+            "spawned": -1,
+            "timeouts": -1,
+            "materials": 0,
+            "meshes": 0,
+            "systems": 0,
+            "shadersBefore": 1,
+            "shadersAfter": 17
+          }
+        },
+        "特效預熱：施放 6 個技能＋6 種職業特效＋白天場景時，新編譯的 shader ≤ 3（關閉預熱時約 10）": {
+          "ok": false,
+          "detail": {
+            "beforeCasts": 17,
+            "afterCasts": 21,
+            "newDuringPlay": 4,
+            "prewarm": {
+              "ms": 15000,
+              "spawned": -1,
+              "timeouts": -1,
+              "materials": 0,
+              "meshes": 0,
+              "systems": 0,
+              "shadersBefore": 1,
+              "shadersAfter": 17
+            },
+            "newKeys": [
+              "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define MAINUV1\n#define UV1\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_I",
+              "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_INDEX -1\n#define PREPASS_DEPT",
+              "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_INDEX -1\n#define PREPASS_DEPT",
+              "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define MAINUV1\n#define UV1\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_I"
+            ]
+          }
+        },
+        "沒有頁面錯誤": {
+          "ok": true,
+          "detail": []
+        },
+        "沒有失敗的網路請求（模型、貼圖、動作檔全部載入）": {
+          "ok": true,
+          "detail": []
+        }
+      },
+      "errors": [],
+      "results": {
+        "loadMs": 21846,
+        "loaded": {
+          "tier": "high",
+          "gender": "male",
+          "monsters": [
+            {
+              "idx": 0,
+              "label": "M002 苔角獸",
+              "level": 3,
+              "behaviour": "passive",
+              "angry": 0,
+              "moving": false,
+              "hp": 600,
+              "state": "idle",
+              "pos": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "home": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "check": {
+                "file": "monsters/m002/M002_MossHornBeast_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 0.64,
+                  "Run": 0.44,
+                  "Attack": 1.3,
+                  "Hurt": 0.45,
+                  "Death": 0.8,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 846
+              }
+            },
+            {
+              "idx": 1,
+              "label": "M003 雲絨鳥",
+              "level": 5,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 750,
+              "state": "idle",
+              "pos": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "home": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "check": {
+                "file": "monsters/m003/M003_CloudFluffBird_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 19,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 1.25,
+                  "Move": 0.8,
+                  "Run": 0.5,
+                  "Attack": 1.1,
+                  "Hurt": 0.45,
+                  "Death": 1,
+                  "Respawn": 0.9
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 995
+              }
+            },
+            {
+              "idx": 2,
+              "label": "M004 風羽狐",
+              "level": 7,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 900,
+              "state": "idle",
+              "pos": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "home": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "check": {
+                "file": "monsters/m004/M004_WindfeatherFox_Rig_V1_1_HQ.glb",
+                "ok": true,
+                "joints": 32,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2,
+                  "Move": 0.8,
+                  "Run": 0.38,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.7,
+                  "Respawn": 0.5
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1283
+              }
+            },
+            {
+              "idx": 3,
+              "label": "M005 星雲咩咩",
+              "level": 8,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1100,
+              "state": "idle",
+              "pos": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "home": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "check": {
+                "file": "monsters/m005/M005_NebulaSheep_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.6,
+                  "Run": 0.42,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.75,
+                  "Respawn": 0.6
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1137
+              }
+            },
+            {
+              "idx": 4,
+              "label": "M006 胡蘿蔔大王",
+              "level": 9,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1800,
+              "state": "idle",
+              "pos": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "home": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "check": {
+                "file": "monsters/m006/M006_CarrotKing_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.9,
+                  "Run": 0.5,
+                  "Attack": 1.3,
+                  "Hurt": 0.5,
+                  "Death": 0.9,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1437
+              }
+            },
+            {
+              "idx": 5,
+              "label": "M007 王冠重錘兔",
+              "level": 10,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 4200,
+              "state": "idle",
+              "pos": [
+                0,
+                10
+              ],
+              "home": [
+                0,
+                10
+              ],
+              "check": {
+                "file": "monsters/m007/M007_CrownHammerRabbit_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 29,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 1.1,
+                  "Run": 0.62,
+                  "Attack": 2,
+                  "Hurt": 0.6,
+                  "Death": 1.6,
+                  "Respawn": 1.1
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1582
+              }
+            }
+          ],
+          "vfx": {
+            "meshFx": 0,
+            "particles": 0,
+            "projectiles": 0,
+            "spawned": 57,
+            "materials": 27,
+            "pooledMeshes": 43,
+            "pooledSystems": 46
+          },
+          "budget": {
+            "active": 0,
+            "activeRemote": 0,
+            "activeCritical": 0,
+            "particles": 0,
+            "granted": 0,
+            "denied": 0,
+            "scaled": 0,
+            "deniedBy": {}
+          },
+          "damageShown": 0,
+          "audioPlayed": 0,
+          "triangles": 199965,
+          "ghosts": 0,
+          "player": {
+            "x": 0,
+            "z": 0,
+            "yaw": 0
+          },
+          "demoStats": {
+            "attack": 40,
+            "critRate": 0.2,
+            "critMult": 1.6,
+            "spread": 0.1,
+            "note": "展示用測試值（不是正式平衡）"
+          }
+        },
+        "shaders": {
+          "beforeCasts": 17,
+          "afterCasts": 21,
+          "newDuringPlay": 4,
+          "prewarm": {
+            "ms": 15000,
+            "spawned": -1,
+            "timeouts": -1,
+            "materials": 0,
+            "meshes": 0,
+            "systems": 0,
+            "shadersBefore": 1,
+            "shadersAfter": 17
+          },
+          "newKeys": [
+            "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define MAINUV1\n#define UV1\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_I",
+            "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_INDEX -1\n#define PREPASS_DEPT",
+            "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_INDEX -1\n#define PREPASS_DEPT",
+            "default+default@#define MATERIALPLUGIN_1\n#define DETAILDIRECTUV 0\n#define DETAIL_NORMALBLENDMETHOD 0\n#define MAINUV1\n#define UV1\n#define PREPASS_COLOR_INDEX -1\n#define PREPASS_IRRADIANCE_LEGACY_INDEX -1\n#define PREPASS_IRRADIANCE_INDEX -1\n#define PREPASS_ALBEDO_INDEX -1\n#define PREPASS_ALBEDO_SQRT_I"
+          ]
+        },
+        "final": {
+          "tier": "high",
+          "gender": "male",
+          "monsters": [
+            {
+              "idx": 0,
+              "label": "M002 苔角獸",
+              "level": 3,
+              "behaviour": "passive",
+              "angry": 6.4500000000000055,
+              "moving": false,
+              "hp": 343,
+              "state": "idle",
+              "pos": [
+                -5.553842321227983,
+                3.1689829826469125
+              ],
+              "home": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "check": {
+                "file": "monsters/m002/M002_MossHornBeast_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 0.64,
+                  "Run": 0.44,
+                  "Attack": 1.3,
+                  "Hurt": 0.45,
+                  "Death": 0.8,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 846
+              }
+            },
+            {
+              "idx": 1,
+              "label": "M003 雲絨鳥",
+              "level": 5,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 750,
+              "state": "idle",
+              "pos": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "home": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "check": {
+                "file": "monsters/m003/M003_CloudFluffBird_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 19,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 1.25,
+                  "Move": 0.8,
+                  "Run": 0.5,
+                  "Attack": 1.1,
+                  "Hurt": 0.45,
+                  "Death": 1,
+                  "Respawn": 0.9
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 995
+              }
+            },
+            {
+              "idx": 2,
+              "label": "M004 風羽狐",
+              "level": 7,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 900,
+              "state": "idle",
+              "pos": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "home": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "check": {
+                "file": "monsters/m004/M004_WindfeatherFox_Rig_V1_1_HQ.glb",
+                "ok": true,
+                "joints": 32,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2,
+                  "Move": 0.8,
+                  "Run": 0.38,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.7,
+                  "Respawn": 0.5
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1283
+              }
+            },
+            {
+              "idx": 3,
+              "label": "M005 星雲咩咩",
+              "level": 8,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1100,
+              "state": "idle",
+              "pos": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "home": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "check": {
+                "file": "monsters/m005/M005_NebulaSheep_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.6,
+                  "Run": 0.42,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.75,
+                  "Respawn": 0.6
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1137
+              }
+            },
+            {
+              "idx": 4,
+              "label": "M006 胡蘿蔔大王",
+              "level": 9,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1800,
+              "state": "idle",
+              "pos": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "home": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "check": {
+                "file": "monsters/m006/M006_CarrotKing_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.9,
+                  "Run": 0.5,
+                  "Attack": 1.3,
+                  "Hurt": 0.5,
+                  "Death": 0.9,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1437
+              }
+            },
+            {
+              "idx": 5,
+              "label": "M007 王冠重錘兔",
+              "level": 10,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 4200,
+              "state": "idle",
+              "pos": [
+                0,
+                10
+              ],
+              "home": [
+                0,
+                10
+              ],
+              "check": {
+                "file": "monsters/m007/M007_CrownHammerRabbit_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 29,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 1.1,
+                  "Run": 0.62,
+                  "Attack": 2,
+                  "Hurt": 0.6,
+                  "Death": 1.6,
+                  "Respawn": 1.1
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1582
+              }
+            }
+          ],
+          "vfx": {
+            "meshFx": 9,
+            "particles": 0,
+            "projectiles": 0,
+            "spawned": 119,
+            "materials": 65,
+            "pooledMeshes": 43,
+            "pooledSystems": 60
+          },
+          "budget": {
+            "active": 24,
+            "activeRemote": 0,
+            "activeCritical": 0,
+            "particles": 611,
+            "granted": 121,
+            "denied": 0,
+            "scaled": 0,
+            "deniedBy": {}
+          },
+          "damageShown": 3,
+          "audioPlayed": 0,
+          "triangles": 199965,
+          "ghosts": 0,
+          "player": {
+            "x": -2.262179100269698,
+            "z": 1.291728928054627,
+            "yaw": -1.0524971499482998
+          },
+          "demoStats": {
+            "attack": 40,
+            "critRate": 0.2,
+            "critMult": 1.6,
+            "spread": 0.1,
+            "note": "展示用測試值（不是正式平衡）"
+          }
+        }
+      }
+    }
+  ],
+  "failures": 3,
+  "finishedAt": "2026-11-28T06:26:10.726Z"
+}
