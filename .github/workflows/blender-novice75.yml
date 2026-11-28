@@ -44,11 +44,19 @@ jobs:
         run: |
           mkdir -p out/inspect
           /opt/blender/blender -b --factory-startup -noaudio -P art/novice75/inspect75.py -- /tmp/decoded/Starwish_Novice_Male_Rigged_V1_RAW.glb public/models/novice_c10b5b_male_hq.glb out/inspect 2>&1 | tee out/inspect.log | grep -E "inspected|Error|Traceback|line [0-9]+" | tail -40
-      - name: Build (weights, retarget, export) if present
+      - name: Build (weights, helper bones, retarget, authored clips)
         run: |
-          if [ -f art/novice75/build75.py ]; then
-            /opt/blender/blender -b --factory-startup -noaudio -P art/novice75/build75.py -- /tmp/decoded/Starwish_Novice_Male_Rigged_V1_RAW.glb public/models/novice_c10b5b_male_hq.glb public/combat-vfx/novice_combat_male.json out 2>&1 | tee out/build.log | grep -vE "^Fra:|Sample" | tail -80
-          fi
+          pip install --quiet numpy scipy pillow
+          python3 art/novice75/build75.py /tmp/decoded/Starwish_Novice_Male_Rigged_V1_RAW.glb public/models/novice_c10b5b_male_hq.glb public/combat-vfx/novice_combat_male.json out/build 2>&1 | tee out/build.log | tail -40
+      - name: Write GLB (HQ / Lite)
+        run: |
+          cd /tmp/gt && npm i --no-save sharp 2>&1 | tail -1
+          cd "$GITHUB_WORKSPACE" && cp art/novice75/write75.mjs /tmp/gt/ && node /tmp/gt/write75.mjs /tmp/decoded/Starwish_Novice_Male_Rigged_V1_RAW.glb out/build/n75_data.json out/build/n75_skin.bin out/glb
+          ls -la out/glb
+      - name: Blender render of the written GLB (independent check)
+        run: |
+          /opt/blender/blender -b --factory-startup -noaudio -P art/novice75/render75.py -- out/glb/novice_n75_male_hq.glb out/render 2>&1 | grep -E "rendered|Error|Traceback|line [0-9]+" | tail -20
+          cat out/render/render.json | head -40
       - name: Push results to art-novice75 (normal push)
         if: always()
         run: |
