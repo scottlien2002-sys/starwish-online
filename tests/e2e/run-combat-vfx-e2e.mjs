@@ -215,7 +215,12 @@ for (const name of browsers) {
         check("移動：沒有跳躍按鈕（跳躍只在技能動作內）", L.jumpButtons === 0, L.jumpButtons);
         await shot("closed");
         // 詳細效能：點開後有 Draw Call、三角面（不是 0），而且血條自動往下讓位
-        await page.click(".cv-perf");
+        // 軟體繪圖很慢時一次點擊偶爾沒被處理：最多點 3 次，等到展開為止
+        for (let k = 0; k < 3; k++) {
+          await page.click(".cv-perf");
+          const ok = await page.waitForFunction(() => /Draw/.test(document.querySelector(".cv-perf").textContent), null, { timeout: 4000 }).then(() => true).catch(() => false);
+          if (ok) break;
+        }
         await sleep(800);
         L = (await verify("效能展開")).L;
         const m = /Draw (\d+)｜三角面 ([\d.]+)k/.exec(L.perfText);
