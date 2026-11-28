@@ -1,1 +1,0 @@
-import{Rr as e}from"./index-DwFSVGW0.js";var t=class extends e{constructor(e,t){super(e,t,3)}};export{t};

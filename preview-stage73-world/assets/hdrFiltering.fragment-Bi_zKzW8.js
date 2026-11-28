@@ -1,0 +1,5 @@
+import{t as e}from"./rolldown-runtime-P3Pd_6ND.js";import{t}from"./shaderStore-D-XQlhUT.js";import{t as n}from"./helperFunctions-Bfi4hglZ.js";import{n as r,t as i}from"./hdrFilteringFunctions-pzE3ktpd.js";import{t as a}from"./pbrBRDFFunctions-BCNINF-p.js";var o=e({hdrFilteringPixelShader:()=>u}),s=`hdrFilteringPixelShader`,c=`#include<helperFunctions>
+#include<importanceSampling>
+#include<pbrBRDFFunctions>
+#include<hdrFilteringFunctions>
+uniform float alphaG;uniform samplerCube inputTexture;uniform vec2 vFilteringInfo;uniform float hdrScale;varying vec3 direction;void main() {vec3 color=radiance(alphaG,inputTexture,direction,vFilteringInfo);gl_FragColor=vec4(color*hdrScale,1.0);}`;t.ShadersStore[s]||(t.ShadersStore[s]=c);var l=[n,r,a,i];for(let e of l)t.IncludesShadersStore[e.name]||(t.IncludesShadersStore[e.name]=e.shader);var u={name:s,shader:c};export{o as t};
