@@ -4,7 +4,7 @@
  */
 import { Matrix, type Scene, Vector3 } from "@babylonjs/core";
 
-/** 傷害數字類型（樣式暫定；正式數值由遊戲決定）。block＝格擋（預留） */
+/** 傷害數字類型（樣式暫定；正式數值由遊戲決定）。block＝格擋：獨立樣式（藍色外框盾牌牌面），不借用 miss */
 export type DamageStyle = "normal" | "crit" | "player" | "heal" | "miss" | "block";
 
 interface Item {
@@ -26,7 +26,7 @@ const CSS = `
 .cvfx-dmg.crit::before{content:"CRITICAL";display:block;font-size:13px;letter-spacing:2px;color:#fff6c9;-webkit-text-stroke:1px #a3460c;text-align:center;margin-bottom:2px}
 .cvfx-dmg.player{color:#ff8a8a;-webkit-text-stroke:1.5px #6e1020;text-shadow:0 2px 0 #4a0a14}
 .cvfx-dmg.heal{color:#9dffb5;-webkit-text-stroke:1.5px #135e2c}
-.cvfx-dmg.block{color:#bfe3ff;font-size:20px;-webkit-text-stroke:1.5px #1d4f80}
+.cvfx-dmg.block{color:#d6ecff;font-size:20px;-webkit-text-stroke:1.5px #1d4f80;text-shadow:0 2px 0 #12345a,0 0 8px rgba(120,190,255,.8);padding:2px 9px 3px;border:2px solid rgba(150,205,255,.9);border-radius:9px;background:rgba(24,58,104,.55)}
 .cvfx-dmg.miss{color:#d8deea;font-size:18px;-webkit-text-stroke:1px #4a5468}
 `;
 

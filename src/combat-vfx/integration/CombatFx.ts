@@ -19,6 +19,7 @@
  *   每格：const camOffset = fx.update(dt);       // 回傳鏡頭震動位移（自己決定要不要加到鏡頭目標）
  *   離開地圖：fx.dispose();
  */
+import { groundHeight, GROUND_LIFT } from "../core/ground.ts";
 import { Frustum, Vector3, Viewport, type Camera, type Mesh, type Plane, type Scene, type TransformNode } from "@babylonjs/core";
 import type { FxKey, HitSpec, Palette, SfxKey, SkillDef, SkillEvent } from "../core/skills.ts";
 import { SkillTimeline, type ClipTiming } from "../core/timeline.ts";
@@ -45,6 +46,12 @@ export interface CombatFxConfig {
   audio?: boolean;
   /** 其他玩家特效簡化（預設 true；false＝Stage 1 做法，只用於效能比較） */
   remoteSimplify?: boolean;
+  /**
+   * 地面高度（A 在 Stage 7.5 整合時提出；預設 0＝原本行為）。
+   * 地面特效（衝擊波、塵環、地裂、碎石、光柱、蓄力環）、範圍提示、怪物死亡／重生、流星落點都放在地形表面。
+   * 斜坡：取中心與周圍 4 點的最高處，平面特效不會埋進上坡那一側（下坡那一側稍微浮起）。
+   */
+  ground?: (x: number, z: number) => number;
 }
 
 /** 一個會施放技能的角色（自己、隊友、其他玩家）。只讀取位置，不改動角色。 */
@@ -122,6 +129,8 @@ function syncWorld(n: TransformNode): void {
 }
 
 const FOLLOW_FX = new Set<FxKey>(["magicCircle", "whirlRing", "chargeAura", "groundGlow", "lightShield", "healAura", "buffOrbit"]);
+/** 地面特效的大約半徑（公尺，scale 1）：斜坡上取地面高度用 */
+const GROUND_RADIUS = 1.2;
 const GROUND_FX = new Set<FxKey>(["shockwave", "dustRing", "groundCrack", "debris", "lightPillar", "chargeRings"]);
 const IMPACT_FX = new Set<FxKey>(["areaBlast", "shockwave", "dustRing", "starBurst"]);
 
@@ -147,6 +156,8 @@ export class CombatFx {
   private disposed = false;
   /** 統計：因距離或不在畫面內而略過的其他玩家特效 */
   readonly culled = { distance: 0, offscreen: 0 };
+  private groundFn: (x: number, z: number) => number = () => 0;
+  private hasGround = false;
   /** 統計：重要戰鬥特效（不省略）的次數 */
   private essentialCount = 0;
 
@@ -164,9 +175,25 @@ export class CombatFx {
     this.audio = cfg.audio === false ? null : new CombatAudio();
     this.audio?.setEnvironment(cfg.env ?? "dark");
     this.vfx.onCrit = () => this.screen.flashCrit();
+    if (cfg.ground) this.setGround(cfg.ground);
   }
 
   // ------------------------------------------------------------------ 設定
+
+  /** 換地圖或地形時更新地面高度函式（不給＝平地 y＝0） */
+  setGround(fn: ((x: number, z: number) => number) | null): void {
+    this.groundFn = fn ?? (() => 0);
+    this.hasGround = !!fn;
+  }
+
+  /**
+   * 地面點：中心高度，斜坡時取中心與半徑 r×0.7 四個方向的最高處（平面特效不埋進上坡），再抬高 2 cm 避免與地面閃爍。
+   * 沒有設定地面時一律 y＝0（與原本行為相同）。函式回傳非數字時當作 0。
+   */
+  groundPoint(x: number, z: number, r = 0): Vector3 {
+    return new Vector3(x, this.hasGround ? groundHeight(this.groundFn, x, z, r) + GROUND_LIFT : 0, z);
+  }
+
 
   setQuality(tier: VfxTier): void {
     this.tier = tier;
@@ -287,7 +314,7 @@ export class CombatFx {
         break;
       case "fx": {
         const at = this.anchor(a, ev);
-        if (GROUND_FX.has(ev.fx)) at.y = 0;
+        if (GROUND_FX.has(ev.fx)) at.y = this.groundPoint(at.x, at.z, GROUND_RADIUS * (ev.scale ?? 1)).y;
         const follow = ev.anchor === "self" && FOLLOW_FX.has(ev.fx) ? a.root : undefined;
         const nearMe = ev.anchor === "target" && Math.hypot(at.x - this.listener.x, at.z - this.listener.z) < 1.5;
         this.spawnFor(a.owner, ev.fx, at, { palette: pal, yaw: a.yaw(), scale: ev.scale, duration: ev.duration, follow, emitterMesh: ev.anchor === "weapon" ? a.weaponFocus : undefined, essential: a.owner !== "self" && (p.essential || nearMe) });
@@ -309,7 +336,8 @@ export class CombatFx {
         let from: Vector3;
         let dir: Vector3;
         if (ev.from === "sky") {
-          const dest = tgt ? new Vector3(tgt.x, 0, tgt.z) : a.position().add(f.scale(6));
+          const d0 = tgt ?? a.position().add(f.scale(6));
+          const dest = this.groundPoint(d0.x, d0.z);
           from = dest.add(new Vector3(-2.2, 9, -1.5));
           dir = dest.subtract(from);
         } else {
@@ -347,7 +375,7 @@ export class CombatFx {
    */
   zone(kind: "bossWarning" | "danger" | "heal", center: Vector3, radius: number, o: { owner?: VfxOwner; duration?: number; margin?: number } = {}): boolean {
     const owner = o.owner ?? "other";
-    const g = new Vector3(center.x, 0, center.z);
+    const g = this.groundPoint(center.x, center.z, radius);
     const flat = Math.hypot(this.listener.x - g.x, this.listener.z - g.z);
     const affects = flat <= radius + (o.margin ?? 3);
     const essential = affects || kind === "bossWarning";
@@ -421,7 +449,7 @@ export class CombatFx {
 
   /** 怪物死亡：地面塵環＋星光碎片（死亡動作、淡出由怪物模組自己播） */
   monsterDeath(groundAt: Vector3, scale = 1): void {
-    const at = new Vector3(groundAt.x, 0, groundAt.z);
+    const at = this.groundPoint(groundAt.x, groundAt.z, 0.8 * scale);
     const d = Vector3.Distance(at, this.listener);
     if (d > this.remoteCullDistance || this.offscreen(at)) return;
     this.vfx.spawn("dustRing", at, { owner: "self", palette: "steel", scale: 0.8 * scale, distance: d });
@@ -430,7 +458,7 @@ export class CombatFx {
 
   /** 怪物重生：魔法陣＋光柱（與展示頁相同） */
   monsterRespawn(groundAt: Vector3, scale = 1, boss = false): void {
-    const at = new Vector3(groundAt.x, 0, groundAt.z);
+    const at = this.groundPoint(groundAt.x, groundAt.z, 0.8 * scale);
     const d = Vector3.Distance(at, this.listener);
     if (d > this.remoteCullDistance || this.offscreen(at)) return;
     this.vfx.spawn("magicCircle", at, { palette: "star", scale: (boss ? 1.8 : 1) * scale, duration: 0.9, distance: d });

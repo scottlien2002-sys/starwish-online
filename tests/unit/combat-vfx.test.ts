@@ -334,3 +334,13 @@ test("重要戰鬥特效：影響本地玩家的其他玩家特效不受距離�
   // 重要特效不佔其他玩家份額
   assert.equal(b.stats.activeRemote, Math.floor(18 * 0.45));
 });
+
+import { groundHeight } from "../../src/combat-vfx/core/ground.ts";
+test("地面高度：平地、高地、斜坡取最高處（不埋進上坡），非數字當 0", () => {
+  assert.equal(groundHeight(() => 0, 1, 2), 0);
+  assert.equal(groundHeight(() => 12.5, 1, 2, 3), 12.5);
+  const slope = (x: number) => 3 + 0.3 * x;
+  assert.equal(groundHeight(slope, 0, 0), 3);
+  assert.ok(Math.abs(groundHeight(slope, 0, 0, 2) - (3 + 0.3 * 1.4)) < 1e-9);
+  assert.equal(groundHeight(() => NaN, 0, 0, 1), 0);
+});

@@ -149,6 +149,21 @@ export function attachWeapon(w: WeaponRig, hand: TransformNode, bladeDir: number
   if (w.kind === "staff") w.root.position.subtractInPlace(Y.scale(0.18));
 }
 
+/**
+ * 掛到 n75 這類「掛點節點」（A 的規格：Weapon_R／Weapon_L，原點＝握把中心，+Y 刀身、+Z 手指、+X 掌心法線）。
+ * 位置 0、旋轉單位、縮放補償掛點的世界縮放（Armature ≈1.2747），武器尺寸維持公尺。法杖握在杖身底端（不後退）。
+ * 與 A 的 NoviceAvatar.attachWeapon 相同做法。C1.0-B5b 的手骨仍用 attachWeapon。
+ */
+export function attachToSocket(w: WeaponRig, socket: TransformNode): void {
+  w.root.parent = socket;
+  w.root.position.setAll(0);
+  w.root.rotationQuaternion = Quaternion.Identity();
+  socket.computeWorldMatrix(true);
+  const sc = new Vector3();
+  socket.getWorldMatrix().decompose(sc);
+  w.root.scaling.set(1 / (Math.abs(sc.x) || 1), 1 / (Math.abs(sc.y) || 1), 1 / (Math.abs(sc.z) || 1));
+}
+
 export function setWeaponVisible(w: WeaponRig, on: boolean): void {
   for (const m of w.meshes) m.isVisible = on;
 }

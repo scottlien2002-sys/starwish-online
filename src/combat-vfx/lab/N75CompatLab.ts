@@ -26,7 +26,8 @@ import { GLTFFileLoader, GLTFLoaderAnimationStartMode } from "@babylonjs/loaders
 import { CombatFx } from "../integration/CombatFx.ts";
 import { SKILLS } from "../core/skills.ts";
 import type { ClipTiming } from "../core/timeline.ts";
-import { buildStaff, buildSword, attachWeapon, setWeaponVisible, type WeaponRig } from "../weapons.ts";
+import { buildStaff, buildSword, attachToSocket, setWeaponVisible, type WeaponRig } from "../weapons.ts";
+import { DynamicTexture, ParticleSystem, type Material } from "@babylonjs/core";
 
 interface N75Meta {
   version: string;
@@ -81,23 +82,28 @@ export async function startN75CompatLab(canvas: HTMLCanvasElement, hudRoot: HTML
   const rHand = node("R_Hand");
   const lHand = node("L_Hand");
   if (!weaponR || !rHand) throw new Error("n75: Weapon_R／R_Hand 掛點不存在");
-  // C 的武器掛在 A 的掛點：+Y 刀身／杖身、+Z 手指方向（A 的規格）
+  // A 的規格（Starwish_Novice_N75_Male_Tech_Spec §3）：掛在 Weapon_R，位置 0、旋轉單位、縮放補償掛點世界縮放；法杖不後退
   const sword = buildSword(scene, "n75");
   const staff = buildStaff(scene, "n75");
-  attachWeapon(sword, weaponR, [0, 1, 0], [0, 0, 1]);
-  attachWeapon(staff, weaponR, [0, 1, 0], [0, 0, 1]);
+  attachToSocket(sword, weaponR);
+  attachToSocket(staff, weaponR);
   setWeaponVisible(staff, false);
-  // 目標（命中點）：角色正前方 1.3 m、胸口高度
-  const targetPoint = new Vector3(0, 0.8, 1.3);
-  const dummy = MeshBuilder.CreateCylinder("dummy", { height: 1.4, diameter: 0.6 }, scene);
-  dummy.position.set(0, 0.7, 1.3 + 0.3);
+  // 目標（命中點）：角色正前方 1.3 m，腳底＋0.55×身高 1.25 m ≈ 0.69 m（A 的規格 §6）
+  const targetPoint = new Vector3(0, 0.69, 1.3);
+  const dummy = MeshBuilder.CreateCylinder("dummy", { height: 1.25, diameter: 0.6 }, scene);
+  dummy.position.set(0, 0.625, 1.3 + 0.3);
   const dm = new StandardMaterial("dm", scene);
   dm.diffuseColor = new Color3(0.7, 0.5, 0.4);
   dm.alpha = 0.55;
   dummy.material = dm;
 
-  const fx = new CombatFx({ scene, camera: cam, hudRoot, tier: (qs.get("q") as "high" | "medium" | "low") ?? "high", audio: false });
-  fx.listener.set(0, 0, 0);
+  const tier0 = (qs.get("q") as "high" | "medium" | "low") ?? "high";
+  const makeFx = (tier: "high" | "medium" | "low") => {
+    const f = new CombatFx({ scene, camera: cam, hudRoot, tier, audio: false });
+    f.listener.set(0, 0, 0);
+    return f;
+  };
+  let fx = makeFx(tier0);
   let weapon: WeaponRig = sword;
   const register = (w: WeaponRig) => {
     weapon = w;
@@ -106,7 +112,28 @@ export async function startN75CompatLab(canvas: HTMLCanvasElement, hudRoot: HTML
     fx.register({ id: "me", owner: "self", root, position: () => root.position, yaw: () => root.rotation.y, weaponBase: w.base, weaponTip: w.tip, weaponFocus: w.focus, target: () => targetPoint.clone() });
   };
   register(sword);
-  scene.render();
+
+  // 正式接入順序（A 的回饋 §2）：場景就緒 → 預熱 → 開始遊戲迴圈
+  let frames = 0;
+  scene.onAfterRenderObservable.add(() => frames++);
+  // &order=prewarm-first：重現 A 遇到的錯誤順序（先預熱再等場景就緒），只記錄結果，最多等 8 秒
+  const wrongOrder = qs.get("order") === "prewarm-first";
+  const tb = performance.now();
+  let prewarmReport;
+  let whenReadyOk = true;
+  if (wrongOrder) {
+    prewarmReport = await fx.prewarm();
+    whenReadyOk = await Promise.race([scene.whenReadyAsync().then(() => true), new Promise<boolean>((r) => setTimeout(() => r(false), 8000))]);
+  } else {
+    await scene.whenReadyAsync();
+    prewarmReport = await fx.prewarm();
+  }
+  const whenReadyMs = Math.round(performance.now() - tb);
+  const brokenAfterPrewarm = fx.vfx.brokenTextures();
+  const notReady = scene.particleSystems.filter((p) => !p.isReady()).map((p) => p.name).slice(0, 12);
+  engine.runRenderLoop(() => scene.render());
+  const loopStartedAt = performance.now();
+  const boot = { order: wrongOrder ? ["prewarm", "whenReadyAsync", "runRenderLoop"] : ["whenReadyAsync", "prewarm", "runRenderLoop"], whenReadyMs, whenReadyOk, notReady, prewarm: prewarmReport, brokenAfterPrewarm, loopStartedAt };
   info.textContent = `n75 ${meta.version} ${lod}｜動作 ${c.animationGroups.length}｜掛點 ${weaponR.name}${weaponL ? "＋" + weaponL.name : ""}｜Combat VFX 相容性測試`;
 
   const abs = (n: TransformNode) => {
@@ -129,7 +156,7 @@ export async function startN75CompatLab(canvas: HTMLCanvasElement, hudRoot: HTML
    * - hits：每次命中 hook 的 [標記時間, 實際經過秒數, 預期秒數, 該格動作時間, 刀尖到目標距離]
    * - projectiles：投射物發射點到右手的距離
    */
-  const run = (skillId: string, rate = 1, stopAt = -1) => {
+  const run = (skillId: string, rate = 1, stopAt = -1, ground?: (x: number, z: number) => number) => {
     const skill = SKILLS.find((s) => s.id === skillId);
     if (!skill) throw new Error(`unknown skill ${skillId}`);
     const clip = anim.clips[skill.clip];
@@ -137,7 +164,8 @@ export async function startN75CompatLab(canvas: HTMLCanvasElement, hudRoot: HTML
     const dur = meta.clips[skill.clip]?.seconds ?? clip?.duration ?? 1;
     if (!clip || !g) return { skillId, missing: !g ? "animation" : "clip" };
     register(skill.weapon === "staff" ? staff : sword);
-    root.position.set(0, 0, 0);
+    const gy = (x: number, z: number) => (ground ? ground(x, z) : 0);
+    root.position.set(0, gy(0, 0), 0);
     root.rotation.y = 0;
     g.start(false, 1, g.from, g.to);
     g.pause();
@@ -178,7 +206,7 @@ export async function startN75CompatLab(canvas: HTMLCanvasElement, hudRoot: HTML
       const t = h.timeline.t;
       g.goToFrame(frameOf(g, t, dur));
       const rm = h.timeline.rootMotion();
-      root.position.set(0, 0, rm.forward);
+      root.position.set(0, gy(0, rm.forward), rm.forward);
       root.rotation.y = -rm.yaw;
       fx.updateVisuals(dt);
       const tip = abs(weapon.tip);
@@ -213,7 +241,10 @@ export async function startN75CompatLab(canvas: HTMLCanvasElement, hudRoot: HTML
     const hitFxErr = hitFx.reduce((m, s) => Math.max(m, Math.min(Vector3.Distance(s.at, targetPoint), Vector3.Distance(s.at, new Vector3(targetPoint.x, 0, targetPoint.z)))), 0);
     const wfx = spawns.filter((s) => !s.fromHit && weaponKeys.has(s.key));
     const weaponFxErr = wfx.reduce((m, s) => Math.max(m, s.toFocus), 0);
-    return { skillId, rate, duration: dur, wall, hitFxCount: hitFx.length, hitFxErr, weaponFxCount: wfx.length, weaponFxErr, trailFrames, trailErrMax, tipJumpMax, chordMax, insideFrames, inside, hits, projectiles };
+    // 地面特效：高度減去該點地面高度（埋進地底＜0；斜坡上會略高）
+    const GROUND = ["shockwave", "dustRing", "groundCrack", "debris", "lightPillar", "chargeRings"];
+    const gfx = spawns.filter((s) => GROUND.includes(s.key)).map((s) => ({ key: s.key, dy: +(s.at.y - gy(s.at.x, s.at.z)).toFixed(3) }));
+    return { skillId, rate, duration: dur, wall, groundFx: gfx, hitFxCount: hitFx.length, hitFxErr, weaponFxCount: wfx.length, weaponFxErr, trailFrames, trailErrMax, tipJumpMax, chordMax, insideFrames, inside, hits, projectiles };
   };
 
   /** A 的普通攻擊／雙手武器動作：只播 A 的動作＋C 的拖尾（basicSwing），量測刀尖是否穿進身體、左手與握把距離 */
@@ -233,6 +264,7 @@ export async function startN75CompatLab(canvas: HTMLCanvasElement, hudRoot: HTML
     let insideFrames = 0;
     let lhandToGripMin = 99;
     let lhandToGripAtHit = -1;
+    let gripAlongAtHit = NaN;
     let tipToTargetAtHit = -1;
     for (let t = 0; t <= m.seconds; t += dt) {
       fx.advance(dt);
@@ -242,20 +274,23 @@ export async function startN75CompatLab(canvas: HTMLCanvasElement, hudRoot: HTML
       const head = fx.trailHead("me");
       if (head?.emitting) trailErrMax = Math.max(trailErrMax, Vector3.Distance(head.tip, tip));
       if (inTorso(tip)) insideFrames++;
-      if (lHand) {
-        // 左手到握把（武器根部往刀身 0～0.25 m 的線段）的距離
-        const b = abs(weapon.base);
-        const dir = tip.subtract(b).normalize();
-        const lh = abs(lHand);
-        const k = Math.max(-0.1, Math.min(0.25, Vector3.Dot(lh.subtract(b), dir)));
-        const d = Vector3.Distance(lh, b.add(dir.scale(k)));
+      if (weaponL) {
+        // 左手握點（Weapon_L 原點＝左手掌心）沿刀身軸（從 Weapon_R 原點）的位置與離軸距離。A 的規格 §4：雙手劍 −0.10、長柄 +0.28
+        const o = abs(weaponR);
+        const dir = tip.subtract(o).normalize();
+        const lh = abs(weaponL);
+        const k = Vector3.Dot(lh.subtract(o), dir);
+        const d = Vector3.Distance(lh, o.add(dir.scale(k)));
         lhandToGripMin = Math.min(lhandToGripMin, d);
-        if (Math.abs(t - hitT) < dt / 2 + 1e-6) lhandToGripAtHit = d;
+        if (Math.abs(t - hitT) < dt / 2 + 1e-6) {
+          lhandToGripAtHit = d;
+          gripAlongAtHit = k;
+        }
       }
       if (Math.abs(t - hitT) < dt / 2 + 1e-6) tipToTargetAtHit = Vector3.Distance(tip, targetPoint);
     }
     g.stop();
-    return { clipName, seconds: m.seconds, hitT, trailErrMax, insideFrames, lhandToGripMin, lhandToGripAtHit, tipToTargetAtHit };
+    return { clipName, seconds: m.seconds, hitT, trailErrMax, insideFrames, lhandToGripMin, lhandToGripAtHit, gripAlongAtHit, tipToTargetAtHit };
   };
 
   /** 停在某個時間點畫一格（截圖用） */
@@ -301,7 +336,156 @@ export async function startN75CompatLab(canvas: HTMLCanvasElement, hudRoot: HTML
     return r;
   };
 
+  /** 新版角色相容（A 的規格 §1～§3）：骨骼數、動作數、掛點父骨骼／本地座標／旋轉、世界縮放、武器尺寸 */
+  const rigCheck = () => {
+    const sk = c.skeletons[0];
+    const q = (n: TransformNode) => {
+      const r = n.rotationQuaternion;
+      return r ? [r.x, r.y, r.z, r.w].map((v) => +v.toFixed(4)) : null;
+    };
+    const p3 = (v: Vector3) => [v.x, v.y, v.z].map((x) => +x.toFixed(4));
+    const sockets = [weaponR, weaponL].filter((n): n is TransformNode => !!n).map((n) => {
+      n.computeWorldMatrix(true);
+      const sc = new Vector3();
+      n.getWorldMatrix().decompose(sc);
+      return { name: n.name, parent: n.parent?.name ?? null, pos: p3(n.position), rot: q(n), worldScale: +Math.abs(sc.y).toFixed(4) };
+    });
+    register(sword);
+    const sl = Vector3.Distance(abs(sword.base), abs(sword.tip));
+    register(staff);
+    const st = Vector3.Distance(abs(weaponR), abs(staff.focus));
+    register(sword);
+    return {
+      bones: sk?.bones.length ?? 0,
+      skeletons: c.skeletons.length,
+      meshes: c.meshes.filter((m) => m.getTotalVertices() > 0).length,
+      materials: c.materials.length,
+      animationGroups: c.animationGroups.length,
+      sockets,
+      swordBaseToTip: +sl.toFixed(4), // 規格：0.40 m（+Y 0.10→0.50）
+      staffGripToFocus: +st.toFixed(4), // 規格：0.62 m（杖頭星晶）
+    };
+  };
+
+  /** 失效貼圖：特效材質、粒子系統，以及場景中所有 fx_ 開頭貼圖 */
+  const textureCheck = () => {
+    const broken = fx.vfx.brokenTextures();
+    for (const m of scene.materials as Material[]) {
+      if (!m.name.startsWith("fxm_")) continue;
+      for (const t of m.getActiveTextures()) if (!t.getInternalTexture()) broken.push(`${m.name}→${t.name}`);
+    }
+    return [...new Set(broken)];
+  };
+  const counts = () => ({ textures: scene.textures.length, materials: scene.materials.length, meshes: scene.meshes.length, particleSystems: scene.particleSystems.length, transformNodes: scene.transformNodes.length });
+  const ALL = ["triple_slash", "staff_cast", "leap_slam", "whirlwind", "star_meteor", "charge_burst"];
+  const castAll = () => {
+    for (const id of ALL) run(id, 1);
+    // 投射物撞擊（dispose(true)）與遠方其他玩家投射物（省略路徑）都走一次
+    const p = fx.launch("self", "magicBolt", new Vector3(0, 1, 0), new Vector3(0, 0, 1), 11, "azure");
+    const w = fx.launch("self", "swordWave", new Vector3(0, 1, 0), new Vector3(0, 0, 1), 9, "azure");
+    for (let i = 0; i < 20; i++) {
+      fx.advance(1 / 60);
+      fx.updateVisuals(1 / 60);
+    }
+    p?.dispose(true);
+    w?.dispose(true);
+    for (let i = 0; i < 90; i++) {
+      fx.advance(1 / 60);
+      fx.updateVisuals(1 / 60);
+    }
+  };
+  const readyWithin = async (ms: number) => {
+    const t0 = performance.now();
+    const ok = await Promise.race([scene.whenReadyAsync().then(() => true), new Promise<boolean>((r) => setTimeout(() => r(false), ms))]);
+    return { ok, ms: Math.round(performance.now() - t0) };
+  };
+
+  /** 畫質切換：每個畫質都施放全部技能，檢查失效貼圖、場景是否還能就緒 */
+  const qualityCycle = async () => {
+    const out: Record<string, unknown>[] = [];
+    for (const t of ["high", "low", "medium", "high"] as const) {
+      fx.setQuality(t);
+      castAll();
+      out.push({ tier: t, broken: textureCheck(), counts: counts(), ready: await readyWithin(8000) });
+    }
+    return out;
+  };
+
+  /** 重複進出地圖：dispose → 新實例 → 場景就緒 → 預熱 → 施放；資源數要回到第一次的值，沒有失效貼圖 */
+  const reenter = async (n = 3) => {
+    const out: Record<string, unknown>[] = [];
+    for (let i = 0; i < n; i++) {
+      fx.dispose();
+      fx = makeFx(tier0);
+      register(sword);
+      const ready = await readyWithin(8000);
+      const pw = await fx.prewarm();
+      castAll();
+      out.push({ i, ready, prewarmMs: pw.ms, leftover: pw.leftoverActive, broken: textureCheck(), counts: counts() });
+    }
+    return out;
+  };
+
+  /** 斜坡、高地：地面 y＝高度＋坡度×x（重現星芽原野 −0.8～28 m 地形） */
+  const groundCheck = (height: number, slope: number) => {
+    const h = (x: number, z: number) => height + slope * x + 0 * z;
+    fx.setGround(h);
+    const res: Record<string, unknown> = { height, slope };
+    for (const id of ["leap_slam", "charge_burst", "star_meteor", "whirlwind"]) {
+      const r = run(id, 1, -1, h) as { groundFx?: { key: string; dy: number }[] };
+      res[id] = r.groundFx ?? [];
+    }
+    // 流星落點、怪物死亡／重生、範圍提示
+    const sp: { key: string; dy: number }[] = [];
+    fx.vfx.onSpawn = (key, at) => sp.push({ key, dy: +(at.y - h(at.x, at.z)).toFixed(3) });
+    fx.monsterDeath(new Vector3(2, 0, 3));
+    fx.monsterRespawn(new Vector3(-2, 0, 3), 1, true);
+    fx.zone("danger", new Vector3(0, 0, 2), 3, { owner: "self" });
+    fx.vfx.onSpawn = null;
+    res.monsterAndZone = sp;
+    fx.setGround(null);
+    return res;
+  };
+
+  /** Babylon 行為確認：粒子系統的發射源網格被釋放時，粒子系統（含貼圖）是否被連帶釋放 */
+  const emitterCascade = () => {
+    const m = MeshBuilder.CreateBox("cascadeProbe", { size: 0.1 }, scene);
+    const tex = new DynamicTexture("cascadeProbeTex", { width: 8, height: 8 }, scene, false);
+    const ps = new ParticleSystem("cascadeProbePs", 8, scene);
+    ps.particleTexture = tex;
+    ps.emitter = m;
+    m.dispose(false, false);
+    const r = { psDisposed: scene.particleSystems.indexOf(ps) < 0, textureDisposed: !tex.getInternalTexture() };
+    if (!r.psDisposed) ps.dispose();
+    if (!r.textureDisposed) tex.dispose();
+    return r;
+  };
+
+  /** 傷害數字五種類型：各自的 class 與實際顏色、外框（格擋不得與未命中相同） */
+  const damageStyles = () => {
+    const out: Record<string, unknown> = {};
+    for (const style of ["normal", "crit", "heal", "block", "miss"] as const) {
+      fx.hit(targetPoint, [], { owner: "self", damage: style === "block" ? "格擋" : style === "miss" ? "MISS" : 123, style, crit: style === "crit" });
+      fx.updateVisuals(1 / 60);
+      const els = [...hudRoot.querySelectorAll<HTMLElement>(`.cvfx-dmg.${style}`)].filter((e) => e.style.display !== "none");
+      const el = els[els.length - 1];
+      const cs = el ? getComputedStyle(el) : null;
+      out[style] = el ? { text: el.textContent, color: cs!.color, border: cs!.borderTopStyle + " " + cs!.borderTopColor, bg: cs!.backgroundColor, size: cs!.fontSize } : null;
+    }
+    return out;
+  };
+
   Object.assign(api, {
+    frames: () => frames,
+    damageStyles,
+    boot,
+    rigCheck,
+    textureCheck,
+    qualityCycle,
+    reenter,
+    groundCheck,
+    emitterCascade,
+    counts,
     essentialCheck,
     available: true,
     version: meta.version,

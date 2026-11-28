@@ -44,6 +44,36 @@ for (const name of browsers) {
       const diff = Object.entries(info.marks).filter(([k, v]) => JSON.stringify(v) !== JSON.stringify(info.cMarks[k] ?? null)).map(([k]) => k);
       check("技能動作標記：A 的 json 與 C 的 novice_combat_male.json 一致", diff.length === 0, diff);
 
+      // 新版角色規格（Starwish_Novice_N75_Male_Tech_Spec §1～§3）
+      const rig = await page.evaluate(() => window.__n75.rigCheck());
+      run.results.rig = rig;
+      check("骨骼：82 根蒙皮骨骼（1 副骨架）", rig.bones === 82 && rig.skeletons === 1, { bones: rig.bones, skeletons: rig.skeletons });
+      check("動作：27 段", rig.animationGroups === 27, rig.animationGroups);
+      const SPEC = {
+        Weapon_R: { parent: "R_Hand", pos: [0.0006, 0.0382, 0.0113], rot: [0.4973, 0.5108, 0.5194, -0.4711] },
+        Weapon_L: { parent: "L_Hand", pos: [0.0023, 0.0418, -0.011], rot: [0.4853, 0.503, 0.5312, -0.4788] },
+      };
+      for (const [name, sp] of Object.entries(SPEC)) {
+        const sk = rig.sockets.find((x) => x.name === name);
+        const posOk = !!sk && sk.pos.every((v, i) => Math.abs(v - sp.pos[i]) <= 0.001);
+        const rotOk = !!sk?.rot && (sk.rot.every((v, i) => Math.abs(v - sp.rot[i]) <= 0.002) || sk.rot.every((v, i) => Math.abs(v + sp.rot[i]) <= 0.002));
+        check(`掛點 ${name}：父骨骼 ${sp.parent}、本地位置與旋轉符合規格`, !!sk && sk.parent === sp.parent && posOk && rotOk, sk);
+        check(`掛點 ${name}：世界縮放 ≈ 1.2747（Armature）`, !!sk && Math.abs(sk.worldScale - 1.2747) <= 0.01, sk?.worldScale);
+      }
+      check("武器縮放補償：短劍拖尾 劍根→劍尖 0.40 m", Math.abs(rig.swordBaseToTip - 0.4) <= 0.005, rig.swordBaseToTip);
+      check("法杖握在杖身底端：握把中心→杖頭星晶 0.62 m", Math.abs(rig.staffGripToFocus - 0.62) <= 0.005, rig.staffGripToFocus);
+
+      // 正式接入順序：場景就緒 → 預熱 → 遊戲迴圈（A 的回饋 §2）
+      const boot = await page.evaluate(() => window.__n75.boot);
+      run.results.boot = boot;
+      check("接入順序：whenReadyAsync → prewarm → runRenderLoop", JSON.stringify(boot.order) === JSON.stringify(["whenReadyAsync", "prewarm", "runRenderLoop"]), boot.order);
+      check("預熱：不扣血、0 音效、0 傷害數字、殘留 0", boot.prewarm.audioPlayed === 0 && boot.prewarm.damageShown === 0 && boot.prewarm.leftoverActive === 0 && boot.prewarm.leftoverProjectiles === 0, boot.prewarm);
+      check("預熱後沒有失效貼圖", boot.brokenAfterPrewarm.length === 0, boot.brokenAfterPrewarm);
+      const f0 = await page.evaluate(() => window.__n75.frames());
+      await page.waitForTimeout(1500);
+      const f1 = await page.evaluate(() => window.__n75.frames());
+      check("預熱後遊戲迴圈有在跑（1.5 秒內畫面持續更新）", f1 - f0 >= 5, { f0, f1 });
+
       // 6 個技能 × 3 種攻速
       const skills = await page.evaluate(() => window.__n75.skills);
       run.results.skills = {};
@@ -92,8 +122,42 @@ for (const name of browsers) {
         run.results.basic[clip] = r;
         check(`${clip}：拖尾沿著刀尖移動（誤差 ≤ 1 cm）`, r.trailErrMax <= 0.01, +r.trailErrMax.toFixed(4));
         check(`${clip}：武器不穿進軀幹`, r.insideFrames === 0, r.insideFrames);
-        if (TWO_HANDED.includes(clip)) run.results.twoHandGrip = { ...(run.results.twoHandGrip ?? {}), [clip]: { lhandToGripAtHit: +r.lhandToGripAtHit.toFixed(3), lhandToGripMin: +r.lhandToGripMin.toFixed(3) } };
+        if (TWO_HANDED.includes(clip)) {
+          // A 的規格 §4：左手握點沿刀身 雙手劍 −0.10、長柄 +0.28（錘擊未列）。正式雙手武器未完成 → 只記錄，列為後續驗收
+          const want = clip.startsWith("Attack_2H") ? -0.1 : clip.startsWith("Attack_Polearm") ? 0.28 : null;
+          run.results.twoHandGrip = { ...(run.results.twoHandGrip ?? {}), [clip]: { spec: want, alongAtHit: +r.gripAlongAtHit.toFixed(3), offAxisAtHit: +r.lhandToGripAtHit.toFixed(3) } };
+          if (want !== null && !(Math.abs(r.gripAlongAtHit - want) <= 0.06 && r.lhandToGripAtHit <= 0.06)) run.warnings.push(`${clip}：命中格左手握點沿刀身 ${r.gripAlongAtHit.toFixed(3)} m（規格 ${want}）、離軸 ${r.lhandToGripAtHit.toFixed(3)} m → 後續以正式雙手武器驗收`);
+        }
       }
+      // 傷害數字：格擋是獨立樣式
+      const ds = await page.evaluate(() => window.__n75.damageStyles());
+      run.results.damageStyles = ds;
+      check("傷害數字：一般／暴擊／治療／格擋／未命中五種都能顯示", ["normal", "crit", "heal", "block", "miss"].every((k) => ds[k]), Object.keys(ds).filter((k) => !ds[k]));
+      check("格擋樣式獨立（顏色、外框都與未命中不同）", !!ds.block && !!ds.miss && ds.block.color !== ds.miss.color && ds.block.border !== ds.miss.border, { block: ds.block, miss: ds.miss });
+
+      // 地面高度、斜坡
+      run.results.ground = {};
+      for (const [hgt, slope] of [[0, 0], [12.5, 0], [-0.8, 0], [3, 0.3], [20, 0.5]]) {
+        const g = await page.evaluate(([a, b]) => window.__n75.groundCheck(a, b), [hgt, slope]);
+        run.results.ground[`${hgt}@${slope}`] = g;
+        const all = Object.entries(g).filter(([k]) => k !== "height" && k !== "slope").flatMap(([, v]) => v);
+        const dys = all.map((x) => x.dy);
+        const maxUp = slope * 1.2 * 1.5 * 0.7 + 0.05;
+        check(`地面特效貼地：高度 ${hgt} m、坡度 ${slope}（不埋地、不浮空超過 ${maxUp.toFixed(2)} m）`, all.length > 0 && Math.min(...dys) >= -0.001 && Math.max(...dys) <= maxUp, { n: all.length, min: Math.min(...dys), max: Math.max(...dys) });
+      }
+
+      // 失效貼圖：畫質切換、重複進出地圖
+      run.results.emitterCascade = await page.evaluate(() => window.__n75.emitterCascade());
+      const qc = await page.evaluate(() => window.__n75.qualityCycle());
+      run.results.qualityCycle = qc;
+      check("畫質切換 高→低→中→高：施放全部技能後沒有失效貼圖", qc.every((x) => x.broken.length === 0), qc.map((x) => x.broken));
+      check("畫質切換後場景仍能就緒（whenReadyAsync）", qc.every((x) => x.ready.ok), qc.map((x) => x.ready));
+      const re = await page.evaluate(() => window.__n75.reenter(3));
+      run.results.reenter = re;
+      check("重複進出地圖 3 次：就緒 → 預熱 → 施放，沒有失效貼圖", re.every((x) => x.broken.length === 0 && x.ready.ok && x.leftover === 0), re.map((x) => ({ b: x.broken, r: x.ready, l: x.leftover })));
+      const c0 = re[0].counts, c2 = re[re.length - 1].counts;
+      check("重複進出地圖：貼圖、材質、網格、粒子、節點數回到第一次的值", JSON.stringify(c0) === JSON.stringify(c2), { first: c0, last: c2 });
+
       // 重要戰鬥特效例外（施放者 40 m 外、鏡頭背後）
       const ess = await page.evaluate(() => window.__n75.essentialCheck());
       run.results.essential = ess;
@@ -107,6 +171,18 @@ for (const name of browsers) {
       await shot("99_end");
     } catch (e) {
       run.errors.push(`exception: ${e instanceof Error ? e.message : String(e)}`);
+    }
+    // 錯誤順序（先預熱再等就緒）：只記錄，說明為什麼文件規定順序
+    if (lod === "lite") {
+      try {
+        const p2 = await ctx.newPage();
+        await p2.goto(`${server.url}/?lab=n75compat&lod=lite&q=high&order=prewarm-first`, { waitUntil: "load" });
+        await p2.waitForFunction(() => window.__n75?.ready === true, null, { timeout: 180000 });
+        run.results.wrongOrder = await p2.evaluate(() => { const b = window.__n75.boot; return b ? { whenReadyOk: b.whenReadyOk, ms: b.whenReadyMs, notReady: b.notReady } : null; });
+        await p2.close();
+      } catch (e) {
+        run.results.wrongOrder = { error: String(e) };
+      }
     }
     check("沒有頁面錯誤", run.errors.length === 0, run.errors.slice(0, 5));
     report.runs.push(run);

@@ -20,6 +20,7 @@ import {
   Mesh,
   MeshBuilder,
   ParticleSystem,
+  type AbstractMesh,
   type Scene,
   StandardMaterial,
   TrailMesh,
@@ -166,7 +167,11 @@ export class VfxSystem {
   private mat(tex: TexKey | null, color: Color3): StandardMaterial {
     const id = `${tex ?? "none"}|${color.toHexString()}`;
     const hit = this.mats.get(id);
-    if (hit) return hit.mat;
+    if (hit) {
+      // 保險：共用貼圖若被外部釋放，換回快取中有效的貼圖
+      if (tex && !hit.mat.diffuseTexture?.getInternalTexture()) hit.mat.diffuseTexture = fxTexture(this.scene, tex, this.q.textureSize);
+      return hit.mat;
+    }
     const m = new StandardMaterial(`fxm_${id}`, this.scene);
     if (tex) {
       m.diffuseTexture = fxTexture(this.scene, tex, this.q.textureSize);
@@ -242,6 +247,13 @@ export class VfxSystem {
   private takePs(key: string, cap: number): PsFx {
     const pool = this.psPool.get(key) ?? [];
     this.psPool.set(key, pool);
+    // 已被外部釋放的粒子系統（例如發射源網格被 dispose 時 Babylon 會連帶釋放）不再使用
+    for (let i = pool.length - 1; i >= 0; i--) {
+      if (!pool[i]!.busy && this.scene.particleSystems.indexOf(pool[i]!.ps) < 0) {
+        pool.splice(i, 1);
+        this.stats.pooledSystems--;
+      }
+    }
     let f = pool.find((p) => !p.busy && p.ps.getActiveCount() === 0 && p.ps.getCapacity() >= cap);
     if (!f) {
       const ps = new ParticleSystem(`ps_${key}_${pool.length}`, Math.max(cap, 8), this.scene);
@@ -961,6 +973,9 @@ export class VfxSystem {
           trail.ps.stop();
           trail.stopAt = self.time;
           trail.freeAt = self.time + 0.6;
+          // 粒子尾巴的發射源是 core：先改成固定位置。否則 core.dispose() 會讓 Babylon 連帶釋放這個粒子系統
+          // ＋共用的星光／火花貼圖（ParticleSystem.dispose 預設會釋放貼圖），之後所有用到這張貼圖的材質都失效
+          detachEmitter(trail.ps);
         }
         self.budget.release(g.handle);
         // 材質是共用的，只釋放網格
@@ -1003,6 +1018,7 @@ export class VfxSystem {
       if (this.time >= f.stopAt && f.ps.isStarted()) f.ps.stop();
       parts += f.ps.getActiveCount();
       if (this.time >= f.freeAt && f.ps.getActiveCount() === 0) {
+        detachEmitter(f.ps);
         f.busy = false;
         this.budget.release(f.handle);
         this.psActive.splice(i, 1);
@@ -1079,6 +1095,22 @@ export class VfxSystem {
     this.prewarmCancelled = true;
   }
 
+  /** 診斷：引用到已失效貼圖（沒有 GPU 貼圖）的特效材質與粒子系統名稱；正常應為空陣列 */
+  brokenTextures(): string[] {
+    const out: string[] = [];
+    for (const [id, { mat }] of this.mats) {
+      const t = mat.diffuseTexture;
+      if (t && !t.getInternalTexture()) out.push(`fxm_${id}`);
+    }
+    for (const l of this.psPool.values())
+      for (const f of l) {
+        const t = f.ps.particleTexture;
+        if (this.scene.particleSystems.indexOf(f.ps) < 0) out.push(`${f.ps.name}(disposed)`);
+        else if (t && !t.getInternalTexture() && f.busy) out.push(f.ps.name);
+      }
+    return out;
+  }
+
   /** 全部清除（換場景、測試用） */
   clear(): void {
     for (const p of [...this.projectiles]) p.dispose(false);
@@ -1092,6 +1124,7 @@ export class VfxSystem {
     for (const f of this.psActive) {
       f.ps.stop();
       f.ps.reset();
+      detachEmitter(f.ps);
       f.busy = false;
       this.budget.release(f.handle);
     }
@@ -1112,5 +1145,13 @@ export class VfxSystem {
     this.psPool.clear();
     this.glow?.dispose();
     this.glow = null;
+  }
+}
+
+/** 粒子系統的發射源改成固定世界座標（不再引用網格），避免網格釋放時連帶釋放粒子系統與共用貼圖 */
+function detachEmitter(ps: ParticleSystem): void {
+  const e = ps.emitter as unknown;
+  if (e && !(e instanceof Vector3) && typeof (e as AbstractMesh).getAbsolutePosition === "function") {
+    ps.emitter = (e as AbstractMesh).getAbsolutePosition().clone();
   }
 }
