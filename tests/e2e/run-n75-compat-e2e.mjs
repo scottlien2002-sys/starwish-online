@@ -17,6 +17,11 @@ const RATES = [1, 1.3, 1.6];
 const FRAME = 1 / 60;
 const TWO_HANDED = ["Attack_2H_Slash", "Attack_2H_Smash", "Attack_Polearm_Thrust", "Attack_Polearm_Swing", "Attack_Hammer_Smash"];
 const ONE_HANDED = ["Attack", "Attack_1H_Chop", "Attack_1H_Thrust"];
+/** 接觸格摘要：時間範圍、部位、最多頂點數 */
+const summarizeContact = (list) => {
+  const regions = [...new Set(list.map((x) => x.region))].join("、");
+  return `${list[0].t.toFixed(2)}～${list[list.length - 1].t.toFixed(2)} 秒，${regions}，最多 ${Math.max(...list.map((x) => x.n))} 個頂點`;
+};
 
 for (const name of browsers) {
   const browser = await pw[name].launch({ args: name === "chromium" ? ["--use-gl=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] : [] });
@@ -60,8 +65,16 @@ for (const name of browsers) {
         check(`掛點 ${name}：父骨骼 ${sp.parent}、本地位置與旋轉符合規格`, !!sk && sk.parent === sp.parent && posOk && rotOk, sk);
         check(`掛點 ${name}：世界縮放 ≈ 1.2747（Armature）`, !!sk && Math.abs(sk.worldScale - 1.2747) <= 0.01, sk?.worldScale);
       }
+      const wr = rig.sockets.find((x) => x.name === "Weapon_R");
+      const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+      // 規格 §3：靜止姿勢 Weapon_R 刀身 (0.01, 0.11, 0.99)、手指 (−0.50, −0.86, 0.10)（glTF）→ Babylon x 反向
+      check("掛點方向：靜止姿勢 Weapon_R 的刀身（+Y）、手指（+Z）世界方向符合規格", !!wr && dot(wr.restBlade, [-0.01, 0.11, 0.99]) > 0.98 && dot(wr.restFinger, [0.5, -0.86, 0.1]) > 0.98, wr && { blade: wr.restBlade, finger: wr.restFinger });
       check("武器縮放補償：短劍拖尾 劍根→劍尖 0.40 m", Math.abs(rig.swordBaseToTip - 0.4) <= 0.005, rig.swordBaseToTip);
       check("法杖握在杖身底端：握把中心→杖頭星晶 0.62 m", Math.abs(rig.staffGripToFocus - 0.62) <= 0.005, rig.staffGripToFocus);
+
+      const cs = await page.evaluate(() => window.__n75.contactSanity());
+      run.results.contactSanity = cs;
+      check("穿模量測自我檢查：穿過胸口的線段有接觸、遠方線段沒有", cs.through > 0 && cs.far === 0, cs);
 
       // 正式接入順序：場景就緒 → 預熱 → 遊戲迴圈（A 的回饋 §2）
       const boot = await page.evaluate(() => window.__n75.boot);
@@ -94,7 +107,7 @@ for (const name of browsers) {
             run.results.torso = run.results.torso ?? {};
             if (r.insideFrames) {
               run.results.torso[tag] = r.inside;
-              run.warnings.push(`${tag}：刀尖靠近頭肩（軀幹圓柱內）${r.insideFrames} 格：${JSON.stringify(r.inside)}`);
+              run.warnings.push(`${tag}：武器碰到角色網格 ${r.insideFrames} 格（${summarizeContact(r.inside)}）→ 待 A 確認`);
             }
           }
           if (r.hitFxCount) check(`${tag}：命中特效出現在目標命中點（≤ 5 cm）`, r.hitFxErr <= 0.05, { n: r.hitFxCount, err: +r.hitFxErr.toFixed(3) });
@@ -121,7 +134,11 @@ for (const name of browsers) {
         const r = await page.evaluate(([c, w]) => window.__n75.runBasic(c, w), [clip, clip.startsWith("Cast_") ? "staff" : "sword"]);
         run.results.basic[clip] = r;
         check(`${clip}：拖尾沿著刀尖移動（誤差 ≤ 1 cm）`, r.trailErrMax <= 0.01, +r.trailErrMax.toFixed(4));
-        check(`${clip}：武器不穿進軀幹`, r.insideFrames === 0, r.insideFrames);
+        if (r.insideFrames) {
+          run.results.torso = run.results.torso ?? {};
+          run.results.torso[clip] = r.inside;
+          run.warnings.push(`${clip}：武器碰到角色網格 ${r.insideFrames} 格（${summarizeContact(r.inside)}）→ 待 A 確認`);
+        }
         if (TWO_HANDED.includes(clip)) {
           // A 的規格 §4：左手握點沿刀身 雙手劍 −0.10、長柄 +0.28（錘擊未列）。正式雙手武器未完成 → 只記錄，列為後續驗收
           const want = clip.startsWith("Attack_2H") ? -0.1 : clip.startsWith("Attack_Polearm") ? 0.28 : null;
@@ -140,10 +157,12 @@ for (const name of browsers) {
       for (const [hgt, slope] of [[0, 0], [12.5, 0], [-0.8, 0], [3, 0.3], [20, 0.5]]) {
         const g = await page.evaluate(([a, b]) => window.__n75.groundCheck(a, b), [hgt, slope]);
         run.results.ground[`${hgt}@${slope}`] = g;
-        const all = Object.entries(g).filter(([k]) => k !== "height" && k !== "slope").flatMap(([, v]) => v);
+        const all = Object.entries(g).filter(([k]) => !["height", "slope", "edges"].includes(k)).flatMap(([, v]) => v);
         const dys = all.map((x) => x.dy);
-        const maxUp = slope * 1.2 * 1.5 * 0.7 + 0.05;
-        check(`地面特效貼地：高度 ${hgt} m、坡度 ${slope}（不埋地、不浮空超過 ${maxUp.toFixed(2)} m）`, all.length > 0 && Math.min(...dys) >= -0.001 && Math.max(...dys) <= maxUp, { n: all.length, min: Math.min(...dys), max: Math.max(...dys) });
+        // 地面特效中心：地面＋0～0.1 m（各特效自己的小抬高，例如塵土 0.08、衝擊波 0.04）
+        check(`地面特效中心貼地：高度 ${hgt} m、坡度 ${slope}`, all.length > 0 && Math.min(...dys) >= -0.001 && Math.max(...dys) <= 0.1, { n: all.length, min: Math.min(...dys), max: Math.max(...dys), bad: all.filter((x) => x.dy < -0.001 || x.dy > 0.1) });
+        const ed = g.edges.flatMap((e) => e.dy);
+        check(`平面地面特效邊緣貼著坡面：高度 ${hgt} m、坡度 ${slope}（邊緣離地 ≤ 0.12 m）`, g.edges.length > 0 && ed.every((d) => Math.abs(d) <= 0.12), g.edges);
       }
 
       // 失效貼圖：畫質切換、重複進出地圖
@@ -157,6 +176,20 @@ for (const name of browsers) {
       check("重複進出地圖 3 次：就緒 → 預熱 → 施放，沒有失效貼圖", re.every((x) => x.broken.length === 0 && x.ready.ok && x.leftover === 0), re.map((x) => ({ b: x.broken, r: x.ready, l: x.leftover })));
       const c0 = re[0].counts, c2 = re[re.length - 1].counts;
       check("重複進出地圖：貼圖、材質、網格、粒子、節點數回到第一次的值", JSON.stringify(c0) === JSON.stringify(c2), { first: c0, last: c2 });
+
+      // 穿模特寫截圖（每個有接觸的動作取接觸最多的一格，右側＋背後）
+      if (name === "chromium" && lod === "hq") {
+        for (const [k, list] of Object.entries(run.results.torso ?? {}).slice(0, 8)) {
+          const worst = list.reduce((a, b) => (b.n > a.n ? b : a));
+          const [id, rate] = k.split(" 攻速×");
+          if (rate && rate !== "1") continue;
+          for (const view of ["side", "back"]) {
+            if (rate) await page.evaluate(([id, t, v]) => window.__n75.poseSkill(id, t, v), [id, worst.t, view]);
+            else await page.evaluate(([c, t, v]) => window.__n75.poseBasic(c, t, c.startsWith("Cast_") ? "staff" : "sword", v), [k, worst.t, view]);
+            await shot(`contact_${id}_${worst.t.toFixed(2)}_${view}`);
+          }
+        }
+      }
 
       // 重要戰鬥特效例外（施放者 40 m 外、鏡頭背後）
       const ess = await page.evaluate(() => window.__n75.essentialCheck());

@@ -49,7 +49,7 @@ export interface CombatFxConfig {
   /**
    * 地面高度（A 在 Stage 7.5 整合時提出；預設 0＝原本行為）。
    * 地面特效（衝擊波、塵環、地裂、碎石、光柱、蓄力環）、範圍提示、怪物死亡／重生、流星落點都放在地形表面。
-   * 斜坡：取中心與周圍 4 點的最高處，平面特效不會埋進上坡那一側（下坡那一側稍微浮起）。
+   * 斜坡：平面地面特效（衝擊波、地裂、魔法陣、光環、範圍提示…）依地面法線傾斜，貼著坡面（最多 35°）。
    */
   ground?: (x: number, z: number) => number;
 }
@@ -129,8 +129,6 @@ function syncWorld(n: TransformNode): void {
 }
 
 const FOLLOW_FX = new Set<FxKey>(["magicCircle", "whirlRing", "chargeAura", "groundGlow", "lightShield", "healAura", "buffOrbit"]);
-/** 地面特效的大約半徑（公尺，scale 1）：斜坡上取地面高度用 */
-const GROUND_RADIUS = 1.2;
 const GROUND_FX = new Set<FxKey>(["shockwave", "dustRing", "groundCrack", "debris", "lightPillar", "chargeRings"]);
 const IMPACT_FX = new Set<FxKey>(["areaBlast", "shockwave", "dustRing", "starBurst"]);
 
@@ -184,10 +182,12 @@ export class CombatFx {
   setGround(fn: ((x: number, z: number) => number) | null): void {
     this.groundFn = fn ?? (() => 0);
     this.hasGround = !!fn;
+    this.vfx.ground = fn;
   }
 
   /**
-   * 地面點：中心高度，斜坡時取中心與半徑 r×0.7 四個方向的最高處（平面特效不埋進上坡），再抬高 2 cm 避免與地面閃爍。
+   * 地面點：地面高度＋2 cm（避免與地面閃爍）。r＞0 時取中心與半徑 r×0.7 四個方向的最高處（給不會傾斜的特效用）。
+   * 斜坡上的平面地面特效由 VfxSystem 依地面法線傾斜貼合。
    * 沒有設定地面時一律 y＝0（與原本行為相同）。函式回傳非數字時當作 0。
    */
   groundPoint(x: number, z: number, r = 0): Vector3 {
@@ -314,7 +314,7 @@ export class CombatFx {
         break;
       case "fx": {
         const at = this.anchor(a, ev);
-        if (GROUND_FX.has(ev.fx)) at.y = this.groundPoint(at.x, at.z, GROUND_RADIUS * (ev.scale ?? 1)).y;
+        if (GROUND_FX.has(ev.fx)) at.y = this.groundPoint(at.x, at.z).y;
         const follow = ev.anchor === "self" && FOLLOW_FX.has(ev.fx) ? a.root : undefined;
         const nearMe = ev.anchor === "target" && Math.hypot(at.x - this.listener.x, at.z - this.listener.z) < 1.5;
         this.spawnFor(a.owner, ev.fx, at, { palette: pal, yaw: a.yaw(), scale: ev.scale, duration: ev.duration, follow, emitterMesh: ev.anchor === "weapon" ? a.weaponFocus : undefined, essential: a.owner !== "self" && (p.essential || nearMe) });
@@ -375,7 +375,7 @@ export class CombatFx {
    */
   zone(kind: "bossWarning" | "danger" | "heal", center: Vector3, radius: number, o: { owner?: VfxOwner; duration?: number; margin?: number } = {}): boolean {
     const owner = o.owner ?? "other";
-    const g = this.groundPoint(center.x, center.z, radius);
+    const g = this.groundPoint(center.x, center.z);
     const flat = Math.hypot(this.listener.x - g.x, this.listener.z - g.z);
     const affects = flat <= radius + (o.margin ?? 3);
     const essential = affects || kind === "bossWarning";
@@ -449,7 +449,7 @@ export class CombatFx {
 
   /** 怪物死亡：地面塵環＋星光碎片（死亡動作、淡出由怪物模組自己播） */
   monsterDeath(groundAt: Vector3, scale = 1): void {
-    const at = this.groundPoint(groundAt.x, groundAt.z, 0.8 * scale);
+    const at = this.groundPoint(groundAt.x, groundAt.z);
     const d = Vector3.Distance(at, this.listener);
     if (d > this.remoteCullDistance || this.offscreen(at)) return;
     this.vfx.spawn("dustRing", at, { owner: "self", palette: "steel", scale: 0.8 * scale, distance: d });
@@ -458,7 +458,7 @@ export class CombatFx {
 
   /** 怪物重生：魔法陣＋光柱（與展示頁相同） */
   monsterRespawn(groundAt: Vector3, scale = 1, boss = false): void {
-    const at = this.groundPoint(groundAt.x, groundAt.z, 0.8 * scale);
+    const at = this.groundPoint(groundAt.x, groundAt.z);
     const d = Vector3.Distance(at, this.listener);
     if (d > this.remoteCullDistance || this.offscreen(at)) return;
     this.vfx.spawn("magicCircle", at, { palette: "star", scale: (boss ? 1.8 : 1) * scale, duration: 0.9, distance: d });

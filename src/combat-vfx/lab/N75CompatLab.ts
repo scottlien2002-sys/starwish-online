@@ -150,6 +150,53 @@ export async function startN75CompatLab(canvas: HTMLCanvasElement, hudRoot: HTML
   const inTorso = (p: Vector3) => axisDist(p) < 0.15 && p.y > 0.45 && p.y < 1.35;
 
   /**
+   * 武器與角色網格的實際接觸（CPU 蒙皮後的頂點）：刀身／杖身線段（握把 0.15 m 以外到尖端）1.5 cm 內的角色頂點數，
+   * 排除左右手掌 12 cm 內（握持本來就會碰到）。>0＝武器碰到或穿進身體、頭、衣服。
+   */
+  const body = c.meshes.find((m) => m.getTotalVertices() > 0 && !!m.skeleton) as import("@babylonjs/core").Mesh | undefined;
+  const segDist = (v: Vector3, a: Vector3, b: Vector3) => {
+    const ab = b.subtract(a);
+    const k = Math.max(0, Math.min(1, Vector3.Dot(v.subtract(a), ab) / ab.lengthSquared()));
+    return Vector3.Distance(v, a.add(ab.scale(k)));
+  };
+  const contactSeg = (a: Vector3, b: Vector3, radius = 0.015) => {
+    if (!body?.skeleton) return { n: 0, region: "" };
+    body.skeleton.prepare(true);
+    body.computeWorldMatrix(true);
+    const pos = body.getPositionData(true, false);
+    if (!pos) return { n: 0, region: "" };
+    const w = body.getWorldMatrix();
+    const hr = abs(rHand);
+    const hl = lHand ? abs(lHand) : null;
+    const v = new Vector3();
+    let n = 0;
+    let ySum = 0;
+    for (let i = 0; i < pos.length; i += 3) {
+      Vector3.TransformCoordinatesFromFloatsToRef(pos[i]!, pos[i + 1]!, pos[i + 2]!, w, v);
+      if (Vector3.Distance(v, hr) < 0.12 || (hl && Vector3.Distance(v, hl) < 0.12)) continue;
+      if (segDist(v, a, b) < radius) {
+        n++;
+        ySum += v.y - root.position.y;
+      }
+    }
+    const y = n ? ySum / n : 0;
+    return { n, region: !n ? "" : y > 0.95 ? "頭／兜帽" : y > 0.55 ? "上身／手臂" : "下身／衣襬" };
+  };
+  const weaponContact = () => {
+    const b = abs(weapon.base);
+    const t = abs(weapon.tip);
+    const a = weapon === staff ? b : Vector3.Lerp(b, t, 0.125); // 短劍：從握把 0.15 m 起算
+    return contactSeg(a, t);
+  };
+  /** 量測方法自我檢查：穿過胸口的線段一定有接觸、遠方線段一定沒有 */
+  const contactSanity = () => {
+    const chest = abs(node("Spine02")!);
+    const through = contactSeg(chest.add(new Vector3(0, 0, -0.4)), chest.add(new Vector3(0, 0, 0.4)));
+    const far = contactSeg(new Vector3(3, 1, 3), new Vector3(3.4, 1, 3));
+    return { through: through.n, far: far.n };
+  };
+
+  /**
    * 播一個技能（固定步長 1/60 秒），回傳量測：
    * - trailErrMax：拖尾最新取樣與刀尖實際位置的最大誤差（公尺）
    * - tipJumpMax：拖尾期間刀尖每格最大移動（偵測瞬移／錯位）
@@ -178,7 +225,7 @@ export async function startN75CompatLab(canvas: HTMLCanvasElement, hudRoot: HTML
     let tipJumpMax = 0;
     let chordMax = 0;
     let insideFrames = 0;
-    const inside: { t: number; axis: number; y: number }[] = [];
+    const inside: { t: number; n: number; region: string }[] = [];
     let trailFrames = 0;
     let prevTip: Vector3 | null = null;
     // 特效生成位置：fromHit＝遊戲呼叫 fx.hit 產生的命中特效；weapon＝技能定義中掛在武器上的特效（到法杖頭／武器發射點的距離）
@@ -220,9 +267,10 @@ export async function startN75CompatLab(canvas: HTMLCanvasElement, hudRoot: HTML
         trailErrMax = Math.max(trailErrMax, Vector3.Distance(head.tip, tip));
         if (prevTip) tipJumpMax = Math.max(tipJumpMax, Vector3.Distance(prevTip, tip));
         chordMax = Math.max(chordMax, head.maxChord);
-        if (inTorso(tip)) {
+        const ct = weaponContact();
+        if (ct.n > 0) {
           insideFrames++;
-          inside.push({ t: +t.toFixed(3), axis: +axisDist(tip).toFixed(3), y: +tip.y.toFixed(3) });
+          inside.push({ t: +t.toFixed(3), n: ct.n, region: ct.region });
         }
         prevTip = tip;
       } else prevTip = null;
@@ -262,6 +310,7 @@ export async function startN75CompatLab(canvas: HTMLCanvasElement, hudRoot: HTML
     const dt = 1 / 60;
     let trailErrMax = 0;
     let insideFrames = 0;
+    const inside: { t: number; n: number; region: string }[] = [];
     let lhandToGripMin = 99;
     let lhandToGripAtHit = -1;
     let gripAlongAtHit = NaN;
@@ -273,7 +322,11 @@ export async function startN75CompatLab(canvas: HTMLCanvasElement, hudRoot: HTML
       const tip = abs(weapon.tip);
       const head = fx.trailHead("me");
       if (head?.emitting) trailErrMax = Math.max(trailErrMax, Vector3.Distance(head.tip, tip));
-      if (inTorso(tip)) insideFrames++;
+      const ct = weaponContact();
+      if (ct.n > 0) {
+        insideFrames++;
+        inside.push({ t: +t.toFixed(3), n: ct.n, region: ct.region });
+      }
       if (weaponL) {
         // 左手握點（Weapon_L 原點＝左手掌心）沿刀身軸（從 Weapon_R 原點）的位置與離軸距離。A 的規格 §4：雙手劍 −0.10、長柄 +0.28
         const o = abs(weaponR);
@@ -290,7 +343,15 @@ export async function startN75CompatLab(canvas: HTMLCanvasElement, hudRoot: HTML
       if (Math.abs(t - hitT) < dt / 2 + 1e-6) tipToTargetAtHit = Vector3.Distance(tip, targetPoint);
     }
     g.stop();
-    return { clipName, seconds: m.seconds, hitT, trailErrMax, insideFrames, lhandToGripMin, lhandToGripAtHit, gripAlongAtHit, tipToTargetAtHit };
+    return { clipName, seconds: m.seconds, hitT, trailErrMax, insideFrames, inside, lhandToGripMin, lhandToGripAtHit, gripAlongAtHit, tipToTargetAtHit };
+  };
+
+  /** 特寫鏡頭（穿模確認截圖）：side＝右側、back＝背後、front＝正面 */
+  const viewCam = (view: string) => {
+    cam.radius = 1.9;
+    cam.target.set(0, 0.85, 0);
+    cam.beta = 1.3;
+    cam.alpha = view === "back" ? -Math.PI / 2 : view === "front" ? Math.PI / 2 : view === "left" ? Math.PI : 0;
   };
 
   /** 停在某個時間點畫一格（截圖用） */
@@ -348,7 +409,10 @@ export async function startN75CompatLab(canvas: HTMLCanvasElement, hudRoot: HTML
       n.computeWorldMatrix(true);
       const sc = new Vector3();
       n.getWorldMatrix().decompose(sc);
-      return { name: n.name, parent: n.parent?.name ?? null, pos: p3(n.position), rot: q(n), worldScale: +Math.abs(sc.y).toFixed(4) };
+      // 靜止姿勢的世界軸（載入後、播放任何動作前）：規格 §3 的 glTF 世界軸轉成 Babylon（glTF 的 x 反向）
+      const wm = n.getWorldMatrix();
+      const ax = (v: Vector3) => p3(Vector3.TransformNormal(v, wm).normalize());
+      return { name: n.name, parent: n.parent?.name ?? null, pos: p3(n.position), rot: q(n), worldScale: +Math.abs(sc.y).toFixed(4), restBlade: ax(new Vector3(0, 1, 0)), restFinger: ax(new Vector3(0, 0, 1)) };
     });
     register(sword);
     const sl = Vector3.Distance(abs(sword.base), abs(sword.tip));
@@ -442,7 +506,23 @@ export async function startN75CompatLab(canvas: HTMLCanvasElement, hudRoot: HTML
     fx.monsterRespawn(new Vector3(-2, 0, 3), 1, true);
     fx.zone("danger", new Vector3(0, 0, 2), 3, { owner: "self" });
     fx.vfx.onSpawn = null;
-    res.monsterAndZone = sp;
+    const GK = ["shockwave", "dustRing", "groundCrack", "debris", "lightPillar", "chargeRings", "magicCircle", "magicCircleBig", "healAura", "groundGlow"];
+    res.monsterAndZone = sp.filter((x) => GK.includes(x.key));
+    // 平面特效邊緣（本地 ±0.5）實際世界高度 − 地面高度：貼著坡面時應接近 0（不埋地、不浮空）
+    fx.advance(1 / 60);
+    fx.updateVisuals(1 / 60);
+    const edges: { mesh: string; dy: number[] }[] = [];
+    for (const m of scene.meshes) {
+      if (!m.isEnabled() || !["fxCircle", "fxShock", "fxCrack", "fxGGlow"].includes(m.name)) continue;
+      m.computeWorldMatrix(true);
+      const w = m.getWorldMatrix();
+      const dy = [new Vector3(0.5, 0, 0), new Vector3(-0.5, 0, 0), new Vector3(0, 0, 0.5), new Vector3(0, 0, -0.5)].map((v) => {
+        const p = Vector3.TransformCoordinates(v, w);
+        return +(p.y - h(p.x, p.z)).toFixed(3);
+      });
+      edges.push({ mesh: m.name, dy });
+    }
+    res.edges = edges;
     fx.setGround(null);
     return res;
   };
@@ -477,6 +557,27 @@ export async function startN75CompatLab(canvas: HTMLCanvasElement, hudRoot: HTML
 
   Object.assign(api, {
     frames: () => frames,
+    contactSanity,
+    poseBasic: (clipName: string, t: number, weaponKind: "sword" | "staff" = "sword", view = "side") => {
+      const g = groups.get(clipName);
+      const m = meta.clips[clipName];
+      if (!g || !m) return false;
+      register(weaponKind === "staff" ? staff : sword);
+      root.position.set(0, 0, 0);
+      root.rotation.y = 0;
+      g.start(false, 1, g.from, g.to);
+      g.pause();
+      g.goToFrame(frameOf(g, t, m.seconds));
+      viewCam(view);
+      scene.render();
+      g.stop();
+      return weaponContact();
+    },
+    poseSkill: (skillId: string, t: number, view = "side") => {
+      viewCam(view);
+      const r = run(skillId, 1, t);
+      return { r, contact: weaponContact() };
+    },
     damageStyles,
     boot,
     rigCheck,

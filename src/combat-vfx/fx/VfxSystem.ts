@@ -25,12 +25,17 @@ import {
   StandardMaterial,
   TrailMesh,
   TransformNode,
+  Quaternion,
   Vector3,
 } from "@babylonjs/core";
 import type { FxKey, Palette } from "../core/skills.ts";
 import { VFX_QUALITY, type VfxQualityConfig, type VfxTier, particleCount } from "../core/quality.ts";
 import { VfxBudget, type VfxOwner, type VfxPriority } from "../core/budget.ts";
 import { fxTexture, type TexKey } from "./textures.ts";
+import { groundHeight, type GroundFn } from "../core/ground.ts";
+
+/** 會貼著坡面傾斜的平面地面特效（takeMesh 的 key） */
+const TILT_KEYS = new Set(["shock", "crack", "circle", "circleBig", "gglow", "heal", "whirl", "cring"]);
 import { PALETTES, type PaletteColors } from "./palette.ts";
 
 export type VfxEnvironment = "dark" | "bright";
@@ -66,6 +71,9 @@ interface MeshFx {
   spin: number;
   n: number;
   tick: (f: MeshFx, u: number, dt: number) => void;
+  /** 地形傾斜（斜坡上的平面地面特效貼著坡面）：mesh 與各層的父節點；位置仍以世界座標計算 */
+  tilt?: TransformNode;
+  tiltOn?: boolean;
 }
 
 interface PsFx {
@@ -218,6 +226,7 @@ export class VfxSystem {
     }
     f.mesh.setEnabled(true);
     for (const l of f.layers) l.setEnabled(true);
+    this.untilt(f);
     f.t = 0;
     f.follow = undefined;
     f.spin = 0;
@@ -232,8 +241,75 @@ export class VfxSystem {
     f.tick = tick;
     if (f.follow) f.mesh.position.copyFrom(f.follow.getAbsolutePosition()).addInPlace(f.offset);
     tick(f, 0, 0);
+    f.tiltOn = !!this.ground && TILT_KEYS.has(f.key);
+    this.applyTilt(f);
     this.floor(f);
     this.active.push(f);
+  }
+
+  // ------------------------------------------------------------------ 地形高度、坡面
+
+  /** 地面高度函式（CombatFx.setGround 設定）；null＝平地 y＝0 */
+  ground: GroundFn | null = null;
+
+  /** 地面高度（沒有設定時 0） */
+  groundY(x: number, z: number): number {
+    return this.ground ? groundHeight(this.ground, x, z) : 0;
+  }
+
+  /** 地面法線（有限差分，最多傾斜 35°）；平地回傳 null */
+  private groundNormal(x: number, z: number): Vector3 | null {
+    if (!this.ground) return null;
+    const d = 0.5;
+    const hx = (groundHeight(this.ground, x + d, z) - groundHeight(this.ground, x - d, z)) / (2 * d);
+    const hz = (groundHeight(this.ground, x, z + d) - groundHeight(this.ground, x, z - d)) / (2 * d);
+    if (Math.abs(hx) < 1e-3 && Math.abs(hz) < 1e-3) return null;
+    const n = new Vector3(-hx, 1, -hz).normalize();
+    const maxTilt = Math.cos((35 * Math.PI) / 180);
+    if (n.y < maxTilt) {
+      const hor = new Vector3(n.x, 0, n.z).normalize().scale(Math.sqrt(1 - maxTilt * maxTilt));
+      return new Vector3(hor.x, maxTilt, hor.z);
+    }
+    return n;
+  }
+
+  /**
+   * 平面地面特效貼著坡面：父節點以特效中心為支點旋轉（世界 = P + R·(本地 − P)）。
+   * 特效程式照舊用世界座標設定 position／rotation.y，所以旋轉、縮放、跟隨都不用改。
+   */
+  private applyTilt(f: MeshFx): void {
+    if (!f.tiltOn) return;
+    const P = f.mesh.position;
+    const n = this.groundNormal(P.x, P.z);
+    if (!n) {
+      if (f.tilt) {
+        f.tilt.rotationQuaternion = Quaternion.Identity();
+        f.tilt.position.setAll(0);
+      }
+      return;
+    }
+    if (!f.tilt) f.tilt = new TransformNode(`fxTilt_${f.key}`, this.scene);
+    if (f.mesh.parent !== f.tilt) {
+      f.mesh.parent = f.tilt;
+      for (const l of f.layers) if (!l.parent) l.parent = f.tilt;
+    }
+    const up = Vector3.Up();
+    const axis = Vector3.Cross(up, n);
+    const ang = Math.acos(Math.max(-1, Math.min(1, Vector3.Dot(up, n))));
+    const q = Quaternion.RotationAxis(axis.normalize(), ang);
+    f.tilt.rotationQuaternion = q;
+    const rp = new Vector3();
+    P.rotateByQuaternionToRef(q, rp);
+    f.tilt.position.copyFrom(P).subtractInPlace(rp);
+  }
+
+  private untilt(f: MeshFx): void {
+    f.tiltOn = false;
+    if (!f.tilt) return;
+    if (f.mesh.parent === f.tilt) f.mesh.parent = null;
+    for (const l of f.layers) if (l.parent === f.tilt) l.parent = null;
+    f.tilt.rotationQuaternion = Quaternion.Identity();
+    f.tilt.position.setAll(0);
   }
 
   /** visibility 不讓它剛好是 0（0 會被當成看不見而略過） */
@@ -529,7 +605,7 @@ export class VfxSystem {
       case "chargeFlash": {
         this.spawn("hitFlash", at, { ...opt, scale: 1.3 * sc });
         this.spawn("hitRing", at, { ...opt, scale: 2.0 * sc });
-        this.spawn("shockwave", new Vector3(at.x, 0, at.z), { ...opt, scale: 0.7 * sc });
+        this.spawn("shockwave", new Vector3(at.x, this.groundY(at.x, at.z), at.z), { ...opt, scale: 0.7 * sc });
         break;
       }
       // ---------------------------------------------------------------- 光柱（施法釋放、星隕落點、祭司聖光、怪物重生）
@@ -707,7 +783,7 @@ export class VfxSystem {
           this.burst("critStars", at, { ...common, count: 40, tex: "star", pal: PALETTES.gold, life: [0.4, 0.8], size: [0.1, 0.24], power: [3, 7],
             emitter: (ps) => ps.createSphereEmitter(0.2, 1), gravity: -2, spin: 6, priority: "critical", drag: 0.3 });
           if (!lite) this.spawn("starShards", at, { ...opt, palette: "gold", scale: 1.2 });
-          this.spawn("shockwave", at.subtract(new Vector3(0, at.y, 0)), { ...opt, palette: "gold", scale: 0.45 });
+          this.spawn("shockwave", new Vector3(at.x, this.groundY(at.x, at.z), at.z), { ...opt, palette: "gold", scale: 0.45 });
           if (owner === "self") this.onCrit?.(at);
         }
         if (key === "boltImpact") this.spawn("starBurst", at, { ...opt, scale: 0.8 });
@@ -743,7 +819,7 @@ export class VfxSystem {
         const p = at.add(fwd.scale(0.6)).addInPlaceFromFloats(0, 0.6, 0);
         this.spawn("hitFlash", p, { ...opt, scale: 0.9 * sc });
         this.spawn("hitRing", p, { ...opt, scale: 1.4 * sc });
-        this.spawn("shockwave", new Vector3(p.x, 0, p.z), { ...opt, scale: 0.6 * sc });
+        this.spawn("shockwave", new Vector3(p.x, this.groundY(p.x, p.z), p.z), { ...opt, scale: 0.6 * sc });
         this.burst("bashSpark", p, { ...common, count: 30, tex: "spark", pal, life: [0.12, 0.25], size: [0.06, 0.14], power: [4, 8],
           emitter: (ps) => ps.createDirectedSphereEmitter(0.2, fwd.add(new Vector3(-0.5, -0.2, -0.5)), fwd.add(new Vector3(0.5, 0.5, 0.5))), stretched: true, priority: "primary" });
         break;
@@ -1003,10 +1079,12 @@ export class VfxSystem {
       const u = Math.min(1, f.t / f.dur);
       if (f.follow) f.mesh.position.copyFrom(f.follow.getAbsolutePosition()).addInPlace(f.offset);
       f.tick(f, u, dt);
+      if (f.tiltOn && f.follow) this.applyTilt(f);
       this.floor(f);
       if (u >= 1) {
         f.mesh.setEnabled(false);
         for (const l of f.layers) l.setEnabled(false);
+        this.untilt(f);
         this.budget.release(f.handle);
         this.active.splice(i, 1);
         this.meshPool.get(f.key)!.push(f);
@@ -1117,6 +1195,7 @@ export class VfxSystem {
     for (const f of this.active) {
       f.mesh.setEnabled(false);
       for (const l of f.layers) l.setEnabled(false);
+      this.untilt(f);
       this.budget.release(f.handle);
       this.meshPool.get(f.key)!.push(f);
     }
@@ -1136,6 +1215,7 @@ export class VfxSystem {
     for (const l of this.meshPool.values()) for (const f of l) {
       f.mesh.dispose(false, false);
       for (const m of f.layers) m.dispose(false, false);
+      f.tilt?.dispose();
     }
     // 粒子貼圖是共用快取（textures.ts），不能跟著粒子系統一起刪（第二次進地圖會拿到已刪除的貼圖）
     for (const l of this.psPool.values()) for (const f of l) f.ps.dispose(false);
