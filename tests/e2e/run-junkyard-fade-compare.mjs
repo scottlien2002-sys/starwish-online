@@ -23,7 +23,8 @@ const settle = (page, n = 3) => page.evaluate((k) => new Promise((r) => { let i 
 const SMALL = (bd) => (bd["草叢小花"]?.tris ?? 0) + (bd["實例化垃圾"]?.tris ?? 0);
 
 for (const q of ["high", "medium", "low"]) {
-  for (const v of [{ id: "before", extra: "&jyfade=0" }, { id: "after", extra: "" }]) {
+  // V3.1：兩邊都關閉地標 GLB（&jylm=0）。地標特效的粒子依時間啟停（熔爐間歇蒸氣等），會讓 Draw Calls 隨機差 1，與小物件漸變無關
+  for (const v of [{ id: "before", extra: "&jyfade=0&jylm=0" }, { id: "after", extra: "&jylm=0" }]) {
     const run = { quality: q, variant: v.id, stops: [], errors: [] };
     const ctx = await browser.newContext({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 1, hasTouch: true });
     await ctx.addInitScript(() => { window.__swNoNav = true; });
