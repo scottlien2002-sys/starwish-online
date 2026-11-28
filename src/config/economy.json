@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "description": "金幣與商店（Stage 7）。金幣掉落量、商品價格、NPC 收購、交易所手續費等尚未定案 → null（正式模式停用對應功能、顯示提示）。test 區塊只給整合測試版使用，畫面標示「測試設定」。",
+  "status": { "goldDrops": "pending", "shopPrices": "pending", "npcBuy": "pending", "market": "pending" },
+  "startingGold": null,
+  "goldDrops": { "star_dew_bobo": null },
+  "itemBasePrice": { "seed": null, "egg": null, "birdEgg": null, "monsterMaterial": null, "shopFeed": null },
+  "shop": [
+    { "offerId": "shop:feed", "item": "shopFeed", "name": "寵物飼料", "price": null }
+  ],
+  "market": { "feeRate": null, "listingHours": null, "maxListings": null, "npcBuyRate": null, "minPrice": null, "maxPrice": null },
+  "test": {
+    "note": "整合測試設定（非正式數值）",
+    "startingGold": 100,
+    "goldDrops": { "star_dew_bobo": [3, 8] },
+    "itemBasePrice": { "seed": 40, "egg": 60, "birdEgg": 80, "monsterMaterial": 6, "shopFeed": 20 },
+    "shop": [
+      { "offerId": "shop:feed", "item": "shopFeed", "name": "寵物飼料", "price": 10 },
+      { "offerId": "shop:seed", "item": "seed", "name": "星芽種子", "price": 120 }
+    ],
+    "market": { "feeRate": 0.05, "listingHours": 24, "maxListings": 5, "npcBuyRate": 0.3, "minPrice": 1, "maxPrice": 999999 }
+  }
+}

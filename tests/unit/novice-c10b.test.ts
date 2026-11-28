@@ -1,12 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
-import { C10B_REFERENCE, C10B_VIEWS, c10pAbLabel, c10pMergeGroups, c10pSlot, frameHistogram, frameTimeline, windowHistograms, isLowView, wantsGlow, c10bFile, c10bLayout, c10bOptionsFromSearch, countHitches, windowAverages } from "../../src/characters/noviceC10b.ts";
+import { C10B_REFERENCE, C10B_VIEWS, c10pAbLabel, c10pShadowMode, c10pMergeGroups, c10pSlot, frameHistogram, frameTimeline, windowHistograms, isLowView, wantsGlow, c10bFile, c10bLayout, c10bOptionsFromSearch, countHitches, windowAverages } from "../../src/characters/noviceC10b.ts";
 
 test("C1.0-B：檔名與網址參數", () => {
   assert.equal(c10bFile("female", "lite"), "novice_c10b_female_lite.glb");
   const d = c10bOptionsFromSearch("?lab=c10b");
-  assert.deepEqual(d, { lod: "hq", count: 2, bench: 0, warmup: 2, view: "front", p1: false, p2: false, diag: [], gpuProbe: false });
+  assert.deepEqual(d, { lod: "hq", count: 2, bench: 0, warmup: 2, view: "front", p1: false, p2: false, diag: [], gpuProbe: false, shadowRefresh: "every", shadowFilter: "default", shadowMap: null, rest: 0, fixSize: false, star: 0, p3: false });
   assert.deepEqual(c10bOptionsFromSearch("?diag=noshadow,bogus,nopost&gpu=1").diag, ["noshadow", "nopost"]);
   assert.equal(c10bOptionsFromSearch("?lab=c10b&p1=1").p1, true);
   const o = c10bOptionsFromSearch("?lab=c10b&lod=lite&count=99&bench=30&view=low");
@@ -111,3 +111,73 @@ test("C1.0-P P3 診斷：時間軸分段（FPS、CPU、GPU 探測、掉幀分布
   assert.equal(w[0]!.cpuAvg, 4);
   assert.equal(w[0]!.gpuAvg, 20);
 });
+
+test("C1.0-P P3-1：陰影診斷參數與代號", () => {
+  const o = c10bOptionsFromSearch("?lab=c10b&shadowrefresh=once&shadowfilter=pcf&shadowmap=1024&rest=30&fixsize=1&bench=60&gpu=1");
+  assert.equal(o.shadowRefresh, "once");
+  assert.equal(o.shadowFilter, "pcf");
+  assert.equal(o.shadowMap, 1024);
+  assert.equal(o.rest, 30);
+  assert.equal(o.fixSize, true);
+  assert.equal(o.bench, 60);
+  assert.equal(c10bOptionsFromSearch("?shadowfilter=ultra&shadowmap=512&rest=999").shadowFilter, "default");
+  assert.equal(c10bOptionsFromSearch("?shadowmap=512").shadowMap, null);
+  assert.equal(c10bOptionsFromSearch("?rest=999").rest, 120);
+  const base = { diag: [] as never[], shadowRefresh: "every" as const, shadowFilter: "default" as const, shadowMap: null, gpuProbe: true };
+  assert.equal(c10pShadowMode(base), "S0 原始 HQ 陰影");
+  assert.match(c10pShadowMode({ ...base, gpuProbe: false }), /^S0n/);
+  assert.match(c10pShadowMode({ ...base, diag: ["noshadow"] as never[] }), /^S1/);
+  assert.match(c10pShadowMode({ ...base, shadowRefresh: "once" }), /^S2/);
+  assert.match(c10pShadowMode({ ...base, shadowFilter: "low" }), /^S3a/);
+  assert.match(c10pShadowMode({ ...base, shadowFilter: "high" }), /^S3b/);
+  assert.match(c10pShadowMode({ ...base, shadowFilter: "pcf" }), /^S3c/);
+  assert.match(c10pShadowMode({ ...base, shadowMap: 1024 }), /^S4/);
+});
+
+test("C1.0-P P3-2：徽記修正版檔名與優化開關", () => {
+  assert.equal(c10bFile("male", "hq", true), "novice_c10b1_male_hq.glb");
+  assert.equal(c10bFile("female", "lite", true), "novice_c10b_female_lite.glb");
+  assert.equal(c10bFile("male", "lite"), "novice_c10b_male_lite.glb");
+  const o = c10bOptionsFromSearch("?lab=c10b&star=1&p3=1");
+  assert.equal(o.star, 1);
+  assert.equal(o.p3, true);
+});
+
+// C1.0-B1：男生披風徽記修正版（art-novice-c10b1，Blender CI＋glTF Validator 0/0）
+for (const [l, bytes] of [["hq", 5237036], ["lite", 1340840]] as const) {
+  const p = `public/models/novice_c10b1_male_${l}.glb`;
+  test(`C1.0-B1 GLB male ${l}：檔案、32 網格、26 材質、不透明、無骨架`, { skip: !existsSync(p) }, () => {
+    assert.equal(readFileSync(p).length, bytes);
+    const j = glbJson(p);
+    assert.equal(j.meshes.length, 32);
+    assert.equal(j.materials.length, 26);
+    assert.ok(j.materials.every((m) => !m.alphaMode || m.alphaMode === "OPAQUE"));
+    assert.ok(!j.skins?.length && !j.animations?.length);
+  });
+}
+
+test("C1.0-B2：徽記縮小版檔名（star=2；女生不變）", () => {
+  assert.equal(c10bOptionsFromSearch("?lab=c10b&star=2").star, 2);
+  assert.equal(c10bOptionsFromSearch("?lab=c10b&star=x").star, 0);
+  assert.equal(c10bFile("male", "hq", 2), "novice_c10b2_male_hq.glb");
+  assert.equal(c10bFile("male", "lite", 2), "novice_c10b2_male_lite.glb");
+  assert.equal(c10bFile("female", "hq", 2), "novice_c10b_female_hq.glb");
+  assert.equal(c10bFile("male", "hq", 1), "novice_c10b1_male_hq.glb");
+  assert.equal(c10bFile("male", "hq", 0), "novice_c10b_male_hq.glb");
+});
+
+// C1.0-B2：男生披風徽記縮小版（art-novice-c10b2 2875dd76，Blender CI＋glTF Validator 0/0）— 正式美術基準
+for (const [l, bytes, tris] of [["hq", 5241688, 199965], ["lite", 1335724, 40395]] as const) {
+  const p = `public/models/novice_c10b2_male_${l}.glb`;
+  test(`C1.0-B2 GLB male ${l}：檔案、32 網格、26 材質、${tris} 三角形、不透明、無骨架`, { skip: !existsSync(p) }, () => {
+    assert.equal(readFileSync(p).length, bytes);
+    const j = glbJson(p);
+    assert.equal(j.meshes.length, 32);
+    assert.equal(j.materials.length, 26);
+    const jj = j as unknown as { meshes: { primitives: { indices: number }[] }[]; accessors: { count: number }[] };
+    const t = jj.meshes.reduce((a, m) => a + m.primitives.reduce((b2, pr) => b2 + jj.accessors[pr.indices]!.count / 3, 0), 0);
+    assert.equal(t, tris);
+    assert.ok(j.materials.every((m) => !m.alphaMode || m.alphaMode === "OPAQUE"));
+    assert.ok(!j.skins?.length && !j.animations?.length);
+  });
+}

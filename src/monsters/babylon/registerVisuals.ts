@@ -21,6 +21,8 @@ import { ClipMonsterVisual, ProceduralVisual, type ClipPlayer } from "../framewo
 import type { MonsterRegistry } from "../framework/registry.ts";
 import type { ClipMap, IMonsterVisual } from "../framework/types.ts";
 import type { MonsterEffect } from "../anim/types.ts";
+import { RIGGED_MONSTERS } from "../rigged/riggedSpec.ts";
+import { RiggedMonsterVisual } from "../rigged/RiggedMonsterVisual.ts";
 
 export interface BabylonVisualContext {
   scene: Scene;
@@ -30,6 +32,8 @@ export interface BabylonVisualContext {
   quality?: "high" | "medium" | "low";
   /** V3.8R 彈跳位移同步（實驗，預設關閉；?hopsync=1） */
   boboHopSync?: boolean;
+  /** 骨骼動畫怪物的模型 LOD（HQ／Lite；與畫質分開）。省略 = 高畫質用 HQ、其餘 Lite */
+  modelLod?: "hq" | "lite";
 }
 
 /**
@@ -37,7 +41,7 @@ export interface BabylonVisualContext {
  * 新增怪物模型時，在這裡加一行 addVisual。
  */
 export function registerBabylonVisuals(registry: MonsterRegistry, ctx: BabylonVisualContext): MonsterRegistry {
-  return registry
+  registry
     .addVisual("star_dew_bobo_procedural", (def) => {
       const model = new StarDewBoboModel(ctx.scene, { height: def.height ?? 0.8, shadows: ctx.shadows, glow: ctx.glow, quality: ctx.quality });
       return new ProceduralVisual(model, (x, y, z, yaw) => {
@@ -50,6 +54,13 @@ export function registerBabylonVisuals(registry: MonsterRegistry, ctx: BabylonVi
     .addVisual("test_dummy_glb", (def, profile) =>
       createGltfVisual(ctx, `${import.meta.env.BASE_URL}models/test-dummy.glb`, profile.clips!, def.height ?? 0.8, 0.7),
     );
+  // 骨骼動畫怪物（M004 起）：同一個視覺類別，只差規格資料
+  for (const spec of RIGGED_MONSTERS) {
+    registry.addVisual(spec.modelId, () =>
+      new RiggedMonsterVisual({ scene: ctx.scene, baseUrl: import.meta.env.BASE_URL, spec, lod: ctx.modelLod ?? (ctx.quality === "high" ? "hq" : "lite"), shadows: ctx.shadows }),
+    );
+  }
+  return registry;
 }
 
 /**

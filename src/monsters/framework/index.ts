@@ -7,6 +7,8 @@ import { STAR_DEW_BOBO_PROFILE } from "../star-dew-bobo/profile.ts";
 import { TEST_DUMMY_PROFILE } from "../test-dummy/profile.ts";
 import { STAR_DEW_BOBO_V38R_PROFILE } from "../star-dew-bobo-v38r/profile.ts";
 import { proceduralProfile } from "./profiles.ts";
+import { RIGGED_MONSTERS } from "../rigged/riggedSpec.ts";
+import { riggedProfile } from "../rigged/riggedProfile.ts";
 import { MonsterRegistry } from "./registry.ts";
 
 export * from "./types.ts";
@@ -18,11 +20,19 @@ export { MonsterFactory } from "./MonsterFactory.ts";
 export { ProceduralVisual, ClipMonsterVisual } from "./visuals.ts";
 export { withPlaybackSpeed, genericClipAnim, clipTimings, proceduralProfile } from "./profiles.ts";
 
-/** 建立含所有怪物資料與動畫設定的註冊表（視覺需另外註冊） */
-export function createMonsterRegistry(): MonsterRegistry {
-  return new MonsterRegistry()
-    .addDefinitions(MONSTER_DEFINITIONS)
+/**
+ * 建立含所有怪物資料與動畫設定的註冊表（視覺需另外註冊）。
+ * legacyAggressive：舊的測試頁（Stage 5 草原預覽、怪物實驗頁、非世界模式的原野預覽）維持原本「全部主動攻擊」，
+ * 保留既有驗收測試；正式遊戲（Stage 7 世界）不傳 → 套用 Stage 7.2 規則（Lv.1～4 被動、Lv.5 以上主動）。
+ */
+export function createMonsterRegistry(opts: { legacyAggressive?: boolean } = {}): MonsterRegistry {
+  const defs = opts.legacyAggressive ? MONSTER_DEFINITIONS.map((d) => ({ ...d, aggressive: d.aggressive ?? true })) : MONSTER_DEFINITIONS;
+  const r = new MonsterRegistry()
+    .addDefinitions(defs)
     .addProfile(proceduralProfile("star_dew_bobo", STAR_DEW_BOBO_PROFILE))
     .addProfile(TEST_DUMMY_PROFILE)
     .addProfile(STAR_DEW_BOBO_V38R_PROFILE);
+  // 骨骼動畫怪物（M004 起）：動畫設定 id = modelId
+  for (const spec of RIGGED_MONSTERS) r.addProfile(riggedProfile(spec));
+  return r;
 }

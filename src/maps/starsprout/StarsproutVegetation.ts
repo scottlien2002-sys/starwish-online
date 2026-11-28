@@ -2,6 +2,7 @@ import { Color3, Matrix, Mesh, MeshBuilder, Quaternion, type Scene, type ShadowG
 import { MAP_HALF } from "./layout.ts";
 import type { SmallKind, SmallPlacement, TreeKind, TreePlacement, TuftPlacement, VegetationLayout } from "./vegetation.ts";
 import type { MapLod } from "./StarsproutWorld.ts";
+import { behindCamera, instKey, levelFor, tuftDensity, VEG_LOD_HQ, VEG_LOD_LITE, type VegLevel, type VegLodConfig } from "./vegLod.ts";
 
 /**
  * Stage 6 P2-1：植被畫面層。
@@ -70,10 +71,13 @@ function trunkGeo(scene: Scene, h: number, dTop: number, dBot: number, tess: num
   return geoOf(m, (_x, y) => mixRGB([col[0] * 0.75, col[1] * 0.75, col[2] * 0.75], col, Math.min(1, y / h)));
 }
 
-function blobTree(scene: Scene, kind: Exclude<TreeKind, "pine">, hi: boolean): Geo {
+/** lvl：0＝精細、1＝中距離（同樣的球數與位置、細分較低）、2＝簡化（舊版「遠景」）；true/false 為舊呼叫方式（＝0／2） */
+function blobTree(scene: Scene, kind: Exclude<TreeKind, "pine">, lvlIn: boolean | VegLevel): Geo {
+  const lvl: VegLevel = lvlIn === true ? 0 : lvlIn === false ? 2 : lvlIn;
+  const hi = lvl < 2;
   const s = STYLE[kind];
-  const seg = hi ? 4 : 2;
-  const parts: Geo[] = [trunkGeo(scene, kind === "cherry" ? 2.4 : 2.6, 0.3, 0.52, hi ? 7 : 4, s.trunk)];
+  const seg = lvl === 0 ? 4 : lvl === 1 ? 3 : 2;
+  const parts: Geo[] = [trunkGeo(scene, kind === "cherry" ? 2.4 : 2.6, 0.3, 0.52, lvl === 0 ? 7 : lvl === 1 ? 6 : 4, s.trunk)];
   const blobs: [number, number, number, number][] =
     kind === "cherry"
       ? [[0, 3.3, 0, 3.4], [1.2, 3.0, 0.3, 2.4], [-1.1, 3.1, -0.4, 2.5], [0.2, 4.1, -0.3, 2.4], [-0.3, 2.8, 1.1, 2.0], [0.6, 3.4, -1.1, 2.0]]
@@ -97,9 +101,11 @@ function blobTree(scene: Scene, kind: Exclude<TreeKind, "pine">, hi: boolean): G
   return joinGeo(parts);
 }
 
-function pineTree(scene: Scene, hi: boolean): Geo {
-  const tess = hi ? 16 : 7;
-  const parts: Geo[] = [trunkGeo(scene, 1.6, 0.24, 0.42, hi ? 7 : 5, [0.48, 0.34, 0.26])];
+function pineTree(scene: Scene, lvlIn: boolean | VegLevel): Geo {
+  const lvl: VegLevel = lvlIn === true ? 0 : lvlIn === false ? 2 : lvlIn;
+  const hi = lvl < 2;
+  const tess = lvl === 0 ? 16 : lvl === 1 ? 10 : 7;
+  const parts: Geo[] = [trunkGeo(scene, 1.6, 0.24, 0.42, lvl === 0 ? 7 : 5, [0.48, 0.34, 0.26])];
   const tiers: [number, number, number][] = [
     [1.3, 3.2, 1.9],
     [2.4, 2.6, 1.7],
@@ -123,7 +129,9 @@ function pineTree(scene: Scene, hi: boolean): Geo {
 }
 
 // ---------------- 灌木、岩石 ----------------
-function bushGeo(scene: Scene, flowered: boolean, hi: boolean): Geo {
+function bushGeo(scene: Scene, flowered: boolean, lvlIn: boolean | VegLevel): Geo {
+  const lvl: VegLevel = lvlIn === true ? 0 : lvlIn === false ? 2 : lvlIn;
+  const hi = lvl < 2;
   const seg = hi ? 3 : 2;
   const dark: RGB = [0.3, 0.58, 0.3];
   const light: RGB = [0.56, 0.82, 0.42];
@@ -138,7 +146,8 @@ function bushGeo(scene: Scene, flowered: boolean, hi: boolean): Geo {
       return [c[0] + j, c[1] + j, c[2] + j];
     }));
   }
-  if (flowered && hi) {
+  // 小花點只在精細等級（中距離看不清楚）
+  if (flowered && lvl === 0) {
     const dots: [number, number, number][] = [[0.1, 0.92, 0.2], [0.42, 0.7, 0.35], [-0.35, 0.72, 0.25], [0.2, 0.75, -0.42], [-0.25, 0.85, -0.2], [0.55, 0.55, -0.15]];
     for (const [i, [x, y, z]] of dots.entries()) {
       const m = MeshBuilder.CreateSphere("PH_vegTmp", { diameter: 0.14, segments: 2 }, scene);
@@ -316,17 +325,72 @@ export function bake(scene: Scene, name: string, items: Placed[], mat: StandardM
   return mesh;
 }
 
+export interface VegLodStats {
+  mode: "lod" | "legacy";
+  /** 樹＋灌木＋岩石：各等級正在畫的數量、剔除（鏡頭後方或霧外）數量 */
+  hi: number;
+  mid: number;
+  lo: number;
+  culled: number;
+  /** 草、花正在畫的數量（抽稀後） */
+  grassShown: number;
+  flowersShown: number;
+  /** 植被正在送進 GPU 的三角面（不含引擎的視錐剔除；估計上限） */
+  tris: number;
+  /** 植被網格數（啟用中） */
+  meshes: number;
+  casters: number;
+  /** 這一幀實際畫出的植被（引擎視錐剔除後）：網格數＝植被 Draw Calls、三角面 */
+  drawnMeshes: number;
+  drawnTris: number;
+}
+
+const VEG_NAME = /^PH_(veg|grass_|flowers_)/;
+
+/** 從場景統計植被：啟用中的網格與三角面、這一幀實際畫出的網格與三角面（新舊版本用同一個方法，前後比較才公平） */
+export function vegSceneStats(scene: Scene): { meshes: number; tris: number; drawnMeshes: number; drawnTris: number } {
+  const triOf = (m: { getTotalIndices(): number; thinInstanceCount?: number; hasThinInstances?: boolean }): number =>
+    (m.getTotalIndices() / 3) * (m.hasThinInstances ? (m.thinInstanceCount ?? 0) : 1);
+  let meshes = 0;
+  let tris = 0;
+  for (const m of scene.meshes) {
+    if (!VEG_NAME.test(m.name) || !m.isEnabled() || m.name.includes("Template")) continue;
+    meshes++;
+    tris += triOf(m as Mesh);
+  }
+  let drawnMeshes = 0;
+  let drawnTris = 0;
+  const am = scene.getActiveMeshes();
+  for (let i = 0; i < am.length; i++) {
+    const m = am.data[i]!;
+    if (!VEG_NAME.test(m.name)) continue;
+    drawnMeshes++;
+    drawnTris += triOf(m as Mesh);
+  }
+  return { meshes, tris: Math.round(tris), drawnMeshes, drawnTris: Math.round(drawnTris) };
+}
+
 export interface VegetationView {
   /** 每幀依玩家位置切換近景精細／遠景簡化、草花顯示格 */
   update(px: number, pz: number, overview: boolean): void;
   setEnabled(on: boolean): void;
-  stats(): { trees: number; smalls: number; grass: number; flowers: number; hiChunks: number; grassCells: number; flowerCells: number; shadowChunks: number };
+  stats(): { trees: number; smalls: number; grass: number; flowers: number; hiChunks: number; grassCells: number; flowerCells: number; shadowChunks: number; lod?: VegLodStats };
 }
 
 const CH = 4;
 const GC = 8;
 
+/**
+ * 植被畫面：預設用 Claude B 的距離分級版（buildVegetationLodView）；網址加 &veglod=0 用原本的版本（對照用）。
+ * 呼叫方式與回傳介面都沒有變。
+ */
 export function buildVegetationView(scene: Scene, layout: VegetationLayout, lod: MapLod, shadows: ShadowGenerator | null): VegetationView {
+  const off = typeof location !== "undefined" && new URLSearchParams(location.search).get("veglod") === "0";
+  return off ? buildVegetationViewLegacy(scene, layout, lod, shadows) : buildVegetationLodView(scene, layout, lod, shadows);
+}
+
+/** Stage 7.4 以前的植被畫面（原樣保留；&veglod=0） */
+export function buildVegetationViewLegacy(scene: Scene, layout: VegetationLayout, lod: MapLod, shadows: ShadowGenerator | null): VegetationView {
   const hq = lod === "hq";
   const mat = new StandardMaterial("PH_vegMat", scene);
   mat.diffuseColor = Color3.White();
@@ -510,7 +574,362 @@ export function buildVegetationView(scene: Scene, layout: VegetationLayout, lod:
       grassCells: gOn,
       flowerCells: fOn,
       shadowChunks: shadowCount,
+      lod: (() => {
+        const ss = vegSceneStats(scene);
+        return { mode: "legacy" as const, hi: 0, mid: 0, lo: 0, culled: 0, grassShown: grassCells.reduce((a, g) => a + (g.mesh.isEnabled() ? g.mesh.thinInstanceCount : 0), 0), flowersShown: flowerCells.reduce((a, f) => a + (f.mesh.isEnabled() ? f.mesh.thinInstanceCount : 0), 0), tris: ss.tris, meshes: ss.meshes, casters: shadowCount, drawnMeshes: ss.drawnMeshes, drawnTris: ss.drawnTris };
+      })(),
     }),
+  };
+  return view;
+}
+
+// =====================================================================
+// Claude B：距離分級版植被（每棵樹各自分級、草花平滑抽稀、鏡頭後方與霧外不畫）
+// =====================================================================
+
+/** Geo → 獨立網格（每個網格各自一份幾何；thin instance 不共用幾何，WebKit 才不會拒絕繪製） */
+function meshFromGeo(scene: Scene, name: string, g: Geo, mat: StandardMaterial): Mesh {
+  const m = new Mesh(name, scene);
+  const vd = new VertexData();
+  vd.positions = g.positions;
+  vd.normals = g.normals;
+  vd.colors = g.colors;
+  vd.indices = g.indices;
+  vd.applyToMesh(m, true);
+  m.material = mat;
+  m.isPickable = false;
+  m.receiveShadows = true;
+  m.alwaysSelectAsActiveMesh = false;
+  return m;
+}
+
+/** 一個繪製網格（多個種類可共用，例如灌木與花灌木的中、遠距離幾何相同） */
+interface LodSlot {
+  mesh: Mesh;
+  buf: Float32Array;
+  count: number;
+  tris: number;
+  level: VegLevel;
+}
+
+interface LodGroup {
+  /** 等級 0／1／2 各寫到哪個網格（可以重複；岩石三級都是同一個） */
+  slots: [LodSlot, LodSlot, LodSlot];
+  /** 本組的實例：預先算好的矩陣（16 個數字一組）與位置 */
+  mats: Float32Array;
+  xs: Float32Array;
+  zs: Float32Array;
+  prev: (VegLevel | null)[];
+  small: boolean;
+}
+
+/** 草或花：整張地圖一個網格，依每一叢到角色的距離抽稀（不再整格切換） */
+interface TuftLayer {
+  mesh: Mesh;
+  /** 依 8×8 格分桶（只掃描附近的格） */
+  cells: { minX: number; maxX: number; minZ: number; maxZ: number; idx: Uint32Array }[];
+  xs: Float32Array;
+  zs: Float32Array;
+  keys: Float32Array;
+  mats: Float32Array;
+  cols: Float32Array;
+  liveM: Float32Array;
+  liveC: Float32Array;
+  count: number;
+  tris: number;
+  full: number;
+  end: number;
+}
+
+export function buildVegetationLodView(scene: Scene, layout: VegetationLayout, lod: MapLod, shadows: ShadowGenerator | null): VegetationView {
+  const hq = lod === "hq";
+  const cfg: VegLodConfig = hq ? VEG_LOD_HQ : VEG_LOD_LITE;
+  const mat = new StandardMaterial("PH_vegMat", scene);
+  mat.diffuseColor = Color3.White();
+  mat.specularColor = new Color3(0.03, 0.03, 0.03);
+  const tuftMat = new StandardMaterial("PH_tuftMat", scene);
+  tuftMat.diffuseColor = Color3.White();
+  tuftMat.specularColor = Color3.Black();
+  tuftMat.backFaceCulling = false;
+
+  // ---------- 樹、灌木、岩石：thin instances（樹：種類 × 3 級；灌木共用中遠距離網格；岩石 1 級） ----------
+  const m4 = new Matrix();
+  const q = new Quaternion();
+  const sv = new Vector3();
+  const tv = new Vector3();
+  type P = { x: number; y: number; z: number; rot: number; scale: number };
+  const slots: LodSlot[] = [];
+  const makeSlot = (name: string, g: Geo, cap: number, level: VegLevel): LodSlot => {
+    const mesh = meshFromGeo(scene, name, g, mat);
+    const buf = new Float32Array(Math.max(1, cap) * 16);
+    mesh.thinInstanceSetBuffer("matrix", buf, 16, false);
+    mesh.thinInstanceCount = 0;
+    mesh.setEnabled(false);
+    const s: LodSlot = { mesh, buf, count: 0, tris: g.indices.length / 3, level };
+    slots.push(s);
+    return s;
+  };
+  const groups: LodGroup[] = [];
+  const makeGroup = (list: P[], sl: [LodSlot, LodSlot, LodSlot], small: boolean): void => {
+    if (!list.length) return;
+    const n = list.length;
+    const mats = new Float32Array(n * 16);
+    const xs = new Float32Array(n);
+    const zs = new Float32Array(n);
+    list.forEach((p, i) => {
+      // 與舊版 bake 相同的轉換：先縮放、再繞 Y 轉 rot、再平移
+      Quaternion.RotationYawPitchRollToRef(p.rot, 0, 0, q);
+      sv.set(p.scale, p.scale, p.scale);
+      tv.set(p.x, p.y, p.z);
+      Matrix.ComposeToRef(sv, q, tv, m4);
+      m4.copyToArray(mats, i * 16);
+      xs[i] = p.x;
+      zs[i] = p.z;
+    });
+    groups.push({ slots: sl, mats, xs, zs, prev: new Array<VegLevel | null>(n).fill(null), small });
+  };
+  const treeKinds: TreeKind[] = ["broad", "broadLight", "cherry", "pine"];
+  for (const k of treeKinds) {
+    const list = layout.trees.filter((t) => t.kind === k);
+    if (!list.length) continue;
+    const geo = (lvl: VegLevel): Geo => (k === "pine" ? pineTree(scene, lvl) : blobTree(scene, k, lvl));
+    makeGroup(list, [makeSlot(`PH_vegHi_tree_${k}`, geo(0), list.length, 0), makeSlot(`PH_vegMid_tree_${k}`, geo(1), list.length, 1), makeSlot(`PH_vegLo_tree_${k}`, geo(2), list.length, 2)], false);
+  }
+  // 灌木：精細與中距離幾何相同 → 中距離直接用精細網格；花灌木只有精細等級有小花，中遠距離與一般灌木共用網格
+  const bushes = layout.smalls.filter((s) => s.kind === "bush");
+  const flowerBushes = layout.smalls.filter((s) => s.kind === "bushFlower");
+  const nb = bushes.length + flowerBushes.length;
+  if (nb) {
+    const bushHi = makeSlot("PH_vegHi_bush", bushGeo(scene, false, 0), nb, 0);
+    const bushLo = makeSlot("PH_vegLo_bush", bushGeo(scene, false, 2), nb, 2);
+    makeGroup(bushes, [bushHi, bushHi, bushLo], true);
+    if (flowerBushes.length) makeGroup(flowerBushes, [makeSlot("PH_vegHi_bushFlower", bushGeo(scene, true, 0), flowerBushes.length, 0), bushHi, bushLo], true);
+  }
+  // 岩石：原本精細與簡化就是同一個模型 → 只有一級
+  for (const [kind, flat] of [["rock", false], ["rockFlat", true]] as const) {
+    const list = layout.smalls.filter((s) => s.kind === kind);
+    if (!list.length) continue;
+    const s = makeSlot(`PH_vegHi_${kind}`, rockGeo(scene, flat, true), list.length, 0);
+    makeGroup(list, [s, s, s], true);
+  }
+
+  // 陰影：只有高畫質、精細等級（玩家附近）投射
+  const casterMeshes: Mesh[] = [];
+  if (hq && shadows) {
+    for (const s of slots) {
+      if (s.level !== 0) continue;
+      shadows.addShadowCaster(s.mesh, false);
+      casterMeshes.push(s.mesh);
+    }
+  }
+
+  // ---------- 草、花：各一個網格；每一叢有固定亂數鍵，密度 ρ 時畫鍵 < ρ 的 → 走動時零星增減，沒有整格切換 ----------
+  const gTemplate = grassTemplate(scene);
+  const fTemplate = flowerTemplate(scene);
+  const makeLayer = (template: Mesh, list: TuftPlacement[], name: string, grid: number, seed: number, full: number, end: number): TuftLayer | null => {
+    if (!list.length) return null;
+    const n = list.length;
+    const mesh = new Mesh(name, scene);
+    VertexData.ExtractFromMesh(template).applyToMesh(mesh);
+    mesh.material = tuftMat;
+    const mats = new Float32Array(n * 16);
+    const cols = new Float32Array(n * 4);
+    const xs = new Float32Array(n);
+    const zs = new Float32Array(n);
+    const keys = new Float32Array(n);
+    const csize = (2 * MAP_HALF) / grid;
+    const buckets: number[][] = Array.from({ length: grid * grid }, () => []);
+    list.forEach((p, i) => {
+      Quaternion.RotationYawPitchRollToRef(p.rot, 0, 0, q);
+      sv.set(p.scale, p.scale, p.scale);
+      tv.set(p.x, p.y, p.z);
+      Matrix.ComposeToRef(sv, q, tv, m4);
+      m4.copyToArray(mats, i * 16);
+      cols[i * 4] = p.r;
+      cols[i * 4 + 1] = p.g;
+      cols[i * 4 + 2] = p.b;
+      cols[i * 4 + 3] = 1;
+      xs[i] = p.x;
+      zs[i] = p.z;
+      keys[i] = instKey(i, seed);
+      const ci = Math.min(grid - 1, Math.max(0, Math.floor((p.x + MAP_HALF) / csize)));
+      const cj = Math.min(grid - 1, Math.max(0, Math.floor((p.z + MAP_HALF) / csize)));
+      buckets[cj * grid + ci]!.push(i);
+    });
+    const cells = buckets.flatMap((b, idx) => {
+      if (!b.length) return [];
+      const i0 = idx % grid;
+      const j0 = Math.floor(idx / grid);
+      return [{ minX: -MAP_HALF + i0 * csize, maxX: -MAP_HALF + (i0 + 1) * csize, minZ: -MAP_HALF + j0 * csize, maxZ: -MAP_HALF + (j0 + 1) * csize, idx: Uint32Array.from(b) }];
+    });
+    // 包圍盒用全部實例算一次（之後只改數量）
+    const liveM = new Float32Array(mats);
+    const liveC = new Float32Array(cols);
+    mesh.thinInstanceSetBuffer("matrix", liveM, 16, false);
+    mesh.thinInstanceSetBuffer("color", liveC, 4, false);
+    mesh.thinInstanceRefreshBoundingInfo(false);
+    mesh.thinInstanceCount = 0;
+    mesh.receiveShadows = false;
+    mesh.isPickable = false;
+    mesh.alwaysSelectAsActiveMesh = false;
+    mesh.freezeWorldMatrix();
+    mesh.setEnabled(false);
+    return { mesh, cells, xs, zs, keys, mats, cols, liveM, liveC, count: 0, tris: (template.getIndices()?.length ?? 0) / 3, full, end };
+  };
+  const grass = makeLayer(gTemplate, layout.grass, "PH_grass_near", GC, 101, cfg.grassFull, cfg.grassEnd);
+  const flowers = makeLayer(fTemplate, layout.flowers, "PH_flowers_near", GC, 202, cfg.flowerFull, cfg.flowerEnd);
+  const layers = [grass, flowers].filter((l): l is TuftLayer => !!l);
+  gTemplate.dispose();
+  fTemplate.dispose();
+
+  // ---------- 更新：玩家移動 > 1 m、鏡頭水平轉 > 8°、或俯視切換時重算（站著不動不重算） ----------
+  let enabled = true;
+  let lastX = Infinity;
+  let lastZ = Infinity;
+  let lastFx = 0;
+  let lastFz = 1;
+  let lastOverview = false;
+  const st: VegLodStats = { mode: "lod", hi: 0, mid: 0, lo: 0, culled: 0, grassShown: 0, flowersShown: 0, tris: 0, meshes: 0, casters: 0, drawnMeshes: 0, drawnTris: 0 };
+  const fwd = new Vector3();
+
+  const rebuildTrees = (px: number, pz: number, fx: number, fz: number, overview: boolean): void => {
+    st.hi = st.mid = st.lo = st.culled = 0;
+    for (const s of slots) s.count = 0;
+    for (const g of groups) {
+      const hiR = g.small ? cfg.smallHiR : cfg.hiR;
+      const midR = g.small ? cfg.smallMidR : cfg.midR;
+      const n = g.xs.length;
+      for (let i = 0; i < n; i++) {
+        const dx = g.xs[i]! - px;
+        const dz = g.zs[i]! - pz;
+        const d = Math.hypot(dx, dz);
+        if (!overview && (d > cfg.farR || behindCamera(dx, dz, d, fx, fz, cfg.behindCos, cfg.behindR))) {
+          st.culled++;
+          g.prev[i] = null;
+          continue;
+        }
+        const lvl: VegLevel = overview ? 2 : levelFor(d, g.prev[i] ?? null, hiR, midR, cfg.hyst);
+        g.prev[i] = lvl;
+        const s = g.slots[lvl];
+        s.buf.set(g.mats.subarray(i * 16, i * 16 + 16), s.count * 16);
+        s.count++;
+        if (lvl === 0) st.hi++;
+        else if (lvl === 1) st.mid++;
+        else st.lo++;
+      }
+    }
+    for (const s of slots) {
+      s.mesh.thinInstanceCount = s.count;
+      if (s.count > 0) {
+        s.mesh.thinInstanceBufferUpdated("matrix");
+        s.mesh.thinInstanceRefreshBoundingInfo(false);
+      }
+      const on = enabled && s.count > 0;
+      if (s.mesh.isEnabled() !== on) s.mesh.setEnabled(on);
+    }
+  };
+
+  const rebuildTufts = (px: number, pz: number, fx: number, fz: number, overview: boolean): void => {
+    st.grassShown = 0;
+    st.flowersShown = 0;
+    for (const L of layers) {
+      let n = 0;
+      if (!overview && enabled) {
+        for (const c of L.cells) {
+          const bdx = Math.max(c.minX - px, 0, px - c.maxX);
+          const bdz = Math.max(c.minZ - pz, 0, pz - c.maxZ);
+          if (Math.hypot(bdx, bdz) >= L.end) continue;
+          for (let k = 0; k < c.idx.length; k++) {
+            const i = c.idx[k]!;
+            const dx = L.xs[i]! - px;
+            const dz = L.zs[i]! - pz;
+            const d = Math.hypot(dx, dz);
+            if (L.keys[i]! >= tuftDensity(d, L.full, L.end, cfg.tuftFloor)) continue;
+            if (behindCamera(dx, dz, d, fx, fz, cfg.behindCos, cfg.behindR)) continue;
+            L.liveM.set(L.mats.subarray(i * 16, i * 16 + 16), n * 16);
+            L.liveC.set(L.cols.subarray(i * 4, i * 4 + 4), n * 4);
+            n++;
+          }
+        }
+      }
+      L.count = n;
+      L.mesh.thinInstanceCount = n;
+      if (n > 0) {
+        L.mesh.thinInstanceBufferUpdated("matrix");
+        L.mesh.thinInstanceBufferUpdated("color");
+      }
+      const on = n > 0;
+      if (L.mesh.isEnabled() !== on) L.mesh.setEnabled(on);
+      if (L === grass) st.grassShown = n;
+      else st.flowersShown = n;
+    }
+  };
+
+  const view: VegetationView = {
+    update(px, pz, overview) {
+      if (!enabled) return;
+      const cam = scene.activeCamera;
+      let fx = lastFx;
+      let fz = lastFz;
+      if (cam) {
+        cam.getDirectionToRef(Vector3.Forward(), fwd);
+        const L = Math.hypot(fwd.x, fwd.z);
+        if (L > 1e-4) {
+          fx = fwd.x / L;
+          fz = fwd.z / L;
+        }
+      }
+      const moved = Math.hypot(px - lastX, pz - lastZ) > 1;
+      const turned = fx * lastFx + fz * lastFz < Math.cos((8 * Math.PI) / 180);
+      if (moved || turned || overview !== lastOverview) {
+        rebuildTrees(px, pz, fx, fz, overview);
+        rebuildTufts(px, pz, fx, fz, overview);
+        lastX = px;
+        lastZ = pz;
+        lastFx = fx;
+        lastFz = fz;
+        lastOverview = overview;
+      }
+    },
+    setEnabled(on) {
+      enabled = on;
+      for (const s of slots) s.mesh.setEnabled(on && s.count > 0);
+      for (const L of layers) L.mesh.setEnabled(on && L.count > 0);
+      if (on) lastX = Infinity; // 重新啟用時立刻重算
+    },
+    stats: () => {
+      let tris = 0;
+      let meshes = 0;
+      for (const s of slots) {
+        if (s.mesh.isEnabled()) {
+          tris += s.count * s.tris;
+          meshes++;
+        }
+      }
+      for (const L of layers) {
+        if (L.mesh.isEnabled()) {
+          tris += L.count * L.tris;
+          meshes++;
+        }
+      }
+      const ss = vegSceneStats(scene);
+      st.tris = Math.round(tris);
+      st.meshes = meshes;
+      st.drawnMeshes = ss.drawnMeshes;
+      st.drawnTris = ss.drawnTris;
+      st.casters = casterMeshes.filter((m) => m.isEnabled()).length;
+      return {
+        trees: layout.trees.length,
+        smalls: layout.smalls.length,
+        grass: layout.grass.length,
+        flowers: layout.flowers.length,
+        hiChunks: st.hi,
+        grassCells: grass && grass.count > 0 ? 1 : 0,
+        flowerCells: flowers && flowers.count > 0 ? 1 : 0,
+        shadowChunks: st.casters,
+        lod: { ...st },
+      };
+    },
   };
   return view;
 }

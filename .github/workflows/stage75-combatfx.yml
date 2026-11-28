@@ -1,0 +1,62 @@
+name: Stage 7.5 CombatFx integration candidate (CI, not iPhone)
+
+# Claude A：C 的正式接入模組 CombatFx 接到 Stage 7.5（新版男性 n75）。整合候選分支，只測試、不部署。
+# - 型別檢查、單元測試（含 C 的 combat-vfx 測試）
+# - Stage 7 世界 E2E（WebKit／Chromium、男女）：CombatFx 單一實例、預熱、技能、HUD、切換畫質不刪共用貼圖
+# - 預熱開／關對照（載入時間、第一次施放卡頓、平均 FPS、1% Low；CI 軟體繪製只看相對變化）
+# 結果推到 results/stage75-combatfx-<run id>（一般 push，不 force）。
+on:
+  push:
+    branches: [integration/stage75-combatfx]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stage75-combatfx-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+      - name: Typecheck
+        id: typecheck
+        continue-on-error: true
+        run: npm run typecheck
+      - name: Unit tests
+        id: unit
+        continue-on-error: true
+        run: npm test
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium webkit
+      - name: Stage 7 world E2E with CombatFx (WebKit + Chromium, male + female)
+        id: world
+        continue-on-error: true
+        run: node tests/e2e/run-world-e2e.mjs dist webkit,chromium
+      - name: Prewarm on / off compare (Chromium)
+        id: prewarm
+        continue-on-error: true
+        run: node tests/e2e/run-prewarm-compare.mjs dist chromium 30 2
+      - name: Push results to results branch
+        if: always()
+        run: |
+          mkdir -p /tmp/res
+          cp -r test-results/. /tmp/res/ 2>/dev/null || true
+          echo "{\"typecheck\":\"${{ steps.typecheck.outcome }}\",\"unit\":\"${{ steps.unit.outcome }}\",\"world\":\"${{ steps.world.outcome }}\",\"prewarm\":\"${{ steps.prewarm.outcome }}\",\"sha\":\"${GITHUB_SHA}\"}" > /tmp/res/outcomes.json
+          cd /tmp/res
+          git init -q && git checkout -q -b "results/stage75-combatfx-${GITHUB_RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -qm "Stage 7.5 CombatFx ${GITHUB_SHA::7}" || exit 0
+          git push -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" "results/stage75-combatfx-${GITHUB_RUN_ID}"
+      - name: Fail if tests failed
+        if: steps.typecheck.outcome != 'success' || steps.unit.outcome != 'success' || steps.world.outcome != 'success' || steps.prewarm.outcome != 'success'
+        run: exit 1

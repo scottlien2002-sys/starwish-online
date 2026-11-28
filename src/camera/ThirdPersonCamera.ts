@@ -8,6 +8,8 @@ import { heightAt } from "../world/terrain.ts";
  * 以避免與虛擬搖桿、技能按鈕搶觸控事件。
  */
 export class ThirdPersonCamera {
+  /** 戰鬥鏡頭震動位移（C 的 CombatFx.update 回傳值；只位移鏡頭目標，不影響判定） */
+  shakeOffset: Vector3 | null = null;
   readonly camera: ArcRotateCamera;
   private readonly smoothTarget = new Vector3();
   private desiredRadius: number = TUNING.camera.distance;
@@ -86,6 +88,8 @@ export class ThirdPersonCamera {
     this.smoothTarget.y += (follow.y + c.targetHeight - this.smoothTarget.y) * k;
     this.smoothTarget.z += (follow.z - this.smoothTarget.z) * k;
     cam.target.copyFrom(this.smoothTarget);
+    // 戰鬥鏡頭震動（Claude C 的 CombatFx；設定可調整或關閉）
+    if (this.shakeOffset) cam.target.addInPlace(this.shakeOffset);
 
     if (this.obstruct && this.obstructEnabled) {
       // 以玩家設定的距離與目前角度檢查「角色 → 鏡頭」線段（用玩家俯角，避免地面抬高造成來回）

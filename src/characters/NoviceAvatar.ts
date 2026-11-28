@@ -1,6 +1,7 @@
 import "@babylonjs/loaders/glTF";
 import {
-  type AbstractMesh,
+  AbstractMesh,
+  type AssetContainer,
   type AnimationGroup,
   type Bone,
   Color3,
@@ -12,11 +13,17 @@ import {
   SceneLoader,
   StandardMaterial,
   type ShadowGenerator,
+  type Skeleton,
+  VertexBuffer,
   type CubeTexture,
   type BaseTexture,
   TransformNode,
   Vector3,
+  Quaternion,
 } from "@babylonjs/core";
+import { MotionProbe, Spring2, SPRINGS } from "./secondaryMotion.ts";
+import { MODULAR_DIR, MODULAR_HAIR_FILES, MODULAR_VERSION, modularFile, type ModularPartInfo } from "./novice72.ts";
+export { MODULAR_DIR, MODULAR_HAIR_FILES, MODULAR_VERSION, modularFile, type ModularPartInfo } from "./novice72.ts";
 import { AnimStateMachine, ANIM_NAMES, ONE_SHOT, type AnimName } from "../actors/animState.ts";
 import { animClock, ANIM_TIMING, attackPlaybackRate } from "../actors/animTiming.ts";
 
@@ -42,6 +49,55 @@ export interface AvatarFrameInput {
   revive?: boolean;
 }
 
+/** 把蒙皮網格的骨骼索引從零件骨架換成身體骨架（依骨骼名稱）。回傳是否需要改寫 */
+export function rebindToSkeleton(mesh: Mesh, from: Skeleton, to: Skeleton): boolean {
+  const map = from.bones.map((b) => to.bones.findIndex((x) => x.name === b.name));
+  if (map.some((i) => i < 0)) throw new Error(`零件 ${mesh.name} 有身體骨架沒有的骨骼`);
+  if (map.every((v, i) => v === i)) return false;
+  for (const kind of [VertexBuffer.MatricesIndicesKind, VertexBuffer.MatricesIndicesExtraKind]) {
+    const d = mesh.getVerticesData(kind);
+    if (!d) continue;
+    const out = Array.from(d, (v) => map[v] ?? 0);
+    mesh.setVerticesData(kind, out, false);
+  }
+  return true;
+}
+
+/** models/novice72/manifest.json：Blender CI 產生並放進 public 的檔案清單（沒有 → 用上一版初心者） */
+export async function modularAvailable(baseUrl: string, g: NoviceGender, lod: NoviceLod): Promise<boolean> {
+  try {
+    const r = await fetch(`${baseUrl}${MODULAR_DIR}/manifest.json`, { cache: "no-cache" });
+    if (!r.ok) return false;
+    const m = (await r.json()) as { files?: string[] };
+    const need = ["body", "hair01", "top", "bottom", "boots", "sword", "staff"].map((s) => modularFile(g, s, lod));
+    return need.every((n) => m.files?.includes(n));
+  } catch {
+    return false;
+  }
+}
+
+/** Stage 7.5：速度低於這個值用走路動作（m/s），高於 WALK_TO_RUN 換回跑步（中間有遲滯，不會來回切換） */
+export const RUN_TO_WALK = 1.9;
+export const WALK_TO_RUN = 2.4;
+/** 站著不動多久之後偶爾播一次 Wait（張望、重心轉移） */
+export const WAIT_AFTER = 8;
+
+/** Stage 7.5：武器類型 → 普通攻擊動作（GLB 內的動作名稱）。這是動作架構，不代表新增或變更已定案的職業武器 */
+export const WEAPON_ATTACK_CLIPS: Readonly<Record<string, string>> = Object.freeze({
+  unarmed: "Attack_Unarmed",
+  oneHand: "Attack",
+  oneHandChop: "Attack_1H_Chop",
+  oneHandThrust: "Attack_1H_Thrust",
+  twoHand: "Attack_2H_Slash",
+  twoHandSmash: "Attack_2H_Smash",
+  polearm: "Attack_Polearm_Thrust",
+  polearmSwing: "Attack_Polearm_Swing",
+  hammer: "Attack_Hammer_Smash",
+  staff: "Cast_Staff",
+  heal: "Cast_Heal",
+  throw: "Attack_Throw",
+});
+
 export function noviceFile(g: NoviceGender, lod: NoviceLod, version = "c10b5"): string {
   return `novice_${version}_${g}_${lod}.glb`;
 }
@@ -50,6 +106,22 @@ export class NoviceAvatar {
   readonly root: TransformNode;
   readonly meshes: AbstractMesh[];
   readonly groups = new Map<AnimName, AnimationGroup>();
+  /** GLB 內全部動作（依名稱）。Stage 7.5 起含 Walk、Wait、各武器類型攻擊、技能動作 */
+  readonly clips = new Map<string, AnimationGroup>();
+  /** Stage 7.5：武器掛點（Weapon_R／Weapon_L；舊版沒有 → null） */
+  readonly sockets: { R: TransformNode | null; L: TransformNode | null } = { R: null, L: null };
+  /** 目前移動動作（跑步時依速度在 Run、Walk 之間切換） */
+  loco: "Run" | "Walk" = "Run";
+  /** 走路／跑步切換與播放倍率範圍（依模型版本） */
+  locoTuning: { toWalk: number; toRun: number; walkMaxRate: number; runMinRate: number } = { toWalk: RUN_TO_WALK, toRun: WALK_TO_RUN, walkMaxRate: 1.8, runMinRate: ANIM_TIMING.run.minRate };
+  private walkW = 0;
+  private waitW = 0;
+  private idleTime = 0;
+  private waiting = false;
+  private readonly secondary: { name: string; tn: TransformNode; spring: Spring2; axP: Vector3; axR: Vector3 }[] = [];
+  private readonly probe = new MotionProbe();
+  private readonly qa = new Quaternion();
+  private readonly qb = new Quaternion();
   readonly sm: AnimStateMachine;
   readonly triangles: number;
   readonly file: string;
@@ -66,11 +138,17 @@ export class NoviceAvatar {
   private readonly weights = new Map<AnimName, number>();
   private readonly listeners: ((e: AvatarEvent) => void)[] = [];
   private readonly headBone: Bone | null;
-  private readonly skinnedRef: AbstractMesh | null;
+  readonly skinnedRef: AbstractMesh | null;
   private blob: Mesh | null = null;
   private readonly tmp = new Vector3();
 
-  private constructor(scene: Scene, file: string, res: Awaited<ReturnType<typeof SceneLoader.ImportMeshAsync>>) {
+  /** Stage 7.2 新版（Tripo 模組化）：武器類型對應的攻擊動作（Attack_Sword／Attack_Staff） */
+  readonly attackClips = new Map<"sword" | "staff", AnimationGroup>();
+  /** Stage 7.2 新版：已載入的模組零件（髮型、上衣、下身、靴子、武器） */
+  parts: ModularPartInfo[] = [];
+  weapon: "sword" | "staff" | null = null;
+
+  private constructor(scene: Scene, file: string, res: { meshes: AbstractMesh[]; animationGroups: AnimationGroup[]; skeletons: Skeleton[]; transformNodes?: TransformNode[] }) {
     this.file = file;
     this.root = new TransformNode("player", scene);
     // glTF 的 __root__ 保留左右手座標轉換，不要改它；移動、轉向都在 player 這一層
@@ -81,26 +159,283 @@ export class NoviceAvatar {
       m.receiveShadows = false;
     }
     for (const ag of res.animationGroups) {
+      if (ag.name === "Attack_Sword") this.attackClips.set("sword", ag);
+      if (ag.name === "Attack_Staff") this.attackClips.set("staff", ag);
       const a = ANIM_NAMES.find((n) => ag.name === n || ag.name.endsWith(n));
       if (a) this.groups.set(a, ag);
+      this.clips.set(ag.name, ag);
       ag.stop();
     }
     this.triangles = res.meshes.reduce((a, m) => a + Math.round((m.getTotalIndices() || 0) / 3), 0);
-    this.headBone = res.skeletons[0]?.bones.find((b) => b.name === "head") ?? null;
+    if (!this.groups.has("Attack") && this.attackClips.size) this.groups.set("Attack", this.attackClips.get("sword") ?? [...this.attackClips.values()][0]!);
+    this.headBone = res.skeletons[0]?.bones.find((b) => b.name === "head" || b.name === "Head") ?? null;
+    const tns = res.transformNodes ?? [];
+    this.sockets.R = tns.find((t) => t.name === "Weapon_R") ?? null;
+    this.sockets.L = tns.find((t) => t.name === "Weapon_L") ?? null;
+    this.setupSecondary(tns);
     this.skinnedRef = res.meshes.find((m) => !!m.skeleton) ?? null;
+    // 頭部側邊半寬（頭、頭髮、馬尾、蝴蝶結的綁定姿勢包圍盒，左右取大者）
+    let hw = 0;
+    for (const m of res.meshes) {
+      if (!/hair|head|face|bow|ponytail/i.test(m.name) || !m.getTotalVertices()) continue;
+      const bi = m.getBoundingInfo().boundingBox;
+      hw = Math.max(hw, Math.abs(bi.minimum.x), Math.abs(bi.maximum.x));
+    }
+    if (hw > 0.15 && hw < 0.6) this.headHalfWidth = hw;
     const durations = Object.fromEntries([...this.groups].map(([n, g]) => [n, (g.to - g.from) / 60])) as Partial<Record<AnimName, number>>;
     this.sm = new AnimStateMachine(durations);
     for (const n of ANIM_NAMES) this.weights.set(n, n === "Idle" ? 1 : 0);
     this.play("Idle");
   }
 
-  static async load(scene: Scene, opts: { gender: NoviceGender; lod: NoviceLod; baseUrl: string; version?: string }): Promise<NoviceAvatar> {
+  /** 共用模型容器（同一場景、同一檔案只下載、解碼一次） */
+  private static readonly containers = new Map<string, Promise<AssetContainer>>();
+
+  /**
+   * Stage 7.5 第二階段：多位玩家共用同一份網格、材質、貼圖（AssetContainer.instantiateModelsToScene）。
+   * 每位玩家只有自己的骨架、動畫群組與節點；貼圖記憶體不隨人數增加（多人遠端玩家用）。
+   */
+  private static async instantiateShared(scene: Scene, baseUrl: string, file: string): Promise<{ meshes: AbstractMesh[]; animationGroups: AnimationGroup[]; skeletons: Skeleton[]; transformNodes: TransformNode[] }> {
+    const key = `${scene.uid}|${baseUrl}${file}`;
+    let p = NoviceAvatar.containers.get(key);
+    if (!p) {
+      const np: Promise<AssetContainer> = SceneLoader.LoadAssetContainerAsync(baseUrl, file, scene).then((c: AssetContainer) => {
+        for (const g of c.animationGroups) g.stop();
+        return c;
+      });
+      NoviceAvatar.containers.set(key, np);
+      p = np;
+    }
+    const c = await p;
+    const inst = c.instantiateModelsToScene((n) => n, false, { doNotInstantiate: true });
+    const root = inst.rootNodes[0]!;
+    const desc = root.getDescendants(false);
+    const meshes = [root, ...desc].filter((n): n is AbstractMesh => n instanceof AbstractMesh);
+    const transformNodes = desc.filter((n): n is TransformNode => n instanceof TransformNode && !(n instanceof AbstractMesh));
+    return { meshes, animationGroups: inst.animationGroups, skeletons: inst.skeletons, transformNodes };
+  }
+
+  /** 共用模型的玩家離開：只刪除自己的節點、骨架、動畫（共用的幾何、材質、貼圖保留給其他玩家） */
+  disposeShared(): void {
+    for (const g of this.clips.values()) g.dispose();
+    for (const m of this.meshes) m.skeleton?.dispose();
+    this.root.dispose(false, false);
+  }
+
+  /** 測試／報告用：共用容器數 */
+  static get sharedContainers(): number {
+    return NoviceAvatar.containers.size;
+  }
+
+  static async load(scene: Scene, opts: { gender: NoviceGender; lod: NoviceLod; baseUrl: string; version?: string; shared?: boolean }): Promise<NoviceAvatar> {
     const file = noviceFile(opts.gender, opts.lod, opts.version);
-    const res = await SceneLoader.ImportMeshAsync("", opts.baseUrl, file, scene);
+    const res = opts.shared ? await NoviceAvatar.instantiateShared(scene, opts.baseUrl, file) : await SceneLoader.ImportMeshAsync("", opts.baseUrl, file, scene);
     const a = new NoviceAvatar(scene, file, res);
+    a.version = opts.version ?? "c10b5";
+    if (a.version === "n75") {
+      // Tripo 原生走路／跑步（根運動量測）：走路 0.73 m/s、跑步 2.66 m/s。
+      // 走路最多 2.2 倍（1.6 m/s）、跑步最少 0.65 倍（1.73 m/s）；1.5 以下走路、1.75 以上跑步 → 任何速度都不超出播放倍率範圍（不滑步）
+      a.walkGroundSpeed = 0.73;
+      a.loco = "Walk";
+      a.locoTuning = { toWalk: 1.5, toRun: 1.75, walkMaxRate: 2.2, runMinRate: 0.65 };
+    }
     const gs = ANIM_TIMING.run.groundSpeedBy[opts.version ?? "c10b5"];
     if (gs) a.groundSpeed = gs[opts.gender];
     return a;
+  }
+
+  /**
+   * Stage 7.2 新版初心者（Tripo 零件，模組化）：身體（骨架＋動畫）＋髮型、上衣、下身、靴子、武器各一個 GLB。
+   * 零件的蒙皮網格重新綁到身體骨架（依骨骼名稱對應索引），零件自己的骨架丟掉。
+   */
+  static async loadModular(scene: Scene, opts: { gender: NoviceGender; lod: NoviceLod; baseUrl: string; appearance: { hair: string; hairColor: string | null; weapon: "sword" | "staff" } }): Promise<NoviceAvatar> {
+    const dir = `${opts.baseUrl}${MODULAR_DIR}/`;
+    const f = (slot: string) => modularFile(opts.gender, slot, opts.lod);
+    const body = await SceneLoader.ImportMeshAsync("", dir, f("body"), scene);
+    const skel = body.skeletons[0];
+    if (!skel) throw new Error("新版初心者身體沒有骨架");
+    const bodyRoot = body.meshes[0]!;
+    const hair = MODULAR_HAIR_FILES.includes(opts.appearance.hair) ? opts.appearance.hair : "hair01";
+    const slots: { slot: string; kind: ModularPartInfo["kind"] }[] = [
+      { slot: hair, kind: "hair" },
+      { slot: "top", kind: "top" },
+      { slot: "bottom", kind: "bottom" },
+      { slot: "boots", kind: "boots" },
+      { slot: opts.appearance.weapon, kind: "weapon" },
+    ];
+    const parts: ModularPartInfo[] = [];
+    const meshes: AbstractMesh[] = [...body.meshes];
+    const loaded = await Promise.all(slots.map((s) => SceneLoader.ImportMeshAsync("", dir, f(s.slot), scene).then((r) => ({ s, r }))));
+    for (const { s, r } of loaded) {
+      const ps = r.skeletons[0];
+      const info: ModularPartInfo = { kind: s.kind, file: f(s.slot), meshes: [], remapped: false };
+      for (const m of r.meshes) {
+        if (!m.getTotalVertices()) continue;
+        if (ps && m.skeleton === ps) info.remapped = rebindToSkeleton(m as Mesh, ps, skel) || info.remapped;
+        m.skeleton = skel;
+        m.parent = bodyRoot;
+        meshes.push(m);
+        info.meshes.push(m.name);
+        if (s.kind === "hair" && opts.appearance.hairColor && m.material instanceof PBRMaterial) m.material.albedoColor = Color3.FromHexString(opts.appearance.hairColor);
+      }
+      for (const m of r.meshes) if (!m.getTotalVertices()) m.dispose(false, false);
+      for (const t of r.transformNodes) t.dispose();
+      ps?.dispose();
+      for (const g of r.animationGroups) g.dispose();
+      parts.push(info);
+    }
+    // 穿上整套衣服（上衣＋下身＋靴子）時，被蓋住的身體不畫（少一個繪製、不會穿模）
+    const dressed = ["top", "bottom", "boots"].every((k) => parts.some((p) => p.kind === k && p.meshes.length));
+    for (const m of body.meshes) if (/Body_Covered/.test(m.name)) m.setEnabled(!dressed);
+    const a = new NoviceAvatar(scene, f("body"), { meshes, animationGroups: body.animationGroups, skeletons: body.skeletons });
+    a.parts = parts;
+    a.setWeapon(opts.appearance.weapon);
+    const gs = ANIM_TIMING.run.groundSpeedBy[MODULAR_VERSION];
+    if (gs) a.groundSpeed = gs[opts.gender];
+    return a;
+  }
+
+  version = "c10b5";
+
+  /** 輔助骨骼名稱（有次級動態的） */
+  get secondaryBones(): string[] {
+    return this.secondary.map((s) => s.name);
+  }
+
+  /** 次級動態目前角度（除錯、測試用；弧度） */
+  secondaryState(): Record<string, { pitch: number; roll: number }> {
+    return Object.fromEntries(this.secondary.map((s) => [s.name, { pitch: s.spring.pitch, roll: s.spring.roll }]));
+  }
+
+  private setupSecondary(tns: TransformNode[]): void {
+    for (const name of Object.keys(SPRINGS) as (keyof typeof SPRINGS)[]) {
+      const tn = tns.find((t) => t.name === name);
+      const p = tn?.parent as TransformNode | null;
+      if (!tn || !p) continue;
+      p.computeWorldMatrix(true);
+      const inv = p.getWorldMatrix().clone().invert();
+      // 綁定姿勢下：角色前方（+Z）、下方、側向 → 父骨骼區域空間
+      const F = Vector3.TransformNormal(new Vector3(0, 0, 1), inv).normalize();
+      const Dn = Vector3.TransformNormal(new Vector3(0, -1, 0), inv).normalize();
+      let axP = Vector3.TransformNormal(new Vector3(1, 0, 0), inv).normalize();
+      // 正的 pitch＝頭髮往後甩：確認轉動方向（下垂方向往「後方」移動）
+      const moved = Dn.rotateByQuaternionToRef(Quaternion.RotationAxis(axP, 0.1), new Vector3()).subtract(Dn);
+      if (Vector3.Dot(moved, F) > 0) axP = axP.negate();
+      tn.rotationQuaternion = Quaternion.Identity();
+      this.secondary.push({ name, tn, spring: new Spring2(SPRINGS[name]), axP, axR: F });
+    }
+  }
+
+  private updateSecondary(dt: number): void {
+    if (!this.secondary.length) return;
+    this.probe.sample(dt, this.root.position.x, this.root.position.z, this.root.rotation.y);
+    const pr = this.probe;
+    for (const s of this.secondary) {
+      s.spring.step(dt, pr.accFwd, pr.accSide, pr.turnRate, pr.speed);
+      Quaternion.RotationAxisToRef(s.axP, s.spring.pitch, this.qa);
+      Quaternion.RotationAxisToRef(s.axR, s.spring.roll, this.qb);
+      this.qa.multiplyToRef(this.qb, s.tn.rotationQuaternion!);
+    }
+  }
+
+  /**
+   * Stage 7.5：武器掛載。武器根節點的原點＝握把、+Y＝刀身／杖身方向（與 Claude C 展示武器相同規格）。
+   * 掛點已抵消角色縮放，武器維持原本的公尺尺寸。舊版模型沒有掛點時回傳 false。
+   */
+  attachWeapon(node: TransformNode, hand: "R" | "L" = "R"): boolean {
+    const sk = this.sockets[hand];
+    if (!sk) return false;
+    sk.computeWorldMatrix(true);
+    const sc = new Vector3();
+    sk.getWorldMatrix().decompose(sc);
+    node.parent = sk;
+    node.position.setAll(0);
+    node.rotationQuaternion = Quaternion.Identity();
+    node.scaling.setAll(1 / Math.max(1e-6, Math.abs(sc.x)));
+    node.setEnabled(true);
+    return true;
+  }
+
+  /** 卸下武器（不刪除，讓遊戲端決定是否回收） */
+  detachWeapon(node: TransformNode): void {
+    node.parent = null;
+    node.setEnabled(false);
+  }
+
+  private previewG: AnimationGroup | null = null;
+
+  /**
+   * Stage 7.5 第二階段：技能動作（Claude C 的 Skill_* 片段）。與 C 的展示頁相同，動作時間由技能時間軸驅動（setSkillTime）：
+   * 攻速倍率、打擊頓幀都在時間軸上，動作、命中、特效、音效用同一個時鐘。播放中不切換移動／待機狀態。
+   */
+  playSkill(name: string, duration: number): boolean {
+    if (!this.previewClip(name)) return false;
+    const g = this.previewG!;
+    g.pause();
+    this.skillDur = Math.max(1e-3, duration);
+    g.goToFrame(g.from);
+    return true;
+  }
+
+  private skillDur = 0;
+
+  setSkillTime(t: number): void {
+    const g = this.previewG;
+    if (!g || !this.skillDur) return;
+    g.goToFrame(g.from + Math.min(1, Math.max(0, t / this.skillDur)) * (g.to - g.from));
+  }
+
+  /** 中斷技能／預覽動作（倒地時），回到狀態機目前的動作 */
+  stopClip(): void {
+    const g = this.previewG;
+    this.skillDur = 0;
+    if (!g) return;
+    this.previewG = null;
+    g.stop();
+    for (const n of ANIM_NAMES) this.weights.set(n, n === this.sm.state ? 1 : 0);
+    this.walkW = this.waitW = 0;
+    this.play(this.sm.state);
+  }
+
+  /** 驗收用：播放任一動作一次（播完回到正常狀態）。回傳是否有這個動作 */
+  previewClip(name: string, rate = 1): boolean {
+    const g = this.clips.get(name);
+    if (!g) return false;
+    for (const x of this.clips.values()) x.stop();
+    this.previewG = g;
+    g.start(false, rate, g.from, g.to, false);
+    g.setWeightForAllAnimatables(1);
+    g.onAnimationGroupEndObservable.addOnce(() => {
+      if (this.previewG !== g) return;
+      this.previewG = null;
+      for (const n of ANIM_NAMES) this.weights.set(n, n === this.sm.state ? 1 : 0);
+      this.walkW = this.waitW = 0;
+      this.play(this.sm.state);
+    });
+    return true;
+  }
+
+  get previewing(): string | null {
+    return this.previewG?.name ?? null;
+  }
+
+  /** Stage 7.5：依武器類型切換普通攻擊動作（WEAPON_ATTACK_CLIPS）；沒有這個動作就維持原本 */
+  setAttackStyle(style: keyof typeof WEAPON_ATTACK_CLIPS | string): boolean {
+    const g = this.clips.get(WEAPON_ATTACK_CLIPS[style] ?? style);
+    if (!g) return false;
+    const cur = this.groups.get("Attack");
+    if (cur && cur !== g) cur.stop();
+    this.groups.set("Attack", g);
+    return true;
+  }
+
+  /** 換武器類型的攻擊動作（模型零件另外載入；這裡只切換動作） */
+  setWeapon(kind: "sword" | "staff"): void {
+    const g = this.attackClips.get(kind);
+    if (!g) return;
+    this.weapon = kind;
+    this.groups.get("Attack")?.stop();
+    this.groups.set("Attack", g);
   }
 
   get bones(): number {
@@ -194,6 +529,18 @@ export class NoviceAvatar {
     return out.set(this.root.position.x, this.root.position.y + 1.25, this.root.position.z);
   }
 
+  /** 頭部（含頭髮、髮飾）側邊半寬（公尺）：載入時從模型量測 */
+  headHalfWidth = 0.33;
+
+  /** 寵物跟隨用：頭部中心、耳朵高度的世界座標（頭骨起點往上 0.14 m） */
+  petAnchor(out = new Vector3()): Vector3 {
+    if (this.headBone && this.skinnedRef) {
+      this.headBone.getAbsolutePositionToRef(this.skinnedRef, this.tmp);
+      return out.set(this.tmp.x, this.tmp.y + 0.14, this.tmp.z);
+    }
+    return out.set(this.root.position.x, this.root.position.y + 0.82, this.root.position.z);
+  }
+
   /**
    * 右耳的世界座標（寵物停在這附近）：頭骨起點（脖子上方）往上 0.14 m、往角色右側 0.17 m（耳朵的模型位置），跟著角色轉向
    */
@@ -222,6 +569,11 @@ export class NoviceAvatar {
     const before = this.sm.state;
     const t0 = this.sm.time;
     const wasDeathDone = this.sm.state === "Death" && t0 >= this.sm.duration("Death");
+    if (this.previewG) {
+      // 動作預覽／技能中：不切換狀態（播完自動回復）
+      this.updateSecondary(dt);
+      return 0;
+    }
     this.sm.update(dt, { moving, jump: input.jump, attack: input.attack, hurt: input.hurt, die: input.die, revive: input.revive });
     if (this.sm.state === "Death" && !wasDeathDone && this.sm.time >= this.sm.duration("Death")) this.emit({ type: "deathEnd" });
     const restarted = ONE_SHOT[this.sm.state] && this.sm.time < t0 && this.sm.state === before;
@@ -244,7 +596,34 @@ export class NoviceAvatar {
     this.runRate = clock.runRate;
     const g = this.groups.get(this.sm.state);
     if (g) g.speedRatio = clock.rate;
+    // Stage 7.5：慢速移動用 Walk（有遲滯）；站著不動一段時間後偶爾播 Wait
+    const walkG = this.clips.get("Walk");
+    if (walkG) {
+      const lt = this.locoTuning;
+      if (this.loco === "Run" && input.speed < lt.toWalk) this.loco = "Walk";
+      else if (this.loco === "Walk" && input.speed > lt.toRun) this.loco = "Run";
+      walkG.speedRatio = Math.max(0.6, Math.min(lt.walkMaxRate, input.speed / Math.max(0.3, this.walkGroundSpeed)));
+      if (this.sm.state === "Run" && g) g.speedRatio = Math.max(lt.runMinRate, Math.min(ANIM_TIMING.run.maxRate, input.speed / this.groundSpeed));
+    }
+    const waitG = this.clips.get("Wait");
+    if (this.sm.state === "Idle") this.idleTime += dt;
+    else {
+      this.idleTime = 0;
+      this.waiting = false;
+    }
+    if (waitG) {
+      if (!this.waiting && this.idleTime > WAIT_AFTER) {
+        this.waiting = true;
+        waitG.stop();
+        waitG.start(false, 1, waitG.from, waitG.to, false);
+        waitG.setWeightForAllAnimatables(this.waitW);
+      } else if (this.waiting && !waitG.isPlaying) {
+        this.waiting = false;
+        this.idleTime = 0;
+      }
+    }
     this.blendWeights(dt);
+    this.updateSecondary(dt);
     const h = this.jumpHeight();
     if (this.wasAirborne && h === 0) this.emit({ type: "land" });
     this.wasAirborne = h > 0;
@@ -260,7 +639,7 @@ export class NoviceAvatar {
   }
 
   dispose(): void {
-    for (const g of this.groups.values()) g.dispose();
+    for (const g of new Set([...this.groups.values(), ...this.attackClips.values()])) g.dispose();
     for (const m of this.meshes) m.dispose();
     this.blob?.dispose(false, true);
     this.root.dispose();
@@ -274,17 +653,41 @@ export class NoviceAvatar {
     g.setWeightForAllAnimatables(this.weights.get(n) ?? 0);
   }
 
+  /** 走路動作在播放倍率 1 時的地面速度（m/s；Blender／Python 量測） */
+  walkGroundSpeed = 1.3;
+
   private blendWeights(dt: number): void {
+    const k = Math.min(1, dt / ANIM_TIMING.crossfade);
+    const walkG = this.clips.get("Walk");
+    const waitG = this.clips.get("Wait");
+    const walkT = walkG && this.sm.state === "Run" && this.loco === "Walk" ? 1 : 0;
+    const waitT = waitG && this.sm.state === "Idle" && this.waiting ? 1 : 0;
+    this.walkW += (walkT - this.walkW) * k;
+    this.waitW += (waitT - this.waitW) * k;
+    for (const [g, w, loop] of [[walkG, this.walkW, true], [waitG, this.waitW, false]] as const) {
+      if (!g) continue;
+      if (w < 0.01) {
+        if (g.isPlaying && !(g === waitG && this.waiting)) g.stop();
+      } else {
+        if (!g.isPlaying && loop) g.start(true, g.speedRatio, g.from, g.to, false);
+        g.setWeightForAllAnimatables(w);
+      }
+    }
     for (const n of ANIM_NAMES) {
       const w = this.weights.get(n)!;
-      const target = n === this.sm.state ? 1 : 0;
-      const nw = w + (target - w) * Math.min(1, dt / ANIM_TIMING.crossfade);
+      let target = n === this.sm.state ? 1 : 0;
+      if (n === "Run") target *= 1 - walkT;
+      if (n === "Idle") target *= 1 - waitT;
+      const nw = w + (target - w) * k;
       this.weights.set(n, nw);
       const g = this.groups.get(n);
       if (!g) continue;
       if (nw < 0.01 && n !== this.sm.state) {
         if (g.isPlaying) g.stop();
-      } else g.setWeightForAllAnimatables(nw);
+      } else {
+        if (!g.isPlaying && !ONE_SHOT[n] && nw >= 0.01) g.start(true, g.speedRatio, g.from, g.to, false);
+        g.setWeightForAllAnimatables(nw);
+      }
     }
   }
 

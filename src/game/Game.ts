@@ -294,7 +294,7 @@ export class Game {
     if (this.experiments.diag === "nomsaa" && this.render.pipeline) this.render.pipeline.samples = 1;
 
     // ---------- 預覽測試：星露啵啵 V2（沿用怪物框架：生成、AI、狀態機、動畫） ----------
-    const registry = registerBabylonVisuals(createMonsterRegistry(), {
+    const registry = registerBabylonVisuals(createMonsterRegistry({ legacyAggressive: true }), {
       scene,
       shadows,
       glow: this.render.glow ?? undefined,

@@ -3,7 +3,7 @@ name: CI & Deploy
 # 每次推送到 main：型別檢查 → 單元測試 → 建置 → 瀏覽器測試 → 部署到 gh-pages 分支（GitHub Pages）
 on:
   push:
-    branches: [main, "feature/**"]
+    branches: [main, "feature/**", "!feature/combat-vfx-*"] # combat-vfx 有自己的工作流程（combat-vfx.yml）
   workflow_dispatch:
 
 permissions:
@@ -16,7 +16,7 @@ concurrency:
 jobs:
   build-test-deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@v5
 
@@ -39,6 +39,11 @@ jobs:
       - name: Install test browsers
         run: npx playwright install --with-deps chromium webkit
 
+      - name: Stage 5.6 play E2E (WebKit)
+        id: playe2e
+        continue-on-error: true
+        run: node tests/e2e/run-play-e2e.mjs dist webkit
+
       - name: Stage 6 P2-3 village E2E (Chromium + WebKit)
         id: villagee2e
         continue-on-error: true
@@ -53,8 +58,11 @@ jobs:
         if: startsWith(github.ref, 'refs/heads/feature/render')
         run: |
           mkdir -p dist/ci-report
-          cp -r test-results/. dist/ci-report/ 2>/dev/null || true
-          echo "{\"commit\":\"${GITHUB_SHA}\",\"runId\":\"${GITHUB_RUN_ID}\",\"villageE2e\":\"${{ steps.villagee2e.outcome }}\",\"mapE2e\":\"${{ steps.mape2e.outcome }}\",\"note\":\"preview deployed before the long legacy E2E; see the Actions log for its result\"}" > dist/ci-report/summary.json
+          # 預覽資料夾只放報告（JSON）與原野 E2E 截圖；地圖／村莊 E2E 的大量截圖（約 180 MB）不放進 GitHub Pages
+          # （gh-pages 全部預覽合計約 3.9 GB，超過 Pages 建議的 1 GB，部署容易逾時）
+          # 2026-11-28 容量規範：測試截圖不放進 Pages（只放 JSON；截圖在 Actions artifacts）
+          (cd test-results 2>/dev/null && find . -type f -name '*.json' -exec cp --parents {} ../dist/ci-report/ \;) || true
+          echo "{\"commit\":\"${GITHUB_SHA}\",\"runId\":\"${GITHUB_RUN_ID}\",\"villageE2e\":\"${{ steps.villagee2e.outcome }}\",\"playE2e\":\"${{ steps.playe2e.outcome }}\",\"mapE2e\":\"${{ steps.mape2e.outcome }}\",\"note\":\"preview deployed before the long legacy E2E; see the Actions log for its result\"}" > dist/ci-report/summary.json
 
       - name: Deploy preview (own folder only)
         # feature/render-* 分支各自部署到獨立子路徑，只替換自己的資料夾，不影響正式版與其他預覽版
@@ -68,16 +76,40 @@ jobs:
           for attempt in 1 2 3 4 5; do
             rm -rf /tmp/pages
             git clone -q --depth 1 -b gh-pages "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" /tmp/pages
+            # 2026-11-28 容量規範：其他預覽引用的自己的檔案先暫存，放入新建置後補回（不會讓別人的預覽壞掉）
+            rm -rf /tmp/keep-assets && node tools/shared-assets.mjs preserve-save /tmp/pages "$DIR" /tmp/keep-assets
             rm -rf "/tmp/pages/$DIR"
             mkdir -p "/tmp/pages/$DIR"
             cp -r dist/. "/tmp/pages/$DIR/"
-            if [ "$DIR" = "preview-map-junkyard" ]; then
-              # Stage 6.8＋6.9 星廢垃圾場：瘦身部署（GitHub Pages 已用約 943 MB／1 GB）。
-              # 這張地圖只需要網頁本體與正式初心者角色（novice_c10b5b_*）；其他地圖的模型與測試截圖不放進這個預覽。
-              find "/tmp/pages/$DIR/models" -mindepth 1 -maxdepth 1 ! -name 'novice_c10b5b_*' -exec rm -rf {} +
+            # 預覽不需要的舊版角色模型與比較用模型（正式頁面不使用；本機 dist 仍保留給後面的舊版測試）
+            (cd "/tmp/pages/$DIR/models" 2>/dev/null && rm -f novice_c10b_*.glb novice_c10b1_*.glb novice_c10b2_*.glb novice_c10b3_*.glb novice_c10b4_*.glb novice_c10b5_*.glb village-p3/*_s62.glb village-p3/p30_sample_*.glb) || true
+            # 星廢垃圾場（Claude B）瘦身部署：只留網頁本體、正式初心者角色與垃圾場地標 GLB（models/junkyard/）；
+            # 其他地圖的模型與測試截圖不放進這個預覽。寫在 preserve-restore 之前，其他預覽引用的檔案仍會補回。
+            case "$DIR" in preview-map-junkyard*)
+              find "/tmp/pages/$DIR/models" -mindepth 1 -maxdepth 1 ! -name 'novice_c10b5b_*' ! -name 'novice_n75*' ! -name 'junkyard' -exec rm -rf {} +
+              find "/tmp/pages/$DIR/models/junkyard" -mindepth 1 -maxdepth 1 ! -name 'jy_lm_*.glb' ! -name 'landmarks.json' -exec rm -rf {} + 2>/dev/null || true
               find "/tmp/pages/$DIR/ci-report" -mindepth 1 ! -name 'summary.json' -exec rm -rf {} + 2>/dev/null || true
-              echo "瘦身後大小：$(du -sh "/tmp/pages/$DIR" | cut -f1)"
-            fi
+              echo "垃圾場瘦身後大小：$(du -sh "/tmp/pages/$DIR" | cut -f1)" ;;
+            esac
+            node tools/shared-assets.mjs preserve-restore /tmp/pages "$DIR" /tmp/keep-assets
+            # 版本化共用資產（/shared-assets/v1/<sha1>，已發布不覆寫）：A 的預覽先行（2026-11-28 使用者核准）
+            case "$DIR" in preview-stage73-world|preview-stage74-perf|preview-stage75-novice)
+              node tools/shared-assets.mjs publish /tmp/pages "$DIR"
+              node tools/shared-assets.mjs verify /tmp/pages || { echo "::error::共用資產檢查失敗，取消發布"; exit 1; } ;;
+            esac
+            # 垃圾場接入共用資產（順序 D → C → B）：由 Claude A 設定 repo 變數 JY_SHARED_ASSETS=1 後才啟用；預設不啟用
+            case "$DIR" in preview-map-junkyard*)
+              if [ "${{ vars.JY_SHARED_ASSETS }}" = "1" ]; then
+                node tools/shared-assets.mjs publish /tmp/pages "$DIR"
+                node tools/shared-assets.mjs verify /tmp/pages || { echo "::error::共用資產檢查失敗，取消發布"; exit 1; }
+              fi ;;
+            esac
+            # 容量檢查：GitHub Pages 建議 1 GB（之前 3.9 GB 時發布逾時；1.14 GB 時仍正常）。超過 1000 MB 警告，超過 1100 MB 不發布
+            TOTAL=$(du -sm --exclude=.git /tmp/pages | cut -f1)
+            echo "預覽資料夾 $(du -sm "/tmp/pages/$DIR" | cut -f1) MB；發布後 gh-pages 合計 ${TOTAL} MB"
+            if [ "$TOTAL" -gt 1100 ]; then echo "::error::gh-pages 合計 ${TOTAL} MB 超過 1100 MB，取消發布（請先依「每條開發線只留最新」整理舊預覽）"; exit 1; fi
+            if [ "$TOTAL" -gt 1000 ]; then echo "::warning::gh-pages 合計 ${TOTAL} MB 超過 1000 MB：暫停非必要的大型預覽部署（容量規範 2026-11-28）"; fi
+            if [ "$TOTAL" -gt 900 ] && [ "$TOTAL" -le 1000 ]; then echo "::notice::gh-pages 合計 ${TOTAL} MB 超過 900 MB：請啟動容量盤點（node tools/pages-inventory.mjs）"; fi
             echo "{\"branch\":\"${GITHUB_REF_NAME}\",\"commit\":\"${GITHUB_SHA}\",\"path\":\"/$DIR/\",\"builtAt\":\"$(date -u +%FT%TZ)\"}" > "/tmp/pages/$DIR/preview.json"
             cd /tmp/pages
             git config user.name "github-actions[bot]"
@@ -126,7 +158,7 @@ jobs:
           git push -qf "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh-pages
 
       - name: Fail job if browser tests failed
-        if: steps.hud.outcome == 'failure' || steps.e2e.outcome == 'failure' || steps.mape2e.outcome == 'failure'
+        if: steps.hud.outcome == 'failure' || steps.e2e.outcome == 'failure' || steps.mape2e.outcome == 'failure' || steps.playe2e.outcome == 'failure' || steps.villagee2e.outcome == 'failure'
         run: |
           echo "瀏覽器測試未通過，詳見網站 ci-report/ 或上方記錄"
           exit 1

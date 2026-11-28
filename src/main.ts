@@ -39,6 +39,39 @@ function main(): void {
   const lab = new URLSearchParams(location.search).get("lab");
   const map = new URLSearchParams(location.search).get("map");
   try {
+    // ?play=world：Stage 7 完整遊戲（星芽村出生 → 南門 → 星芽原野 → 星願石返回；共用存檔）；&newgame=1 重新開始、&g=female 新存檔性別
+    if (new URLSearchParams(location.search).get("play") === "world") {
+      document.body.classList.add("map-mode");
+      void import("./game/worldSession.ts")
+        .then(async (ws) => {
+          const world = new ws.WorldSession(new URLSearchParams(location.search));
+          if (world.save.character.map === "starsprout") {
+            const m = await import("./game/StarsproutGame.ts");
+            await m.startStarsproutGame(canvas, hudRoot, world);
+          } else {
+            const m = await import("./game/VillageGame.ts");
+            await m.startVillageGame(canvas, hudRoot, world);
+          }
+        })
+        .then(() => hideBoot())
+        .catch((err: unknown) => {
+          console.error(err);
+          fail(`星願物語載入失敗：${err instanceof Error ? err.message : String(err)}`);
+        });
+      return;
+    }
+    // ?play=starsprout：Stage 5.6 整合測試（男女初心者在星芽原野打怪、掉落、背包、寵物）；&g=female、&lod=lite、&charshadow=realtime
+    if (new URLSearchParams(location.search).get("play") === "starsprout") {
+      document.body.classList.add("map-mode");
+      void import("./game/StarsproutGame.ts")
+        .then((m) => m.startStarsproutGame(canvas, hudRoot))
+        .then(() => hideBoot())
+        .catch((err: unknown) => {
+          console.error(err);
+          fail(`星芽原野整合測試載入失敗：${err instanceof Error ? err.message : String(err)}`);
+        });
+      return;
+    }
     // ?map=starsprout：Stage 6 星芽原野（第一階段：地形與主要路線，沒有怪物）；&lod=lite、&autoplay=route&loops=3
     if (map === "starsprout") {
       document.body.classList.add("map-mode");
@@ -144,6 +177,42 @@ function main(): void {
         });
       return;
     }
+    // ?lab=anim：Stage 5.5 角色動畫（C1.0-B4 候選：骨架＋五個動作）＋星靈寵物系統測試頁
+    if (lab === "anim") {
+      document.body.classList.add("lab-mode");
+      void import("./lab/AnimPetLab.ts")
+        .then((m) => m.startAnimPetLab(canvas, hudRoot))
+        .then(() => hideBoot())
+        .catch((err: unknown) => {
+          console.error(err);
+          fail(`動畫／寵物測試頁載入失敗：${err instanceof Error ? err.message : String(err)}`);
+        });
+      return;
+    }
+    // ?lab=rigged：Stage 7.2 骨骼動畫怪物接入測試（M004 風羽狐；未交付時用接口測試替身）&q=hq|lite&count=N
+    // ?lab=combat：Combat VFX Lab（Claude C；戰鬥動畫與技能特效技術展示，非正式技能）&q=high|medium|low&g=female&auto=1&multi=4
+    if (lab === "combat") {
+      document.body.classList.add("lab-mode");
+      void import("./combat-vfx/lab/CombatVfxLab.ts")
+        .then((m) => m.startCombatVfxLab(canvas, hudRoot))
+        .then(() => hideBoot())
+        .catch((err: unknown) => {
+          console.error(err);
+          fail(`Combat VFX Lab 載入失敗：${err instanceof Error ? err.message : String(err)}`);
+        });
+      return;
+    }
+    if (lab === "rigged") {
+      document.body.classList.add("lab-mode");
+      void import("./lab/RiggedMonsterLab.ts")
+        .then((m) => m.startRiggedMonsterLab(canvas, hudRoot))
+        .then(() => hideBoot())
+        .catch((err: unknown) => {
+          console.error(err);
+          fail(`骨骼動畫怪物測試頁載入失敗：${err instanceof Error ? err.message : String(err)}`);
+        });
+      return;
+    }
     const LAB_MONSTER: Record<string, string> = { bobo: "star_dew_bobo", dummy: "test_dummy" };
     if (lab && (lab in LAB_MONSTER || lab === "field")) {
       const start =
@@ -168,4 +237,8 @@ function main(): void {
   }
 }
 
-main();
+// Stage 7.4：預覽站共用其他預覽資料夾的大型模型（asset-remap.json；本機與一般建置為空清單）→ 所有頁面開機前先設定
+void import("./core/assetRemap.ts")
+  .then((m) => m.installAssetRemap())
+  .catch(() => 0)
+  .then(() => main());

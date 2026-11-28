@@ -1,6 +1,6 @@
 import { createRng, type Rng } from "../../core/rng.ts";
 import type { MonsterInstance } from "./MonsterInstance.ts";
-import type { BrainMode, MonsterTarget } from "./types.ts";
+import { isAggressive, type BrainMode, type MonsterTarget } from "./types.ts";
 
 export interface BrainOptions {
   seed?: number;
@@ -106,12 +106,15 @@ export class MonsterBrain {
     const busy = state === "attack" || state === "hit";
     const pos = m.currentPosition;
     const fromSpawn = Math.hypot(pos.x - m.spawnPosition.x, pos.z - m.spawnPosition.z);
-    const hasTarget = target !== null && target.alive;
+    // 被動怪物（Lv.1～4）：沒被打過就當作沒看到玩家
+    const hasTarget = target !== null && target.alive && (isAggressive(def) || m.provoked);
     const distToTarget = hasTarget ? Math.hypot(target.x - pos.x, target.z - pos.z) : Infinity;
 
     // ---- 決定模式 ----
     if (this._mode === "return") {
       if (fromSpawn <= this.arrive) {
+        // 脫戰回到出生點：被動怪物恢復被動
+        m.provoked = false;
         this._mode = "idle";
         this.idleTimer = this.rng.range(this.idleMin, this.idleMax);
       }
@@ -133,14 +136,14 @@ export class MonsterBrain {
         break;
       }
       case "chase":
-        this.moveToward(target!.x, target!.z, dt, busy, def.attackRange * 0.9);
+        this.moveToward(target!.x, target!.z, dt, busy, def.attackRange * 0.9, def.chaseSpeed ?? def.moveSpeed);
         break;
       case "return":
-        this.moveToward(m.spawnPosition.x, m.spawnPosition.z, dt, busy, 0);
+        this.moveToward(m.spawnPosition.x, m.spawnPosition.z, dt, busy, 0, def.chaseSpeed ?? def.moveSpeed);
         break;
       case "patrol": {
         const p = this.patrolPoint;
-        if (!p || this.moveToward(p.x, p.z, dt, busy, 0)) {
+        if (!p || this.moveToward(p.x, p.z, dt, busy, 0, def.patrolSpeed ?? def.moveSpeed)) {
           this._mode = "idle";
           this.patrolPoint = null;
           this.idleTimer = this.rng.range(this.idleMin, this.idleMax);
@@ -163,7 +166,7 @@ export class MonsterBrain {
   }
 
   /** 朝目標移動；回傳 true 表示已抵達（停在 stopDistance 內） */
-  private moveToward(tx: number, tz: number, dt: number, busy: boolean, stopDistance: number): boolean {
+  private moveToward(tx: number, tz: number, dt: number, busy: boolean, stopDistance: number, speed: number = this.instance.definition.moveSpeed): boolean {
     const m = this.instance;
     const pos = m.currentPosition;
     const dx = tx - pos.x;
@@ -177,7 +180,7 @@ export class MonsterBrain {
     if (busy) return false;
     m.setLocomotion(true);
     if (m.sm.state !== "move") return false;
-    const step = Math.min(dist - reach * 0.5, m.definition.moveSpeed * Math.min(dt, 0.1));
+    const step = Math.min(dist - reach * 0.5, speed * Math.min(dt, 0.1));
     pos.x += (dx / dist) * step;
     pos.z += (dz / dist) * step;
     this.face(dx, dz);

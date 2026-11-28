@@ -25,7 +25,7 @@ export interface CombatMonster {
   readonly instanceId: string;
   readonly isAlive: boolean;
   readonly currentPosition: { x: number; z: number };
-  readonly definition: { attack: number; attackRange: number; name: string };
+  readonly definition: { attack: number; attackRange: number; name: string; bodyRadius?: number };
   /** now：遊戲時間；kind：受擊種類（普通攻擊 = normal：不擊退、不硬直） */
   receiveDamage(amount: number, now?: number, kind?: "normal" | "control"): { applied: boolean; killed: boolean };
 }
@@ -39,7 +39,23 @@ export type AttackStartResult =
   | { ok: true; targetId: string; hitAt: number }
   | { ok: false; reason: "cooldown" | "no-target" | "down" };
 
+/** 每個遊戲畫面可以覆寫的戰鬥參數（預設＝PREVIEW_COMBAT，新手草原不變；Stage 5.6 星芽原野整合用攻速與寵物加成調整） */
+export interface CombatTuning {
+  maxHp: number;
+  attackDamage: number;
+  /** 攻擊間隔（秒） */
+  attackInterval: number;
+  /** 受到傷害的倍率（防禦力換算；1 = 不變） */
+  damageTakenMul: number;
+}
+
 export class PreviewCombat {
+  readonly tuning: CombatTuning = {
+    maxHp: PREVIEW_COMBAT.playerMaxHp,
+    attackDamage: PREVIEW_COMBAT.playerAttackDamage,
+    attackInterval: PREVIEW_COMBAT.playerAttackInterval,
+    damageTakenMul: 1,
+  };
   hp: number = PREVIEW_COMBAT.playerMaxHp;
   private nextAttackAt = 0;
   private downUntil: number | null = null;
@@ -65,7 +81,8 @@ export class PreviewCombat {
     let bestD: number = PREVIEW_COMBAT.playerAttackRange;
     for (const m of monsters) {
       if (!m.isAlive) continue;
-      const d = Math.hypot(m.currentPosition.x - px, m.currentPosition.z - pz);
+      // 距離從身體外緣算（bodyRadius；星露啵啵沒有設定 = 0，維持原本行為）
+      const d = Math.hypot(m.currentPosition.x - px, m.currentPosition.z - pz) - (m.definition.bodyRadius ?? 0);
       if (d <= bestD) {
         bestD = d;
         best = m;
@@ -84,7 +101,7 @@ export class PreviewCombat {
       return null;
     }
     const cur = this.lockedId ? monsters.find((m) => m.instanceId === this.lockedId) : undefined;
-    if (cur && cur.isAlive && Math.hypot(cur.currentPosition.x - px, cur.currentPosition.z - pz) <= PREVIEW_COMBAT.playerAttackRange) return cur;
+    if (cur && cur.isAlive && Math.hypot(cur.currentPosition.x - px, cur.currentPosition.z - pz) - (cur.definition.bodyRadius ?? 0) <= PREVIEW_COMBAT.playerAttackRange) return cur;
     const next = this.nearestTarget(px, pz, monsters);
     this.lockedId = next?.instanceId ?? null;
     return next;
@@ -103,7 +120,7 @@ export class PreviewCombat {
     if (now < this.nextAttackAt) return { ok: false, reason: "cooldown" };
     const target = this.lockTarget(px, pz, monsters);
     if (!target) return { ok: false, reason: "no-target" };
-    this.nextAttackAt = now + PREVIEW_COMBAT.playerAttackInterval;
+    this.nextAttackAt = now + this.tuning.attackInterval;
     this.pending = { targetId: target.instanceId, hitAt: now + hitDelay };
     return { ok: true, targetId: target.instanceId, hitAt: this.pending.hitAt };
   }
@@ -119,10 +136,11 @@ export class PreviewCombat {
     if (this.isDown) return { ok: false, reason: "down" };
     const target = monsters.find((m) => m.instanceId === p.targetId);
     if (!target || !target.isAlive) return { ok: false, reason: "miss" };
-    const d = Math.hypot(target.currentPosition.x - px, target.currentPosition.z - pz);
+    const d = Math.hypot(target.currentPosition.x - px, target.currentPosition.z - pz) - (target.definition.bodyRadius ?? 0);
     if (d > PREVIEW_COMBAT.playerAttackRange + 0.6) return { ok: false, reason: "miss" };
-    const r = target.receiveDamage(PREVIEW_COMBAT.playerAttackDamage, now, this.attackHitKind);
-    return { ok: true, targetId: target.instanceId, killed: r.killed, damage: PREVIEW_COMBAT.playerAttackDamage };
+    const dmg = this.tuning.attackDamage;
+    const r = target.receiveDamage(dmg, now, this.attackHitKind);
+    return { ok: true, targetId: target.instanceId, killed: r.killed, damage: dmg };
   }
 
   /** 按下攻擊並立即結算（不經過動畫；單元測試與純邏輯使用） */
@@ -140,7 +158,7 @@ export class PreviewCombat {
     if (this.isDown || !monster.isAlive) return 0;
     const d = Math.hypot(monster.currentPosition.x - px, monster.currentPosition.z - pz);
     if (d > monster.definition.attackRange + PREVIEW_COMBAT.impactSlack) return 0;
-    const dmg = Math.max(0, Math.floor(monster.definition.attack));
+    const dmg = Math.max(this.tuning.damageTakenMul === 1 ? 0 : 1, Math.floor(monster.definition.attack * this.tuning.damageTakenMul));
     this.hp = Math.max(0, this.hp - dmg);
     this.hitsTaken++;
     if (this.hp === 0) {
@@ -152,7 +170,7 @@ export class PreviewCombat {
 
   /** 測試用（?debug=1 的「重設測試」）：玩家 HP 全滿、解除倒地、清除冷卻、未揮中的攻擊與鎖定。數值不變 */
   resetForTest(): void {
-    this.hp = PREVIEW_COMBAT.playerMaxHp;
+    this.hp = this.tuning.maxHp;
     this.downUntil = null;
     this.nextAttackAt = 0;
     this.pending = null;
@@ -171,7 +189,7 @@ export class PreviewCombat {
   update(now: number): boolean {
     if (this.downUntil !== null && now >= this.downUntil) {
       this.downUntil = null;
-      this.hp = PREVIEW_COMBAT.playerMaxHp;
+      this.hp = this.tuning.maxHp;
       return true;
     }
     return false;

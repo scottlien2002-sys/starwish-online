@@ -1,0 +1,52 @@
+name: Field vegetation LOD compare (CI, not iPhone)
+
+# Claude B：星芽原野植被距離分級，優化前後對照（&veglod=0 vs 預設）。
+# CI 沒有實體 GPU（軟體繪製）：三角面／Draw Calls 為確定值，FPS 只看相對變化，不能當 iPhone 驗收。
+# 只在 perf/field-veglod 分支執行；不部署 GitHub Pages。結果推到每次執行各自的新分支 results/field-veglod-<run id>（一般 push，不 force）。
+on:
+  push:
+    branches: [perf/field-veglod]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: field-veglod-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+      - name: Typecheck
+        run: npx tsc --noEmit -p tsconfig.json
+      - name: Unit tests
+        run: npm test
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: Vegetation LOD compare
+        id: cmp
+        continue-on-error: true
+        run: node tests/e2e/run-veglod-compare.mjs dist chromium 40
+      - name: Map e2e (regression, after)
+        run: node tests/e2e/run-map-e2e.mjs dist chromium
+        continue-on-error: true
+        id: mape2e
+      - name: Push report to results branch
+        if: always()
+        run: |
+          mkdir -p /tmp/res && cp -r test-results/. /tmp/res/ 2>/dev/null || true
+          echo "compare: ${{ steps.cmp.outcome }} / map-e2e: ${{ steps.mape2e.outcome }}" > /tmp/res/map-e2e-outcome.txt
+          cd /tmp/res
+          git init -q && git checkout -q -b "results/field-veglod-${GITHUB_RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -qm "Field veg LOD compare ${GITHUB_SHA::7}" || exit 0
+          git push -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" "results/field-veglod-${GITHUB_RUN_ID}"

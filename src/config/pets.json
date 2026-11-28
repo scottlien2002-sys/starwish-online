@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "description": "星靈寵物設定。鑑定數值由企劃確認；機率、孵化時間、成長、進化、掉落、加成倍率尚未定案（null = 未設定，正式遊戲不得自行假設）。preview 區塊只給測試頁使用，不是正式平衡數值。",
+  "status": {
+    "appraisalValues": "confirmed",
+    "affixCountWeights": "pending",
+    "statWeights": "pending",
+    "valueWeights": "pending",
+    "hatch": "pending",
+    "growth": "pending",
+    "evolution": "pending",
+    "feed": "pending",
+    "drops": "pending",
+    "bonusScale": "pending",
+    "care": "pending",
+    "services": "pending"
+  },
+  "sources": [
+    { "id": "seed", "label": "種子", "species": "sprout" },
+    { "id": "egg", "label": "孵化蛋", "species": "wisp" },
+    { "id": "birdEgg", "label": "鳥蛋", "species": "bird" }
+  ],
+  "species": [
+    { "id": "sprout", "label": "星芽靈（暫定名稱）", "motion": "float", "stages": [
+      { "id": "hatching", "label": "孵化中（種子）" }, { "id": "initial", "label": "初始" }, { "id": "juvenile", "label": "幼年期" }, { "id": "growing", "label": "成長期" }, { "id": "complete", "label": "完成體" } ] },
+    { "id": "wisp", "label": "星光精靈（暫定名稱）", "motion": "float", "stages": [
+      { "id": "hatching", "label": "孵化中（蛋）" }, { "id": "initial", "label": "初始" }, { "id": "juvenile", "label": "幼年期" }, { "id": "growing", "label": "成長期" }, { "id": "complete", "label": "完成體" } ] },
+    { "id": "bird", "label": "星羽鳥（暫定名稱）", "motion": "fly", "stages": [
+      { "id": "hatching", "label": "孵化中（鳥蛋）" }, { "id": "initial", "label": "初始" }, { "id": "juvenile", "label": "幼年期" }, { "id": "growing", "label": "成長期" }, { "id": "complete", "label": "完成體" } ] }
+  ],
+  "appraisal": {
+    "maxAffixes": 4,
+    "oneAffixPerStat": true,
+    "allowNegative": true,
+    "stats": [
+      { "stat": "attack", "label": "攻擊力", "unit": "percent", "values": [-10, -5, 10, 15, 20, 25], "valueWeights": null, "statWeight": null },
+      { "stat": "attackSpeed", "label": "攻速", "unit": "flat", "values": [-4, -2, 2, 4, 6, 8, 10], "valueWeights": null, "statWeight": null },
+      { "stat": "defense", "label": "防禦力", "unit": "percent", "values": [-10, -5, 10, 15, 20, 25], "valueWeights": null, "statWeight": null },
+      { "stat": "maxHp", "label": "生命值", "unit": "percent", "values": [-10, -5, 10, 15, 20], "valueWeights": null, "statWeight": null }
+    ],
+    "affixCountWeights": null
+  },
+  "growth": {
+    "hatchSeconds": null,
+    "expPerSecond": null,
+    "stageExp": null,
+    "evolveRequiresFeedCount": null,
+    "bonusScaleByStage": null
+  },
+  "feed": [
+    { "id": "monsterMaterial", "label": "怪物材料", "exp": null },
+    { "id": "shopFeed", "label": "商店飼料", "exp": null }
+  ],
+  "drops": { "default": { "seed": null, "egg": null, "birdEgg": null, "monsterMaterial": null } },
+  "stageNote": "成長階段統一為：初始、幼年期、成長期、完成體（2026-11-26 企劃確認）。陣列第 0 格是孵化中（不是成長階段，沒有加成、不跟隨）。",
+  "visual": { "note": "跟隨位置：角色耳朵旁；各階段大小（公尺，約略高度）明顯不同，完成體約等於角色臉部大小", "stageSize": [0, 0.075, 0.115, 0.16, 0.22] },
+  "care": {
+    "note": "飽食度、餓死、死亡與復活（方案 B：靈魂復活型）。數值與細節尚未確認 → null，正式模式停用寵物功能",
+    "satietyMax": null,
+    "satietyLossPerHour": null,
+    "feedSatiety": { "monsterMaterial": null, "shopFeed": null },
+    "starveDeathMinutes": null,
+    "growthStopsWhenHungry": null,
+    "reviveFee": null,
+    "reviveSatietyRatio": null
+  },
+  "services": { "note": "寵物商人：鑑定費用、飼料價格（未定案；遊戲目前沒有金幣系統）", "appraisalFee": null, "feedPrice": { "shopFeed": null } },
+  "preview": {
+    "note": "只給測試頁（?lab=anim）使用的暫定數值，方便驗證流程；不是正式平衡數值，正式遊戲不得讀取。",
+    "affixCountWeights": [1, 1, 1, 1, 1],
+    "statWeights": { "attack": 1, "attackSpeed": 1, "defense": 1, "maxHp": 1 },
+    "valueWeights": null,
+    "hatchSeconds": 30,
+    "expPerSecond": 2,
+    "stageExp": [0, 0, 60, 200, 500],
+    "evolveRequiresFeedCount": [0, 0, 1, 3, 5],
+    "bonusScaleByStage": [0, 0.25, 0.5, 0.75, 1.0],
+    "feedExp": { "monsterMaterial": 20, "shopFeed": 50 },
+    "drops": { "seed": 0.25, "egg": 0.15, "birdEgg": 0.1, "monsterMaterial": 0.6 },
+    "services": { "appraisalFee": 20, "feedPrice": { "shopFeed": 10 } },
+    "care": { "satietyMax": 100, "satietyLossPerHour": 120, "feedSatiety": { "monsterMaterial": 30, "shopFeed": 50 }, "starveDeathMinutes": 10, "growthStopsWhenHungry": true, "reviveFee": 50, "reviveSatietyRatio": 0.5 }
+  }
+}

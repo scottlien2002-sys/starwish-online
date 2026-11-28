@@ -2,8 +2,8 @@ import type { AbstractMesh, Scene } from "@babylonjs/core";
 import { PointerEventTypes } from "@babylonjs/core";
 import { NPC_SPOTS, type NpcSpot, PORTALS, type PortalDef } from "./layout.ts";
 import { canTalkToPetMerchant, PET_MERCHANT } from "./petMerchant.ts";
-import { connectPetAppraisalService, createDemoAppraisalService } from "./petAppraisal.ts";
-import { connectGuildMarketService, createDemoGuildService, guildMarketService, simulateDemoSale } from "./guildMarket.ts";
+import { connectPetAppraisalService, createDemoAppraisalService, type PetAppraisalService } from "./petAppraisal.ts";
+import { connectGuildMarketService, createDemoGuildService, guildMarketService, simulateDemoSale, type GuildMarketService } from "./guildMarket.ts";
 import { GuildWindow } from "./GuildWindow.ts";
 import { PetAppraisalWindow } from "./PetAppraisalWindow.ts";
 import { PetMerchantPanel } from "./PetMerchantPanel.ts";
@@ -16,15 +16,21 @@ import { npcProfile, type VillageNpcs } from "./NpcP3.ts";
  * - 洛恩：停止巡走並面向玩家 → 商人選單 →「寵物鑑定」開啟星靈鑑定視窗（預覽版使用明確標示的測試資料）
  * - 傳送門：南門開放（確認後前往星芽原野）、北東西休眠（顯示未開放）；不新增出口
  */
-/** 與 Claude A Stage 7.1（feature/render-stage71-world）的 InteractOptions 同名同義的欄位 */
-export interface InteractOpts {
-  avatarUrl: string;
-  goToMap: (map: "starsprout") => void;
-  /** Stage 7.1／6.7：已開放的傳送陣由頁面端「踩入自動傳送」處理（PortalTrigger），這裡不顯示互動按鈕與確認視窗 */
-  autoPortals?: boolean;
-}
 
 type Target = { kind: "npc"; npc: NpcSpot } | { kind: "merchant" } | { kind: "portal"; portal: PortalDef };
+
+export interface InteractOptions {
+  avatarUrl: string;
+  goToMap: (map: "starsprout") => void;
+  /** Stage 7：寵物鑑定服務（Claude A 寵物核心＋金幣扣款）；沒有傳入 → 示範服務 */
+  appraisal?: PetAppraisalService;
+  /** Stage 7：星願商會服務；沒有傳入 → 示範服務 */
+  guild?: GuildMarketService;
+  /** 視窗關閉、金幣或背包可能改變時通知（更新畫面） */
+  onChange?: () => void;
+  /** Stage 7.1：已開放的傳送陣由遊戲端「踩入自動傳送」處理，這裡不顯示互動按鈕與確認視窗 */
+  autoPortals?: boolean;
+}
 
 const CSS = `
 .vi-btn{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 150px);z-index:40;min-width:150px;max-width:70vw;padding:12px 20px;border-radius:24px;border:2px solid #e8c46e;
@@ -54,7 +60,7 @@ export class VillageInteract {
   readonly log: { t: number; what: string }[] = [];
 
   private readonly merchant: PetMerchantV2 | null;
-  private readonly opts: InteractOpts;
+  private readonly opts: InteractOptions;
   /** Stage 6.7：委託佈告欄網格（直接點擊開啟委託介面） */
   boardMeshes: readonly AbstractMesh[] = [];
   /** Stage 6.7：洛恩最近一格的姿勢（動作、Walk 播放速度；測試與截圖用） */
@@ -67,7 +73,7 @@ export class VillageInteract {
 
   private readonly scene: Scene;
 
-  constructor(scene: Scene, merchant: PetMerchantV2 | null, opts: InteractOpts) {
+  constructor(scene: Scene, merchant: PetMerchantV2 | null, opts: InteractOptions) {
     this.scene = scene;
     this.merchant = merchant;
     this.opts = opts;
@@ -86,13 +92,17 @@ export class VillageInteract {
     this.dlg.hidden = true;
     this.dlg.addEventListener("pointerdown", (e) => e.stopPropagation());
     document.body.appendChild(this.dlg);
-    // 預覽版：星靈鑑定使用明確標示的測試資料（Claude A 寵物核心接入後改成正式服務）
-    connectPetAppraisalService(createDemoAppraisalService({ delayMs: 600 }));
-    this.appraisal = new PetAppraisalWindow({ avatarUrl: opts.avatarUrl, onBack: () => void this.panel.open(), onClose: () => this.endTalk() });
+    // 預覽版：星靈鑑定使用明確標示的測試資料。Stage 7 完整遊戲：接上 Claude A 寵物核心（opts.appraisal）
+    connectPetAppraisalService(opts.appraisal ?? createDemoAppraisalService({ delayMs: 600 }));
+    this.appraisal = new PetAppraisalWindow({ avatarUrl: opts.avatarUrl, onBack: () => void this.panel.open(), onClose: () => {
+      this.endTalk();
+      opts.onChange?.();
+    } });
     this.panel.onAppraise = () => void this.appraisal.open();
     // 預覽版：星願商會使用明確標示的本機示範資料（不是真正的多人交易；正式交易由共用伺服器處理）
-    connectGuildMarketService(createDemoGuildService({ delayMs: 400 }));
-    this.guild = new GuildWindow();
+    // Stage 7 完整遊戲：接在角色存檔上的本機服務或正式 API（opts.guild）
+    connectGuildMarketService(opts.guild ?? createDemoGuildService({ delayMs: 400 }));
+    this.guild = new GuildWindow({ onClose: () => opts.onChange?.() });
     this.panel.onClose = () => {
       if (!this.appraisal.isOpen) this.endTalk();
     };
@@ -191,6 +201,7 @@ export class VillageInteract {
       }
     }
     if (best) return { kind: "npc", npc: best };
+    // Stage 7.1：完整遊戲裡已開放的傳送陣是「踩進去自動傳送」（不顯示按鈕或確認）；未開放的仍可查看說明
     for (const p of PORTALS) if (!(this.opts.autoPortals && p.open) && Math.hypot(p.x - this.px, p.z - this.pz) <= p.r + 0.3) return { kind: "portal", portal: p };
     return null;
   }
@@ -334,3 +345,6 @@ export class VillageInteract {
   /** 互動距離（給說明與測試） */
   static readonly MERCHANT_R = PET_MERCHANT.interactR;
 }
+
+/** Claude B Stage 6.7 使用的名稱（同一個型別） */
+export type InteractOpts = InteractOptions;

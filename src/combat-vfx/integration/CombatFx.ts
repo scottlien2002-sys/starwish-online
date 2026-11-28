@@ -1,0 +1,559 @@
+/**
+ * Combat VFX 正式接入模組（給 Claude A 的遊戲世界、Claude D 的多人連線）
+ *
+ * 一個 CombatFx 實例＝一張地圖的戰鬥畫面與音效：特效、武器拖尾、投射物、命中、暴擊、傷害數字、
+ * 怪物受傷／死亡／重生、畫面閃光、鏡頭震動、戰鬥音效。
+ *
+ * ⚠️ 只負責「畫面與聲音」，不做任何遊戲判定：
+ *   - 不扣血、不判斷命中、不決定暴擊（由 A 的戰鬥規則或 D 的伺服器結果傳進來）
+ *   - 不送網路封包（D 決定何時呼叫）
+ *   - 技能名稱、數值、正式技能配置一律未定案（core/classKits.ts 的樣板只是草稿）
+ *
+ * 基本用法：
+ *   const fx = new CombatFx({ scene, camera, hudRoot, tier: "medium" });
+ *   await fx.prewarm();                         // 載入畫面期間呼叫（≈5 格），之後第一次施放不卡
+ *   fx.register({ id, owner: "self", root, position, yaw, weaponBase, weaponTip });
+ *   fx.playSkill(id, skillDef, clipTiming, rate, { onHit: (hit) => … });   // 依動作檔時間播放特效／音效／拖尾
+ *   fx.hit(point, ["hitFlash","hitSpark"], { owner: "self", damage: 128, crit: true });
+ *   fx.monsterDeath(pos); fx.monsterRespawn(pos);
+ *   每格：const camOffset = fx.update(dt);       // 回傳鏡頭震動位移（自己決定要不要加到鏡頭目標）
+ *   離開地圖：fx.dispose();
+ */
+import { Frustum, Vector3, Viewport, type Camera, type Mesh, type Plane, type Scene, type TransformNode } from "@babylonjs/core";
+import type { FxKey, HitSpec, Palette, SfxKey, SkillDef, SkillEvent } from "../core/skills.ts";
+import { SkillTimeline, type ClipTiming } from "../core/timeline.ts";
+import { VFX_QUALITY, type VfxTier } from "../core/quality.ts";
+import type { VfxOwner } from "../core/budget.ts";
+import { FX_KEY_LIST } from "../core/classKits.ts";
+import { VfxSystem, type Projectile, type SpawnOptions, type VfxEnvironment } from "../fx/VfxSystem.ts";
+import { WeaponTrail } from "../fx/WeaponTrail.ts";
+import { DamageNumbers, type DamageStyle } from "../fx/DamageNumbers.ts";
+import { ScreenFx } from "../fx/ScreenFx.ts";
+import { CameraFx } from "../fx/CameraFx.ts";
+import { CombatAudio } from "../fx/CombatAudio.ts";
+import { PALETTES } from "../fx/palette.ts";
+
+export interface CombatFxConfig {
+  scene: Scene;
+  /** 主鏡頭（不可視特效判定、音效左右聲道、預熱） */
+  camera: Camera;
+  /** 傷害數字、畫面閃光的 DOM 容器（通常是 #hud-root） */
+  hudRoot: HTMLElement;
+  tier: VfxTier;
+  env?: VfxEnvironment;
+  /** false＝不建立音效（伺服器端、測試） */
+  audio?: boolean;
+  /** 其他玩家特效簡化（預設 true；false＝Stage 1 做法，只用於效能比較） */
+  remoteSimplify?: boolean;
+  /**
+   * 地面高度（A 整合時加入，預設 0＝原本行為）：地面特效（衝擊波、塵環、地裂、光柱…）、怪物死亡／重生、流星落點放在地形表面。
+   * 星芽原野地形高度約 −0.8～28 m，固定 y＝0 會埋在地底或浮在空中。
+   */
+  ground?: (x: number, z: number) => number;
+}
+
+/** 一個會施放技能的角色（自己、隊友、其他玩家）。只讀取位置，不改動角色。 */
+export interface FxActor {
+  id: string;
+  owner: VfxOwner;
+  /** 跟隨型特效（魔法陣、旋風、光環）掛在這裡 */
+  root: TransformNode;
+  position(): Vector3;
+  /** Babylon 世界的 rotation.y */
+  yaw(): number;
+  /** 武器拖尾：劍根與劍尖節點（沒有就不畫拖尾） */
+  weaponBase?: TransformNode;
+  weaponTip?: TransformNode;
+  /** 武器上的粒子發射點（法杖頭等） */
+  weaponFocus?: Mesh;
+  /** 目前鎖定目標的命中點（沒有目標回傳 null） */
+  target?(): Vector3 | null;
+}
+
+export interface SkillHooks {
+  /** 動作檔的命中時間到了（由遊戲決定打到誰、扣多少；之後呼叫 fx.hit 畫命中） */
+  onHit?(hit: HitSpec, clipT: number): void;
+  /** 投射物發射（visual 可能為 null＝被特效預算省略；判定照常） */
+  onProjectile?(ev: Extract<SkillEvent, { kind: "projectile" }>, visual: Projectile | null, clipT: number): void;
+  /** 技能播完 */
+  onEnd?(): void;
+}
+
+export interface SkillFxHandle {
+  readonly timeline: SkillTimeline;
+  /** 打擊頓幀（毫秒）：時鐘停住，動作與後續事件一起延後 */
+  hitstop(ms: number): void;
+  cancel(): void;
+  readonly done: boolean;
+}
+
+interface ActorState {
+  actor: FxActor;
+  trail: WeaponTrail | null;
+  trailEnd: number;
+}
+
+interface Playing {
+  actorId: string;
+  skill: SkillDef;
+  tl: SkillTimeline;
+  hooks: SkillHooks;
+  cancelled: boolean;
+}
+
+export interface PrewarmReport {
+  ms: number;
+  spawned: number;
+  /** 預熱後仍在畫面上的特效／投射物（應為 0） */
+  leftoverActive: number;
+  leftoverProjectiles: number;
+  /** 預熱期間播出的音效（應為 0） */
+  audioPlayed: number;
+  /** 預熱期間顯示的傷害數字（應為 0） */
+  damageShown: number;
+  tier: VfxTier;
+  /** 預熱建立的共用材質、物件池網格、粒子系統數（低畫質應比高畫質少） */
+  materials: number;
+  pooledMeshes: number;
+  particleSystems: number;
+}
+
+const FOLLOW_FX = new Set<FxKey>(["magicCircle", "whirlRing", "chargeAura", "groundGlow", "lightShield", "healAura", "buffOrbit"]);
+const GROUND_FX = new Set<FxKey>(["shockwave", "dustRing", "groundCrack", "debris", "lightPillar", "chargeRings"]);
+const IMPACT_FX = new Set<FxKey>(["areaBlast", "shockwave", "dustRing", "starBurst"]);
+
+export class CombatFx {
+  readonly scene: Scene;
+  readonly camera: Camera;
+  readonly vfx: VfxSystem;
+  readonly damage: DamageNumbers;
+  readonly screen: ScreenFx;
+  readonly shake: CameraFx;
+  readonly audio: CombatAudio | null;
+  tier: VfxTier;
+  /** 本地玩家位置（特效距離預算、其他玩家音效左右聲道）；預設跟隨鏡頭目標 */
+  readonly listener = new Vector3();
+  /** 其他玩家的特效：超過這個距離、或不在畫面內（含邊界 margin）就不生成（命中閃光等 critical 也一樣略過，因為看不到） */
+  remoteCullDistance = 28;
+  remoteFrustumMargin = 2.5;
+  private readonly actors = new Map<string, ActorState>();
+  private readonly playing: Playing[] = [];
+  private readonly frustum: Plane[] = [];
+  private frustumFrame = -1;
+  private disposed = false;
+  /** 統計：因距離或不在畫面內而略過的其他玩家特效 */
+  readonly culled = { distance: 0, offscreen: 0 };
+  private readonly groundY: (x: number, z: number) => number;
+
+  constructor(cfg: CombatFxConfig) {
+    this.scene = cfg.scene;
+    this.camera = cfg.camera;
+    this.tier = cfg.tier;
+    this.vfx = new VfxSystem(cfg.scene, cfg.tier);
+    this.vfx.remoteSimplify = cfg.remoteSimplify ?? true;
+    this.vfx.setEnvironment(cfg.env ?? "dark");
+    this.damage = new DamageNumbers(cfg.scene, cfg.hudRoot, VFX_QUALITY[cfg.tier].damageNumbers);
+    this.screen = new ScreenFx(cfg.hudRoot);
+    this.shake = new CameraFx();
+    this.shake.scale = VFX_QUALITY[cfg.tier].shake;
+    this.audio = cfg.audio === false ? null : new CombatAudio();
+    this.audio?.setEnvironment(cfg.env ?? "dark");
+    this.vfx.onCrit = () => this.screen.flashCrit();
+    this.groundY = cfg.ground ?? (() => 0);
+  }
+
+  // ------------------------------------------------------------------ 設定
+
+  setQuality(tier: VfxTier): void {
+    this.tier = tier;
+    this.vfx.clear();
+    this.vfx.setTier(tier);
+    this.damage.setMax(VFX_QUALITY[tier].damageNumbers);
+    this.shake.scale = VFX_QUALITY[tier].shake;
+    for (const st of this.actors.values()) this.rebuildTrail(st);
+  }
+
+  setEnvironment(env: VfxEnvironment): void {
+    this.vfx.setEnvironment(env);
+    this.audio?.setEnvironment(env);
+    for (const st of this.actors.values()) st.trail?.setBright(env === "bright");
+  }
+
+  /** 使用者第一次點擊畫面時呼叫（iPhone 規定） */
+  unlockAudio(): void {
+    this.audio?.unlock();
+  }
+
+  // ------------------------------------------------------------------ 角色
+
+  register(actor: FxActor): void {
+    this.unregister(actor.id);
+    const st: ActorState = { actor, trail: null, trailEnd: -1 };
+    this.rebuildTrail(st);
+    this.actors.set(actor.id, st);
+  }
+
+  unregister(id: string): void {
+    const st = this.actors.get(id);
+    if (!st) return;
+    st.trail?.dispose();
+    this.actors.delete(id);
+    for (const p of this.playing) if (p.actorId === id) p.cancelled = true;
+  }
+
+  private rebuildTrail(st: ActorState): void {
+    st.trail?.dispose();
+    st.trail = null;
+    const a = st.actor;
+    if (!a.weaponBase || !a.weaponTip) return;
+    const q = VFX_QUALITY[this.tier];
+    const self = a.owner === "self";
+    st.trail = new WeaponTrail(this.scene, a.weaponBase, a.weaponTip, self ? q.trailSegments : Math.max(6, q.trailSegments >> 1), q.trailLife, null, !self && this.vfx.remoteSimplify);
+  }
+
+  // ------------------------------------------------------------------ 技能（依動作檔時間播放畫面與音效）
+
+  /**
+   * clip：動作檔片段（novice_combat_<g>.json 的 clips[skill.clip]：duration、marks）。
+   * rate：攻速播放倍率（core/attackSpeed.ts，上限 1.6）。命中、投射物交給 hooks，由遊戲判定。
+   */
+  playSkill(actorId: string, skill: SkillDef, clip: ClipTiming, rate = 1, hooks: SkillHooks = {}): SkillFxHandle | null {
+    const st = this.actors.get(actorId);
+    if (!st) return null;
+    for (const p of this.playing) if (p.actorId === actorId) p.cancelled = true;
+    const tl = new SkillTimeline(skill, clip, rate);
+    const p: Playing = { actorId, skill, tl, hooks, cancelled: false };
+    this.playing.push(p);
+    return {
+      timeline: tl,
+      hitstop: (ms) => tl.hitstop(ms),
+      cancel: () => {
+        p.cancelled = true;
+      },
+      get done() {
+        return tl.done || p.cancelled;
+      },
+    };
+  }
+
+  /** 普通攻擊（沒有技能定義時）：拖尾 seconds 秒＋揮擊音效 */
+  basicSwing(actorId: string, palette: Palette = "steel", seconds = 0.22, sfx: SfxKey = "swish"): void {
+    const st = this.actors.get(actorId);
+    if (!st) return;
+    if (st.trail) {
+      st.trail.setColor(PALETTES[palette].main);
+      st.trail.start();
+      st.trailEnd = this.now + seconds;
+    }
+    this.sound(sfx, st.actor);
+  }
+
+  private now = 0;
+
+  private anchor(a: FxActor, ev: { anchor: string; forward?: number }): Vector3 {
+    const y = a.yaw();
+    const f = new Vector3(Math.sin(y), 0, Math.cos(y));
+    const pos = a.position();
+    switch (ev.anchor) {
+      case "target":
+        return a.target?.()?.clone() ?? pos.add(f.scale(4));
+      case "weapon":
+        return a.weaponFocus ? a.weaponFocus.getAbsolutePosition().clone() : pos.add(f.scale(0.5)).addInPlaceFromFloats(0, 1, 0);
+      case "front":
+        return pos.add(f.scale(ev.forward ?? 0.6)).addInPlaceFromFloats(0, 0.55, 0);
+      default:
+        return pos.clone();
+    }
+  }
+
+  private runEvent(p: Playing, st: ActorState, ev: SkillEvent, t: number, end?: number): void {
+    const a = st.actor;
+    const pal = ("palette" in ev && ev.palette) || p.skill.palette;
+    switch (ev.kind) {
+      case "trail":
+        if (st.trail) {
+          st.trail.setColor(PALETTES[pal].main);
+          st.trail.start();
+          st.trailEnd = this.now + Math.max(0.05, ((end ?? t + 0.2) - t) / p.tl.rate);
+        }
+        break;
+      case "fx": {
+        const at = this.anchor(a, ev);
+        if (GROUND_FX.has(ev.fx)) at.y = this.groundY(at.x, at.z);
+        const follow = ev.anchor === "self" && FOLLOW_FX.has(ev.fx) ? a.root : undefined;
+        this.spawnFor(a.owner, ev.fx, at, { palette: pal, yaw: a.yaw(), scale: ev.scale, duration: ev.duration, follow, emitterMesh: ev.anchor === "weapon" ? a.weaponFocus : undefined });
+        break;
+      }
+      case "sfx":
+        this.sound(ev.sfx, a);
+        break;
+      case "shake":
+        if (a.owner === "self") this.shake.shake(ev.amount);
+        break;
+      case "hit":
+        p.hooks.onHit?.(ev.hit, t);
+        break;
+      case "projectile": {
+        const y = a.yaw();
+        const f = new Vector3(Math.sin(y), 0, Math.cos(y));
+        const tgt = a.target?.() ?? null;
+        let from: Vector3;
+        let dir: Vector3;
+        if (ev.from === "sky") {
+          const d0 = tgt ? new Vector3(tgt.x, 0, tgt.z) : a.position().add(f.scale(6));
+          const dest = new Vector3(d0.x, this.groundY(d0.x, d0.z), d0.z);
+          from = dest.add(new Vector3(-2.2, 9, -1.5));
+          dir = dest.subtract(from);
+        } else {
+          from = ev.from === "weapon" && a.weaponFocus ? a.weaponFocus.getAbsolutePosition().clone() : a.position().add(f.scale(0.6)).addInPlaceFromFloats(0, 0.55, 0);
+          dir = ev.fx === "swordWave" || !tgt ? f.clone() : tgt.subtract(from);
+        }
+        const vis = this.cullRemote(a.owner, from) ? null : this.vfx.launch(ev.fx, from, dir, ev.speed, { owner: a.owner, palette: pal, distance: Vector3.Distance(from, this.listener) });
+        p.hooks.onProjectile?.(ev, vis, t);
+        break;
+      }
+    }
+  }
+
+  // ------------------------------------------------------------------ 直接呼叫（命中、怪物、玩家受傷）
+
+  /** 任意特效（技能施放、職業展示）。其他玩家的特效會依距離、畫面外自動略過 */
+  spawn(owner: VfxOwner, key: FxKey, at: Vector3, opt: Omit<SpawnOptions, "owner" | "distance"> = {}): void {
+    this.spawnFor(owner, key, at, opt);
+  }
+
+  launch(owner: VfxOwner, kind: "magicBolt" | "swordWave" | "meteor", from: Vector3, dir: Vector3, speed: number, palette: Palette = "azure"): Projectile | null {
+    if (this.cullRemote(owner, from)) return null;
+    return this.vfx.launch(kind, from, dir, speed, { owner, palette, distance: Vector3.Distance(from, this.listener) });
+  }
+
+  /**
+   * 命中畫面：特效＋傷害數字＋暴擊閃光＋音效＋鏡頭震動（自己）。數值由遊戲／伺服器提供。
+   * ground：範圍技能的地面衝擊點（areaBlast、shockwave、dustRing、starBurst 會放在這裡）
+   */
+  hit(
+    at: Vector3,
+    keys: readonly FxKey[],
+    o: { owner: VfxOwner; damage?: number | string; crit?: boolean; palette?: Palette; shake?: number; sfx?: SfxKey; ground?: Vector3; style?: DamageStyle; actorId?: string } = { owner: "self" },
+  ): void {
+    const opt = { owner: o.owner, palette: o.palette ?? "steel", distance: Vector3.Distance(at, this.listener) };
+    if (o.ground) {
+      const g = keys.filter((k) => IMPACT_FX.has(k));
+      if (g.length && !this.cullRemote(o.owner, o.ground)) this.vfx.hitFx(o.ground, g, false, opt);
+      keys = keys.filter((k) => !IMPACT_FX.has(k));
+    }
+    if (!this.cullRemote(o.owner, at)) this.vfx.hitFx(at, keys, o.owner === "self" && !!o.crit, opt);
+    // 傷害數字：自己打出的、或打在自己身上的才顯示（其他玩家的數字不顯示，避免畫面被數字淹沒）
+    if (o.damage !== undefined && (o.owner === "self" || o.style === "player")) this.damage.show(at.add(new Vector3(0, 0.35, 0)), o.damage, o.style ?? (o.crit ? "crit" : "normal"));
+    if (o.owner === "self") {
+      if (o.sfx || o.crit) {
+        this.audio?.play(o.crit ? "crit" : o.sfx!);
+        if (o.crit && o.sfx) this.audio?.play(o.sfx, 0.8);
+      }
+      if (o.shake) this.shake.shake(o.shake * (o.crit ? 1.35 : 1));
+    } else if (o.sfx) {
+      const a = o.actorId ? this.actors.get(o.actorId)?.actor : undefined;
+      this.audio?.play(o.sfx, 0.35, a ? this.panOf(a.position()) : this.panOf(at));
+    }
+  }
+
+  /** 怪物受傷（沒有傷害數字的輕微受擊，例如其他玩家打的） */
+  monsterHurt(at: Vector3, owner: VfxOwner = "other", palette: Palette = "steel"): void {
+    if (!this.cullRemote(owner, at)) this.vfx.spawn("hitFlash", at, { owner, palette, scale: 0.7, distance: Vector3.Distance(at, this.listener) });
+  }
+
+  /** 怪物死亡：地面塵環＋星光碎片（死亡動作、淡出由怪物模組自己播） */
+  monsterDeath(groundAt: Vector3, scale = 1): void {
+    const at = new Vector3(groundAt.x, this.groundY(groundAt.x, groundAt.z), groundAt.z);
+    const d = Vector3.Distance(at, this.listener);
+    if (d > this.remoteCullDistance || this.offscreen(at)) return;
+    this.vfx.spawn("dustRing", at, { owner: "self", palette: "steel", scale: 0.8 * scale, distance: d });
+    this.vfx.spawn("starShards", at.add(new Vector3(0, 0.5 * scale, 0)), { owner: "self", palette: "star", scale: 0.7 * scale, distance: d });
+  }
+
+  /** 怪物重生：魔法陣＋光柱（與展示頁相同） */
+  monsterRespawn(groundAt: Vector3, scale = 1, boss = false): void {
+    const at = new Vector3(groundAt.x, this.groundY(groundAt.x, groundAt.z), groundAt.z);
+    const d = Vector3.Distance(at, this.listener);
+    if (d > this.remoteCullDistance || this.offscreen(at)) return;
+    this.vfx.spawn("magicCircle", at, { palette: "star", scale: (boss ? 1.8 : 1) * scale, duration: 0.9, distance: d });
+    this.vfx.spawn("lightPillar", at, { palette: "star", scale: (boss ? 1.6 : 0.9) * scale, duration: 0.8, distance: d });
+  }
+
+  /** 自己被打：受傷數字、紅色閃光、畫面邊緣受傷提示、震動 */
+  playerHurt(chest: Vector3, damage: number, shake = 0.15): void {
+    this.damage.show(chest.add(new Vector3(0, 0.45, 0)), damage, "player");
+    this.vfx.spawn("hitFlash", chest, { palette: "rose" });
+    this.shake.shake(shake);
+    this.screen.flashHurt();
+  }
+
+  // ------------------------------------------------------------------ 每格
+
+  /** 回傳鏡頭震動位移（加到鏡頭目標上；不影響判定） */
+  update(dt: number): Vector3 {
+    if (this.disposed) return Vector3.ZeroReadOnly as Vector3;
+    this.now += dt;
+    const cam = this.camera as Camera & { target?: Vector3 };
+    if (cam.target && this.listener.lengthSquared() === 0) this.listener.copyFrom(cam.target);
+    for (let i = this.playing.length - 1; i >= 0; i--) {
+      const p = this.playing[i]!;
+      const st = this.actors.get(p.actorId);
+      if (p.cancelled || !st) {
+        this.playing.splice(i, 1);
+        if (st?.trail) st.trail.stop();
+        continue;
+      }
+      for (const e of p.tl.advance(dt)) this.runEvent(p, st, e.event, e.t, e.end);
+      if (p.tl.done) {
+        this.playing.splice(i, 1);
+        st.trail?.stop();
+        p.hooks.onEnd?.();
+      }
+    }
+    for (const st of this.actors.values()) {
+      if (st.trail && st.trailEnd >= 0 && this.now >= st.trailEnd) {
+        st.trail.stop();
+        st.trailEnd = -1;
+      }
+      st.trail?.update(dt);
+    }
+    this.vfx.update(dt);
+    this.damage.update(dt);
+    this.screen.update(dt);
+    return this.shake.update(dt, this.camera as never);
+  }
+
+  // ------------------------------------------------------------------ 預熱與診斷
+
+  /**
+   * 預熱：每種特效、投射物、暴擊先生成一次並畫 1 格（共約 5 格），然後全部收回物件池。
+   * - 畫面：預熱期間鏡頭只畫 1×1 像素（玩家看不到預熱特效）；請在載入畫面期間呼叫
+   * - 不扣血、不顯示傷害數字、不播音效、不呼叫任何 hooks（不會觸發網路事件）
+   * - 依目前畫質：低畫質只建立主層（沒有發光層、次要層）
+   * - maxMs：最長等待（預設 4000 ms；逾時就停，不擋開機）
+   */
+  async prewarm(o: { keys?: readonly FxKey[]; maxMs?: number } = {}): Promise<PrewarmReport> {
+    const t0 = performance.now();
+    const audio0 = this.audio?.played ?? 0;
+    const dmg0 = this.damage.shown;
+    const eng = this.scene.getEngine();
+    const oldVp = this.camera.viewport;
+    this.camera.viewport = new Viewport(0, 0, 1 / Math.max(1, eng.getRenderWidth()), 1 / Math.max(1, eng.getRenderHeight()));
+    const fwd = this.camera.getDirection(Vector3.Forward());
+    const at = this.camera.position.add(fwd.scale(4));
+    let spawned = 0;
+    let made = { materials: 0, meshes: 0, systems: 0 };
+    try {
+      const run = this.vfx.prewarm(at, o.keys ?? FX_KEY_LIST, ["steel"]);
+      const timeout = new Promise<null>((r) => setTimeout(() => r(null), o.maxMs ?? 4000));
+      const r = await Promise.race([run, timeout]);
+      if (!r) this.vfx.cancelPrewarm();
+      spawned = r?.spawned ?? -1;
+      if (r) made = { materials: r.materials, meshes: r.meshes, systems: r.systems };
+      // 拖尾也先編譯（自己的第一個角色）
+      const first = [...this.actors.values()].find((s) => s.trail);
+      if (first?.trail) {
+        first.trail.start();
+        first.trail.update(1 / 30);
+        this.scene.render();
+        first.trail.stop();
+        first.trail.update(1);
+      }
+    } finally {
+      this.vfx.clear();
+      this.camera.viewport = oldVp;
+    }
+    const s = this.vfx.stats;
+    return {
+      ms: Math.round(performance.now() - t0),
+      spawned,
+      leftoverActive: s.meshFx + (this.vfx.budget.stats.active ?? 0),
+      leftoverProjectiles: s.projectiles,
+      audioPlayed: (this.audio?.played ?? 0) - audio0,
+      damageShown: this.damage.shown - dmg0,
+      tier: this.tier,
+      materials: made.materials,
+      pooledMeshes: made.meshes,
+      particleSystems: made.systems,
+    };
+  }
+
+  /** 效能診斷（FPS 面板、iPhone 比較測試） */
+  stats() {
+    return {
+      tier: this.tier,
+      actors: this.actors.size,
+      playing: this.playing.length,
+      vfx: { ...this.vfx.stats },
+      budget: { ...this.vfx.budget.stats },
+      culled: { ...this.culled },
+      damageShown: this.damage.shown,
+      audioPlayed: this.audio?.played ?? 0,
+    };
+  }
+
+  /** 離開地圖：釋放所有網格、粒子、材質、拖尾、DOM、音效。共用貼圖快取隨場景一起釋放。 */
+  dispose(): void {
+    if (this.disposed) return;
+    this.disposed = true;
+    this.playing.length = 0;
+    for (const st of this.actors.values()) st.trail?.dispose();
+    this.actors.clear();
+    this.vfx.dispose();
+    this.damage.dispose();
+    this.screen.dispose();
+    this.audio?.dispose();
+  }
+
+  // ------------------------------------------------------------------ 內部
+
+  private spawnFor(owner: VfxOwner, key: FxKey, at: Vector3, opt: Omit<SpawnOptions, "owner" | "distance">): void {
+    if (this.cullRemote(owner, at)) return;
+    this.vfx.spawn(key, at, { ...opt, owner, distance: Vector3.Distance(at, this.listener) });
+  }
+
+  private sound(key: SfxKey, a: FxActor): void {
+    if (!this.audio) return;
+    if (a.owner === "self") this.audio.play(key);
+    else {
+      const p = a.position();
+      if (Vector3.Distance(p, this.listener) > this.remoteCullDistance) return;
+      this.audio.play(key, 0.3, this.panOf(p));
+    }
+  }
+
+  private panOf(p: Vector3): number {
+    const right = this.camera.getDirection(Vector3.Right());
+    const d = p.subtract(this.listener);
+    return Math.max(-0.8, Math.min(0.8, Vector3.Dot(d, right) / 8));
+  }
+
+  /** 其他玩家：太遠或不在畫面內 → 不生成（看不到的特效不花資源） */
+  private cullRemote(owner: VfxOwner, at: Vector3): boolean {
+    if (owner === "self") return false;
+    if (Vector3.Distance(at, this.listener) > this.remoteCullDistance) {
+      this.culled.distance++;
+      return true;
+    }
+    if (this.offscreen(at)) {
+      this.culled.offscreen++;
+      return true;
+    }
+    return false;
+  }
+
+  private offscreen(at: Vector3): boolean {
+    const fid = this.scene.getFrameId();
+    if (fid !== this.frustumFrame) {
+      this.frustumFrame = fid;
+      const planes = Frustum.GetPlanes(this.camera.getTransformationMatrix());
+      this.frustum.length = 0;
+      this.frustum.push(...planes);
+    }
+    for (const p of this.frustum) if (p.dotCoordinate(at) < -this.remoteFrustumMargin) return true;
+    return false;
+  }
+}
+
+

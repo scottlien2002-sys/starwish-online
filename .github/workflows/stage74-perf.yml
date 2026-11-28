@@ -1,0 +1,48 @@
+name: Stage 7.4 perf compare (CI, not iPhone)
+
+# Stage 7.4：同一台 CI 機器上對照 Stage 7.3（0366d0fa）與 7.4（關閉開關／完整優化）＋長時間穩定性。
+# CI 沒有實體 GPU（軟體繪製）：FPS 絕對值不能當 iPhone 驗收，只看相對變化與 CPU 端數據。
+# 報告與截圖推到每次執行各自的新分支 results/stage74-perf-<run id>（一般 push，不 force）。不部署。
+on:
+  push:
+    branches: [feature/render-stage74-perf]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stage74-perf-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  perf:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+      - run: npm run build
+      - name: Build Stage 7.3 (0366d0fa) for comparison
+        run: |
+          git worktree add /tmp/b73 0366d0fa
+          cd /tmp/b73
+          npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+          npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: Perf compare
+        run: node tests/e2e/run-perf-compare.mjs /tmp/b73/dist dist chromium 60 180
+      - name: Push report to results branch
+        if: always()
+        run: |
+          mkdir -p /tmp/res && cp -r test-results/perf-compare/. /tmp/res/ 2>/dev/null || true
+          cd /tmp/res
+          git init -q && git checkout -q -b "results/stage74-perf-${GITHUB_RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -qm "Stage 7.4 perf compare ${GITHUB_SHA::7}" || exit 0
+          git push -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" "results/stage74-perf-${GITHUB_RUN_ID}"

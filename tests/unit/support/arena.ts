@@ -81,7 +81,8 @@ export class Arena {
   /** 加一隻 V3.8R 星露啵啵（可指定 HP，只為了讓長時間測試的怪物不被打死；遊戲數值不變） */
   add(x: number, z: number, opts: { maxHp?: number } = {}): ArenaMonster {
     const base = this.registry.definition("star_dew_bobo");
-    const def: MonsterDefinition = opts.maxHp ? { ...base, maxHp: opts.maxHp } : base;
+    // 這組測試驗證「主動攻擊型」怪物的戰鬥流程：星露啵啵（Lv.1）依 Stage 7.2 規則是被動，這裡明確設成主動
+    const def: MonsterDefinition = { ...base, aggressive: true, ...(opts.maxHp ? { maxHp: opts.maxHp } : {}) };
     const profile = this.profileTimings;
     const inst = new MonsterInstance(`m${++this.seq}`, def, profile.anim.timings, { x, y: 0, z });
     const brain = new MonsterBrain(inst, { seed: this.seq * 7919 });

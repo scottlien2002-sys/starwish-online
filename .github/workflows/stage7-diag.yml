@@ -1,0 +1,48 @@
+name: Stage 7 diag — legacy Chromium stress test (controlled A/B on one runner)
+
+# 原有 E2E「受擊規則：持續攻擊 25 秒」在 Stage 5.6 分支 Chromium 只打中 9 次（門檻 10）。
+# 在同一台機器上建置三個版本、交錯執行相同情境，比較畫格數、遊戲時間、命中數，找出真正原因（不改原測試門檻）。
+on:
+  push:
+    branches: [feature/render-stage7-world]
+    paths: [".github/workflows/stage7-diag.yml", "tests/diag/**"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stage7-diag
+  cancel-in-progress: false
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Build three versions
+        run: |
+          set -e
+          cp tests/diag/stress-repro.mjs /tmp/stress-repro.mjs
+          for spec in "b5anim:a8ac09cd" "map:28952a20" "s56:4ae5602c" "s7:HEAD"; do
+            n=${spec%%:*}; c=${spec##*:}
+            rm -rf /tmp/src-$n && git worktree add -q /tmp/src-$n $c
+            (cd /tmp/src-$n && npm install --no-audit --no-fund >/dev/null 2>&1 && npm run build >/dev/null 2>&1 && echo "built $n $(git rev-parse --short HEAD)")
+          done
+          (cd /tmp/src-s7 && npx playwright install --with-deps chromium >/dev/null)
+      - name: Interleaved runs (Chromium, 3 rounds)
+        run: |
+          cd /tmp/src-s7
+          mkdir -p tests/diag && cp /tmp/stress-repro.mjs tests/diag/stress-repro.mjs
+          for round in 1 2 3; do
+            for n in b5anim map s56 s7; do node tests/diag/stress-repro.mjs /tmp/src-$n/dist $n chromium 1; done
+          done
+      - name: WebKit reference (1 round)
+        run: |
+          cd /tmp/src-s7 && npx playwright install --with-deps webkit >/dev/null
+          for n in b5anim map s56; do node tests/diag/stress-repro.mjs /tmp/src-$n/dist $n webkit 1; done

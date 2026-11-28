@@ -94,7 +94,7 @@ export async function startMonsterField(canvas: HTMLCanvasElement, uiRoot: HTMLE
   targetMesh.material = targetMat;
   shadows.addShadowCaster(targetMesh);
 
-  const registry = registerBabylonVisuals(createMonsterRegistry(), { scene, shadows, glow });
+  const registry = registerBabylonVisuals(createMonsterRegistry({ legacyAggressive: true }), { scene, shadows, glow });
   const factory = new MonsterFactory(registry);
   const spawns: [string, number, number][] = [
     ["star_dew_bobo", -5, -3],

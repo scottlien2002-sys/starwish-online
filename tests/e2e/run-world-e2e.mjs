@@ -1,0 +1,534 @@
+// Stage 7 完整遊戲循環（?play=world）端對端測試：
+// 新存檔在星芽村出生 → 洛恩鑑定（收費、不重複扣款）→ 星願商會（買、掛賣、取消、賣給 NPC）→ 南門 → 星芽原野
+// → 打怪、金幣與物品掉落、撿取（唯一編號）→ 星願石返回星芽村 → 存檔保留 → 再到原野戰死 → 星芽村復活。
+// 一般移動沒有跳躍按鈕。商會是本機服務（serverBacked=false），不是真正的多人交易。
+// 用法：node tests/e2e/run-world-e2e.mjs dist [webkit,chromium]
+import { mkdirSync, writeFileSync } from "node:fs";
+import { loadPlaywright, serve } from "./static-server.mjs";
+
+const distDir = process.argv[2] ?? "dist";
+const browsers = (process.argv[3] ?? "webkit").split(",");
+const outDir = new URL("../../test-results/world-e2e/", import.meta.url).pathname;
+mkdirSync(outDir, { recursive: true });
+const pw = await loadPlaywright();
+const server = await serve(distDir);
+const report = { startedAt: new Date().toISOString(), runs: [] };
+let failures = 0;
+
+for (const name of browsers) {
+  let browser;
+  try {
+    browser = await pw[name].launch();
+  } catch (e) {
+    report.runs.push({ browser: name, ok: false, error: `無法啟動瀏覽器：${e.message}` });
+    failures++;
+    continue;
+  }
+  for (const g of (process.env.WORLD_GENDERS ?? "male,female").split(",")) {
+    const run = { browser: name, label: g, checks: {}, errors: [], screenshots: [], results: {} };
+    const check = (k, ok, detail) => (run.checks[k] = { ok: !!ok, detail });
+    const ctx = await browser.newContext({ viewport: { width: 852, height: 393 }, deviceScaleFactor: 2, hasTouch: true });
+    const page = await ctx.newPage();
+    page.on("pageerror", (e) => run.errors.push(`pageerror: ${e.message}`));
+    page.on("console", (m) => m.type() === "error" && run.errors.push(`console: ${m.text()}`));
+    const shot = async (label) => {
+      const f = `${name}_${g}_${label}.png`;
+      await page.screenshot({ path: outDir + f }).catch(() => {});
+      run.screenshots.push(f);
+    };
+    const wait = (ms) => page.waitForTimeout(ms);
+    // 美術載入完成後才建立互動（洛恩、商會、傳送門）→ 等到互動物件出現
+    const waitVillage = () => page.waitForFunction(() => window.__starwishWorld?.ready === true && !!window.__starwishWorld.info().interact, null, { timeout: 180000 });
+    const waitField = () => page.waitForFunction(() => window.__starwishPlay?.ready === true && !!window.__starwishPlay.world, null, { timeout: 120000 });
+    const V = (fn, arg) => page.evaluate(fn, arg);
+    try {
+      // ---------- 1. 新存檔：在星芽村出生 ----------
+      await page.goto(`${server.url}/?play=world&newgame=1&g=${g}&seed=11`, { waitUntil: "load" });
+      await waitVillage();
+      // 重新整理一次（去掉 newgame）：確認存檔已寫入、不會每次都重來
+      await page.goto(`${server.url}/?play=world&seed=11`, { waitUntil: "load" });
+      await waitVillage();
+      let vi = await V(() => window.__starwishWorld.info());
+      run.results.start = vi;
+      check("新存檔在星芽村出生（性別、測試設定、起始金幣 100）", vi.map === "village" && vi.gender === g && vi.mode === "test" && vi.gold === 100, { map: vi.map, gender: vi.gender, gold: vi.gold, mode: vi.mode });
+      check("星芽村：一般移動沒有跳躍按鈕", vi.jumpButtonVisible === false, vi.jumpButtonVisible);
+      // ---------- Stage 7.2：新版初心者（Tripo 模組化） ----------
+      const am = vi.avatarModel;
+      const kinds = new Set((am?.parts ?? []).map((p) => p.kind));
+      void kinds;
+      const villageFile = vi.file;
+      // Stage 6.7（Claude B）NPC：等 NPC 全部載入（美術在背景載入）
+      const vn = await V(() => window.__starwishWorld.info().npcs);
+      check("村莊 NPC（Claude B Stage 6.7）：七位 NPC＋洛恩＋N008 委託佈告欄已載入", !!vn && vn.ids.length >= 7 && vn.merchant && vn.board, vn);
+      // Stage 7.5：男性改用新版 n75（Tripo 單一模型＋蒙皮修正），女性維持已驗收的 C1.0-B5b；都不是封存的 Stage 7.2 模組化版本
+      check("角色模型：男性 Stage 7.5 新版 n75、女性 C1.0-B5b（不是封存的 Stage 7.2 Tripo 模組化版）", !!am && am.modular === false && (g === "male" ? /^novice_n75_male_(hq|lite)\.glb$/ : /^novice_c10b5b_female_(hq|lite)\.glb$/).test(vi.file), { file: vi.file, modular: am?.modular });
+      check("角色動作：Idle／Run／Attack／Hurt／Death 齊全；Jump 只給技能（一般移動沒有跳躍鍵）", !!am && ["Idle", "Run", "Attack", "Hurt", "Death", "Jump"].every((c) => am.clips.includes(c)) && vi.jumpButtonVisible === false, am && { clips: am.clips });
+      check("Stage 7.2：存檔有等級、經驗、外觀（髮型、髮色、武器）", vi.level === 1 && vi.exp === 0 && vi.appearance?.hair === "hair01" && vi.appearance?.weapon === "sword", { level: vi.level, exp: vi.exp, appearance: vi.appearance });
+      await shot("village_start");
+
+      // ---------- 2. 洛恩鑑定：收鑑定費、同一請求只扣一次、金幣不足不鑑定 ----------
+      const ap = await V(async () => {
+        const w = window.__starwishWorld;
+        w.give("seed", 2);
+        const bag = w.info().bag.filter((b) => b.kind === "seed");
+        const svc = w.appraisal();
+        const q = await svc.quote(bag[0].id);
+        const r1 = await svc.appraise(bag[0].id, "e2e-ap-1");
+        const r2 = await svc.appraise(bag[0].id, "e2e-ap-1");
+        const after = w.info();
+        return { quote: q.ok ? q.data : q, r1: r1.ok, r2: r2.ok, gold: after.gold, ledger: after.ledger.filter((l) => l.kind === "appraisal").length, appraised: after.bag.find((b) => b.id === bag[0].id)?.affixes != null };
+      });
+      run.results.appraisal = ap;
+      check("洛恩鑑定：收 20 金幣（測試設定），重送同一請求不重複扣款", ap.r1 && ap.r2 && ap.gold === 80 && ap.ledger === 1 && ap.appraised, ap);
+
+      // ---------- 3. 星願商會：買、掛賣鎖定、取消、賣 NPC；本機服務標示不是多人交易 ----------
+      const gm = await V(async () => {
+        const w = window.__starwishWorld;
+        const s = w.guildService();
+        const b1 = await s.buyFromShop("shop:feed", 1, "e2e-buy-1");
+        const b2 = await s.buyFromShop("shop:feed", 1, "e2e-buy-1");
+        const seed = w.info().bag.find((x) => x.kind === "seed" && x.affixes == null);
+        const l = await s.createListing(seed.id, 500, "e2e-list-1");
+        const lockedAfterList = w.info().bag.find((x) => x.id === seed.id)?.locked;
+        const dup = await s.createListing(seed.id, 500, "e2e-list-2");
+        const ownBuy = l.ok ? await s.buyListing(l.data.listingId, "e2e-own") : null;
+        const c = l.ok ? await s.cancelListing(l.data.listingId, "e2e-cancel-1") : null;
+        const lockedAfterCancel = w.info().bag.find((x) => x.id === seed.id)?.locked;
+        const goldBeforeSell = w.info().gold;
+        const sell = await s.sellToShop(seed.id, "e2e-sell-1");
+        const sell2 = await s.sellToShop(seed.id, "e2e-sell-1");
+        const i = w.info();
+        return { serverBacked: s.serverBacked, b1: b1.ok, b2: b2.ok, feed: i.items.shopFeed, listed: l.ok, lockedAfterList, dup: dup.ok, ownBuy: ownBuy?.ok ?? null, cancelled: c?.ok ?? null, lockedAfterCancel, sold: sell.ok && sell2.ok, goldBeforeSell, gold: i.gold, stillInBag: i.bag.some((x) => x.id === seed.id) };
+      });
+      run.results.guild = gm;
+      check("商會：本機服務（serverBacked=false，不是真正的多人交易）", gm.serverBacked === false, gm.serverBacked);
+      check("商會：買飼料扣 10 金幣，重送不重複扣款", gm.b1 && gm.b2 && gm.feed === 1, gm);
+      check("商會：掛賣鎖定物品、不能重複掛賣、不能買自己的、取消後解鎖", gm.listed && gm.lockedAfterList === true && gm.dup === false && gm.ownBuy === false && gm.cancelled && !gm.lockedAfterCancel, gm);
+      check("商會：賣給 NPC 入帳 12（40×0.3），重送不重複入帳、物品移出背包", gm.sold && gm.gold === gm.goldBeforeSell + 12 && !gm.stillInBag, gm);
+      const goldBeforeField = gm.gold;
+      const bagBeforeField = (await V(() => window.__starwishWorld.info())).bag.length;
+
+      // ---------- 3b. 背包／寵物視窗：右上 X、子畫面返回、iPhone 可視範圍 ----------
+      const xCheck = () =>
+        page.evaluate(() => {
+          const x = document.querySelector(".wp.open .wp-x");
+          if (!x) return { ok: false, why: "no X" };
+          const r = x.getBoundingClientRect();
+          const vw = window.innerWidth, vh = window.innerHeight;
+          const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+          const panel = document.querySelector(".wp.open").getBoundingClientRect();
+          const btns = [...document.querySelectorAll(".wp.open button")].map((b) => b.getBoundingClientRect()).filter((b) => b.width > 0);
+          const outX = btns.filter((b) => b.left < -1 || b.right > vw + 1).length;
+          const body = document.querySelector(".wp.open .wp-body");
+          return { ok: true, inView: r.left >= 0 && r.top >= 0 && r.right <= vw && r.bottom <= vh, size: [r.width, r.height], onTop: top === x || x.contains(top), panelBottom: panel.bottom, vh, vw, outX, scrollable: body.scrollHeight > body.clientHeight ? "scroll" : "fits", bodyTouch: getComputedStyle(body).touchAction };
+        });
+      await page.click(".skill-1");
+      await wait(300);
+      let ui = await V(() => window.__starwishWorld.info().panel);
+      const x1 = await xCheck();
+      run.results.panelLandscape = x1;
+      check("背包按鈕開啟背包視窗，右上角 X 在畫面內、沒有被遮住、至少 40 px", ui === "bag" && x1.inView && x1.onTop && x1.size[0] >= 40 && x1.size[1] >= 40 && x1.panelBottom <= x1.vh && x1.outX === 0, { ui, x1 });
+      await page.click(".wp.open .wp-x");
+      await wait(200);
+      ui = await V(() => window.__starwishWorld.info().panel);
+      check("點 X 立即關閉背包視窗", ui === "closed", ui);
+      // 孵化一隻寵物（測試設定 30 秒）並裝備，檢查子畫面返回與跟隨位置
+      await V(() => window.__starwishWorld.give("seed", 1));
+      await page.click(".skill-1");
+      await wait(300);
+      await page.evaluate(() => [...document.querySelectorAll(".wp.open .wp-body button")].find((b) => b.textContent === "孵化" && !b.disabled)?.click());
+      await page.waitForFunction(() => window.__starwishWorld.info().pets.some((p) => p.stage >= 1), null, { timeout: 90000 }).catch(() => {});
+      await page.click('.wp.open [data-tab="pet"]');
+      await wait(300);
+      const petId = await V(() => window.__starwishWorld.info().pets.find((p) => p.stage >= 1)?.id ?? null);
+      // 選單每 0.5 秒更新內容；點擊若剛好遇到重畫，重試（最多 3 次，記錄次數）
+      let uiDetail = "";
+      let tries = 0;
+      await page.evaluate(() => {
+        window.__evlog = [];
+        for (const t of ["pointerdown", "mousedown", "pointerup", "mouseup", "click", "touchstart", "touchend"])
+          document.addEventListener(t, (e) => window.__evlog.push(`${t}:${e.target?.tagName}.${String(e.target?.className ?? "").slice(0, 20)}`), true);
+      });
+      const clickErrs = [];
+      while (tries < 3 && uiDetail !== `pet:${petId}`) {
+        tries++;
+        await page.click(`.wp.open [data-pet="${petId}"]`, { timeout: 30000 }).catch((e) => clickErrs.push(String(e.message).split("\n").slice(0, 6).join(" | ")));
+        await wait(300);
+        uiDetail = await V(() => window.__starwishWorld.info().panel);
+      }
+      run.results.petDetailTries = tries;
+      if (uiDetail !== `pet:${petId}`) {
+        const diag = await page.evaluate((id) => {
+          const c = document.querySelector(`.wp.open [data-pet="${id}"]`);
+          if (!c) return { card: false };
+          c.scrollIntoView({ block: "center" });
+          const r = c.getBoundingClientRect();
+          const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+          const body = document.querySelector(".wp.open .wp-body");
+          const br = body.getBoundingClientRect();
+          const before = window.__starwishWorld.info().panel;
+          c.click();
+          const after = window.__starwishWorld.info().panel;
+          return { card: true, rect: [r.left, r.top, r.width, r.height], body: [br.top, br.height, body.scrollTop, body.scrollHeight], top: top ? `${top.tagName}.${top.className}` : null, isCard: top === c || c.contains(top), before, afterProgrammatic: after };
+        }, petId);
+        diag.evlog = await page.evaluate(() => window.__evlog.slice(0, 20));
+        diag.clickErrs = clickErrs;
+        run.results.petDetailDiag = diag;
+        console.log(`  · [${name} ${g}] 寵物卡片診斷：${JSON.stringify(diag)}`);
+        await page.click('.wp.open [data-a="back"]').catch(() => {});
+        await wait(300);
+      }
+      await page.click('.wp.open [data-a="back"]').catch(() => {});
+      await wait(300);
+      const uiBack = await V(() => window.__starwishWorld.info().panel);
+      check("寵物子畫面：點寵物進入詳細、返回鍵回到寵物列表", petId !== null && uiDetail === `pet:${petId}` && uiBack === "pet", { petId, uiDetail, uiBack });
+      await page.click(`.wp.open [data-pet="${petId}"]`).catch(() => {});
+      await wait(300);
+      await page.evaluate(() => [...document.querySelectorAll(".wp.open .wp-body button")].find((b) => b.textContent === "裝備")?.click());
+      await wait(300);
+      // 直向 iPhone（393×852）：視窗與按鈕都在畫面內
+      await page.setViewportSize({ width: 393, height: 852 });
+      await wait(600);
+      const x2 = await xCheck();
+      run.results.panelPortrait = x2;
+      check("直向 iPhone：寵物視窗 X 在畫面內、沒有被遮住，按鈕不超出左右邊界，內容區可捲動（touch-action pan-y）", x2.inView && x2.onTop && x2.outX === 0 && x2.panelBottom <= x2.vh && /pan-y/.test(x2.bodyTouch), x2);
+      await shot("panel_portrait");
+      const ov = await page.evaluate(() => {
+        const a = document.querySelector(".map-toggle")?.getBoundingClientRect();
+        const b = document.querySelector(".perf-quality")?.getBoundingClientRect();
+        if (!a || !b) return { missing: true };
+        const overlap = !(a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top);
+        return { overlap, menu: [a.left, a.top, a.width, a.height], quality: [b.left, b.top, b.width, b.height] };
+      });
+      check("直向 iPhone：「選單」按鈕與「畫質」按鈕不重疊", ov.overlap === false, ov);
+      await page.click(".wp.open .wp-x");
+      await page.setViewportSize({ width: 852, height: 393 });
+      await wait(3500);
+      const pg = await V(() => ({ panel: window.__starwishWorld.info().panel, gap: window.__starwishWorld.info().petGap, hw: window.__starwishWorld.info().headHalfWidth, size: window.__starwishWorld.info().followerSize, eq: window.__starwishWorld.info().equipped }));
+      run.results.petGap = pg;
+      check("寵物跟在頭部側邊：與頭部外緣保持 15～25 cm 可見間距（大小不變）", pg.panel === "closed" && pg.eq === petId && pg.gap >= 0.15 && pg.gap <= 0.25 && pg.size > 0 && pg.size <= 0.08, pg);
+      await shot("village_pet");
+
+      // ---------- 4. 南門：走進傳送陣直接傳送（沒有確認視窗） ----------
+      const p0 = await V(() => window.__starwishWorld.info().portal);
+      check("星芽村：抵達點在南方傳送陣外、傳送陣已啟用、沒有觸發", p0.armed && !p0.fired && p0.dist > p0.triggerR, p0);
+      const nav = page.waitForNavigation({ timeout: 90000 }).catch(() => null);
+      // 一步一步走進去（每步 0.8 m）
+      let dlgSeen = false;
+      for (const z of [-39.8, -40.6, -41.4, -42.2, -43.0]) {
+        const fired = await V((zz) => {
+          const w = window.__starwishWorld;
+          if (w.info().portal.fired) return true;
+          w.teleport(0, zz, Math.PI);
+          return false;
+        }, z).catch(() => true);
+        if (fired) break;
+        dlgSeen = dlgSeen || (await page.evaluate(() => { const d = document.querySelector(".vi-dlg"); return !!d && !d.hidden; }).catch(() => false));
+        await wait(400);
+      }
+      check("南方傳送陣：踩進去直接傳送，沒有出現確認視窗或傳送按鈕", !dlgSeen, { dlgSeen });
+      await nav;
+      await waitField();
+      await page.waitForFunction(() => window.__starwishPlay.info().monsters.length > 0, null, { timeout: 60000 }).catch(() => {});
+      // 畫面開始更新後再讀（寵物跟隨在第一格才定位）
+      await page.waitForFunction(() => Number.isFinite(window.__starwishPlay.world.info().petGap) && window.__starwishPlay.world.info().petGap > 0, null, { timeout: 30000 }).catch(() => {});
+      await wait(1500);
+      let fi = await V(() => window.__starwishPlay.world.info());
+      const fp = await V(() => window.__starwishPlay.info());
+      run.results.fieldArrive = { fi, pos: fp.pos };
+      check("南方傳送陣 → 星芽原野新手營地（抵達在營地傳送陣外側）", fi.map === "starsprout" && Math.hypot(fp.pos[0] + 56, fp.pos[2] + 64) < 1.5 && fi.portal.dist > fi.portal.triggerR, { pos: fp.pos, portal: fi.portal });
+      await wait(3000);
+      const fi2 = await V(() => window.__starwishPlay.world.info());
+      check("營地傳送陣：已建立（魔法陣＋符文＋光柱）、抵達後啟用但不會自動觸發（不會兩張地圖無限往返）", fi2.map === "starsprout" && fi2.portal.built && fi2.portal.meshes >= 3 && fi2.portal.armed && !fi2.portal.fired, fi2.portal);
+      check("切換地圖：金幣、背包、模型性別保留", fi.gold === goldBeforeField && fi.bag === bagBeforeField - 0 && fp.gender === g, { gold: fi.gold, goldBeforeField, bag: fi.bag, bagBeforeField });
+      check("星芽原野：一般移動沒有跳躍按鈕", fi.jumpButton === false, fi.jumpButton);
+      check("原野與村莊用同一個角色模型（C1.0-B5b，沒有變回其他版本）", fp.avatarModel?.modular === false && fp.file === vi.file, { village: vi.file, field: fp.file });
+      check("切換地圖後寵物仍裝備、在頭部側邊 15～25 cm", fi.pets.length >= 1 && fi.petGap >= 0.15 && fi.petGap <= 0.25, { gap: fi.petGap, pets: fi.pets });
+      await shot("field_arrive");
+      // ---------- Stage 7.5：新版男性初心者 ----------
+      if (g === "male") {
+        const am75 = fp.avatarModel;
+        check("Stage 7.5：男性使用新版初心者（n75）、HQ／Lite 對應檔案，27 段動作、雙手武器掛點、頭髮／兜帽次級動態", am75?.version === "n75" && /novice_n75_male_(hq|lite)\.glb/.test(fp.file) && am75.allClips.length >= 27 && ["Walk", "Wait", "Attack_Unarmed", "Attack_2H_Smash", "Cast_Heal", "Block", "Jump_Land"].every((c) => am75.allClips.includes(c)) && am75.sockets.R && am75.sockets.L && am75.secondary.includes("Hair_Back") && am75.secondary.includes("Hood"), { file: fp.file, am75 });
+        const wt = await V(() => window.__starwishPlay.weaponTest("sword", "R"));
+        check("Stage 7.5：右手掛上展示短劍（掛點在右手骨附近 8 cm 內）", wt.attached && wt.dist !== null && wt.dist < 0.08, wt);
+        const wl = await V(() => window.__starwishPlay.weaponTest("staff", "L"));
+        check("Stage 7.5：左手掛點可用（法杖）", wl.attached && wl.dist !== null && wl.dist < 0.08, wl);
+        await V(() => window.__starwishPlay.weaponTest("sword", "R"));
+        const styles = await V(() => ["twoHandSmash", "polearm", "staff", "oneHand"].map((s) => window.__starwishPlay.setAttackStyle(s)));
+        check("Stage 7.5：依武器類型切換普通攻擊動作（雙手重擊、長柄突刺、法杖、單手）", styles.every(Boolean), styles);
+        // 動作預覽：重擊（截圖）
+        await V(() => window.__starwishPlay.previewClip("Attack_2H_Smash"));
+        await wait(300);
+        await shot("n75_preview_smash");
+        await wait(800);
+        await V(() => window.__starwishPlay.previewClip("Attack_1H_Chop"));
+        await wait(250);
+        await shot("n75_sword_chop");
+        await wait(800);
+        const sec = await V(() => window.__starwishPlay.secondary());
+        check("Stage 7.5：次級動態數值有限且在上限內", Object.values(sec).every((v) => Number.isFinite(v.pitch) && Math.abs(v.pitch) <= 0.23 && Math.abs(v.roll) <= 0.23), sec);
+        // ---------- Stage 7.5 第二階段：C 的六段展示技能接到本地玩家 ----------
+        const sk0 = await V(() => window.__starwishPlay.skillState());
+        check("Stage 7.5 技能：本地玩家技能已啟用（技能列、音效、六段技能）", sk0.enabled && Object.keys(sk0.cooldowns).length === 6 && sk0.audio, sk0);
+        // ---------- C 正式接入模組 CombatFx：一張地圖一個實例、預熱、沒有第二套特效系統 ----------
+        const cf0 = sk0.combatFx;
+        const layers = await V(() => ({ dmg: document.querySelectorAll(".cvfx-dmg-layer").length }));
+        check("CombatFx：一張地圖一個實例（傷害數字層只有 1 個，沒有舊版特效系統同時執行）", !!cf0 && layers.dmg === 1 && cf0.actors >= 1, { layers, actors: cf0?.actors });
+        check("CombatFx：地圖載入期間已預熱（不扣血、不播音效、不顯示數字、沒有殘留特效）", !!cf0?.prewarm && cf0.prewarm.audioPlayed === 0 && cf0.prewarm.damageShown === 0 && cf0.prewarm.leftoverActive === 0 && cf0.prewarm.leftoverProjectiles === 0 && sk0.prewarmMs !== null, { prewarm: cf0?.prewarm, ms: sk0.prewarmMs });
+        // 音效需要使用者手勢（iPhone 規定）：點一下畫面
+        await page.mouse.click(426, 70).catch(() => {});
+        const skillShots = { whirlwind: "n75_skill_whirlwind", star_meteor: "n75_skill_meteor", triple_slash: "n75_skill_triple" };
+        const castRes = {};
+        for (const id of ["triple_slash", "staff_cast", "leap_slam", "whirlwind", "star_meteor", "charge_burst"]) {
+          // 每次施放前站到最近一隻活著的怪物旁邊 1.4 m、補滿 HP
+          await V(() => {
+            const api = window.__starwishPlay;
+            api.heal();
+            const i = api.info();
+            const alive = i.monsters.filter((m) => m.state !== "death" && m.hp > 0).sort((a, b) => Math.hypot(a.x - i.pos[0], a.z - i.pos[2]) - Math.hypot(b.x - i.pos[0], b.z - i.pos[2]));
+            if (alive[0]) api.teleport(alive[0].x, alive[0].z - 1.4, 0);
+          });
+          await wait(400);
+          const pos0 = await V(() => window.__starwishPlay.info().pos);
+          castRes[id] = await V((id) => window.__starwishPlay.skill(id), id);
+          if (skillShots[id]) {
+            await wait(id === "star_meteor" ? 1100 : 600);
+            await shot(skillShots[id]);
+          }
+          // CI 軟體繪製很慢（每幀最多算 0.1 秒遊戲時間）→ 等技能真的結束，不用固定秒數
+          for (let k = 0; k < 120; k++) {
+            if (!(await V(() => window.__starwishPlay.skillState().busy))) break;
+            await wait(250);
+          }
+          await wait(300);
+          const pos1 = await V(() => window.__starwishPlay.info().pos);
+          castRes[id].moved = Math.hypot(pos1[0] - pos0[0], pos1[2] - pos0[2]);
+        }
+        const sk1 = await V(() => window.__starwishPlay.skillState());
+        run.results.stage75Skills = { castRes, state: sk1 };
+        check("Stage 7.5 技能：六段技能都能施放，播放 C 的 Skill_* 動作", Object.values(castRes).every((r) => r.ok) && sk1.stats.casts >= 6 && Object.keys(sk1.stats.bySkill).length === 6, castRes);
+        const cf1 = sk1.combatFx;
+        check("Stage 7.5 技能（CombatFx）：命中時有傷害、命中特效、傷害數字；投射物有判定", sk1.stats.hits >= 3 && sk1.stats.viaCombatFx >= 6 && sk1.fx.hitFx >= 3 && cf1.damageShown > cf0.damageShown && sk1.stats.projectiles >= 2, { stats: sk1.stats, fx: sk1.fx, damageShown: cf1.damageShown });
+        check("Stage 7.5 技能（CombatFx）：技能特效、武器拖尾、投射物外觀都由 CombatFx 播放", cf1.vfx.spawned > (cf0.vfx.spawned ?? 0) && sk1.stats.projectileVisuals >= 1, { vfx: cf1.vfx, budget: cf1.budget });
+        if (name === "chromium") check("Stage 7.5 技能（CombatFx）：戰鬥音效有播放（點擊後解鎖）", cf1.audioPlayed > 0, { audioPlayed: cf1.audioPlayed });
+        check("Stage 7.5 技能：跳斬、蓄力衝刺有技能位移（經地形碰撞），原地技能不移動", castRes.leap_slam.moved > 0.3 && castRes.charge_burst.moved > 0.3 && castRes.staff_cast.moved < 0.2 && castRes.star_meteor.moved < 0.2, Object.fromEntries(Object.entries(castRes).map(([k, v]) => [k, v.moved])));
+        check("Stage 7.5 技能：施放結束後回到一般狀態（沒有卡在技能中）", !sk1.busy, sk1.active);
+        // ---------- HUD（暫定）：預留樣式、閃光與震動可關閉 ----------
+        const txt = await V(() => {
+          const api = window.__starwishPlay;
+          const r = ["heal", "crit", "miss", "block"].map((k) => api.combatText(k, k === "heal" ? 25 : 99));
+          return { r, state: api.skillState().fx.texts };
+        });
+        check("HUD 暫定：預留治療、暴擊、未命中、格擋樣式", txt.r.every(Boolean) && ["heal", "crit", "miss", "block"].every((k) => (txt.state[k] ?? 0) >= 1), txt);
+        const hudOff = await V(() => window.__starwishPlay.combatHud({ flash: false, shake: 0 }));
+        const hudHalf = await V(() => window.__starwishPlay.combatHud({ flash: true, shake: 0.5 }));
+        const hudOn = await V(() => window.__starwishPlay.combatHud({ flash: true, shake: 1 }));
+        await V(() => window.__starwishPlay.weaponTest("sword", "R"));
+        const qc = await V(() => window.__starwishPlay.combatFxQualityCycle());
+        run.results.combatFxQualityCycle = qc;
+        check("CombatFx：切換畫質後沒有材質引用到已刪除的貼圖、貼圖／材質數沒有累積", !!qc && qc.brokenAfter === 0 && qc.after.textures <= qc.before.textures + 2 && qc.after.materials <= qc.before.materials + 2, qc);
+        check("HUD 暫定：畫面閃光、鏡頭震動可以關閉／減弱／恢復", !hudOff.screenEnabled && !hudOff.shakeEnabled && hudHalf.shakeEnabled && hudHalf.shakeScale < hudOn.shakeScale && hudOn.screenEnabled, { hudOff, hudHalf, hudOn });
+        const shr = await V(() => window.__starwishPlay.sharedAvatarTest(3));
+        run.results.stage75Shared = shr;
+        // 3 位共用同一個材質、同一組圖片貼圖（usedTextures）；每多一人只多 1 張骨架的骨骼矩陣小貼圖（82 根骨骼，約 5 KB）
+        check("Stage 7.5 多人共用貼圖：3 位 n75 共用同一份材質與貼圖（每多一人只多骨骼矩陣小貼圖）", shr.materials === 1 && shr.usedTextures <= 4 && shr.texAfterAll - shr.texAfterFirst <= shr.n - 1 && shr.meshes === 3, shr);
+        await V(() => window.__starwishPlay.weaponTest(null, "R"));
+      }
+      // ---------- Stage 7.3：七種怪物 ----------
+      const fm = fp.fieldMonsters ?? [];
+      const mk = {};
+      for (const m of fp.monsters) mk[m.kind] = (mk[m.kind] ?? 0) + 1;
+      run.results.fieldMonsters = { fm, kinds: mk };
+      check("Stage 7.3 七種怪物：M002～M007 都是 Claude C 的正式模型（已交付、Lite），依原本 7 區出現；星露啵啵沿用", fm.length === 6 && fm.every((x) => x.delivered && x.count > 0 && /Lite/.test(x.status)) && mk.star_dew_bobo === 6 && mk.moss_horn_beast === 5 && mk.cloud_fluff_bird === 5 && mk.windfeather_fox === 4 && mk.nebula_sheep === 4 && mk.carrot_king === 2 && mk.crown_hammer_rabbit === 1 && !mk.rig_contract_fixture, { fm, kinds: mk });
+      const lv = Object.fromEntries(fp.monsters.map((m) => [m.kind, { level: m.level, aggressive: m.aggressive }]));
+      check("Stage 7.3：Lv.1～4 被動（星露啵啵、苔角獸）、Lv.5 以上主動（雲絨鳥～王冠重錘兔）", lv.star_dew_bobo?.aggressive === false && lv.moss_horn_beast?.aggressive === false && ["cloud_fluff_bird", "windfeather_fox", "nebula_sheep", "carrot_king", "crown_hammer_rabbit"].every((k) => lv[k]?.aggressive === true), lv);
+      if (g === "male" && name === "webkit") {
+        // 各區截圖（交付用）：站在區域外緣看怪物
+        const zones = [["01_bobo", -24, -60], ["02_moss_horn_beast", -62, -39], ["03_cloud_fluff_bird", 14, -19], ["04_windfeather_fox", 52, 16], ["05_nebula_sheep", -44, 37], ["06_carrot_king", -12, 28], ["07_crown_hammer_rabbit", 0, 57]];
+        for (const [label, x, z] of zones) {
+          await V(([x, z]) => { window.__starwishPlay.teleport(x, z); window.__starwishPlay.heal(); }, [x, z]);
+          await wait(2500);
+          await shot(`zone_${label}`);
+        }
+        await V(() => window.__starwishPlay.teleport(-56, -60));
+        await wait(1500);
+      }
+
+      // ---------- 5. 打怪、金幣掉落、撿取 ----------
+      const fight = await V(
+        () =>
+          new Promise((res) => {
+            const api = window.__starwishPlay;
+            const t0 = performance.now();
+            const step = () => {
+              const i = api.info();
+              const w = api.world.info();
+              if (i.hp < i.maxHp * 0.5) api.world.setHp(i.maxHp); // 這段只測掉落
+              const loot = w.loot;
+              if (loot.length && i.kills >= 2) {
+                const l = loot[0];
+                api.teleport(l.x, l.z);
+              } else {
+                const alive = i.monsters.filter((m) => m.state !== "death" && m.hp > 0);
+                if (alive.length) {
+                  const m = alive[0];
+                  if (Math.hypot(m.x - i.pos[0], m.z - i.pos[2]) > 1.6) api.teleport(m.x + 1.0, m.z);
+                  api.press("attack");
+                } else if (loot.length) api.teleport(loot[0].x, loot[0].z);
+              }
+              if ((i.kills >= 2 && w.loot.length === 0 && w.goldPicked > 0) || performance.now() - t0 > 150000) res({ kills: i.kills, picked: i.picked, w });
+              else setTimeout(step, 120);
+            };
+            step();
+          }),
+      );
+      run.results.fight = { kills: fight.kills, picked: fight.picked, goldDropped: fight.w.goldDropped, goldPicked: fight.w.goldPicked, gold: fight.w.gold, claimed: fight.w.claimed };
+      const drops = fight.w.ledger.filter((l) => l.kind === "monsterDrop");
+      check("原野：擊倒怪物、掉落金幣（測試設定 3–8）並撿起入帳", fight.kills >= 2 && fight.w.goldPicked > 0 && fight.w.gold === goldBeforeField + fight.w.goldPicked && drops.every((d) => d.amount >= 3 && d.amount <= 8), run.results.fight);
+      const fw = fight.w;
+      const cfx = (await V(() => window.__starwishPlay.info())).combatFx;
+      check("Stage 7.3 戰鬥特效（Claude C VFX V2）：命中火花與傷害數字和命中同步出現", !!cfx && cfx.hitFx >= fight.kills && cfx.numbers >= cfx.hitFx && cfx.damageShown > 0, cfx);
+      check("Stage 7.2：擊敗怪物得到經驗（測試設定），存進角色存檔", fw.expGained > 0 && (fw.level > 1 || fw.exp > 0), { expGained: fw.expGained, level: fw.level, exp: fw.exp });
+      check("掉落物唯一編號：每個撿起的掉落只入帳一次", new Set(drops.map((d) => d.requestId)).size === drops.length && fight.w.claimed >= drops.length, { drops: drops.length, claimed: fight.w.claimed });
+      // ---------- Stage 7.4：持續普通攻擊 25 秒，怪物不會因受擊／擊退而永久無法反擊 ----------
+      const sustain = await V(
+        () =>
+          new Promise((res) => {
+            const api = window.__starwishPlay;
+            const i0 = api.info();
+            const tgt = i0.monsters.filter((m) => m.state !== "death" && m.hp > 0).sort((a, b) => Math.hypot(a.x - i0.pos[0], a.z - i0.pos[2]) - Math.hypot(b.x - i0.pos[0], b.z - i0.pos[2]))[0];
+            if (!tgt) return res({ error: "no target" });
+            api.setMonsterHp(tgt.id, 999999);
+            api.teleport(tgt.x + 1.0, tgt.z);
+            const hurt0 = i0.combatFx?.hurt ?? 0;
+            const kb0 = { done: i0.combatFx?.knockbacks ?? 0, skip: i0.combatFx?.knockSkipped ?? 0 };
+            const att0 = tgt.attacks?.resolved ?? 0;
+            // 以遊戲時間計算（CI 是軟體繪製、FPS 低；遊戲每幀最多前進 0.1 秒，實際時間會比遊戲時間長）
+            const g0 = i0.gameTime;
+            const w0 = performance.now();
+            let maxGap = 0;
+            let lastHurtAt = g0;
+            let lastHurt = hurt0;
+            let presses = 0;
+            const step = () => {
+              const i = api.info();
+              const m = i.monsters.find((x) => x.id === tgt.id);
+              if (i.hp < i.maxHp * 0.5) api.world.setHp(i.maxHp);
+              if (m && Math.hypot(m.x - i.pos[0], m.z - i.pos[2]) > 2.0) api.teleport(m.x + 1.0, m.z);
+              api.press("attack");
+              presses++;
+              const h = i.combatFx?.hurt ?? 0;
+              const now = i.gameTime;
+              if (h > lastHurt) {
+                maxGap = Math.max(maxGap, now - lastHurtAt);
+                lastHurtAt = now;
+                lastHurt = h;
+              }
+              if (now - g0 >= 25 || performance.now() - w0 > 360000) {
+                maxGap = Math.max(maxGap, now - lastHurtAt);
+                res({ kind: tgt.kind, gameSeconds: Math.round((now - g0) * 10) / 10, wallSeconds: Math.round((performance.now() - w0) / 100) / 10, presses, playerHits: i.hits ?? null, hurtTaken: h - hurt0, monsterAttacks: (m?.attacks?.resolved ?? 0) - att0, knockbacks: (i.combatFx?.knockbacks ?? 0) - kb0.done, knockSkipped: (i.combatFx?.knockSkipped ?? 0) - kb0.skip, maxGapSec: Math.round(maxGap * 10) / 10, alive: !!m && m.hp > 0 });
+              } else setTimeout(step, 120);
+            };
+            step();
+          }),
+      );
+      run.results.sustainedAttack = sustain;
+      check("Stage 7.4：玩家持續普攻（遊戲時間 25 秒；CI 太慢時至少 15 秒，怪物血量調高）：怪物仍多次反擊命中（≥ 4 次）、最長不出手間隔 < 8 秒；擊退有衰減（不會一直被推離）", !sustain.error && sustain.gameSeconds >= 15 && sustain.hurtTaken >= 4 && sustain.monsterAttacks >= 4 && sustain.maxGapSec < 8 && sustain.knockSkipped > sustain.knockbacks, sustain);
+      await shot("field_fight");
+
+      // ---------- 6. 走進營地傳送陣返回星芽村，存檔保留 ----------
+      const beforeBack = await V(() => window.__starwishPlay.world.info());
+      await V(() => window.__starwishPlay.teleport(-56, -64.5));
+      await shot("field_portal");
+      const nav2 = page.waitForNavigation({ timeout: 90000 }).catch(() => null);
+      for (const z of [-65.3, -66.1, -66.9, -67.7]) {
+        const fired = await V((zz) => {
+          const api = window.__starwishPlay;
+          if (api.world.info().portal.fired) return true;
+          api.teleport(-56, zz);
+          return false;
+        }, z).catch(() => true);
+        if (fired) break;
+        await wait(400);
+      }
+      await nav2;
+      await waitVillage();
+      vi = await V(() => window.__starwishWorld.info());
+      run.results.backVillage = { gold: vi.gold, pos: vi.pos, bag: vi.bag.length };
+      check("營地傳送陣：踩進去直接回到星芽村南門內側（南方傳送陣外、沒有再被傳回原野）", vi.map === "village" && Math.hypot(vi.pos[0] - 0, vi.pos[2] + 39) < 1.5 && vi.portal.armed && !vi.portal.fired, { pos: vi.pos, portal: vi.portal });
+      check("Stage 7.2 返回村莊：等級、經驗、外觀、武器保留", vi.level === beforeBack.level && vi.exp === beforeBack.exp && JSON.stringify(vi.appearance) === JSON.stringify(beforeBack.appearance) && vi.file === villageFile && vi.avatarModel?.modular === false, { village: { level: vi.level, exp: vi.exp, appearance: vi.appearance }, field: { level: beforeBack.level, exp: beforeBack.exp, appearance: beforeBack.appearance } });
+      check("返回村莊：金幣、背包、物品數量保留", vi.gold === beforeBack.gold && vi.bag.length === beforeBack.bag && vi.items.monsterMaterial === beforeBack.items.monsterMaterial, { vi: vi.gold, field: beforeBack.gold });
+      await shot("village_back");
+
+      // ---------- 7. 再到原野，戰死 → 星芽村復活 ----------
+      await V(() => window.__starwishWorld.toField());
+      await waitField();
+      await page.waitForFunction(() => window.__starwishPlay.info().monsters.length > 0, null, { timeout: 60000 }).catch(() => {});
+      const goldBeforeDeath = await V(() => window.__starwishPlay.world.info().gold);
+      const nav3 = page.waitForNavigation({ timeout: 180000 }).catch(() => null);
+      const death = await V(
+        () =>
+          new Promise((res) => {
+            const api = window.__starwishPlay;
+            const t0 = performance.now();
+            let seen = null;
+            const step = () => {
+              const i = api.info();
+              const w = api.world.info();
+              // 倒地在怪物更新時發生，角色動作在下一格才切換 → 看到倒地後再取幾格
+              if (w.down && !seen) seen = { state: w.state, deathClip: w.deathClip, states: [] };
+              if (seen && w.down) seen.states.push(w.state);
+              if (!w.down && !seen) {
+                if (i.hp > 1) api.world.setHp(1);
+                const m = i.monsters.find((x) => x.state !== "death" && x.hp > 0);
+                if (m && Math.hypot(m.x - i.pos[0], m.z - i.pos[2]) > 1.2) api.teleport(m.x + 0.9, m.z);
+                // Stage 7.2：星露啵啵（Lv.1）是被動怪物，要先打一下才會反擊
+                else if (m && !m.provoked) api.press("attack");
+              }
+              if ((seen && (seen.states.length >= 6 || !w.down)) || performance.now() - t0 > 120000) {
+                if (seen) seen.state = seen.states.includes("Death") ? "Death" : seen.states[seen.states.length - 1];
+                res(seen);
+              }
+              else setTimeout(step, 150);
+            };
+            step();
+          }),
+      ).catch(() => null);
+      run.results.death = death;
+      await shot("field_down");
+      await nav3;
+      await waitVillage();
+      vi = await V(() => window.__starwishWorld.info());
+      run.results.respawn = { pos: vi.pos, deaths: vi.deaths, hp: vi.hp, gold: vi.gold };
+      check("戰死：生命歸零後倒地並播死亡動作（不是整個角色僵硬往後倒）", !!death && death.deathClip === true && death.state === "Death", death);
+      check("戰死 → 在星芽村復活（死亡次數 +1、滿血、金幣不變）", vi.map === "village" && vi.deaths === 1 && (vi.hp === null || vi.hp >= 100) && vi.gold === goldBeforeDeath, run.results.respawn);
+      await shot("village_respawn");
+    } catch (e) {
+      run.errors.push(`例外：${e.message}`);
+      run.results.exceptionState = await page
+        .evaluate(() => ({
+          url: location.href,
+          boot: document.getElementById("boot")?.textContent?.slice(0, 300) ?? null,
+          world: window.__starwishWorld ? { ready: window.__starwishWorld.ready, info: (() => { try { const i = window.__starwishWorld.info(); return { map: i.map, art: i.art, interact: i.interact, pos: i.pos }; } catch (x) { return String(x); } })() } : null,
+          play: window.__starwishPlay ? { ready: window.__starwishPlay.ready, world: !!window.__starwishPlay.world } : null,
+          save: (() => { try { const s = JSON.parse(localStorage.getItem("starwish.stage7.save.v1") ?? "null"); return s && s.character; } catch { return "bad"; } })(),
+        }))
+        .catch((x) => String(x));
+      console.log(`  ! [${name} ${g}] 狀態：${JSON.stringify(run.results.exceptionState).slice(0, 900)}`);
+      await shot("exception");
+    }
+    run.ok = Object.values(run.checks).every((c) => c.ok) && run.errors.length === 0 && Object.keys(run.checks).length >= 20;
+    if (!run.ok) failures++;
+    for (const [k, c] of Object.entries(run.checks)) console.log(`${c.ok ? "✓" : "✗"} [${name} ${g}] ${k}${c.ok ? "" : "  " + JSON.stringify(c.detail).slice(0, 400)}`);
+    for (const e of run.errors) console.log(`  ! [${name} ${g}] ${e}`);
+    report.runs.push(run);
+    await ctx.close();
+  }
+  await browser.close();
+}
+await server.close();
+report.finishedAt = new Date().toISOString();
+report.ok = failures === 0;
+writeFileSync(outDir + "report.json", JSON.stringify(report, null, 2));
+console.log(failures ? `世界循環 E2E 失敗：${failures}` : "世界循環 E2E 全部通過");
+process.exit(failures ? 1 : 0);
