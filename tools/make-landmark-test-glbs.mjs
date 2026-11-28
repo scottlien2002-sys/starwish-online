@@ -40,7 +40,7 @@ function partGeo(size, kind) {
     boxGeo(ox + 0, oy + h * k * 0.75, oz + (-7.5 + 0.5 * 24) * k, w * k * 0.4, h * k * 0.5, d * k, pos, nor, idx); // 全長桁架
     boxGeo(ox + 0, oy + h * k * 0.5, oz + -6.5 * k, w * k, h * k, 2 * k, pos, nor, idx); // 配重（後端）
   } else {
-    boxGeo(ox, oy + (h * k) / 2, oz, w * k * 0.9, h * k, d * k * 0.8, pos, nor, idx);
+    boxGeo(ox, oy + (h * k) / 2, oz, w * k, h * k, d * k * 0.8, pos, nor, idx);
     // 鼻子：正面 +Z，讓包圍盒深度剛好＝d
     boxGeo(ox, oy + h * k * 0.5, oz + d * k * 0.45, w * k * 0.3, h * k * 0.3, d * k * 0.1, pos, nor, idx);
   }

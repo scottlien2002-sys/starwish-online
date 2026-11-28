@@ -31,14 +31,14 @@ const check = (name, ok, detail) => {
 };
 const settle = (page, n = 4) => page.evaluate((k) => new Promise((r) => { let i = 0; const f = () => (++i >= k ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); }), n);
 
-// 參考視角：角色站點、面向、鏡頭俯角與距離（看得到整個地標）
+// 參考視角：鏡頭位置與注視點（相對地面高度），整個地標入鏡
 const VIEWS = [
-  { id: "colossus", label: "廢棄機械巨像", x: 84, z: -22, yaw: Math.atan2(24, -24), beta: 1.28, radius: 16 },
-  { id: "furnace1", label: "廢鐵熔爐（工廠高台）", x: -38, z: 76, yaw: Math.atan2(-22, 14), beta: 1.22, radius: 12 },
-  { id: "furnace2", label: "廢鐵熔爐（工廠地面）", x: -58, z: 46, yaw: Math.atan2(-12, 12), beta: 1.25, radius: 10 },
-  { id: "crane1", label: "廢料回收吊車（回收區）", x: -46, z: -24, yaw: Math.atan2(-26, -23), beta: 1.18, radius: 14 },
-  { id: "crane3", label: "廢料回收吊車（中央窪地）", x: 18, z: -36, yaw: Math.atan2(-12, -24), beta: 1.15, radius: 14 },
-  { id: "reactor", label: "魔導核心反應爐", x: 22, z: 92, yaw: 0, beta: 1.12, radius: 18 },
+  { id: "colossus", label: "廢棄機械巨像", from: [72, 12, -16], to: [108, 4, -46] },
+  { id: "furnace1", label: "廢鐵熔爐（工廠高台）", from: [-38, 30, 70], to: [-60, 21, 90], abs: true },
+  { id: "furnace2", label: "廢鐵熔爐（工廠地面）", from: [-50, 21, 42], to: [-70, 17, 58], abs: true },
+  { id: "crane1", label: "廢料回收吊車（回收區）", from: [-38, 22, -14], to: [-72, 20, -47], abs: true },
+  { id: "crane3", label: "廢料回收吊車（中央窪地）", from: [34, 9, -30], to: [6, 9, -60] },
+  { id: "reactor", label: "魔導核心反應爐", from: [22, 33, 78], to: [22, 33, 128], abs: true },
 ];
 
 async function open(base, q, extra = "") {
@@ -61,8 +61,15 @@ async function open(base, q, extra = "") {
 
 async function shots(page, prefix) {
   for (const v of VIEWS) {
-    await page.evaluate((o) => window.__starwishJunkyard.shot(o), v);
-    await page.waitForTimeout(900);
+    const o = await page.evaluate((v) => {
+      const api = window.__starwishJunkyard;
+      const g = (x, z) => (v.abs ? 0 : api.ground(x, z));
+      return { from: [v.from[0], v.from[1] + g(v.from[0], v.from[2]), v.from[2]], to: [v.to[0], v.to[1] + g(v.to[0], v.to[2]), v.to[2]] };
+    }, v);
+    // 角色移到鏡頭附近（分區載入、距離漸變以鏡頭為準）
+    await page.evaluate((o) => window.__starwishJunkyard.teleport(o.from[0], o.from[2], 0), o);
+    await page.evaluate((o) => window.__starwishJunkyard.shotLook(o), o);
+    await page.waitForTimeout(1200);
     await settle(page, 6);
     await page.screenshot({ path: `${outDir}${prefix}_${v.id}.png` });
   }

@@ -711,6 +711,15 @@ class JunkyardPage {
         this.camera.snap(this.pos, this.alphaBehind(o.yaw), o.beta, o.radius);
         this.shotHold = true;
       },
+      /** 截圖用：鏡頭放在 from、看向 to（世界座標），角色移到看不到的地方以外不動 */
+      shotLook: (o: { from: [number, number, number]; to: [number, number, number] }) => {
+        const c = this.camera.camera;
+        c.setTarget(new Vector3(o.to[0], o.to[1], o.to[2]));
+        c.setPosition(new Vector3(o.from[0], o.from[1], o.from[2]));
+        this.world.updateStreaming(o.to[0], o.to[2]);
+        this.world.updateFades(o.from[0], o.from[2], true);
+        this.shotHold = true;
+      },
       shotRelease: () => {
         this.shotHold = false;
       },
