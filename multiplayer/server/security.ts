@@ -56,6 +56,8 @@ export function parseClientMsg(raw: string): ClientMsg | null {
       if (o.name !== undefined && typeof o.name !== "string") return null;
       if (o.gender !== undefined && o.gender !== "male" && o.gender !== "female") return null;
       if (o.resume !== undefined && (typeof o.resume !== "string" || o.resume.length > 128)) return null;
+      if (o.auth !== undefined && (typeof o.auth !== "string" || o.auth.length > 128)) return null;
+      if (o.cid !== undefined && (typeof o.cid !== "string" || !/^[0-9a-f-]{36}$/i.test(o.cid))) return null;
       if (o.devMap !== undefined && !isMapId(o.devMap)) return null;
       if (o.ap !== undefined && (typeof o.ap !== "object" || o.ap === null || JSON.stringify(o.ap).length > 200)) return null;
       return o as unknown as ClientMsg;

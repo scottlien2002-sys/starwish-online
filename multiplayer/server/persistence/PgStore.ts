@@ -9,7 +9,7 @@ import { readFileSync } from "node:fs";
 import { hostname } from "node:os";
 import { parseAppearance } from "../../../src/core/gameSave.ts";
 import type { AppearanceWire, Gender, MapId } from "../../shared/protocol.ts";
-import { hashToken, newToken, type CharacterRecord, type CharacterStore, type GoldResult, type InventoryItem, type ItemResult, type SaveResult } from "./Store.ts";
+import { hashToken, MAX_CHARACTERS_PER_ACCOUNT_TEST, newToken, type AccountRecord, type CharacterRecord, type CharacterStore, type GoldResult, type InventoryItem, type ItemResult, type SaveResult, type SessionRecord, type TradeResult, type TradeSide } from "./Store.ts";
 
 type Sql = ReturnType<typeof postgres>;
 type Row = Record<string, unknown>;
@@ -22,9 +22,16 @@ function toItem(x: Row): InventoryItem {
   return { uid: String(x.uid), defId: String(x.def_id), qty: num(x.qty), state: x.state as InventoryItem["state"], location: x.location === "storage" ? "storage" : "bag", version: num(x.version) };
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function toAccount(r: Row): AccountRecord {
+  return { id: String(r.id), realm: String(r.realm), username: String(r.username), passHash: String(r.pass_hash), failedCount: num(r.failed_count), lockedUntil: r.locked_until ? new Date(String(r.locked_until)).getTime() : null, createdAt: new Date(String(r.created_at)).getTime() };
+}
+
 function toRecord(r: Row): CharacterRecord {
   return {
     id: String(r.id),
+    accountId: r.account_id ? String(r.account_id) : null,
     realm: String(r.realm),
     name: String(r.name),
     gender: r.gender === "female" ? "female" : "male",
@@ -214,6 +221,108 @@ export class PgStore implements CharacterStore {
   async countCharacters(): Promise<number> {
     const r = await this.sql`SELECT count(*)::int AS n FROM characters WHERE realm = ${this.realm}`;
     return num(r[0]!.n);
+  }
+
+  // ---------------- Stage 8.5：帳號 ----------------
+  async createAccount(username: string, passHash: string, _now: number): Promise<{ ok: true; account: AccountRecord } | { ok: false; err: "taken" }> {
+    const r = await this.sql`INSERT INTO accounts (realm, username, pass_hash) VALUES (${this.realm}, ${username}, ${passHash}) ON CONFLICT DO NOTHING RETURNING *`;
+    return r[0] ? { ok: true, account: toAccount(r[0] as Row) } : { ok: false, err: "taken" };
+  }
+
+  async findAccount(username: string): Promise<AccountRecord | null> {
+    const r = await this.sql`SELECT * FROM accounts WHERE realm = ${this.realm} AND username = ${username}`;
+    return r[0] ? toAccount(r[0] as Row) : null;
+  }
+
+  async loginFailed(accountId: string, now: number, maxFails: number, lockMs: number): Promise<void> {
+    await this.sql`UPDATE accounts SET
+        failed_count = CASE WHEN failed_count + 1 >= ${maxFails} THEN 0 ELSE failed_count + 1 END,
+        locked_until = CASE WHEN failed_count + 1 >= ${maxFails} THEN ${new Date(now + lockMs)} ELSE locked_until END
+      WHERE id = ${accountId}::uuid AND realm = ${this.realm}`;
+  }
+
+  async loginOk(accountId: string, now: number): Promise<void> {
+    await this.sql`UPDATE accounts SET failed_count = 0, locked_until = NULL, last_login_at = ${new Date(now)} WHERE id = ${accountId}::uuid AND realm = ${this.realm}`;
+  }
+
+  async createSession(accountId: string, tokenHash: string, expiresAt: number, _now: number): Promise<void> {
+    await this.sql`INSERT INTO account_sessions (token_hash, account_id, realm, expires_at) VALUES (${tokenHash}, ${accountId}::uuid, ${this.realm}, ${new Date(expiresAt)})`;
+  }
+
+  async findSession(tokenHash: string, now: number): Promise<SessionRecord | null> {
+    const r = await this.sql`SELECT account_id, expires_at FROM account_sessions WHERE token_hash = ${tokenHash} AND realm = ${this.realm} AND revoked_at IS NULL AND expires_at > ${new Date(now)}`;
+    return r[0] ? { accountId: String(r[0].account_id), expiresAt: new Date(String(r[0].expires_at)).getTime() } : null;
+  }
+
+  async revokeSession(tokenHash: string, now: number): Promise<void> {
+    await this.sql`UPDATE account_sessions SET revoked_at = ${new Date(now)} WHERE token_hash = ${tokenHash} AND revoked_at IS NULL`;
+  }
+
+  async listCharacters(accountId: string): Promise<CharacterRecord[]> {
+    const r = await this.sql`SELECT * FROM characters WHERE account_id = ${accountId}::uuid AND realm = ${this.realm} ORDER BY created_at`;
+    return r.map((x) => toRecord(x as Row));
+  }
+
+  async createCharacter(accountId: string, name: string, gender: Gender, appearance: AppearanceWire, _now: number): Promise<{ character: CharacterRecord; token: string } | null> {
+    const token = newToken();
+    return this.sql.begin(async (tx) => {
+      // 鎖住帳號列：同一帳號同時建立角色也不會超過上限
+      const acc = await tx`SELECT id FROM accounts WHERE id = ${accountId}::uuid AND realm = ${this.realm} FOR UPDATE`;
+      if (!acc[0]) return null;
+      const n = await tx`SELECT count(*)::int AS n FROM characters WHERE account_id = ${accountId}::uuid AND realm = ${this.realm}`;
+      if (num(n[0]!.n) >= MAX_CHARACTERS_PER_ACCOUNT_TEST) return null;
+      const r = await tx`INSERT INTO characters (realm, account_id, name, gender, appearance) VALUES (${this.realm}, ${accountId}::uuid, ${name}, ${gender}, ${tx.json(appearance as never)}) RETURNING *`;
+      await tx`INSERT INTO session_tokens (token_hash, character_id) VALUES (${hashToken(token)}, ${r[0]!.id as string})`;
+      return { character: toRecord(r[0] as Row), token };
+    });
+  }
+
+  async trade(requestId: string, a: TradeSide, b: TradeSide): Promise<TradeResult> {
+    const allUids = [...a.items, ...b.items].map((x) => x.uid);
+    if (!UUID_RE.test(a.characterId) || !UUID_RE.test(b.characterId) || allUids.some((u) => !UUID_RE.test(u))) return { ok: false, err: "bad_request" };
+    if (a.characterId === b.characterId) return { ok: false, err: "same_character" };
+    if (new Set(allUids).size !== allUids.length) return { ok: false, err: "duplicate_item" };
+    for (const side of [a, b]) if (!Number.isInteger(side.gold) || side.gold < 0) return { ok: false, err: "bad_request" };
+    return this.sql.begin(async (tx) => {
+      const prev = await tx`SELECT result FROM request_ledger WHERE request_id = ${requestId} AND character_id IN (${a.characterId}::uuid, ${b.characterId}::uuid) LIMIT 1`;
+      if (prev[0]) return { ...(prev[0].result as TradeResult), dup: true };
+      // 依 id 排序上鎖：兩筆交易同時進行也不會互相等待（死結）
+      const ids = [a.characterId, b.characterId].sort();
+      const chars = await tx`SELECT id, gold, equipment FROM characters WHERE id IN (${ids[0]!}::uuid, ${ids[1]!}::uuid) AND realm = ${this.realm} ORDER BY id FOR UPDATE`;
+      const items = allUids.length ? await tx`SELECT uid, owner_id, state, location, version FROM items WHERE uid IN ${tx(allUids)} ORDER BY uid FOR UPDATE` : [];
+      const byId = new Map(chars.map((c) => [String(c.id), c]));
+      const byUid = new Map(items.map((x) => [String(x.uid), x]));
+      const check = (side: TradeSide): string | null => {
+        const c = byId.get(side.characterId);
+        if (!c) return "not_found";
+        if (num(c.gold) < side.gold) return "insufficient_gold";
+        const eq = Object.values((c.equipment ?? {}) as Record<string, string>);
+        for (const x of side.items) {
+          const it = byUid.get(x.uid);
+          if (!it || String(it.owner_id) !== side.characterId || it.state !== "owned") return "not_owner";
+          if (it.location !== "bag") return "not_in_bag";
+          if (num(it.version) !== x.version) return "version_conflict";
+          if (eq.includes(x.uid)) return "equipped";
+        }
+        return null;
+      };
+      const err = check(a) ?? check(b);
+      let res: TradeResult;
+      if (err) res = { ok: false, err };
+      else {
+        for (const [side, to] of [[a, b.characterId], [b, a.characterId]] as const) {
+          for (const x of side.items) await tx`UPDATE items SET owner_id = ${to}::uuid, version = version + 1, updated_at = now() WHERE uid = ${x.uid}::uuid`;
+        }
+        for (const [cid, delta] of [[a.characterId, b.gold - a.gold], [b.characterId, a.gold - b.gold]] as const) {
+          const u = await tx`UPDATE characters SET gold = gold + ${delta}, version = version + 1, updated_at = now() WHERE id = ${cid}::uuid RETURNING gold`;
+          if (delta !== 0) await tx`INSERT INTO gold_ledger (character_id, delta, balance_after, reason, request_id) VALUES (${cid}::uuid, ${delta}, ${u[0]!.gold as number}, 'trade', ${requestId})`;
+        }
+        await tx`INSERT INTO trade_log (request_id, char_a, char_b, detail) VALUES (${requestId}, ${a.characterId}::uuid, ${b.characterId}::uuid, ${tx.json({ a, b } as never)})`;
+        res = { ok: true, moved: a.items.length + b.items.length };
+      }
+      for (const cid of [a.characterId, b.characterId]) await tx`INSERT INTO request_ledger (character_id, request_id, kind, result) VALUES (${cid}::uuid, ${requestId}, 'trade', ${tx.json(res as never)})`;
+      return res;
+    });
   }
 
   async close(): Promise<void> {

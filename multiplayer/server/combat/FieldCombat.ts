@@ -29,8 +29,9 @@ import { SkillTimeline } from "../../../src/combat-vfx/core/timeline.ts";
 import { skillRate } from "../../../src/combat-vfx/core/damage.ts";
 import { ANIM, MON_STATES, toCm, toMrad, type CombatEvent, type MonTuple } from "../../shared/protocol.ts";
 import type { CharacterStore, InventoryItem } from "../persistence/Store.ts";
-import type { ServerPlayer } from "../Room.ts";
-import { COMBAT_TEST_RULES as R } from "./rules.ts";
+import type { ServerPlayer, SkillDisplacement } from "../Room.ts";
+import { COMBAT_TEST_RULES as R, SKILL_DISPLACEMENT_TEST as DISP } from "./rules.ts";
+import { PLAYER_RADIUS } from "../../../src/maps/starsprout/route.ts";
 import { loadCombatData, type CombatData } from "./data.ts";
 
 /** 玩家基礎能力值（Claude A 測試設定；寵物加成在 Stage 8.4 移到伺服器前一律不採用客戶端數值） */
@@ -88,6 +89,9 @@ export interface CombatCounters {
   playersDowned: number;
   hitsOnDeadTarget?: number;
   knockbacks?: number;
+  /** Stage 8.5 技能位移次數、被地形或障礙物擋下的次數 */
+  displacements?: number;
+  dispBlocked?: number;
   /** 最近 8 次擊退距離（公尺；0＝依規則不推） */
   lastKnocks?: number[];
 }
@@ -239,8 +243,15 @@ export class FieldCombat {
     let el = 0;
     let n = 0;
     const step = 1 / 240;
+    // 技能位移（根運動）取樣：[實際秒, 前進距離]（頓幀期間時間軸暫停，位移也跟著停）
+    const fwd: number[] = [0, 0];
+    let nextSample = DISP.sampleStep;
     while (!tl.done && el < 12) {
       el += step;
+      if (el >= nextSample - 1e-9) {
+        fwd.push(el, tl.rootMotion().forward);
+        nextSample += DISP.sampleStep;
+      }
       for (const fe of tl.advance(step)) {
         if (fe.event.kind === "hit") {
           this.pending.push({ at: nowS + el, castId, hitId: fe.event.hit.id, pid: p.pid, skill: def, spec: fe.event.hit, targetNid, x: p.x, z: p.z, yaw });
@@ -255,14 +266,63 @@ export class FieldCombat {
       }
     }
     const duration = el;
+    fwd.push(el, tl.rootMotion().forward);
+    const disp = this.planDisplacement(p, def.id, castId, yaw, fwd, nowS);
     p.cs.cds.set(def.id, nowS + Math.max(def.cooldown, 0));
     p.cs.busyUntil = nowS + duration;
     p.cs.nextAtk = Math.max(p.cs.nextAtk, nowS + duration);
     this.counters.attacksAccepted++;
     if (target) this.addThreat(target, p.pid, 1);
-    this.emit({ k: "cast", c: castId, p: p.pid, s: def.id, t: targetNid, x: toCm(p.x), z: toCm(p.z), y: toMrad(yaw), st: Date.now(), r: Math.round(rate * 1000), dur: Math.round(duration * 1000) });
+    this.emit({ k: "cast", c: castId, p: p.pid, s: def.id, t: targetNid, x: toCm(p.x), z: toCm(p.z), y: toMrad(yaw), st: Date.now(), r: Math.round(rate * 1000), dur: Math.round(duration * 1000), ...(disp ? { ex: toCm(disp.ex), ez: toCm(disp.ez), md: Math.round(disp.dur * 1000) } : {}) });
     this.pending.push({ at: nowS + duration, castId, hitId: "__end", pid: p.pid, skill: def, spec: null, targetNid: 0, x: p.x, z: p.z, yaw });
     return { ok: true, castId, hits: n, duration };
+  }
+
+  /**
+   * Stage 8.5 技能位移：起點＝伺服器位置、方向＝施放朝向、距離＝根運動×測試倍率（上限 DISP.maxDistance）。
+   * 每段都用 A 的 FieldTerrainQuery.clampMove（每 5 cm 檢查地形與碰撞物）；一旦被擋住就停在擋住前的點，之後不再前進（不滑行、不穿牆）。
+   * 路徑在施放時就整條算好 → 所有玩家收到同一個終點，伺服器每 tick 依時間取點。
+   */
+  private planDisplacement(p: ServerPlayer, skillId: string, castId: number, yaw: number, fwd: number[], nowS: number): SkillDisplacement | null {
+    if (!DISP.enabled) return null;
+    const tq = this.host.terrainQuery?.();
+    if (!tq) return null;
+    const scale = DISP.scale[skillId] ?? DISP.defaultScale;
+    const total = Math.min(DISP.maxDistance, Math.max(0, (fwd[fwd.length - 1] ?? 0) * scale));
+    if (total < DISP.minDistance) return null;
+    const dx = Math.sin(yaw);
+    const dz = Math.cos(yaw);
+    const sx = p.x;
+    const sz = p.z;
+    const r = PLAYER_RADIUS * 0.9;
+    const path: number[] = [0, sx, sz];
+    let cx = sx;
+    let cz = sz;
+    let blocked = false;
+    let endT = 0;
+    for (let i = 2; i < fwd.length; i += 2) {
+      const t = fwd[i]!;
+      const f = Math.min(DISP.maxDistance, Math.max(0, fwd[i + 1]! * scale));
+      if (!blocked) {
+        const want = { x: sx + dx * f, z: sz + dz * f };
+        const got = tq.clampMove({ x: cx, z: cz }, want, r);
+        if (Math.hypot(got.x - want.x, got.z - want.z) > 0.005) blocked = true;
+        if (Math.hypot(got.x - cx, got.z - cz) > 1e-4) endT = t;
+        cx = got.x;
+        cz = got.z;
+      }
+      path.push(t, cx, cz);
+    }
+    const moved = Math.hypot(cx - sx, cz - sz);
+    if (blocked) this.counters.dispBlocked = (this.counters.dispBlocked ?? 0) + 1;
+    if (moved < DISP.minDistance) return null;
+    // 終點之後的取樣點都相同：路徑截到最後一次移動
+    let cut = path.length;
+    while (cut > 6 && path[cut - 3]! > endT + 1e-9) cut -= 3;
+    const d: SkillDisplacement = { castId, skill: skillId, t0: nowS, path: path.slice(0, cut), sx, sz, ex: cx, ez: cz, dur: path[cut - 3]! };
+    p.disp = d;
+    this.counters.displacements = (this.counters.displacements ?? 0) + 1;
+    return d;
   }
 
   /** 命中範圍內的怪物（技能範圍判定用；單體或普通攻擊只打目標） */

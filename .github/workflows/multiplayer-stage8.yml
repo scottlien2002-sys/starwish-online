@@ -2,8 +2,9 @@ name: Multiplayer Stage 8 (Claude D)
 
 # 只在 Claude D 的多人連線分支執行（feature/multiplayer-**、integration/multiplayer-**）。
 # - server：伺服器／網路層測試（型別、單元、整合、WSS、PostgreSQL、2D 雙人頁）
-# - game：正式 3D 遊戲（單機回歸＋3D 雙人 E2E，Chromium＋WebKit）→ 部署多人測試預覽到 gh-pages 的 /preview-mp84/（只替換自己的資料夾）
-# - 測試結果推到 results/mp84-* 分支（JSON＋截圖），方便查看
+# - game：正式 3D 遊戲（單機回歸＋3D 雙人 E2E，Chromium＋WebKit）
+# - Stage 8.5：不部署 Render、不新增 GitHub Pages 預覽（部署與公開網址驗證步驟已移除；8.4 的 /preview-mp84/ 不受影響）
+# - 測試結果推到 results/mp85-* 分支（JSON＋截圖），方便查看
 # concurrency 依分支分開，不會取消其他人的 CI；不碰 main。
 on:
   push:
@@ -43,6 +44,30 @@ jobs:
           mkdir -p reports
           node --test --test-reporter=tap --test-concurrency=1 tests/combat.test.ts | tee reports/combat-tap.txt
           cp test-results/combat.json reports/combat-results.json
+      - name: Stage 8.5 accounts / login / session / duplicate login / rate limit
+        run: |
+          set -o pipefail
+          node --test --test-reporter=tap --test-concurrency=1 tests/auth.test.ts | tee reports/auth-tap.txt
+      - name: Stage 8.5 skill displacement sync (leap slam / dash; no wall pass-through)
+        run: |
+          set -o pipefail
+          node --test --test-reporter=tap --test-concurrency=1 tests/displacement.test.ts | tee reports/displacement-tap.txt
+          cp test-results/displacement.json reports/displacement-results.json
+      - name: Stage 8.5 server authority hardening + malformed packet fuzz
+        run: |
+          set -o pipefail
+          node --test --test-reporter=tap --test-concurrency=1 tests/authority.test.ts | tee reports/authority-tap.txt
+          cp test-results/authority.json reports/authority-results.json
+      - name: Stage 8.5 bag / equipment / trade atomicity
+        run: |
+          set -o pipefail
+          node --test --test-reporter=tap --test-concurrency=1 tests/trade.test.ts | tee reports/trade-tap.txt
+          cp test-results/trade.json reports/trade-results.json
+      - name: Stage 8.5 load test 10/20/32/40 (server child process; CPU / memory / tick / traffic; NOT iPhone data)
+        run: |
+          set -o pipefail
+          node tests/load-stage85.ts 20 10,20,32,40 | tee reports/load85.txt
+          cp test-results/load85.json test-results/load85.md reports/
       - name: WSS test (self-signed TLS)
         run: npm run test:wss
       - name: PostgreSQL schema / atomicity / server restart persistence
@@ -60,8 +85,8 @@ jobs:
           echo "{\"job\":\"server\",\"commit\":\"${GITHUB_SHA}\",\"run\":\"${GITHUB_RUN_ID}\"}" > /tmp/res/server/meta.json
           cd /tmp/res
           git init -q -b r && git config user.name "github-actions[bot]" && git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A && git commit -qm "mp84 server results ${GITHUB_SHA::7}"
-          git push -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" "HEAD:refs/heads/results/mp84-server-${GITHUB_RUN_ID}"
+          git add -A && git commit -qm "mp85 server results ${GITHUB_SHA::7}"
+          git push -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" "HEAD:refs/heads/results/mp85-server-${GITHUB_RUN_ID}"
 
   game:
     runs-on: ubuntu-24.04
@@ -114,67 +139,6 @@ jobs:
         id: render
         continue-on-error: true
         run: node tests/e2e/run-mp-render-perf.mjs dist chromium 2,4,8,16,32,40
-      - name: Pages capacity dry run (no push; Stage 8.4 deploys only after Claude A clears capacity)
-        id: capacity
-        continue-on-error: true
-        run: |
-          DIR=preview-mp84
-          rm -rf /tmp/pages
-          git clone -q --depth 1 -b gh-pages "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" /tmp/pages
-          BEFORE=$(du -sm --exclude=.git /tmp/pages | cut -f1)
-          rm -rf "/tmp/pages/$DIR" && mkdir -p "/tmp/pages/$DIR"
-          cp -r dist/. "/tmp/pages/$DIR/"
-          (cd "/tmp/pages/$DIR/models" && rm -f novice_c10b_*.glb novice_c10b1_*.glb novice_c10b2_*.glb novice_c10b3_*.glb novice_c10b4_*.glb novice_c10b5_*.glb novice_c10b5a_*.glb novice_male_v1_*.glb novice_female_v1_*.glb bobo_v3_*.glb bobo_v31_*.glb bobo_v33_*.glb bobo_v34_*.glb bobo_v35_*.glb bobo_v36_*.glb bobo_v37_*.glb bobo_v38_*.glb village-p3/*_s62.glb village-p3/p30_sample_*.glb) || true
-          node tools/mp-asset-remap.mjs /tmp/pages "$DIR"
-          AFTER=$(du -sm --exclude=.git /tmp/pages | cut -f1)
-          PREV=$(du -sm "/tmp/pages/$DIR" | cut -f1)
-          echo "{\"dryRun\":true,\"ghPagesNowMB\":${BEFORE},\"previewMB\":${PREV},\"ghPagesAfterMB\":${AFTER},\"stopLineMB\":1100,\"remapped\":$(node -e "console.log(Object.keys(require('/tmp/pages/$DIR/asset-remap.json').files).length)")}" > /tmp/capacity.json
-          cat /tmp/capacity.json
-          (cd "/tmp/pages/$DIR" && find . -type f -size +200k -printf "%s %p\n" | sort -rn | head -30) > /tmp/capacity-largest.txt || true
-          if [ "$AFTER" -gt 1100 ]; then echo "::warning::部署後 gh-pages 會是 ${AFTER} MB，超過 1100 MB 停止線（目前 ${BEFORE} MB）"; fi
-      - name: Deploy multiplayer preview (own folder /preview-mp84/ only; needs repo variable MP84_DEPLOY=1 after Claude A clears capacity)
-        id: deploy
-        if: github.ref_name == 'integration/multiplayer-stage8-4' && steps.mpchromium.outcome == 'success' && vars.MP84_DEPLOY == '1'
-        run: |
-          DIR=preview-mp84
-          for attempt in 1 2 3 4 5; do
-            rm -rf /tmp/pages
-            git clone -q --depth 1 -b gh-pages "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" /tmp/pages
-            rm -rf "/tmp/pages/$DIR" && mkdir -p "/tmp/pages/$DIR"
-            cp -r dist/. "/tmp/pages/$DIR/"
-            # 預覽不使用的舊版角色／怪物模型（與其他預覽相同的清理規則）
-            (cd "/tmp/pages/$DIR/models" && rm -f novice_c10b_*.glb novice_c10b1_*.glb novice_c10b2_*.glb novice_c10b3_*.glb novice_c10b4_*.glb novice_c10b5_*.glb novice_c10b5a_*.glb novice_male_v1_*.glb novice_female_v1_*.glb bobo_v3_*.glb bobo_v31_*.glb bobo_v33_*.glb bobo_v34_*.glb bobo_v35_*.glb bobo_v36_*.glb bobo_v37_*.glb bobo_v38_*.glb village-p3/*_s62.glb village-p3/p30_sample_*.glb) || true
-            # 不重複發布：與其他預覽內容完全相同的模型／貼圖改為引用
-            node tools/mp-asset-remap.mjs /tmp/pages "$DIR"
-            TOTAL=$(du -sm --exclude=.git /tmp/pages | cut -f1)
-            echo "預覽資料夾 $(du -sm "/tmp/pages/$DIR" | cut -f1) MB；發布後 gh-pages 合計 ${TOTAL} MB"
-            if [ "$TOTAL" -gt 1100 ]; then echo "::error::gh-pages 合計 ${TOTAL} MB 超過 1100 MB，取消發布"; exit 1; fi
-            if [ "$TOTAL" -gt 1000 ]; then echo "::warning::gh-pages 合計 ${TOTAL} MB 超過 1 GB 建議值"; fi
-            echo "{\"branch\":\"${GITHUB_REF_NAME}\",\"commit\":\"${GITHUB_SHA}\",\"path\":\"/$DIR/\",\"builtAt\":\"$(date -u +%FT%TZ)\",\"ghPagesTotalMB\":${TOTAL},\"previewMB\":$(du -sm "/tmp/pages/$DIR" | cut -f1)}" > "/tmp/pages/$DIR/preview.json"
-            cp "/tmp/pages/$DIR/preview.json" /tmp/preview-meta.json
-            cp "/tmp/pages/$DIR/asset-remap.json" /tmp/asset-remap.json
-            cd /tmp/pages
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add -A
-            git commit -qm "Preview /$DIR/ ${GITHUB_REF_NAME} ${GITHUB_SHA::7}"
-            if git push -q origin gh-pages; then echo "deployed /$DIR/"; exit 0; fi
-            cd - >/dev/null
-            echo "push rejected (another deploy in progress), retry $attempt"; sleep $((attempt * 5))
-          done
-          exit 1
-      - name: Verify published preview (Chromium, live GitHub Pages URL + test server on the runner)
-        id: live
-        if: steps.deploy.outcome == 'success'
-        continue-on-error: true
-        run: |
-          URL="https://scottlien2002-sys.github.io/starwish-online/preview-mp84"
-          for i in $(seq 1 40); do
-            if curl -fsS "$URL/preview.json" | grep -q "${GITHUB_SHA}"; then echo "pages updated"; break; fi
-            sleep 15
-          done
-          # 公開網址是 https：瀏覽器只允許 wss://，所以測試伺服器用暫時自簽憑證（只在這台測試機上）
-          MP_E2E_SITE="$URL" MP_E2E_TLS=1 MP_E2E_TAG=live_ node tests/e2e/run-mp-e2e.mjs dist chromium
       - name: Push results branch
         if: always()
         run: |
@@ -183,14 +147,12 @@ jobs:
           rm -rf /tmp/res/game/mp-e2e/video   # 原始錄影太大：只保留合成後的 mp4
           cp test-results/shared-assets-plan.json /tmp/res/game/ 2>/dev/null || true
           cp -r test-results/mp-render /tmp/res/game/ 2>/dev/null || true
-          cp /tmp/capacity.json /tmp/capacity-largest.txt /tmp/res/game/ 2>/dev/null || true
           (cd test-results 2>/dev/null && find . -maxdepth 3 -name '*.json' -not -path './mp-*' -exec cp --parents {} /tmp/res/game/ \;) || true
-          cp /tmp/preview-meta.json /tmp/asset-remap.json /tmp/res/game/ 2>/dev/null || true
-          echo "{\"job\":\"game\",\"commit\":\"${GITHUB_SHA}\",\"run\":\"${GITHUB_RUN_ID}\",\"mpChromium\":\"${{ steps.mpchromium.outcome }}\",\"mpWebkit\":\"${{ steps.mpwebkit.outcome }}\",\"world\":\"${{ steps.world.outcome }}\",\"migrate\":\"${{ steps.migrate.outcome }}\",\"render\":\"${{ steps.render.outcome }}\",\"capacity\":\"${{ steps.capacity.outcome }}\",\"deploy\":\"${{ steps.deploy.outcome }}\",\"live\":\"${{ steps.live.outcome }}\"}" > /tmp/res/game/meta.json
+          echo "{\"job\":\"game\",\"commit\":\"${GITHUB_SHA}\",\"run\":\"${GITHUB_RUN_ID}\",\"mpChromium\":\"${{ steps.mpchromium.outcome }}\",\"mpWebkit\":\"${{ steps.mpwebkit.outcome }}\",\"world\":\"${{ steps.world.outcome }}\",\"migrate\":\"${{ steps.migrate.outcome }}\",\"render\":\"${{ steps.render.outcome }}\"}" > /tmp/res/game/meta.json
           cd /tmp/res
           git init -q -b r && git config user.name "github-actions[bot]" && git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A && git commit -qm "mp84 game results ${GITHUB_SHA::7}"
-          git push -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" "HEAD:refs/heads/results/mp84-game-${GITHUB_RUN_ID}"
+          git add -A && git commit -qm "mp85 game results ${GITHUB_SHA::7}"
+          git push -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" "HEAD:refs/heads/results/mp85-game-${GITHUB_RUN_ID}"
       - name: Fail if tests failed
         if: steps.mpchromium.outcome != 'success' || steps.mpwebkit.outcome != 'success' || steps.world.outcome != 'success' || steps.migrate.outcome != 'success'
         run: exit 1

@@ -1,4 +1,12 @@
-# 星願物語 Stage 8.0～8.3｜多人連線（Claude D）
+# 星願物語 Stage 8.0～8.5｜多人連線（Claude D）
+
+> **Stage 8.5「多人核心系統完善」**（報告 `docs/STAGE8_5_REPORT.md`）：
+> 帳號註冊／登入／登出（`server/auth/`，scrypt 密碼雜湊、登入憑證只存雜湊、失敗鎖定、IP 速率限制、重複登入踢舊連線）、
+> 技能位移同步（跳斬、突進；伺服器驗證起點／終點／碰撞，`SKILL_DISPLACEMENT_TEST` 測試設定）、
+> 交易資料介面（`server/trade.ts`，原子交換、重複請求只成交一次）、10／20／32／40 人效能測試（`tests/load-stage85.ts`，伺服器數據，不是 iPhone 結果）。
+> 環境變數：`MP_ALLOW_GUEST=0` 關閉訪客（只能用帳號登入）；`MP_TRUST_PROXY=1`（Render 會自動視為 1）從 X-Forwarded-For 取得真實 IP 做速率限制。
+> HTTP：`GET /auth/config`、`POST /auth/register`、`POST /auth/login`、`POST /auth/logout`、`GET /auth/me`、`POST /auth/characters`（Bearer 憑證）。
+> 遊戲網址加 `&login=1` 顯示測試登入視窗、`&logout=1` 登出、`&mpskill=leap_slam`（或 charge_burst、whirlwind）把技能鈕換成其他展示技能。
 
 > Stage 8.2＋8.3：原野戰鬥改為伺服器權威（怪物、傷害、經驗、金幣、掉落、背包、倉庫、裝備都由伺服器管理）。
 > 報告：`docs/STAGE8_2_REPORT.md`；Render 部署：`docs/RENDER_DEPLOY.md`；伺服器戰鬥：`server/combat/`（測試設定集中在 `rules.ts`）。
@@ -33,7 +41,12 @@ npm run test:integration   # 11 項（真的開伺服器＋機器人）
 npm run test:combat        # 15 項：伺服器權威戰鬥、掉落、背包、倉庫、重啟、4／8／16／40 人負載
 npm run test:wss           # 自簽憑證 WSS
 npm run test:browser       # Chromium 兩個分頁＝兩位玩家（MP_BROWSER=webkit 改 Safari 引擎）
-sudo bash db/test-db.sh    # 本機 PostgreSQL 16 暫時實例：結構＋原子交易＋並行測試
+npm run test:auth          # Stage 8.5 帳號、登入憑證、重複登入、速率限制
+npm run test:displacement  # Stage 8.5 技能位移（不穿牆、三方位置一致）
+npm run test:authority     # Stage 8.5 客戶端數值不可信、瞬移、重複領獎、格式錯誤封包
+npm run test:trade         # Stage 8.5 交易原子性、重複請求、斷線
+npm run test:load85        # Stage 8.5 10／20／32／40 人（伺服器子行程；CPU、記憶體、tick、流量）
+sudo bash db/test-db.sh    # 本機 PostgreSQL 16 暫時實例：結構＋原子交易＋並行測試（含 8.5 帳號、交易）
 ```
 
 CI：`.github/workflows/multiplayer-stage8.yml` 只在 `feature/multiplayer-**` 分支、`multiplayer/**` 變動時執行，不部署。

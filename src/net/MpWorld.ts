@@ -129,7 +129,7 @@ export class MpWorld {
    * 連線並等待伺服器歡迎訊息（免費主機休眠時喚醒約需 1 分鐘：畫面顯示等待中，自動重試）。
    * 失敗會丟出錯誤，呼叫端可回到單機或顯示訊息。
    */
-  static async connect(o: { url: string; gender: Gender; appearance: AppearanceWire; name?: string; hudRoot: HTMLElement; status: (s: string) => void }): Promise<MpWorld> {
+  static async connect(o: { url: string; gender: Gender; appearance: AppearanceWire; name?: string; hudRoot: HTMLElement; status: (s: string) => void; auth?: string; cid?: string }): Promise<MpWorld> {
     let token: string | null = null;
     try {
       token = window.sessionStorage.getItem(TOKEN_KEY);
@@ -144,6 +144,7 @@ export class MpWorld {
       gender: o.gender,
       ap: o.appearance,
       resumeToken: token ?? undefined,
+      ...(o.auth ? { auth: o.auth, cid: o.cid } : {}),
       onEvent: (e) => {
         events.push(e);
         self?.onEvent(e);
@@ -160,6 +161,8 @@ export class MpWorld {
         client.update(1 / 30, 0, 0);
         const err = events.find((e) => e.type === "error") as { code: string; msg: string } | undefined;
         if (err && (err.code === "proto" || err.code === "full" || err.code === "replaced")) return reject(new Error(err.msg));
+        // Stage 8.5 帳號：憑證無效、角色不屬於這個帳號、超過角色數
+        if (err && (err.code === "auth" || err.code === "auth_required" || err.code === "not_your_character" || err.code === "character_limit")) return reject(new Error(`登入失敗（${err.code}）：${err.msg}`));
         if (client.state === "online" && client.map) return resolve();
         const s = Math.round((performance.now() - t0) / 1000);
         o.status(s < 4 ? "連線多人伺服器…" : `連線多人伺服器…（${s} 秒；免費測試主機休眠中時喚醒約需 1 分鐘）`);

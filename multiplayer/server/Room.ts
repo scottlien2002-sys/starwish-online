@@ -27,6 +27,9 @@ export interface PlayerCounters {
   actsAccepted: number;
   actsRejected: number;
   stepsWhileDown: number;
+  /** Stage 8.5：技能位移中收到（照算序號但不移動）的步數 */
+  stepsDuringSkill?: number;
+  skillMoves?: number;
 }
 
 /** 動作事件的最短間隔（秒）：防止洗封包；不影響任何數值 */
@@ -54,6 +57,34 @@ export function newCombatState(): PlayerCombatState {
   return { hp: 100, maxHp: 100, level: 1, exp: 0, gold: 0, nextAtk: 0, busyUntil: 0, cds: new Map(), downAt: 0, progressDirty: false, statsDirty: true };
 }
 
+/** Stage 8.5 技能位移：施放時伺服器已驗證好的整條路徑（時間, x, z），每 tick 依時間取點 */
+export interface SkillDisplacement {
+  castId: number;
+  skill: string;
+  /** 開始時間（房間時鐘秒） */
+  t0: number;
+  /** [t, x, z, t, x, z, …]；t 從 0 開始、遞增 */
+  path: number[];
+  sx: number;
+  sz: number;
+  ex: number;
+  ez: number;
+  dur: number;
+}
+
+export function samplePath(d: SkillDisplacement, t: number): { x: number; z: number } {
+  const a = d.path;
+  const n = a.length / 3;
+  if (n === 0 || t <= a[0]!) return { x: d.sx, z: d.sz };
+  if (t >= a[(n - 1) * 3]!) return { x: d.ex, z: d.ez };
+  let i = 1;
+  while (i < n && a[i * 3]! < t) i++;
+  const t0 = a[(i - 1) * 3]!;
+  const t1 = a[i * 3]!;
+  const k = t1 > t0 ? (t - t0) / (t1 - t0) : 1;
+  return { x: a[(i - 1) * 3 + 1]! + (a[i * 3 + 1]! - a[(i - 1) * 3 + 1]!) * k, z: a[(i - 1) * 3 + 2]! + (a[i * 3 + 2]! - a[(i - 1) * 3 + 2]!) * k };
+}
+
 export class ServerPlayer implements PlayerView {
   readonly pid: number;
   readonly characterId: string;
@@ -63,6 +94,8 @@ export class ServerPlayer implements PlayerView {
   readonly state: MoveState;
   /** 倒地中（Stage 8.2 前由客戶端回報，只影響顯示與移動；復活只能透過伺服器的 respawn） */
   down = false;
+  /** Stage 8.5：技能位移中（伺服器驅動位置；一般移動輸入照算序號但不移動） */
+  disp: SkillDisplacement | null = null;
   act = 0;
   actSeq = 0;
   readonly lastAct: Record<ActKind, number> = { attack: -1e9, hurt: -1e9, death: -1e9 };
@@ -303,6 +336,30 @@ export class Room implements RoomView {
       const x0 = p.state.x;
       const z0 = p.state.z;
       let n = 0;
+      if (p.disp && (p.down || !p.connected)) p.disp = null;
+      if (p.disp) {
+        // 技能位移：輸入照預算消化並回報 ack（客戶端重播不會在結束後補走），位置只跟伺服器驗證過的路徑
+        while (p.queue.length > 0 && p.budget >= STEP - 1e-9 && n < maxSteps) {
+          p.queue.shift();
+          p.budget -= STEP;
+          p.ack++;
+          n++;
+          p.counters.stepsDuringSkill = (p.counters.stepsDuringSkill ?? 0) + 1;
+        }
+        const d = p.disp;
+        const el = this.clock + dt - d.t0;
+        const q = samplePath(d, el);
+        p.state.x = Math.round(q.x * 100) / 100;
+        p.state.z = Math.round(q.z * 100) / 100;
+        p.state.speed = 0;
+        p.idleTicks = 0;
+        p.persistDirty = true;
+        if (el >= d.dur) {
+          p.disp = null;
+          p.counters.skillMoves = (p.counters.skillMoves ?? 0) + 1;
+        }
+        continue;
+      }
       while (p.queue.length > 0 && p.budget >= STEP - 1e-9 && n < maxSteps) {
         const [qx, qz] = p.queue.shift()!;
         stepMove(p.state, qx, qz, this.auth);

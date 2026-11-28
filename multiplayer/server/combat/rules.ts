@@ -39,3 +39,40 @@ export const COMBAT_TEST_RULES = Object.freeze({
 export const STARTER_KIT_TEST = Object.freeze({ gold: 100, items: Object.freeze(["test_novice_sword", "test_novice_staff"]) });
 /** 測試武器道具 → 外觀武器種類（技能限定武器用） */
 export const WEAPON_ITEMS_TEST: Readonly<Record<string, "sword" | "staff">> = Object.freeze({ test_novice_sword: "sword", test_novice_staff: "staff" });
+
+/**
+ * Stage 8.5 技能位移「測試設定」（跳斬、突進與之後的位移技能共用）。
+ * ⚠ 六大職業正式技能與數值尚未定案：位移距離取 Claude C 展示動作的根運動（rootMotion）× 下面的倍率，
+ *   全部是測試值，不得當成正式數值。一般移動仍然沒有跳躍。
+ * 伺服器驗證：起點＝伺服器位置；方向＝施放朝向；每段沿路徑每 5 cm 用 A 的 FieldTerrainQuery 檢查
+ * （地形可行走＋樹、岩石、建築碰撞）；第一個不能站的點之前就停下（不滑行、不穿牆）；距離上限 maxDistance。
+ */
+export const SKILL_DISPLACEMENT_TEST = Object.freeze({
+  note: "Stage 8.5 技能位移測試設定（非正式數值）",
+  enabled: true,
+  /** 各技能的位移倍率；沒列出的技能用 defaultScale（未來的位移技能只要有根運動就自動支援） */
+  scale: Object.freeze({ leap_slam: 1, charge_burst: 1, triple_slash: 1, whirlwind: 1 } as Record<string, number>),
+  defaultScale: 1,
+  /** 單次技能位移上限（公尺） */
+  maxDistance: 3,
+  /** 小於這個距離就不位移（公尺） */
+  minDistance: 0.05,
+  /** 路徑取樣間隔（秒） */
+  sampleStep: 1 / 60,
+});
+
+/**
+ * Stage 8.5 玩家交易「測試設定」（伺服器資料介面；尚無正式交易畫面，正式規則待企劃）。
+ * 交易本身是原子操作（CharacterStore.trade：兩邊道具、金幣同一個交易寫入，失敗就全部不變）。
+ */
+export const TRADE_TEST = Object.freeze({
+  note: "Stage 8.5 交易測試設定（非正式規則）",
+  /** 兩位玩家需在同一房間、距離幾公尺內 */
+  maxDistance: 8,
+  /** 交易邀請有效時間 */
+  offerTtlMs: 60_000,
+  /** 單邊最多幾件道具 */
+  maxItems: 8,
+  /** 單次金幣上限 */
+  maxGold: 1_000_000_000,
+});

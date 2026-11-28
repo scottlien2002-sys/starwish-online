@@ -91,7 +91,7 @@ export class MpFieldCombat {
   readonly audio: CombatAudio | null;
   private readonly ownsFx: boolean;
   /** 統計（測試介面） */
-  readonly stats = { attacksSent: 0, attacksOk: 0, attacksRejected: 0, skillsSent: 0, skillsOk: 0, hitsShown: 0, castsShown: 0, remoteCastsShown: 0, picksSent: 0, picksOk: 0, picksRejected: 0, monsterHitsTaken: 0, damageDealt: 0, lastReject: "" };
+  readonly stats = { attacksSent: 0, attacksOk: 0, attacksRejected: 0, skillsSent: 0, skillsOk: 0, hitsShown: 0, castsShown: 0, remoteCastsShown: 0, picksSent: 0, picksOk: 0, picksRejected: 0, monsterHitsTaken: 0, damageDealt: 0, lastReject: "", displacementsShown: 0 };
   private readonly pendingCmd = new Map<string, "atk" | "sk" | "pick">();
   private readonly gender: "male" | "female";
 
@@ -222,7 +222,10 @@ export class MpFieldCombat {
   /** 展示技能（非正式職業技能）：短劍 → 三段連擊；法杖 → 魔法彈 */
   skill(weapon: "sword" | "staff"): boolean {
     if (this.client.state !== "online" || this.client.self?.down) return false;
-    const def = skillById(weapon === "staff" ? "staff_cast" : "triple_slash");
+    // Stage 8.5：網址 &mpskill=leap_slam／charge_burst／whirlwind 可換成其他展示技能（測試用；正式六職業技能未定案）
+    const pick = typeof location !== "undefined" ? new URLSearchParams(location.search).get("mpskill") : null;
+    const chosen = pick ? skillById(pick) : undefined;
+    const def = chosen && chosen.weapon === weapon ? chosen : skillById(weapon === "staff" ? "staff_cast" : "triple_slash");
     if (!def) return false;
     const t = this.pickTarget(def.range + 0.4);
     if (!t && def.faceTarget) {
@@ -276,6 +279,9 @@ export class MpFieldCombat {
         const w = self ? this.host.weapon() : null;
         if (self && w && def?.weapon === "sword") trail = new WeaponTrail(this.host.scene, w.base, w.tip, VFX_QUALITY[this.tier].trailSegments, VFX_QUALITY[this.tier].trailLife, null);
         this.casts.set(e.c, { c: e.c, pid: e.p, self, def, tl, yaw: e.y / 1000, targetNid: e.t, x: e.x / 100, z: e.z / 100, trail, trailEnd: -1, age: 0, dur: e.dur / 1000 });
+        // Stage 8.5 技能位移：伺服器已驗證終點（ex/ez）；自己在位移期間不送移動輸入，位置由快照平滑追上
+        if (self && e.md) this.client.holdInput(e.md + 60);
+        if (e.md) this.stats.displacementsShown++;
         if (self) this.stats.castsShown++;
         else this.stats.remoteCastsShown++;
         if (!def) this.sfx("swish", self, e.x / 100, e.z / 100, 0.8);

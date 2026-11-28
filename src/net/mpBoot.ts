@@ -8,6 +8,7 @@ import { FileTools } from "@babylonjs/core";
 import type { WorldSession } from "../game/worldSession.ts";
 import { parseAppearance } from "../core/gameSave.ts";
 import { MpWorld, mpServerUrl, normalizeServer } from "./MpWorld.ts";
+import { forgetLogin, mpLogin, rememberCharacter } from "./mpLogin.ts";
 
 /**
  * Stage 8.4：M002 苔角獸、M003 雲絨鳥 Rig V1.1 候選版（Claude C，待統一視覺驗收）。
@@ -72,7 +73,16 @@ export async function bootMultiplayer(world: WorldSession, hudRoot: HTMLElement,
   if (params.has("hair") || params.has("hairColor") || params.has("weapon")) {
     c.appearance = parseAppearance({ hair: params.get("hair") ?? c.appearance.hair, hairColor: params.get("hairColor") ?? c.appearance.hairColor, weapon: params.get("weapon") ?? c.appearance.weapon });
   }
-  const mp = await MpWorld.connect({ url, gender: c.gender, appearance: c.appearance, name: params.get("name") ?? undefined, hudRoot, status });
+  // Stage 8.5：帳號登入（伺服器不開放訪客或網址 &login=1 時顯示測試登入視窗；否則維持訪客）
+  const login = await mpLogin(url, params, status);
+  let mp: MpWorld;
+  try {
+    mp = await MpWorld.connect({ url, gender: c.gender, appearance: c.appearance, name: params.get("name") ?? login?.username ?? undefined, hudRoot, status, auth: login?.auth, cid: login?.cid });
+  } catch (e) {
+    if (login && /auth|登入/.test(String(e))) forgetLogin();
+    throw e;
+  }
+  if (login) rememberCharacter(mp.client.characterId);
   world.mp = mp;
   // 伺服器的角色資料為準（性別、外觀、地圖、位置）；單機存檔不會被當成線上資料
   c.gender = mp.client.gender;

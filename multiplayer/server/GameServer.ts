@@ -12,10 +12,12 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { WebSocketServer, type WebSocket } from "ws";
 import { MAX_MESSAGE_BYTES, MOVE_SPEED, PROTOCOL_VERSION, RECONNECT_GRACE_MS, ROOM_CAPACITY, SNAPSHOT_HZ, STEP, TICK_HZ } from "../shared/constants.ts";
-import type { ClientMsg, Gender, HelloMsg, InvMsg, MapId, ServerMsg } from "../shared/protocol.ts";
+import type { ClientMsg, ErrorMsg, Gender, HelloMsg, InvMsg, MapId, ServerMsg } from "../shared/protocol.ts";
 import { EQUIP_SLOTS } from "../../src/core/gameSave.ts";
 import { FieldCombat } from "./combat/FieldCombat.ts";
-import { COMBAT_TEST_RULES, STARTER_KIT_TEST, WEAPON_ITEMS_TEST } from "./combat/rules.ts";
+import { AuthService } from "./auth/AuthService.ts";
+import { COMBAT_TEST_RULES, STARTER_KIT_TEST, TRADE_TEST, WEAPON_ITEMS_TEST } from "./combat/rules.ts";
+import { TradeBook, parseSide, type TradeOffer } from "./trade.ts";
 import type { CharacterRecord } from "./persistence/Store.ts";
 import { parseAppearance } from "../../src/core/gameSave.ts";
 import { RESPAWN_SLOTS } from "../../src/maps/village/layout.ts";
@@ -37,6 +39,16 @@ export interface ServerOptions {
   allowedOrigins: string[];
   store?: CharacterStore;
   log?: (msg: string) => void;
+  /** Stage 8.5：是否允許訪客角色（不登入）。正式公開測試設 false（MP_ALLOW_GUEST=0） */
+  allowGuest?: boolean;
+  /** 在反向代理後面（Render）：用 X-Forwarded-For 的第一個位址當玩家 IP（限速用）。直接對外時不可開 */
+  trustProxy?: boolean;
+}
+
+function clientIp(req: IncomingMessage, trustProxy: boolean): string {
+  const xf = req.headers["x-forwarded-for"];
+  if (trustProxy && typeof xf === "string" && xf.trim()) return xf.split(",")[0]!.trim().slice(0, 64);
+  return req.socket.remoteAddress ?? "?";
 }
 
 interface Conn {
@@ -68,6 +80,9 @@ const MIME: Record<string, string> = { html: "text/html; charset=utf-8", js: "te
 export class GameServer {
   readonly opts: ServerOptions;
   readonly store: CharacterStore;
+  readonly auth: AuthService;
+  readonly trades: TradeBook;
+  private cpuPrev: { user: number; system: number; wall: number } | null = null;
   readonly ledger = new RequestLedger();
   private http!: Server;
   private wss!: WebSocketServer;
@@ -83,6 +98,7 @@ export class GameServer {
   readonly systems: RoomSystem[] = [createEmoteSystem()];
   readonly stats = {
     ticks: 0,
+    authRejected: 0,
     tickMsSum: 0,
     tickMsMax: 0,
     bytesIn: 0,
@@ -115,6 +131,8 @@ export class GameServer {
   constructor(opts: ServerOptions) {
     this.opts = opts;
     this.store = opts.store ?? new MemoryStore();
+    this.trades = new TradeBook(this.store);
+    this.auth = new AuthService(this.store, { allowedOrigins: opts.allowedOrigins, allowGuest: opts.allowGuest !== false, log: opts.log });
   }
 
   private log(m: string): void {
@@ -170,6 +188,13 @@ export class GameServer {
   // ---------------- HTTP ----------------
   private onHttp(req: IncomingMessage, res: ServerResponse): void {
     const url = (req.url ?? "/").split("?")[0]!;
+    if (url.startsWith("/auth/")) {
+      void this.auth.handle(req, res, url, clientIp(req, !!this.opts.trustProxy)).catch(() => {
+        if (!res.headersSent) res.writeHead(500);
+        res.end();
+      });
+      return;
+    }
     if (url === "/health") return this.json(res, { ok: true, proto: PROTOCOL_VERSION });
     if (url === "/metrics") return this.json(res, this.metrics());
     if (url === "/mp") {
@@ -197,7 +222,17 @@ export class GameServer {
 
   metrics(): Record<string, unknown> {
     const tw = this.tickWindow;
+    // Stage 8.5：伺服器 CPU（上次查詢以來的平均使用率）與記憶體
+    const cpu = process.cpuUsage();
+    const wall = performance.now();
+    const prev = this.cpuPrev;
+    const cpuPct = prev ? Math.round(((cpu.user - prev.user + cpu.system - prev.system) / 1000 / Math.max(1, wall - prev.wall)) * 1000) / 10 : null;
+    this.cpuPrev = { user: cpu.user, system: cpu.system, wall };
+    const mem = process.memoryUsage();
     return {
+      process: { cpuPct, rssMB: Math.round(mem.rss / 1048576), heapUsedMB: Math.round(mem.heapUsed / 1048576), externalMB: Math.round(mem.external / 1048576) },
+      auth: { ...this.auth.stats, allowGuest: this.opts.allowGuest !== false },
+      trades: { ...this.trades.stats },
       uptimeS: Math.round((Date.now() - this.startedAt) / 1000),
       proto: PROTOCOL_VERSION,
       tickHz: TICK_HZ,
@@ -243,7 +278,7 @@ export class GameServer {
   // ---------------- WebSocket ----------------
   private onConnection(ws: WebSocket, req: IncomingMessage): void {
     const now = Date.now();
-    const c: Conn = { id: this.nextConn++, ws, ip: req.socket.remoteAddress ?? "?", bucket: new TokenBucket(120, 240, now), cmdBucket: new TokenBucket(10, 20, now), violations: 0, player: null, helloPending: false };
+    const c: Conn = { id: this.nextConn++, ws, ip: clientIp(req, !!this.opts.trustProxy), bucket: new TokenBucket(120, 240, now), cmdBucket: new TokenBucket(10, 20, now), violations: 0, player: null, helloPending: false };
     this.conns.add(c);
     const helloTimeout = setTimeout(() => {
       if (!c.player) this.close(c, 4001, "hello timeout");
@@ -342,7 +377,7 @@ export class GameServer {
         }
         const live = this.live.get(p.characterId);
         if (!live) return;
-        if (m.k === "pick" || m.k === "move" || m.k === "equip" || m.k === "inv") return this.asyncCmd(c, p, live, m.id, m.k, m.p);
+        if (m.k === "pick" || m.k === "move" || m.k === "equip" || m.k === "inv" || m.k === "trade") return this.asyncCmd(c, p, live, m.id, m.k, m.p);
         const sys = live.room.systems.find((s) => s.commands.includes(m.k));
         const now = Date.now();
         const r = this.ledger.run(p.characterId, m.id, now, () => {
@@ -366,10 +401,39 @@ export class GameServer {
       return this.close(c, 4000, "protocol");
     }
     const now = Date.now();
-    let rec = m.resume ? await this.store.findByToken(m.resume) : null;
-    let token = m.resume ?? "";
+    let rec: CharacterRecord | null = null;
+    let token = "";
     let resumed = false;
+    const deny = (code: ErrorMsg["code"], msg: string): void => {
+      this.stats.authRejected++;
+      this.sendTo(c, { t: "err", code, msg });
+      this.close(c, 4005, code);
+    };
+    if (m.auth) {
+      // Stage 8.5：帳號登入。憑證錯誤也算進同一 IP 的登入限速（不能用 WebSocket 暴力猜憑證）
+      if (!this.auth.ipAllowed(c.ip, now)) return deny("rate", "登入嘗試太頻繁，請稍後再試");
+      const sess = await this.auth.verify(m.auth, now);
+      if (!sess) return deny("auth", "登入已失效，請重新登入");
+      const chars = await this.store.listCharacters(sess.accountId);
+      if (m.cid) {
+        rec = chars.find((x) => x.id === m.cid) ?? null;
+        // 防止冒用：只能進入自己帳號的角色
+        if (!rec) return deny("not_your_character", "這個角色不屬於目前登入的帳號");
+      } else rec = chars[0] ?? null;
+      if (!rec) {
+        const gender: Gender = m.gender === "female" ? "female" : "male";
+        const created = await this.store.createCharacter(sess.accountId, sanitizeName(m.name, this.nextPid + 1000), gender, parseAppearance(m.ap), now);
+        if (!created) return deny("character_limit", "角色數量已達上限");
+        rec = created.character;
+      }
+    } else if (m.resume) {
+      rec = await this.store.findByToken(m.resume);
+      // 帳號角色不能只靠角色憑證接回（帳號登出、憑證外流時也冒用不了）
+      if (rec?.accountId) return deny("auth_required", "請先登入帳號");
+      if (rec) token = m.resume;
+    }
     if (!rec) {
+      if (this.opts.allowGuest === false) return deny("auth_required", "請先登入帳號");
       if (this.live.size >= this.opts.maxPlayers) {
         this.sendTo(c, { t: "err", code: "full", msg: "伺服器人數已滿" });
         return this.close(c, 4003, "full");
@@ -444,6 +508,7 @@ export class GameServer {
       ap: { ...p.appearance },
       name: p.name,
       realm: this.store.realm,
+      acct: rec.accountId ? 1 : 0,
       tick: live.room.tick,
       st: now,
       e: p.epoch,
@@ -463,6 +528,7 @@ export class GameServer {
     if (!live || live.conn !== c) return;
     live.conn = null;
     p.connected = false;
+    this.cancelTrades(p.characterId, "disconnected");
     p.disconnectedAt = Date.now();
     void this.persist(live);
     live.graceTimer = setTimeout(() => {
@@ -509,6 +575,7 @@ export class GameServer {
       this.rate.perSec = { bytesIn: Math.round(this.rate.bytesIn / s), bytesOut: Math.round(this.rate.bytesOut / s), msgsIn: Math.round(this.rate.msgsIn / s), msgsOut: Math.round(this.rate.msgsOut / s) };
       this.rate.bytesIn = this.rate.bytesOut = this.rate.msgsIn = this.rate.msgsOut = 0;
       this.rate.at = now;
+      for (const o of this.trades.expire(now)) this.tradeNotify(o, "cancel", "expired");
     }
   }
 
@@ -517,6 +584,8 @@ export class GameServer {
     const live = this.live.get(p.characterId);
     if (!live) return;
     from.remove(p.pid);
+    this.cancelTrades(p.characterId, "map_changed");
+    p.disp = null;
     p.queue.length = 0;
     p.epoch++;
     p.nextSeq = p.ack + 1;
@@ -543,6 +612,7 @@ export class GameServer {
     this.respawnCount = (this.respawnCount + 1) % RESPAWN_SLOTS.length;
     const slot = RESPAWN_SLOTS[this.respawnCount]!;
     p.down = false;
+    p.disp = null;
     this.transfer(p, live.room, { map: "village", x: slot.x, z: slot.z, yaw: slot.yaw });
     return { ok: true, data: { map: "village" } };
   }
@@ -705,7 +775,74 @@ export class GameServer {
       await this.sendInventory(p);
       return { ok: true, data: { slot, uid, weapon: p.appearance.weapon } };
     }
+    if (k === "trade") return this.tradeCmd(p, live, o);
     return { ok: false, err: "unknown_cmd" };
+  }
+
+  // ---------------- Stage 8.5 交易（伺服器資料介面；尚無正式交易畫面） ----------------
+  private tradeCmd(p: ServerPlayer, live: Live, o: Record<string, unknown>): Promise<{ ok: boolean; data?: unknown; err?: string }> | { ok: boolean; data?: unknown; err?: string } {
+    const op = o.op;
+    if (op === "offer") {
+      const to = Number.isInteger(o.to) ? live.room.get(o.to as number) : undefined;
+      if (!to || to === p || !to.connected) return { ok: false, err: "no_target" };
+      if (p.down || to.down) return { ok: false, err: "down" };
+      if (Math.hypot(to.x - p.x, to.z - p.z) > TRADE_TEST.maxDistance) return { ok: false, err: "too_far" };
+      const side = parseSide(o);
+      if (!side) return { ok: false, err: "bad_request" };
+      const { offer, replaced } = this.trades.offer({ fromCid: p.characterId, fromPid: p.pid, toCid: to.characterId, toPid: to.pid, room: live.room.key, give: { characterId: p.characterId, ...side } }, Date.now());
+      if (replaced) this.tradeNotify(replaced, "cancel", "replaced");
+      return this.store.listItems(p.characterId).then((items) => {
+        const mine = new Map(items.map((i) => [i.uid, i]));
+        to.send({ t: "trade", ev: "offer", tid: offer.tid, from: p.pid, name: p.name, gold: side.gold, items: side.items.map((x) => ({ uid: x.uid, defId: mine.get(x.uid)?.defId ?? "?", qty: mine.get(x.uid)?.qty ?? 0, version: x.version })) });
+        return { ok: true, data: { tid: offer.tid } };
+      });
+    }
+    const tid = typeof o.tid === "string" && o.tid.length <= 40 ? o.tid : "";
+    if (op === "cancel") {
+      const offer = this.trades.get(tid);
+      if (!offer || (offer.fromCid !== p.characterId && offer.toCid !== p.characterId)) return { ok: false, err: "no_trade" };
+      if (offer.settling) return { ok: false, err: "settling" };
+      this.trades.remove(offer);
+      this.trades.stats.cancelled++;
+      this.tradeNotify(offer, "cancel", "cancelled");
+      return { ok: true };
+    }
+    if (op === "accept") {
+      const offer = this.trades.get(tid);
+      if (!offer) {
+        const fin = this.trades.finished(tid);
+        if (fin) return fin.ok ? { ok: true, data: { tid, moved: fin.moved, dup: 1 } } : { ok: false, err: fin.err };
+        return { ok: false, err: "no_trade" };
+      }
+      if (offer.toCid !== p.characterId) return { ok: false, err: "not_your_trade" };
+      const from = this.live.get(offer.fromCid)?.player;
+      if (!from || !from.connected || this.live.get(offer.fromCid)?.room !== live.room) return { ok: false, err: "partner_gone" };
+      if (p.down || from.down) return { ok: false, err: "down" };
+      if (Math.hypot(from.x - p.x, from.z - p.z) > TRADE_TEST.maxDistance) return { ok: false, err: "too_far" };
+      const side = parseSide(o);
+      if (!side) return { ok: false, err: "bad_request" };
+      return this.trades.accept(offer, { characterId: p.characterId, ...side }).then(async (r) => {
+        if (!r.dupAccept) {
+          await Promise.all([this.sendInventory(p), this.sendInventory(from)]);
+          this.tradeNotify(offer, r.ok ? "done" : "cancel", r.ok ? undefined : r.err);
+        }
+        return r.ok ? { ok: true, data: { tid, moved: r.moved, ...(r.dup ? { dup: 1 } : {}) } } : { ok: false, err: r.err };
+      });
+    }
+    return { ok: false, err: "bad_request" };
+  }
+
+  private tradeNotify(o: TradeOffer, ev: "done" | "cancel", reason?: string): void {
+    for (const cid of [o.fromCid, o.toCid]) this.live.get(cid)?.player.send({ t: "trade", ev, tid: o.tid, from: o.fromPid, ...(reason ? { reason } : {}) });
+  }
+
+  /** 斷線、換地圖：取消牽涉到這個角色、還沒成交的邀請 */
+  private cancelTrades(cid: string, reason: string): void {
+    for (const o of this.trades.involving(cid)) {
+      this.trades.remove(o);
+      this.trades.stats.cancelled++;
+      this.tradeNotify(o, "cancel", reason);
+    }
   }
 
   async sendInventory(p: ServerPlayer): Promise<void> {
@@ -740,5 +877,7 @@ export function optionsFromEnv(env: NodeJS.ProcessEnv, store?: CharacterStore): 
     maxPlayers: Number(env.MP_MAX_PLAYERS ?? 200),
     allowedOrigins: (env.MP_ALLOWED_ORIGINS ?? "https://scottlien2002-sys.github.io").split(",").map((s) => s.trim()).filter(Boolean),
     log: (m) => console.log(`[${new Date().toISOString()}] ${m}`),
+    allowGuest: env.MP_ALLOW_GUEST !== "0",
+    trustProxy: !!env.RENDER || env.MP_TRUST_PROXY === "1",
   };
 }

@@ -8,7 +8,7 @@
  * 斷線：自動重連（0.5→1→2→4→8 秒），帶憑證接回原角色，收到完整快照即完成重新同步，未送達的輸入會重送
  */
 import { INPUT_SEND_MS, INTERP_DELAY_MS, MAX_STEPS_PER_MSG, MOVE_DEADZONE, PROTOCOL_VERSION, SNAP_CORRECTION_M, STEP } from "../shared/constants.ts";
-import { ANIM, MON_STATES, fromCm, fromMrad, quantizeDir, type CombatEvent, type InvMsg, type ActKind, type AppearanceWire, type Gender, type MapId, type PlayerMeta, type ServerMsg, type SnapMsg } from "../shared/protocol.ts";
+import { ANIM, MON_STATES, fromCm, fromMrad, quantizeDir, type CombatEvent, type InvMsg, type TradeMsg, type ActKind, type AppearanceWire, type Gender, type MapId, type PlayerMeta, type ServerMsg, type SnapMsg } from "../shared/protocol.ts";
 import { getMap, type MapAuthority } from "../shared/maps.ts";
 import { runLength, stepMove, type MoveState } from "../shared/sim.ts";
 import { Interpolator, type Pose } from "./Interpolator.ts";
@@ -26,6 +26,9 @@ export interface NetClientOptions {
   lagMs?: number;
   jitterMs?: number;
   resumeToken?: string;
+  /** Stage 8.5：帳號登入憑證（/auth/login）與要使用的角色 id */
+  auth?: string;
+  cid?: string;
   autoReconnect?: boolean;
   now?: () => number;
   WebSocketImpl?: typeof WebSocket;
@@ -78,7 +81,8 @@ export type NetEvent =
   | { type: "map"; map: MapId }
   | { type: "state"; state: ConnState }
   | { type: "error"; code: string; msg: string }
-  | { type: "cmd"; id: string; ok: boolean; dup: boolean; data?: unknown; err?: string };
+  | { type: "cmd"; id: string; ok: boolean; dup: boolean; data?: unknown; err?: string }
+  | { type: "trade"; msg: TradeMsg };
 
 export interface RemotePlayer extends Pose {
   id: number;
@@ -196,7 +200,7 @@ export class NetClient {
     const ws = new WS(this.opts.url);
     this.ws = ws;
     ws.onopen = () => {
-      this.sendRaw({ t: "hello", v: PROTOCOL_VERSION, name: this.opts.name, gender: this.opts.gender, ...(this.opts.ap ? { ap: this.opts.ap } : {}), ...(this.token ? { resume: this.token } : {}), ...(this.opts.devMap ? { devMap: this.opts.devMap } : {}) });
+      this.sendRaw({ t: "hello", v: PROTOCOL_VERSION, name: this.opts.name, gender: this.opts.gender, ...(this.opts.ap ? { ap: this.opts.ap } : {}), ...(this.opts.auth ? { auth: this.opts.auth, ...(this.characterId || this.opts.cid ? { cid: this.characterId || this.opts.cid } : {}) } : this.token ? { resume: this.token } : {}), ...(this.opts.devMap ? { devMap: this.opts.devMap } : {}) });
     };
     ws.onmessage = (ev: MessageEvent) => {
       const s = typeof ev.data === "string" ? ev.data : String(ev.data);
@@ -276,13 +280,21 @@ export class NetClient {
     setTimeout(go, at - this.now());
   }
 
+  /** Stage 8.5：技能位移期間暫停移動輸入（毫秒）；位移終點由伺服器決定 */
+  private holdUntil = 0;
+  holdInput(ms: number): void {
+    this.holdUntil = Math.max(this.holdUntil, this.now() + Math.max(0, Math.min(ms, 5000)));
+  }
+
   // ---------------- 每幀更新 ----------------
   /** inputX / inputZ：世界座標方向（長度 0..1，與單機版 inputToWorld 的輸出相同） */
   update(dt: number, inputX: number, inputZ: number): void {
     const t = this.now();
     if (this.state === "online" && this.map) {
       this.acc = Math.min(this.acc + dt, 0.25);
-      const [qx, qz] = quantizeDir(inputX, inputZ);
+      // Stage 8.5 技能位移中：自己不預測移動（位置由伺服器驗證的路徑決定，經由快照平滑追上）
+      const held = t < this.holdUntil;
+      const [qx, qz] = held ? [0, 0] : quantizeDir(inputX, inputZ);
       const moving = Math.hypot(qx / 127, qz / 127) > MOVE_DEADZONE;
       while (this.acc >= STEP) {
         this.acc -= STEP;
@@ -453,12 +465,15 @@ export class NetClient {
       case "res":
         this.opts.onEvent?.({ type: "cmd", id: m.id, ok: m.ok, dup: m.dup === 1, data: m.data, err: m.err });
         return;
+      case "trade":
+        this.opts.onEvent?.({ type: "trade", msg: m });
+        return;
       case "inv":
         this.inventory = m;
         if (this.self) this.self.gold = m.gold;
         return;
       case "err":
-        if (m.code === "replaced" || m.code === "proto" || m.code === "full") this.noReconnect = true;
+        if (m.code === "replaced" || m.code === "proto" || m.code === "full" || m.code === "auth" || m.code === "auth_required" || m.code === "not_your_character" || m.code === "character_limit") this.noReconnect = true;
         this.opts.onEvent?.({ type: "error", code: m.code, msg: m.msg });
         return;
     }

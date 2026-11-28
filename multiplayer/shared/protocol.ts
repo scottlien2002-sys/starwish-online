@@ -37,6 +37,10 @@ export interface HelloMsg {
   devMap?: MapId;
   /** 新角色的外觀（只在建立角色時採用；之後以伺服器資料為準） */
   ap?: AppearanceWire;
+  /** Stage 8.5：帳號登入憑證（/auth/login 取得）。有帶時用帳號登入，角色必須屬於這個帳號 */
+  auth?: string;
+  /** Stage 8.5：要使用的角色 id（帳號下的角色；沒帶時用第一個角色，沒有角色就建立一個） */
+  cid?: string;
 }
 export interface InputMsg {
   t: "in";
@@ -99,6 +103,8 @@ export interface WelcomeMsg {
   name: string;
   /** 伺服器資料區（test／prod）；測試伺服器一律為 test */
   realm: string;
+  /** Stage 8.5：1＝帳號角色（重連要帶帳號憑證＋cid）；0＝訪客角色 */
+  acct?: 0 | 1;
   tick: number;
   st: number;
   /** 地圖世代 */
@@ -142,7 +148,7 @@ export const MON_STATES = ["idle", "move", "attack", "hit", "death", "dead", "re
 
 /** 戰鬥事件（客戶端依事件播放動作、特效、傷害數字；不逐幀同步特效） */
 export type CombatEvent =
-  | { k: "cast"; c: number; p: number; s: string; t: number; x: number; z: number; y: number; st: number; r: number; dur: number }
+  | { k: "cast"; c: number; p: number; s: string; t: number; x: number; z: number; y: number; st: number; r: number; dur: number; /** Stage 8.5 技能位移：伺服器驗證後的終點（公分）與位移時間（毫秒）；沒有位移時不送 */ ex?: number; ez?: number; md?: number }
   | { k: "hit"; c: number; h: string; p: number; t: number; d: number; cr: 0 | 1; ms: 0 | 1; hp: number; kl: 0 | 1 }
   | { k: "end"; c: number; p: number }
   | { k: "mh"; m: number; p: number; d: number; b: 0 | 1; hp: number }
@@ -177,7 +183,7 @@ export interface CmdResultMsg {
 }
 export interface ErrorMsg {
   t: "err";
-  code: "proto" | "bad_msg" | "rate" | "full" | "auth" | "replaced" | "server";
+  code: "proto" | "bad_msg" | "rate" | "full" | "auth" | "replaced" | "server" | "auth_required" | "not_your_character" | "character_limit";
   msg: string;
 }
 /** 背包（只送給本人） */
@@ -187,7 +193,20 @@ export interface InvMsg {
   gold: number;
   equipment: Record<string, string>;
 }
-export type ServerMsg = WelcomeMsg | SnapMsg | MapChangeMsg | PongMsg | CmdResultMsg | ErrorMsg | InvMsg;
+/** Stage 8.5 交易通知（測試介面，尚無正式交易畫面）：對方提出交易、交易完成、取消或過期 */
+export interface TradeMsg {
+  t: "trade";
+  ev: "offer" | "done" | "cancel";
+  tid: string;
+  /** 提出交易的玩家 pid／名字 */
+  from: number;
+  name?: string;
+  items?: { uid: string; defId: string; qty: number; version: number }[];
+  gold?: number;
+  reason?: string;
+}
+
+export type ServerMsg = WelcomeMsg | SnapMsg | MapChangeMsg | PongMsg | CmdResultMsg | ErrorMsg | InvMsg | TradeMsg;
 
 // ---------------- 量化 ----------------
 export const toCm = (m: number): number => Math.round(m * 100);

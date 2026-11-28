@@ -169,3 +169,86 @@ test("PostgreSQL（Stage 8.2）：原野擊殺＋撿取 → 伺服器重啟後�
     await srv.stop();
   }
 });
+
+// ---------------- Stage 8.5：帳號、登入憑證、交易（PostgreSQL 實測） ----------------
+test("PostgreSQL（Stage 8.5）：帳號名稱唯一、密碼雜湊、登入失敗鎖定、登入憑證只存雜湊且可撤銷、角色數上限", { skip }, async () => {
+  const { hashPassword, verifyPassword } = await import("../server/auth/password.ts");
+  const { hashToken } = await import("../server/persistence/Store.ts");
+  const s = await PgStore.open({ url: url!, realm: "test", ssl: "disable" });
+  const name = `pg_${Date.now().toString(36)}`;
+  const hash = await hashPassword("correct horse battery");
+  const a1 = await s.createAccount(name, hash, Date.now());
+  const a2 = await s.createAccount(name, hash, Date.now());
+  assert.equal(a1.ok, true);
+  assert.equal(a2.ok, false, "同名帳號被唯一索引擋下");
+  await assert.rejects(s.createAccount(name.toUpperCase(), hash, Date.now()), /accounts_username_check/, "資料庫只接受已轉小寫的名稱");
+  const acc = (a1 as { account: { id: string } }).account;
+  const found = await s.findAccount(name);
+  assert.ok(found && found.passHash.startsWith("scrypt$") && !found.passHash.includes("correct"));
+  assert.equal(await verifyPassword("correct horse battery", found!.passHash), true);
+  for (let i = 0; i < 5; i++) await s.loginFailed(acc.id, Date.now(), 5, 60_000);
+  const locked = await s.findAccount(name);
+  assert.ok((locked!.lockedUntil ?? 0) > Date.now(), "連續失敗 5 次 → 鎖定");
+  await s.loginOk(acc.id, Date.now());
+  assert.equal((await s.findAccount(name))!.failedCount, 0);
+  const token = "tok-" + Math.random().toString(36).slice(2);
+  await s.createSession(acc.id, hashToken(token), Date.now() + 60_000, Date.now());
+  assert.equal((await s.findSession(hashToken(token), Date.now()))?.accountId, acc.id);
+  assert.equal(await s.findSession(token, Date.now()), null, "原始憑證查不到（只存雜湊）");
+  assert.equal(await s.findSession(hashToken(token), Date.now() + 120_000), null, "過期");
+  await s.revokeSession(hashToken(token), Date.now());
+  assert.equal(await s.findSession(hashToken(token), Date.now()), null, "撤銷");
+  const made = await Promise.all([0, 1, 2, 3, 4, 5].map((i) => s.createCharacter(acc.id, `角${i}`, "male", { hair: "hair01", hairColor: null, weapon: "sword" }, Date.now())));
+  const chars = await s.listCharacters(acc.id);
+  results.pgAccounts = { username: name, lockedUntil: locked!.lockedUntil, created: made.filter(Boolean).length, listed: chars.length };
+  assert.equal(made.filter(Boolean).length, 4, "同時建立 6 個 → 只成功 4 個（帳號列鎖）");
+  assert.equal(chars.length, 4);
+  assert.ok(chars.every((c) => c.accountId === acc.id));
+  await s.close();
+});
+
+test("PostgreSQL（Stage 8.5）：交易原子交換、同一筆重送只成交一次、同一件道具同時交易給兩個人只有一筆成功", { skip }, async () => {
+  const s = await PgStore.open({ url: url!, realm: "test", ssl: "disable" });
+  const ap = { hair: "hair01", hairColor: null, weapon: "sword" } as const;
+  const A = (await s.createGuest("交易甲", "male", ap, 0)).character;
+  const B = (await s.createGuest("交易乙", "female", ap, 0)).character;
+  const C = (await s.createGuest("交易丙", "male", ap, 0)).character;
+  for (const c of [A, B, C]) await s.changeGold(c.id, `seed-${c.id}`, 100, "test_seed");
+  const g = await s.grantItem(A.id, `grant-${A.id}`, "test_novice_staff", 1);
+  const item = g.ok ? g.item! : null;
+  assert.ok(item);
+  const sum = async () => {
+    let gold = 0;
+    let items = 0;
+    for (const c of [A, B, C]) {
+      gold += (await s.get(c.id))!.gold;
+      items += (await s.listItems(c.id)).length;
+    }
+    return { gold, items };
+  };
+  const before = await sum();
+  // 同一件道具同時給 B 和 C（不同交易）→ 只有一筆成功，另一筆 version_conflict／not_owner
+  const [rb, rc] = await Promise.all([
+    s.trade(`trade-${crypto.randomUUID()}`, { characterId: A.id, items: [{ uid: item!.uid, version: item!.version }], gold: 10 }, { characterId: B.id, items: [], gold: 0 }),
+    s.trade(`trade-${crypto.randomUUID()}`, { characterId: A.id, items: [{ uid: item!.uid, version: item!.version }], gold: 10 }, { characterId: C.id, items: [], gold: 0 }),
+  ]);
+  assert.equal([rb, rc].filter((r) => r.ok).length, 1, JSON.stringify([rb, rc]));
+  const winner = rb.ok ? B : C;
+  assert.equal((await s.listItems(winner.id)).filter((i) => i.uid === item!.uid).length, 1);
+  assert.equal((await s.listItems(A.id)).length, 0);
+  // 同一筆重送 → dup，不再成交
+  const rid = `trade-${crypto.randomUUID()}`;
+  const t1 = await s.trade(rid, { characterId: winner.id, items: [], gold: 5 }, { characterId: A.id, items: [], gold: 0 });
+  const t2 = await s.trade(rid, { characterId: winner.id, items: [], gold: 5 }, { characterId: A.id, items: [], gold: 0 });
+  assert.equal(t1.ok, true);
+  assert.equal(t2.dup, true);
+  // 金幣不足 → 整筆失敗，道具也不動
+  const it2 = (await s.listItems(winner.id))[0]!;
+  const bad = await s.trade(`trade-${crypto.randomUUID()}`, { characterId: winner.id, items: [{ uid: it2.uid, version: it2.version }], gold: 0 }, { characterId: A.id, items: [], gold: 99999 });
+  assert.equal(bad.ok, false);
+  assert.equal((await s.listItems(winner.id)).length, 1, "失敗時道具不動（原子）");
+  const after = await sum();
+  results.pgTrade = { concurrent: [rb, rc], resend: [t1, t2], insufficient: bad, before, after };
+  assert.deepEqual(after, before, "總金幣、道具數不變");
+  await s.close();
+});

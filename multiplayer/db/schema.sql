@@ -182,3 +182,44 @@ DO $$ BEGIN
 END $$;
 ALTER TABLE characters ADD COLUMN IF NOT EXISTS equipment jsonb NOT NULL DEFAULT '{}'::jsonb;
 INSERT INTO schema_meta(key, value) VALUES ('schema_version', '8.2') ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
+
+-- Stage 8.5：正式帳號（與角色資料分開）、登入憑證、交易紀錄（可重複執行）
+ALTER TABLE accounts ADD COLUMN IF NOT EXISTS realm text NOT NULL DEFAULT 'test';
+ALTER TABLE accounts ADD COLUMN IF NOT EXISTS username text;
+ALTER TABLE accounts ADD COLUMN IF NOT EXISTS pass_hash text;
+ALTER TABLE accounts ADD COLUMN IF NOT EXISTS failed_count integer NOT NULL DEFAULT 0;
+ALTER TABLE accounts ADD COLUMN IF NOT EXISTS locked_until timestamptz;
+ALTER TABLE accounts ADD COLUMN IF NOT EXISTS last_login_at timestamptz;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'accounts_realm_check') THEN
+    ALTER TABLE accounts ADD CONSTRAINT accounts_realm_check CHECK (realm IN ('test', 'prod'));
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'accounts_username_check') THEN
+    ALTER TABLE accounts ADD CONSTRAINT accounts_username_check CHECK (username IS NULL OR username ~ '^[a-z0-9_]{3,20}$');
+  END IF;
+END $$;
+-- 同一資料區內帳號名稱唯一（存小寫）
+CREATE UNIQUE INDEX IF NOT EXISTS accounts_realm_username_uq ON accounts(realm, username) WHERE username IS NOT NULL;
+CREATE INDEX IF NOT EXISTS characters_account_idx ON characters(account_id) WHERE account_id IS NOT NULL;
+
+-- 帳號登入憑證：只存 SHA-256 雜湊；有到期時間；登出即撤銷
+CREATE TABLE IF NOT EXISTS account_sessions (
+  token_hash  text PRIMARY KEY,
+  account_id  uuid NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+  realm       text NOT NULL CHECK (realm IN ('test', 'prod')),
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  expires_at  timestamptz NOT NULL,
+  revoked_at  timestamptz
+);
+CREATE INDEX IF NOT EXISTS account_sessions_account_idx ON account_sessions(account_id);
+
+-- 交易稽核：每筆成交一列（雙方、交換內容）
+CREATE TABLE IF NOT EXISTS trade_log (
+  id          bigserial PRIMARY KEY,
+  request_id  text NOT NULL UNIQUE,
+  char_a      uuid NOT NULL REFERENCES characters(id),
+  char_b      uuid NOT NULL REFERENCES characters(id),
+  detail      jsonb NOT NULL,
+  created_at  timestamptz NOT NULL DEFAULT now()
+);
+INSERT INTO schema_meta(key, value) VALUES ('schema_version', '8.5') ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
