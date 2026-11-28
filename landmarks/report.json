@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-11-28T04:01:03.053Z",
+  "startedAt": "2026-11-28T04:40:24.323Z",
   "note": "CI 軟體繪圖；GLB 為測試替身（不是正式美術）",
   "runs": [
     {
@@ -27,8 +27,8 @@
             "placements": 1,
             "tris": 24,
             "materials": 1,
-            "scale": 3.003,
-            "ms": 4531,
+            "scale": 2.7027,
+            "ms": 5207,
             "lod": true
           },
           {
@@ -39,7 +39,7 @@
             "tris": 24,
             "materials": 1,
             "scale": 2.7027,
-            "ms": 3637,
+            "ms": 4238,
             "lod": true
           },
           {
@@ -50,7 +50,7 @@
             "tris": 24,
             "materials": 1,
             "scale": 2.7027,
-            "ms": 3625,
+            "ms": 4195,
             "lod": true
           },
           {
@@ -61,7 +61,7 @@
             "tris": 36,
             "materials": 1,
             "scale": 2.7027,
-            "ms": 3616,
+            "ms": 4164,
             "lod": true
           },
           {
@@ -72,7 +72,7 @@
             "tris": 24,
             "materials": 1,
             "scale": 2.7027,
-            "ms": 3575,
+            "ms": 4163,
             "lod": true
           },
           {
@@ -83,7 +83,7 @@
             "tris": 24,
             "materials": 1,
             "scale": 2.7027,
-            "ms": 3626,
+            "ms": 4267,
             "lod": true
           }
         ],
@@ -93,9 +93,9 @@
       "sizes": [
         [
           "colossus",
-          15,
+          13.5,
           0,
-          false
+          true
         ],
         [
           "furnace1",
@@ -135,13 +135,13 @@
         ]
       ],
       "perf": {
-        "fps": 0.9537040274921071,
-        "draws": 77,
-        "tris": 169202,
-        "meshes": 64,
+        "fps": 1.6817840365059071,
+        "draws": 84,
+        "tris": 173862,
+        "meshes": 76,
         "textures": 14,
         "materials": 47,
-        "geometries": 238,
+        "geometries": 217,
         "contextLost": 0
       }
     },
@@ -170,8 +170,8 @@
             "placements": 1,
             "tris": 24,
             "materials": 1,
-            "scale": 3.003,
-            "ms": 1262,
+            "scale": 2.7027,
+            "ms": 1400,
             "lod": false
           },
           {
@@ -182,7 +182,7 @@
             "tris": 24,
             "materials": 1,
             "scale": 2.7027,
-            "ms": 1026,
+            "ms": 1142,
             "lod": false
           },
           {
@@ -193,7 +193,7 @@
             "tris": 24,
             "materials": 1,
             "scale": 2.7027,
-            "ms": 1003,
+            "ms": 1120,
             "lod": false
           },
           {
@@ -204,7 +204,7 @@
             "tris": 36,
             "materials": 1,
             "scale": 2.7027,
-            "ms": 997,
+            "ms": 1106,
             "lod": false
           },
           {
@@ -215,7 +215,7 @@
             "tris": 24,
             "materials": 1,
             "scale": 2.7027,
-            "ms": 1092,
+            "ms": 1117,
             "lod": false
           },
           {
@@ -226,7 +226,7 @@
             "tris": 24,
             "materials": 1,
             "scale": 2.7027,
-            "ms": 1074,
+            "ms": 1196,
             "lod": false
           }
         ],
@@ -236,9 +236,9 @@
       "sizes": [
         [
           "colossus",
-          15,
+          13.5,
           0,
-          false
+          true
         ],
         [
           "furnace1",
@@ -278,7 +278,7 @@
         ]
       ],
       "perf": {
-        "fps": 3.8706181377164994,
+        "fps": 3.520259091069064,
         "draws": 96,
         "tris": 116124,
         "meshes": 92,
@@ -446,13 +446,13 @@
     },
     {
       "name": "high：地標縮放到規格高度、底部落地（含埋入深度）",
-      "ok": false,
+      "ok": true,
       "detail": [
         [
           "colossus",
-          15,
+          13.5,
           0,
-          false
+          true
         ],
         [
           "furnace1",
@@ -631,13 +631,13 @@
     },
     {
       "name": "medium：地標縮放到規格高度、底部落地（含埋入深度）",
-      "ok": false,
+      "ok": true,
       "detail": [
         [
           "colossus",
-          15,
+          13.5,
           0,
-          false
+          true
         ],
         [
           "furnace1",
@@ -681,7 +681,7 @@
       "name": "medium：吊臂 GLB 掛在旋轉節點上（2.5 秒內移動）",
       "ok": true,
       "detail": {
-        "moved": 0.5216804213589367
+        "moved": 0.4758049054520577
       }
     },
     {
@@ -1339,5 +1339,5 @@
     ],
     "v3look_halos": 70
   },
-  "finishedAt": "2026-11-28T04:09:46.373Z"
+  "finishedAt": "2026-11-28T04:49:34.185Z"
 }
