@@ -354,6 +354,8 @@ try {
     const i = await finfo(P);
     P.trail = [{ x: -56, z: -64 }, { x: i.pos[0], z: i.pos[2] }];
   }
+  // 戰鬥音效：瀏覽器規定要先有使用者點擊才能出聲 → 點一下畫面上方空白處（不影響遊戲操作）
+  await A.page.mouse.click(300, 160).catch(() => {});
   const fA = fighter(A, false, async () => ((await field(B).catch(() => null))?.skillsOk ?? 0) > 0, "A");
   // B 第一發之後要等 A 真的打出傷害（伺服器 hit 事件）才繼續，確保兩人都有貢獻
   const fB = fighter(B, true, async () => {
@@ -397,6 +399,8 @@ try {
   check("其他玩家的技能特效依伺服器施放事件播放（A 看到 B 的施放）", fldA.remoteCastsShown > 0, { remoteCasts: fldA.remoteCastsShown, vfx: fldA.vfx });
   const skA = await A.page.evaluate(() => window.__mpWorld.skillAnim);
   check("其他玩家播 Claude C 的技能動作（A 看到 B 的魔法彈動作，不是普通攻擊）", skA.started >= 1, { ...skA, sampledState: results.samples.remoteSkillSeen ?? false });
+  results.samples.audio = { A: fldA.audio, B: fldB.audio };
+  if (browserName === "chromium") check("戰鬥音效：點擊畫面後 A 的攻擊／命中有播放（Claude C Stage 3 音效）", (fldA.audio?.played ?? 0) > 0, fldA.audio);
   check("戰鬥特效共用 Claude A 的原野戰鬥表現（沒有第二套特效系統）、戰鬥音效已建立", fldA.sharedFx === true && fldB.sharedFx === true && !!fldA.audio && !!fldB.audio, { A: { shared: fldA.sharedFx, audio: fldA.audio }, B: { shared: fldB.sharedFx, audio: fldB.audio } });
   fiA = await fieldInfo(A);
   fiB = await fieldInfo(B);
