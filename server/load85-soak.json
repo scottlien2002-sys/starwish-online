@@ -1,0 +1,71 @@
+{
+  "note": "CI／本機伺服器數據，不是 iPhone 實機結果（iPhone 畫面效能由實機測試填寫）",
+  "limits": {
+    "tickAvgMs": 10,
+    "tickMaxMs": 50,
+    "maxCorrectionCm": 200,
+    "positionMaxCm": 5
+  },
+  "env": {
+    "node": "v22.23.5",
+    "cpu": "Intel(R) Xeon(R) 6975P-C",
+    "cores": 4,
+    "memGB": 15.3,
+    "ci": true
+  },
+  "crashed": false,
+  "scenarios": [
+    {
+      "players": 24,
+      "durationS": 300,
+      "joinMs": 1143,
+      "onlineAtStart": 24,
+      "onlineAtEnd": 24,
+      "notOnline": [],
+      "laggedBots": 5,
+      "server": {
+        "cpuPctAvg": 3.1,
+        "cpuPctMax": 10.2,
+        "rssMBMax": 155,
+        "rssGrowthMB": -5.9,
+        "heapGrowthMB": -5.5,
+        "heapMBMax": 40,
+        "tickAvgMs": 0.666,
+        "tickMaxMs": 3.025,
+        "bytesOutPerSecAvg": 449089,
+        "bytesInPerSecAvg": 24185,
+        "msgsOutPerSecAvg": 528,
+        "bytesOutPerPlayerPerSec": 18712
+      },
+      "clients": {
+        "cmdsOk": 2116,
+        "cmdErrors": {
+          "busy": 460,
+          "bad_target": 72,
+          "down": 84,
+          "no_combat_here": 354,
+          "out_of_range": 206
+        },
+        "castsSeen": 2114,
+        "displacements": 1368,
+        "reconnects": 148,
+        "drops": 148,
+        "maxCorrectionCm": 152,
+        "snapCorrections": 0,
+        "duplicateEvents": 0,
+        "positionPairs": 336,
+        "positionMaxCm": 1.5
+      },
+      "junk": {
+        "sent": 2934,
+        "reopened": 58
+      },
+      "finalStats": {
+        "badMessages": 2934,
+        "kicked": 57
+      },
+      "samples": 299,
+      "pass": true
+    }
+  ]
+}

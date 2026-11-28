@@ -1,0 +1,178 @@
+{
+  "obstacles": [
+    {
+      "skill": "leap_slam",
+      "kind": "boundary",
+      "start": {
+        "x": 81.8,
+        "z": -58.5
+      },
+      "yaw": 1.5707963267948966,
+      "expectedStop": 0.2,
+      "dist": 0.16,
+      "clipForward": 1.2,
+      "beyond": "boundary",
+      "server": {
+        "x": 81.96,
+        "z": -58.5
+      },
+      "legal": true
+    },
+    {
+      "skill": "leap_slam",
+      "kind": "river",
+      "start": {
+        "x": -78,
+        "z": 29
+      },
+      "yaw": 0.4398425828157544,
+      "expectedStop": 0.291,
+      "dist": 0.255,
+      "clipForward": 1.2,
+      "beyond": "river",
+      "server": {
+        "x": -77.89,
+        "z": 29.23
+      },
+      "legal": true
+    },
+    {
+      "skill": "leap_slam",
+      "kind": "collider",
+      "start": {
+        "x": 5.66,
+        "z": 79.51
+      },
+      "yaw": 3.141592653589793,
+      "expectedStop": 0.35,
+      "dist": 0.33,
+      "clipForward": 1.2,
+      "beyond": "collider",
+      "server": {
+        "x": 5.66,
+        "z": 79.18
+      },
+      "legal": true
+    },
+    {
+      "skill": "charge_burst",
+      "kind": "boundary",
+      "start": {
+        "x": 81.8,
+        "z": -58.5
+      },
+      "yaw": 1.5707963267948966,
+      "expectedStop": 0.2,
+      "dist": 0.17,
+      "clipForward": 0.6,
+      "beyond": "boundary",
+      "server": {
+        "x": 81.97,
+        "z": -58.5
+      },
+      "legal": true
+    },
+    {
+      "skill": "charge_burst",
+      "kind": "river",
+      "start": {
+        "x": -78,
+        "z": 29
+      },
+      "yaw": 0.4398425828157544,
+      "expectedStop": 0.291,
+      "dist": 0.277,
+      "clipForward": 0.6,
+      "beyond": "river",
+      "server": {
+        "x": -77.88,
+        "z": 29.25
+      },
+      "legal": true
+    },
+    {
+      "skill": "charge_burst",
+      "kind": "collider",
+      "start": {
+        "x": 5.66,
+        "z": 79.51
+      },
+      "yaw": 3.141592653589793,
+      "expectedStop": 0.35,
+      "dist": 0.35,
+      "clipForward": 0.6,
+      "beyond": "collider",
+      "server": {
+        "x": 5.66,
+        "z": 79.16
+      },
+      "legal": true
+    }
+  ],
+  "landing": {
+    "monster": "star_dew_bobo",
+    "startGapM": 3.8,
+    "landGapM": 2.6,
+    "radius": 2.6,
+    "slack": 0.75,
+    "hits": [
+      {
+        "d": 60,
+        "cr": 1,
+        "ms": 0
+      }
+    ],
+    "hp": [
+      60,
+      0
+    ]
+  },
+  "firstStep": {
+    "moveSpeed": 5,
+    "from": {
+      "x": -52.95,
+      "z": -57.42
+    },
+    "movedM": 2.51,
+    "seconds": 0.5,
+    "speedViolations": 0
+  },
+  "disconnect": {
+    "start": {
+      "x": -53.95,
+      "z": -55.02,
+      "yaw": 2.748893571891069
+    },
+    "frozen": {
+      "x": -53.92,
+      "z": -55.1
+    },
+    "end": {
+      "x": -53.49,
+      "z": -56.13
+    },
+    "partialM": 0.085,
+    "self": {
+      "x": -53.92,
+      "z": -55.1,
+      "yaw": 2.749,
+      "anim": 0
+    },
+    "observer": {
+      "x": -53.92,
+      "z": -55.1
+    }
+  },
+  "down": {
+    "start": {
+      "x": -53.92,
+      "z": -55.1,
+      "yaw": -0.39269908169872414
+    },
+    "stoppedAt": {
+      "x": -53.92,
+      "z": -55.1
+    },
+    "partialM": 0
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "basic": {
+    "tid": "10d363ef-73dc-4be4-8fde-ba7bf7160b0f",
+    "goldA": 95,
+    "goldB": 105,
+    "totals": {
+      "gold": 200,
+      "items": 4,
+      "uids": 4
+    }
+  },
+  "duplicate": {
+    "accepts": [
+      {
+        "ok": true,
+        "dup": false
+      },
+      {
+        "ok": true,
+        "dup": false
+      },
+      {
+        "ok": true,
+        "dup": false
+      }
+    ],
+    "resendDup": true,
+    "later": {
+      "tid": "fb556087-5731-4d89-950d-44bce2aa8ba3",
+      "moved": 1,
+      "dup": 1
+    },
+    "stats": {
+      "offers": 1,
+      "accepted": 1,
+      "rejected": 0,
+      "cancelled": 0,
+      "expired": 0,
+      "duplicateAccepts": 2
+    },
+    "totals": {
+      "gold": 200,
+      "items": 4,
+      "uids": 4
+    }
+  },
+  "forged": {
+    "errors": {
+      "notOwner": "not_owner",
+      "version": "version_conflict",
+      "negative": "bad_request",
+      "float": "bad_request",
+      "insufficient": "insufficient_gold",
+      "thirdParty": "not_your_trade",
+      "replaced": "no_trade",
+      "tooFar": "too_far",
+      "raceAccept": "equipped"
+    },
+    "winner": "equip",
+    "totals": {
+      "gold": 300,
+      "items": 6,
+      "uids": 6
+    }
+  },
+  "disconnect": {
+    "cancelled": true,
+    "goldAfter": 100,
+    "items": 2,
+    "stats": {
+      "offers": 1,
+      "accepted": 0,
+      "rejected": 0,
+      "cancelled": 1,
+      "expired": 0,
+      "duplicateAccepts": 0
+    }
+  }
+}
