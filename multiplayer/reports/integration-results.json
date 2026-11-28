@@ -5,8 +5,8 @@
     "remoteFinalPosErrCm": 0,
     "localFinalPosErrCm": 0.03,
     "serverPos": [
-      6.03,
-      7.03
+      6.2,
+      7.33
     ],
     "aStats": {
       "state": "online",
@@ -15,24 +15,24 @@
       "pid": 1,
       "rttMs": 0,
       "rttAvgMs": 1,
-      "jitterMs": 0,
-      "bytesUpPerSec": 463,
-      "bytesDownPerSec": 2204,
-      "msgsUpPerSec": 12,
+      "jitterMs": 1,
+      "bytesUpPerSec": 508,
+      "bytesDownPerSec": 2228,
+      "msgsUpPerSec": 13,
       "msgsDownPerSec": 21,
       "snapsPerSec": 20,
       "players": 2,
       "pendingInputs": 0,
-      "corrections": 14,
+      "corrections": 16,
       "lastCorrectionCm": 8,
-      "maxCorrectionCm": 33,
+      "maxCorrectionCm": 31,
       "snapCorrections": 0,
       "reconnects": 0,
       "lastResyncMs": 0,
       "serverTick": 47,
       "fps": 0,
       "totalBytesUp": 1213,
-      "totalBytesDown": 6166
+      "totalBytesDown": 6176
     },
     "bStats": {
       "state": "online",
@@ -42,8 +42,8 @@
       "rttMs": 0,
       "rttAvgMs": 0,
       "jitterMs": 0,
-      "bytesUpPerSec": 28,
-      "bytesDownPerSec": 2380,
+      "bytesUpPerSec": 27,
+      "bytesDownPerSec": 2356,
       "msgsUpPerSec": 1,
       "msgsDownPerSec": 21,
       "snapsPerSec": 20,
@@ -58,14 +58,14 @@
       "serverTick": 47,
       "fps": 0,
       "totalBytesUp": 136,
-      "totalBytesDown": 6675
+      "totalBytesDown": 6655
     }
   },
   "prediction": {
     "lagOneWayMs": 120,
     "jitterMs": 40,
     "rttMs": 281,
-    "localResponseMs": 12,
+    "localResponseMs": 21,
     "corrections": 0,
     "maxCorrectionCm": 0,
     "snapCorrections": 0,
@@ -84,8 +84,8 @@
     }
   },
   "reconnect": {
-    "resyncMsFromDrop": 551,
-    "observerSawDisconnectMs": 102,
+    "resyncMsFromDrop": 550,
+    "observerSawDisconnectMs": 103,
     "samePid": true,
     "finalErrCm": 0,
     "reconnects": 1,
@@ -115,8 +115,8 @@
   "cheat": {
     "speedHackSeconds": 3.02,
     "movedM": 15.78,
-    "legitMaxM": 15.09,
-    "limitM": 18.09,
+    "legitMaxM": 15.12,
+    "limitM": 18.12,
     "stepsDropped": 1503,
     "kickedAfterGarbage": true,
     "badMessages": 60,
@@ -139,7 +139,7 @@
     "results": [
       {
         "type": "cmd",
-        "id": "1_mwznfq9m_0",
+        "id": "1_mwzvxcnc_0",
         "ok": true,
         "dup": false,
         "data": {
@@ -150,7 +150,7 @@
       },
       {
         "type": "cmd",
-        "id": "1_mwznfq9m_0",
+        "id": "1_mwzvxcnc_0",
         "ok": true,
         "dup": true,
         "data": {
@@ -161,14 +161,14 @@
       },
       {
         "type": "cmd",
-        "id": "1_mwznfq9m_1",
+        "id": "1_mwzvxcnc_1",
         "ok": false,
         "dup": false,
         "err": "bad_emote"
       },
       {
         "type": "cmd",
-        "id": "1_mwznfq9m_2",
+        "id": "1_mwzvxcnc_2",
         "ok": false,
         "dup": false,
         "err": "unknown_cmd"
@@ -179,17 +179,17 @@
   "load40": {
     "tick": {
       "count": 161,
-      "avgMs": 0.87,
-      "maxMs": 2.981
+      "avgMs": 1.235,
+      "maxMs": 5.196
     },
     "serverNetPerSec": {
-      "bytesIn": 30926,
-      "bytesOut": 878511,
-      "msgsIn": 676,
+      "bytesIn": 30192,
+      "bytesOut": 889094,
+      "msgsIn": 682,
       "msgsOut": 839
     },
-    "perClientDownBps": 21717,
-    "perClientUpBps": 736,
+    "perClientDownBps": 22376,
+    "perClientUpBps": 778,
     "roomPlayers": [
       40
     ],

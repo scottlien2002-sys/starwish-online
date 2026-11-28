@@ -256,13 +256,25 @@ export class NetClient {
     const lag = this.opts.lagMs ?? 0;
     if (lag <= 0) return fn();
     const j = this.opts.jitterMs ?? 0;
-    // 保持順序：抖動只往後延，不會讓訊息互相超車
+    // 保持順序：抖動只往後延，不會讓訊息互相超車（Stage 8.5：改用依序佇列；各自 setTimeout 的毫秒取整會讓訊息偶爾超車）
     const at = Math.max(this.lastDelayAt, this.now() + lag + Math.random() * j);
     this.lastDelayAt = at;
-    setTimeout(fn, at - this.now());
+    this.lagQueue(this.recvQ, at, fn);
   }
   private lastDelayAt = 0;
   private lastSendDelayAt = 0;
+  private readonly recvQ: { at: number; fn: () => void }[] = [];
+  private readonly sendQ: { at: number; fn: () => void }[] = [];
+  /** 模擬延遲的依序佇列：只有一個計時器，依時間先後一筆一筆送出 */
+  private lagQueue(q: { at: number; fn: () => void }[], at: number, fn: () => void): void {
+    q.push({ at, fn });
+    if (q.length > 1) return;
+    const pump = (): void => {
+      while (q.length && q[0]!.at <= this.now() + 0.5) q.shift()!.fn();
+      if (q.length) setTimeout(pump, Math.max(0, q[0]!.at - this.now()));
+    };
+    setTimeout(pump, Math.max(0, at - this.now()));
+  }
 
   private sendRaw(m: object): void {
     const s = JSON.stringify(m);
@@ -277,7 +289,7 @@ export class NetClient {
     if (lag <= 0) return go();
     const at = Math.max(this.lastSendDelayAt, this.now() + lag + Math.random() * (this.opts.jitterMs ?? 0));
     this.lastSendDelayAt = at;
-    setTimeout(go, at - this.now());
+    this.lagQueue(this.sendQ, at, go);
   }
 
   /** Stage 8.5：技能位移期間暫停移動輸入（毫秒）；位移終點由伺服器決定 */

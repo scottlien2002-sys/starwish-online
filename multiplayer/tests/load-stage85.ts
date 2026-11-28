@@ -20,7 +20,7 @@ const COUNTS = (process.argv[3] ?? "10,20,32,40").split(",").map(Number);
 const PORT = 25000 + Math.floor(Math.random() * 2000);
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 /** 合格標準（測試設定）：伺服器 20 Hz，一個 tick 50 ms；平均 < 10 ms、最大 < 50 ms、全部機器人最後都在線、伺服器沒有當機 */
-const LIMITS = { tickAvgMs: 10, tickMaxMs: 50 };
+const LIMITS = { tickAvgMs: 10, tickMaxMs: 50, maxCorrectionCm: 200 };
 const SKILLS = ["triple_slash", "leap_slam", "charge_burst", "whirlwind"];
 
 async function startServerProcess(): Promise<ChildProcess> {
@@ -218,7 +218,7 @@ async function scenario(n: number) {
     finalStats: final ? { badMessages: (final as unknown as { totals?: Record<string, number> }).totals?.badMessages, kicked: (final as unknown as { totals?: Record<string, number> }).totals?.kicked } : null,
     samples: samples.length,
   };
-  const pass = out.onlineAtEnd === n && out.server.tickAvgMs < LIMITS.tickAvgMs && out.server.tickMaxMs < LIMITS.tickMaxMs && out.clients.castsSeen > 0 && out.clients.displacements > 0;
+  const pass = out.onlineAtEnd === n && out.server.tickAvgMs < LIMITS.tickAvgMs && out.server.tickMaxMs < LIMITS.tickMaxMs && out.clients.castsSeen > 0 && out.clients.displacements > 0 && out.clients.maxCorrectionCm < LIMITS.maxCorrectionCm;
   for (const s of sims) s.c.close();
   await sleep(500);
   return { ...out, pass };
@@ -255,7 +255,7 @@ const md = [
   "|---|---|---|---|---|---|---|---|---|---|---|---|",
   ...all.map((r) => `| ${r.players} | ${r.pass ? "合格" : "不合格"} | ${r.server.tickAvgMs} ms | ${r.server.tickMaxMs} ms | ${r.server.cpuPctAvg}%／${r.server.cpuPctMax}% | ${r.server.rssMBMax} MB | ${r.server.bytesOutPerSecAvg}（${r.server.bytesOutPerPlayerPerSec}） | ${r.server.bytesInPerSecAvg} | ${r.onlineAtEnd}/${r.players} | ${r.clients.reconnects} | ${r.clients.displacements} | ${r.clients.maxCorrectionCm} cm |`),
   "",
-  `合格標準（測試設定）：tick 平均 < ${LIMITS.tickAvgMs} ms、最大 < ${LIMITS.tickMaxMs} ms（20 Hz 一個 tick 50 ms）、結束時全部在線、有技能與位移技能同步、伺服器未當機。`,
+  `合格標準（測試設定）：tick 平均 < ${LIMITS.tickAvgMs} ms、最大 < ${LIMITS.tickMaxMs} ms（20 Hz 一個 tick 50 ms）、結束時全部在線、有技能與位移技能同步、一般校正 < ${LIMITS.maxCorrectionCm / 100} m（重連、換地圖的完整重新同步不算）、伺服器未當機。`,
 ].join("\n");
 writeFileSync(new URL("../test-results/load85.md", import.meta.url), md + "\n");
 console.log(md);
