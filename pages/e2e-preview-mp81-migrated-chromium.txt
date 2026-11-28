@@ -1,0 +1,29 @@
+PASS 兩位玩家進入同一個星芽村房間 {"room":"village-1"}
+PASS A 看見 B 的 3D 角色（女、粉紅髮色、法杖；模組化零件） {"id":2,"name":"小願","loaded":true,"state":"Idle","pos":[10.8,6.3],"yaw":-2.094,"link":1,"parts":5,"hairColor":"#c0408a","gender":"female"}
+PASS B 看見 A 的 3D 角色（男、深棕髮色、短劍） {"id":1,"name":"阿星","loaded":true,"state":"Idle","pos":[6.2,10.8],"yaw":-2.618,"link":1,"parts":5,"hairColor":"#3a2a1a","gender":"male"}
+PASS 本地角色外觀以伺服器資料建立（B 是女性、法杖） {"gender":"female","weapon":"staff"}
+PASS 一般移動沒有跳躍按鈕
+PASS 星芽村正式美術（Claude B Stage 6.7：Tripo NPC、N008 佈告欄、洛恩）載入完成 {"art":"loaded"}
+PASS B 看到 A 跑步（Run 動畫） {"states":["Idle","Run"]}
+PASS 遠端移動沒有瞬移（取樣間最大位移 < 5 m/s 對應距離的 2 倍） {"samples":7,"maxStepM":0.5,"maxApparentSpeed":1.32,"midState":"Run","midYaw":1.648}
+PASS A 停下後 B 看到 Idle {"state":"Idle"}
+PASS B 看到 A 朝東跑（跑步中 yaw≈90°）且停下後朝向＝伺服器朝向 {"lastRunYaw":1.572,"remoteYaw":1.571,"serverYaw":1.571}
+PASS B 畫面中 A 的位置＝伺服器權威位置（< 5 cm） {"errCm":0}
+PASS A 本地預測位置＝伺服器位置（< 5 cm） {"errCm":0}
+PASS N009 洛恩巡邏：兩位玩家看到的位置一致（< 0.5 m，伺服器時間） {"a":{"x":-5.454334837689443,"z":9.321492985480775,"paused":false},"b":{"x":-5.581420893263537,"z":9.245958079736317,"paused":false},"gapM":0.1478390594775478,"server":{"patrolT":1795868194.809,"at":1795868194809,"paused":false,"tx":0,"tz":0}}
+PASS A 走入南門自動到星芽原野（伺服器換房間） {"room":"starsprout-1"}
+PASS 留在村莊的 B 看不到已到原野的 A（不同地圖互不可見） {"remotes":[]}
+PASS 換地圖後 A 外觀與角色保留（同一玩家、同一外觀） {"pid":1,"weapon":"sword"}
+PASS A、B 都在星芽原野，互相看見 {"room":"starsprout-1"}
+PASS A 在原野實際攻擊怪物，B 看到 A 的 Attack 動畫 {"localAttack":true,"distances":[23.4,21.61,19.73,17.85,16.23,14.72,13.23,11.74,10.25,8.75,7.39,6.3,5.23,4.16,3.12,2.08,1.07],"seconds":76.392}
+PASS Hurt 動作同步（B 看到 A 受擊動畫）
+PASS B 斷線時 A 看到 B 標示斷線中
+PASS B 自動重連、同一角色、A 看到 B 恢復 {"reconnects":1,"resyncMs":2245}
+PASS Death 動作同步（B 看到 A 倒地）
+PASS B 走入原野營地傳送陣回到星芽村、A 倒地後在星芽村復活 {"a":"village-1","b":"village-1"}
+PASS 回到村莊後再次互相看見
+PASS 同一角色重複登入：新分頁接手同一玩家，舊分頁被中斷且不自動重連 {"oldState":"offline","newPid":2,"oldPid":2}
+PASS 伺服器沒有加速／非法位置紀錄 [{"pid":1,"name":"阿星","room":"village-1","connected":true,"queue":0,"ack":1332,"stepsApplied":1332,"stepsDropped":0,"staleEpochInputs":1,"duplicateSteps":0,"seqGaps":0,"illegalPositions":0,"speedViolations":0,"actsAccepted":4,"actsRejected":9,"stepsWhileDown":0},{"pid":2,"name":"小願","room":"village-1","connected":true,"queue":0,"ack":870,"stepsApplied":870,"stepsDropped":0,"staleEpochInputs":2,"duplicateSteps":0,"seqGaps":0,"illegalPositions":0,"speedViolations":0,"actsAccepted":0,"actsRejected":0,"stepsWhileDown":0}]
+PASS 瀏覽器沒有 JavaScript 錯誤 []
+PASS 沒有 404／載入失敗的檔案 []
+28/28 passed (chromium)
