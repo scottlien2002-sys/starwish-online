@@ -88,6 +88,80 @@ jobs:
           git add -A && git commit -qm "mp85 server results ${GITHUB_SHA::7}"
           git push -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" "HEAD:refs/heads/results/mp85-server-${GITHUB_RUN_ID}"
 
+  # C 部門共用資產交接（Claude C，2026-11-28）：preview-mp81／mp82 的 12 個 C 檔改指向 /shared-assets/v1/。
+  # 只在測試機上模擬 gh-pages（不推送 gh-pages、不部署），用 8.1／8.2 當時的程式與 E2E 做回歸：
+  #   migrated＝新對照、模擬站完全沒有 preview-combat-vfx；original＝目前線上的對照（對照組）
+  pages-c-migration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 200
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Fetch gh-pages (read only) and the deployed mp81 / mp82 commits
+        run: |
+          git fetch -q --depth=1 origin gh-pages:refs/remotes/origin/gh-pages
+          git fetch -q --depth=1 origin 172ab048154b715abc11542717b712ae2cf5b535 235e93cc562b917cf55dc4b95b954597152a5d87
+          git rev-parse origin/gh-pages | tee /tmp/ghpages.sha
+      - name: Verify 12 files (size, SHA-1, glTF header) and build new asset-remap.json
+        run: node tools/mp-pages-c-migration.mjs verify origin/gh-pages /tmp/mig
+      - name: Stage simulated gh-pages (migrated without preview-combat-vfx / original)
+        run: |
+          node tools/mp-pages-c-migration.mjs stage origin/gh-pages /tmp/pages-m migrated /tmp/mig
+          node tools/mp-pages-c-migration.mjs stage origin/gh-pages /tmp/pages-o original /tmp/mig
+          test ! -e /tmp/pages-m/preview-combat-vfx
+      - name: Prepare Stage 8.1 / 8.2 worktrees (deployed code, unchanged)
+        run: |
+          git worktree add -q /tmp/w81 172ab048154b715abc11542717b712ae2cf5b535
+          git worktree add -q /tmp/w82 235e93cc562b917cf55dc4b95b954597152a5d87
+          for w in /tmp/w81 /tmp/w82; do (cd $w && npm install --no-audit --no-fund >/dev/null && cd multiplayer && npm install --omit=dev --no-audit --no-fund >/dev/null); done
+          (cd /tmp/w82 && npx playwright install --with-deps chromium webkit)
+      - name: Regression E2E on simulated Pages
+        id: e2e
+        continue-on-error: true
+        run: |
+          set +e
+          mkdir -p /tmp/res/pages
+          fails=0
+          run() { # preview worktree root mode browser port
+            local p=$1 w=$2 root=$3 mode=$4 b=$5 port=$6
+            node tests/e2e/pages-log-server.mjs $root $port /tmp/res/pages/log-$p-$mode-$b.json & local sp=$!
+            sleep 1
+            (cd $w && MP_E2E_TAG="$mode-" MP_E2E_SITE="http://127.0.0.1:$port/$p" timeout 1800 node tests/e2e/run-mp-e2e.mjs dist $b) > /tmp/res/pages/e2e-$p-$mode-$b.txt 2>&1
+            local rc=$?
+            kill -TERM $sp; wait $sp 2>/dev/null
+            cp $w/test-results/mp-e2e/$mode-mp-e2e-$b.json /tmp/res/pages/e2e-$p-$mode-$b.json 2>/dev/null
+            echo "$p $mode $b exit=$rc $(grep -c '^PASS' /tmp/res/pages/e2e-$p-$mode-$b.txt) PASS / $(grep -c '^FAIL' /tmp/res/pages/e2e-$p-$mode-$b.txt) FAIL" | tee -a /tmp/res/pages/summary.txt
+            if [ "$mode" = migrated ]; then
+              node tools/mp-pages-c-migration.mjs audit $root /tmp/res/pages/log-$p-$mode-$b.json $p /tmp/res/pages/audit-$b | tee -a /tmp/res/pages/summary.txt
+              [ ${PIPESTATUS[0]} -ne 0 ] && fails=$((fails+1))
+            fi
+            [ $rc -ne 0 ] && [ "$mode" = migrated ] && fails=$((fails+1))
+          }
+          run preview-mp81 /tmp/w81 /tmp/pages-m migrated chromium 4181
+          run preview-mp81 /tmp/w81 /tmp/pages-m migrated webkit 4182
+          run preview-mp81 /tmp/w81 /tmp/pages-o original chromium 4183
+          run preview-mp82 /tmp/w82 /tmp/pages-m migrated chromium 4281
+          run preview-mp82 /tmp/w82 /tmp/pages-m migrated webkit 4282
+          run preview-mp82 /tmp/w82 /tmp/pages-o original chromium 4283
+          echo "fails=$fails" | tee -a /tmp/res/pages/summary.txt
+          exit $fails
+      - name: Push results branch
+        if: always()
+        run: |
+          mkdir -p /tmp/res/pages
+          cp -r /tmp/mig /tmp/res/pages/migration 2>/dev/null || true
+          cp /tmp/w81/test-results/mp-e2e/*.png /tmp/w82/test-results/mp-e2e/*.png /tmp/res/pages/ 2>/dev/null || true
+          echo "{\"job\":\"pages-c-migration\",\"commit\":\"${GITHUB_SHA}\",\"run\":\"${GITHUB_RUN_ID}\",\"ghPages\":\"$(cat /tmp/ghpages.sha)\",\"e2e\":\"${{ steps.e2e.outcome }}\"}" > /tmp/res/pages/meta.json
+          cd /tmp/res
+          git init -q -b r && git config user.name "github-actions[bot]" && git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -qm "mp85 pages c-migration results ${GITHUB_SHA::7}"
+          git push -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" "HEAD:refs/heads/results/mp85-pages-${GITHUB_RUN_ID}"
+      - name: Fail if tests failed
+        if: steps.e2e.outcome != 'success'
+        run: exit 1
+
   game:
     runs-on: ubuntu-24.04
     timeout-minutes: 240

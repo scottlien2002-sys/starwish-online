@@ -18,6 +18,19 @@ const sha = (f) => createHash("sha1").update(readFileSync(f)).digest("hex");
 
 // 其他預覽資料夾的檔案索引（只看 preview-*；不碰正式網站根目錄的檔案，避免 main 部署時被換掉）
 const index = new Map();
+// 2026-11-28：優先使用正式共用資產 /shared-assets/v1/（檔名＝內容 SHA-1，已發布不覆寫），不再綁住其他部門的預覽資料夾。
+// 檔名與內容不一致的檔案不採用。
+const sharedDir = join(pages, "shared-assets", "v1");
+let sharedHits = 0;
+try {
+  for (const f of walk(sharedDir)) {
+    if (!EXT.test(f)) continue;
+    const name = f.split(sep).pop().replace(/\.[^.]+$/, "");
+    if (/^[0-9a-f]{40}$/.test(name) && sha(f) === name && !index.has(name)) index.set(name, relative(pages, f).split(sep).join("/"));
+  }
+} catch {
+  /* 還沒有共用資產目錄 */
+}
 for (const top of readdirSync(pages)) {
   if (top === mine || !top.startsWith("preview-")) continue;
   const dir = join(pages, top);
