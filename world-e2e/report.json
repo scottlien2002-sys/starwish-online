@@ -1,0 +1,5231 @@
+{
+  "startedAt": "2026-11-28T13:17:07.129Z",
+  "runs": [
+    {
+      "browser": "webkit",
+      "label": "male",
+      "checks": {
+        "新存檔在星芽村出生（性別、測試設定、起始金幣 100）": {
+          "ok": true,
+          "detail": {
+            "map": "village",
+            "gender": "male",
+            "gold": 100,
+            "mode": "test"
+          }
+        },
+        "星芽村：一般移動沒有跳躍按鈕": {
+          "ok": true,
+          "detail": false
+        },
+        "村莊 NPC（Claude B Stage 6.7）：七位 NPC＋洛恩＋N008 委託佈告欄已載入": {
+          "ok": true,
+          "detail": {
+            "ids": [
+              "sword",
+              "knight",
+              "smith",
+              "mage",
+              "church",
+              "circus",
+              "warehouse",
+              "guild"
+            ],
+            "board": true,
+            "merchant": true
+          }
+        },
+        "角色模型：男性 Stage 7.5 新版 n75、女性 C1.0-B5b（不是封存的 Stage 7.2 Tripo 模組化版）": {
+          "ok": true,
+          "detail": {
+            "file": "novice_n75_male_hq.glb",
+            "modular": false
+          }
+        },
+        "角色動作：Idle／Run／Attack／Hurt／Death 齊全；Jump 只給技能（一般移動沒有跳躍鍵）": {
+          "ok": true,
+          "detail": {
+            "clips": [
+              "Idle",
+              "Run",
+              "Attack",
+              "Hurt",
+              "Death",
+              "Jump"
+            ]
+          }
+        },
+        "Stage 7.2：存檔有等級、經驗、外觀（髮型、髮色、武器）": {
+          "ok": true,
+          "detail": {
+            "level": 1,
+            "exp": 0,
+            "appearance": {
+              "hair": "hair01",
+              "hairColor": null,
+              "weapon": "sword"
+            }
+          }
+        },
+        "洛恩鑑定：收 20 金幣（測試設定），重送同一請求不重複扣款": {
+          "ok": true,
+          "detail": {
+            "quote": {
+              "fee": 20,
+              "test": true
+            },
+            "r1": true,
+            "r2": true,
+            "gold": 80,
+            "ledger": 1,
+            "appraised": true
+          }
+        },
+        "商會：本機服務（serverBacked=false，不是真正的多人交易）": {
+          "ok": true,
+          "detail": false
+        },
+        "商會：買飼料扣 10 金幣，重送不重複扣款": {
+          "ok": true,
+          "detail": {
+            "serverBacked": false,
+            "b1": true,
+            "b2": true,
+            "feed": 1,
+            "listed": true,
+            "lockedAfterList": true,
+            "dup": false,
+            "ownBuy": false,
+            "cancelled": true,
+            "lockedAfterCancel": false,
+            "sold": true,
+            "goldBeforeSell": 70,
+            "gold": 82,
+            "stillInBag": false
+          }
+        },
+        "商會：掛賣鎖定物品、不能重複掛賣、不能買自己的、取消後解鎖": {
+          "ok": true,
+          "detail": {
+            "serverBacked": false,
+            "b1": true,
+            "b2": true,
+            "feed": 1,
+            "listed": true,
+            "lockedAfterList": true,
+            "dup": false,
+            "ownBuy": false,
+            "cancelled": true,
+            "lockedAfterCancel": false,
+            "sold": true,
+            "goldBeforeSell": 70,
+            "gold": 82,
+            "stillInBag": false
+          }
+        },
+        "商會：賣給 NPC 入帳 12（40×0.3），重送不重複入帳、物品移出背包": {
+          "ok": true,
+          "detail": {
+            "serverBacked": false,
+            "b1": true,
+            "b2": true,
+            "feed": 1,
+            "listed": true,
+            "lockedAfterList": true,
+            "dup": false,
+            "ownBuy": false,
+            "cancelled": true,
+            "lockedAfterCancel": false,
+            "sold": true,
+            "goldBeforeSell": 70,
+            "gold": 82,
+            "stillInBag": false
+          }
+        },
+        "背包按鈕開啟背包視窗，右上角 X 在畫面內、沒有被遮住、至少 40 px": {
+          "ok": true,
+          "detail": {
+            "ui": "bag",
+            "x1": {
+              "ok": true,
+              "inView": true,
+              "size": [
+                44,
+                44
+              ],
+              "onTop": true,
+              "panelBottom": 325.75,
+              "vh": 393,
+              "vw": 852,
+              "outX": 0,
+              "scrollable": "fits",
+              "bodyTouch": "pan-y"
+            }
+          }
+        },
+        "點 X 立即關閉背包視窗": {
+          "ok": true,
+          "detail": "closed"
+        },
+        "寵物子畫面：點寵物進入詳細、返回鍵回到寵物列表": {
+          "ok": true,
+          "detail": {
+            "petId": 1,
+            "uiDetail": "pet:1",
+            "uiBack": "pet"
+          }
+        },
+        "直向 iPhone：寵物視窗 X 在畫面內、沒有被遮住，按鈕不超出左右邊界，內容區可捲動（touch-action pan-y）": {
+          "ok": true,
+          "detail": {
+            "ok": true,
+            "inView": true,
+            "size": [
+              44,
+              44
+            ],
+            "onTop": true,
+            "panelBottom": 316.0625,
+            "vh": 852,
+            "vw": 393,
+            "outX": 0,
+            "scrollable": "fits",
+            "bodyTouch": "pan-y"
+          }
+        },
+        "直向 iPhone：「選單」按鈕與「畫質」按鈕不重疊": {
+          "ok": true,
+          "detail": {
+            "overlap": false,
+            "menu": [
+              317,
+              160,
+              64,
+              40
+            ],
+            "quality": [
+              285,
+              108,
+              96,
+              44
+            ]
+          }
+        },
+        "寵物跟在頭部側邊：與頭部外緣保持 15～25 cm 可見間距（大小不變）": {
+          "ok": true,
+          "detail": {
+            "panel": "closed",
+            "gap": 0.2001388059540942,
+            "hw": 0.33,
+            "size": 0.075,
+            "eq": 1
+          }
+        },
+        "星芽村：抵達點在南方傳送陣外、傳送陣已啟用、沒有觸發": {
+          "ok": true,
+          "detail": {
+            "armed": true,
+            "fired": false,
+            "dist": 31.5,
+            "triggerR": 2.6
+          }
+        },
+        "南方傳送陣：踩進去直接傳送，沒有出現確認視窗或傳送按鈕": {
+          "ok": true,
+          "detail": {
+            "dlgSeen": false
+          }
+        },
+        "南方傳送陣 → 星芽原野新手營地（抵達在營地傳送陣外側）": {
+          "ok": true,
+          "detail": {
+            "pos": [
+              -56,
+              2,
+              -64
+            ],
+            "portal": {
+              "armed": true,
+              "fired": false,
+              "dist": 4,
+              "triggerR": 1.6,
+              "built": true,
+              "meshes": 3
+            }
+          }
+        },
+        "營地傳送陣：已建立（魔法陣＋符文＋光柱）、抵達後啟用但不會自動觸發（不會兩張地圖無限往返）": {
+          "ok": true,
+          "detail": {
+            "armed": true,
+            "fired": false,
+            "dist": 4,
+            "triggerR": 1.6,
+            "built": true,
+            "meshes": 3
+          }
+        },
+        "切換地圖：金幣、背包、模型性別保留": {
+          "ok": true,
+          "detail": {
+            "gold": 82,
+            "goldBeforeField": 82,
+            "bag": 1,
+            "bagBeforeField": 1
+          }
+        },
+        "星芽原野：一般移動沒有跳躍按鈕": {
+          "ok": true,
+          "detail": false
+        },
+        "原野與村莊用同一個角色模型（C1.0-B5b，沒有變回其他版本）": {
+          "ok": true,
+          "detail": {
+            "village": "novice_n75_male_hq.glb",
+            "field": "novice_n75_male_hq.glb"
+          }
+        },
+        "切換地圖後寵物仍裝備、在頭部側邊 15～25 cm": {
+          "ok": true,
+          "detail": {
+            "gap": 0.20057823143627365,
+            "pets": [
+              {
+                "id": 1,
+                "stage": 1,
+                "life": "alive",
+                "satiety": 99.2014
+              }
+            ]
+          }
+        },
+        "Stage 7.5：男性使用新版初心者（n75）、HQ／Lite 對應檔案，27 段動作、雙手武器掛點、頭髮／兜帽次級動態": {
+          "ok": true,
+          "detail": {
+            "file": "novice_n75_male_hq.glb",
+            "am75": {
+              "modular": false,
+              "weapon": null,
+              "bones": 82,
+              "triangles": 9609,
+              "parts": [],
+              "clips": [
+                "Idle",
+                "Run",
+                "Attack",
+                "Hurt",
+                "Death",
+                "Jump"
+              ],
+              "attackClips": [],
+              "allClips": [
+                "Idle",
+                "Run",
+                "Attack",
+                "Hurt",
+                "Death",
+                "Jump",
+                "Skill_TripleSlash",
+                "Skill_StaffCast",
+                "Skill_LeapSlam",
+                "Skill_Whirlwind",
+                "Skill_StarMeteor",
+                "Skill_ChargeBurst",
+                "Walk",
+                "Wait",
+                "Attack_Unarmed",
+                "Attack_1H_Chop",
+                "Attack_1H_Thrust",
+                "Attack_2H_Slash",
+                "Attack_2H_Smash",
+                "Attack_Polearm_Thrust",
+                "Attack_Polearm_Swing",
+                "Attack_Hammer_Smash",
+                "Cast_Staff",
+                "Cast_Heal",
+                "Attack_Throw",
+                "Block",
+                "Jump_Land"
+              ],
+              "version": "n75",
+              "sockets": {
+                "R": true,
+                "L": true
+              },
+              "secondary": [
+                "Hair_Back",
+                "Hood"
+              ],
+              "loco": "Walk"
+            }
+          }
+        },
+        "Stage 7.5：右手掛上展示短劍（掛點在右手骨附近 8 cm 內）": {
+          "ok": true,
+          "detail": {
+            "attached": true,
+            "socket": [
+              -55.809932708740234,
+              2.5479984283447266,
+              -64.11705017089844
+            ],
+            "hand": [
+              -55.81390380859375,
+              2.5929160118103027,
+              -64.14054107666016
+            ],
+            "dist": 0.05084468105848974
+          }
+        },
+        "Stage 7.5：左手掛點可用（法杖）": {
+          "ok": true,
+          "detail": {
+            "attached": true,
+            "socket": [
+              -56.022911071777344,
+              2.5429437160491943,
+              -63.97669982910156
+            ],
+            "hand": [
+              -56.03546905517578,
+              2.596350908279419,
+              -63.970298767089844
+            ],
+            "dist": 0.05523590067908248
+          }
+        },
+        "Stage 7.5：依武器類型切換普通攻擊動作（雙手重擊、長柄突刺、法杖、單手）": {
+          "ok": true,
+          "detail": [
+            true,
+            true,
+            true,
+            true
+          ]
+        },
+        "Stage 7.5：次級動態數值有限且在上限內": {
+          "ok": true,
+          "detail": {
+            "Hair_Back": {
+              "pitch": 0,
+              "roll": 0
+            },
+            "Hood": {
+              "pitch": 0,
+              "roll": 0
+            }
+          }
+        },
+        "Stage 7.5 技能：本地玩家技能已啟用（技能列、音效、六段技能）": {
+          "ok": true,
+          "detail": {
+            "enabled": true,
+            "busy": false,
+            "active": null,
+            "t": 0,
+            "stats": {
+              "hitstopMs": 0,
+              "casts": 0,
+              "hits": 0,
+              "projectiles": 0,
+              "projectileVisuals": 0,
+              "moved": 0,
+              "hitEvents": 0,
+              "bySkill": {},
+              "viaCombatFx": 0
+            },
+            "cooldowns": {
+              "triple_slash": 0,
+              "staff_cast": 0,
+              "leap_slam": 0,
+              "whirlwind": 0,
+              "star_meteor": 0,
+              "charge_burst": 0
+            },
+            "log": [],
+            "audio": true,
+            "trail": true,
+            "combatFx": {
+              "tier": "high",
+              "actors": 1,
+              "playing": 0,
+              "vfx": {
+                "meshFx": 0,
+                "particles": 0,
+                "projectiles": 0,
+                "spawned": 62,
+                "materials": 27,
+                "pooledMeshes": 46,
+                "pooledSystems": 48
+              },
+              "budget": {
+                "active": 0,
+                "activeRemote": 0,
+                "activeCritical": 0,
+                "particles": 0,
+                "granted": 0,
+                "denied": 0,
+                "scaled": 0,
+                "deniedBy": {}
+              },
+              "culled": {
+                "distance": 0,
+                "offscreen": 0
+              },
+              "damageShown": 0,
+              "audioPlayed": 0,
+              "field": {
+                "hitFx": 0,
+                "numbers": 0,
+                "hurt": 0,
+                "respawnFx": 0,
+                "deathFx": 0,
+                "skillCasts": 0,
+                "swings": 0,
+                "texts": {}
+              },
+              "hud": {
+                "flash": true,
+                "shake": 1,
+                "numbers": true
+              },
+              "prewarm": {
+                "ms": 3498,
+                "spawned": 66,
+                "leftoverActive": 0,
+                "leftoverProjectiles": 0,
+                "audioPlayed": 0,
+                "damageShown": 0,
+                "tier": "high",
+                "materials": 27,
+                "pooledMeshes": 46,
+                "particleSystems": 48
+              }
+            },
+            "prewarmMs": 3498,
+            "loop": {
+              "started": true,
+              "frames": 36,
+              "now": 3.5000000000000018
+            },
+            "fx": {
+              "hitFx": 0,
+              "numbers": 0,
+              "hurt": 0,
+              "respawnFx": 0,
+              "deathFx": 0,
+              "skillCasts": 0,
+              "swings": 0,
+              "texts": {}
+            }
+          }
+        },
+        "CombatFx：一張地圖一個實例（傷害數字層只有 1 個，沒有舊版特效系統同時執行）": {
+          "ok": true,
+          "detail": {
+            "layers": {
+              "dmg": 1
+            },
+            "actors": 1
+          }
+        },
+        "CombatFx：地圖載入期間已預熱（不扣血、不播音效、不顯示數字、沒有殘留特效）": {
+          "ok": true,
+          "detail": {
+            "prewarm": {
+              "ms": 3498,
+              "spawned": 66,
+              "leftoverActive": 0,
+              "leftoverProjectiles": 0,
+              "audioPlayed": 0,
+              "damageShown": 0,
+              "tier": "high",
+              "materials": 27,
+              "pooledMeshes": 46,
+              "particleSystems": 48
+            },
+            "ms": 3498
+          }
+        },
+        "Stage 7.5 技能：六段技能都能施放，播放 C 的 Skill_* 動作": {
+          "ok": true,
+          "detail": {
+            "triple_slash": {
+              "ok": true,
+              "skill": "triple_slash",
+              "targetId": "star_dew_bobo#4",
+              "rate": 1.03,
+              "moved": 0.5549999999999997
+            },
+            "staff_cast": {
+              "ok": true,
+              "skill": "staff_cast",
+              "targetId": "star_dew_bobo#5",
+              "rate": 1.03,
+              "moved": 0
+            },
+            "leap_slam": {
+              "ok": true,
+              "skill": "leap_slam",
+              "targetId": "star_dew_bobo#5",
+              "rate": 1,
+              "moved": 1.1999999999999957
+            },
+            "whirlwind": {
+              "ok": true,
+              "skill": "whirlwind",
+              "targetId": "star_dew_bobo#3",
+              "rate": 1.03,
+              "moved": 0.2500000000000142
+            },
+            "star_meteor": {
+              "ok": true,
+              "skill": "star_meteor",
+              "targetId": "star_dew_bobo#1",
+              "rate": 1,
+              "moved": 0
+            },
+            "charge_burst": {
+              "ok": true,
+              "skill": "charge_burst",
+              "targetId": "star_dew_bobo#1",
+              "rate": 1,
+              "moved": 0.6000000000000014
+            }
+          }
+        },
+        "Stage 7.5 技能（CombatFx）：命中時有傷害、命中特效、傷害數字；投射物有判定": {
+          "ok": true,
+          "detail": {
+            "stats": {
+              "hitstopMs": 520,
+              "casts": 6,
+              "hits": 11,
+              "projectiles": 3,
+              "projectileVisuals": 3,
+              "moved": 2.605000000000011,
+              "hitEvents": 8,
+              "bySkill": {
+                "triple_slash": 1,
+                "staff_cast": 1,
+                "leap_slam": 1,
+                "whirlwind": 1,
+                "star_meteor": 1,
+                "charge_burst": 1
+              },
+              "viaCombatFx": 6
+            },
+            "fx": {
+              "hitFx": 11,
+              "numbers": 15,
+              "hurt": 4,
+              "respawnFx": 1,
+              "deathFx": 4,
+              "skillCasts": 6,
+              "swings": 0,
+              "texts": {}
+            },
+            "damageShown": 15
+          }
+        },
+        "Stage 7.5 技能（CombatFx）：技能特效、武器拖尾、投射物外觀都由 CombatFx 播放": {
+          "ok": true,
+          "detail": {
+            "vfx": {
+              "meshFx": 0,
+              "particles": 0,
+              "projectiles": 0,
+              "spawned": 133,
+              "materials": 59,
+              "pooledMeshes": 46,
+              "pooledSystems": 58
+            },
+            "budget": {
+              "active": 0,
+              "activeRemote": 0,
+              "activeCritical": 0,
+              "particles": 0,
+              "granted": 143,
+              "denied": 0,
+              "scaled": 0,
+              "deniedBy": {}
+            }
+          }
+        },
+        "Stage 7.5 技能：跳斬、蓄力衝刺有技能位移（經地形碰撞），原地技能不移動": {
+          "ok": true,
+          "detail": {
+            "triple_slash": 0.5549999999999997,
+            "staff_cast": 0,
+            "leap_slam": 1.1999999999999957,
+            "whirlwind": 0.2500000000000142,
+            "star_meteor": 0,
+            "charge_burst": 0.6000000000000014
+          }
+        },
+        "Stage 7.5 技能：施放結束後回到一般狀態（沒有卡在技能中）": {
+          "ok": true,
+          "detail": null
+        },
+        "HUD 暫定：預留治療、暴擊、未命中、格擋樣式": {
+          "ok": true,
+          "detail": {
+            "r": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "state": {
+              "heal": 1,
+              "crit": 1,
+              "miss": 1,
+              "block": 1
+            }
+          }
+        },
+        "CombatFx：切換畫質後沒有材質引用到已刪除的貼圖、貼圖／材質數沒有累積": {
+          "ok": true,
+          "detail": {
+            "tier0": "high",
+            "before": {
+              "textures": 136,
+              "materials": 143,
+              "meshes": 284,
+              "particleSystems": 53
+            },
+            "after": {
+              "textures": 136,
+              "materials": 143,
+              "meshes": 284,
+              "particleSystems": 53
+            },
+            "rounds": [
+              {
+                "tier": "high",
+                "textures": 136,
+                "materials": 143,
+                "meshes": 284,
+                "particleSystems": 53,
+                "broken": 4
+              },
+              {
+                "tier": "low",
+                "textures": 133,
+                "materials": 143,
+                "meshes": 284,
+                "particleSystems": 53,
+                "broken": 4
+              },
+              {
+                "tier": "medium",
+                "textures": 136,
+                "materials": 143,
+                "meshes": 284,
+                "particleSystems": 53,
+                "broken": 4
+              },
+              {
+                "tier": "high",
+                "textures": 136,
+                "materials": 143,
+                "meshes": 284,
+                "particleSystems": 53,
+                "broken": 4
+              }
+            ],
+            "brokenBefore": 4,
+            "brokenBeforeList": [
+              "fxm_star|#BFE0FF:fx_star_256",
+              "fxm_spark|#BFE0FF:fx_spark_256",
+              "fxm_spark|#FFFFFF:fx_spark_256",
+              "fxm_star|#59BFFF:fx_star_256"
+            ],
+            "brokenAfter": 4,
+            "brokenAfterList": [
+              "fxm_star|#BFE0FF:fx_star_256",
+              "fxm_spark|#BFE0FF:fx_spark_256",
+              "fxm_spark|#FFFFFF:fx_spark_256",
+              "fxm_star|#59BFFF:fx_star_256"
+            ],
+            "trail": true
+          }
+        },
+        "HUD 暫定：畫面閃光、鏡頭震動可以關閉／減弱／恢復": {
+          "ok": true,
+          "detail": {
+            "hudOff": {
+              "flash": false,
+              "shake": 0,
+              "numbers": true,
+              "screenEnabled": false,
+              "shakeEnabled": false,
+              "shakeScale": 0
+            },
+            "hudHalf": {
+              "flash": true,
+              "shake": 0.5,
+              "numbers": true,
+              "screenEnabled": true,
+              "shakeEnabled": true,
+              "shakeScale": 0.5
+            },
+            "hudOn": {
+              "flash": true,
+              "shake": 1,
+              "numbers": true,
+              "screenEnabled": true,
+              "shakeEnabled": true,
+              "shakeScale": 1
+            }
+          }
+        },
+        "Stage 7.5 多人共用貼圖：3 位 n75 共用同一份材質與貼圖（每多一人只多骨骼矩陣小貼圖）": {
+          "ok": true,
+          "detail": {
+            "n": 3,
+            "texBefore": 136,
+            "texAfterFirst": 138,
+            "texAfterAll": 140,
+            "materials": 1,
+            "usedTextures": 3,
+            "meshes": 3,
+            "containers": 1
+          }
+        },
+        "Stage 7.3 七種怪物：M002～M007 都是 Claude C 的正式模型（已交付、Lite），依原本 7 區出現；星露啵啵沿用": {
+          "ok": true,
+          "detail": {
+            "fm": [
+              {
+                "zone": "02",
+                "zoneName": "苔葉林緣",
+                "monster": "苔角獸",
+                "delivered": true,
+                "count": 5,
+                "status": "M002 苔角獸 Rig V1.0 Lite"
+              },
+              {
+                "zone": "03",
+                "zoneName": "微風花丘",
+                "monster": "雲絨鳥",
+                "delivered": true,
+                "count": 5,
+                "status": "M003 雲絨鳥 Rig V1.0 Lite"
+              },
+              {
+                "zone": "04",
+                "zoneName": "羽風高地",
+                "monster": "風羽狐",
+                "delivered": true,
+                "count": 4,
+                "status": "M004 風羽狐 Rig V1.1 Lite"
+              },
+              {
+                "zone": "05",
+                "zoneName": "星雲花田",
+                "monster": "星雲咩咩",
+                "delivered": true,
+                "count": 4,
+                "status": "M005 星雲咩咩 Rig V1.0 Lite"
+              },
+              {
+                "zone": "06",
+                "zoneName": "胡蘿蔔園",
+                "monster": "胡蘿蔔大王",
+                "delivered": true,
+                "count": 2,
+                "status": "M006 胡蘿蔔大王 Rig V1.0 Lite"
+              },
+              {
+                "zone": "07",
+                "zoneName": "王冠遺跡",
+                "monster": "王冠重錘兔",
+                "delivered": true,
+                "count": 1,
+                "status": "M007 王冠重錘兔 Rig V1.0 Lite"
+              }
+            ],
+            "kinds": {
+              "star_dew_bobo": 6,
+              "moss_horn_beast": 5,
+              "cloud_fluff_bird": 5,
+              "windfeather_fox": 4,
+              "nebula_sheep": 4,
+              "carrot_king": 2,
+              "crown_hammer_rabbit": 1
+            }
+          }
+        },
+        "Stage 7.3：Lv.1～4 被動（星露啵啵、苔角獸）、Lv.5 以上主動（雲絨鳥～王冠重錘兔）": {
+          "ok": true,
+          "detail": {
+            "star_dew_bobo": {
+              "level": 1,
+              "aggressive": false
+            },
+            "moss_horn_beast": {
+              "level": 3,
+              "aggressive": false
+            },
+            "cloud_fluff_bird": {
+              "level": 5,
+              "aggressive": true
+            },
+            "windfeather_fox": {
+              "level": 7,
+              "aggressive": true
+            },
+            "nebula_sheep": {
+              "level": 8,
+              "aggressive": true
+            },
+            "carrot_king": {
+              "level": 9,
+              "aggressive": true
+            },
+            "crown_hammer_rabbit": {
+              "level": 10,
+              "aggressive": true
+            }
+          }
+        },
+        "原野：擊倒怪物、掉落金幣（測試設定 3–8）並撿起入帳": {
+          "ok": true,
+          "detail": {
+            "kills": 4,
+            "picked": 4,
+            "goldDropped": 24,
+            "goldPicked": 24,
+            "gold": 106,
+            "claimed": 8
+          }
+        },
+        "Stage 7.3 戰鬥特效（Claude C VFX V2）：命中火花與傷害數字和命中同步出現": {
+          "ok": true,
+          "detail": {
+            "tier": "high",
+            "hitFx": 11,
+            "numbers": 16,
+            "hurt": 5,
+            "respawnFx": 4,
+            "deathFx": 4,
+            "skillCasts": 6,
+            "swings": 6,
+            "texts": {
+              "heal": 1,
+              "crit": 1,
+              "miss": 1,
+              "block": 1
+            },
+            "damageShown": 20,
+            "audioPlayed": 32,
+            "module": "CombatFx",
+            "knockbacks": 4,
+            "knockSkipped": 3
+          }
+        },
+        "Stage 7.2：擊敗怪物得到經驗（測試設定），存進角色存檔": {
+          "ok": true,
+          "detail": {
+            "expGained": 48,
+            "level": 1,
+            "exp": 48
+          }
+        },
+        "掉落物唯一編號：每個撿起的掉落只入帳一次": {
+          "ok": true,
+          "detail": {
+            "drops": 4,
+            "claimed": 8
+          }
+        },
+        "Stage 7.4：玩家持續普攻（遊戲時間 25 秒；CI 太慢時至少 15 秒，怪物血量調高）：怪物仍多次反擊命中（≥ 4 次）、最長不出手間隔 < 8 秒；擊退有衰減（不會一直被推離）": {
+          "ok": true,
+          "detail": {
+            "kind": "star_dew_bobo",
+            "gameSeconds": 25,
+            "wallSeconds": 34.1,
+            "presses": 249,
+            "playerHits": 53,
+            "hurtTaken": 13,
+            "monsterAttacks": 13,
+            "knockbacks": 1,
+            "knockSkipped": 41,
+            "maxGapSec": 2,
+            "alive": true
+          }
+        },
+        "營地傳送陣：踩進去直接回到星芽村南門內側（南方傳送陣外、沒有再被傳回原野）": {
+          "ok": true,
+          "detail": {
+            "pos": [
+              0,
+              0,
+              -39
+            ],
+            "portal": {
+              "armed": true,
+              "fired": false,
+              "dist": 5,
+              "triggerR": 2.6
+            }
+          }
+        },
+        "Stage 7.2 返回村莊：等級、經驗、外觀、武器保留": {
+          "ok": true,
+          "detail": {
+            "village": {
+              "level": 1,
+              "exp": 48,
+              "appearance": {
+                "hair": "hair01",
+                "hairColor": null,
+                "weapon": "sword"
+              }
+            },
+            "field": {
+              "level": 1,
+              "exp": 48,
+              "appearance": {
+                "hair": "hair01",
+                "hairColor": null,
+                "weapon": "sword"
+              }
+            }
+          }
+        },
+        "返回村莊：金幣、背包、物品數量保留": {
+          "ok": true,
+          "detail": {
+            "vi": 106,
+            "field": 106
+          }
+        },
+        "戰死：生命歸零後倒地並播死亡動作（不是整個角色僵硬往後倒）": {
+          "ok": true,
+          "detail": {
+            "state": "Death",
+            "deathClip": true,
+            "states": [
+              "Idle",
+              "Death",
+              "Death",
+              "Death",
+              "Death",
+              "Death"
+            ]
+          }
+        },
+        "戰死 → 在星芽村復活（死亡次數 +1、滿血、金幣不變）": {
+          "ok": true,
+          "detail": {
+            "pos": [
+              6.2,
+              0,
+              10.8
+            ],
+            "deaths": 1,
+            "hp": null,
+            "gold": 106
+          }
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "webkit_male_village_start.png",
+        "webkit_male_panel_portrait.png",
+        "webkit_male_village_pet.png",
+        "webkit_male_field_arrive.png",
+        "webkit_male_n75_preview_smash.png",
+        "webkit_male_n75_sword_chop.png",
+        "webkit_male_n75_skill_triple.png",
+        "webkit_male_n75_skill_whirlwind.png",
+        "webkit_male_n75_skill_meteor.png",
+        "webkit_male_zone_01_bobo.png",
+        "webkit_male_zone_02_moss_horn_beast.png",
+        "webkit_male_zone_03_cloud_fluff_bird.png",
+        "webkit_male_zone_04_windfeather_fox.png",
+        "webkit_male_zone_05_nebula_sheep.png",
+        "webkit_male_zone_06_carrot_king.png",
+        "webkit_male_zone_07_crown_hammer_rabbit.png",
+        "webkit_male_field_fight.png",
+        "webkit_male_field_portal.png",
+        "webkit_male_village_back.png",
+        "webkit_male_field_down.png",
+        "webkit_male_village_respawn.png"
+      ],
+      "results": {
+        "start": {
+          "map": "village",
+          "gender": "male",
+          "file": "novice_n75_male_hq.glb",
+          "npcs": {
+            "ids": [
+              "sword",
+              "knight",
+              "smith",
+              "mage",
+              "church",
+              "circus",
+              "warehouse",
+              "guild"
+            ],
+            "board": true,
+            "merchant": true
+          },
+          "merchantPose": {
+            "x": -4.132981069542964,
+            "z": -9.9778989511219,
+            "yaw": -2.7488935718910694,
+            "walking": false,
+            "station": 0,
+            "bearing": 202.5,
+            "anim": "Idle",
+            "facing": -2.7488935718910694,
+            "lod": 0,
+            "paused": false,
+            "walkRate": 1
+          },
+          "avatarModel": {
+            "modular": false,
+            "weapon": null,
+            "bones": 82,
+            "triangles": 9609,
+            "parts": [],
+            "clips": [
+              "Idle",
+              "Run",
+              "Attack",
+              "Hurt",
+              "Death",
+              "Jump"
+            ],
+            "attackClips": []
+          },
+          "state": "Idle",
+          "pos": [
+            0,
+            0,
+            -12.5
+          ],
+          "gold": 100,
+          "hp": null,
+          "items": {
+            "seed": 0,
+            "egg": 0,
+            "birdEgg": 0,
+            "monsterMaterial": 0,
+            "shopFeed": 0
+          },
+          "bag": [],
+          "pets": [],
+          "equipped": null,
+          "followerVisible": false,
+          "followerSize": 0,
+          "ledger": [],
+          "deaths": 0,
+          "level": 1,
+          "exp": 0,
+          "appearance": {
+            "hair": "hair01",
+            "hairColor": null,
+            "weapon": "sword"
+          },
+          "art": "loaded",
+          "interact": {
+            "target": null,
+            "talking": false,
+            "dialog": "",
+            "panelOpen": false,
+            "appraisalOpen": false,
+            "merchantPaused": false
+          },
+          "portal": {
+            "armed": true,
+            "fired": false,
+            "dist": 31.5,
+            "triggerR": 2.6
+          },
+          "panel": "closed",
+          "petGap": null,
+          "headHalfWidth": 0.33,
+          "quality": {
+            "lod": "hq",
+            "render": "auto",
+            "scale": 0.6666666666666666
+          },
+          "mode": "test",
+          "render": {
+            "drawCalls": 55,
+            "contextLost": 0,
+            "charShadow": "blob"
+          },
+          "jumpButtonVisible": false
+        },
+        "appraisal": {
+          "quote": {
+            "fee": 20,
+            "test": true
+          },
+          "r1": true,
+          "r2": true,
+          "gold": 80,
+          "ledger": 1,
+          "appraised": true
+        },
+        "guild": {
+          "serverBacked": false,
+          "b1": true,
+          "b2": true,
+          "feed": 1,
+          "listed": true,
+          "lockedAfterList": true,
+          "dup": false,
+          "ownBuy": false,
+          "cancelled": true,
+          "lockedAfterCancel": false,
+          "sold": true,
+          "goldBeforeSell": 70,
+          "gold": 82,
+          "stillInBag": false
+        },
+        "panelLandscape": {
+          "ok": true,
+          "inView": true,
+          "size": [
+            44,
+            44
+          ],
+          "onTop": true,
+          "panelBottom": 325.75,
+          "vh": 393,
+          "vw": 852,
+          "outX": 0,
+          "scrollable": "fits",
+          "bodyTouch": "pan-y"
+        },
+        "petDetailTries": 1,
+        "panelPortrait": {
+          "ok": true,
+          "inView": true,
+          "size": [
+            44,
+            44
+          ],
+          "onTop": true,
+          "panelBottom": 316.0625,
+          "vh": 852,
+          "vw": 393,
+          "outX": 0,
+          "scrollable": "fits",
+          "bodyTouch": "pan-y"
+        },
+        "petGap": {
+          "panel": "closed",
+          "gap": 0.2001388059540942,
+          "hw": 0.33,
+          "size": 0.075,
+          "eq": 1
+        },
+        "fieldArrive": {
+          "fi": {
+            "map": "starsprout",
+            "gold": 82,
+            "deaths": 0,
+            "level": 1,
+            "exp": 0,
+            "expGained": 0,
+            "appearance": {
+              "hair": "hair01",
+              "hairColor": null,
+              "weapon": "sword"
+            },
+            "hp": 100,
+            "down": false,
+            "deathClip": true,
+            "state": "Idle",
+            "portal": {
+              "armed": true,
+              "fired": false,
+              "dist": 4,
+              "triggerR": 1.6,
+              "built": true,
+              "meshes": 3
+            },
+            "panel": "closed",
+            "petGap": 0.20057823143627365,
+            "headHalfWidth": 0.33,
+            "goldDropped": 0,
+            "goldPicked": 0,
+            "goldOnGround": 0,
+            "jumpButton": false,
+            "claimed": 0,
+            "ledger": [
+              {
+                "seq": 1,
+                "requestId": "appraise:e2e-ap-1",
+                "kind": "appraisal",
+                "amount": -20,
+                "balanceAfter": 80,
+                "ref": "item:1",
+                "at": 1795871838806
+              },
+              {
+                "seq": 2,
+                "requestId": "e2e-buy-1",
+                "kind": "shopBuy",
+                "amount": -10,
+                "balanceAfter": 70,
+                "ref": "shop:feed×1",
+                "at": 1795871839102
+              },
+              {
+                "seq": 3,
+                "requestId": "e2e-sell-1",
+                "kind": "shopSell",
+                "amount": 12,
+                "balanceAfter": 82,
+                "ref": "item:2",
+                "at": 1795871839106
+              }
+            ],
+            "bag": 1,
+            "items": {
+              "seed": 1,
+              "egg": 0,
+              "birdEgg": 0,
+              "monsterMaterial": 0,
+              "shopFeed": 1
+            },
+            "pets": [
+              {
+                "id": 1,
+                "stage": 1,
+                "life": "alive",
+                "satiety": 99.2014
+              }
+            ],
+            "followerSize": 0.075,
+            "loot": []
+          },
+          "pos": [
+            -56,
+            2,
+            -64
+          ]
+        },
+        "stage75Skills": {
+          "castRes": {
+            "triple_slash": {
+              "ok": true,
+              "skill": "triple_slash",
+              "targetId": "star_dew_bobo#4",
+              "rate": 1.03,
+              "moved": 0.5549999999999997
+            },
+            "staff_cast": {
+              "ok": true,
+              "skill": "staff_cast",
+              "targetId": "star_dew_bobo#5",
+              "rate": 1.03,
+              "moved": 0
+            },
+            "leap_slam": {
+              "ok": true,
+              "skill": "leap_slam",
+              "targetId": "star_dew_bobo#5",
+              "rate": 1,
+              "moved": 1.1999999999999957
+            },
+            "whirlwind": {
+              "ok": true,
+              "skill": "whirlwind",
+              "targetId": "star_dew_bobo#3",
+              "rate": 1.03,
+              "moved": 0.2500000000000142
+            },
+            "star_meteor": {
+              "ok": true,
+              "skill": "star_meteor",
+              "targetId": "star_dew_bobo#1",
+              "rate": 1,
+              "moved": 0
+            },
+            "charge_burst": {
+              "ok": true,
+              "skill": "charge_burst",
+              "targetId": "star_dew_bobo#1",
+              "rate": 1,
+              "moved": 0.6000000000000014
+            }
+          },
+          "state": {
+            "enabled": true,
+            "busy": false,
+            "active": null,
+            "t": 0,
+            "stats": {
+              "hitstopMs": 520,
+              "casts": 6,
+              "hits": 11,
+              "projectiles": 3,
+              "projectileVisuals": 3,
+              "moved": 2.605000000000011,
+              "hitEvents": 8,
+              "bySkill": {
+                "triple_slash": 1,
+                "staff_cast": 1,
+                "leap_slam": 1,
+                "whirlwind": 1,
+                "star_meteor": 1,
+                "charge_burst": 1
+              },
+              "viaCombatFx": 6
+            },
+            "cooldowns": {
+              "triple_slash": 0,
+              "staff_cast": 0,
+              "leap_slam": 0,
+              "whirlwind": 0,
+              "star_meteor": 0,
+              "charge_burst": 3.5999999999999943
+            },
+            "log": [
+              {
+                "skill": "triple_slash",
+                "ok": true,
+                "t": 3.900000000000002
+              },
+              {
+                "skill": "staff_cast",
+                "ok": true,
+                "t": 6.299999999999994
+              },
+              {
+                "skill": "leap_slam",
+                "ok": true,
+                "t": 8.099999999999987
+              },
+              {
+                "skill": "whirlwind",
+                "ok": true,
+                "t": 10.09999999999998
+              },
+              {
+                "skill": "star_meteor",
+                "ok": true,
+                "t": 12.69999999999997
+              },
+              {
+                "skill": "charge_burst",
+                "ok": true,
+                "t": 14.999999999999963
+              }
+            ],
+            "audio": true,
+            "trail": true,
+            "combatFx": {
+              "tier": "high",
+              "actors": 1,
+              "playing": 0,
+              "vfx": {
+                "meshFx": 0,
+                "particles": 0,
+                "projectiles": 0,
+                "spawned": 133,
+                "materials": 59,
+                "pooledMeshes": 46,
+                "pooledSystems": 58
+              },
+              "budget": {
+                "active": 0,
+                "activeRemote": 0,
+                "activeCritical": 0,
+                "particles": 0,
+                "granted": 143,
+                "denied": 0,
+                "scaled": 0,
+                "deniedBy": {}
+              },
+              "culled": {
+                "distance": 0,
+                "offscreen": 0
+              },
+              "damageShown": 15,
+              "audioPlayed": 26,
+              "field": {
+                "hitFx": 11,
+                "numbers": 15,
+                "hurt": 4,
+                "respawnFx": 1,
+                "deathFx": 4,
+                "skillCasts": 6,
+                "swings": 0,
+                "texts": {}
+              },
+              "hud": {
+                "flash": true,
+                "shake": 1,
+                "numbers": true
+              },
+              "prewarm": {
+                "ms": 3498,
+                "spawned": 66,
+                "leftoverActive": 0,
+                "leftoverProjectiles": 0,
+                "audioPlayed": 0,
+                "damageShown": 0,
+                "tier": "high",
+                "materials": 27,
+                "pooledMeshes": 46,
+                "particleSystems": 48
+              }
+            },
+            "prewarmMs": 3498,
+            "loop": {
+              "started": true,
+              "frames": 178,
+              "now": 17.69999999999998
+            },
+            "fx": {
+              "hitFx": 11,
+              "numbers": 15,
+              "hurt": 4,
+              "respawnFx": 1,
+              "deathFx": 4,
+              "skillCasts": 6,
+              "swings": 0,
+              "texts": {}
+            }
+          }
+        },
+        "combatFxQualityCycle": {
+          "tier0": "high",
+          "before": {
+            "textures": 136,
+            "materials": 143,
+            "meshes": 284,
+            "particleSystems": 53
+          },
+          "after": {
+            "textures": 136,
+            "materials": 143,
+            "meshes": 284,
+            "particleSystems": 53
+          },
+          "rounds": [
+            {
+              "tier": "high",
+              "textures": 136,
+              "materials": 143,
+              "meshes": 284,
+              "particleSystems": 53,
+              "broken": 4
+            },
+            {
+              "tier": "low",
+              "textures": 133,
+              "materials": 143,
+              "meshes": 284,
+              "particleSystems": 53,
+              "broken": 4
+            },
+            {
+              "tier": "medium",
+              "textures": 136,
+              "materials": 143,
+              "meshes": 284,
+              "particleSystems": 53,
+              "broken": 4
+            },
+            {
+              "tier": "high",
+              "textures": 136,
+              "materials": 143,
+              "meshes": 284,
+              "particleSystems": 53,
+              "broken": 4
+            }
+          ],
+          "brokenBefore": 4,
+          "brokenBeforeList": [
+            "fxm_star|#BFE0FF:fx_star_256",
+            "fxm_spark|#BFE0FF:fx_spark_256",
+            "fxm_spark|#FFFFFF:fx_spark_256",
+            "fxm_star|#59BFFF:fx_star_256"
+          ],
+          "brokenAfter": 4,
+          "brokenAfterList": [
+            "fxm_star|#BFE0FF:fx_star_256",
+            "fxm_spark|#BFE0FF:fx_spark_256",
+            "fxm_spark|#FFFFFF:fx_spark_256",
+            "fxm_star|#59BFFF:fx_star_256"
+          ],
+          "trail": true
+        },
+        "stage75Shared": {
+          "n": 3,
+          "texBefore": 136,
+          "texAfterFirst": 138,
+          "texAfterAll": 140,
+          "materials": 1,
+          "usedTextures": 3,
+          "meshes": 3,
+          "containers": 1
+        },
+        "fieldMonsters": {
+          "fm": [
+            {
+              "zone": "02",
+              "zoneName": "苔葉林緣",
+              "monster": "苔角獸",
+              "delivered": true,
+              "count": 5,
+              "status": "M002 苔角獸 Rig V1.0 Lite"
+            },
+            {
+              "zone": "03",
+              "zoneName": "微風花丘",
+              "monster": "雲絨鳥",
+              "delivered": true,
+              "count": 5,
+              "status": "M003 雲絨鳥 Rig V1.0 Lite"
+            },
+            {
+              "zone": "04",
+              "zoneName": "羽風高地",
+              "monster": "風羽狐",
+              "delivered": true,
+              "count": 4,
+              "status": "M004 風羽狐 Rig V1.1 Lite"
+            },
+            {
+              "zone": "05",
+              "zoneName": "星雲花田",
+              "monster": "星雲咩咩",
+              "delivered": true,
+              "count": 4,
+              "status": "M005 星雲咩咩 Rig V1.0 Lite"
+            },
+            {
+              "zone": "06",
+              "zoneName": "胡蘿蔔園",
+              "monster": "胡蘿蔔大王",
+              "delivered": true,
+              "count": 2,
+              "status": "M006 胡蘿蔔大王 Rig V1.0 Lite"
+            },
+            {
+              "zone": "07",
+              "zoneName": "王冠遺跡",
+              "monster": "王冠重錘兔",
+              "delivered": true,
+              "count": 1,
+              "status": "M007 王冠重錘兔 Rig V1.0 Lite"
+            }
+          ],
+          "kinds": {
+            "star_dew_bobo": 6,
+            "moss_horn_beast": 5,
+            "cloud_fluff_bird": 5,
+            "windfeather_fox": 4,
+            "nebula_sheep": 4,
+            "carrot_king": 2,
+            "crown_hammer_rabbit": 1
+          }
+        },
+        "fight": {
+          "kills": 4,
+          "picked": 4,
+          "goldDropped": 24,
+          "goldPicked": 24,
+          "gold": 106,
+          "claimed": 8
+        },
+        "sustainedAttack": {
+          "kind": "star_dew_bobo",
+          "gameSeconds": 25,
+          "wallSeconds": 34.1,
+          "presses": 249,
+          "playerHits": 53,
+          "hurtTaken": 13,
+          "monsterAttacks": 13,
+          "knockbacks": 1,
+          "knockSkipped": 41,
+          "maxGapSec": 2,
+          "alive": true
+        },
+        "backVillage": {
+          "gold": 106,
+          "pos": [
+            0,
+            0,
+            -39
+          ],
+          "bag": 3
+        },
+        "death": {
+          "state": "Death",
+          "deathClip": true,
+          "states": [
+            "Idle",
+            "Death",
+            "Death",
+            "Death",
+            "Death",
+            "Death"
+          ]
+        },
+        "respawn": {
+          "pos": [
+            6.2,
+            0,
+            10.8
+          ],
+          "deaths": 1,
+          "hp": null,
+          "gold": 106
+        }
+      },
+      "console": [],
+      "ok": true
+    },
+    {
+      "browser": "webkit",
+      "label": "female",
+      "checks": {
+        "新存檔在星芽村出生（性別、測試設定、起始金幣 100）": {
+          "ok": true,
+          "detail": {
+            "map": "village",
+            "gender": "female",
+            "gold": 100,
+            "mode": "test"
+          }
+        },
+        "星芽村：一般移動沒有跳躍按鈕": {
+          "ok": true,
+          "detail": false
+        },
+        "村莊 NPC（Claude B Stage 6.7）：七位 NPC＋洛恩＋N008 委託佈告欄已載入": {
+          "ok": true,
+          "detail": {
+            "ids": [
+              "sword",
+              "knight",
+              "smith",
+              "mage",
+              "church",
+              "circus",
+              "warehouse",
+              "guild"
+            ],
+            "board": true,
+            "merchant": true
+          }
+        },
+        "角色模型：男性 Stage 7.5 新版 n75、女性 C1.0-B5b（不是封存的 Stage 7.2 Tripo 模組化版）": {
+          "ok": true,
+          "detail": {
+            "file": "novice_c10b5b_female_hq.glb",
+            "modular": false
+          }
+        },
+        "角色動作：Idle／Run／Attack／Hurt／Death 齊全；Jump 只給技能（一般移動沒有跳躍鍵）": {
+          "ok": true,
+          "detail": {
+            "clips": [
+              "Attack",
+              "Death",
+              "Hurt",
+              "Idle",
+              "Jump",
+              "Run"
+            ]
+          }
+        },
+        "Stage 7.2：存檔有等級、經驗、外觀（髮型、髮色、武器）": {
+          "ok": true,
+          "detail": {
+            "level": 1,
+            "exp": 0,
+            "appearance": {
+              "hair": "hair01",
+              "hairColor": null,
+              "weapon": "sword"
+            }
+          }
+        },
+        "洛恩鑑定：收 20 金幣（測試設定），重送同一請求不重複扣款": {
+          "ok": true,
+          "detail": {
+            "quote": {
+              "fee": 20,
+              "test": true
+            },
+            "r1": true,
+            "r2": true,
+            "gold": 80,
+            "ledger": 1,
+            "appraised": true
+          }
+        },
+        "商會：本機服務（serverBacked=false，不是真正的多人交易）": {
+          "ok": true,
+          "detail": false
+        },
+        "商會：買飼料扣 10 金幣，重送不重複扣款": {
+          "ok": true,
+          "detail": {
+            "serverBacked": false,
+            "b1": true,
+            "b2": true,
+            "feed": 1,
+            "listed": true,
+            "lockedAfterList": true,
+            "dup": false,
+            "ownBuy": false,
+            "cancelled": true,
+            "lockedAfterCancel": false,
+            "sold": true,
+            "goldBeforeSell": 70,
+            "gold": 82,
+            "stillInBag": false
+          }
+        },
+        "商會：掛賣鎖定物品、不能重複掛賣、不能買自己的、取消後解鎖": {
+          "ok": true,
+          "detail": {
+            "serverBacked": false,
+            "b1": true,
+            "b2": true,
+            "feed": 1,
+            "listed": true,
+            "lockedAfterList": true,
+            "dup": false,
+            "ownBuy": false,
+            "cancelled": true,
+            "lockedAfterCancel": false,
+            "sold": true,
+            "goldBeforeSell": 70,
+            "gold": 82,
+            "stillInBag": false
+          }
+        },
+        "商會：賣給 NPC 入帳 12（40×0.3），重送不重複入帳、物品移出背包": {
+          "ok": true,
+          "detail": {
+            "serverBacked": false,
+            "b1": true,
+            "b2": true,
+            "feed": 1,
+            "listed": true,
+            "lockedAfterList": true,
+            "dup": false,
+            "ownBuy": false,
+            "cancelled": true,
+            "lockedAfterCancel": false,
+            "sold": true,
+            "goldBeforeSell": 70,
+            "gold": 82,
+            "stillInBag": false
+          }
+        },
+        "背包按鈕開啟背包視窗，右上角 X 在畫面內、沒有被遮住、至少 40 px": {
+          "ok": true,
+          "detail": {
+            "ui": "bag",
+            "x1": {
+              "ok": true,
+              "inView": true,
+              "size": [
+                44,
+                44
+              ],
+              "onTop": true,
+              "panelBottom": 325.75,
+              "vh": 393,
+              "vw": 852,
+              "outX": 0,
+              "scrollable": "fits",
+              "bodyTouch": "pan-y"
+            }
+          }
+        },
+        "點 X 立即關閉背包視窗": {
+          "ok": true,
+          "detail": "closed"
+        },
+        "寵物子畫面：點寵物進入詳細、返回鍵回到寵物列表": {
+          "ok": true,
+          "detail": {
+            "petId": 1,
+            "uiDetail": "pet:1",
+            "uiBack": "pet"
+          }
+        },
+        "直向 iPhone：寵物視窗 X 在畫面內、沒有被遮住，按鈕不超出左右邊界，內容區可捲動（touch-action pan-y）": {
+          "ok": true,
+          "detail": {
+            "ok": true,
+            "inView": true,
+            "size": [
+              44,
+              44
+            ],
+            "onTop": true,
+            "panelBottom": 316.0625,
+            "vh": 852,
+            "vw": 393,
+            "outX": 0,
+            "scrollable": "fits",
+            "bodyTouch": "pan-y"
+          }
+        },
+        "直向 iPhone：「選單」按鈕與「畫質」按鈕不重疊": {
+          "ok": true,
+          "detail": {
+            "overlap": false,
+            "menu": [
+              317,
+              160,
+              64,
+              40
+            ],
+            "quality": [
+              285,
+              108,
+              96,
+              44
+            ]
+          }
+        },
+        "寵物跟在頭部側邊：與頭部外緣保持 15～25 cm 可見間距（大小不變）": {
+          "ok": true,
+          "detail": {
+            "panel": "closed",
+            "gap": 0.2002624666867817,
+            "hw": 0.3293747901916504,
+            "size": 0.075,
+            "eq": 1
+          }
+        },
+        "星芽村：抵達點在南方傳送陣外、傳送陣已啟用、沒有觸發": {
+          "ok": true,
+          "detail": {
+            "armed": true,
+            "fired": false,
+            "dist": 31.5,
+            "triggerR": 2.6
+          }
+        },
+        "南方傳送陣：踩進去直接傳送，沒有出現確認視窗或傳送按鈕": {
+          "ok": true,
+          "detail": {
+            "dlgSeen": false
+          }
+        },
+        "南方傳送陣 → 星芽原野新手營地（抵達在營地傳送陣外側）": {
+          "ok": true,
+          "detail": {
+            "pos": [
+              -56,
+              2,
+              -64
+            ],
+            "portal": {
+              "armed": true,
+              "fired": false,
+              "dist": 4,
+              "triggerR": 1.6,
+              "built": true,
+              "meshes": 3
+            }
+          }
+        },
+        "營地傳送陣：已建立（魔法陣＋符文＋光柱）、抵達後啟用但不會自動觸發（不會兩張地圖無限往返）": {
+          "ok": true,
+          "detail": {
+            "armed": true,
+            "fired": false,
+            "dist": 4,
+            "triggerR": 1.6,
+            "built": true,
+            "meshes": 3
+          }
+        },
+        "切換地圖：金幣、背包、模型性別保留": {
+          "ok": true,
+          "detail": {
+            "gold": 82,
+            "goldBeforeField": 82,
+            "bag": 1,
+            "bagBeforeField": 1
+          }
+        },
+        "星芽原野：一般移動沒有跳躍按鈕": {
+          "ok": true,
+          "detail": false
+        },
+        "原野與村莊用同一個角色模型（C1.0-B5b，沒有變回其他版本）": {
+          "ok": true,
+          "detail": {
+            "village": "novice_c10b5b_female_hq.glb",
+            "field": "novice_c10b5b_female_hq.glb"
+          }
+        },
+        "切換地圖後寵物仍裝備、在頭部側邊 15～25 cm": {
+          "ok": true,
+          "detail": {
+            "gap": 0.19972182002890956,
+            "pets": [
+              {
+                "id": 1,
+                "stage": 1,
+                "life": "alive",
+                "satiety": 98.6795
+              }
+            ]
+          }
+        },
+        "Stage 7.3 七種怪物：M002～M007 都是 Claude C 的正式模型（已交付、Lite），依原本 7 區出現；星露啵啵沿用": {
+          "ok": true,
+          "detail": {
+            "fm": [
+              {
+                "zone": "02",
+                "zoneName": "苔葉林緣",
+                "monster": "苔角獸",
+                "delivered": true,
+                "count": 5,
+                "status": "M002 苔角獸 Rig V1.0 Lite"
+              },
+              {
+                "zone": "03",
+                "zoneName": "微風花丘",
+                "monster": "雲絨鳥",
+                "delivered": true,
+                "count": 5,
+                "status": "M003 雲絨鳥 Rig V1.0 Lite"
+              },
+              {
+                "zone": "04",
+                "zoneName": "羽風高地",
+                "monster": "風羽狐",
+                "delivered": true,
+                "count": 4,
+                "status": "M004 風羽狐 Rig V1.1 Lite"
+              },
+              {
+                "zone": "05",
+                "zoneName": "星雲花田",
+                "monster": "星雲咩咩",
+                "delivered": true,
+                "count": 4,
+                "status": "M005 星雲咩咩 Rig V1.0 Lite"
+              },
+              {
+                "zone": "06",
+                "zoneName": "胡蘿蔔園",
+                "monster": "胡蘿蔔大王",
+                "delivered": true,
+                "count": 2,
+                "status": "M006 胡蘿蔔大王 Rig V1.0 Lite"
+              },
+              {
+                "zone": "07",
+                "zoneName": "王冠遺跡",
+                "monster": "王冠重錘兔",
+                "delivered": true,
+                "count": 1,
+                "status": "M007 王冠重錘兔 Rig V1.0 Lite"
+              }
+            ],
+            "kinds": {
+              "star_dew_bobo": 6,
+              "moss_horn_beast": 5,
+              "cloud_fluff_bird": 5,
+              "windfeather_fox": 4,
+              "nebula_sheep": 4,
+              "carrot_king": 2,
+              "crown_hammer_rabbit": 1
+            }
+          }
+        },
+        "Stage 7.3：Lv.1～4 被動（星露啵啵、苔角獸）、Lv.5 以上主動（雲絨鳥～王冠重錘兔）": {
+          "ok": true,
+          "detail": {
+            "star_dew_bobo": {
+              "level": 1,
+              "aggressive": false
+            },
+            "moss_horn_beast": {
+              "level": 3,
+              "aggressive": false
+            },
+            "cloud_fluff_bird": {
+              "level": 5,
+              "aggressive": true
+            },
+            "windfeather_fox": {
+              "level": 7,
+              "aggressive": true
+            },
+            "nebula_sheep": {
+              "level": 8,
+              "aggressive": true
+            },
+            "carrot_king": {
+              "level": 9,
+              "aggressive": true
+            },
+            "crown_hammer_rabbit": {
+              "level": 10,
+              "aggressive": true
+            }
+          }
+        },
+        "原野：擊倒怪物、掉落金幣（測試設定 3–8）並撿起入帳": {
+          "ok": true,
+          "detail": {
+            "kills": 2,
+            "picked": 2,
+            "goldDropped": 12,
+            "goldPicked": 12,
+            "gold": 94,
+            "claimed": 4
+          }
+        },
+        "Stage 7.3 戰鬥特效（Claude C VFX V2）：命中火花與傷害數字和命中同步出現": {
+          "ok": true,
+          "detail": {
+            "tier": "high",
+            "hitFx": 6,
+            "numbers": 8,
+            "hurt": 2,
+            "respawnFx": 0,
+            "deathFx": 2,
+            "skillCasts": 0,
+            "swings": 6,
+            "texts": {},
+            "damageShown": 8,
+            "audioPlayed": 0,
+            "module": "CombatFx",
+            "knockbacks": 2,
+            "knockSkipped": 2
+          }
+        },
+        "Stage 7.2：擊敗怪物得到經驗（測試設定），存進角色存檔": {
+          "ok": true,
+          "detail": {
+            "expGained": 24,
+            "level": 1,
+            "exp": 24
+          }
+        },
+        "掉落物唯一編號：每個撿起的掉落只入帳一次": {
+          "ok": true,
+          "detail": {
+            "drops": 2,
+            "claimed": 4
+          }
+        },
+        "Stage 7.4：玩家持續普攻（遊戲時間 25 秒；CI 太慢時至少 15 秒，怪物血量調高）：怪物仍多次反擊命中（≥ 4 次）、最長不出手間隔 < 8 秒；擊退有衰減（不會一直被推離）": {
+          "ok": true,
+          "detail": {
+            "kind": "star_dew_bobo",
+            "gameSeconds": 25,
+            "wallSeconds": 173,
+            "presses": 249,
+            "playerHits": 47,
+            "hurtTaken": 12,
+            "monsterAttacks": 12,
+            "knockbacks": 1,
+            "knockSkipped": 40,
+            "maxGapSec": 2.1,
+            "alive": true
+          }
+        },
+        "營地傳送陣：踩進去直接回到星芽村南門內側（南方傳送陣外、沒有再被傳回原野）": {
+          "ok": true,
+          "detail": {
+            "pos": [
+              0,
+              0,
+              -39
+            ],
+            "portal": {
+              "armed": true,
+              "fired": false,
+              "dist": 5,
+              "triggerR": 2.6
+            }
+          }
+        },
+        "Stage 7.2 返回村莊：等級、經驗、外觀、武器保留": {
+          "ok": true,
+          "detail": {
+            "village": {
+              "level": 1,
+              "exp": 24,
+              "appearance": {
+                "hair": "hair01",
+                "hairColor": null,
+                "weapon": "sword"
+              }
+            },
+            "field": {
+              "level": 1,
+              "exp": 24,
+              "appearance": {
+                "hair": "hair01",
+                "hairColor": null,
+                "weapon": "sword"
+              }
+            }
+          }
+        },
+        "返回村莊：金幣、背包、物品數量保留": {
+          "ok": true,
+          "detail": {
+            "vi": 94,
+            "field": 94
+          }
+        },
+        "戰死：生命歸零後倒地並播死亡動作（不是整個角色僵硬往後倒）": {
+          "ok": true,
+          "detail": {
+            "state": "Death",
+            "deathClip": true,
+            "states": [
+              "Idle",
+              "Death",
+              "Death",
+              "Death",
+              "Death",
+              "Death"
+            ]
+          }
+        },
+        "戰死 → 在星芽村復活（死亡次數 +1、滿血、金幣不變）": {
+          "ok": true,
+          "detail": {
+            "pos": [
+              6.2,
+              0,
+              10.8
+            ],
+            "deaths": 1,
+            "hp": null,
+            "gold": 94
+          }
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "webkit_female_village_start.png",
+        "webkit_female_panel_portrait.png",
+        "webkit_female_village_pet.png",
+        "webkit_female_field_arrive.png",
+        "webkit_female_field_fight.png",
+        "webkit_female_field_portal.png",
+        "webkit_female_village_back.png",
+        "webkit_female_field_down.png",
+        "webkit_female_village_respawn.png"
+      ],
+      "results": {
+        "start": {
+          "map": "village",
+          "gender": "female",
+          "file": "novice_c10b5b_female_hq.glb",
+          "npcs": {
+            "ids": [
+              "sword",
+              "knight",
+              "smith",
+              "mage",
+              "church",
+              "circus",
+              "warehouse",
+              "guild"
+            ],
+            "board": true,
+            "merchant": true
+          },
+          "merchantPose": {
+            "x": -4.940455809341038,
+            "z": -9.603743873924813,
+            "yaw": -1.0956713191702463,
+            "walking": true,
+            "station": -1,
+            "bearing": 207.22265767801355,
+            "anim": "Walk",
+            "facing": -1.0956713191702463,
+            "lod": 0,
+            "paused": false,
+            "walkRate": 1
+          },
+          "avatarModel": {
+            "modular": false,
+            "weapon": null,
+            "bones": 17,
+            "triangles": 199955,
+            "parts": [],
+            "clips": [
+              "Attack",
+              "Death",
+              "Hurt",
+              "Idle",
+              "Jump",
+              "Run"
+            ],
+            "attackClips": []
+          },
+          "state": "Idle",
+          "pos": [
+            0,
+            0,
+            -12.5
+          ],
+          "gold": 100,
+          "hp": null,
+          "items": {
+            "seed": 0,
+            "egg": 0,
+            "birdEgg": 0,
+            "monsterMaterial": 0,
+            "shopFeed": 0
+          },
+          "bag": [],
+          "pets": [],
+          "equipped": null,
+          "followerVisible": false,
+          "followerSize": 0,
+          "ledger": [],
+          "deaths": 0,
+          "level": 1,
+          "exp": 0,
+          "appearance": {
+            "hair": "hair01",
+            "hairColor": null,
+            "weapon": "sword"
+          },
+          "art": "loaded",
+          "interact": {
+            "target": null,
+            "talking": false,
+            "dialog": "",
+            "panelOpen": false,
+            "appraisalOpen": false,
+            "merchantPaused": false
+          },
+          "portal": {
+            "armed": true,
+            "fired": false,
+            "dist": 31.5,
+            "triggerR": 2.6
+          },
+          "panel": "closed",
+          "petGap": null,
+          "headHalfWidth": 0.3293747901916504,
+          "quality": {
+            "lod": "hq",
+            "render": "auto",
+            "scale": 0.6666666666666666
+          },
+          "mode": "test",
+          "render": {
+            "drawCalls": 80,
+            "contextLost": 0,
+            "charShadow": "blob"
+          },
+          "jumpButtonVisible": false
+        },
+        "appraisal": {
+          "quote": {
+            "fee": 20,
+            "test": true
+          },
+          "r1": true,
+          "r2": true,
+          "gold": 80,
+          "ledger": 1,
+          "appraised": true
+        },
+        "guild": {
+          "serverBacked": false,
+          "b1": true,
+          "b2": true,
+          "feed": 1,
+          "listed": true,
+          "lockedAfterList": true,
+          "dup": false,
+          "ownBuy": false,
+          "cancelled": true,
+          "lockedAfterCancel": false,
+          "sold": true,
+          "goldBeforeSell": 70,
+          "gold": 82,
+          "stillInBag": false
+        },
+        "panelLandscape": {
+          "ok": true,
+          "inView": true,
+          "size": [
+            44,
+            44
+          ],
+          "onTop": true,
+          "panelBottom": 325.75,
+          "vh": 393,
+          "vw": 852,
+          "outX": 0,
+          "scrollable": "fits",
+          "bodyTouch": "pan-y"
+        },
+        "petDetailTries": 1,
+        "panelPortrait": {
+          "ok": true,
+          "inView": true,
+          "size": [
+            44,
+            44
+          ],
+          "onTop": true,
+          "panelBottom": 316.0625,
+          "vh": 852,
+          "vw": 393,
+          "outX": 0,
+          "scrollable": "fits",
+          "bodyTouch": "pan-y"
+        },
+        "petGap": {
+          "panel": "closed",
+          "gap": 0.2002624666867817,
+          "hw": 0.3293747901916504,
+          "size": 0.075,
+          "eq": 1
+        },
+        "fieldArrive": {
+          "fi": {
+            "map": "starsprout",
+            "gold": 82,
+            "deaths": 0,
+            "level": 1,
+            "exp": 0,
+            "expGained": 0,
+            "appearance": {
+              "hair": "hair01",
+              "hairColor": null,
+              "weapon": "sword"
+            },
+            "hp": 100,
+            "down": false,
+            "deathClip": true,
+            "state": "Idle",
+            "portal": {
+              "armed": true,
+              "fired": false,
+              "dist": 4,
+              "triggerR": 1.6,
+              "built": true,
+              "meshes": 3
+            },
+            "panel": "closed",
+            "petGap": 0.19972182002890956,
+            "headHalfWidth": 0.3293747901916504,
+            "goldDropped": 0,
+            "goldPicked": 0,
+            "goldOnGround": 0,
+            "jumpButton": false,
+            "claimed": 0,
+            "ledger": [
+              {
+                "seq": 1,
+                "requestId": "appraise:e2e-ap-1",
+                "kind": "appraisal",
+                "amount": -20,
+                "balanceAfter": 80,
+                "ref": "item:1",
+                "at": 1795872045522
+              },
+              {
+                "seq": 2,
+                "requestId": "e2e-buy-1",
+                "kind": "shopBuy",
+                "amount": -10,
+                "balanceAfter": 70,
+                "ref": "shop:feed×1",
+                "at": 1795872046146
+              },
+              {
+                "seq": 3,
+                "requestId": "e2e-sell-1",
+                "kind": "shopSell",
+                "amount": 12,
+                "balanceAfter": 82,
+                "ref": "item:2",
+                "at": 1795872046148
+              }
+            ],
+            "bag": 1,
+            "items": {
+              "seed": 1,
+              "egg": 0,
+              "birdEgg": 0,
+              "monsterMaterial": 0,
+              "shopFeed": 1
+            },
+            "pets": [
+              {
+                "id": 1,
+                "stage": 1,
+                "life": "alive",
+                "satiety": 98.6795
+              }
+            ],
+            "followerSize": 0.075,
+            "loot": []
+          },
+          "pos": [
+            -56,
+            2,
+            -64
+          ]
+        },
+        "fieldMonsters": {
+          "fm": [
+            {
+              "zone": "02",
+              "zoneName": "苔葉林緣",
+              "monster": "苔角獸",
+              "delivered": true,
+              "count": 5,
+              "status": "M002 苔角獸 Rig V1.0 Lite"
+            },
+            {
+              "zone": "03",
+              "zoneName": "微風花丘",
+              "monster": "雲絨鳥",
+              "delivered": true,
+              "count": 5,
+              "status": "M003 雲絨鳥 Rig V1.0 Lite"
+            },
+            {
+              "zone": "04",
+              "zoneName": "羽風高地",
+              "monster": "風羽狐",
+              "delivered": true,
+              "count": 4,
+              "status": "M004 風羽狐 Rig V1.1 Lite"
+            },
+            {
+              "zone": "05",
+              "zoneName": "星雲花田",
+              "monster": "星雲咩咩",
+              "delivered": true,
+              "count": 4,
+              "status": "M005 星雲咩咩 Rig V1.0 Lite"
+            },
+            {
+              "zone": "06",
+              "zoneName": "胡蘿蔔園",
+              "monster": "胡蘿蔔大王",
+              "delivered": true,
+              "count": 2,
+              "status": "M006 胡蘿蔔大王 Rig V1.0 Lite"
+            },
+            {
+              "zone": "07",
+              "zoneName": "王冠遺跡",
+              "monster": "王冠重錘兔",
+              "delivered": true,
+              "count": 1,
+              "status": "M007 王冠重錘兔 Rig V1.0 Lite"
+            }
+          ],
+          "kinds": {
+            "star_dew_bobo": 6,
+            "moss_horn_beast": 5,
+            "cloud_fluff_bird": 5,
+            "windfeather_fox": 4,
+            "nebula_sheep": 4,
+            "carrot_king": 2,
+            "crown_hammer_rabbit": 1
+          }
+        },
+        "fight": {
+          "kills": 2,
+          "picked": 2,
+          "goldDropped": 12,
+          "goldPicked": 12,
+          "gold": 94,
+          "claimed": 4
+        },
+        "sustainedAttack": {
+          "kind": "star_dew_bobo",
+          "gameSeconds": 25,
+          "wallSeconds": 173,
+          "presses": 249,
+          "playerHits": 47,
+          "hurtTaken": 12,
+          "monsterAttacks": 12,
+          "knockbacks": 1,
+          "knockSkipped": 40,
+          "maxGapSec": 2.1,
+          "alive": true
+        },
+        "backVillage": {
+          "gold": 94,
+          "pos": [
+            0,
+            0,
+            -39
+          ],
+          "bag": 2
+        },
+        "death": {
+          "state": "Death",
+          "deathClip": true,
+          "states": [
+            "Idle",
+            "Death",
+            "Death",
+            "Death",
+            "Death",
+            "Death"
+          ]
+        },
+        "respawn": {
+          "pos": [
+            6.2,
+            0,
+            10.8
+          ],
+          "deaths": 1,
+          "hp": null,
+          "gold": 94
+        }
+      },
+      "console": [],
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "label": "male",
+      "checks": {
+        "新存檔在星芽村出生（性別、測試設定、起始金幣 100）": {
+          "ok": true,
+          "detail": {
+            "map": "village",
+            "gender": "male",
+            "gold": 100,
+            "mode": "test"
+          }
+        },
+        "星芽村：一般移動沒有跳躍按鈕": {
+          "ok": true,
+          "detail": false
+        },
+        "村莊 NPC（Claude B Stage 6.7）：七位 NPC＋洛恩＋N008 委託佈告欄已載入": {
+          "ok": true,
+          "detail": {
+            "ids": [
+              "sword",
+              "knight",
+              "smith",
+              "mage",
+              "church",
+              "circus",
+              "warehouse",
+              "guild"
+            ],
+            "board": true,
+            "merchant": true
+          }
+        },
+        "角色模型：男性 Stage 7.5 新版 n75、女性 C1.0-B5b（不是封存的 Stage 7.2 Tripo 模組化版）": {
+          "ok": true,
+          "detail": {
+            "file": "novice_n75_male_hq.glb",
+            "modular": false
+          }
+        },
+        "角色動作：Idle／Run／Attack／Hurt／Death 齊全；Jump 只給技能（一般移動沒有跳躍鍵）": {
+          "ok": true,
+          "detail": {
+            "clips": [
+              "Idle",
+              "Run",
+              "Attack",
+              "Hurt",
+              "Death",
+              "Jump"
+            ]
+          }
+        },
+        "Stage 7.2：存檔有等級、經驗、外觀（髮型、髮色、武器）": {
+          "ok": true,
+          "detail": {
+            "level": 1,
+            "exp": 0,
+            "appearance": {
+              "hair": "hair01",
+              "hairColor": null,
+              "weapon": "sword"
+            }
+          }
+        },
+        "洛恩鑑定：收 20 金幣（測試設定），重送同一請求不重複扣款": {
+          "ok": true,
+          "detail": {
+            "quote": {
+              "fee": 20,
+              "test": true
+            },
+            "r1": true,
+            "r2": true,
+            "gold": 80,
+            "ledger": 1,
+            "appraised": true
+          }
+        },
+        "商會：本機服務（serverBacked=false，不是真正的多人交易）": {
+          "ok": true,
+          "detail": false
+        },
+        "商會：買飼料扣 10 金幣，重送不重複扣款": {
+          "ok": true,
+          "detail": {
+            "serverBacked": false,
+            "b1": true,
+            "b2": true,
+            "feed": 1,
+            "listed": true,
+            "lockedAfterList": true,
+            "dup": false,
+            "ownBuy": false,
+            "cancelled": true,
+            "lockedAfterCancel": false,
+            "sold": true,
+            "goldBeforeSell": 70,
+            "gold": 82,
+            "stillInBag": false
+          }
+        },
+        "商會：掛賣鎖定物品、不能重複掛賣、不能買自己的、取消後解鎖": {
+          "ok": true,
+          "detail": {
+            "serverBacked": false,
+            "b1": true,
+            "b2": true,
+            "feed": 1,
+            "listed": true,
+            "lockedAfterList": true,
+            "dup": false,
+            "ownBuy": false,
+            "cancelled": true,
+            "lockedAfterCancel": false,
+            "sold": true,
+            "goldBeforeSell": 70,
+            "gold": 82,
+            "stillInBag": false
+          }
+        },
+        "商會：賣給 NPC 入帳 12（40×0.3），重送不重複入帳、物品移出背包": {
+          "ok": true,
+          "detail": {
+            "serverBacked": false,
+            "b1": true,
+            "b2": true,
+            "feed": 1,
+            "listed": true,
+            "lockedAfterList": true,
+            "dup": false,
+            "ownBuy": false,
+            "cancelled": true,
+            "lockedAfterCancel": false,
+            "sold": true,
+            "goldBeforeSell": 70,
+            "gold": 82,
+            "stillInBag": false
+          }
+        },
+        "背包按鈕開啟背包視窗，右上角 X 在畫面內、沒有被遮住、至少 40 px": {
+          "ok": true,
+          "detail": {
+            "ui": "bag",
+            "x1": {
+              "ok": true,
+              "inView": true,
+              "size": [
+                44,
+                44
+              ],
+              "onTop": true,
+              "panelBottom": 325.75,
+              "vh": 393,
+              "vw": 852,
+              "outX": 0,
+              "scrollable": "fits",
+              "bodyTouch": "pan-y"
+            }
+          }
+        },
+        "點 X 立即關閉背包視窗": {
+          "ok": true,
+          "detail": "closed"
+        },
+        "寵物子畫面：點寵物進入詳細、返回鍵回到寵物列表": {
+          "ok": true,
+          "detail": {
+            "petId": 1,
+            "uiDetail": "pet:1",
+            "uiBack": "pet"
+          }
+        },
+        "直向 iPhone：寵物視窗 X 在畫面內、沒有被遮住，按鈕不超出左右邊界，內容區可捲動（touch-action pan-y）": {
+          "ok": true,
+          "detail": {
+            "ok": true,
+            "inView": true,
+            "size": [
+              44,
+              44
+            ],
+            "onTop": true,
+            "panelBottom": 316.0625,
+            "vh": 852,
+            "vw": 393,
+            "outX": 0,
+            "scrollable": "fits",
+            "bodyTouch": "pan-y"
+          }
+        },
+        "直向 iPhone：「選單」按鈕與「畫質」按鈕不重疊": {
+          "ok": true,
+          "detail": {
+            "overlap": false,
+            "menu": [
+              317,
+              160,
+              64,
+              40
+            ],
+            "quality": [
+              285,
+              108,
+              96,
+              44
+            ]
+          }
+        },
+        "寵物跟在頭部側邊：與頭部外緣保持 15～25 cm 可見間距（大小不變）": {
+          "ok": true,
+          "detail": {
+            "panel": "closed",
+            "gap": 0.1998395748001495,
+            "hw": 0.33,
+            "size": 0.075,
+            "eq": 1
+          }
+        },
+        "星芽村：抵達點在南方傳送陣外、傳送陣已啟用、沒有觸發": {
+          "ok": true,
+          "detail": {
+            "armed": true,
+            "fired": false,
+            "dist": 31.5,
+            "triggerR": 2.6
+          }
+        },
+        "南方傳送陣：踩進去直接傳送，沒有出現確認視窗或傳送按鈕": {
+          "ok": true,
+          "detail": {
+            "dlgSeen": false
+          }
+        },
+        "南方傳送陣 → 星芽原野新手營地（抵達在營地傳送陣外側）": {
+          "ok": true,
+          "detail": {
+            "pos": [
+              -56,
+              2,
+              -64
+            ],
+            "portal": {
+              "armed": true,
+              "fired": false,
+              "dist": 4,
+              "triggerR": 1.6,
+              "built": true,
+              "meshes": 3
+            }
+          }
+        },
+        "營地傳送陣：已建立（魔法陣＋符文＋光柱）、抵達後啟用但不會自動觸發（不會兩張地圖無限往返）": {
+          "ok": true,
+          "detail": {
+            "armed": true,
+            "fired": false,
+            "dist": 4,
+            "triggerR": 1.6,
+            "built": true,
+            "meshes": 3
+          }
+        },
+        "切換地圖：金幣、背包、模型性別保留": {
+          "ok": true,
+          "detail": {
+            "gold": 82,
+            "goldBeforeField": 82,
+            "bag": 1,
+            "bagBeforeField": 1
+          }
+        },
+        "星芽原野：一般移動沒有跳躍按鈕": {
+          "ok": true,
+          "detail": false
+        },
+        "原野與村莊用同一個角色模型（C1.0-B5b，沒有變回其他版本）": {
+          "ok": true,
+          "detail": {
+            "village": "novice_n75_male_hq.glb",
+            "field": "novice_n75_male_hq.glb"
+          }
+        },
+        "切換地圖後寵物仍裝備、在頭部側邊 15～25 cm": {
+          "ok": true,
+          "detail": {
+            "gap": 0.20032240715676122,
+            "pets": [
+              {
+                "id": 1,
+                "stage": 1,
+                "life": "alive",
+                "satiety": 98.95093333333334
+              }
+            ]
+          }
+        },
+        "Stage 7.5：男性使用新版初心者（n75）、HQ／Lite 對應檔案，27 段動作、雙手武器掛點、頭髮／兜帽次級動態": {
+          "ok": true,
+          "detail": {
+            "file": "novice_n75_male_hq.glb",
+            "am75": {
+              "modular": false,
+              "weapon": null,
+              "bones": 82,
+              "triangles": 9609,
+              "parts": [],
+              "clips": [
+                "Idle",
+                "Run",
+                "Attack",
+                "Hurt",
+                "Death",
+                "Jump"
+              ],
+              "attackClips": [],
+              "allClips": [
+                "Idle",
+                "Run",
+                "Attack",
+                "Hurt",
+                "Death",
+                "Jump",
+                "Skill_TripleSlash",
+                "Skill_StaffCast",
+                "Skill_LeapSlam",
+                "Skill_Whirlwind",
+                "Skill_StarMeteor",
+                "Skill_ChargeBurst",
+                "Walk",
+                "Wait",
+                "Attack_Unarmed",
+                "Attack_1H_Chop",
+                "Attack_1H_Thrust",
+                "Attack_2H_Slash",
+                "Attack_2H_Smash",
+                "Attack_Polearm_Thrust",
+                "Attack_Polearm_Swing",
+                "Attack_Hammer_Smash",
+                "Cast_Staff",
+                "Cast_Heal",
+                "Attack_Throw",
+                "Block",
+                "Jump_Land"
+              ],
+              "version": "n75",
+              "sockets": {
+                "R": true,
+                "L": true
+              },
+              "secondary": [
+                "Hair_Back",
+                "Hood"
+              ],
+              "loco": "Walk"
+            }
+          }
+        },
+        "Stage 7.5：右手掛上展示短劍（掛點在右手骨附近 8 cm 內）": {
+          "ok": true,
+          "detail": {
+            "attached": true,
+            "socket": [
+              -55.821529388427734,
+              2.5423061847686768,
+              -64.13162231445312
+            ],
+            "hand": [
+              -55.823265075683594,
+              2.589871644973755,
+              -64.14949035644531
+            ],
+            "dist": 0.05084046163643284
+          }
+        },
+        "Stage 7.5：左手掛點可用（法杖）": {
+          "ok": true,
+          "detail": {
+            "attached": true,
+            "socket": [
+              -56.016849517822266,
+              2.5455896854400635,
+              -63.98245620727539
+            ],
+            "hand": [
+              -56.03171157836914,
+              2.5985705852508545,
+              -63.9776496887207
+            ],
+            "dist": 0.055235488674190335
+          }
+        },
+        "Stage 7.5：依武器類型切換普通攻擊動作（雙手重擊、長柄突刺、法杖、單手）": {
+          "ok": true,
+          "detail": [
+            true,
+            true,
+            true,
+            true
+          ]
+        },
+        "Stage 7.5：次級動態數值有限且在上限內": {
+          "ok": true,
+          "detail": {
+            "Hair_Back": {
+              "pitch": 0,
+              "roll": 0
+            },
+            "Hood": {
+              "pitch": 0,
+              "roll": 0
+            }
+          }
+        },
+        "Stage 7.5 技能：本地玩家技能已啟用（技能列、音效、六段技能）": {
+          "ok": true,
+          "detail": {
+            "enabled": true,
+            "busy": false,
+            "active": null,
+            "t": 0,
+            "stats": {
+              "hitstopMs": 0,
+              "casts": 0,
+              "hits": 0,
+              "projectiles": 0,
+              "projectileVisuals": 0,
+              "moved": 0,
+              "hitEvents": 0,
+              "bySkill": {},
+              "viaCombatFx": 0
+            },
+            "cooldowns": {
+              "triple_slash": 0,
+              "staff_cast": 0,
+              "leap_slam": 0,
+              "whirlwind": 0,
+              "star_meteor": 0,
+              "charge_burst": 0
+            },
+            "log": [],
+            "audio": true,
+            "trail": true,
+            "combatFx": {
+              "tier": "high",
+              "actors": 1,
+              "playing": 0,
+              "vfx": {
+                "meshFx": 0,
+                "particles": 0,
+                "projectiles": 0,
+                "spawned": 62,
+                "materials": 27,
+                "pooledMeshes": 46,
+                "pooledSystems": 48
+              },
+              "budget": {
+                "active": 0,
+                "activeRemote": 0,
+                "activeCritical": 0,
+                "particles": 0,
+                "granted": 0,
+                "denied": 0,
+                "scaled": 0,
+                "deniedBy": {}
+              },
+              "culled": {
+                "distance": 0,
+                "offscreen": 0
+              },
+              "damageShown": 0,
+              "audioPlayed": 0,
+              "field": {
+                "hitFx": 0,
+                "numbers": 0,
+                "hurt": 0,
+                "respawnFx": 0,
+                "deathFx": 0,
+                "skillCasts": 0,
+                "swings": 0,
+                "texts": {}
+              },
+              "hud": {
+                "flash": true,
+                "shake": 1,
+                "numbers": true
+              },
+              "prewarm": {
+                "ms": 1552,
+                "spawned": 66,
+                "leftoverActive": 0,
+                "leftoverProjectiles": 0,
+                "audioPlayed": 0,
+                "damageShown": 0,
+                "tier": "high",
+                "materials": 27,
+                "pooledMeshes": 46,
+                "particleSystems": 48
+              }
+            },
+            "prewarmMs": 1552,
+            "loop": {
+              "started": true,
+              "frames": 57,
+              "now": 5.599999999999996
+            },
+            "fx": {
+              "hitFx": 0,
+              "numbers": 0,
+              "hurt": 0,
+              "respawnFx": 0,
+              "deathFx": 0,
+              "skillCasts": 0,
+              "swings": 0,
+              "texts": {}
+            }
+          }
+        },
+        "CombatFx：一張地圖一個實例（傷害數字層只有 1 個，沒有舊版特效系統同時執行）": {
+          "ok": true,
+          "detail": {
+            "layers": {
+              "dmg": 1
+            },
+            "actors": 1
+          }
+        },
+        "CombatFx：地圖載入期間已預熱（不扣血、不播音效、不顯示數字、沒有殘留特效）": {
+          "ok": true,
+          "detail": {
+            "prewarm": {
+              "ms": 1552,
+              "spawned": 66,
+              "leftoverActive": 0,
+              "leftoverProjectiles": 0,
+              "audioPlayed": 0,
+              "damageShown": 0,
+              "tier": "high",
+              "materials": 27,
+              "pooledMeshes": 46,
+              "particleSystems": 48
+            },
+            "ms": 1552
+          }
+        },
+        "Stage 7.5 技能：六段技能都能施放，播放 C 的 Skill_* 動作": {
+          "ok": true,
+          "detail": {
+            "triple_slash": {
+              "ok": true,
+              "skill": "triple_slash",
+              "targetId": "star_dew_bobo#4",
+              "rate": 1.03,
+              "moved": 0.5549999999999997
+            },
+            "staff_cast": {
+              "ok": true,
+              "skill": "staff_cast",
+              "targetId": "star_dew_bobo#5",
+              "rate": 1.03,
+              "moved": 0
+            },
+            "leap_slam": {
+              "ok": true,
+              "skill": "leap_slam",
+              "targetId": "star_dew_bobo#5",
+              "rate": 1,
+              "moved": 1.1999999999999957
+            },
+            "whirlwind": {
+              "ok": true,
+              "skill": "whirlwind",
+              "targetId": "star_dew_bobo#3",
+              "rate": 1.03,
+              "moved": 0.25
+            },
+            "star_meteor": {
+              "ok": true,
+              "skill": "star_meteor",
+              "targetId": "star_dew_bobo#6",
+              "rate": 1,
+              "moved": 0
+            },
+            "charge_burst": {
+              "ok": true,
+              "skill": "charge_burst",
+              "targetId": "star_dew_bobo#6",
+              "rate": 1,
+              "moved": 0.6000000000000014
+            }
+          }
+        },
+        "Stage 7.5 技能（CombatFx）：命中時有傷害、命中特效、傷害數字；投射物有判定": {
+          "ok": true,
+          "detail": {
+            "stats": {
+              "hitstopMs": 425,
+              "casts": 6,
+              "hits": 10,
+              "projectiles": 3,
+              "projectileVisuals": 3,
+              "moved": 2.604999999999997,
+              "hitEvents": 8,
+              "bySkill": {
+                "triple_slash": 1,
+                "staff_cast": 1,
+                "leap_slam": 1,
+                "whirlwind": 1,
+                "star_meteor": 1,
+                "charge_burst": 1
+              },
+              "viaCombatFx": 6
+            },
+            "fx": {
+              "hitFx": 10,
+              "numbers": 14,
+              "hurt": 4,
+              "respawnFx": 1,
+              "deathFx": 4,
+              "skillCasts": 6,
+              "swings": 0,
+              "texts": {}
+            },
+            "damageShown": 14
+          }
+        },
+        "Stage 7.5 技能（CombatFx）：技能特效、武器拖尾、投射物外觀都由 CombatFx 播放": {
+          "ok": true,
+          "detail": {
+            "vfx": {
+              "meshFx": 0,
+              "particles": 0,
+              "projectiles": 0,
+              "spawned": 131,
+              "materials": 59,
+              "pooledMeshes": 46,
+              "pooledSystems": 59
+            },
+            "budget": {
+              "active": 0,
+              "activeRemote": 0,
+              "activeCritical": 0,
+              "particles": 0,
+              "granted": 139,
+              "denied": 0,
+              "scaled": 0,
+              "deniedBy": {}
+            }
+          }
+        },
+        "Stage 7.5 技能（CombatFx）：戰鬥音效有播放（點擊後解鎖）": {
+          "ok": true,
+          "detail": {
+            "audioPlayed": 24
+          }
+        },
+        "Stage 7.5 技能：跳斬、蓄力衝刺有技能位移（經地形碰撞），原地技能不移動": {
+          "ok": true,
+          "detail": {
+            "triple_slash": 0.5549999999999997,
+            "staff_cast": 0,
+            "leap_slam": 1.1999999999999957,
+            "whirlwind": 0.25,
+            "star_meteor": 0,
+            "charge_burst": 0.6000000000000014
+          }
+        },
+        "Stage 7.5 技能：施放結束後回到一般狀態（沒有卡在技能中）": {
+          "ok": true,
+          "detail": null
+        },
+        "HUD 暫定：預留治療、暴擊、未命中、格擋樣式": {
+          "ok": true,
+          "detail": {
+            "r": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "state": {
+              "heal": 1,
+              "crit": 1,
+              "miss": 1,
+              "block": 1
+            }
+          }
+        },
+        "CombatFx：切換畫質後沒有材質引用到已刪除的貼圖、貼圖／材質數沒有累積": {
+          "ok": true,
+          "detail": {
+            "tier0": "high",
+            "before": {
+              "textures": 136,
+              "materials": 143,
+              "meshes": 284,
+              "particleSystems": 54
+            },
+            "after": {
+              "textures": 136,
+              "materials": 145,
+              "meshes": 284,
+              "particleSystems": 54
+            },
+            "rounds": [
+              {
+                "tier": "high",
+                "textures": 136,
+                "materials": 143,
+                "meshes": 284,
+                "particleSystems": 54,
+                "broken": 4
+              },
+              {
+                "tier": "low",
+                "textures": 133,
+                "materials": 143,
+                "meshes": 284,
+                "particleSystems": 54,
+                "broken": 4
+              },
+              {
+                "tier": "medium",
+                "textures": 136,
+                "materials": 143,
+                "meshes": 284,
+                "particleSystems": 54,
+                "broken": 4
+              },
+              {
+                "tier": "high",
+                "textures": 136,
+                "materials": 145,
+                "meshes": 284,
+                "particleSystems": 54,
+                "broken": 4
+              }
+            ],
+            "brokenBefore": 4,
+            "brokenBeforeList": [
+              "fxm_star|#BFE0FF:fx_star_256",
+              "fxm_spark|#BFE0FF:fx_spark_256",
+              "fxm_spark|#FFFFFF:fx_spark_256",
+              "fxm_star|#59BFFF:fx_star_256"
+            ],
+            "brokenAfter": 4,
+            "brokenAfterList": [
+              "fxm_star|#BFE0FF:fx_star_256",
+              "fxm_spark|#BFE0FF:fx_spark_256",
+              "fxm_spark|#FFFFFF:fx_spark_256",
+              "fxm_star|#59BFFF:fx_star_256"
+            ],
+            "trail": true
+          }
+        },
+        "HUD 暫定：畫面閃光、鏡頭震動可以關閉／減弱／恢復": {
+          "ok": true,
+          "detail": {
+            "hudOff": {
+              "flash": false,
+              "shake": 0,
+              "numbers": true,
+              "screenEnabled": false,
+              "shakeEnabled": false,
+              "shakeScale": 0
+            },
+            "hudHalf": {
+              "flash": true,
+              "shake": 0.5,
+              "numbers": true,
+              "screenEnabled": true,
+              "shakeEnabled": true,
+              "shakeScale": 0.5
+            },
+            "hudOn": {
+              "flash": true,
+              "shake": 1,
+              "numbers": true,
+              "screenEnabled": true,
+              "shakeEnabled": true,
+              "shakeScale": 1
+            }
+          }
+        },
+        "Stage 7.5 多人共用貼圖：3 位 n75 共用同一份材質與貼圖（每多一人只多骨骼矩陣小貼圖）": {
+          "ok": true,
+          "detail": {
+            "n": 3,
+            "texBefore": 136,
+            "texAfterFirst": 138,
+            "texAfterAll": 140,
+            "materials": 1,
+            "usedTextures": 3,
+            "meshes": 3,
+            "containers": 1
+          }
+        },
+        "Stage 7.3 七種怪物：M002～M007 都是 Claude C 的正式模型（已交付、Lite），依原本 7 區出現；星露啵啵沿用": {
+          "ok": true,
+          "detail": {
+            "fm": [
+              {
+                "zone": "02",
+                "zoneName": "苔葉林緣",
+                "monster": "苔角獸",
+                "delivered": true,
+                "count": 5,
+                "status": "M002 苔角獸 Rig V1.0 Lite"
+              },
+              {
+                "zone": "03",
+                "zoneName": "微風花丘",
+                "monster": "雲絨鳥",
+                "delivered": true,
+                "count": 5,
+                "status": "M003 雲絨鳥 Rig V1.0 Lite"
+              },
+              {
+                "zone": "04",
+                "zoneName": "羽風高地",
+                "monster": "風羽狐",
+                "delivered": true,
+                "count": 4,
+                "status": "M004 風羽狐 Rig V1.1 Lite"
+              },
+              {
+                "zone": "05",
+                "zoneName": "星雲花田",
+                "monster": "星雲咩咩",
+                "delivered": true,
+                "count": 4,
+                "status": "M005 星雲咩咩 Rig V1.0 Lite"
+              },
+              {
+                "zone": "06",
+                "zoneName": "胡蘿蔔園",
+                "monster": "胡蘿蔔大王",
+                "delivered": true,
+                "count": 2,
+                "status": "M006 胡蘿蔔大王 Rig V1.0 Lite"
+              },
+              {
+                "zone": "07",
+                "zoneName": "王冠遺跡",
+                "monster": "王冠重錘兔",
+                "delivered": true,
+                "count": 1,
+                "status": "M007 王冠重錘兔 Rig V1.0 Lite"
+              }
+            ],
+            "kinds": {
+              "star_dew_bobo": 6,
+              "moss_horn_beast": 5,
+              "cloud_fluff_bird": 5,
+              "windfeather_fox": 4,
+              "nebula_sheep": 4,
+              "carrot_king": 2,
+              "crown_hammer_rabbit": 1
+            }
+          }
+        },
+        "Stage 7.3：Lv.1～4 被動（星露啵啵、苔角獸）、Lv.5 以上主動（雲絨鳥～王冠重錘兔）": {
+          "ok": true,
+          "detail": {
+            "star_dew_bobo": {
+              "level": 1,
+              "aggressive": false
+            },
+            "moss_horn_beast": {
+              "level": 3,
+              "aggressive": false
+            },
+            "cloud_fluff_bird": {
+              "level": 5,
+              "aggressive": true
+            },
+            "windfeather_fox": {
+              "level": 7,
+              "aggressive": true
+            },
+            "nebula_sheep": {
+              "level": 8,
+              "aggressive": true
+            },
+            "carrot_king": {
+              "level": 9,
+              "aggressive": true
+            },
+            "crown_hammer_rabbit": {
+              "level": 10,
+              "aggressive": true
+            }
+          }
+        },
+        "原野：擊倒怪物、掉落金幣（測試設定 3–8）並撿起入帳": {
+          "ok": true,
+          "detail": {
+            "kills": 4,
+            "picked": 4,
+            "goldDropped": 24,
+            "goldPicked": 24,
+            "gold": 106,
+            "claimed": 8
+          }
+        },
+        "Stage 7.3 戰鬥特效（Claude C VFX V2）：命中火花與傷害數字和命中同步出現": {
+          "ok": true,
+          "detail": {
+            "tier": "high",
+            "hitFx": 10,
+            "numbers": 14,
+            "hurt": 4,
+            "respawnFx": 2,
+            "deathFx": 4,
+            "skillCasts": 6,
+            "swings": 6,
+            "texts": {
+              "heal": 1,
+              "crit": 1,
+              "miss": 1,
+              "block": 1
+            },
+            "damageShown": 18,
+            "audioPlayed": 30,
+            "module": "CombatFx",
+            "knockbacks": 5,
+            "knockSkipped": 1
+          }
+        },
+        "Stage 7.2：擊敗怪物得到經驗（測試設定），存進角色存檔": {
+          "ok": true,
+          "detail": {
+            "expGained": 48,
+            "level": 1,
+            "exp": 48
+          }
+        },
+        "掉落物唯一編號：每個撿起的掉落只入帳一次": {
+          "ok": true,
+          "detail": {
+            "drops": 4,
+            "claimed": 8
+          }
+        },
+        "Stage 7.4：玩家持續普攻（遊戲時間 25 秒；CI 太慢時至少 15 秒，怪物血量調高）：怪物仍多次反擊命中（≥ 4 次）、最長不出手間隔 < 8 秒；擊退有衰減（不會一直被推離）": {
+          "ok": true,
+          "detail": {
+            "kind": "star_dew_bobo",
+            "gameSeconds": 25.1,
+            "wallSeconds": 48,
+            "presses": 128,
+            "playerHits": 52,
+            "hurtTaken": 13,
+            "monsterAttacks": 13,
+            "knockbacks": 0,
+            "knockSkipped": 41,
+            "maxGapSec": 2,
+            "alive": true
+          }
+        },
+        "營地傳送陣：踩進去直接回到星芽村南門內側（南方傳送陣外、沒有再被傳回原野）": {
+          "ok": true,
+          "detail": {
+            "pos": [
+              0,
+              0,
+              -39
+            ],
+            "portal": {
+              "armed": true,
+              "fired": false,
+              "dist": 5,
+              "triggerR": 2.6
+            }
+          }
+        },
+        "Stage 7.2 返回村莊：等級、經驗、外觀、武器保留": {
+          "ok": true,
+          "detail": {
+            "village": {
+              "level": 1,
+              "exp": 48,
+              "appearance": {
+                "hair": "hair01",
+                "hairColor": null,
+                "weapon": "sword"
+              }
+            },
+            "field": {
+              "level": 1,
+              "exp": 48,
+              "appearance": {
+                "hair": "hair01",
+                "hairColor": null,
+                "weapon": "sword"
+              }
+            }
+          }
+        },
+        "返回村莊：金幣、背包、物品數量保留": {
+          "ok": true,
+          "detail": {
+            "vi": 106,
+            "field": 106
+          }
+        },
+        "戰死：生命歸零後倒地並播死亡動作（不是整個角色僵硬往後倒）": {
+          "ok": true,
+          "detail": {
+            "state": "Death",
+            "deathClip": true,
+            "states": [
+              "Idle",
+              "Death",
+              "Death",
+              "Death",
+              "Death",
+              "Death"
+            ]
+          }
+        },
+        "戰死 → 在星芽村復活（死亡次數 +1、滿血、金幣不變）": {
+          "ok": true,
+          "detail": {
+            "pos": [
+              6.2,
+              0,
+              10.8
+            ],
+            "deaths": 1,
+            "hp": null,
+            "gold": 106
+          }
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "chromium_male_village_start.png",
+        "chromium_male_panel_portrait.png",
+        "chromium_male_village_pet.png",
+        "chromium_male_field_arrive.png",
+        "chromium_male_n75_preview_smash.png",
+        "chromium_male_n75_sword_chop.png",
+        "chromium_male_n75_skill_triple.png",
+        "chromium_male_n75_skill_whirlwind.png",
+        "chromium_male_n75_skill_meteor.png",
+        "chromium_male_field_fight.png",
+        "chromium_male_field_portal.png",
+        "chromium_male_village_back.png",
+        "chromium_male_field_down.png",
+        "chromium_male_village_respawn.png"
+      ],
+      "results": {
+        "start": {
+          "map": "village",
+          "gender": "male",
+          "file": "novice_n75_male_hq.glb",
+          "npcs": {
+            "ids": [
+              "sword",
+              "knight",
+              "smith",
+              "mage",
+              "church",
+              "circus",
+              "warehouse",
+              "guild"
+            ],
+            "board": true,
+            "merchant": true
+          },
+          "merchantPose": {
+            "x": -9.9778989511219,
+            "z": -4.132981069542967,
+            "yaw": -1.9634954084936205,
+            "walking": false,
+            "station": 1,
+            "bearing": 247.5,
+            "anim": "Idle",
+            "facing": -1.9634954084936205,
+            "lod": 1,
+            "paused": false,
+            "walkRate": 1
+          },
+          "avatarModel": {
+            "modular": false,
+            "weapon": null,
+            "bones": 82,
+            "triangles": 9609,
+            "parts": [],
+            "clips": [
+              "Idle",
+              "Run",
+              "Attack",
+              "Hurt",
+              "Death",
+              "Jump"
+            ],
+            "attackClips": []
+          },
+          "state": "Idle",
+          "pos": [
+            0,
+            0,
+            -12.5
+          ],
+          "gold": 100,
+          "hp": null,
+          "items": {
+            "seed": 0,
+            "egg": 0,
+            "birdEgg": 0,
+            "monsterMaterial": 0,
+            "shopFeed": 0
+          },
+          "bag": [],
+          "pets": [],
+          "equipped": null,
+          "followerVisible": false,
+          "followerSize": 0,
+          "ledger": [],
+          "deaths": 0,
+          "level": 1,
+          "exp": 0,
+          "appearance": {
+            "hair": "hair01",
+            "hairColor": null,
+            "weapon": "sword"
+          },
+          "art": "載入 npc_guild_far.glb",
+          "interact": {
+            "target": null,
+            "talking": false,
+            "dialog": "",
+            "panelOpen": false,
+            "appraisalOpen": false,
+            "merchantPaused": false
+          },
+          "portal": {
+            "armed": true,
+            "fired": false,
+            "dist": 31.5,
+            "triggerR": 2.6
+          },
+          "panel": "closed",
+          "petGap": null,
+          "headHalfWidth": 0.33,
+          "quality": {
+            "lod": "hq",
+            "render": "auto",
+            "scale": 1
+          },
+          "mode": "test",
+          "render": {
+            "drawCalls": 55,
+            "contextLost": 0,
+            "charShadow": "blob"
+          },
+          "jumpButtonVisible": false
+        },
+        "appraisal": {
+          "quote": {
+            "fee": 20,
+            "test": true
+          },
+          "r1": true,
+          "r2": true,
+          "gold": 80,
+          "ledger": 1,
+          "appraised": true
+        },
+        "guild": {
+          "serverBacked": false,
+          "b1": true,
+          "b2": true,
+          "feed": 1,
+          "listed": true,
+          "lockedAfterList": true,
+          "dup": false,
+          "ownBuy": false,
+          "cancelled": true,
+          "lockedAfterCancel": false,
+          "sold": true,
+          "goldBeforeSell": 70,
+          "gold": 82,
+          "stillInBag": false
+        },
+        "panelLandscape": {
+          "ok": true,
+          "inView": true,
+          "size": [
+            44,
+            44
+          ],
+          "onTop": true,
+          "panelBottom": 325.75,
+          "vh": 393,
+          "vw": 852,
+          "outX": 0,
+          "scrollable": "fits",
+          "bodyTouch": "pan-y"
+        },
+        "petDetailTries": 1,
+        "panelPortrait": {
+          "ok": true,
+          "inView": true,
+          "size": [
+            44,
+            44
+          ],
+          "onTop": true,
+          "panelBottom": 316.0625,
+          "vh": 852,
+          "vw": 393,
+          "outX": 0,
+          "scrollable": "fits",
+          "bodyTouch": "pan-y"
+        },
+        "petGap": {
+          "panel": "closed",
+          "gap": 0.1998395748001495,
+          "hw": 0.33,
+          "size": 0.075,
+          "eq": 1
+        },
+        "fieldArrive": {
+          "fi": {
+            "map": "starsprout",
+            "gold": 82,
+            "deaths": 0,
+            "level": 1,
+            "exp": 0,
+            "expGained": 0,
+            "appearance": {
+              "hair": "hair01",
+              "hairColor": null,
+              "weapon": "sword"
+            },
+            "hp": 100,
+            "down": false,
+            "deathClip": true,
+            "state": "Idle",
+            "portal": {
+              "armed": true,
+              "fired": false,
+              "dist": 4,
+              "triggerR": 1.6,
+              "built": true,
+              "meshes": 3
+            },
+            "panel": "closed",
+            "petGap": 0.20032240715676122,
+            "headHalfWidth": 0.33,
+            "goldDropped": 0,
+            "goldPicked": 0,
+            "goldOnGround": 0,
+            "jumpButton": false,
+            "claimed": 0,
+            "ledger": [
+              {
+                "seq": 1,
+                "requestId": "appraise:e2e-ap-1",
+                "kind": "appraisal",
+                "amount": -20,
+                "balanceAfter": 80,
+                "ref": "item:1",
+                "at": 1795872463710
+              },
+              {
+                "seq": 2,
+                "requestId": "e2e-buy-1",
+                "kind": "shopBuy",
+                "amount": -10,
+                "balanceAfter": 70,
+                "ref": "shop:feed×1",
+                "at": 1795872463941
+              },
+              {
+                "seq": 3,
+                "requestId": "e2e-sell-1",
+                "kind": "shopSell",
+                "amount": 12,
+                "balanceAfter": 82,
+                "ref": "item:2",
+                "at": 1795872463942
+              }
+            ],
+            "bag": 1,
+            "items": {
+              "seed": 1,
+              "egg": 0,
+              "birdEgg": 0,
+              "monsterMaterial": 0,
+              "shopFeed": 1
+            },
+            "pets": [
+              {
+                "id": 1,
+                "stage": 1,
+                "life": "alive",
+                "satiety": 98.95093333333334
+              }
+            ],
+            "followerSize": 0.075,
+            "loot": []
+          },
+          "pos": [
+            -56,
+            2,
+            -64
+          ]
+        },
+        "stage75Skills": {
+          "castRes": {
+            "triple_slash": {
+              "ok": true,
+              "skill": "triple_slash",
+              "targetId": "star_dew_bobo#4",
+              "rate": 1.03,
+              "moved": 0.5549999999999997
+            },
+            "staff_cast": {
+              "ok": true,
+              "skill": "staff_cast",
+              "targetId": "star_dew_bobo#5",
+              "rate": 1.03,
+              "moved": 0
+            },
+            "leap_slam": {
+              "ok": true,
+              "skill": "leap_slam",
+              "targetId": "star_dew_bobo#5",
+              "rate": 1,
+              "moved": 1.1999999999999957
+            },
+            "whirlwind": {
+              "ok": true,
+              "skill": "whirlwind",
+              "targetId": "star_dew_bobo#3",
+              "rate": 1.03,
+              "moved": 0.25
+            },
+            "star_meteor": {
+              "ok": true,
+              "skill": "star_meteor",
+              "targetId": "star_dew_bobo#6",
+              "rate": 1,
+              "moved": 0
+            },
+            "charge_burst": {
+              "ok": true,
+              "skill": "charge_burst",
+              "targetId": "star_dew_bobo#6",
+              "rate": 1,
+              "moved": 0.6000000000000014
+            }
+          },
+          "state": {
+            "enabled": true,
+            "busy": false,
+            "active": null,
+            "t": 0,
+            "stats": {
+              "hitstopMs": 425,
+              "casts": 6,
+              "hits": 10,
+              "projectiles": 3,
+              "projectileVisuals": 3,
+              "moved": 2.604999999999997,
+              "hitEvents": 8,
+              "bySkill": {
+                "triple_slash": 1,
+                "staff_cast": 1,
+                "leap_slam": 1,
+                "whirlwind": 1,
+                "star_meteor": 1,
+                "charge_burst": 1
+              },
+              "viaCombatFx": 6
+            },
+            "cooldowns": {
+              "triple_slash": 0,
+              "staff_cast": 0,
+              "leap_slam": 0,
+              "whirlwind": 0,
+              "star_meteor": 0,
+              "charge_burst": 3.6999999999999957
+            },
+            "log": [
+              {
+                "skill": "triple_slash",
+                "ok": true,
+                "t": 6.199999999999994
+              },
+              {
+                "skill": "staff_cast",
+                "ok": true,
+                "t": 8.699999999999985
+              },
+              {
+                "skill": "leap_slam",
+                "ok": true,
+                "t": 10.699999999999978
+              },
+              {
+                "skill": "whirlwind",
+                "ok": true,
+                "t": 13.09999999999997
+              },
+              {
+                "skill": "star_meteor",
+                "ok": true,
+                "t": 15.69999999999996
+              },
+              {
+                "skill": "charge_burst",
+                "ok": true,
+                "t": 18.19999999999999
+              }
+            ],
+            "audio": true,
+            "trail": true,
+            "combatFx": {
+              "tier": "high",
+              "actors": 1,
+              "playing": 0,
+              "vfx": {
+                "meshFx": 0,
+                "particles": 0,
+                "projectiles": 0,
+                "spawned": 131,
+                "materials": 59,
+                "pooledMeshes": 46,
+                "pooledSystems": 59
+              },
+              "budget": {
+                "active": 0,
+                "activeRemote": 0,
+                "activeCritical": 0,
+                "particles": 0,
+                "granted": 139,
+                "denied": 0,
+                "scaled": 0,
+                "deniedBy": {}
+              },
+              "culled": {
+                "distance": 0,
+                "offscreen": 0
+              },
+              "damageShown": 14,
+              "audioPlayed": 24,
+              "field": {
+                "hitFx": 10,
+                "numbers": 14,
+                "hurt": 4,
+                "respawnFx": 1,
+                "deathFx": 4,
+                "skillCasts": 6,
+                "swings": 0,
+                "texts": {}
+              },
+              "hud": {
+                "flash": true,
+                "shake": 1,
+                "numbers": true
+              },
+              "prewarm": {
+                "ms": 1552,
+                "spawned": 66,
+                "leftoverActive": 0,
+                "leftoverProjectiles": 0,
+                "audioPlayed": 0,
+                "damageShown": 0,
+                "tier": "high",
+                "materials": 27,
+                "pooledMeshes": 46,
+                "particleSystems": 48
+              }
+            },
+            "prewarmMs": 1552,
+            "loop": {
+              "started": true,
+              "frames": 209,
+              "now": 20.800000000000026
+            },
+            "fx": {
+              "hitFx": 10,
+              "numbers": 14,
+              "hurt": 4,
+              "respawnFx": 1,
+              "deathFx": 4,
+              "skillCasts": 6,
+              "swings": 0,
+              "texts": {}
+            }
+          }
+        },
+        "combatFxQualityCycle": {
+          "tier0": "high",
+          "before": {
+            "textures": 136,
+            "materials": 143,
+            "meshes": 284,
+            "particleSystems": 54
+          },
+          "after": {
+            "textures": 136,
+            "materials": 145,
+            "meshes": 284,
+            "particleSystems": 54
+          },
+          "rounds": [
+            {
+              "tier": "high",
+              "textures": 136,
+              "materials": 143,
+              "meshes": 284,
+              "particleSystems": 54,
+              "broken": 4
+            },
+            {
+              "tier": "low",
+              "textures": 133,
+              "materials": 143,
+              "meshes": 284,
+              "particleSystems": 54,
+              "broken": 4
+            },
+            {
+              "tier": "medium",
+              "textures": 136,
+              "materials": 143,
+              "meshes": 284,
+              "particleSystems": 54,
+              "broken": 4
+            },
+            {
+              "tier": "high",
+              "textures": 136,
+              "materials": 145,
+              "meshes": 284,
+              "particleSystems": 54,
+              "broken": 4
+            }
+          ],
+          "brokenBefore": 4,
+          "brokenBeforeList": [
+            "fxm_star|#BFE0FF:fx_star_256",
+            "fxm_spark|#BFE0FF:fx_spark_256",
+            "fxm_spark|#FFFFFF:fx_spark_256",
+            "fxm_star|#59BFFF:fx_star_256"
+          ],
+          "brokenAfter": 4,
+          "brokenAfterList": [
+            "fxm_star|#BFE0FF:fx_star_256",
+            "fxm_spark|#BFE0FF:fx_spark_256",
+            "fxm_spark|#FFFFFF:fx_spark_256",
+            "fxm_star|#59BFFF:fx_star_256"
+          ],
+          "trail": true
+        },
+        "stage75Shared": {
+          "n": 3,
+          "texBefore": 136,
+          "texAfterFirst": 138,
+          "texAfterAll": 140,
+          "materials": 1,
+          "usedTextures": 3,
+          "meshes": 3,
+          "containers": 1
+        },
+        "fieldMonsters": {
+          "fm": [
+            {
+              "zone": "02",
+              "zoneName": "苔葉林緣",
+              "monster": "苔角獸",
+              "delivered": true,
+              "count": 5,
+              "status": "M002 苔角獸 Rig V1.0 Lite"
+            },
+            {
+              "zone": "03",
+              "zoneName": "微風花丘",
+              "monster": "雲絨鳥",
+              "delivered": true,
+              "count": 5,
+              "status": "M003 雲絨鳥 Rig V1.0 Lite"
+            },
+            {
+              "zone": "04",
+              "zoneName": "羽風高地",
+              "monster": "風羽狐",
+              "delivered": true,
+              "count": 4,
+              "status": "M004 風羽狐 Rig V1.1 Lite"
+            },
+            {
+              "zone": "05",
+              "zoneName": "星雲花田",
+              "monster": "星雲咩咩",
+              "delivered": true,
+              "count": 4,
+              "status": "M005 星雲咩咩 Rig V1.0 Lite"
+            },
+            {
+              "zone": "06",
+              "zoneName": "胡蘿蔔園",
+              "monster": "胡蘿蔔大王",
+              "delivered": true,
+              "count": 2,
+              "status": "M006 胡蘿蔔大王 Rig V1.0 Lite"
+            },
+            {
+              "zone": "07",
+              "zoneName": "王冠遺跡",
+              "monster": "王冠重錘兔",
+              "delivered": true,
+              "count": 1,
+              "status": "M007 王冠重錘兔 Rig V1.0 Lite"
+            }
+          ],
+          "kinds": {
+            "star_dew_bobo": 6,
+            "moss_horn_beast": 5,
+            "cloud_fluff_bird": 5,
+            "windfeather_fox": 4,
+            "nebula_sheep": 4,
+            "carrot_king": 2,
+            "crown_hammer_rabbit": 1
+          }
+        },
+        "fight": {
+          "kills": 4,
+          "picked": 4,
+          "goldDropped": 24,
+          "goldPicked": 24,
+          "gold": 106,
+          "claimed": 8
+        },
+        "sustainedAttack": {
+          "kind": "star_dew_bobo",
+          "gameSeconds": 25.1,
+          "wallSeconds": 48,
+          "presses": 128,
+          "playerHits": 52,
+          "hurtTaken": 13,
+          "monsterAttacks": 13,
+          "knockbacks": 0,
+          "knockSkipped": 41,
+          "maxGapSec": 2,
+          "alive": true
+        },
+        "backVillage": {
+          "gold": 106,
+          "pos": [
+            0,
+            0,
+            -39
+          ],
+          "bag": 3
+        },
+        "death": {
+          "state": "Death",
+          "deathClip": true,
+          "states": [
+            "Idle",
+            "Death",
+            "Death",
+            "Death",
+            "Death",
+            "Death"
+          ]
+        },
+        "respawn": {
+          "pos": [
+            6.2,
+            0,
+            10.8
+          ],
+          "deaths": 1,
+          "hp": null,
+          "gold": 106
+        }
+      },
+      "console": [
+        "warning: [.WebGL-0x194c001a4200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+        "warning: [.WebGL-0x194c001a4200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+        "warning: [.WebGL-0x194c001a4200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+        "warning: [.WebGL-0x194c001a4200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+      ],
+      "ok": true
+    },
+    {
+      "browser": "chromium",
+      "label": "female",
+      "checks": {
+        "新存檔在星芽村出生（性別、測試設定、起始金幣 100）": {
+          "ok": true,
+          "detail": {
+            "map": "village",
+            "gender": "female",
+            "gold": 100,
+            "mode": "test"
+          }
+        },
+        "星芽村：一般移動沒有跳躍按鈕": {
+          "ok": true,
+          "detail": false
+        },
+        "村莊 NPC（Claude B Stage 6.7）：七位 NPC＋洛恩＋N008 委託佈告欄已載入": {
+          "ok": true,
+          "detail": {
+            "ids": [
+              "sword",
+              "knight",
+              "smith",
+              "mage",
+              "church",
+              "circus",
+              "warehouse",
+              "guild"
+            ],
+            "board": true,
+            "merchant": true
+          }
+        },
+        "角色模型：男性 Stage 7.5 新版 n75、女性 C1.0-B5b（不是封存的 Stage 7.2 Tripo 模組化版）": {
+          "ok": true,
+          "detail": {
+            "file": "novice_c10b5b_female_hq.glb",
+            "modular": false
+          }
+        },
+        "角色動作：Idle／Run／Attack／Hurt／Death 齊全；Jump 只給技能（一般移動沒有跳躍鍵）": {
+          "ok": true,
+          "detail": {
+            "clips": [
+              "Attack",
+              "Death",
+              "Hurt",
+              "Idle",
+              "Jump",
+              "Run"
+            ]
+          }
+        },
+        "Stage 7.2：存檔有等級、經驗、外觀（髮型、髮色、武器）": {
+          "ok": true,
+          "detail": {
+            "level": 1,
+            "exp": 0,
+            "appearance": {
+              "hair": "hair01",
+              "hairColor": null,
+              "weapon": "sword"
+            }
+          }
+        },
+        "洛恩鑑定：收 20 金幣（測試設定），重送同一請求不重複扣款": {
+          "ok": true,
+          "detail": {
+            "quote": {
+              "fee": 20,
+              "test": true
+            },
+            "r1": true,
+            "r2": true,
+            "gold": 80,
+            "ledger": 1,
+            "appraised": true
+          }
+        },
+        "商會：本機服務（serverBacked=false，不是真正的多人交易）": {
+          "ok": true,
+          "detail": false
+        },
+        "商會：買飼料扣 10 金幣，重送不重複扣款": {
+          "ok": true,
+          "detail": {
+            "serverBacked": false,
+            "b1": true,
+            "b2": true,
+            "feed": 1,
+            "listed": true,
+            "lockedAfterList": true,
+            "dup": false,
+            "ownBuy": false,
+            "cancelled": true,
+            "lockedAfterCancel": false,
+            "sold": true,
+            "goldBeforeSell": 70,
+            "gold": 82,
+            "stillInBag": false
+          }
+        },
+        "商會：掛賣鎖定物品、不能重複掛賣、不能買自己的、取消後解鎖": {
+          "ok": true,
+          "detail": {
+            "serverBacked": false,
+            "b1": true,
+            "b2": true,
+            "feed": 1,
+            "listed": true,
+            "lockedAfterList": true,
+            "dup": false,
+            "ownBuy": false,
+            "cancelled": true,
+            "lockedAfterCancel": false,
+            "sold": true,
+            "goldBeforeSell": 70,
+            "gold": 82,
+            "stillInBag": false
+          }
+        },
+        "商會：賣給 NPC 入帳 12（40×0.3），重送不重複入帳、物品移出背包": {
+          "ok": true,
+          "detail": {
+            "serverBacked": false,
+            "b1": true,
+            "b2": true,
+            "feed": 1,
+            "listed": true,
+            "lockedAfterList": true,
+            "dup": false,
+            "ownBuy": false,
+            "cancelled": true,
+            "lockedAfterCancel": false,
+            "sold": true,
+            "goldBeforeSell": 70,
+            "gold": 82,
+            "stillInBag": false
+          }
+        },
+        "背包按鈕開啟背包視窗，右上角 X 在畫面內、沒有被遮住、至少 40 px": {
+          "ok": true,
+          "detail": {
+            "ui": "bag",
+            "x1": {
+              "ok": true,
+              "inView": true,
+              "size": [
+                44,
+                44
+              ],
+              "onTop": true,
+              "panelBottom": 325.75,
+              "vh": 393,
+              "vw": 852,
+              "outX": 0,
+              "scrollable": "fits",
+              "bodyTouch": "pan-y"
+            }
+          }
+        },
+        "點 X 立即關閉背包視窗": {
+          "ok": true,
+          "detail": "closed"
+        },
+        "寵物子畫面：點寵物進入詳細、返回鍵回到寵物列表": {
+          "ok": true,
+          "detail": {
+            "petId": 1,
+            "uiDetail": "pet:1",
+            "uiBack": "pet"
+          }
+        },
+        "直向 iPhone：寵物視窗 X 在畫面內、沒有被遮住，按鈕不超出左右邊界，內容區可捲動（touch-action pan-y）": {
+          "ok": true,
+          "detail": {
+            "ok": true,
+            "inView": true,
+            "size": [
+              44,
+              44
+            ],
+            "onTop": true,
+            "panelBottom": 316.0625,
+            "vh": 852,
+            "vw": 393,
+            "outX": 0,
+            "scrollable": "fits",
+            "bodyTouch": "pan-y"
+          }
+        },
+        "直向 iPhone：「選單」按鈕與「畫質」按鈕不重疊": {
+          "ok": true,
+          "detail": {
+            "overlap": false,
+            "menu": [
+              317,
+              160,
+              64,
+              40
+            ],
+            "quality": [
+              285,
+              108,
+              96,
+              44
+            ]
+          }
+        },
+        "寵物跟在頭部側邊：與頭部外緣保持 15～25 cm 可見間距（大小不變）": {
+          "ok": true,
+          "detail": {
+            "panel": "closed",
+            "gap": 0.19931532673446115,
+            "hw": 0.3293747901916504,
+            "size": 0.075,
+            "eq": 1
+          }
+        },
+        "星芽村：抵達點在南方傳送陣外、傳送陣已啟用、沒有觸發": {
+          "ok": true,
+          "detail": {
+            "armed": true,
+            "fired": false,
+            "dist": 31.5,
+            "triggerR": 2.6
+          }
+        },
+        "南方傳送陣：踩進去直接傳送，沒有出現確認視窗或傳送按鈕": {
+          "ok": true,
+          "detail": {
+            "dlgSeen": false
+          }
+        },
+        "南方傳送陣 → 星芽原野新手營地（抵達在營地傳送陣外側）": {
+          "ok": true,
+          "detail": {
+            "pos": [
+              -56,
+              2,
+              -64
+            ],
+            "portal": {
+              "armed": true,
+              "fired": false,
+              "dist": 4,
+              "triggerR": 1.6,
+              "built": true,
+              "meshes": 3
+            }
+          }
+        },
+        "營地傳送陣：已建立（魔法陣＋符文＋光柱）、抵達後啟用但不會自動觸發（不會兩張地圖無限往返）": {
+          "ok": true,
+          "detail": {
+            "armed": true,
+            "fired": false,
+            "dist": 4,
+            "triggerR": 1.6,
+            "built": true,
+            "meshes": 3
+          }
+        },
+        "切換地圖：金幣、背包、模型性別保留": {
+          "ok": true,
+          "detail": {
+            "gold": 82,
+            "goldBeforeField": 82,
+            "bag": 1,
+            "bagBeforeField": 1
+          }
+        },
+        "星芽原野：一般移動沒有跳躍按鈕": {
+          "ok": true,
+          "detail": false
+        },
+        "原野與村莊用同一個角色模型（C1.0-B5b，沒有變回其他版本）": {
+          "ok": true,
+          "detail": {
+            "village": "novice_c10b5b_female_hq.glb",
+            "field": "novice_c10b5b_female_hq.glb"
+          }
+        },
+        "切換地圖後寵物仍裝備、在頭部側邊 15～25 cm": {
+          "ok": true,
+          "detail": {
+            "gap": 0.20107591858964366,
+            "pets": [
+              {
+                "id": 1,
+                "stage": 1,
+                "life": "alive",
+                "satiety": 98.66063333333335
+              }
+            ]
+          }
+        },
+        "Stage 7.3 七種怪物：M002～M007 都是 Claude C 的正式模型（已交付、Lite），依原本 7 區出現；星露啵啵沿用": {
+          "ok": true,
+          "detail": {
+            "fm": [
+              {
+                "zone": "02",
+                "zoneName": "苔葉林緣",
+                "monster": "苔角獸",
+                "delivered": true,
+                "count": 5,
+                "status": "M002 苔角獸 Rig V1.0 Lite"
+              },
+              {
+                "zone": "03",
+                "zoneName": "微風花丘",
+                "monster": "雲絨鳥",
+                "delivered": true,
+                "count": 5,
+                "status": "M003 雲絨鳥 Rig V1.0 Lite"
+              },
+              {
+                "zone": "04",
+                "zoneName": "羽風高地",
+                "monster": "風羽狐",
+                "delivered": true,
+                "count": 4,
+                "status": "M004 風羽狐 Rig V1.1 Lite"
+              },
+              {
+                "zone": "05",
+                "zoneName": "星雲花田",
+                "monster": "星雲咩咩",
+                "delivered": true,
+                "count": 4,
+                "status": "M005 星雲咩咩 Rig V1.0 Lite"
+              },
+              {
+                "zone": "06",
+                "zoneName": "胡蘿蔔園",
+                "monster": "胡蘿蔔大王",
+                "delivered": true,
+                "count": 2,
+                "status": "M006 胡蘿蔔大王 Rig V1.0 Lite"
+              },
+              {
+                "zone": "07",
+                "zoneName": "王冠遺跡",
+                "monster": "王冠重錘兔",
+                "delivered": true,
+                "count": 1,
+                "status": "M007 王冠重錘兔 Rig V1.0 Lite"
+              }
+            ],
+            "kinds": {
+              "star_dew_bobo": 6,
+              "moss_horn_beast": 5,
+              "cloud_fluff_bird": 5,
+              "windfeather_fox": 4,
+              "nebula_sheep": 4,
+              "carrot_king": 2,
+              "crown_hammer_rabbit": 1
+            }
+          }
+        },
+        "Stage 7.3：Lv.1～4 被動（星露啵啵、苔角獸）、Lv.5 以上主動（雲絨鳥～王冠重錘兔）": {
+          "ok": true,
+          "detail": {
+            "star_dew_bobo": {
+              "level": 1,
+              "aggressive": false
+            },
+            "moss_horn_beast": {
+              "level": 3,
+              "aggressive": false
+            },
+            "cloud_fluff_bird": {
+              "level": 5,
+              "aggressive": true
+            },
+            "windfeather_fox": {
+              "level": 7,
+              "aggressive": true
+            },
+            "nebula_sheep": {
+              "level": 8,
+              "aggressive": true
+            },
+            "carrot_king": {
+              "level": 9,
+              "aggressive": true
+            },
+            "crown_hammer_rabbit": {
+              "level": 10,
+              "aggressive": true
+            }
+          }
+        },
+        "原野：擊倒怪物、掉落金幣（測試設定 3–8）並撿起入帳": {
+          "ok": true,
+          "detail": {
+            "kills": 2,
+            "picked": 2,
+            "goldDropped": 12,
+            "goldPicked": 12,
+            "gold": 94,
+            "claimed": 4
+          }
+        },
+        "Stage 7.3 戰鬥特效（Claude C VFX V2）：命中火花與傷害數字和命中同步出現": {
+          "ok": true,
+          "detail": {
+            "tier": "high",
+            "hitFx": 6,
+            "numbers": 8,
+            "hurt": 2,
+            "respawnFx": 0,
+            "deathFx": 2,
+            "skillCasts": 0,
+            "swings": 6,
+            "texts": {},
+            "damageShown": 8,
+            "audioPlayed": 0,
+            "module": "CombatFx",
+            "knockbacks": 2,
+            "knockSkipped": 2
+          }
+        },
+        "Stage 7.2：擊敗怪物得到經驗（測試設定），存進角色存檔": {
+          "ok": true,
+          "detail": {
+            "expGained": 24,
+            "level": 1,
+            "exp": 24
+          }
+        },
+        "掉落物唯一編號：每個撿起的掉落只入帳一次": {
+          "ok": true,
+          "detail": {
+            "drops": 2,
+            "claimed": 4
+          }
+        },
+        "Stage 7.4：玩家持續普攻（遊戲時間 25 秒；CI 太慢時至少 15 秒，怪物血量調高）：怪物仍多次反擊命中（≥ 4 次）、最長不出手間隔 < 8 秒；擊退有衰減（不會一直被推離）": {
+          "ok": true,
+          "detail": {
+            "kind": "star_dew_bobo",
+            "gameSeconds": 25,
+            "wallSeconds": 69.6,
+            "presses": 128,
+            "playerHits": 48,
+            "hurtTaken": 12,
+            "monsterAttacks": 12,
+            "knockbacks": 1,
+            "knockSkipped": 41,
+            "maxGapSec": 2.1,
+            "alive": true
+          }
+        },
+        "營地傳送陣：踩進去直接回到星芽村南門內側（南方傳送陣外、沒有再被傳回原野）": {
+          "ok": true,
+          "detail": {
+            "pos": [
+              0,
+              0,
+              -39
+            ],
+            "portal": {
+              "armed": true,
+              "fired": false,
+              "dist": 5,
+              "triggerR": 2.6
+            }
+          }
+        },
+        "Stage 7.2 返回村莊：等級、經驗、外觀、武器保留": {
+          "ok": true,
+          "detail": {
+            "village": {
+              "level": 1,
+              "exp": 24,
+              "appearance": {
+                "hair": "hair01",
+                "hairColor": null,
+                "weapon": "sword"
+              }
+            },
+            "field": {
+              "level": 1,
+              "exp": 24,
+              "appearance": {
+                "hair": "hair01",
+                "hairColor": null,
+                "weapon": "sword"
+              }
+            }
+          }
+        },
+        "返回村莊：金幣、背包、物品數量保留": {
+          "ok": true,
+          "detail": {
+            "vi": 94,
+            "field": 94
+          }
+        },
+        "戰死：生命歸零後倒地並播死亡動作（不是整個角色僵硬往後倒）": {
+          "ok": true,
+          "detail": {
+            "state": "Death",
+            "deathClip": true,
+            "states": [
+              "Idle",
+              "Death",
+              "Death",
+              "Death",
+              "Death",
+              "Death"
+            ]
+          }
+        },
+        "戰死 → 在星芽村復活（死亡次數 +1、滿血、金幣不變）": {
+          "ok": true,
+          "detail": {
+            "pos": [
+              6.2,
+              0,
+              10.8
+            ],
+            "deaths": 1,
+            "hp": null,
+            "gold": 94
+          }
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "chromium_female_village_start.png",
+        "chromium_female_panel_portrait.png",
+        "chromium_female_village_pet.png",
+        "chromium_female_field_arrive.png",
+        "chromium_female_field_fight.png",
+        "chromium_female_field_portal.png",
+        "chromium_female_village_back.png",
+        "chromium_female_field_down.png",
+        "chromium_female_village_respawn.png"
+      ],
+      "results": {
+        "start": {
+          "map": "village",
+          "gender": "female",
+          "file": "novice_c10b5b_female_hq.glb",
+          "npcs": {
+            "ids": [
+              "sword",
+              "knight",
+              "smith",
+              "mage",
+              "church",
+              "circus",
+              "warehouse",
+              "guild"
+            ],
+            "board": true,
+            "merchant": true
+          },
+          "merchantPose": {
+            "x": -10.709493545994645,
+            "z": 1.3952591115269772,
+            "yaw": 0.12955275490382492,
+            "walking": true,
+            "station": -1,
+            "bearing": 277.422826080282,
+            "anim": "Walk",
+            "facing": 0.12955275490382492,
+            "lod": 1,
+            "paused": false,
+            "walkRate": 1
+          },
+          "avatarModel": {
+            "modular": false,
+            "weapon": null,
+            "bones": 17,
+            "triangles": 199955,
+            "parts": [],
+            "clips": [
+              "Attack",
+              "Death",
+              "Hurt",
+              "Idle",
+              "Jump",
+              "Run"
+            ],
+            "attackClips": []
+          },
+          "state": "Idle",
+          "pos": [
+            0,
+            0,
+            -12.5
+          ],
+          "gold": 100,
+          "hp": null,
+          "items": {
+            "seed": 0,
+            "egg": 0,
+            "birdEgg": 0,
+            "monsterMaterial": 0,
+            "shopFeed": 0
+          },
+          "bag": [],
+          "pets": [],
+          "equipped": null,
+          "followerVisible": false,
+          "followerSize": 0,
+          "ledger": [],
+          "deaths": 0,
+          "level": 1,
+          "exp": 0,
+          "appearance": {
+            "hair": "hair01",
+            "hairColor": null,
+            "weapon": "sword"
+          },
+          "art": "載入 npc_guild_far.glb",
+          "interact": {
+            "target": null,
+            "talking": false,
+            "dialog": "",
+            "panelOpen": false,
+            "appraisalOpen": false,
+            "merchantPaused": false
+          },
+          "portal": {
+            "armed": true,
+            "fired": false,
+            "dist": 31.5,
+            "triggerR": 2.6
+          },
+          "panel": "closed",
+          "petGap": null,
+          "headHalfWidth": 0.3293747901916504,
+          "quality": {
+            "lod": "hq",
+            "render": "auto",
+            "scale": 1
+          },
+          "mode": "test",
+          "render": {
+            "drawCalls": 80,
+            "contextLost": 0,
+            "charShadow": "blob"
+          },
+          "jumpButtonVisible": false
+        },
+        "appraisal": {
+          "quote": {
+            "fee": 20,
+            "test": true
+          },
+          "r1": true,
+          "r2": true,
+          "gold": 80,
+          "ledger": 1,
+          "appraised": true
+        },
+        "guild": {
+          "serverBacked": false,
+          "b1": true,
+          "b2": true,
+          "feed": 1,
+          "listed": true,
+          "lockedAfterList": true,
+          "dup": false,
+          "ownBuy": false,
+          "cancelled": true,
+          "lockedAfterCancel": false,
+          "sold": true,
+          "goldBeforeSell": 70,
+          "gold": 82,
+          "stillInBag": false
+        },
+        "panelLandscape": {
+          "ok": true,
+          "inView": true,
+          "size": [
+            44,
+            44
+          ],
+          "onTop": true,
+          "panelBottom": 325.75,
+          "vh": 393,
+          "vw": 852,
+          "outX": 0,
+          "scrollable": "fits",
+          "bodyTouch": "pan-y"
+        },
+        "petDetailTries": 1,
+        "panelPortrait": {
+          "ok": true,
+          "inView": true,
+          "size": [
+            44,
+            44
+          ],
+          "onTop": true,
+          "panelBottom": 316.0625,
+          "vh": 852,
+          "vw": 393,
+          "outX": 0,
+          "scrollable": "fits",
+          "bodyTouch": "pan-y"
+        },
+        "petGap": {
+          "panel": "closed",
+          "gap": 0.19931532673446115,
+          "hw": 0.3293747901916504,
+          "size": 0.075,
+          "eq": 1
+        },
+        "fieldArrive": {
+          "fi": {
+            "map": "starsprout",
+            "gold": 82,
+            "deaths": 0,
+            "level": 1,
+            "exp": 0,
+            "expGained": 0,
+            "appearance": {
+              "hair": "hair01",
+              "hairColor": null,
+              "weapon": "sword"
+            },
+            "hp": 100,
+            "down": false,
+            "deathClip": true,
+            "state": "Idle",
+            "portal": {
+              "armed": true,
+              "fired": false,
+              "dist": 4,
+              "triggerR": 1.6,
+              "built": true,
+              "meshes": 3
+            },
+            "panel": "closed",
+            "petGap": 0.20107591858964366,
+            "headHalfWidth": 0.3293747901916504,
+            "goldDropped": 0,
+            "goldPicked": 0,
+            "goldOnGround": 0,
+            "jumpButton": false,
+            "claimed": 0,
+            "ledger": [
+              {
+                "seq": 1,
+                "requestId": "appraise:e2e-ap-1",
+                "kind": "appraisal",
+                "amount": -20,
+                "balanceAfter": 80,
+                "ref": "item:1",
+                "at": 1795872801153
+              },
+              {
+                "seq": 2,
+                "requestId": "e2e-buy-1",
+                "kind": "shopBuy",
+                "amount": -10,
+                "balanceAfter": 70,
+                "ref": "shop:feed×1",
+                "at": 1795872801502
+              },
+              {
+                "seq": 3,
+                "requestId": "e2e-sell-1",
+                "kind": "shopSell",
+                "amount": 12,
+                "balanceAfter": 82,
+                "ref": "item:2",
+                "at": 1795872801504
+              }
+            ],
+            "bag": 1,
+            "items": {
+              "seed": 1,
+              "egg": 0,
+              "birdEgg": 0,
+              "monsterMaterial": 0,
+              "shopFeed": 1
+            },
+            "pets": [
+              {
+                "id": 1,
+                "stage": 1,
+                "life": "alive",
+                "satiety": 98.66063333333335
+              }
+            ],
+            "followerSize": 0.075,
+            "loot": []
+          },
+          "pos": [
+            -56,
+            2,
+            -64
+          ]
+        },
+        "fieldMonsters": {
+          "fm": [
+            {
+              "zone": "02",
+              "zoneName": "苔葉林緣",
+              "monster": "苔角獸",
+              "delivered": true,
+              "count": 5,
+              "status": "M002 苔角獸 Rig V1.0 Lite"
+            },
+            {
+              "zone": "03",
+              "zoneName": "微風花丘",
+              "monster": "雲絨鳥",
+              "delivered": true,
+              "count": 5,
+              "status": "M003 雲絨鳥 Rig V1.0 Lite"
+            },
+            {
+              "zone": "04",
+              "zoneName": "羽風高地",
+              "monster": "風羽狐",
+              "delivered": true,
+              "count": 4,
+              "status": "M004 風羽狐 Rig V1.1 Lite"
+            },
+            {
+              "zone": "05",
+              "zoneName": "星雲花田",
+              "monster": "星雲咩咩",
+              "delivered": true,
+              "count": 4,
+              "status": "M005 星雲咩咩 Rig V1.0 Lite"
+            },
+            {
+              "zone": "06",
+              "zoneName": "胡蘿蔔園",
+              "monster": "胡蘿蔔大王",
+              "delivered": true,
+              "count": 2,
+              "status": "M006 胡蘿蔔大王 Rig V1.0 Lite"
+            },
+            {
+              "zone": "07",
+              "zoneName": "王冠遺跡",
+              "monster": "王冠重錘兔",
+              "delivered": true,
+              "count": 1,
+              "status": "M007 王冠重錘兔 Rig V1.0 Lite"
+            }
+          ],
+          "kinds": {
+            "star_dew_bobo": 6,
+            "moss_horn_beast": 5,
+            "cloud_fluff_bird": 5,
+            "windfeather_fox": 4,
+            "nebula_sheep": 4,
+            "carrot_king": 2,
+            "crown_hammer_rabbit": 1
+          }
+        },
+        "fight": {
+          "kills": 2,
+          "picked": 2,
+          "goldDropped": 12,
+          "goldPicked": 12,
+          "gold": 94,
+          "claimed": 4
+        },
+        "sustainedAttack": {
+          "kind": "star_dew_bobo",
+          "gameSeconds": 25,
+          "wallSeconds": 69.6,
+          "presses": 128,
+          "playerHits": 48,
+          "hurtTaken": 12,
+          "monsterAttacks": 12,
+          "knockbacks": 1,
+          "knockSkipped": 41,
+          "maxGapSec": 2.1,
+          "alive": true
+        },
+        "backVillage": {
+          "gold": 94,
+          "pos": [
+            0,
+            0,
+            -39
+          ],
+          "bag": 2
+        },
+        "death": {
+          "state": "Death",
+          "deathClip": true,
+          "states": [
+            "Idle",
+            "Death",
+            "Death",
+            "Death",
+            "Death",
+            "Death"
+          ]
+        },
+        "respawn": {
+          "pos": [
+            6.2,
+            0,
+            10.8
+          ],
+          "deaths": 1,
+          "hp": null,
+          "gold": 94
+        }
+      },
+      "console": [],
+      "ok": true
+    }
+  ],
+  "finishedAt": "2026-11-28T13:38:12.222Z",
+  "ok": true
+}
