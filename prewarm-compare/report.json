@@ -1,0 +1,437 @@
+{
+  "startedAt": "2026-11-28T12:48:00.766Z",
+  "browser": "chromium",
+  "benchSeconds": 20,
+  "repeats": 1,
+  "note": "CI 軟體繪製，不是 iPhone；只比較相對變化",
+  "runs": [
+    {
+      "label": "lite_prewarm_on",
+      "rep": 0,
+      "url": "&lod=lite&quality=medium",
+      "ok": true,
+      "loadMs": 1945,
+      "prewarmMs": null,
+      "prewarm": null,
+      "firstCasts": [
+        {
+          "skill": "triple_slash",
+          "ok": true,
+          "frames": 10,
+          "maxMs": 352,
+          "over50": 10,
+          "baseMedianMs": 120,
+          "medianMs": 170
+        },
+        {
+          "skill": "staff_cast",
+          "ok": true,
+          "frames": 13,
+          "maxMs": 164,
+          "over50": 13,
+          "baseMedianMs": 146,
+          "medianMs": 145
+        },
+        {
+          "skill": "star_meteor",
+          "ok": true,
+          "frames": 12,
+          "maxMs": 173,
+          "over50": 12,
+          "baseMedianMs": 147,
+          "medianMs": 154
+        }
+      ],
+      "bench": {
+        "avgFps": 6.877441990271958,
+        "low1Fps": 5.608524957941921,
+        "minFps": 4.87092060399305,
+        "avgDraw": 71.19565217391305,
+        "kills": 5
+      },
+      "combatFx": {
+        "tier": "medium",
+        "actors": 1,
+        "playing": 0,
+        "vfx": {
+          "meshFx": 1,
+          "particles": 18,
+          "projectiles": 0,
+          "spawned": 121,
+          "materials": 49,
+          "pooledMeshes": 44,
+          "pooledSystems": 42
+        },
+        "budget": {
+          "active": 3,
+          "activeRemote": 0,
+          "activeCritical": 0,
+          "particles": 50,
+          "granted": 148,
+          "denied": 0,
+          "scaled": 0,
+          "deniedBy": {}
+        },
+        "culled": {
+          "distance": 0,
+          "offscreen": 0
+        },
+        "damageShown": 27,
+        "audioPlayed": 0,
+        "field": {
+          "hitFx": 20,
+          "numbers": 27,
+          "hurt": 7,
+          "respawnFx": 3,
+          "deathFx": 7,
+          "skillCasts": 3,
+          "swings": 15,
+          "texts": {}
+        },
+        "hud": {
+          "flash": true,
+          "shake": 1,
+          "numbers": true
+        },
+        "prewarm": {
+          "ms": 1294,
+          "spawned": 66,
+          "leftoverActive": 0,
+          "leftoverProjectiles": 0,
+          "audioPlayed": 0,
+          "damageShown": 0,
+          "tier": "medium",
+          "materials": 27,
+          "pooledMeshes": 44,
+          "particleSystems": 40
+        }
+      },
+      "errors": []
+    },
+    {
+      "label": "lite_prewarm_off",
+      "rep": 0,
+      "url": "&lod=lite&quality=medium&prewarm=0",
+      "ok": true,
+      "loadMs": 2020,
+      "prewarmMs": null,
+      "prewarm": null,
+      "firstCasts": [
+        {
+          "skill": "triple_slash",
+          "ok": true,
+          "frames": 11,
+          "maxMs": 297,
+          "over50": 11,
+          "baseMedianMs": 168,
+          "medianMs": 156
+        },
+        {
+          "skill": "staff_cast",
+          "ok": true,
+          "frames": 13,
+          "maxMs": 162,
+          "over50": 13,
+          "baseMedianMs": 126,
+          "medianMs": 134
+        },
+        {
+          "skill": "star_meteor",
+          "ok": true,
+          "frames": 13,
+          "maxMs": 163,
+          "over50": 13,
+          "baseMedianMs": 136,
+          "medianMs": 142
+        }
+      ],
+      "bench": {
+        "avgFps": 7.710637197108731,
+        "low1Fps": 6.301197227475069,
+        "minFps": 5.868544600942174,
+        "avgDraw": 69.8,
+        "kills": 6
+      },
+      "combatFx": {
+        "tier": "medium",
+        "actors": 1,
+        "playing": 0,
+        "vfx": {
+          "meshFx": 0,
+          "particles": 129,
+          "projectiles": 0,
+          "spawned": 74,
+          "materials": 37,
+          "pooledMeshes": 13,
+          "pooledSystems": 25
+        },
+        "budget": {
+          "active": 8,
+          "activeRemote": 0,
+          "activeCritical": 1,
+          "particles": 179,
+          "granted": 162,
+          "denied": 0,
+          "scaled": 0,
+          "deniedBy": {}
+        },
+        "culled": {
+          "distance": 0,
+          "offscreen": 0
+        },
+        "damageShown": 31,
+        "audioPlayed": 0,
+        "field": {
+          "hitFx": 23,
+          "numbers": 31,
+          "hurt": 8,
+          "respawnFx": 3,
+          "deathFx": 8,
+          "skillCasts": 3,
+          "swings": 18,
+          "texts": {}
+        },
+        "hud": {
+          "flash": true,
+          "shake": 1,
+          "numbers": true
+        },
+        "prewarm": null
+      },
+      "errors": []
+    },
+    {
+      "label": "hq_prewarm_on",
+      "rep": 0,
+      "url": "&lod=hq&quality=high",
+      "ok": true,
+      "loadMs": 2182,
+      "prewarmMs": null,
+      "prewarm": null,
+      "firstCasts": [
+        {
+          "skill": "triple_slash",
+          "ok": true,
+          "frames": 5,
+          "maxMs": 1000,
+          "over50": 4,
+          "baseMedianMs": 205,
+          "medianMs": 477
+        },
+        {
+          "skill": "staff_cast",
+          "ok": true,
+          "frames": 7,
+          "maxMs": 323,
+          "over50": 7,
+          "baseMedianMs": 312,
+          "medianMs": 313
+        },
+        {
+          "skill": "star_meteor",
+          "ok": true,
+          "frames": 7,
+          "maxMs": 323,
+          "over50": 7,
+          "baseMedianMs": 301,
+          "medianMs": 310
+        }
+      ],
+      "bench": {
+        "avgFps": 2.964368293116749,
+        "low1Fps": 2.701242571581569,
+        "minFps": 2.701242571581569,
+        "avgDraw": 88.31666666666666,
+        "kills": 2
+      },
+      "combatFx": {
+        "tier": "high",
+        "actors": 1,
+        "playing": 0,
+        "vfx": {
+          "meshFx": 0,
+          "particles": 0,
+          "projectiles": 0,
+          "spawned": 108,
+          "materials": 47,
+          "pooledMeshes": 46,
+          "pooledSystems": 49
+        },
+        "budget": {
+          "active": 3,
+          "activeRemote": 0,
+          "activeCritical": 0,
+          "particles": 80,
+          "granted": 98,
+          "denied": 0,
+          "scaled": 0,
+          "deniedBy": {}
+        },
+        "culled": {
+          "distance": 0,
+          "offscreen": 0
+        },
+        "damageShown": 15,
+        "audioPlayed": 0,
+        "field": {
+          "hitFx": 11,
+          "numbers": 15,
+          "hurt": 4,
+          "respawnFx": 1,
+          "deathFx": 4,
+          "skillCasts": 3,
+          "swings": 6,
+          "texts": {}
+        },
+        "hud": {
+          "flash": true,
+          "shake": 1,
+          "numbers": true
+        },
+        "prewarm": {
+          "ms": 1822,
+          "spawned": 66,
+          "leftoverActive": 0,
+          "leftoverProjectiles": 0,
+          "audioPlayed": 0,
+          "damageShown": 0,
+          "tier": "high",
+          "materials": 27,
+          "pooledMeshes": 46,
+          "particleSystems": 48
+        }
+      },
+      "errors": []
+    },
+    {
+      "label": "hq_prewarm_off",
+      "rep": 0,
+      "url": "&lod=hq&quality=high&prewarm=0",
+      "ok": true,
+      "loadMs": 2223,
+      "prewarmMs": null,
+      "prewarm": null,
+      "firstCasts": [
+        {
+          "skill": "triple_slash",
+          "ok": true,
+          "frames": 5,
+          "maxMs": 582,
+          "over50": 5,
+          "baseMedianMs": 510,
+          "medianMs": 493
+        },
+        {
+          "skill": "staff_cast",
+          "ok": true,
+          "frames": 7,
+          "maxMs": 335,
+          "over50": 7,
+          "baseMedianMs": 316,
+          "medianMs": 313
+        },
+        {
+          "skill": "star_meteor",
+          "ok": true,
+          "frames": 7,
+          "maxMs": 330,
+          "over50": 7,
+          "baseMedianMs": 312,
+          "medianMs": 320
+        }
+      ],
+      "bench": {
+        "avgFps": 2.9332681495966764,
+        "low1Fps": 2.732987154959328,
+        "minFps": 2.732987154959328,
+        "avgDraw": 88.56666666666666,
+        "kills": 2
+      },
+      "combatFx": {
+        "tier": "high",
+        "actors": 1,
+        "playing": 0,
+        "vfx": {
+          "meshFx": 0,
+          "particles": 127,
+          "projectiles": 0,
+          "spawned": 46,
+          "materials": 35,
+          "pooledMeshes": 13,
+          "pooledSystems": 24
+        },
+        "budget": {
+          "active": 4,
+          "activeRemote": 0,
+          "activeCritical": 0,
+          "particles": 220,
+          "granted": 98,
+          "denied": 0,
+          "scaled": 0,
+          "deniedBy": {}
+        },
+        "culled": {
+          "distance": 0,
+          "offscreen": 0
+        },
+        "damageShown": 15,
+        "audioPlayed": 0,
+        "field": {
+          "hitFx": 11,
+          "numbers": 15,
+          "hurt": 4,
+          "respawnFx": 1,
+          "deathFx": 4,
+          "skillCasts": 3,
+          "swings": 6,
+          "texts": {}
+        },
+        "hud": {
+          "flash": true,
+          "shake": 1,
+          "numbers": true
+        },
+        "prewarm": null
+      },
+      "errors": []
+    }
+  ],
+  "summary": {
+    "lite_prewarm_on": {
+      "n": 1,
+      "loadMs": 1945,
+      "prewarmMs": 0,
+      "firstCastMaxMs": 352,
+      "firstCastOver50": 35,
+      "avgFps": 6.88,
+      "low1Fps": 5.61
+    },
+    "lite_prewarm_off": {
+      "n": 1,
+      "loadMs": 2020,
+      "prewarmMs": 0,
+      "firstCastMaxMs": 297,
+      "firstCastOver50": 37,
+      "avgFps": 7.71,
+      "low1Fps": 6.3
+    },
+    "hq_prewarm_on": {
+      "n": 1,
+      "loadMs": 2182,
+      "prewarmMs": 0,
+      "firstCastMaxMs": 1000,
+      "firstCastOver50": 18,
+      "avgFps": 2.96,
+      "low1Fps": 2.7
+    },
+    "hq_prewarm_off": {
+      "n": 1,
+      "loadMs": 2223,
+      "prewarmMs": 0,
+      "firstCastMaxMs": 582,
+      "firstCastOver50": 19,
+      "avgFps": 2.93,
+      "low1Fps": 2.73
+    }
+  }
+}
