@@ -50,6 +50,13 @@ for (const name of browsers) {
     const ctx = await browser.newContext({ viewport: tcase.viewport ?? { width: 932, height: 430 }, deviceScaleFactor: 1, hasTouch: true });
     const page = await ctx.newPage();
     page.on("pageerror", (e) => run.errors.push(`pageerror: ${e.message}`));
+    const failedReq = [];
+    const sharedReq = [];
+    page.on("requestfailed", (r) => !/favicon/.test(r.url()) && failedReq.push(`${r.failure()?.errorText ?? "failed"} ${r.url()}`));
+    page.on("response", (r) => {
+      if (r.status() >= 400 && !/favicon/.test(r.url())) failedReq.push(`${r.status()} ${r.url()}`);
+      if (r.url().includes("/shared-assets/")) sharedReq.push(r.url());
+    });
     page.on("console", (m) => m.type() === "error" && !/Failed to load resource/.test(m.text()) && run.errors.push(`console: ${m.text()}`));
     const shot = (l) => page.screenshot({ path: `${outDir}${name}_${tcase.id}_${l}.png` }).catch(() => {});
     try {
@@ -427,6 +434,12 @@ for (const name of browsers) {
       const errs = await page.evaluate(() => window.__cvfx.errors);
       run.results.final = st;
       check("沒有頁面錯誤", run.errors.length === 0 && errs.length === 0, [...run.errors, ...errs].slice(0, 10));
+      check("沒有失敗的網路請求（模型、貼圖、動作檔全部載入）", failedReq.length === 0, failedReq.slice(0, 10));
+      if (remote) {
+        const remapN = await page.evaluate(() => window.__starwishAssetRemap ?? 0);
+        run.results.sharedAssets = { remap: remapN, requests: sharedReq.length };
+        check("公開網址：大型模型改從 /shared-assets/ 共用區讀取", remapN > 0 && sharedReq.length > 0, run.results.sharedAssets);
+      }
     } catch (e) {
       check("執行完成", false, String(e));
       await shot("error");
