@@ -1,18 +1,18 @@
 {
- "note": "Stage 8.1 多人測試預覽：以下檔案與其他預覽資料夾內容完全相同（SHA-1），從那裡讀取，不重複發布",
+ "note": "Stage 8.1 多人測試預覽：以下檔案與其他預覽資料夾內容完全相同（SHA-1），從那裡讀取，不重複發布｜2026-11-28 Claude D：C 部門 12 檔改讀正式共用資產 shared-assets/v1（內容 SHA-1 相同），不再依賴 preview-combat-vfx",
  "sources": [
   "preview-stage71-world",
-  "preview-combat-vfx",
-  "preview-stage72-world"
+  "preview-stage72-world",
+  "shared-assets/v1"
  ],
  "files": {
   "models/bobo_v38r_high.glb": "../preview-stage71-world/models/bobo_v38r_high.glb",
   "models/bobo_v38r_low.glb": "../preview-stage71-world/models/bobo_v38r_low.glb",
   "models/bobo_v38r_medium.glb": "../preview-stage71-world/models/bobo_v38r_medium.glb",
-  "models/novice_c10b5b_female_hq.glb": "../preview-combat-vfx/models/novice_c10b5b_female_hq.glb",
-  "models/novice_c10b5b_female_lite.glb": "../preview-combat-vfx/models/novice_c10b5b_female_lite.glb",
-  "models/novice_c10b5b_male_hq.glb": "../preview-combat-vfx/models/novice_c10b5b_male_hq.glb",
-  "models/novice_c10b5b_male_lite.glb": "../preview-combat-vfx/models/novice_c10b5b_male_lite.glb",
+  "models/novice_c10b5b_female_hq.glb": "../shared-assets/v1/91/91e095b457c4d6e5bde91267e9c03573762e3a98.glb",
+  "models/novice_c10b5b_female_lite.glb": "../shared-assets/v1/92/9245d7801570a6f3b44f11446aa2c70c0c1c5a9c.glb",
+  "models/novice_c10b5b_male_hq.glb": "../shared-assets/v1/1d/1d7777b5f502d7d9645444b0cacaaf2460298867.glb",
+  "models/novice_c10b5b_male_lite.glb": "../shared-assets/v1/4f/4f4947e0778044ef0cade4aae861abed4ab7fff3.glb",
   "models/village-npc67/board67_hq.glb": "../preview-stage72-world/models/village-npc67/board67_hq.glb",
   "models/village-npc67/board67_lite.glb": "../preview-stage72-world/models/village-npc67/board67_lite.glb",
   "models/village-npc67/npc_clown67_far.glb": "../preview-stage72-world/models/village-npc67/npc_clown67_far.glb",
