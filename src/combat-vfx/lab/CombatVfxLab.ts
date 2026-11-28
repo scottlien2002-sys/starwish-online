@@ -1232,8 +1232,8 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
     const p = perf();
     const triK = (renderStats.triangles / 1000).toFixed(renderStats.triangles < 10000 ? 1 : 0);
     hud.setPerf(
-      `FPS ${p.fps.toFixed(0)}｜10s ${p.avg10s.toFixed(1)}｜1%Low ${p.low1.toFixed(1)}｜DC ${renderStats.draws}｜${triK}k面`,
-      `Combat VFX Lab（技術展示，非正式技能／數值）\n` +
+      `FPS ${p.fps.toFixed(0)}｜平均 ${p.avg10s.toFixed(1)}｜1% Low ${p.low1.toFixed(1)}`,
+      `Combat VFX Lab（技術展示，非正式技能／數值）｜點此收合\n` +
         `FPS ${p.fps.toFixed(0)}｜10 秒平均 ${p.avg10s.toFixed(1)}｜1% Low ${p.low1.toFixed(1)}\n` +
         `Draw ${renderStats.draws}｜三角面 ${triK}k｜網格 ${renderStats.activeMeshes}｜粒子 ${vfx.stats.particles}｜特效 ${vfx.stats.meshFx}＋投射 ${vfx.stats.projectiles}\n` +
         `預算 ${vfx.budget.stats.active}/${VFX_QUALITY[tier].maxActiveEffects}｜拒絕 ${vfx.budget.stats.denied}｜品質 ${VFX_QUALITY[tier].label}｜攻速 ${clampAttackSpeed(aspd)}${aspd > 160 ? "（上限）" : ""}\n` +
@@ -1407,7 +1407,7 @@ function buildHud(root: HTMLElement) {
   const st = document.createElement("style");
   st.textContent = `
   .cv-hud{--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px);--st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);--sk:60px;--joy:116px;
-    position:absolute;inset:0;pointer-events:none;font-family:system-ui,"PingFang TC",sans-serif;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+    position:fixed;left:0;top:var(--vvt,0px);width:100%;height:var(--vvh,100%);overflow:hidden;pointer-events:none;font-family:system-ui,"PingFang TC",sans-serif;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
   .cv-hud>*{pointer-events:auto}
   .cv-perf{position:absolute;left:calc(6px + var(--sl));top:calc(6px + var(--st));max-width:calc(100vw - 120px - var(--sl) - var(--sr));z-index:9;
     background:rgba(16,20,42,.5);color:#e8eeff;border-radius:7px;padding:2px 7px;font:10px/1.5 ui-monospace,Menlo,monospace;white-space:pre;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
@@ -1416,7 +1416,7 @@ function buildHud(root: HTMLElement) {
     background:rgba(30,40,80,.78);color:#fff;font:12px system-ui,"PingFang TC",sans-serif}
   .cv-devbtn.on{background:linear-gradient(#ffd77a,#e8a83c);color:#3a2300;font-weight:700}
   .cv-dev{position:absolute;right:calc(6px + var(--sr));top:calc(42px + var(--st));z-index:20;width:min(320px,calc(100vw - 12px - var(--sl) - var(--sr)));
-    max-height:calc(100% - 52px - var(--st) - var(--sb));overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;box-sizing:border-box;
+    max-height:calc(100% - 52px - var(--st) - var(--sb));overflow-x:hidden;overflow-y:auto;touch-action:pan-y;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;box-sizing:border-box;
     background:rgba(16,20,42,.9);border:1px solid rgba(255,230,160,.35);border-radius:12px;padding:8px;color:#eef3ff;font:12px/1.4 system-ui,"PingFang TC",sans-serif;display:none}
   .cv-dev.open{display:block}
   .cv-dev h4{margin:6px 2px 4px;font-size:11px;color:#ffe9a8;font-weight:700}
@@ -1425,11 +1425,13 @@ function buildHud(root: HTMLElement) {
   .cv-btn{background:rgba(30,40,80,.85);color:#fff;border:1px solid rgba(255,230,160,.45);border-radius:8px;padding:6px 9px;font:12px system-ui,"PingFang TC",sans-serif;min-height:30px}
   .cv-btn.on{background:linear-gradient(#ffd77a,#e8a83c);color:#3a2300;border-color:#fff2c2;font-weight:700}
   .cv-aspd{display:flex;align-items:center;gap:6px;width:100%}.cv-aspd input{flex:1}
-  .cv-help{opacity:.8;font-size:11px;margin:2px;white-space:normal;overflow-wrap:anywhere;flex:1 1 100%;min-width:0}
-  .cv-target{position:absolute;left:50%;transform:translateX(-50%);top:calc(42px + var(--st));z-index:8;background:rgba(20,24,48,.55);color:#fff;border-radius:8px;padding:2px 10px 4px;
+  .cv-help{opacity:.85;font-size:11px;margin:2px;white-space:normal;overflow-wrap:anywhere;flex:1 1 100%;min-width:0}
+  .cv-dev details{margin-top:6px}.cv-dev summary{cursor:pointer;color:#ffe9a8;font-size:11px;font-weight:700;padding:4px 2px;list-style:none}
+  .cv-dev summary::-webkit-details-marker{display:none}.cv-dev summary::before{content:"▸ "}.cv-dev details[open] summary::before{content:"▾ "}
+  .cv-target{position:absolute;left:50%;transform:translateX(-50%);top:var(--tgt-top,calc(42px + var(--st)));z-index:8;background:rgba(20,24,48,.55);color:#fff;border-radius:8px;padding:2px 10px 4px;
     font:11px system-ui,"PingFang TC",sans-serif;width:max-content;max-width:calc(100vw - 150px - var(--sl) - var(--sr));min-width:150px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
   .cv-hp{height:4px;background:#422;border-radius:3px;margin-top:2px;overflow:hidden}.cv-hp>div{height:100%;background:linear-gradient(90deg,#ff6b7d,#ffb36b)}
-  .cv-clsnote{position:absolute;left:50%;transform:translateX(-50%);top:calc(76px + var(--st));z-index:8;max-width:calc(100vw - 24px - var(--sl) - var(--sr));color:#ffe9a8;
+  .cv-clsnote{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--tgt-top,calc(42px + var(--st))) + 34px);z-index:8;max-width:calc(100vw - 24px - var(--sl) - var(--sr));color:#ffe9a8;
     font:11px system-ui,"PingFang TC";text-shadow:0 1px 2px #000;opacity:0;transition:opacity .3s;text-align:center;pointer-events:none}
   .cv-skills{position:absolute;right:calc(10px + var(--sr));bottom:calc(12px + var(--sb));display:grid;grid-template-columns:repeat(3,var(--sk));gap:8px;z-index:8}
   .cv-skill{position:relative;width:var(--sk);height:var(--sk);padding:0;border-radius:50%;border:2px solid #ffe3a0;background:radial-gradient(circle at 35% 30%,#7fa8ff,#283a8a 70%);color:#fff;
@@ -1469,7 +1471,7 @@ function buildHud(root: HTMLElement) {
   // 開發者選單
   const devBtn = document.createElement("button");
   devBtn.className = "cv-devbtn";
-  devBtn.textContent = "⚙ 開發者";
+  devBtn.textContent = "⚙ 測試設定";
   devBtn.dataset.dev = "toggle";
   stop(devBtn);
   const dev = document.createElement("div");
@@ -1479,7 +1481,7 @@ function buildHud(root: HTMLElement) {
   const setDev = (on: boolean) => {
     dev.classList.toggle("open", on);
     devBtn.classList.toggle("on", on);
-    devBtn.textContent = on ? "✕ 收合" : "⚙ 開發者";
+    devBtn.textContent = on ? "✕ 收合設定" : "⚙ 測試設定";
   };
   devBtn.addEventListener("click", () => setDev(!dev.classList.contains("open")));
   const section = (t: string) => {
@@ -1530,11 +1532,16 @@ function buildHud(root: HTMLElement) {
     b.dataset.cls = c.id;
     return b;
   });
-  const rH = section("操作");
+  // 操作說明：可展開／收合（預設收合）
+  const helpBox = document.createElement("details");
+  helpBox.dataset.help = "1";
+  const helpSum = document.createElement("summary");
+  helpSum.textContent = "操作說明";
   const help = document.createElement("div");
   help.className = "cv-help";
-  help.textContent = "搖桿／WASD 移動（沒有跳躍鍵；跳躍只在技能動作內）｜1～6 或右下按鈕施放技能｜拖曳畫面轉鏡頭｜雙指或滾輪、＋－ 按鈕縮放鏡頭｜點左上效能列看詳細數字";
-  rH.appendChild(help);
+  help.textContent = "左下搖桿／WASD 移動（沒有跳躍鍵；跳躍只在技能「跳斬」動作內）｜右下 1～6 施放技能｜拖曳畫面轉鏡頭｜雙指、滾輪或 ＋／－ 縮放鏡頭｜點左上效能列看 Draw Call、三角面等詳細數字";
+  helpBox.append(helpSum, help);
+  dev.appendChild(helpBox);
   // 目標
   const tgt = document.createElement("div");
   tgt.className = "cv-target";
@@ -1616,6 +1623,27 @@ function buildHud(root: HTMLElement) {
   joyEl.addEventListener("pointercancel", endJoy);
   hudEl.append(perf, devBtn, dev, tgt, clsNote, zoom, skills, joyEl);
   root.appendChild(hudEl);
+  // 目標血條永遠放在效能列與設定按鈕的下方（效能列展開時也不會重疊）
+  const placeTarget = () => {
+    const h = hudEl.getBoundingClientRect();
+    const b = Math.max(perf.getBoundingClientRect().bottom, devBtn.getBoundingClientRect().bottom) - h.top;
+    hudEl.style.setProperty("--tgt-top", `${Math.round(b + 6)}px`);
+  };
+  // 動態 viewport：iPhone Safari 網址列伸縮、App 內嵌瀏覽器（沒有 dvh）都以 visualViewport 為準
+  const placeViewport = () => {
+    const vv = window.visualViewport;
+    hudEl.style.setProperty("--vvh", `${Math.round(vv ? vv.height : window.innerHeight)}px`);
+    hudEl.style.setProperty("--vvt", `${Math.round(vv ? vv.offsetTop : 0)}px`);
+    placeTarget();
+  };
+  placeViewport();
+  window.addEventListener("resize", placeViewport);
+  window.addEventListener("orientationchange", () => window.setTimeout(placeViewport, 250));
+  window.visualViewport?.addEventListener("resize", placeViewport);
+  window.visualViewport?.addEventListener("scroll", placeViewport);
+  if (typeof ResizeObserver !== "undefined") new ResizeObserver(placeTarget).observe(perf);
+  // 選單內捲動不得帶動整個頁面
+  dev.addEventListener("touchmove", (e) => e.stopPropagation(), { passive: true });
   return {
     tierButtons, gender, sound, shake, hitstop, auto, multi, env, aspd, skillButtons, joystick, classButtons, zoomIn, zoomOut,
     setDev,

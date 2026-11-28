@@ -162,66 +162,115 @@ for (const name of browsers) {
         check("規則：技能不能穿越不可通行地形（跳斬被岩石擋下）", after.b === true && dist >= rock.r + 0.3 - 0.02, { after, rock, dist });
         await page.evaluate(() => window.__cvfx.setMonsterAI(true));
       } else if (tcase.id.startsWith("ui-")) {
-        const vp = tcase.viewport;
         // 模擬 iPhone 瀏海／Home 指示條的 Safe Area（直向：上 47、下 34；橫向：左右 47、下 21）
-        const safe = vp.height > vp.width ? { l: 0, r: 0, t: 47, b: 34 } : { l: 47, r: 47, t: 0, b: 21 };
-        const layout = async () => page.evaluate((sf) => {
+        const safeFor = (w, h) => (h > w ? { l: 0, r: 0, t: 47, b: 34 } : { l: 47, r: 47, t: 0, b: 21 });
+        const layout = async (sf) => page.evaluate((sf) => {
           const hud = document.querySelector(".cv-hud");
           for (const [k, v] of Object.entries({ "--sl": sf.l, "--sr": sf.r, "--st": sf.t, "--sb": sf.b })) hud.style.setProperty(k, `${v}px`);
+          window.dispatchEvent(new Event("resize"));
           const R = (el) => { const r = el.getBoundingClientRect(); return { x: r.left, y: r.top, r: r.right, b: r.bottom, w: r.width, h: r.height, vis: getComputedStyle(el).display !== "none" && r.width > 0 }; };
           const q = (s) => [...document.querySelectorAll(s)];
+          const dev = q(".cv-dev")[0];
           return {
             W: innerWidth, H: innerHeight,
-            perf: R(q(".cv-perf")[0]), dev: R(q(".cv-devbtn")[0]), menu: R(q(".cv-dev")[0]), target: R(q(".cv-target")[0]), zoom: R(q(".cv-zoom")[0]), joy: R(q(".cv-joy")[0]),
-            skills: q(".cv-skill").map(R), menuButtons: q(".cv-dev .cv-btn").map(R),
-            perfText: q(".cv-perf")[0].textContent, jumpButtons: q("button").filter((b) => /跳躍|jump/i.test(b.textContent) && !b.classList.contains("cv-skill")).length,
+            perf: R(q(".cv-perf")[0]), dev: R(q(".cv-devbtn")[0]), menu: R(dev), target: R(q(".cv-target")[0]), zoom: R(q(".cv-zoom")[0]), joy: R(q(".cv-joy")[0]),
+            skills: q(".cv-skill").map(R), menuButtons: q(".cv-dev .cv-btn").map(R), menuScroll: [dev.scrollHeight, dev.clientHeight],
+            devLabel: q(".cv-devbtn")[0].textContent, perfText: q(".cv-perf")[0].textContent, help: !!q(".cv-dev details[data-help]")[0], helpOpen: !!q(".cv-dev details[data-help]")[0]?.open,
+            jumpButtons: q("button").filter((b) => /跳躍|jump/i.test(b.textContent) && !b.classList.contains("cv-skill")).length,
             outsideDev: q(".cv-hud button").filter((b) => !b.closest(".cv-dev") && !b.closest(".cv-skills") && !b.closest(".cv-zoom") && !b.classList.contains("cv-devbtn")).length,
+            pageScroll: [window.scrollY, document.scrollingElement?.scrollTop ?? 0, document.body.scrollTop],
           };
-        }, safe);
-        await sleep(2500);
-        let L = await layout();
-        const inside = (r) => r.x >= safe.l - 0.5 && r.y >= safe.t - 0.5 && r.r <= L.W - safe.r + 0.5 && r.b <= L.H - safe.b + 0.5;
+        }, sf);
+        const inside = (L, sf, r) => r.x >= sf.l - 0.5 && r.y >= sf.t - 0.5 && r.r <= L.W - sf.r + 0.5 && r.b <= L.H - sf.b + 0.5;
         const hit = (a, b) => a.x < b.r - 0.5 && b.x < a.r - 0.5 && a.y < b.b - 0.5 && b.y < a.b - 0.5;
-        const ctrls = { perf: L.perf, dev: L.dev, target: L.target, zoom: L.zoom, joy: L.joy, ...Object.fromEntries(L.skills.map((r, i) => [`skill${i + 1}`, r])) };
-        const out = Object.entries(ctrls).filter(([, r]) => !inside(r)).map(([k, r]) => [k, r]);
-        check(`介面（${vp.width}×${vp.height}）：所有按鈕、搖桿、效能列、血條都在畫面內且避開 Safe Area`, out.length === 0, { safe, out });
-        const keys = Object.keys(ctrls);
-        const ov = [];
-        for (let i = 0; i < keys.length; i++) for (let j = i + 1; j < keys.length; j++) if (hit(ctrls[keys[i]], ctrls[keys[j]])) ov.push([keys[i], keys[j]]);
-        check(`介面（${vp.width}×${vp.height}）：技能、搖桿、縮放、效能列、血條、開發者按鈕互不重疊`, ov.length === 0, ov);
-        check("介面：測試設定都收進開發者選單（選單預設收合；畫面上沒有其他設定按鈕）", !L.menu.vis && L.outsideDev === 0 && L.menuButtons.length >= 14, { menuVisible: L.menu.vis, outside: L.outsideDev, inMenu: L.menuButtons.length });
-        check("介面：效能列精簡（1 行、高度 ≤ 22 px），不擋住目標血條", L.perf.h <= 22 && !hit(L.perf, L.target), { perf: L.perf, target: L.target });
-        const m = /DC (\d+)｜([\d.]+)k面/.exec(L.perfText);
-        check("統計：Draw Call、三角面不再顯示 0", m && Number(m[1]) > 0 && Number(m[2]) > 0, L.perfText);
+        const verify = async (tag) => {
+          const vp = page.viewportSize();
+          const sf = safeFor(vp.width, vp.height);
+          await sleep(600);
+          const L = await layout(sf);
+          const ctrls = { perf: L.perf, dev: L.dev, target: L.target, zoom: L.zoom, joy: L.joy, ...Object.fromEntries(L.skills.map((r, i) => [`skill${i + 1}`, r])) };
+          const out = Object.entries(ctrls).filter(([, r]) => !inside(L, sf, r)).map(([k, r]) => [k, r]);
+          const keys = Object.keys(ctrls);
+          const ov = [];
+          for (let i = 0; i < keys.length; i++) for (let j = i + 1; j < keys.length; j++) if (hit(ctrls[keys[i]], ctrls[keys[j]])) ov.push([keys[i], keys[j]]);
+          return { vp, sf, L, out, ov, tag };
+        };
+        const sizeCheck = (v) => {
+          check(`介面 ${v.tag}（${v.vp.width}×${v.vp.height}）：所有按鈕都在可視範圍且避開 Safe Area`, v.out.length === 0, { safe: v.sf, out: v.out });
+          check(`介面 ${v.tag}（${v.vp.width}×${v.vp.height}）：搖桿、六個技能、縮放、效能列、血條、設定按鈕互不重疊`, v.ov.length === 0, v.ov);
+        };
+        await sleep(2000);
+        let v = await verify("預設");
+        sizeCheck(v);
+        let L = v.L;
+        check("介面：測試設定全部集中在右上「測試設定」選單（預設收合；畫面上沒有其他設定按鈕）", /測試設定/.test(L.devLabel) && !L.menu.vis && L.outsideDev === 0 && L.menuButtons.length >= 16, { label: L.devLabel, menuVisible: L.menu.vis, outside: L.outsideDev, inMenu: L.menuButtons.length });
+        check("效能列：預設只顯示即時 FPS、平均、1% Low（1 行），且不擋目標血條", /^FPS \d+｜平均 [\d.]+｜1% Low [\d.]+$/.test(L.perfText) && L.perf.h <= 22 && !hit(L.perf, L.target), { text: L.perfText, perf: L.perf, target: L.target });
         check("移動：沒有跳躍按鈕（跳躍只在技能動作內）", L.jumpButtons === 0, L.jumpButtons);
         await shot("closed");
+        // 詳細效能：點開後有 Draw Call、三角面（不是 0），而且血條自動往下讓位
+        await page.click(".cv-perf");
+        await sleep(800);
+        L = (await verify("效能展開")).L;
+        const m = /Draw (\d+)｜三角面 ([\d.]+)k/.exec(L.perfText);
+        check("效能列：點一下展開詳細數字；Draw Call、三角面不是 0；展開時也不擋血條", m && Number(m[1]) > 0 && Number(m[2]) > 0 && !hit(L.perf, L.target), { text: L.perfText, perf: L.perf, target: L.target });
+        await shot("perfopen");
+        await page.click(".cv-perf");
+        // 設定選單
         await page.click(".cv-devbtn");
         await sleep(400);
-        L = await layout();
-        check(`介面（${vp.width}×${vp.height}）：開發者選單展開後在畫面內（可捲動），收合按鈕仍可按`, L.menu.vis && inside(L.menu) && inside(L.dev) && !hit(L.menu, L.dev), { menu: L.menu, dev: L.dev });
+        v = await verify("選單展開");
+        L = v.L;
+        check(`介面（${v.vp.width}×${v.vp.height}）：測試設定選單展開後在可視範圍內、不蓋住收合按鈕`, L.menu.vis && inside(L, v.sf, L.menu) && !hit(L.menu, L.dev), { menu: L.menu, dev: L.dev });
+        check("操作說明：在選單內、預設收合、可展開", L.help && !L.helpOpen, { help: L.help, open: L.helpOpen });
+        await page.click(".cv-dev details[data-help] summary");
+        await sleep(200);
+        const helpOpen = await page.evaluate(() => document.querySelector(".cv-dev details[data-help]").open);
+        check("操作說明：點一下可展開", helpOpen, helpOpen);
         await shot("devmenu");
         await page.click(".cv-devbtn");
         await sleep(300);
-        L = await layout();
-        check("介面：開發者選單可收合", !L.menu.vis, L.menu);
+        L = (await verify("選單收合")).L;
+        check("介面：測試設定選單可收合", !L.menu.vis, L.menu);
+        // 鏡頭縮放
         const r0 = await page.evaluate(() => window.__cvfx.camRadius());
         await page.click(".cv-zoom [data-zoom=in]");
         await page.click(".cv-zoom [data-zoom=in]");
         await sleep(1500);
         const r1 = await page.evaluate(() => window.__cvfx.camRadius());
-        await shot("zoomed");
         await page.click(".cv-zoom [data-zoom=out]");
         await page.click(".cv-zoom [data-zoom=out]");
         await page.click(".cv-zoom [data-zoom=out]");
         await sleep(1500);
         const r2 = await page.evaluate(() => window.__cvfx.camRadius());
-        check("鏡頭：＋ 可以拉近角色、－ 可以拉遠（在 2.4～16 m 範圍內）", r1 < r0 * 0.8 && r2 > r1 && r1 >= 2.39, { r0, r1, r2 });
-        // 點效能列可展開詳細數字
-        await page.click(".cv-perf");
-        await sleep(200);
-        const longTxt = await page.evaluate(() => document.querySelector(".cv-perf").textContent);
-        check("效能列：點一下展開詳細數字", /10 秒平均/.test(longTxt) && /三角面/.test(longTxt), longTxt);
-        await page.click(".cv-perf");
+        check("鏡頭：＋ 可以拉近角色、－ 可以拉遠（2.4～16 m）", r1 < r0 * 0.8 && r2 > r1 && r1 >= 2.39, { r0, r1, r2 });
+        // 不同手機尺寸＋直橫向切換（iPhone SE／一般／Pro Max、Android、App 內嵌視窗的矮畫面）
+        const sizes = tcase.id === "ui-portrait"
+          ? [[375, 667], [360, 640], [430, 932], [390, 664], [844, 390], [390, 844]]
+          : [[667, 375], [932, 430], [740, 360], [390, 844], [844, 390]];
+        for (const [w, h] of sizes) {
+          await page.setViewportSize({ width: w, height: h });
+          v = await verify(h > w ? "直向" : "橫向");
+          sizeCheck(v);
+        }
+        // 選單內容太多時：選單內部捲動，整個頁面不捲動（矮的橫向畫面）
+        await page.setViewportSize({ width: 667, height: 375 });
+        await sleep(600);
+        await page.click(".cv-devbtn");
+        await sleep(400);
+        const box = await page.evaluate(() => { const r = document.querySelector(".cv-dev").getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+        await page.mouse.move(box.x, box.y);
+        await page.mouse.wheel(0, 400);
+        await sleep(500);
+        const sc = await page.evaluate(() => { const d = document.querySelector(".cv-dev"); return { menuTop: d.scrollTop, menuScrollable: d.scrollHeight > d.clientHeight + 1, page: [window.scrollY, document.scrollingElement?.scrollTop ?? 0, document.body.scrollTop] }; });
+        check("選單：內容超過畫面時可在選單內垂直捲動，整個頁面不捲動", sc.menuScrollable && sc.menuTop > 0 && sc.page.every((x) => x === 0), sc);
+        await shot("menu_scrolled");
+        // 選單內的按鈕真的可以操作（切換特效畫質）
+        await page.evaluate(() => document.querySelector('.cv-dev [data-tier="high"]').scrollIntoView({ block: "nearest" }));
+        await page.click('.cv-dev [data-tier="high"]');
+        await sleep(600);
+        const tierOn = await page.evaluate(() => document.querySelector('.cv-dev [data-tier="high"]').classList.contains("on"));
+        check("選單：選單內的設定按鈕可以操作", tierOn, tierOn);
+        await page.click(".cv-devbtn");
       } else if (tcase.id === "audio") {
         // 音效 V2：每個音效離線算出波形（星夜／白天兩種殘響），輸出 WAV 試聽檔並檢查音量
         const adir = `${outDir}audio-${name}/`;
