@@ -7,6 +7,7 @@
  */
 import {
   ArcRotateCamera,
+  type AbstractMesh,
   Color3,
   Color4,
   DirectionalLight,
@@ -1263,6 +1264,21 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
     ]);
     vfx.cancelPrewarm();
     vfx.clear();
+    // 怪物死亡淡出／重生淡入用的半透明版本，以及武器拖尾：也先編譯（CI 實測這兩類是預熱後仍會臨時編譯的 shader）
+    const faded: [AbstractMesh, number][] = [];
+    for (const m of scene.meshes) {
+      if (!m.material || !m.isEnabled() || m.visibility < 1 || m.name.startsWith("fx")) continue;
+      faded.push([m, m.visibility]);
+      m.visibility = 0.999;
+    }
+    player.trail.start();
+    for (let k = 0; k < 3; k++) {
+      player.trail.update(1 / 30);
+      scene.render();
+    }
+    player.trail.stop();
+    for (const [m, v] of faded) m.visibility = v;
+    scene.render();
     prewarmStats = { ...r, shadersBefore: before, shadersAfter: shaderCount() };
   }
   if (!manual) {
