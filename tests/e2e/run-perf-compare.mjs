@@ -7,6 +7,7 @@
 // CI 沒有實體 GPU（軟體繪製），FPS 的「絕對值」沒有參考價值，只看「相對變化」與 CPU 端時間、Draw Calls、三角面、動畫更新數。
 // 另跑一次長時間穩定性（預設 180 秒）：沒有錯誤、資源數（mesh／材質／貼圖）不持續增加。
 // 用法：node tests/e2e/run-perf-compare.mjs <dist73> <dist74> [chromium] [benchSeconds] [soakSeconds]
+// Stage 7.5：PERF_VARIANTS=n75 時改成比較角色模型（同一份建置：舊版男 C1.0-B5b／新版 n75 × HQ／Lite）
 import { mkdirSync, writeFileSync } from "node:fs";
 import { loadPlaywright, serve } from "./static-server.mjs";
 
@@ -51,11 +52,19 @@ async function openField(base, extra, label) {
   return { ctx, page, errors, label };
 }
 
-const variants = [
-  { label: "A_stage73", base: s73.url, extra: "" },
-  { label: "B_stage74_off", base: s74.url, extra: "&mlod=0&shadowq=original" },
-  { label: "C_stage74", base: s74.url, extra: "" },
-];
+const variants =
+  process.env.PERF_VARIANTS === "n75"
+    ? [
+        { label: "old_c10b5b_hq", base: s74.url, extra: "&nv=c10b5b&lod=hq" },
+        { label: "n75_hq", base: s74.url, extra: "&lod=hq" },
+        { label: "old_c10b5b_lite", base: s74.url, extra: "&nv=c10b5b&lod=lite" },
+        { label: "n75_lite", base: s74.url, extra: "&lod=lite" },
+      ]
+    : [
+        { label: "A_stage73", base: s73.url, extra: "" },
+        { label: "B_stage74_off", base: s74.url, extra: "&mlod=0&shadowq=original" },
+        { label: "C_stage74", base: s74.url, extra: "" },
+      ];
 
 for (const v of variants) {
   const run = { label: v.label, url: v.extra || "(預設)", ok: false };
@@ -65,7 +74,7 @@ for (const v of variants) {
     run.bench = await page.evaluate((s) => window.__starwishPlay.bench(s), benchS);
     run.info = await page.evaluate(() => {
       const i = window.__starwishPlay.info();
-      return { monsters: i.monsters.length, tiers: i.monsterDetail ?? null, rig: (i.monsters ?? []).slice(0, 3) };
+      return { monsters: i.monsters.length, tiers: i.monsterDetail ?? null, file: i.file, avatarTriangles: i.avatarModel?.triangles ?? null, avatarBones: i.avatarModel?.bones ?? null };
     });
     run.session = await page.evaluate(() => {
       // 7.4 才有完整 session（Draw Calls、CPU、記憶體）；7.3 只有基本欄位
@@ -118,7 +127,7 @@ if (soakS > 0) {
   report.soak = soak;
 }
 
-const A = report.runs[0]?.bench, C = report.runs[2]?.bench;
+const A = report.runs[0]?.bench, C = report.runs[process.env.PERF_VARIANTS === "n75" ? 1 : 2]?.bench;
 if (A && C) report.delta = { avgFps: +(C.avgFps - A.avgFps).toFixed(1), low1Fps: +(C.low1Fps - A.low1Fps).toFixed(1), avgDraw: +(C.avgDraw - A.avgDraw).toFixed(0), ratio: +(C.avgFps / Math.max(A.avgFps, 0.1)).toFixed(2) };
 report.finishedAt = new Date().toISOString();
 writeFileSync(outDir + "report.json", JSON.stringify(report, null, 2));

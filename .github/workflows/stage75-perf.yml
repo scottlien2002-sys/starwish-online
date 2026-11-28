@@ -1,0 +1,40 @@
+name: Stage 7.5 character perf (CI, not iPhone)
+
+# Stage 7.5：同一份建置比較舊版男性（C1.0-B5b）與新版（n75）× HQ／Lite，加長時間穩定性。
+# CI 沒有實體 GPU（軟體繪製）：FPS 絕對值不能當 iPhone 驗收，只看相對變化與三角面、Draw Calls、貼圖、CPU。
+# 結果推到 results/stage75-perf-<run id>（一般 push，不 force）。不部署。
+on:
+  push:
+    branches: [feature/render-stage75-novice]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stage75-perf-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  perf:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: Perf compare (old male vs n75, HQ / Lite)
+        run: PERF_VARIANTS=n75 node tests/e2e/run-perf-compare.mjs dist dist chromium 45 180
+      - name: Push report to results branch
+        if: always()
+        run: |
+          mkdir -p /tmp/res && cp -r test-results/perf-compare/. /tmp/res/ 2>/dev/null || true
+          cd /tmp/res
+          git init -q && git checkout -q -b "results/stage75-perf-${GITHUB_RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -qm "Stage 7.5 perf ${GITHUB_SHA::7}" || exit 0
+          git push -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" "results/stage75-perf-${GITHUB_RUN_ID}"
