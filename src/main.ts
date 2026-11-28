@@ -213,4 +213,8 @@ function main(): void {
   }
 }
 
-main();
+// 共用資產（/shared-assets/）：所有頁面開機前先讓 Babylon 改從共用區讀取大型模型（本機／一般建置是空清單）
+void import("./core/assetRemap.ts")
+  .then((m) => m.installAssetRemap())
+  .catch(() => 0)
+  .then(() => main());

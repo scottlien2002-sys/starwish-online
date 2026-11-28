@@ -74,25 +74,39 @@ jobs:
           find dist/models -maxdepth 1 -type f -name '*.glb' ! -name 'novice_c10b5b_*' -delete
           find dist/models -mindepth 1 -maxdepth 1 -type d ! -name monsters -exec rm -rf {} +
           du -sh dist
+          # 共用資產（Claude A 規格 claude/Starwish_Shared_Assets_Spec.md）：大型模型搬進 /shared-assets/（內容雜湊命名、已發布不覆寫）
           for attempt in 1 2 3 4 5; do
-            rm -rf /tmp/pages
+            rm -rf /tmp/pages /tmp/keep-assets
             git clone -q --depth 1 -b gh-pages "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" /tmp/pages
+            BASE=$(git -C /tmp/pages rev-parse HEAD)
+            BEFORE=$(du -sm --exclude=.git /tmp/pages | cut -f1)
+            # 1. 其他預覽（例如 D 的 mp81／mp82）引用的、本資料夾的檔案先暫存
+            node tools/shared-assets.mjs preserve-save /tmp/pages "$DIR" /tmp/keep-assets
             rm -rf "/tmp/pages/$DIR"
             mkdir -p "/tmp/pages/$DIR"
             cp -r dist/. "/tmp/pages/$DIR/"
+            # 2. 放回新建置沒有、但別人還在用的檔案
+            node tools/shared-assets.mjs preserve-restore /tmp/pages "$DIR" /tmp/keep-assets
+            # 3. 大型資產搬進共用區（相同內容只留一份；別人還在引用的不搬），寫 asset-remap.json、更新 index.json
+            node tools/shared-assets.mjs publish /tmp/pages "$DIR" | tee -a test-results/combat-vfx/shared-assets.txt
+            node tools/shared-assets.mjs verify /tmp/pages || exit 1
+            # 4. 容量檢查：> 1100 MB 停止；> 1000 MB 警告；> 900 MB 提醒盤點
             TOTAL=$(du -sm --exclude=.git /tmp/pages | cut -f1)
-            echo "預覽資料夾 $(du -sm "/tmp/pages/$DIR" | cut -f1) MB；發布後 gh-pages 合計 ${TOTAL} MB"
+            echo "gh-pages 基準 ${BASE::8}：發布前 ${BEFORE} MB → 發布後 ${TOTAL} MB；預覽資料夾 $(du -sm "/tmp/pages/$DIR" | cut -f1) MB、共用區 $(du -sm /tmp/pages/shared-assets | cut -f1) MB" | tee -a test-results/combat-vfx/shared-assets.txt
             echo "pages_total_mb=${TOTAL}" >> "$GITHUB_OUTPUT"
+            echo "pages_before_mb=${BEFORE}" >> "$GITHUB_OUTPUT"
             if [ "$TOTAL" -gt 1100 ]; then echo "::error::gh-pages 合計 ${TOTAL} MB 超過 1100 MB，取消發布"; exit 1; fi
-            echo "{\"branch\":\"${GITHUB_REF_NAME}\",\"commit\":\"${GITHUB_SHA}\",\"path\":\"/$DIR/\",\"builtAt\":\"$(date -u +%FT%TZ)\",\"e2e\":\"${{ steps.e2e.outcome }}\"}" > "/tmp/pages/$DIR/preview.json"
+            if [ "$TOTAL" -gt 1000 ]; then echo "::warning::gh-pages 合計 ${TOTAL} MB 超過 1000 MB：暫停非必要大型預覽部署"; fi
+            if [ "$TOTAL" -gt 900 ]; then echo "::notice::gh-pages 合計 ${TOTAL} MB 超過 900 MB：請啟動容量盤點"; fi
+            echo "{\"branch\":\"${GITHUB_REF_NAME}\",\"commit\":\"${GITHUB_SHA}\",\"path\":\"/$DIR/\",\"builtAt\":\"$(date -u +%FT%TZ)\",\"e2e\":\"${{ steps.e2e.outcome }}\",\"pagesBase\":\"${BASE}\",\"sharedAssets\":\"shared-assets/v1\"}" > "/tmp/pages/$DIR/preview.json"
             cd /tmp/pages
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add -A "$DIR"
-            git commit -q -m "Preview $DIR from ${GITHUB_REF_NAME}@${GITHUB_SHA::8}" || { echo "no changes"; exit 0; }
+            git add -A "$DIR" shared-assets
+            git commit -q -m "Preview $DIR from ${GITHUB_REF_NAME}@${GITHUB_SHA::8} (shared-assets)" || { echo "no changes"; exit 0; }
             if git push -q origin gh-pages; then echo "deployed /$DIR/"; exit 0; fi
             cd - >/dev/null
-            echo "push conflict, retry $attempt"; sleep $((attempt * 7))
+            echo "push conflict, retry $attempt（重新 clone、重做全部步驟）"; sleep $((attempt * 7))
           done
           exit 1
 
@@ -108,9 +122,7 @@ jobs:
             sleep 10
           done
           [ "$C" = "$GITHUB_SHA" ] || { echo "Pages not updated yet"; exit 1; }
-          for f in "" "models/novice_c10b5b_male_lite.glb" "models/monsters/manifest.json" "models/monsters/m007/M007_CrownHammerRabbit_Rig_V1_Lite.glb" "combat-vfx/novice_combat_female.json"; do
-            echo "$(curl -s -o /dev/null -w '%{http_code}' "$URL/$f") $f"
-          done | tee test-results/combat-vfx/public-http.txt
+          node tests/e2e/verify-preview-remap.mjs "$URL" 8 | tee test-results/combat-vfx/public-http.txt; [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
           CVFX_CASES=male-medium node tests/e2e/run-combat-vfx-e2e.mjs "$URL" webkit 2>&1 | tee test-results/combat-vfx/public-e2e.txt; exit ${PIPESTATUS[0]}
 
       - name: Push test results to results/combat-vfx-<run>
@@ -118,7 +130,7 @@ jobs:
         run: |
           mkdir -p /tmp/res && cp -r test-results/. /tmp/res/ 2>/dev/null || true
           cat > /tmp/res/outcome.json <<EOF
-          {"commit":"${GITHUB_SHA}","run":"${GITHUB_RUN_ID}","typecheck":"${{ steps.typecheck.outcome }}","unit":"${{ steps.unit.outcome }}","build":"${{ steps.build.outcome }}","e2e":"${{ steps.e2e.outcome }}","deploy":"${{ steps.deploy.outcome }}","verify":"${{ steps.verify.outcome }}","pagesTotalMb":"${{ steps.deploy.outputs.pages_total_mb }}"}
+          {"commit":"${GITHUB_SHA}","run":"${GITHUB_RUN_ID}","typecheck":"${{ steps.typecheck.outcome }}","unit":"${{ steps.unit.outcome }}","build":"${{ steps.build.outcome }}","e2e":"${{ steps.e2e.outcome }}","deploy":"${{ steps.deploy.outcome }}","verify":"${{ steps.verify.outcome }}","pagesBeforeMb":"${{ steps.deploy.outputs.pages_before_mb }}","pagesTotalMb":"${{ steps.deploy.outputs.pages_total_mb }}"}
           EOF
           cd /tmp/res
           git init -q -b "results/combat-vfx-${GITHUB_RUN_ID}"
