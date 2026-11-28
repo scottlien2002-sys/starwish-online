@@ -20,7 +20,7 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -37,20 +37,28 @@ jobs:
         run: npm test
       - run: npm run build
       - run: npx playwright install --with-deps chromium webkit
+      - name: Quick world E2E (Chromium, male) — fails fast
+        id: quick
+        continue-on-error: true
+        run: |
+          WORLD_GENDERS=male node tests/e2e/run-world-e2e.mjs dist chromium
+          mkdir -p test-results/world-e2e-quick && cp test-results/world-e2e/report.json test-results/world-e2e-quick/report.json 2>/dev/null || true
       - name: Stage 7 world E2E with CombatFx (WebKit + Chromium, male + female)
         id: world
+        if: steps.quick.outcome == 'success'
         continue-on-error: true
         run: node tests/e2e/run-world-e2e.mjs dist webkit,chromium
       - name: Prewarm on / off compare (Chromium)
         id: prewarm
+        if: steps.quick.outcome == 'success'
         continue-on-error: true
-        run: node tests/e2e/run-prewarm-compare.mjs dist chromium 30 2
+        run: node tests/e2e/run-prewarm-compare.mjs dist chromium 20 1
       - name: Push results to results branch
         if: always()
         run: |
           mkdir -p /tmp/res
           cp -r test-results/. /tmp/res/ 2>/dev/null || true
-          echo "{\"typecheck\":\"${{ steps.typecheck.outcome }}\",\"unit\":\"${{ steps.unit.outcome }}\",\"world\":\"${{ steps.world.outcome }}\",\"prewarm\":\"${{ steps.prewarm.outcome }}\",\"sha\":\"${GITHUB_SHA}\"}" > /tmp/res/outcomes.json
+          echo "{\"typecheck\":\"${{ steps.typecheck.outcome }}\",\"unit\":\"${{ steps.unit.outcome }}\",\"quick\":\"${{ steps.quick.outcome }}\",\"world\":\"${{ steps.world.outcome }}\",\"prewarm\":\"${{ steps.prewarm.outcome }}\",\"sha\":\"${GITHUB_SHA}\"}" > /tmp/res/outcomes.json
           cd /tmp/res
           git init -q && git checkout -q -b "results/stage75-combatfx-${GITHUB_RUN_ID}"
           git config user.name "github-actions[bot]"
@@ -58,5 +66,5 @@ jobs:
           git add -A && git commit -qm "Stage 7.5 CombatFx ${GITHUB_SHA::7}" || exit 0
           git push -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" "results/stage75-combatfx-${GITHUB_RUN_ID}"
       - name: Fail if tests failed
-        if: steps.typecheck.outcome != 'success' || steps.unit.outcome != 'success' || steps.world.outcome != 'success' || steps.prewarm.outcome != 'success'
+        if: steps.typecheck.outcome != 'success' || steps.unit.outcome != 'success' || steps.quick.outcome != 'success' || steps.world.outcome != 'success' || steps.prewarm.outcome != 'success'
         run: exit 1

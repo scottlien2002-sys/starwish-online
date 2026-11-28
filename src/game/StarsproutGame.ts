@@ -146,7 +146,7 @@ export interface PlayApi {
   sharedAvatarTest(n: number): Promise<{ n: number; texBefore: number; texAfterFirst: number; texAfterAll: number; materials: number; usedTextures: number; meshes: number; containers: number }>;
   /** Stage 7.5 第二階段：本地玩家技能（測試用） */
   skill(id: string): { ok: boolean; reason?: string; targetId?: string | null; rate?: number };
-  skillState(): { enabled: boolean; busy: boolean; active: string | null; t: number; stats: unknown; cooldowns: Record<string, number>; log: unknown[]; audio: boolean; trail: boolean; fx: unknown; combatFx: unknown; prewarmMs: number | null };
+  skillState(): { enabled: boolean; busy: boolean; active: string | null; t: number; stats: unknown; cooldowns: Record<string, number>; log: unknown[]; audio: boolean; trail: boolean; fx: unknown; combatFx: unknown; prewarmMs: number | null; loop: { started: boolean; frames: number; now: number } };
   /** 戰鬥 HUD 設定（暫定）：畫面閃光、鏡頭震動倍率、傷害數字；以及預留的戰鬥文字樣式測試 */
   combatHud(p?: { flash?: boolean; shake?: number; numbers?: boolean }): unknown;
   combatText(kind: "damage" | "crit" | "heal" | "miss" | "block" | "hurt", value: number | string): boolean;
@@ -552,15 +552,7 @@ class StarsproutGame {
     }
     // Stage 7.5 第二階段：C 的六段展示技能接到本地玩家（新版男性初心者 n75 才有 Skill_* 動作）。&skills=0 關閉
     if (this.fx && this.params.get("skills") !== "0" && this.avatar.clips.has("Skill_TripleSlash")) await this.setupSkills();
-    if (this.fx) {
-      this.registerSelfFx();
-      // 預熱：地圖載入期間（載入畫面還沒關掉前）。&prewarm=0 關閉（比較用）
-      if (this.params.get("prewarm") !== "0") {
-        const t0 = performance.now();
-        await this.fx.prewarm();
-        this.prewarmMs = Math.round(performance.now() - t0);
-      }
-    }
+    if (this.fx) this.registerSelfFx();
     this.perf.setExtra(() => ({
       monsterDetail: this.detailOn ? { ...this.tierCount } : "關閉（&mlod=0）",
       monsters: this.monsters.length,
@@ -597,6 +589,13 @@ class StarsproutGame {
     }
     this.installApi();
     await scene.whenReadyAsync();
+    // CombatFx 預熱：地圖載入期間（載入畫面還沒關掉、遊戲迴圈還沒開始前）。&prewarm=0 關閉（比較用）
+    // 一定要在 whenReadyAsync 之後：預熱建立的粒子系統要真的畫過才算「就緒」，放在前面會讓場景一直等不到就緒
+    if (this.fx && this.params.get("prewarm") !== "0") {
+      const t0 = performance.now();
+      await this.fx.prewarm();
+      this.prewarmMs = Math.round(performance.now() - t0);
+    }
     const auto = this.params.get("autoplay");
     if (auto === "fight") {
       const dur = Math.max(10, Math.min(300, Number(this.params.get("duration") ?? 60) || 60));
@@ -604,7 +603,12 @@ class StarsproutGame {
     }
   }
 
+  /** 診斷：遊戲迴圈是否已開始、已跑幾格 */
+  loopStarted = false;
+  frames = 0;
+
   start(): void {
+    this.loopStarted = true;
     this.engine.runRenderLoop(this.frame);
     const petNote = this.pets.enabled ? (this.pets.mode === "preview" ? "寵物：測試設定" : "寵物：正式設定") : this.pets.disabledReason;
     if (this.ws) this.hud.toast("星芽原野：往東走到「星露草坪」打星露啵啵。回星芽村：走進營地的藍色傳送陣", 4000);
@@ -620,6 +624,7 @@ class StarsproutGame {
     const rawDt = this.engine.getDeltaTime() / 1000;
     const dt = Math.min(rawDt, 0.1);
     this.now += dt;
+    this.frames++;
     this.keyboard.update();
     if (this.autoFight) this.autoDrive();
     const down = this.combat.isDown;
@@ -1658,6 +1663,7 @@ class StarsproutGame {
           trail: !!self.testWeapon,
           combatFx: self.fx ? self.fx.diag() : null,
           prewarmMs: self.prewarmMs,
+          loop: { started: self.loopStarted, frames: self.frames, now: self.now },
           fx: self.fx ? { ...self.fx.stats, texts: { ...self.fx.stats.texts } } : null,
         };
       },

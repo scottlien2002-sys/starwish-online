@@ -30,6 +30,8 @@ for (const name of browsers) {
     const ctx = await browser.newContext({ viewport: { width: 852, height: 393 }, deviceScaleFactor: 2, hasTouch: true });
     const page = await ctx.newPage();
     page.on("pageerror", (e) => run.errors.push(`pageerror: ${e.message}`));
+    run.console = [];
+    page.on("console", (m) => (m.type() === "error" || m.type() === "warning") && run.console.length < 60 && run.console.push(`${m.type()}: ${m.text().slice(0, 300)}`));
     page.on("console", (m) => m.type() === "error" && run.errors.push(`console: ${m.text()}`));
     const shot = async (label) => {
       const f = `${name}_${g}_${label}.png`;
