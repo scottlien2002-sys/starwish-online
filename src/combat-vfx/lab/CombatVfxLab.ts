@@ -984,6 +984,14 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
     castByIndex(i);
   }));
   hudRoot.addEventListener("pointerdown", () => audio.unlock(), { capture: true });
+  // 載入完成後閒置時先準備音效緩衝（第一次點擊不卡）
+  window.setTimeout(() => {
+    try {
+      audio.prepare();
+    } catch {
+      /* 沒有 WebAudio 的環境略過 */
+    }
+  }, 1200);
 
   const setTier = async (t: VfxTier): Promise<void> => {
     tier = t;

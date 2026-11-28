@@ -295,7 +295,20 @@ export class CombatAudio {
   played = 0;
   private env: "dark" | "bright" = "dark";
 
+  /**
+   * 預先建立音效環境（Stage 3.1）：載入後閒置時就產生雜訊與殘響緩衝（約 20 萬個取樣），
+   * 第一次點擊時只要 resume，不會在第一下攻擊時卡頓。AudioContext 在使用者點擊前是暫停狀態（iOS 規定），不會發聲。
+   */
+  prepare(): void {
+    if (this.ctx) return;
+    this.unlockInternal(false);
+  }
+
   unlock(): void {
+    this.unlockInternal(true);
+  }
+
+  private unlockInternal(resume: boolean): void {
     if (!this.ctx) {
       const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
       if (!AC) return;
@@ -305,7 +318,7 @@ export class CombatAudio {
       this.wet = m.wet;
       this.bus = { ctx: this.ctx, dry: m.master, wet: m.wet, noise: makeNoise(this.ctx, Math.random), rnd: Math.random };
     }
-    if (this.ctx.state === "suspended") void this.ctx.resume();
+    if (resume && this.ctx.state === "suspended") void this.ctx.resume();
   }
 
   get ready(): boolean {
