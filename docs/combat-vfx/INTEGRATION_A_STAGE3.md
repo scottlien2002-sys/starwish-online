@@ -122,3 +122,13 @@ const r = validateSkillDef(draft, animFile.clips[draft.clip]);                //
   新增 `stats.activeCritical`。低畫質＋多人時，自己的次要層會先被省略，命中閃光照常。
 - 32 人固定鏡頭結果：三角面 −25%、Draw Call 與 Stage 2 相同水準（176 vs 174）、比 Stage 1 做法少 84%。
 - 4／8／16／32 人固定鏡頭比較見 `REPORT_STAGE3.md`（CI 軟體繪圖數字，**iPhone 實機未驗證**）。
+
+## 8. 展示頁介面（給 A 參考，不是正式 HUD）
+
+- 展示頁的手機介面已改成：右上「⚙ 開發者」選單、左上 1 行效能列、右下技能與＋／－縮放、左下搖桿，並支援直向、橫向與 Safe Area。
+- 正式遊戲 HUD 由 A 統一整合，我沒有動正式介面。可以參考的做法：
+  - 四周位置都加 `env(safe-area-inset-*)`（index.html 已有 `viewport-fit=cover`）。
+  - 旋轉時同時接 `resize`、`orientationchange`（延遲 250 ms）、`visualViewport.resize`，再呼叫 `engine.resize()`。
+  - Draw Call、三角面要在 `scene.onAfterRenderObservable` 讀（`instrumentation.drawCallsCounter.current`、`scene.getActiveIndices()/3`）。在畫面更新前讀會得到 0。
+  - 鏡頭縮放：ArcRotateCamera 的 `lowerRadiusLimit` 2.4、`upperRadiusLimit` 16；按鈕縮放用目標距離平順插值，玩家用雙指縮放時自動讓出控制。
+- 一般移動沒有跳躍鍵；跳躍只在技能動作內（跳斬）。

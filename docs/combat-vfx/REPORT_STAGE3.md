@@ -7,14 +7,14 @@
 
 | 項目 | 位置 |
 |---|---|
-| Stage 3 分支 | `feature/combat-vfx-stage3`（最後驗證 commit efca17d，CI run 46047851221） |
+| Stage 3 分支 | `feature/combat-vfx-stage3`（最後驗證 commit 998ca18，CI run 46084174679，225 項全部通過） |
 | Stage 2 備份 | `backup/combat-vfx-stage2-final`（= Stage 2 最終版 ecdf80d；`feature/combat-vfx-stage2` 也沒動） |
 | 展示網址 | https://scottlien2002-sys.github.io/starwish-online/preview-combat-vfx-s3/?lab=combat |
 | Stage 1／2 網址（保留） | `/preview-combat-vfx/`、`/preview-combat-vfx-s2/` |
 | Claude A 整合 | `docs/combat-vfx/INTEGRATION_A_STAGE3.md` |
 | Claude D 多人 | `docs/combat-vfx/MULTIPLAYER_D_STAGE3.md` |
 | 怪物交付清單 | `docs/monsters/CLAUDE_C_DELIVERY_M001-M007.md`（M002／M003 更新為 Rig V1.1） |
-| CI 結果 | `results/combat-vfx-46047851221`（report.json、效能截圖、音效 WAV 試聽檔、展示畫面序列） |
+| CI 結果 | `results/combat-vfx-46084174679`（report.json、效能截圖、手機介面截圖、音效 WAV 試聽檔、展示畫面序列） |
 
 展示頁新參數：`&multi=32`、`&perf=stage2|legacy`（比較用）、`&lodFar=14`（遠距離切換距離）。
 測試 API：`__cvfx.perfScene(n)`（固定效能場景）、`__cvfx.renderSfx(key, env)`（離線音效）。
@@ -39,6 +39,32 @@
 **六、C1.0-B5b 外觀**：沒有修改（Lite／HQ 檔沒動；remote 近距離版逐位元組相同）。
 
 **七、A、D 交付文件**：已更新（Stage 3 版）。
+
+## 2-1. iPhone 實機回報與展示頁手機介面修正（併入 Stage 3）
+
+使用者 iPhone 實機測試 **Stage 2** 的結果：即時 60 FPS、10 秒平均 58.7、1% Low 30.6（使用者實測；Stage 3 的實機數字仍**未驗證**）。
+
+回報的問題都已修在展示頁（技術測試介面，**不是正式遊戲 HUD**；正式介面由 Claude A 統一整合）：
+
+| # | 問題 | 修正 |
+|---|---|---|
+| 1 | 直向時右側設定按鈕超出螢幕 | 設定全部收進右上角「⚙ 開發者」選單；選單寬度不超過螢幕、可捲動 |
+| 2 | 職業切換按鈕與技能按鈕重疊 | 職業特效按鈕移進開發者選單；畫面上只剩搖桿、技能、縮放 |
+| 3 | 技術測試設定分散 | 開發者選單（預設收合）：畫質、男女、音效、震動、頓幀、自動示範、多人、場景、攻速、職業特效、操作說明 |
+| 4 | FPS 面板遮擋血條與畫面 | 改成左上 1 行精簡列（高 19 px），點一下展開詳細數字；目標血條移到它下方 |
+| 5 | Draw Call、三角面顯示 0 | 原因是在「畫面更新前」讀數字，計數剛歸零；改成每格畫完後記錄 |
+| 6 | 鏡頭不能拉近 | 技能上方加「＋／－」（每次 0.8／1.25 倍，平順移動）；最近 2.4 m（原 3 m）、最遠 16 m；雙指與滾輪照常 |
+| 7 | 直向、橫向、Safe Area | 四周都用 `env(safe-area-inset-*)`；窄螢幕／矮螢幕自動縮小按鈕；旋轉時重新調整畫面（resize＋orientationchange＋visualViewport） |
+| 8 | 跳躍 | 維持沒有跳躍鍵（鍵盤空白鍵也沒有）；跳躍只在技能「跳斬」動作內 |
+| 9 | 正式 HUD | 沒有重新設計；只改展示頁 |
+
+自動測試（Chromium＋WebKit，各跑直向 390×844 與橫向 844×390，並模擬 iPhone 瀏海／Home 條的 Safe Area）：
+- 所有控制項都在安全區內、互不重疊。
+- 選單預設收合、可展開收合；畫面上沒有其他設定按鈕。
+- 效能列 1 行，不擋血條；Draw Call 與三角面不是 0。
+- 沒有跳躍按鈕；＋拉近（6.2 → 4.0 m）、－拉遠可用。
+
+共 4 組，每組 13 項全部通過。iPhone 實機的觸控手感**未驗證**。
 
 ## 3. 效能比較（固定鏡頭、固定站位、同一可見人數）
 
@@ -88,7 +114,7 @@
 - M002 附帶改善：Run 最低點 −2.9 → −0.4 mm；Run 腳底滑動最大 29.5 → 15.6 mm。
 - 仍有的拉伸：M002 腿很短、絨毛下緣直接蓋到蹄上；M003 翅膀和身體絨毛黏在同一個網格。要完全消除需要改模型（分開網格），本階段沒有做。
 
-## 6. 自動測試（173 項全部通過）
+## 6. 自動測試（225 項全部通過，含手機介面 52 項）
 
 - Chromium＋WebKit：
   - 6 個技能 × 男女 × 星夜／白天的命中同步。
@@ -106,7 +132,7 @@
   - 檢查器能抓錯。
   - 音效鍵值與 WAV 格式。
 - 公開網址：資源 HTTP 200；WebKit 實際載入通過。
-- gh-pages 總容量 923 MB（上限 1100 MB），沒有刪除其他預覽。
+- gh-pages 總容量 651 MB（上限 1100 MB），沒有刪除其他預覽。
 
 修正紀錄（本階段 CI 過程中發現並修好）：
 - 遠距離版第一次部署時沒畫出來：切換時把 glTF 的 `__root__` 空節點也關掉了，整個角色跟著消失。已排除空節點，並加 `lodDebug` 檢查。
@@ -114,7 +140,7 @@
 
 ## 7. 尚未完成／未驗證
 
-1. **iPhone Safari 實機 FPS、記憶體、發熱、音效聽感：未驗證**（沒有用雲端或逐格影片代替）。
+1. **iPhone Safari 實機：Stage 3 的 FPS、記憶體、發熱、音效聽感、新介面觸控手感都未驗證**（沒有用雲端或逐格影片代替；Stage 2 的實機數字是使用者實測）。
 2. 32 人實機是否能維持可玩幀率：未驗證；CI 只證明相對改善（三角面 −25%、draw call 與 Stage 2 同水準）。
 3. 六大職業：
    - 只有套件、樣板、檢查器。
