@@ -41,13 +41,14 @@ jobs:
           curl -fsSL --retry 5 --retry-delay 10 "$URL" -o /tmp/blender.tar.xz || curl -fsSL --retry 5 "https://mirrors.ocf.berkeley.edu/blender/release/Blender${BLENDER_SERIES}/blender-${BLENDER_VERSION}-linux-x64.tar.xz" -o /tmp/blender.tar.xz
           mkdir -p /opt/blender && tar -xf /tmp/blender.tar.xz -C /opt/blender --strip-components=1
       - name: Inspect
+        if: false
         run: |
           mkdir -p out/inspect
           /opt/blender/blender -b --factory-startup -noaudio -P art/novice75/inspect75.py -- /tmp/decoded/Starwish_Novice_Male_Rigged_V1_RAW.glb public/models/novice_c10b5b_male_hq.glb out/inspect 2>&1 | tee out/inspect.log | grep -E "inspected|Error|Traceback|line [0-9]+" | tail -40
       - name: Build (weights, helper bones, retarget, authored clips)
         run: |
           pip install --quiet numpy scipy pillow
-          python3 art/novice75/build75.py /tmp/decoded/Starwish_Novice_Male_Rigged_V1_RAW.glb public/models/novice_c10b5b_male_hq.glb public/combat-vfx/novice_combat_male.json out/build 2>&1 | tee out/build.log | tail -40
+          python3 art/novice75/build75.py /tmp/decoded/Starwish_Novice_Male_Rigged_V1_RAW.glb public/models/novice_c10b5b_male_hq.glb public/combat-vfx/novice_combat_male.json out/build art/novice75/source/Starwish_Novice_Male_Rigged_V1b_Anim_RAW.glb 2>&1 | tee out/build.log | tail -40
       - name: Write GLB (HQ / Lite)
         run: |
           cd /tmp/gt && npm i --no-save @gltf-transform/core@4 @gltf-transform/extensions@4 @gltf-transform/functions@4 meshoptimizer sharp 2>&1 | tail -1

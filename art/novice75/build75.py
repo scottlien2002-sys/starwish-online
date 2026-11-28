@@ -15,10 +15,12 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from gl import load, acc, Skel, qaxis, qnorm, qmul, qinv, m2q, trs  # noqa: E402
 from weights75 import fix_weights  # noqa: E402
 from anim75 import (Target, Retargeter, sample_gltf_anim, sample_json_clip, clip_from_world, ground_fix, keyed_clip,  # noqa: E402
-                    blend_frames, resample, hem_bake, ground_speed, pose_from_rots, rotq, FPS, X, Y, Z)
+                    blend_frames, resample, hem_bake, ground_speed, pose_from_rots, rotq, FPS, X, Y, Z,
+                    native_clip, loop_blend, loop_gap, offhand_grip)
 import preview as pv  # noqa: E402
 
 SRC, REF, COMBAT, OUT = sys.argv[1:5]
+NATIVE = sys.argv[5] if len(sys.argv) > 5 else None  # Stage 7.5 第二階段：Tripo 重新匯出（含 walk／run／wait／idle）
 os.makedirs(os.path.join(OUT, "preview"), exist_ok=True)
 T0 = time.time()
 REPORT = {"tool": "art/novice75/build75.py", "source": os.path.basename(SRC)}
@@ -163,25 +165,45 @@ for nm, clip in combat["clips"].items():
     out = clip_from_world(tgt, [rt.frame(R, T) for R, T in fr], loop=False)
     add(nm, out, marks=clip.get("marks"), ground=nm not in ("Skill_LeapSlam",))
 
-# B. 衍生：Walk、Wait
-idle = CLIPS["Idle"]
-base = idle[0]
-run = CLIPS["Run"]
-run_n = len(run)
-walk_n = int(round((run_n - 1) * 1.6)) + 1
-run_slow = resample(run, walk_n)
-walk = blend_frames(tgt, [base] * walk_n, run_slow, 0.55)
-add("Walk", walk, loop=True)
-# Wait：Idle 循環 × 2，加上左右張望、重心轉移、伸手整理
-idle2 = resample(idle + idle[1:], int(round(4.0 * FPS)) + 1)
-look = []
-nW = len(idle2)
-for f, (R, T) in enumerate(idle2):
-    t = f / (nW - 1)
-    yaw = 22 * np.sin(2 * np.pi * t) * (0.5 - 0.5 * np.cos(2 * np.pi * t))
-    sway = 0.012 * np.sin(2 * np.pi * t)
-    look.append(pose_from_rots(tgt, (R, T), [("Head", "up", yaw), ("Spine02", "up", yaw * 0.3), ("Hip", "fwd", -3 * np.sin(2 * np.pi * t))], (sway, 0, 0)))
-add("Wait", look, loop=True)
+# B. 移動與待機
+NATIVE_REPORT = None
+if NATIVE:
+    # Tripo 原生動畫（同一套骨架；幾何、權重與第一版相同，只是轉了 90°）→ 轉到已修正的模型，蒙皮修正與輔助骨骼保留
+    j2, b2 = load(NATIVE)
+    NATIVE_REPORT = {"file": os.path.basename(NATIVE), "animations": []}
+    speeds = {}
+    for a in j2.get("animations", []):
+        nm = {"walk": "Walk", "run": "Run", "wait": "Wait", "idle": "Idle"}.get(a["name"].lower())
+        if not nm:
+            continue
+        fr, spd, dur = native_clip(tgt, j2, b2, a, scale)
+        gap = loop_gap(fr)
+        fr = loop_blend(fr) if gap > 1.0 else fr
+        speeds[nm] = spd
+        NATIVE_REPORT["animations"].append({"name": a["name"], "clip": nm, "seconds": dur, "channels": len(a["channels"]), "rootMotion_mps": spd, "loopGapDeg": gap})
+        add(nm, fr, loop=True)
+    idle = CLIPS["Idle"]
+    base = idle[0]
+    REPORT["native"] = NATIVE_REPORT
+    REPORT["nativeSpeeds"] = speeds
+else:
+    idle = CLIPS["Idle"]
+    base = idle[0]
+    run = CLIPS["Run"]
+    run_n = len(run)
+    walk_n = int(round((run_n - 1) * 1.6)) + 1
+    run_slow = resample(run, walk_n)
+    walk = blend_frames(tgt, [base] * walk_n, run_slow, 0.55)
+    add("Walk", walk, loop=True)
+    idle2 = resample(idle + idle[1:], int(round(4.0 * FPS)) + 1)
+    look = []
+    nW = len(idle2)
+    for f, (R, T) in enumerate(idle2):
+        t = f / (nW - 1)
+        yaw = 22 * np.sin(2 * np.pi * t) * (0.5 - 0.5 * np.cos(2 * np.pi * t))
+        sway = 0.012 * np.sin(2 * np.pi * t)
+        look.append(pose_from_rots(tgt, (R, T), [("Head", "up", yaw), ("Spine02", "up", yaw * 0.3), ("Hip", "fwd", -3 * np.sin(2 * np.pi * t))], (sway, 0, 0)))
+    add("Wait", look, loop=True)
 
 # C. 程式化關鍵影格（武器類型共用動作；右手主手）。時間單位秒；命中＝最遠／最低點
 D = 0.62  # 與既有普通攻擊相同長度（遊戲依攻速調整播放速度，命中時間點比例一致）
@@ -189,8 +211,10 @@ HIT = round(D * 0.4, 3)
 
 
 def keyed(name, keys, dur=D, marks=None, ground=True):
-    fr = keyed_clip(tgt, base, keys, dur)
-    add(name, fr, marks=marks or {"hit": HIT}, ground=ground, per_frame=True)
+    mk = marks or {"hit": HIT}
+    hit_t = mk.get("hit", mk.get("release"))
+    fr = keyed_clip(tgt, base, keys, dur, hit=hit_t if isinstance(hit_t, (int, float)) else None)
+    add(name, fr, marks=mk, ground=ground, per_frame=True)
 
 
 R_, L_ = "R_", "L_"
@@ -306,8 +330,26 @@ land_keys = [
 ]
 keyed("Jump_Land", land_keys, dur=0.4, marks={"land": 0.0})
 
+# D. 雙手武器：副手握持（左手 IK 到武器握把上；雙手劍左手在右手下方、長柄武器左手在前方）
+GRIPS = {"Attack_2H_Slash": -0.1, "Attack_2H_Smash": -0.1, "Attack_Polearm_Thrust": 0.28, "Attack_Polearm_Swing": 0.28}
+REPORT["offhandIK"] = {}
+for nm, along in GRIPS.items():
+    fr = CLIPS[nm]
+    dur = (len(fr) - 1) / FPS
+    CLIPS[nm] = offhand_grip(tgt, fr, along, blend_in=[(0, 0.0), (0.1, 1.0), (dur - 0.12, 1.0), (dur, 0.0)])
+    # 檢查：左手掛點與握點的距離（每格）
+    errs = []
+    for R, T in CLIPS[nm]:
+        W = S.world(R=R, T=T)
+        Mr = W[S.idx["Weapon_R"]]
+        blade = Mr[:3, 1] / np.linalg.norm(Mr[:3, 1])
+        errs.append(float(np.linalg.norm(W[S.idx["Weapon_L"]][:3, 3] - (Mr[:3, 3] + blade * along))))
+    core = errs[int(0.1 * FPS) + 1:len(errs) - int(0.12 * FPS) - 1] or errs
+    REPORT["offhandIK"][nm] = {"grip_along_m": along, "max_error_cm": round(max(core) * 100, 2), "mean_error_cm": round(sum(core) / len(core) * 100, 2)}
+log("offhand IK", REPORT["offhandIK"])
+
 REPORT["clips"] = {n: {"seconds": round((len(f) - 1) / FPS, 3), "loop": n in LOOP, "marks": MARKS[n]} for n, f in CLIPS.items()}
-REPORT["groundSpeed"] = {"Run": ground_speed(tgt, CLIPS["Run"]), "Walk": ground_speed(tgt, CLIPS["Walk"])}
+REPORT["groundSpeed"] = {"Run": ground_speed(tgt, CLIPS["Run"]), "Walk": ground_speed(tgt, CLIPS["Walk"]), "native_rootMotion": REPORT.get("nativeSpeeds")}
 log("ground speed", REPORT["groundSpeed"])
 
 # ---------------- 輸出 ----------------

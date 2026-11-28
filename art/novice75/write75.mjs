@@ -67,7 +67,10 @@ async function build(lod) {
   }
   // 6. 材質名稱（除錯用）、Lite 貼圖縮小
   root.listMaterials()[0].setName("novice_n75_male");
+  // 貼圖記憶體（Stage 7.5 第二階段）：HQ 顏色貼圖維持 2048（臉、頭髮細節），法線與 ORM 降到 1024（手機畫面看不出差異，
+  // GPU 記憶體約 64 MB → 32 MB）；Lite 全部 1024。法線維持 PNG（JPEG 會讓法線出現色塊）
   if (lod === "lite") await doc.transform(textureCompress({ encoder: sharp, resize: [1024, 1024] }));
+  else await doc.transform(textureCompress({ encoder: sharp, resize: [1024, 1024], slots: /^(normalTexture|metallicRoughnessTexture|occlusionTexture)$/ }));
   await doc.transform(dedup(), prune({ keepLeaves: true, keepAttributes: true }));
   const file = `${outDir}/novice_n75_male_${lod}.glb`;
   await io.write(file, doc);
