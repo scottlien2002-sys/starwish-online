@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-11-28T00:26:03.943Z",
+  "startedAt": "2026-11-28T02:23:17.716Z",
   "note": "CI 軟體繪圖：三角面／Draw Calls 為確定值，FPS 不代表 iPhone 實機",
   "runs": [
     {
@@ -8,9 +8,9 @@
       "stops": [
         {
           "id": "entry",
-          "draws": 98,
-          "tris": 202490,
-          "smallTris": 107310,
+          "draws": 102,
+          "tris": 226810,
+          "smallTris": 125502,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -19,6 +19,10 @@
             "地形": {
               "meshes": 26,
               "tris": 53248
+            },
+            "高台鋪面": {
+              "meshes": 4,
+              "tris": 6128
             },
             "水面": {
               "meshes": 1,
@@ -38,7 +42,7 @@
             },
             "草叢小花": {
               "meshes": 6,
-              "tris": 11796
+              "tris": 29988
             }
           },
           "fade": {
@@ -52,9 +56,9 @@
         },
         {
           "id": "hills",
-          "draws": 76,
-          "tris": 170744,
-          "smallTris": 107310,
+          "draws": 77,
+          "tris": 189980,
+          "smallTris": 125502,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -63,6 +67,10 @@
             "地形": {
               "meshes": 16,
               "tris": 32768
+            },
+            "高台鋪面": {
+              "meshes": 1,
+              "tris": 1044
             },
             "地標與機械": {
               "meshes": 17,
@@ -78,7 +86,7 @@
             },
             "草叢小花": {
               "meshes": 6,
-              "tris": 11796
+              "tris": 29988
             }
           },
           "fade": {
@@ -93,8 +101,8 @@
         {
           "id": "colossus",
           "draws": 52,
-          "tris": 123550,
-          "smallTris": 82424,
+          "tris": 137350,
+          "smallTris": 96224,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -118,7 +126,7 @@
             },
             "草叢小花": {
               "meshes": 4,
-              "tris": 9024
+              "tris": 22824
             }
           },
           "fade": {
@@ -132,9 +140,9 @@
         },
         {
           "id": "central",
-          "draws": 97,
-          "tris": 215962,
-          "smallTris": 130726,
+          "draws": 103,
+          "tris": 251270,
+          "smallTris": 160386,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -143,6 +151,10 @@
             "地形": {
               "meshes": 18,
               "tris": 36864
+            },
+            "高台鋪面": {
+              "meshes": 3,
+              "tris": 5648
             },
             "水面": {
               "meshes": 1,
@@ -157,12 +169,12 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 26,
-              "tris": 115684
+              "meshes": 29,
+              "tris": 122256
             },
             "草叢小花": {
               "meshes": 8,
-              "tris": 15042
+              "tris": 38130
             }
           },
           "fade": {
@@ -176,9 +188,9 @@
         },
         {
           "id": "recycle",
-          "draws": 116,
-          "tris": 200958,
-          "smallTris": 155456,
+          "draws": 120,
+          "tris": 236138,
+          "smallTris": 188152,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -187,6 +199,10 @@
             "地形": {
               "meshes": 9,
               "tris": 18432
+            },
+            "高台鋪面": {
+              "meshes": 1,
+              "tris": 2484
             },
             "水面": {
               "meshes": 1,
@@ -201,12 +217,12 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 31,
-              "tris": 138524
+              "meshes": 34,
+              "tris": 145096
             },
             "草叢小花": {
               "meshes": 10,
-              "tris": 16932
+              "tris": 43056
             }
           },
           "fade": {
@@ -220,9 +236,9 @@
         },
         {
           "id": "walkway",
-          "draws": 106,
-          "tris": 165334,
-          "smallTris": 82034,
+          "draws": 115,
+          "tris": 195578,
+          "smallTris": 106630,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -231,6 +247,10 @@
             "地形": {
               "meshes": 15,
               "tris": 30720
+            },
+            "高台鋪面": {
+              "meshes": 3,
+              "tris": 5648
             },
             "水面": {
               "meshes": 1,
@@ -245,12 +265,12 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 20,
-              "tris": 72968
+              "meshes": 26,
+              "tris": 83644
             },
             "草叢小花": {
               "meshes": 6,
-              "tris": 9066
+              "tris": 22986
             }
           },
           "fade": {
@@ -264,9 +284,9 @@
         },
         {
           "id": "bridge",
-          "draws": 96,
-          "tris": 157610,
-          "smallTris": 82034,
+          "draws": 104,
+          "tris": 187310,
+          "smallTris": 106086,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -275,6 +295,10 @@
             "地形": {
               "meshes": 13,
               "tris": 26624
+            },
+            "高台鋪面": {
+              "meshes": 3,
+              "tris": 5648
             },
             "水面": {
               "meshes": 1,
@@ -289,12 +313,12 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 20,
-              "tris": 72968
+              "meshes": 25,
+              "tris": 83100
             },
             "草叢小花": {
               "meshes": 6,
-              "tris": 9066
+              "tris": 22986
             }
           },
           "fade": {
@@ -308,9 +332,9 @@
         },
         {
           "id": "factory",
-          "draws": 109,
-          "tris": 178272,
-          "smallTris": 105464,
+          "draws": 114,
+          "tris": 198964,
+          "smallTris": 123064,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -320,25 +344,29 @@
               "meshes": 9,
               "tris": 18432
             },
+            "高台鋪面": {
+              "meshes": 2,
+              "tris": 3164
+            },
             "水面": {
               "meshes": 1,
               "tris": 100
             },
             "地標與機械": {
-              "meshes": 35,
-              "tris": 40698
+              "meshes": 33,
+              "tris": 37888
             },
             "漂浮水晶": {
               "meshes": 1,
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 19,
-              "tris": 99458
+              "meshes": 23,
+              "tris": 106450
             },
             "草叢小花": {
               "meshes": 5,
-              "tris": 6006
+              "tris": 16614
             }
           },
           "fade": {
@@ -352,9 +380,9 @@
         },
         {
           "id": "platform",
-          "draws": 77,
-          "tris": 106304,
-          "smallTris": 71610,
+          "draws": 81,
+          "tris": 115564,
+          "smallTris": 78750,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -363,6 +391,10 @@
             "地形": {
               "meshes": 6,
               "tris": 12288
+            },
+            "高台鋪面": {
+              "meshes": 1,
+              "tris": 2120
             },
             "水面": {
               "meshes": 1,
@@ -377,12 +409,12 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 12,
-              "tris": 69720
+              "meshes": 15,
+              "tris": 73824
             },
             "草叢小花": {
               "meshes": 2,
-              "tris": 1890
+              "tris": 4926
             }
           },
           "fade": {
@@ -396,9 +428,9 @@
         },
         {
           "id": "core",
-          "draws": 73,
-          "tris": 166734,
-          "smallTris": 87650,
+          "draws": 75,
+          "tris": 176378,
+          "smallTris": 96250,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -407,6 +439,10 @@
             "地形": {
               "meshes": 7,
               "tris": 14336
+            },
+            "高台鋪面": {
+              "meshes": 1,
+              "tris": 1044
             },
             "水面": {
               "meshes": 1,
@@ -421,12 +457,12 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 15,
-              "tris": 84092
+              "meshes": 16,
+              "tris": 86980
             },
             "草叢小花": {
               "meshes": 4,
-              "tris": 3558
+              "tris": 9270
             }
           },
           "fade": {
@@ -442,7 +478,7 @@
       "errors": [],
       "pop": {
         "maxStepJumpTris": 0,
-        "avgSmallTris": 135990,
+        "avgSmallTris": 165650,
         "rel": 0
       },
       "contextLost": 0
@@ -453,9 +489,9 @@
       "stops": [
         {
           "id": "entry",
-          "draws": 98,
-          "tris": 180212,
-          "smallTris": 85032,
+          "draws": 102,
+          "tris": 189616,
+          "smallTris": 88308,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -464,6 +500,10 @@
             "地形": {
               "meshes": 26,
               "tris": 53248
+            },
+            "高台鋪面": {
+              "meshes": 4,
+              "tris": 6128
             },
             "水面": {
               "meshes": 1,
@@ -483,7 +523,7 @@
             },
             "草叢小花": {
               "meshes": 6,
-              "tris": 1968
+              "tris": 5244
             }
           },
           "fade": {
@@ -491,15 +531,15 @@
             "meshes": 18,
             "total": 2665,
             "shown": 861,
-            "tris": 49836,
-            "trisFull": 72114
+            "tris": 53112,
+            "trisFull": 90306
           }
         },
         {
           "id": "hills",
-          "draws": 76,
-          "tris": 151160,
-          "smallTris": 87726,
+          "draws": 77,
+          "tris": 156752,
+          "smallTris": 92274,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -508,6 +548,10 @@
             "地形": {
               "meshes": 16,
               "tris": 32768
+            },
+            "高台鋪面": {
+              "meshes": 1,
+              "tris": 1044
             },
             "地標與機械": {
               "meshes": 17,
@@ -523,7 +567,7 @@
             },
             "草叢小花": {
               "meshes": 6,
-              "tris": 2820
+              "tris": 7368
             }
           },
           "fade": {
@@ -531,15 +575,15 @@
             "meshes": 18,
             "total": 2665,
             "shown": 1031,
-            "tris": 52530,
-            "trisFull": 72114
+            "tris": 57078,
+            "trisFull": 90306
           }
         },
         {
           "id": "colossus",
           "draws": 52,
-          "tris": 111202,
-          "smallTris": 70076,
+          "tris": 115582,
+          "smallTris": 74456,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -563,7 +607,7 @@
             },
             "草叢小花": {
               "meshes": 4,
-              "tris": 2580
+              "tris": 6960
             }
           },
           "fade": {
@@ -571,15 +615,15 @@
             "meshes": 18,
             "total": 2665,
             "shown": 980,
-            "tris": 52122,
-            "trisFull": 72114
+            "tris": 56502,
+            "trisFull": 90306
           }
         },
         {
           "id": "central",
-          "draws": 94,
-          "tris": 181372,
-          "smallTris": 96136,
+          "draws": 99,
+          "tris": 193760,
+          "smallTris": 102876,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -588,6 +632,10 @@
             "地形": {
               "meshes": 18,
               "tris": 36864
+            },
+            "高台鋪面": {
+              "meshes": 3,
+              "tris": 5648
             },
             "水面": {
               "meshes": 1,
@@ -602,28 +650,28 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 23,
-              "tris": 92698
+              "meshes": 25,
+              "tris": 93846
             },
             "草叢小花": {
               "meshes": 8,
-              "tris": 3438
+              "tris": 9030
             }
           },
           "fade": {
             "on": true,
-            "meshes": 24,
-            "total": 3403,
-            "shown": 1254,
-            "tris": 63396,
-            "trisFull": 92286
+            "meshes": 27,
+            "total": 3475,
+            "shown": 1267,
+            "tris": 70136,
+            "trisFull": 121946
           }
         },
         {
           "id": "recycle",
-          "draws": 116,
-          "tris": 164412,
-          "smallTris": 118910,
+          "draws": 120,
+          "tris": 176560,
+          "smallTris": 128574,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -632,6 +680,10 @@
             "地形": {
               "meshes": 9,
               "tris": 18432
+            },
+            "高台鋪面": {
+              "meshes": 1,
+              "tris": 2484
             },
             "水面": {
               "meshes": 1,
@@ -646,28 +698,28 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 31,
-              "tris": 116858
+              "meshes": 34,
+              "tris": 123198
             },
             "草叢小花": {
               "meshes": 10,
-              "tris": 2052
+              "tris": 5376
             }
           },
           "fade": {
             "on": true,
-            "meshes": 30,
-            "total": 3953,
-            "shown": 1190,
-            "tris": 79890,
-            "trisFull": 116436
+            "meshes": 36,
+            "total": 4064,
+            "shown": 1270,
+            "tris": 90554,
+            "trisFull": 153236
           }
         },
         {
           "id": "walkway",
-          "draws": 104,
-          "tris": 143338,
-          "smallTris": 60038,
+          "draws": 112,
+          "tris": 155910,
+          "smallTris": 66962,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -676,6 +728,10 @@
             "地形": {
               "meshes": 15,
               "tris": 30720
+            },
+            "高台鋪面": {
+              "meshes": 3,
+              "tris": 5648
             },
             "水面": {
               "meshes": 1,
@@ -690,28 +746,28 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 20,
-              "tris": 58700
+              "meshes": 25,
+              "tris": 63572
             },
             "草叢小花": {
               "meshes": 4,
-              "tris": 1338
+              "tris": 3390
             }
           },
           "fade": {
             "on": true,
-            "meshes": 24,
-            "total": 3318,
-            "shown": 899,
-            "tris": 64032,
-            "trisFull": 99390
+            "meshes": 30,
+            "total": 3429,
+            "shown": 957,
+            "tris": 71532,
+            "trisFull": 131798
           }
         },
         {
           "id": "bridge",
-          "draws": 93,
-          "tris": 131894,
-          "smallTris": 56318,
+          "draws": 100,
+          "tris": 145426,
+          "smallTris": 64202,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -720,6 +776,10 @@
             "地形": {
               "meshes": 13,
               "tris": 26624
+            },
+            "高台鋪面": {
+              "meshes": 3,
+              "tris": 5648
             },
             "水面": {
               "meshes": 1,
@@ -734,28 +794,28 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 17,
-              "tris": 55058
+              "meshes": 21,
+              "tris": 60926
             },
             "草叢小花": {
               "meshes": 6,
-              "tris": 1260
+              "tris": 3276
             }
           },
           "fade": {
             "on": true,
-            "meshes": 24,
-            "total": 3318,
-            "shown": 925,
-            "tris": 67776,
-            "trisFull": 99390
+            "meshes": 30,
+            "total": 3429,
+            "shown": 1002,
+            "tris": 77084,
+            "trisFull": 131798
           }
         },
         {
           "id": "factory",
-          "draws": 105,
-          "tris": 157128,
-          "smallTris": 84320,
+          "draws": 107,
+          "tris": 160922,
+          "smallTris": 87760,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -765,41 +825,45 @@
               "meshes": 9,
               "tris": 18432
             },
+            "高台鋪面": {
+              "meshes": 2,
+              "tris": 3164
+            },
             "水面": {
               "meshes": 1,
               "tris": 100
             },
             "地標與機械": {
-              "meshes": 35,
-              "tris": 40698
+              "meshes": 33,
+              "tris": 37888
             },
             "漂浮水晶": {
               "meshes": 1,
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 16,
-              "tris": 83630
+              "meshes": 18,
+              "tris": 85870
             },
             "草叢小花": {
               "meshes": 4,
-              "tris": 690
+              "tris": 1890
             }
           },
           "fade": {
             "on": true,
-            "meshes": 30,
-            "total": 3971,
-            "shown": 1186,
-            "tris": 93618,
-            "trisFull": 132942
+            "meshes": 38,
+            "total": 4121,
+            "shown": 1257,
+            "tris": 102134,
+            "trisFull": 171050
           }
         },
         {
           "id": "platform",
-          "draws": 77,
-          "tris": 99836,
-          "smallTris": 65142,
+          "draws": 80,
+          "tris": 105676,
+          "smallTris": 68862,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -808,6 +872,10 @@
             "地形": {
               "meshes": 6,
               "tris": 12288
+            },
+            "高台鋪面": {
+              "meshes": 1,
+              "tris": 2120
             },
             "水面": {
               "meshes": 1,
@@ -822,28 +890,28 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 12,
-              "tris": 64368
+              "meshes": 14,
+              "tris": 66744
             },
             "草叢小花": {
               "meshes": 2,
-              "tris": 774
+              "tris": 2118
             }
           },
           "fade": {
             "on": true,
-            "meshes": 24,
-            "total": 2724,
-            "shown": 872,
-            "tris": 64878,
-            "trisFull": 93246
+            "meshes": 32,
+            "total": 2874,
+            "shown": 935,
+            "tris": 72850,
+            "trisFull": 123542
           }
         },
         {
           "id": "core",
-          "draws": 72,
-          "tris": 157122,
-          "smallTris": 78038,
+          "draws": 74,
+          "tris": 161162,
+          "smallTris": 81034,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -852,6 +920,10 @@
             "地形": {
               "meshes": 7,
               "tris": 14336
+            },
+            "高台鋪面": {
+              "meshes": 1,
+              "tris": 1044
             },
             "水面": {
               "meshes": 1,
@@ -866,29 +938,29 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 15,
-              "tris": 77678
+              "meshes": 16,
+              "tris": 80338
             },
             "草叢小花": {
               "meshes": 3,
-              "tris": 360
+              "tris": 696
             }
           },
           "fade": {
             "on": true,
-            "meshes": 24,
-            "total": 2724,
-            "shown": 902,
-            "tris": 64086,
-            "trisFull": 93246
+            "meshes": 32,
+            "total": 2874,
+            "shown": 961,
+            "tris": 71302,
+            "trisFull": 123542
           }
         }
       ],
       "errors": [],
       "pop": {
-        "maxStepJumpTris": 4266,
-        "avgSmallTris": 102360,
-        "rel": 0.042
+        "maxStepJumpTris": 4242,
+        "avgSmallTris": 107360,
+        "rel": 0.04
       },
       "contextLost": 0
     },
@@ -898,9 +970,9 @@
       "stops": [
         {
           "id": "entry",
-          "draws": 89,
-          "tris": 112078,
-          "smallTris": 37818,
+          "draws": 93,
+          "tris": 119590,
+          "smallTris": 41298,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -909,6 +981,10 @@
             "地形": {
               "meshes": 26,
               "tris": 32500
+            },
+            "高台鋪面": {
+              "meshes": 4,
+              "tris": 4032
             },
             "水面": {
               "meshes": 1,
@@ -928,7 +1004,7 @@
             },
             "草叢小花": {
               "meshes": 4,
-              "tris": 4476
+              "tris": 7956
             }
           },
           "fade": {
@@ -942,9 +1018,9 @@
         },
         {
           "id": "hills",
-          "draws": 75,
-          "tris": 97594,
-          "smallTris": 48268,
+          "draws": 76,
+          "tris": 103328,
+          "smallTris": 53302,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -953,6 +1029,10 @@
             "地形": {
               "meshes": 16,
               "tris": 20000
+            },
+            "高台鋪面": {
+              "meshes": 1,
+              "tris": 700
             },
             "地標與機械": {
               "meshes": 17,
@@ -968,7 +1048,7 @@
             },
             "草叢小花": {
               "meshes": 6,
-              "tris": 6516
+              "tris": 11550
             }
           },
           "fade": {
@@ -983,8 +1063,8 @@
         {
           "id": "colossus",
           "draws": 52,
-          "tris": 70890,
-          "smallTris": 34896,
+          "tris": 74850,
+          "smallTris": 38856,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -1008,7 +1088,7 @@
             },
             "草叢小花": {
               "meshes": 4,
-              "tris": 5172
+              "tris": 9132
             }
           },
           "fade": {
@@ -1022,9 +1102,9 @@
         },
         {
           "id": "central",
-          "draws": 87,
-          "tris": 123036,
-          "smallTris": 52544,
+          "draws": 93,
+          "tris": 138022,
+          "smallTris": 63822,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -1033,6 +1113,10 @@
             "地形": {
               "meshes": 18,
               "tris": 22500
+            },
+            "高台鋪面": {
+              "meshes": 3,
+              "tris": 3708
             },
             "水面": {
               "meshes": 1,
@@ -1047,12 +1131,12 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 21,
-              "tris": 45602
+              "meshes": 24,
+              "tris": 51678
             },
             "草叢小花": {
               "meshes": 6,
-              "tris": 6942
+              "tris": 12144
             }
           },
           "fade": {
@@ -1066,9 +1150,9 @@
         },
         {
           "id": "recycle",
-          "draws": 97,
-          "tris": 86168,
-          "smallTris": 49976,
+          "draws": 101,
+          "tris": 99882,
+          "smallTris": 62082,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -1077,6 +1161,10 @@
             "地形": {
               "meshes": 9,
               "tris": 11250
+            },
+            "高台鋪面": {
+              "meshes": 1,
+              "tris": 1608
             },
             "水面": {
               "meshes": 1,
@@ -1091,12 +1179,12 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 22,
-              "tris": 41990
+              "meshes": 25,
+              "tris": 48066
             },
             "草叢小花": {
               "meshes": 8,
-              "tris": 7986
+              "tris": 14016
             }
           },
           "fade": {
@@ -1110,9 +1198,9 @@
         },
         {
           "id": "walkway",
-          "draws": 99,
-          "tris": 107854,
-          "smallTris": 38308,
+          "draws": 108,
+          "tris": 124926,
+          "smallTris": 51672,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -1121,6 +1209,10 @@
             "地形": {
               "meshes": 15,
               "tris": 18750
+            },
+            "高台鋪面": {
+              "meshes": 3,
+              "tris": 3708
             },
             "水面": {
               "meshes": 1,
@@ -1135,12 +1227,12 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 18,
-              "tris": 33454
+              "meshes": 24,
+              "tris": 43194
             },
             "草叢小花": {
               "meshes": 6,
-              "tris": 4854
+              "tris": 8478
             }
           },
           "fade": {
@@ -1154,9 +1246,9 @@
         },
         {
           "id": "bridge",
-          "draws": 91,
-          "tris": 103094,
-          "smallTris": 38308,
+          "draws": 99,
+          "tris": 119718,
+          "smallTris": 51224,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -1165,6 +1257,10 @@
             "地形": {
               "meshes": 13,
               "tris": 16250
+            },
+            "高台鋪面": {
+              "meshes": 3,
+              "tris": 3708
             },
             "水面": {
               "meshes": 1,
@@ -1179,12 +1275,12 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 18,
-              "tris": 33454
+              "meshes": 23,
+              "tris": 42746
             },
             "草叢小花": {
               "meshes": 6,
-              "tris": 4854
+              "tris": 8478
             }
           },
           "fade": {
@@ -1198,9 +1294,9 @@
         },
         {
           "id": "factory",
-          "draws": 97,
-          "tris": 104788,
-          "smallTris": 43976,
+          "draws": 103,
+          "tris": 114356,
+          "smallTris": 51444,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -1209,6 +1305,10 @@
             "地形": {
               "meshes": 9,
               "tris": 11250
+            },
+            "高台鋪面": {
+              "meshes": 2,
+              "tris": 2100
             },
             "水面": {
               "meshes": 1,
@@ -1223,12 +1323,12 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 18,
-              "tris": 42062
+              "meshes": 22,
+              "tris": 48006
             },
             "草叢小花": {
               "meshes": 4,
-              "tris": 1914
+              "tris": 3438
             }
           },
           "fade": {
@@ -1242,9 +1342,9 @@
         },
         {
           "id": "platform",
-          "draws": 73,
-          "tris": 56848,
-          "smallTris": 27454,
+          "draws": 77,
+          "tris": 62740,
+          "smallTris": 31946,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -1253,6 +1353,10 @@
             "地形": {
               "meshes": 6,
               "tris": 7500
+            },
+            "高台鋪面": {
+              "meshes": 1,
+              "tris": 1400
             },
             "水面": {
               "meshes": 1,
@@ -1267,12 +1371,12 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 11,
-              "tris": 26410
+              "meshes": 14,
+              "tris": 30074
             },
             "草叢小花": {
               "meshes": 2,
-              "tris": 1044
+              "tris": 1872
             }
           },
           "fade": {
@@ -1286,9 +1390,9 @@
         },
         {
           "id": "core",
-          "draws": 70,
-          "tris": 108464,
-          "smallTris": 38120,
+          "draws": 72,
+          "tris": 112968,
+          "smallTris": 41924,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -1297,6 +1401,10 @@
             "地形": {
               "meshes": 7,
               "tris": 8750
+            },
+            "高台鋪面": {
+              "meshes": 1,
+              "tris": 700
             },
             "水面": {
               "meshes": 1,
@@ -1311,12 +1419,12 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 15,
-              "tris": 36206
+              "meshes": 16,
+              "tris": 38486
             },
             "草叢小花": {
               "meshes": 4,
-              "tris": 1914
+              "tris": 3438
             }
           },
           "fade": {
@@ -1332,7 +1440,7 @@
       "errors": [],
       "pop": {
         "maxStepJumpTris": 0,
-        "avgSmallTris": 63662,
+        "avgSmallTris": 76014,
         "rel": 0
       },
       "contextLost": 0
@@ -1343,9 +1451,9 @@
       "stops": [
         {
           "id": "entry",
-          "draws": 89,
-          "tris": 104656,
-          "smallTris": 30396,
+          "draws": 93,
+          "tris": 109294,
+          "smallTris": 31002,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -1354,6 +1462,10 @@
             "地形": {
               "meshes": 26,
               "tris": 32500
+            },
+            "高台鋪面": {
+              "meshes": 4,
+              "tris": 4032
             },
             "水面": {
               "meshes": 1,
@@ -1373,7 +1485,7 @@
             },
             "草叢小花": {
               "meshes": 4,
-              "tris": 726
+              "tris": 1332
             }
           },
           "fade": {
@@ -1381,15 +1493,15 @@
             "meshes": 12,
             "total": 1054,
             "shown": 362,
-            "tris": 16152,
-            "trisFull": 23574
+            "tris": 16758,
+            "trisFull": 27054
           }
         },
         {
           "id": "hills",
-          "draws": 74,
-          "tris": 86308,
-          "smallTris": 36982,
+          "draws": 75,
+          "tris": 87890,
+          "smallTris": 37864,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -1398,6 +1510,10 @@
             "地形": {
               "meshes": 16,
               "tris": 20000
+            },
+            "高台鋪面": {
+              "meshes": 1,
+              "tris": 700
             },
             "地標與機械": {
               "meshes": 17,
@@ -1413,7 +1529,7 @@
             },
             "草叢小花": {
               "meshes": 5,
-              "tris": 1098
+              "tris": 1980
             }
           },
           "fade": {
@@ -1421,15 +1537,15 @@
             "meshes": 18,
             "total": 1468,
             "shown": 469,
-            "tris": 19432,
-            "trisFull": 30664
+            "tris": 20368,
+            "trisFull": 35698
           }
         },
         {
           "id": "colossus",
           "draws": 50,
-          "tris": 63322,
-          "smallTris": 27328,
+          "tris": 64114,
+          "smallTris": 28120,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -1453,7 +1569,7 @@
             },
             "草叢小花": {
               "meshes": 3,
-              "tris": 966
+              "tris": 1758
             }
           },
           "fade": {
@@ -1461,15 +1577,15 @@
             "meshes": 12,
             "total": 1132,
             "shown": 384,
-            "tris": 14738,
-            "trisFull": 22690
+            "tris": 15626,
+            "trisFull": 26650
           }
         },
         {
           "id": "central",
-          "draws": 83,
-          "tris": 107538,
-          "smallTris": 37046,
+          "draws": 88,
+          "tris": 112188,
+          "smallTris": 37988,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -1478,6 +1594,10 @@
             "地形": {
               "meshes": 18,
               "tris": 22500
+            },
+            "高台鋪面": {
+              "meshes": 3,
+              "tris": 3708
             },
             "水面": {
               "meshes": 1,
@@ -1492,28 +1612,28 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 18,
-              "tris": 36452
+              "meshes": 20,
+              "tris": 37088
             },
             "草叢小花": {
               "meshes": 5,
-              "tris": 594
+              "tris": 900
             }
           },
           "fade": {
             "on": true,
-            "meshes": 18,
-            "total": 1541,
-            "shown": 461,
-            "tris": 19354,
-            "trisFull": 32132
+            "meshes": 21,
+            "total": 1613,
+            "shown": 468,
+            "tris": 20872,
+            "trisFull": 43410
           }
         },
         {
           "id": "recycle",
-          "draws": 92,
-          "tris": 70744,
-          "smallTris": 34552,
+          "draws": 96,
+          "tris": 77478,
+          "smallTris": 39678,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -1522,6 +1642,10 @@
             "地形": {
               "meshes": 9,
               "tris": 11250
+            },
+            "高台鋪面": {
+              "meshes": 1,
+              "tris": 1608
             },
             "水面": {
               "meshes": 1,
@@ -1536,28 +1660,28 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 21,
-              "tris": 34336
+              "meshes": 24,
+              "tris": 39324
             },
             "草叢小花": {
               "meshes": 4,
-              "tris": 216
+              "tris": 354
             }
           },
           "fade": {
             "on": true,
-            "meshes": 24,
-            "total": 1847,
-            "shown": 426,
-            "tris": 25198,
-            "trisFull": 42316
+            "meshes": 30,
+            "total": 1958,
+            "shown": 492,
+            "tris": 30930,
+            "trisFull": 58086
           }
         },
         {
           "id": "walkway",
-          "draws": 95,
-          "tris": 97976,
-          "smallTris": 28430,
+          "draws": 101,
+          "tris": 105752,
+          "smallTris": 32498,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -1566,6 +1690,10 @@
             "地形": {
               "meshes": 15,
               "tris": 18750
+            },
+            "高台鋪面": {
+              "meshes": 3,
+              "tris": 3708
             },
             "水面": {
               "meshes": 1,
@@ -1580,28 +1708,28 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 18,
-              "tris": 28010
+              "meshes": 21,
+              "tris": 31754
             },
             "草叢小花": {
               "meshes": 2,
-              "tris": 420
+              "tris": 744
             }
           },
           "fade": {
             "on": true,
-            "meshes": 18,
-            "total": 1129,
-            "shown": 275,
-            "tris": 15366,
-            "trisFull": 26716
+            "meshes": 24,
+            "total": 1240,
+            "shown": 318,
+            "tris": 19434,
+            "trisFull": 40080
           }
         },
         {
           "id": "bridge",
-          "draws": 86,
-          "tris": 90430,
-          "smallTris": 25644,
+          "draws": 94,
+          "tris": 98782,
+          "smallTris": 30288,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -1610,6 +1738,10 @@
             "地形": {
               "meshes": 13,
               "tris": 16250
+            },
+            "高台鋪面": {
+              "meshes": 3,
+              "tris": 3708
             },
             "水面": {
               "meshes": 1,
@@ -1624,28 +1756,28 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 15,
-              "tris": 25404
+              "meshes": 20,
+              "tris": 29868
             },
             "草叢小花": {
               "meshes": 4,
-              "tris": 240
+              "tris": 420
             }
           },
           "fade": {
             "on": true,
-            "meshes": 18,
-            "total": 1129,
-            "shown": 263,
-            "tris": 15688,
-            "trisFull": 26716
+            "meshes": 24,
+            "total": 1240,
+            "shown": 316,
+            "tris": 20492,
+            "trisFull": 40080
           }
         },
         {
           "id": "factory",
-          "draws": 96,
-          "tris": 100900,
-          "smallTris": 37278,
+          "draws": 102,
+          "tris": 106524,
+          "smallTris": 40802,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -1655,41 +1787,45 @@
               "meshes": 9,
               "tris": 11250
             },
+            "高台鋪面": {
+              "meshes": 2,
+              "tris": 2100
+            },
             "水面": {
               "meshes": 1,
               "tris": 100
             },
             "地標與機械": {
-              "meshes": 35,
-              "tris": 40526
+              "meshes": 34,
+              "tris": 40454
             },
             "漂浮水晶": {
               "meshes": 1,
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 16,
-              "tris": 37074
+              "meshes": 20,
+              "tris": 40406
             },
             "草叢小花": {
               "meshes": 3,
-              "tris": 204
+              "tris": 396
             }
           },
           "fade": {
             "on": true,
-            "meshes": 24,
-            "total": 1471,
-            "shown": 410,
-            "tris": 25498,
-            "trisFull": 39892
+            "meshes": 32,
+            "total": 1621,
+            "shown": 461,
+            "tris": 30324,
+            "trisFull": 56344
           }
         },
         {
           "id": "platform",
-          "draws": 72,
-          "tris": 50352,
-          "smallTris": 20958,
+          "draws": 76,
+          "tris": 55336,
+          "smallTris": 24542,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -1698,6 +1834,10 @@
             "地形": {
               "meshes": 6,
               "tris": 7500
+            },
+            "高台鋪面": {
+              "meshes": 1,
+              "tris": 1400
             },
             "水面": {
               "meshes": 1,
@@ -1712,28 +1852,28 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 10,
-              "tris": 20694
+              "meshes": 13,
+              "tris": 24038
             },
             "草叢小花": {
               "meshes": 2,
-              "tris": 264
+              "tris": 504
             }
           },
           "fade": {
             "on": true,
-            "meshes": 24,
-            "total": 1471,
-            "shown": 405,
-            "tris": 25236,
-            "trisFull": 39892
+            "meshes": 32,
+            "total": 1621,
+            "shown": 451,
+            "tris": 29474,
+            "trisFull": 56344
           }
         },
         {
           "id": "core",
-          "draws": 69,
-          "tris": 102742,
-          "smallTris": 32398,
+          "draws": 71,
+          "tris": 105440,
+          "smallTris": 34396,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -1742,6 +1882,10 @@
             "地形": {
               "meshes": 7,
               "tris": 8750
+            },
+            "高台鋪面": {
+              "meshes": 1,
+              "tris": 700
             },
             "水面": {
               "meshes": 1,
@@ -1756,29 +1900,29 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 14,
-              "tris": 32080
+              "meshes": 15,
+              "tris": 33820
             },
             "草叢小花": {
               "meshes": 4,
-              "tris": 318
+              "tris": 576
             }
           },
           "fade": {
             "on": true,
-            "meshes": 24,
-            "total": 1471,
-            "shown": 427,
-            "tris": 24692,
-            "trisFull": 39892
+            "meshes": 32,
+            "total": 1621,
+            "shown": 469,
+            "tris": 28060,
+            "trisFull": 56344
           }
         }
       ],
       "errors": [],
       "pop": {
-        "maxStepJumpTris": 1884,
-        "avgSmallTris": 46398,
-        "rel": 0.041
+        "maxStepJumpTris": 1896,
+        "avgSmallTris": 47315,
+        "rel": 0.04
       },
       "contextLost": 0
     },
@@ -1788,9 +1932,9 @@
       "stops": [
         {
           "id": "entry",
-          "draws": 82,
-          "tris": 78244,
-          "smallTris": 27174,
+          "draws": 85,
+          "tris": 83574,
+          "smallTris": 29172,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -1799,6 +1943,10 @@
             "地形": {
               "meshes": 24,
               "tris": 19200
+            },
+            "高台鋪面": {
+              "meshes": 3,
+              "tris": 3332
             },
             "水面": {
               "meshes": 1,
@@ -1818,7 +1966,7 @@
             },
             "草叢小花": {
               "meshes": 4,
-              "tris": 2466
+              "tris": 4464
             }
           },
           "fade": {
@@ -1832,9 +1980,9 @@
         },
         {
           "id": "hills",
-          "draws": 73,
-          "tris": 76712,
-          "smallTris": 35306,
+          "draws": 74,
+          "tris": 80154,
+          "smallTris": 38048,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -1843,6 +1991,10 @@
             "地形": {
               "meshes": 16,
               "tris": 12800
+            },
+            "高台鋪面": {
+              "meshes": 1,
+              "tris": 700
             },
             "地標與機械": {
               "meshes": 17,
@@ -1858,7 +2010,7 @@
             },
             "草叢小花": {
               "meshes": 6,
-              "tris": 3498
+              "tris": 6240
             }
           },
           "fade": {
@@ -1873,8 +2025,8 @@
         {
           "id": "colossus",
           "draws": 45,
-          "tris": 51270,
-          "smallTris": 23688,
+          "tris": 53484,
+          "smallTris": 25902,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -1898,7 +2050,7 @@
             },
             "草叢小花": {
               "meshes": 4,
-              "tris": 2814
+              "tris": 5028
             }
           },
           "fade": {
@@ -1912,9 +2064,9 @@
         },
         {
           "id": "central",
-          "draws": 81,
-          "tris": 98614,
-          "smallTris": 38718,
+          "draws": 87,
+          "tris": 111278,
+          "smallTris": 47674,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -1923,6 +2075,10 @@
             "地形": {
               "meshes": 18,
               "tris": 14400
+            },
+            "高台鋪面": {
+              "meshes": 3,
+              "tris": 3708
             },
             "水面": {
               "meshes": 1,
@@ -1937,12 +2093,12 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 21,
-              "tris": 35028
+              "meshes": 24,
+              "tris": 41104
             },
             "草叢小花": {
               "meshes": 6,
-              "tris": 3690
+              "tris": 6570
             }
           },
           "fade": {
@@ -1956,9 +2112,9 @@
         },
         {
           "id": "recycle",
-          "draws": 70,
-          "tris": 56668,
-          "smallTris": 27834,
+          "draws": 74,
+          "tris": 67232,
+          "smallTris": 36790,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -1967,6 +2123,10 @@
             "地形": {
               "meshes": 9,
               "tris": 7200
+            },
+            "高台鋪面": {
+              "meshes": 1,
+              "tris": 1608
             },
             "水面": {
               "meshes": 1,
@@ -1981,12 +2141,12 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 13,
-              "tris": 24144
+              "meshes": 16,
+              "tris": 30220
             },
             "草叢小花": {
               "meshes": 6,
-              "tris": 3690
+              "tris": 6570
             }
           },
           "fade": {
@@ -2000,9 +2160,9 @@
         },
         {
           "id": "walkway",
-          "draws": 77,
-          "tris": 73438,
-          "smallTris": 14634,
+          "draws": 83,
+          "tris": 84632,
+          "smallTris": 22120,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -2011,6 +2171,10 @@
             "地形": {
               "meshes": 15,
               "tris": 12000
+            },
+            "高台鋪面": {
+              "meshes": 3,
+              "tris": 3708
             },
             "水面": {
               "meshes": 1,
@@ -2025,12 +2189,12 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 9,
-              "tris": 12726
+              "meshes": 12,
+              "tris": 18802
             },
             "草叢小花": {
               "meshes": 4,
-              "tris": 1908
+              "tris": 3318
             }
           },
           "fade": {
@@ -2044,9 +2208,9 @@
         },
         {
           "id": "bridge",
-          "draws": 75,
-          "tris": 81048,
-          "smallTris": 26204,
+          "draws": 83,
+          "tris": 95800,
+          "smallTris": 37248,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -2055,6 +2219,10 @@
             "地形": {
               "meshes": 13,
               "tris": 10400
+            },
+            "高台鋪面": {
+              "meshes": 3,
+              "tris": 3708
             },
             "水面": {
               "meshes": 1,
@@ -2069,12 +2237,12 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 16,
-              "tris": 23852
+              "meshes": 21,
+              "tris": 33144
             },
             "草叢小花": {
               "meshes": 6,
-              "tris": 2352
+              "tris": 4104
             }
           },
           "fade": {
@@ -2088,9 +2256,9 @@
         },
         {
           "id": "factory",
-          "draws": 71,
-          "tris": 71774,
-          "smallTris": 16538,
+          "draws": 76,
+          "tris": 77880,
+          "smallTris": 20544,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -2099,6 +2267,10 @@
             "地形": {
               "meshes": 9,
               "tris": 7200
+            },
+            "高台鋪面": {
+              "meshes": 2,
+              "tris": 2100
             },
             "水面": {
               "meshes": 1,
@@ -2113,12 +2285,12 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 11,
-              "tris": 16094
+              "meshes": 14,
+              "tris": 19758
             },
             "草叢小花": {
               "meshes": 2,
-              "tris": 444
+              "tris": 786
             }
           },
           "fade": {
@@ -2132,9 +2304,9 @@
         },
         {
           "id": "platform",
-          "draws": 51,
-          "tris": 39596,
-          "smallTris": 16758,
+          "draws": 55,
+          "tris": 45002,
+          "smallTris": 20764,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -2143,6 +2315,10 @@
             "地形": {
               "meshes": 6,
               "tris": 4800
+            },
+            "高台鋪面": {
+              "meshes": 1,
+              "tris": 1400
             },
             "水面": {
               "meshes": 1,
@@ -2157,12 +2333,12 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 9,
-              "tris": 16314
+              "meshes": 12,
+              "tris": 19978
             },
             "草叢小花": {
               "meshes": 2,
-              "tris": 444
+              "tris": 786
             }
           },
           "fade": {
@@ -2176,9 +2352,9 @@
         },
         {
           "id": "core",
-          "draws": 59,
-          "tris": 78158,
-          "smallTris": 25292,
+          "draws": 61,
+          "tris": 81930,
+          "smallTris": 28364,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -2187,6 +2363,10 @@
             "地形": {
               "meshes": 7,
               "tris": 5600
+            },
+            "高台鋪面": {
+              "meshes": 1,
+              "tris": 700
             },
             "水面": {
               "meshes": 1,
@@ -2201,12 +2381,12 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 14,
-              "tris": 24266
+              "meshes": 15,
+              "tris": 26546
             },
             "草叢小花": {
               "meshes": 4,
-              "tris": 1026
+              "tris": 1818
             }
           },
           "fade": {
@@ -2222,7 +2402,7 @@
       "errors": [],
       "pop": {
         "maxStepJumpTris": 0,
-        "avgSmallTris": 35306,
+        "avgSmallTris": 38048,
         "rel": 0
       },
       "contextLost": 0
@@ -2233,9 +2413,9 @@
       "stops": [
         {
           "id": "entry",
-          "draws": 82,
-          "tris": 73736,
-          "smallTris": 22666,
+          "draws": 85,
+          "tris": 77248,
+          "smallTris": 22846,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -2244,6 +2424,10 @@
             "地形": {
               "meshes": 24,
               "tris": 19200
+            },
+            "高台鋪面": {
+              "meshes": 3,
+              "tris": 3332
             },
             "水面": {
               "meshes": 1,
@@ -2263,7 +2447,7 @@
             },
             "草叢小花": {
               "meshes": 4,
-              "tris": 222
+              "tris": 402
             }
           },
           "fade": {
@@ -2271,15 +2455,15 @@
             "meshes": 12,
             "total": 600,
             "shown": 187,
-            "tris": 10486,
-            "trisFull": 14994
+            "tris": 10666,
+            "trisFull": 16992
           }
         },
         {
           "id": "hills",
-          "draws": 72,
-          "tris": 69964,
-          "smallTris": 28558,
+          "draws": 73,
+          "tris": 71066,
+          "smallTris": 28960,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -2288,6 +2472,10 @@
             "地形": {
               "meshes": 16,
               "tris": 12800
+            },
+            "高台鋪面": {
+              "meshes": 1,
+              "tris": 700
             },
             "地標與機械": {
               "meshes": 17,
@@ -2303,7 +2491,7 @@
             },
             "草叢小花": {
               "meshes": 5,
-              "tris": 474
+              "tris": 876
             }
           },
           "fade": {
@@ -2311,15 +2499,15 @@
             "meshes": 18,
             "total": 827,
             "shown": 259,
-            "tris": 13294,
-            "trisFull": 20042
+            "tris": 13696,
+            "trisFull": 22784
           }
         },
         {
           "id": "colossus",
           "draws": 42,
-          "tris": 46444,
-          "smallTris": 18862,
+          "tris": 46810,
+          "smallTris": 19228,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -2343,7 +2531,7 @@
             },
             "草叢小花": {
               "meshes": 2,
-              "tris": 414
+              "tris": 780
             }
           },
           "fade": {
@@ -2351,15 +2539,15 @@
             "meshes": 12,
             "total": 652,
             "shown": 208,
-            "tris": 10772,
-            "trisFull": 15796
+            "tris": 11138,
+            "trisFull": 18010
           }
         },
         {
           "id": "central",
-          "draws": 76,
-          "tris": 89052,
-          "smallTris": 29156,
+          "draws": 80,
+          "tris": 93102,
+          "smallTris": 29498,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -2368,6 +2556,10 @@
             "地形": {
               "meshes": 18,
               "tris": 14400
+            },
+            "高台鋪面": {
+              "meshes": 3,
+              "tris": 3708
             },
             "水面": {
               "meshes": 1,
@@ -2382,28 +2574,28 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 18,
-              "tris": 28790
+              "meshes": 19,
+              "tris": 28886
             },
             "草叢小花": {
               "meshes": 4,
-              "tris": 366
+              "tris": 612
             }
           },
           "fade": {
             "on": true,
-            "meshes": 18,
-            "total": 878,
-            "shown": 245,
-            "tris": 13896,
-            "trisFull": 21822
+            "meshes": 21,
+            "total": 950,
+            "shown": 246,
+            "tris": 14238,
+            "trisFull": 30778
           }
         },
         {
           "id": "recycle",
-          "draws": 67,
-          "tris": 49634,
-          "smallTris": 20800,
+          "draws": 71,
+          "tris": 54958,
+          "smallTris": 24516,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -2412,6 +2604,10 @@
             "地形": {
               "meshes": 9,
               "tris": 7200
+            },
+            "高台鋪面": {
+              "meshes": 1,
+              "tris": 1608
             },
             "水面": {
               "meshes": 1,
@@ -2426,28 +2622,28 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 12,
-              "tris": 20626
+              "meshes": 15,
+              "tris": 24222
             },
             "草叢小花": {
               "meshes": 4,
-              "tris": 174
+              "tris": 294
             }
           },
           "fade": {
             "on": true,
-            "meshes": 18,
-            "total": 878,
-            "shown": 215,
-            "tris": 13832,
-            "trisFull": 21822
+            "meshes": 21,
+            "total": 950,
+            "shown": 260,
+            "tris": 17548,
+            "trisFull": 30778
           }
         },
         {
           "id": "walkway",
-          "draws": 75,
-          "tris": 70016,
-          "smallTris": 11212,
+          "draws": 81,
+          "tris": 76822,
+          "smallTris": 14310,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -2456,6 +2652,10 @@
             "地形": {
               "meshes": 15,
               "tris": 12000
+            },
+            "高台鋪面": {
+              "meshes": 3,
+              "tris": 3708
             },
             "水面": {
               "meshes": 1,
@@ -2470,28 +2670,28 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 9,
-              "tris": 11068
+              "meshes": 12,
+              "tris": 14040
             },
             "草叢小花": {
               "meshes": 2,
-              "tris": 144
+              "tris": 270
             }
           },
           "fade": {
             "on": true,
-            "meshes": 12,
-            "total": 453,
-            "shown": 108,
-            "tris": 6320,
-            "trisFull": 11074
+            "meshes": 15,
+            "total": 525,
+            "shown": 142,
+            "tris": 9418,
+            "trisFull": 18560
           }
         },
         {
           "id": "bridge",
-          "draws": 69,
-          "tris": 73120,
-          "smallTris": 18276,
+          "draws": 77,
+          "tris": 80288,
+          "smallTris": 21736,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -2500,6 +2700,10 @@
             "地形": {
               "meshes": 13,
               "tris": 10400
+            },
+            "高台鋪面": {
+              "meshes": 3,
+              "tris": 3708
             },
             "水面": {
               "meshes": 1,
@@ -2514,28 +2718,28 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 13,
-              "tris": 18126
+              "meshes": 18,
+              "tris": 21454
             },
             "草叢小花": {
               "meshes": 3,
-              "tris": 150
+              "tris": 282
             }
           },
           "fade": {
             "on": true,
-            "meshes": 18,
-            "total": 598,
-            "shown": 153,
-            "tris": 9408,
-            "trisFull": 16656
+            "meshes": 24,
+            "total": 709,
+            "shown": 192,
+            "tris": 12868,
+            "trisFull": 28148
           }
         },
         {
           "id": "factory",
-          "draws": 68,
-          "tris": 68944,
-          "smallTris": 13708,
+          "draws": 73,
+          "tris": 73570,
+          "smallTris": 16234,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -2544,6 +2748,10 @@
             "地形": {
               "meshes": 9,
               "tris": 7200
+            },
+            "高台鋪面": {
+              "meshes": 2,
+              "tris": 2100
             },
             "水面": {
               "meshes": 1,
@@ -2558,28 +2766,28 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 9,
-              "tris": 13642
+              "meshes": 12,
+              "tris": 16102
             },
             "草叢小花": {
               "meshes": 1,
-              "tris": 66
+              "tris": 132
             }
           },
           "fade": {
             "on": true,
-            "meshes": 18,
-            "total": 598,
-            "shown": 138,
-            "tris": 9400,
-            "trisFull": 16656
+            "meshes": 24,
+            "total": 709,
+            "shown": 170,
+            "tris": 12448,
+            "trisFull": 28148
           }
         },
         {
           "id": "platform",
-          "draws": 50,
-          "tris": 37734,
-          "smallTris": 14896,
+          "draws": 54,
+          "tris": 41640,
+          "smallTris": 17402,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -2588,6 +2796,10 @@
             "地形": {
               "meshes": 6,
               "tris": 4800
+            },
+            "高台鋪面": {
+              "meshes": 1,
+              "tris": 1400
             },
             "水面": {
               "meshes": 1,
@@ -2602,28 +2814,28 @@
               "tris": 288
             },
             "實例化垃圾": {
-              "meshes": 9,
-              "tris": 14842
+              "meshes": 12,
+              "tris": 17294
             },
             "草叢小花": {
               "meshes": 1,
-              "tris": 54
+              "tris": 108
             }
           },
           "fade": {
             "on": true,
-            "meshes": 24,
-            "total": 815,
-            "shown": 227,
-            "tris": 15452,
-            "trisFull": 24798
+            "meshes": 32,
+            "total": 965,
+            "shown": 258,
+            "tris": 18204,
+            "trisFull": 39132
           }
         },
         {
           "id": "core",
-          "draws": 57,
-          "tris": 74598,
-          "smallTris": 21732,
+          "draws": 58,
+          "tris": 75442,
+          "smallTris": 21876,
           "groups": {
             "角色與其他": {
               "meshes": 12,
@@ -2632,6 +2844,10 @@
             "地形": {
               "meshes": 7,
               "tris": 5600
+            },
+            "高台鋪面": {
+              "meshes": 1,
+              "tris": 700
             },
             "水面": {
               "meshes": 1,
@@ -2651,24 +2867,24 @@
             },
             "草叢小花": {
               "meshes": 3,
-              "tris": 168
+              "tris": 312
             }
           },
           "fade": {
             "on": true,
-            "meshes": 18,
-            "total": 589,
-            "shown": 213,
-            "tris": 12910,
-            "trisFull": 18772
+            "meshes": 23,
+            "total": 667,
+            "shown": 235,
+            "tris": 14578,
+            "trisFull": 26364
           }
         }
       ],
       "errors": [],
       "pop": {
-        "maxStepJumpTris": 168,
-        "avgSmallTris": 28480,
-        "rel": 0.006
+        "maxStepJumpTris": 156,
+        "avgSmallTris": 28789,
+        "rel": 0.005
       },
       "contextLost": 0
     }
@@ -2708,370 +2924,370 @@
       "name": "high：小物件三角面平均下降",
       "ok": true,
       "detail": [
-        101202,
-        80174
+        120655,
+        85531
       ]
     },
     {
       "name": "high：Draw Calls 不增加",
       "ok": true,
       "detail": [
-        116,
-        116
+        120,
+        120
       ]
     },
     {
       "name": "medium：小物件三角面平均下降",
       "ok": true,
       "detail": [
-        40967,
-        31101
+        48757,
+        33718
       ]
     },
     {
       "name": "medium：Draw Calls 不增加",
       "ok": true,
       "detail": [
-        99,
-        96
+        108,
+        102
       ]
     },
     {
       "name": "low：小物件三角面平均下降",
       "ok": true,
       "detail": [
-        25215,
-        19987
+        30663,
+        21661
       ]
     },
     {
       "name": "low：Draw Calls 不增加",
       "ok": true,
       "detail": [
-        82,
-        82
+        87,
+        85
       ]
     }
   ],
   "summary": {
     "high": {
       "trisMean": [
-        168796,
-        147768
+        191534,
+        156137
       ],
       "trisMax": [
-        215962,
-        181372
+        251270,
+        193760
       ],
       "smallTrisMean": [
-        101202,
-        80174
+        120655,
+        85531
       ],
       "drawsMean": [
-        90,
-        89
+        94,
+        92
       ],
       "drawsMax": [
-        116,
-        116
+        120,
+        120
       ],
       "pop": [
         {
           "maxStepJumpTris": 0,
-          "avgSmallTris": 135990,
+          "avgSmallTris": 165650,
           "rel": 0
         },
         {
-          "maxStepJumpTris": 4266,
-          "avgSmallTris": 102360,
-          "rel": 0.042
+          "maxStepJumpTris": 4242,
+          "avgSmallTris": 107360,
+          "rel": 0.04
         }
       ],
       "perStop": [
         [
           "entry",
-          202490,
-          180212,
-          98,
-          98
+          226810,
+          189616,
+          102,
+          102
         ],
         [
           "hills",
-          170744,
-          151160,
-          76,
-          76
+          189980,
+          156752,
+          77,
+          77
         ],
         [
           "colossus",
-          123550,
-          111202,
+          137350,
+          115582,
           52,
           52
         ],
         [
           "central",
-          215962,
-          181372,
-          97,
-          94
+          251270,
+          193760,
+          103,
+          99
         ],
         [
           "recycle",
-          200958,
-          164412,
-          116,
-          116
+          236138,
+          176560,
+          120,
+          120
         ],
         [
           "walkway",
-          165334,
-          143338,
-          106,
-          104
+          195578,
+          155910,
+          115,
+          112
         ],
         [
           "bridge",
-          157610,
-          131894,
-          96,
-          93
+          187310,
+          145426,
+          104,
+          100
         ],
         [
           "factory",
-          178272,
-          157128,
-          109,
-          105
+          198964,
+          160922,
+          114,
+          107
         ],
         [
           "platform",
-          106304,
-          99836,
-          77,
-          77
+          115564,
+          105676,
+          81,
+          80
         ],
         [
           "core",
-          166734,
-          157122,
-          73,
-          72
+          176378,
+          161162,
+          75,
+          74
         ]
       ]
     },
     "medium": {
       "trisMean": [
-        97081,
-        87497
+        107038,
+        92280
       ],
       "trisMax": [
-        123036,
-        107538
+        138022,
+        112188
       ],
       "smallTrisMean": [
-        40967,
-        31101
+        48757,
+        33718
       ],
       "drawsMean": [
-        83,
-        81
+        87,
+        85
       ],
       "drawsMax": [
-        99,
-        96
+        108,
+        102
       ],
       "pop": [
         {
           "maxStepJumpTris": 0,
-          "avgSmallTris": 63662,
+          "avgSmallTris": 76014,
           "rel": 0
         },
         {
-          "maxStepJumpTris": 1884,
-          "avgSmallTris": 46398,
-          "rel": 0.041
+          "maxStepJumpTris": 1896,
+          "avgSmallTris": 47315,
+          "rel": 0.04
         }
       ],
       "perStop": [
         [
           "entry",
-          112078,
-          104656,
-          89,
-          89
+          119590,
+          109294,
+          93,
+          93
         ],
         [
           "hills",
-          97594,
-          86308,
-          75,
-          74
+          103328,
+          87890,
+          76,
+          75
         ],
         [
           "colossus",
-          70890,
-          63322,
+          74850,
+          64114,
           52,
           50
         ],
         [
           "central",
-          123036,
-          107538,
-          87,
-          83
+          138022,
+          112188,
+          93,
+          88
         ],
         [
           "recycle",
-          86168,
-          70744,
-          97,
-          92
-        ],
-        [
-          "walkway",
-          107854,
-          97976,
-          99,
-          95
-        ],
-        [
-          "bridge",
-          103094,
-          90430,
-          91,
-          86
-        ],
-        [
-          "factory",
-          104788,
-          100900,
-          97,
+          99882,
+          77478,
+          101,
           96
         ],
         [
+          "walkway",
+          124926,
+          105752,
+          108,
+          101
+        ],
+        [
+          "bridge",
+          119718,
+          98782,
+          99,
+          94
+        ],
+        [
+          "factory",
+          114356,
+          106524,
+          103,
+          102
+        ],
+        [
           "platform",
-          56848,
-          50352,
-          73,
-          72
+          62740,
+          55336,
+          77,
+          76
         ],
         [
           "core",
-          108464,
-          102742,
-          70,
-          69
+          112968,
+          105440,
+          72,
+          71
         ]
       ]
     },
     "low": {
       "trisMean": [
-        70552,
-        65324
+        78097,
+        69095
       ],
       "trisMax": [
-        98614,
-        89052
+        111278,
+        93102
       ],
       "smallTrisMean": [
-        25215,
-        19987
+        30663,
+        21661
       ],
       "drawsMean": [
-        68,
-        66
+        72,
+        69
       ],
       "drawsMax": [
-        82,
-        82
+        87,
+        85
       ],
       "pop": [
         {
           "maxStepJumpTris": 0,
-          "avgSmallTris": 35306,
+          "avgSmallTris": 38048,
           "rel": 0
         },
         {
-          "maxStepJumpTris": 168,
-          "avgSmallTris": 28480,
-          "rel": 0.006
+          "maxStepJumpTris": 156,
+          "avgSmallTris": 28789,
+          "rel": 0.005
         }
       ],
       "perStop": [
         [
           "entry",
-          78244,
-          73736,
-          82,
-          82
+          83574,
+          77248,
+          85,
+          85
         ],
         [
           "hills",
-          76712,
-          69964,
-          73,
-          72
+          80154,
+          71066,
+          74,
+          73
         ],
         [
           "colossus",
-          51270,
-          46444,
+          53484,
+          46810,
           45,
           42
         ],
         [
           "central",
-          98614,
-          89052,
-          81,
-          76
+          111278,
+          93102,
+          87,
+          80
         ],
         [
           "recycle",
-          56668,
-          49634,
-          70,
-          67
+          67232,
+          54958,
+          74,
+          71
         ],
         [
           "walkway",
-          73438,
-          70016,
-          77,
-          75
+          84632,
+          76822,
+          83,
+          81
         ],
         [
           "bridge",
-          81048,
-          73120,
-          75,
-          69
+          95800,
+          80288,
+          83,
+          77
         ],
         [
           "factory",
-          71774,
-          68944,
-          71,
-          68
+          77880,
+          73570,
+          76,
+          73
         ],
         [
           "platform",
-          39596,
-          37734,
-          51,
-          50
+          45002,
+          41640,
+          55,
+          54
         ],
         [
           "core",
-          78158,
-          74598,
-          59,
-          57
+          81930,
+          75442,
+          61,
+          58
         ]
       ]
     }
   },
-  "finishedAt": "2026-11-28T00:36:47.979Z"
+  "finishedAt": "2026-11-28T02:30:57.276Z"
 }
