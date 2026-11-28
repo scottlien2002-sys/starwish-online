@@ -30,6 +30,7 @@ jobs:
         run: |
           mkdir -p /tmp/gt && cd /tmp/gt && npm init -y >/dev/null && npm i --no-save @gltf-transform/core@4 @gltf-transform/extensions@4 @gltf-transform/functions@4 meshoptimizer 2>&1 | tail -2
           cd "$GITHUB_WORKSPACE" && cp art/novice75/decompress.mjs /tmp/gt/ && node /tmp/gt/decompress.mjs art/novice75/source /tmp/decoded
+          mkdir -p out/decoded && cp /tmp/decoded/*.glb out/decoded/
       - name: System libraries for Blender (headless)
         run: |
           sudo apt-get update -qq
