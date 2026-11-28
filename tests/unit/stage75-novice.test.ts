@@ -13,7 +13,8 @@ test("7.5 版本：男性預設新版 n75；&nv=c10b5b 切回舊版；女性維�
   assert.equal(noviceVersionFor("male", new URLSearchParams("nv=c10b5b")), "c10b5b");
   assert.equal(noviceVersionFor("female"), "c10b5b");
   assert.equal(noviceVersionFor("female", new URLSearchParams("nv=n75")), "c10b5b", "女性這階段不換");
-  assert.ok(ANIM_TIMING.run.groundSpeedBy.n75!.male > 3, "新版腿長約 2.1 倍 → 跑步地面速度要重新量測");
+  // 第二階段：改用 Tripo 原生跑步，地面速度依原生根運動量測（2.66 m/s）；走路 0.73 m/s
+  assert.ok(Math.abs(ANIM_TIMING.run.groundSpeedBy.n75!.male - 2.66) < 0.05, "原生跑步根運動 2.66 m/s");
 });
 
 // ---------------- 次級動態 ----------------
@@ -89,4 +90,43 @@ test("7.5 動作清單 JSON：攻擊類動作都有命中／釋放時間標記",
     assert.ok(typeof marks.hit === "number" || typeof marks.release === "number", `${n} 缺少命中時間`);
   }
   assert.ok(m.clips.Idle.loop && m.clips.Run.loop && m.clips.Walk.loop);
+});
+
+// ---------------- 第二階段：技能動作、貼圖記憶體 ----------------
+function glbImageSizes(f: string): number[][] {
+  const b = readFileSync(f);
+  const len = b.readUInt32LE(12);
+  const j = JSON.parse(b.subarray(20, 20 + len).toString("utf8"));
+  const bin = 20 + len + 8;
+  return (j.images as { bufferView: number }[]).map((im) => {
+    const bv = j.bufferViews[im.bufferView];
+    const d = b.subarray(bin + (bv.byteOffset ?? 0), bin + (bv.byteOffset ?? 0) + bv.byteLength);
+    if (d[0] === 0x89) return [d.readUInt32BE(16), d.readUInt32BE(20)];
+    for (let i = 2; i < d.length; ) {
+      const m = d[i + 1]!;
+      const l = d.readUInt16BE(i + 2);
+      if (m === 0xc0 || m === 0xc2) return [d.readUInt16BE(i + 7), d.readUInt16BE(i + 5)];
+      i += 2 + l;
+    }
+    return [0, 0];
+  });
+}
+
+test("7.5 第二階段：Claude C 六段技能動作在角色檔裡（Skill_*）", () => {
+  for (const lod of ["hq", "lite"]) {
+    const names = (glbJson(`${MODELS}novice_n75_male_${lod}.glb`).animations as { name: string }[]).map((a) => a.name);
+    for (const n of ["Skill_TripleSlash", "Skill_StaffCast", "Skill_LeapSlam", "Skill_Whirlwind", "Skill_StarMeteor", "Skill_ChargeBurst"]) assert.ok(names.includes(n), `${lod} 缺少 ${n}`);
+  }
+});
+
+test("7.5 第二階段：貼圖記憶體 — HQ 只有底色 2048、法線／金屬粗糙 1024；Lite 全部 1024", () => {
+  const hq = glbImageSizes(`${MODELS}novice_n75_male_hq.glb`);
+  const lite = glbImageSizes(`${MODELS}novice_n75_male_lite.glb`);
+  assert.equal(hq.filter((s) => s[0] === 2048).length, 1, JSON.stringify(hq));
+  assert.ok(hq.every((s) => s[0] <= 2048 && s[0] === s[1]));
+  assert.ok(lite.every((s) => s[0] === 1024), JSON.stringify(lite));
+  // 未壓縮 RGBA＋mipmap 估計（GPU 記憶體）：HQ ≤ 34 MB（第一階段 3×2048 ≈ 64 MB）
+  const mb = (ss: number[][]) => ss.reduce((a, [w, h]) => a + (w! * h! * 4 * 4) / 3, 0) / 2 ** 20;
+  assert.ok(mb(hq) < 34, `HQ ${mb(hq).toFixed(1)} MB`);
+  assert.ok(mb(lite) < 17, `Lite ${mb(lite).toFixed(1)} MB`);
 });

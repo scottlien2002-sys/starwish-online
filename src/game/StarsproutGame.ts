@@ -75,6 +75,13 @@ import { buildCampPortal, type CampPortal } from "./CampPortal.ts";
 import { RESPAWN_SLOTS } from "../maps/village/layout.ts";
 import { nextLootUid } from "../core/gameSave.ts";
 import { rollGold } from "../economy/economyConfig.ts";
+import { FieldSkills, type SkillHost, type SkillTarget } from "./fieldSkills.ts";
+import type { ClipTiming } from "../combat-vfx/core/timeline.ts";
+import { WeaponTrail } from "../combat-vfx/fx/WeaponTrail.ts";
+import { CameraFx } from "../combat-vfx/fx/CameraFx.ts";
+import { PALETTES } from "../combat-vfx/fx/palette.ts";
+import { VFX_QUALITY } from "../combat-vfx/core/quality.ts";
+import { FileTools } from "@babylonjs/core";
 
 /**
  * Stage 5.6 正式遊戲整合（?play=starsprout）：男女初心者在星芽原野實際遊玩。
@@ -139,6 +146,11 @@ export interface PlayApi {
   heal(): void;
   /** Stage 7.5：武器掛載測試（Claude C 展示武器）；回傳掛點與手骨世界座標 */
   weaponTest(kind: "sword" | "staff" | null, hand?: "R" | "L"): { attached: boolean; socket: number[] | null; hand: number[] | null; dist: number | null };
+  /** Stage 7.5 第二階段：多位玩家共用模型貼圖（載入 n 個共用 n75 Lite，回報貼圖／材質數，之後移除） */
+  sharedAvatarTest(n: number): Promise<{ n: number; texBefore: number; texAfterFirst: number; texAfterAll: number; materials: number; meshes: number; containers: number }>;
+  /** Stage 7.5 第二階段：本地玩家技能（測試用） */
+  skill(id: string): { ok: boolean; reason?: string; targetId?: string | null; rate?: number };
+  skillState(): { enabled: boolean; busy: boolean; active: string | null; t: number; stats: unknown; cooldowns: Record<string, number>; log: unknown[]; audio: boolean; trail: boolean; fx: unknown } ;
   setAttackStyle(style: string): boolean;
   previewClip(name: string): boolean;
   secondary(): Record<string, { pitch: number; roll: number }>;
@@ -532,6 +544,8 @@ class StarsproutGame {
     await Promise.all(this.monsters.map((m) => m.visual?.load() ?? Promise.resolve()));
     // Stage 7.3：戰鬥特效（Claude C Combat VFX Stage 2）：命中火花、傷害數字、受傷紅框、重生光柱。完整遊戲才開；&fx=0 關閉（比較用）
     if (this.ws && this.params.get("fx") !== "0") this.fx = new FieldCombatFx(scene, this.hudRoot, this.lod === "hq" ? "high" : "medium");
+    // Stage 7.5 第二階段：C 的六段展示技能接到本地玩家（新版男性初心者 n75 才有 Skill_* 動作）。&skills=0 關閉
+    if (this.fx && this.params.get("skills") !== "0" && this.avatar.clips.has("Skill_TripleSlash")) await this.setupSkills();
     this.perf.setExtra(() => ({
       monsterDetail: this.detailOn ? { ...this.tierCount } : "關閉（&mlod=0）",
       monsters: this.monsters.length,
@@ -601,7 +615,12 @@ class StarsproutGame {
     const mx = w.x * s;
     const mz = w.z * s;
     const speed01 = Math.min(1, l);
-    const attacking = this.avatar.state === "Attack";
+    if (down && this.skills?.busy) {
+      this.skills.cancel();
+      this.avatar.stopClip();
+    }
+    const casting = !!this.skills?.busy;
+    const attacking = this.avatar.state === "Attack" || casting;
     this.curSpeed = 0;
     if (speed01 > 0.05 && !attacking && !down) {
       const sp = TUNING.player.moveSpeed * speed01;
@@ -618,6 +637,12 @@ class StarsproutGame {
     if (tgt) {
       const p = tgt.instance.currentPosition;
       this.yaw = turnTowards(this.yaw, p.x - this.pos.x, p.z - this.pos.z, 24, dt);
+    }
+    // 技能：時間軸（動作、命中、特效、音效同一個時鐘）＋技能位移（經地形碰撞）
+    if (this.skills) {
+      this.skills.update(dt);
+      this.skillTrail?.update(dt);
+      this.updateSkillBar();
     }
     const groundY = this.terrain.surface(this.pos.x, this.pos.z);
     this.pos.y = groundY;
@@ -662,7 +687,7 @@ class StarsproutGame {
 
   // ---------------- 戰鬥 ----------------
   private tryAttack(fromPlayer: boolean): boolean {
-    if (this.avatar.state === "Attack") return false;
+    if (this.avatar.state === "Attack" || this.skills?.busy) return false;
     const t = this.avatar.getAttackTiming();
     const r = this.combat.startAttack(this.now, this.pos.x, this.pos.z, this.monsterInstances, t.hitAt - 1e-6);
     if (r.ok) {
@@ -674,14 +699,14 @@ class StarsproutGame {
     return false;
   }
 
-  private onHit(r: PlayerAttackResult): void {
+  private onHit(r: PlayerAttackResult, fromSkill = false): void {
     if (!r.ok) return;
     this.hits++;
     const mc = this.monsters.find((x) => x.instance.instanceId === r.targetId);
     if (!mc) return;
     const i = mc.instance;
     const ip = i.currentPosition;
-    this.fx?.playerHit(ip.x, this.terrain.surface(ip.x, ip.z), ip.z, i.definition.height ?? 1, r.damage, r.killed);
+    if (!fromSkill) this.fx?.playerHit(ip.x, this.terrain.surface(ip.x, ip.z), ip.z, i.definition.height ?? 1, r.damage, r.killed);
     // Stage 7.3：普通攻擊的輕微擊退（Claude C 受擊反應 V2：0.12＋震動×0.75，普通攻擊震動 0.14 → 約 0.22 m；Boss ×0.25）。
     // 用 FieldTerrainQuery：撞到岩石、溪流、地圖邊界就停在前面
     if (this.ws && !r.killed && this.params.get("fx") !== "0") {
@@ -1012,6 +1037,153 @@ class StarsproutGame {
     const hb = this.avatar.skinnedRef?.skeleton?.bones.find((b) => b.name === `${hand}_Hand`);
     const hp = hb && this.avatar.skinnedRef ? hb.getAbsolutePosition(this.avatar.skinnedRef) : null;
     return { attached: true, socket: [sp.x, sp.y, sp.z], hand: hp ? [hp.x, hp.y, hp.z] : null, dist: hp ? Vector3.Distance(sp, hp) : null };
+  }
+
+  // ---------------- Stage 7.5 第二階段：本地玩家技能（Claude C 六段展示技能） ----------------
+  private skills: FieldSkills | null = null;
+  private skillTrail: WeaponTrail | null = null;
+  private skillTrailFor: WeaponRig | null = null;
+  private skillBtns: { id: string; el: HTMLButtonElement; cd: HTMLElement; last: string }[] = [];
+  private skillBarT = 0;
+  readonly skillLog: { skill: string; ok: boolean; reason?: string; t: number }[] = [];
+
+  private async setupSkills(): Promise<void> {
+    const fx = this.fx!;
+    let clips: Record<string, ClipTiming>;
+    try {
+      const url = FileTools.PreprocessUrl(`${import.meta.env.BASE_URL}combat-vfx/novice_combat_male.json`);
+      const j = (await (await fetch(url)).json()) as { clips: Record<string, ClipTiming> };
+      clips = j.clips;
+    } catch {
+      return;
+    }
+    fx.enableSkills(this.hudRoot);
+    const shake = new CameraFx();
+    shake.scale = VFX_QUALITY[fx.tier].shake ?? 1;
+    this.camera.shakeFx = shake;
+    const targets: SkillTarget[] = [];
+    const host: SkillHost = {
+      now: () => this.now,
+      player: () => ({ x: this.pos.x, y: this.pos.y, z: this.pos.z, yaw: this.yaw, down: this.combat.isDown }),
+      setYaw: (y) => {
+        this.yaw = y;
+      },
+      move: (dx, dz) => {
+        const r = resolveMove(this.terrain, this.colliders, PLAYER_RADIUS, this.pos.x, this.pos.z, this.pos.x + dx, this.pos.z + dz);
+        const d = Math.hypot(r.x - this.pos.x, r.z - this.pos.z);
+        this.pos.x = r.x;
+        this.pos.z = r.z;
+        return d;
+      },
+      targets: () => {
+        targets.length = 0;
+        for (const m of this.monsters) {
+          const i = m.instance;
+          const p = i.currentPosition;
+          targets.push({ id: i.instanceId, x: p.x, z: p.z, r: i.definition.bodyRadius ?? 0.5, h: i.definition.height ?? 1, alive: i.isAlive });
+        }
+        return targets;
+      },
+      damage: (id, mult, crit, keys) => {
+        const mc = this.monsters.find((x) => x.instance.instanceId === id);
+        if (!mc || !mc.instance.isAlive) return false;
+        // 傷害＝目前普通攻擊傷害 × C 的展示倍率（測試值，不是正式技能數值）
+        const dmg = Math.max(1, Math.round(this.combat.tuning.attackDamage * mult));
+        const r = mc.instance.receiveDamage(dmg, this.now, "normal");
+        if (!r.applied) return false;
+        const ip = mc.instance.currentPosition;
+        const h = mc.instance.definition.height ?? 1;
+        fx.skillHit(keys, ip.x, this.terrain.surface(ip.x, ip.z) + Math.max(0.35, h * 0.55), ip.z, h, dmg, crit);
+        this.onHit({ ok: true, targetId: id, killed: r.killed, damage: dmg }, true);
+        return true;
+      },
+      attackSpeed: () => this.stats?.attackSpeed ?? 100,
+      playClip: (name) => this.avatar.playSkill(name, clips[name]?.duration ?? 1),
+      clipTime: (t) => this.avatar.setSkillTime(t),
+      endClip: () => this.avatar.stopClip(),
+      fx: (key, x, y, z, opt) => fx.skillFx(key, x, y, z, { yaw: opt.yaw, scale: opt.scale, duration: opt.duration, palette: opt.palette, follow: opt.follow ? this.avatar.root : undefined }),
+      trail: (on, palette) => {
+        const w = this.testWeapon;
+        if (!w) return;
+        if (this.skillTrailFor !== w) {
+          this.skillTrail?.dispose();
+          const q = VFX_QUALITY[fx.tier];
+          this.skillTrail = new WeaponTrail(this.scene, w.base, w.tip, q.trailSegments, q.trailLife, null);
+          this.skillTrail.setBright(true);
+          this.skillTrailFor = w;
+        }
+        if (on) {
+          this.skillTrail!.setColor(PALETTES[palette ?? "steel"].main);
+          this.skillTrail!.start();
+        } else this.skillTrail!.stop();
+      },
+      launch: (kind, x, y, z, dx, dz, speed, palette) => fx.launch(kind, x, y, z, dx, dz, speed, palette),
+      projPos: (h) => fx.projPos(h),
+      projSteer: (h, x, y, z) => fx.projSteer(h, x, y, z),
+      projEnd: (h, burst) => fx.projEnd(h, burst),
+      sfx: (k) => fx.sfx(k),
+      shake: (a) => shake.shake(a),
+      equipWeapon: (kind) => {
+        if (this.testWeapon?.kind !== kind) this.equipTestWeapon(kind, "R");
+      },
+    };
+    this.skills = new FieldSkills(host, clips);
+    this.buildSkillBar();
+  }
+
+  /** 施放技能（技能列、鍵盤 1–6、測試 API 共用） */
+  castSkill(id: string): ReturnType<FieldSkills["cast"]> | { ok: false; reason: "attack" | "disabled" } {
+    if (!this.skills) return { ok: false, reason: "disabled" };
+    if (this.avatar.state === "Attack") return { ok: false, reason: "attack" };
+    const r = this.skills.cast(id);
+    if (r.ok) this.attackTargetId = r.targetId;
+    this.skillLog.push({ skill: id, ok: r.ok, reason: r.ok ? undefined : r.reason, t: this.now });
+    if (this.skillLog.length > 50) this.skillLog.shift();
+    return r;
+  }
+
+  private buildSkillBar(): void {
+    const bar = document.createElement("div");
+    bar.className = "sw-skillbar";
+    bar.style.cssText = "position:absolute;right:calc(12px + env(safe-area-inset-right));bottom:calc(178px + env(safe-area-inset-bottom));z-index:30;display:grid;grid-template-columns:repeat(3,48px);gap:7px;pointer-events:none";
+    FieldSkills.list().forEach((d, k) => {
+      const el = document.createElement("button");
+      el.dataset.skill = d.id;
+      el.title = `${d.label}（展示技能，數值未定案）`;
+      el.style.cssText = `position:relative;width:48px;height:48px;border-radius:50%;border:2px solid rgba(255,246,220,.85);background:radial-gradient(circle at 35% 30%,#fff7 0,#0000 45%),${d.weapon === "staff" ? "#3f5fb8" : "#a8742e"};color:#fffbe9;font:700 11px -apple-system,'PingFang TC',sans-serif;text-shadow:0 1px 2px #0008;pointer-events:auto;touch-action:manipulation;overflow:hidden;padding:0`;
+      el.innerHTML = `<span style="position:relative;z-index:2">${d.short}</span><small style="position:absolute;right:6px;bottom:2px;z-index:2;font-size:9px;opacity:.8">${k + 1}</small>`;
+      const cd = document.createElement("div");
+      cd.style.cssText = "position:absolute;inset:0;background:rgba(10,14,40,.62);z-index:1;transform-origin:bottom;transform:scaleY(0)";
+      el.appendChild(cd);
+      const press = (e: Event): void => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.castSkill(d.id);
+      };
+      el.addEventListener("pointerdown", press);
+      bar.appendChild(el);
+      this.skillBtns.push({ id: d.id, el, cd, last: "" });
+    });
+    this.hudRoot.appendChild(bar);
+    window.addEventListener("keydown", (e) => {
+      const m = /^Digit([1-6])$/.exec(e.code);
+      if (m) this.castSkill(FieldSkills.list()[Number(m[1]) - 1]!.id);
+    });
+  }
+
+  private updateSkillBar(): void {
+    this.skillBarT += 1;
+    if (this.skillBarT % 4) return;
+    const busy = this.skills!.busy;
+    for (const b of this.skillBtns) {
+      const def = FieldSkills.list().find((d) => d.id === b.id)!;
+      const left = this.skills!.cooldownLeft(b.id);
+      const v = `${busy ? 1 : 0}|${Math.ceil(left * 10)}`;
+      if (v === b.last) continue;
+      b.last = v;
+      b.cd.style.transform = `scaleY(${def.cooldown > 0 ? Math.min(1, left / def.cooldown) : 0})`;
+      b.el.style.opacity = busy ? "0.7" : "1";
+    }
   }
 
   private buildClipPanel(): void {
@@ -1396,6 +1568,42 @@ class StarsproutGame {
       toZone01: () => self.toZone01(),
       // Stage 7.5 驗收／測試：武器掛載、攻擊動作類型、動作預覽
       weaponTest: (kind: "sword" | "staff" | null, hand: "R" | "L" = "R") => self.equipTestWeapon(kind, hand),
+      skill: (id: string) => self.castSkill(id),
+      sharedAvatarTest: async (n: number) => {
+        const sc = self.scene;
+        const texBefore = sc.textures.length;
+        const list: NoviceAvatar[] = [];
+        let texAfterFirst = texBefore;
+        for (let k = 0; k < n; k++) {
+          const a = await NoviceAvatar.load(sc, { gender: "male", lod: "lite", baseUrl: `${import.meta.env.BASE_URL}models/`, version: "n75", shared: true });
+          a.root.position.set(self.pos.x + 1.5 * (k + 1), self.pos.y, self.pos.z + 1.5);
+          list.push(a);
+          if (k === 0) texAfterFirst = sc.textures.length;
+        }
+        const texAfterAll = sc.textures.length;
+        const mats = new Set(list.flatMap((a) => a.meshes.map((m) => m.material).filter(Boolean)));
+        const meshes = list.reduce((x, a) => x + a.meshes.filter((m) => m.getTotalVertices() > 0).length, 0);
+        await new Promise((r) => setTimeout(r, 300));
+        for (const a of list) a.disposeShared();
+        return { n, texBefore, texAfterFirst, texAfterAll, materials: mats.size, meshes, containers: NoviceAvatar.sharedContainers };
+      },
+      skillState: () => {
+        const sk = self.skills;
+        const cds: Record<string, number> = {};
+        if (sk) for (const d of FieldSkills.list()) cds[d.id] = sk.cooldownLeft(d.id);
+        return {
+          enabled: !!sk,
+          busy: !!sk?.busy,
+          active: sk?.active?.def.id ?? null,
+          t: sk?.active?.tl.t ?? 0,
+          stats: sk ? { ...sk.stats, bySkill: { ...sk.stats.bySkill } } : null,
+          cooldowns: cds,
+          log: self.skillLog.slice(-20),
+          audio: !!self.fx?.audio,
+          trail: !!self.skillTrail,
+          fx: self.fx ? { ...self.fx.stats } : null,
+        };
+      },
       setAttackStyle: (style: string) => self.avatar.setAttackStyle(style),
       previewClip: (name: string) => self.avatar.previewClip(name),
       secondary: () => self.avatar.secondaryState(),

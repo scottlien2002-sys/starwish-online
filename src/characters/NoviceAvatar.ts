@@ -1,6 +1,7 @@
 import "@babylonjs/loaders/glTF";
 import {
-  type AbstractMesh,
+  AbstractMesh,
+  type AssetContainer,
   type AnimationGroup,
   type Bone,
   Color3,
@@ -111,6 +112,8 @@ export class NoviceAvatar {
   readonly sockets: { R: TransformNode | null; L: TransformNode | null } = { R: null, L: null };
   /** 目前移動動作（跑步時依速度在 Run、Walk 之間切換） */
   loco: "Run" | "Walk" = "Run";
+  /** 走路／跑步切換與播放倍率範圍（依模型版本） */
+  locoTuning: { toWalk: number; toRun: number; walkMaxRate: number; runMinRate: number } = { toWalk: RUN_TO_WALK, toRun: WALK_TO_RUN, walkMaxRate: 1.8, runMinRate: ANIM_TIMING.run.minRate };
   private walkW = 0;
   private waitW = 0;
   private idleTime = 0;
@@ -185,12 +188,57 @@ export class NoviceAvatar {
     this.play("Idle");
   }
 
-  static async load(scene: Scene, opts: { gender: NoviceGender; lod: NoviceLod; baseUrl: string; version?: string }): Promise<NoviceAvatar> {
+  /** 共用模型容器（同一場景、同一檔案只下載、解碼一次） */
+  private static readonly containers = new Map<string, Promise<AssetContainer>>();
+
+  /**
+   * Stage 7.5 第二階段：多位玩家共用同一份網格、材質、貼圖（AssetContainer.instantiateModelsToScene）。
+   * 每位玩家只有自己的骨架、動畫群組與節點；貼圖記憶體不隨人數增加（多人遠端玩家用）。
+   */
+  private static async instantiateShared(scene: Scene, baseUrl: string, file: string): Promise<{ meshes: AbstractMesh[]; animationGroups: AnimationGroup[]; skeletons: Skeleton[]; transformNodes: TransformNode[] }> {
+    const key = `${scene.uid}|${baseUrl}${file}`;
+    let p = NoviceAvatar.containers.get(key);
+    if (!p) {
+      const np: Promise<AssetContainer> = SceneLoader.LoadAssetContainerAsync(baseUrl, file, scene).then((c: AssetContainer) => {
+        for (const g of c.animationGroups) g.stop();
+        return c;
+      });
+      NoviceAvatar.containers.set(key, np);
+      p = np;
+    }
+    const c = await p;
+    const inst = c.instantiateModelsToScene((n) => n, false, { doNotInstantiate: true });
+    const root = inst.rootNodes[0]!;
+    const desc = root.getDescendants(false);
+    const meshes = [root, ...desc].filter((n): n is AbstractMesh => n instanceof AbstractMesh);
+    const transformNodes = desc.filter((n): n is TransformNode => n instanceof TransformNode && !(n instanceof AbstractMesh));
+    return { meshes, animationGroups: inst.animationGroups, skeletons: inst.skeletons, transformNodes };
+  }
+
+  /** 共用模型的玩家離開：只刪除自己的節點、骨架、動畫（共用的幾何、材質、貼圖保留給其他玩家） */
+  disposeShared(): void {
+    for (const g of this.clips.values()) g.dispose();
+    for (const m of this.meshes) m.skeleton?.dispose();
+    this.root.dispose(false, false);
+  }
+
+  /** 測試／報告用：共用容器數 */
+  static get sharedContainers(): number {
+    return NoviceAvatar.containers.size;
+  }
+
+  static async load(scene: Scene, opts: { gender: NoviceGender; lod: NoviceLod; baseUrl: string; version?: string; shared?: boolean }): Promise<NoviceAvatar> {
     const file = noviceFile(opts.gender, opts.lod, opts.version);
-    const res = await SceneLoader.ImportMeshAsync("", opts.baseUrl, file, scene);
+    const res = opts.shared ? await NoviceAvatar.instantiateShared(scene, opts.baseUrl, file) : await SceneLoader.ImportMeshAsync("", opts.baseUrl, file, scene);
     const a = new NoviceAvatar(scene, file, res);
     a.version = opts.version ?? "c10b5";
-    if (a.version === "n75") a.walkGroundSpeed = 1.31;
+    if (a.version === "n75") {
+      // Tripo 原生走路／跑步（根運動量測）：走路 0.73 m/s、跑步 2.66 m/s。
+      // 走路最多 2.2 倍（1.6 m/s）、跑步最少 0.65 倍（1.73 m/s）；1.5 以下走路、1.75 以上跑步 → 任何速度都不超出播放倍率範圍（不滑步）
+      a.walkGroundSpeed = 0.73;
+      a.loco = "Walk";
+      a.locoTuning = { toWalk: 1.5, toRun: 1.75, walkMaxRate: 2.2, runMinRate: 0.65 };
+    }
     const gs = ANIM_TIMING.run.groundSpeedBy[opts.version ?? "c10b5"];
     if (gs) a.groundSpeed = gs[opts.gender];
     return a;
@@ -316,13 +364,46 @@ export class NoviceAvatar {
 
   private previewG: AnimationGroup | null = null;
 
+  /**
+   * Stage 7.5 第二階段：技能動作（Claude C 的 Skill_* 片段）。與 C 的展示頁相同，動作時間由技能時間軸驅動（setSkillTime）：
+   * 攻速倍率、打擊頓幀都在時間軸上，動作、命中、特效、音效用同一個時鐘。播放中不切換移動／待機狀態。
+   */
+  playSkill(name: string, duration: number): boolean {
+    if (!this.previewClip(name)) return false;
+    const g = this.previewG!;
+    g.pause();
+    this.skillDur = Math.max(1e-3, duration);
+    g.goToFrame(g.from);
+    return true;
+  }
+
+  private skillDur = 0;
+
+  setSkillTime(t: number): void {
+    const g = this.previewG;
+    if (!g || !this.skillDur) return;
+    g.goToFrame(g.from + Math.min(1, Math.max(0, t / this.skillDur)) * (g.to - g.from));
+  }
+
+  /** 中斷技能／預覽動作（倒地時），回到狀態機目前的動作 */
+  stopClip(): void {
+    const g = this.previewG;
+    this.skillDur = 0;
+    if (!g) return;
+    this.previewG = null;
+    g.stop();
+    for (const n of ANIM_NAMES) this.weights.set(n, n === this.sm.state ? 1 : 0);
+    this.walkW = this.waitW = 0;
+    this.play(this.sm.state);
+  }
+
   /** 驗收用：播放任一動作一次（播完回到正常狀態）。回傳是否有這個動作 */
-  previewClip(name: string): boolean {
+  previewClip(name: string, rate = 1): boolean {
     const g = this.clips.get(name);
     if (!g) return false;
     for (const x of this.clips.values()) x.stop();
     this.previewG = g;
-    g.start(false, 1, g.from, g.to, false);
+    g.start(false, rate, g.from, g.to, false);
     g.setWeightForAllAnimatables(1);
     g.onAnimationGroupEndObservable.addOnce(() => {
       if (this.previewG !== g) return;
@@ -489,7 +570,7 @@ export class NoviceAvatar {
     const t0 = this.sm.time;
     const wasDeathDone = this.sm.state === "Death" && t0 >= this.sm.duration("Death");
     if (this.previewG) {
-      // 動作預覽中：不切換狀態（播完自動回復）
+      // 動作預覽／技能中：不切換狀態（播完自動回復）
       this.updateSecondary(dt);
       return 0;
     }
@@ -518,9 +599,11 @@ export class NoviceAvatar {
     // Stage 7.5：慢速移動用 Walk（有遲滯）；站著不動一段時間後偶爾播 Wait
     const walkG = this.clips.get("Walk");
     if (walkG) {
-      if (this.loco === "Run" && input.speed < RUN_TO_WALK) this.loco = "Walk";
-      else if (this.loco === "Walk" && input.speed > WALK_TO_RUN) this.loco = "Run";
-      walkG.speedRatio = Math.max(0.6, Math.min(1.8, input.speed / Math.max(0.3, this.walkGroundSpeed)));
+      const lt = this.locoTuning;
+      if (this.loco === "Run" && input.speed < lt.toWalk) this.loco = "Walk";
+      else if (this.loco === "Walk" && input.speed > lt.toRun) this.loco = "Run";
+      walkG.speedRatio = Math.max(0.6, Math.min(lt.walkMaxRate, input.speed / Math.max(0.3, this.walkGroundSpeed)));
+      if (this.sm.state === "Run" && g) g.speedRatio = Math.max(lt.runMinRate, Math.min(ANIM_TIMING.run.maxRate, input.speed / this.groundSpeed));
     }
     const waitG = this.clips.get("Wait");
     if (this.sm.state === "Idle") this.idleTime += dt;
