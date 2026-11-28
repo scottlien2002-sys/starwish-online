@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-11-28T12:28:41.538Z",
+  "startedAt": "2026-11-28T13:08:52.912Z",
   "note": "CI 軟體繪圖：FPS 不代表 iPhone 實機",
   "runs": [
     {
@@ -74,11 +74,11 @@
             ],
             [
               "hills",
-              82
+              83
             ],
             [
               "colossus",
-              72
+              66
             ],
             [
               "central",
@@ -90,7 +90,7 @@
             ],
             [
               "walkway",
-              101
+              95
             ],
             [
               "bridge",
@@ -106,7 +106,7 @@
             ],
             [
               "core",
-              83
+              77
             ]
           ]
         },
@@ -125,8 +125,8 @@
             ],
             [
               "colossus",
-              117090,
-              341775
+              115222,
+              339907
             ],
             [
               "central",
@@ -140,8 +140,8 @@
             ],
             [
               "walkway",
-              113931,
-              317062
+              112063,
+              315194
             ],
             [
               "bridge",
@@ -160,8 +160,8 @@
             ],
             [
               "core",
-              129381,
-              359365
+              127513,
+              357497
             ]
           ]
         },
@@ -205,7 +205,7 @@
               "fired": true,
               "log": [
                 {
-                  "t": 162.45939999999996,
+                  "t": 239.5035,
                   "map": "starsprout",
                   "x": 0,
                   "z": -133.5
@@ -260,24 +260,24 @@
             "sm": {
               "done": false,
               "stops": 0,
-              "idx": 3
+              "idx": 2
             },
             "pos": [
-              12.392632814688513,
-              -98.87963075541047
+              0.4667459049506484,
+              -105.05522539603896
             ]
           }
         },
         "沒有 WebGL Context Lost": {
           "ok": true,
           "detail": {
-            "fps": 1.8844339474494183,
-            "draws": 89,
-            "tris": 347884,
-            "meshes": 80,
+            "fps": 1.042336222920972,
+            "draws": 106,
+            "tris": 359590,
+            "meshes": 96,
             "textures": 45,
             "materials": 123,
-            "geometries": 248,
+            "geometries": 260,
             "contextLost": 0
           }
         },
@@ -312,7 +312,7 @@
         "chromium_high-portrait_topdown_spawns.png"
       ],
       "results": {
-        "loadSec": 17.214,
+        "loadSec": 26.292,
         "tier": {
           "tier": "high",
           "source": "url",
@@ -380,7 +380,7 @@
           "instances": 3172,
           "instanceMeshes": 27,
           "particles": 122,
-          "buildMs": 480,
+          "buildMs": 755,
           "scatter": {
             "mound": 1751,
             "debris": 520,
@@ -449,7 +449,7 @@
           {
             "id": "hills",
             "label": "廢棄山丘區",
-            "draws": 82,
+            "draws": 83,
             "tris": 326287,
             "sceneTris": 101602,
             "breakdown": {
@@ -487,9 +487,9 @@
           {
             "id": "colossus",
             "label": "機械巨像遺骸",
-            "draws": 72,
-            "tris": 341775,
-            "sceneTris": 117090,
+            "draws": 66,
+            "tris": 339907,
+            "sceneTris": 115222,
             "breakdown": {
               "角色與其他": {
                 "meshes": 36,
@@ -620,9 +620,9 @@
           {
             "id": "walkway",
             "label": "高架金屬步道",
-            "draws": 101,
-            "tris": 317062,
-            "sceneTris": 113931,
+            "draws": 95,
+            "tris": 315194,
+            "sceneTris": 112063,
             "breakdown": {
               "角色與其他": {
                 "meshes": 35,
@@ -809,9 +809,9 @@
           {
             "id": "core",
             "label": "核心熔煉場（Boss）",
-            "draws": 83,
-            "tris": 359365,
-            "sceneTris": 129381,
+            "draws": 77,
+            "tris": 357497,
+            "sceneTris": 127513,
             "breakdown": {
               "角色與其他": {
                 "meshes": 37,
@@ -859,13 +859,13 @@
           "sm": {
             "done": false,
             "stops": 0,
-            "idx": 3
+            "idx": 2
           },
           "pos": {
-            "x": 12.392632814688513,
-            "y": 0.36482861656604654,
-            "z": -98.87963075541047,
-            "yaw": 1.1838512762318847,
+            "x": 0.4667459049506484,
+            "y": 0,
+            "z": -105.05522539603896,
+            "yaw": 0.23467396748305602,
             "walkable": true,
             "char": "loaded",
             "model": "novice_c10b5b_male_hq.glb"
@@ -873,16 +873,16 @@
         },
         "final": {
           "perf": {
-            "fps": 1.8844339474494183,
-            "draws": 89,
-            "tris": 347884,
-            "meshes": 80,
+            "fps": 1.042336222920972,
+            "draws": 106,
+            "tris": 359590,
+            "meshes": 96,
             "textures": 45,
             "materials": 123,
-            "geometries": 248,
+            "geometries": 260,
             "contextLost": 0
           },
-          "report": "星願物語 星廢垃圾場（Lv11–20）預覽報告｜2026/11/28 下午12:32:19\n裝置：Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n畫質：高畫質（來源 url）｜模型 HQ｜陰影 即時（附近大型地標）｜MSAA 4｜後製 開\n解析度：390×844（實際倍率 1.00，DPR 2）\n載入：頁面 0.78 秒（可走格網 198 ms、場景 480 ms）｜角色 loaded\n地圖：300×300 m｜可走面積 50,317 m²｜碰撞物 328\n地形：36 塊、73,728 面｜地標網格 91（191,576 面）\n分區載入中：central、hills、entry｜實例 3,172（27 個實例網格）｜粒子上限 122\n擺放總數：垃圾山 1751、地面碎屑 520、垃圾堆物件 332、草叢 2400、小花 700\n目前畫面：Draw Calls 91、三角形 349,568、FPS 1.9\n（尚未跑巡迴：上方按「巡迴：走完整條路線」）\nWebGL Context Lost：0 次"
+          "report": "星願物語 星廢垃圾場（Lv11–20）預覽報告｜2026/11/28 下午1:14:02\n裝置：Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n畫質：高畫質（來源 url）｜模型 HQ｜陰影 即時（附近大型地標）｜MSAA 4｜後製 開\n解析度：390×844（實際倍率 1.00，DPR 2）\n載入：頁面 1.20 秒（可走格網 312 ms、場景 755 ms）｜角色 loaded\n地圖：300×300 m｜可走面積 50,317 m²｜碰撞物 328\n地形：36 塊、73,728 面｜地標網格 91（191,576 面）\n分區載入中：central、recycle、hills、entry｜實例 4,100（39 個實例網格）｜粒子上限 174\n擺放總數：垃圾山 1751、地面碎屑 520、垃圾堆物件 332、草叢 2400、小花 700\n目前畫面：Draw Calls 107、三角形 353,889、FPS 1.1\n（尚未跑巡迴：上方按「巡迴：走完整條路線」）\nWebGL Context Lost：0 次"
         }
       }
     },
@@ -981,7 +981,7 @@
             ],
             [
               "factory",
-              96
+              95
             ],
             [
               "platform",
@@ -989,7 +989,7 @@
             ],
             [
               "core",
-              78
+              79
             ]
           ]
         },
@@ -1088,7 +1088,7 @@
               "fired": true,
               "log": [
                 {
-                  "t": 56.04779999999999,
+                  "t": 82.0713,
                   "map": "starsprout",
                   "x": 0,
                   "z": -133.5
@@ -1143,21 +1143,21 @@
             "sm": {
               "done": false,
               "stops": 1,
-              "idx": 5
+              "idx": 4
             },
             "pos": [
-              69.62912592806349,
-              -64.66874550439599
+              59.841888950085114,
+              -82.66192678086155
             ]
           }
         },
         "沒有 WebGL Context Lost": {
           "ok": true,
           "detail": {
-            "fps": 12.97409505686955,
-            "draws": 79,
-            "tris": 113889,
-            "meshes": 74,
+            "fps": 8.990649724286774,
+            "draws": 69,
+            "tris": 96187,
+            "meshes": 66,
             "textures": 34,
             "materials": 97,
             "geometries": 246,
@@ -1193,7 +1193,7 @@
         "chromium_medium-portrait_spawns_recycle.png"
       ],
       "results": {
-        "loadSec": 5.498,
+        "loadSec": 8.937,
         "tier": {
           "tier": "medium",
           "source": "url",
@@ -1260,7 +1260,7 @@
           "instances": 1302,
           "instanceMeshes": 18,
           "particles": 64,
-          "buildMs": 370,
+          "buildMs": 565,
           "scatter": {
             "mound": 854,
             "debris": 300,
@@ -1588,7 +1588,7 @@
           {
             "id": "factory",
             "label": "廢棄工廠區",
-            "draws": 96,
+            "draws": 95,
             "tris": 107853,
             "sceneTris": 54425,
             "breakdown": {
@@ -1682,7 +1682,7 @@
           {
             "id": "core",
             "label": "核心熔煉場（Boss）",
-            "draws": 78,
+            "draws": 79,
             "tris": 127548,
             "sceneTris": 70240,
             "breakdown": {
@@ -1732,13 +1732,13 @@
           "sm": {
             "done": false,
             "stops": 1,
-            "idx": 5
+            "idx": 4
           },
           "pos": {
-            "x": 69.62912592806349,
-            "y": 4.4946765442557215,
-            "z": -64.66874550439599,
-            "yaw": 0.48727831275353145,
+            "x": 59.841888950085114,
+            "y": 3.4038257257008495,
+            "z": -82.66192678086155,
+            "yaw": 1.363427099409446,
             "walkable": true,
             "char": "loaded",
             "model": "novice_c10b5b_female_lite.glb"
@@ -1746,16 +1746,16 @@
         },
         "final": {
           "perf": {
-            "fps": 12.97409505686955,
-            "draws": 79,
-            "tris": 113889,
-            "meshes": 74,
+            "fps": 8.990649724286774,
+            "draws": 69,
+            "tris": 96187,
+            "meshes": 66,
             "textures": 34,
             "materials": 97,
             "geometries": 246,
             "contextLost": 0
           },
-          "report": "星願物語 星廢垃圾場（Lv11–20）預覽報告｜2026/11/28 下午12:33:43\n裝置：Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n畫質：中畫質（來源 url）｜模型 Lite｜陰影 即時（附近大型地標）｜MSAA 2｜後製 開\n解析度：390×844（實際倍率 1.00，DPR 2）\n載入：頁面 0.65 秒（可走格網 194 ms、場景 370 ms）｜角色 loaded\n地圖：300×300 m｜可走面積 50,317 m²｜碰撞物 328\n地形：36 塊、45,000 面｜地標網格 91（131,556 面）\n分區載入中：central、entry、hills｜實例 1,773（27 個實例網格）｜粒子上限 64\n擺放總數：垃圾山 854、地面碎屑 300、垃圾堆物件 332、草叢 1300、小花 400\n目前畫面：Draw Calls 79、三角形 113,889、FPS 13.0\n（尚未跑巡迴：上方按「巡迴：走完整條路線」）\nWebGL Context Lost：0 次"
+          "report": "星願物語 星廢垃圾場（Lv11–20）預覽報告｜2026/11/28 下午1:15:53\n裝置：Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n畫質：中畫質（來源 url）｜模型 Lite｜陰影 即時（附近大型地標）｜MSAA 2｜後製 開\n解析度：390×844（實際倍率 1.00，DPR 2）\n載入：頁面 0.97 秒（可走格網 285 ms、場景 565 ms）｜角色 loaded\n地圖：300×300 m｜可走面積 50,317 m²｜碰撞物 328\n地形：36 塊、45,000 面｜地標網格 91（131,556 面）\n分區載入中：central、entry、hills｜實例 1,773（27 個實例網格）｜粒子上限 64\n擺放總數：垃圾山 854、地面碎屑 300、垃圾堆物件 332、草叢 1300、小花 400\n目前畫面：Draw Calls 68、三角形 94,747、FPS 9.0\n（尚未跑巡迴：上方按「巡迴：走完整條路線」）\nWebGL Context Lost：0 次"
         }
       }
     },
@@ -1834,7 +1834,7 @@
             ],
             [
               "colossus",
-              62
+              63
             ],
             [
               "central",
@@ -1961,7 +1961,7 @@
               "fired": true,
               "log": [
                 {
-                  "t": 43.901,
+                  "t": 64.20290000000003,
                   "map": "starsprout",
                   "x": 0,
                   "z": -133.5
@@ -2019,18 +2019,18 @@
               "idx": 5
             },
             "pos": [
-              69.33650752846742,
-              -65.22032474619039
+              68.2520498790736,
+              -70.5436297128185
             ]
           }
         },
         "沒有 WebGL Context Lost": {
           "ok": true,
           "detail": {
-            "fps": 17.0726155246977,
-            "draws": 70,
-            "tris": 91089,
-            "meshes": 69,
+            "fps": 10.06677628267474,
+            "draws": 72,
+            "tris": 92689,
+            "meshes": 71,
             "textures": 29,
             "materials": 97,
             "geometries": 246,
@@ -2066,7 +2066,7 @@
         "chromium_low-portrait_spawns_recycle.png"
       ],
       "results": {
-        "loadSec": 3.928,
+        "loadSec": 6.078,
         "tier": {
           "tier": "low",
           "source": "url",
@@ -2133,7 +2133,7 @@
           "instances": 802,
           "instanceMeshes": 18,
           "particles": 0,
-          "buildMs": 339,
+          "buildMs": 500,
           "scatter": {
             "mound": 535,
             "debris": 180,
@@ -2239,7 +2239,7 @@
           {
             "id": "colossus",
             "label": "機械巨像遺骸",
-            "draws": 62,
+            "draws": 63,
             "tris": 84665,
             "sceneTris": 34260,
             "breakdown": {
@@ -2604,10 +2604,10 @@
             "idx": 5
           },
           "pos": {
-            "x": 69.33650752846742,
-            "y": 4.198287002174363,
-            "z": -65.22032474619039,
-            "yaw": 0.487285512612911,
+            "x": 68.2520498790736,
+            "y": 2.99652164270306,
+            "z": -70.5436297128185,
+            "yaw": 0.4532574707458254,
             "walkable": true,
             "char": "loaded",
             "model": "novice_c10b5b_male_lite.glb"
@@ -2615,16 +2615,16 @@
         },
         "final": {
           "perf": {
-            "fps": 17.0726155246977,
-            "draws": 70,
-            "tris": 91089,
-            "meshes": 69,
+            "fps": 10.06677628267474,
+            "draws": 72,
+            "tris": 92689,
+            "meshes": 71,
             "textures": 29,
             "materials": 97,
             "geometries": 246,
             "contextLost": 0
           },
-          "report": "星願物語 星廢垃圾場（Lv11–20）預覽報告｜2026/11/28 下午12:34:53\n裝置：Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n畫質：低畫質（來源 url）｜模型 Lite｜陰影 腳底柔和陰影｜MSAA 1｜後製 關\n解析度：390×844（實際倍率 1.00，DPR 2）\n載入：頁面 0.61 秒（可走格網 193 ms、場景 339 ms）｜角色 loaded\n地圖：300×300 m｜可走面積 50,317 m²｜碰撞物 328\n地形：36 塊、28,800 面｜地標網格 91（131,556 面）\n分區載入中：central、entry、hills｜實例 1,080（27 個實例網格）｜粒子上限 0\n擺放總數：垃圾山 535、地面碎屑 180、垃圾堆物件 332、草叢 700、小花 200\n目前畫面：Draw Calls 69、三角形 91,089、FPS 17.0\n（尚未跑巡迴：上方按「巡迴：走完整條路線」）\nWebGL Context Lost：0 次"
+          "report": "星願物語 星廢垃圾場（Lv11–20）預覽報告｜2026/11/28 下午1:17:25\n裝置：Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n畫質：低畫質（來源 url）｜模型 Lite｜陰影 腳底柔和陰影｜MSAA 1｜後製 關\n解析度：390×844（實際倍率 1.00，DPR 2）\n載入：頁面 0.90 秒（可走格網 295 ms、場景 500 ms）｜角色 loaded\n地圖：300×300 m｜可走面積 50,317 m²｜碰撞物 328\n地形：36 塊、28,800 面｜地標網格 91（131,556 面）\n分區載入中：central、entry、hills｜實例 1,080（27 個實例網格）｜粒子上限 0\n擺放總數：垃圾山 535、地面碎屑 180、垃圾堆物件 332、草叢 700、小花 200\n目前畫面：Draw Calls 72、三角形 92,689、FPS 10.0\n（尚未跑巡迴：上方按「巡迴：走完整條路線」）\nWebGL Context Lost：0 次"
         }
       }
     },
@@ -2691,7 +2691,7 @@
             "im": 27
           }
         },
-        "各區 Draw Calls ≤ 160（最高 141）": {
+        "各區 Draw Calls ≤ 160（最高 142）": {
           "ok": true,
           "detail": [
             [
@@ -2712,7 +2712,7 @@
             ],
             [
               "recycle",
-              141
+              142
             ],
             [
               "walkway",
@@ -2728,7 +2728,7 @@
             ],
             [
               "platform",
-              106
+              107
             ],
             [
               "core",
@@ -2762,7 +2762,7 @@
             [
               "recycle",
               202264,
-              424989
+              425013
             ],
             [
               "walkway",
@@ -2832,7 +2832,7 @@
               "fired": true,
               "log": [
                 {
-                  "t": 164.33029999999994,
+                  "t": 236.43419999999995,
                   "map": "starsprout",
                   "x": 0,
                   "z": -133.5
@@ -2887,21 +2887,21 @@
             "sm": {
               "done": false,
               "stops": 0,
-              "idx": 3
+              "idx": 2
             },
             "pos": [
-              7.620854408086736,
-              -101.19260982663384
+              0.2333729524753242,
+              -106.02761269801948
             ]
           }
         },
         "沒有 WebGL Context Lost": {
           "ok": true,
           "detail": {
-            "fps": 2.321604073641285,
-            "draws": 109,
-            "tris": 368789,
-            "meshes": 98,
+            "fps": 1.4666627555659857,
+            "draws": 138,
+            "tris": 420300,
+            "meshes": 131,
             "textures": 34,
             "materials": 101,
             "geometries": 260,
@@ -2937,7 +2937,7 @@
         "chromium_high-landscape_spawns_recycle.png"
       ],
       "results": {
-        "loadSec": 16.609,
+        "loadSec": 24.601,
         "tier": {
           "tier": "high",
           "source": "url",
@@ -3005,7 +3005,7 @@
           "instances": 3172,
           "instanceMeshes": 27,
           "particles": 122,
-          "buildMs": 489,
+          "buildMs": 760,
           "scatter": {
             "mound": 1751,
             "debris": 520,
@@ -3201,13 +3201,13 @@
           {
             "id": "recycle",
             "label": "回收處理區",
-            "draws": 141,
-            "tris": 424989,
+            "draws": 142,
+            "tris": 425013,
             "sceneTris": 202264,
             "breakdown": {
               "角色與其他": {
-                "meshes": 37,
-                "tris": 222725
+                "meshes": 38,
+                "tris": 222749
               },
               "地形": {
                 "meshes": 9,
@@ -3391,7 +3391,7 @@
           {
             "id": "platform",
             "label": "熔爐上方平台",
-            "draws": 106,
+            "draws": 107,
             "tris": 336368,
             "sceneTris": 121488,
             "breakdown": {
@@ -3488,13 +3488,13 @@
           "sm": {
             "done": false,
             "stops": 0,
-            "idx": 3
+            "idx": 2
           },
           "pos": {
-            "x": 7.620854408086736,
-            "y": 0.036476924237948634,
-            "z": -101.19260982663384,
-            "yaw": 1.1751943195676695,
+            "x": 0.2333729524753242,
+            "y": 0,
+            "z": -106.02761269801948,
+            "yaw": 0.22122147569217188,
             "walkable": true,
             "char": "loaded",
             "model": "novice_c10b5b_male_hq.glb"
@@ -3502,16 +3502,16 @@
         },
         "final": {
           "perf": {
-            "fps": 2.321604073641285,
-            "draws": 109,
-            "tris": 368789,
-            "meshes": 98,
+            "fps": 1.4666627555659857,
+            "draws": 138,
+            "tris": 420300,
+            "meshes": 131,
             "textures": 34,
             "materials": 101,
             "geometries": 260,
             "contextLost": 0
           },
-          "report": "星願物語 星廢垃圾場（Lv11–20）預覽報告｜2026/11/28 下午12:38:10\n裝置：Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n畫質：高畫質（來源 url）｜模型 HQ｜陰影 即時（附近大型地標）｜MSAA 4｜後製 開\n解析度：844×390（實際倍率 1.00，DPR 2）\n載入：頁面 0.77 秒（可走格網 189 ms、場景 489 ms）｜角色 loaded\n地圖：300×300 m｜可走面積 50,317 m²｜碰撞物 328\n地形：36 塊、73,728 面｜地標網格 91（191,576 面）\n分區載入中：central、entry、hills、recycle｜實例 4,100（39 個實例網格）｜粒子上限 174\n擺放總數：垃圾山 1751、地面碎屑 520、垃圾堆物件 332、草叢 2400、小花 700\n目前畫面：Draw Calls 109、三角形 368,885、FPS 2.4\n（尚未跑巡迴：上方按「巡迴：走完整條路線」）\nWebGL Context Lost：0 次"
+          "report": "星願物語 星廢垃圾場（Lv11–20）預覽報告｜2026/11/28 下午1:21:59\n裝置：Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n畫質：高畫質（來源 url）｜模型 HQ｜陰影 即時（附近大型地標）｜MSAA 4｜後製 開\n解析度：844×390（實際倍率 1.00，DPR 2）\n載入：頁面 1.17 秒（可走格網 291 ms、場景 760 ms）｜角色 loaded\n地圖：300×300 m｜可走面積 50,317 m²｜碰撞物 328\n地形：36 塊、73,728 面｜地標網格 91（191,576 面）\n分區載入中：central、entry、hills、recycle｜實例 4,100（39 個實例網格）｜粒子上限 174\n擺放總數：垃圾山 1751、地面碎屑 520、垃圾堆物件 332、草叢 2400、小花 700\n目前畫面：Draw Calls 138、三角形 418,252、FPS 1.4\n（尚未跑巡迴：上方按「巡迴：走完整條路線」）\nWebGL Context Lost：0 次"
         }
       }
     },
@@ -3615,11 +3615,11 @@
             ],
             [
               "platform",
-              97
+              98
             ],
             [
               "core",
-              85
+              84
             ]
           ]
         },
@@ -3718,7 +3718,7 @@
               "fired": true,
               "log": [
                 {
-                  "t": 41.968,
+                  "t": 51.529,
                   "map": "starsprout",
                   "x": 0,
                   "z": -133.5
@@ -3776,18 +3776,18 @@
               "idx": 5
             },
             "pos": [
-              67.69398227825378,
-              -69.26487978077229
+              61.42527425717096,
+              -81.13208766879629
             ]
           }
         },
         "沒有 WebGL Context Lost": {
           "ok": true,
           "detail": {
-            "fps": 10.72194424588991,
-            "draws": 87,
-            "tris": 365551,
-            "meshes": 80,
+            "fps": 9.12408759124084,
+            "draws": 79,
+            "tris": 349611,
+            "meshes": 72,
             "textures": 34,
             "materials": 101,
             "geometries": 260,
@@ -3823,7 +3823,7 @@
         "webkit_high-portrait_spawns_recycle.png"
       ],
       "results": {
-        "loadSec": 5.613,
+        "loadSec": 9.052,
         "tier": {
           "tier": "high",
           "source": "url",
@@ -3891,7 +3891,7 @@
           "instances": 3172,
           "instanceMeshes": 27,
           "particles": 122,
-          "buildMs": 792,
+          "buildMs": 1284,
           "scatter": {
             "mound": 1751,
             "debris": 520,
@@ -4273,7 +4273,7 @@
           {
             "id": "platform",
             "label": "熔爐上方平台",
-            "draws": 97,
+            "draws": 98,
             "tris": 309954,
             "sceneTris": 95074,
             "breakdown": {
@@ -4320,7 +4320,7 @@
           {
             "id": "core",
             "label": "核心熔煉場（Boss）",
-            "draws": 85,
+            "draws": 84,
             "tris": 359365,
             "sceneTris": 129381,
             "breakdown": {
@@ -4373,10 +4373,10 @@
             "idx": 5
           },
           "pos": {
-            "x": 67.69398227825378,
-            "y": 2.952456664166404,
-            "z": -69.26487978077229,
-            "yaw": 0.4697367091416205,
+            "x": 61.42527425717096,
+            "y": 3.321886843922239,
+            "z": -81.13208766879629,
+            "yaw": 0.4925699036294152,
             "walkable": true,
             "char": "loaded",
             "model": "novice_c10b5b_male_hq.glb"
@@ -4384,16 +4384,16 @@
         },
         "final": {
           "perf": {
-            "fps": 10.72194424588991,
-            "draws": 87,
-            "tris": 365551,
-            "meshes": 80,
+            "fps": 9.12408759124084,
+            "draws": 79,
+            "tris": 349611,
+            "meshes": 72,
             "textures": 34,
             "materials": 101,
             "geometries": 260,
             "contextLost": 0
           },
-          "report": "星願物語 星廢垃圾場（Lv11–20）預覽報告｜2026/11/28 下午12:39:23\n裝置：Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n畫質：高畫質（來源 url）｜模型 HQ｜陰影 即時（附近大型地標）｜MSAA 4｜後製 開\n解析度：390×844（實際倍率 1.00，DPR 2）\n載入：頁面 1.19 秒（可走格網 237 ms、場景 792 ms）｜角色 loaded\n地圖：300×300 m｜可走面積 50,317 m²｜碰撞物 328\n地形：36 塊、73,728 面｜地標網格 91（191,576 面）\n分區載入中：central、entry、hills、recycle｜實例 4,100（39 個實例網格）｜粒子上限 174\n擺放總數：垃圾山 1751、地面碎屑 520、垃圾堆物件 332、草叢 2400、小花 700\n目前畫面：Draw Calls 87、三角形 365,551、FPS 10.7\n（尚未跑巡迴：上方按「巡迴：走完整條路線」）\nWebGL Context Lost：0 次"
+          "report": "星願物語 星廢垃圾場（Lv11–20）預覽報告｜2026/11/28 下午1:23:21\n裝置：Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n畫質：高畫質（來源 url）｜模型 HQ｜陰影 即時（附近大型地標）｜MSAA 4｜後製 開\n解析度：390×844（實際倍率 1.00，DPR 2）\n載入：頁面 1.83 秒（可走格網 335 ms、場景 1284 ms）｜角色 loaded\n地圖：300×300 m｜可走面積 50,317 m²｜碰撞物 328\n地形：36 塊、73,728 面｜地標網格 91（191,576 面）\n分區載入中：central、entry、hills、recycle｜實例 4,100（39 個實例網格）｜粒子上限 174\n擺放總數：垃圾山 1751、地面碎屑 520、垃圾堆物件 332、草叢 2400、小花 700\n目前畫面：Draw Calls 79、三角形 349,611、FPS 9.1\n（尚未跑巡迴：上方按「巡迴：走完整條路線」）\nWebGL Context Lost：0 次"
         }
       }
     },
@@ -4484,7 +4484,7 @@
             ],
             [
               "walkway",
-              95
+              94
             ],
             [
               "bridge",
@@ -4492,7 +4492,7 @@
             ],
             [
               "factory",
-              95
+              96
             ],
             [
               "platform",
@@ -4500,7 +4500,7 @@
             ],
             [
               "core",
-              80
+              78
             ]
           ]
         },
@@ -4599,7 +4599,7 @@
               "fired": true,
               "log": [
                 {
-                  "t": 28.027,
+                  "t": 34.095,
                   "map": "starsprout",
                   "x": 0,
                   "z": -133.5
@@ -4657,18 +4657,18 @@
               "idx": 5
             },
             "pos": [
-              69.30079419454836,
-              -65.2853806667942
+              69.33112898686893,
+              -65.22924446870945
             ]
           }
         },
         "沒有 WebGL Context Lost": {
           "ok": true,
           "detail": {
-            "fps": 22.675736961451346,
-            "draws": 78,
-            "tris": 112639,
-            "meshes": 73,
+            "fps": 15.5199172271082,
+            "draws": 79,
+            "tris": 113913,
+            "meshes": 74,
             "textures": 34,
             "materials": 97,
             "geometries": 246,
@@ -4704,7 +4704,7 @@
         "webkit_medium-portrait_spawns_recycle.png"
       ],
       "results": {
-        "loadSec": 2.566,
+        "loadSec": 4.2,
         "tier": {
           "tier": "medium",
           "source": "url",
@@ -4771,7 +4771,7 @@
           "instances": 1302,
           "instanceMeshes": 18,
           "particles": 64,
-          "buildMs": 469,
+          "buildMs": 729,
           "scatter": {
             "mound": 854,
             "debris": 300,
@@ -5007,7 +5007,7 @@
           {
             "id": "walkway",
             "label": "高架金屬步道",
-            "draws": 95,
+            "draws": 94,
             "tris": 102069,
             "sceneTris": 58948,
             "breakdown": {
@@ -5099,7 +5099,7 @@
           {
             "id": "factory",
             "label": "廢棄工廠區",
-            "draws": 95,
+            "draws": 96,
             "tris": 107853,
             "sceneTris": 54425,
             "breakdown": {
@@ -5193,7 +5193,7 @@
           {
             "id": "core",
             "label": "核心熔煉場（Boss）",
-            "draws": 80,
+            "draws": 78,
             "tris": 127548,
             "sceneTris": 70240,
             "breakdown": {
@@ -5246,10 +5246,10 @@
             "idx": 5
           },
           "pos": {
-            "x": 69.30079419454836,
-            "y": 4.167253115871718,
-            "z": -65.2853806667942,
-            "yaw": 0.4873129056960576,
+            "x": 69.33112898686893,
+            "y": 4.1939334918517925,
+            "z": -65.22924446870945,
+            "yaw": 0.48729993259560267,
             "walkable": true,
             "char": "loaded",
             "model": "novice_c10b5b_female_lite.glb"
@@ -5257,16 +5257,16 @@
         },
         "final": {
           "perf": {
-            "fps": 22.675736961451346,
-            "draws": 78,
-            "tris": 112639,
-            "meshes": 73,
+            "fps": 15.5199172271082,
+            "draws": 79,
+            "tris": 113913,
+            "meshes": 74,
             "textures": 34,
             "materials": 97,
             "geometries": 246,
             "contextLost": 0
           },
-          "report": "星願物語 星廢垃圾場（Lv11–20）預覽報告｜2026/11/28 下午12:40:17\n裝置：Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n畫質：中畫質（來源 url）｜模型 Lite｜陰影 即時（附近大型地標）｜MSAA 2｜後製 開\n解析度：390×844（實際倍率 1.00，DPR 2）\n載入：頁面 0.79 秒（可走格網 194 ms、場景 469 ms）｜角色 loaded\n地圖：300×300 m｜可走面積 50,317 m²｜碰撞物 328\n地形：36 塊、45,000 面｜地標網格 91（131,556 面）\n分區載入中：central、entry、hills｜實例 1,773（27 個實例網格）｜粒子上限 64\n擺放總數：垃圾山 854、地面碎屑 300、垃圾堆物件 332、草叢 1300、小花 400\n目前畫面：Draw Calls 78、三角形 112,639、FPS 22.7\n（尚未跑巡迴：上方按「巡迴：走完整條路線」）\nWebGL Context Lost：0 次"
+          "report": "星願物語 星廢垃圾場（Lv11–20）預覽報告｜2026/11/28 下午1:24:22\n裝置：Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n畫質：中畫質（來源 url）｜模型 Lite｜陰影 即時（附近大型地標）｜MSAA 2｜後製 開\n解析度：390×844（實際倍率 1.00，DPR 2）\n載入：頁面 1.19 秒（可走格網 279 ms、場景 729 ms）｜角色 loaded\n地圖：300×300 m｜可走面積 50,317 m²｜碰撞物 328\n地形：36 塊、45,000 面｜地標網格 91（131,556 面）\n分區載入中：central、entry、hills｜實例 1,773（27 個實例網格）｜粒子上限 64\n擺放總數：垃圾山 854、地面碎屑 300、垃圾堆物件 332、草叢 1300、小花 400\n目前畫面：Draw Calls 79、三角形 113,913、FPS 15.5\n（尚未跑巡迴：上方按「巡迴：走完整條路線」）\nWebGL Context Lost：0 次"
         }
       }
     },
@@ -5365,11 +5365,11 @@
             ],
             [
               "factory",
-              72
+              73
             ],
             [
               "platform",
-              70
+              71
             ],
             [
               "core",
@@ -5472,7 +5472,7 @@
               "fired": true,
               "log": [
                 {
-                  "t": 26.458,
+                  "t": 32.321,
                   "map": "starsprout",
                   "x": 0,
                   "z": -133.5
@@ -5530,17 +5530,17 @@
               "idx": 5
             },
             "pos": [
-              69.4822555706511,
-              -64.93903264093045
+              69.35116504594447,
+              -65.18569799908549
             ]
           }
         },
         "沒有 WebGL Context Lost": {
           "ok": true,
           "detail": {
-            "fps": 25.751072961373385,
+            "fps": 17.953321364452403,
             "draws": 70,
-            "tris": 91101,
+            "tris": 91089,
             "meshes": 69,
             "textures": 29,
             "materials": 97,
@@ -5577,7 +5577,7 @@
         "webkit_low-portrait_spawns_recycle.png"
       ],
       "results": {
-        "loadSec": 2.713,
+        "loadSec": 4.399,
         "tier": {
           "tier": "low",
           "source": "url",
@@ -5644,7 +5644,7 @@
           "instances": 802,
           "instanceMeshes": 18,
           "particles": 0,
-          "buildMs": 427,
+          "buildMs": 609,
           "scatter": {
             "mound": 535,
             "debris": 180,
@@ -5970,7 +5970,7 @@
           {
             "id": "factory",
             "label": "廢棄工廠區",
-            "draws": 72,
+            "draws": 73,
             "tris": 84604,
             "sceneTris": 30750,
             "breakdown": {
@@ -6016,7 +6016,7 @@
           {
             "id": "platform",
             "label": "熔爐上方平台",
-            "draws": 70,
+            "draws": 71,
             "tris": 81470,
             "sceneTris": 27614,
             "breakdown": {
@@ -6115,10 +6115,10 @@
             "idx": 5
           },
           "pos": {
-            "x": 69.4822555706511,
-            "y": 4.337136631859665,
-            "z": -64.93903264093045,
-            "yaw": 0.48735971438251213,
+            "x": 69.35116504594447,
+            "y": 4.214093451629083,
+            "z": -65.18569799908549,
+            "yaw": 0.4873674488161113,
             "walkable": true,
             "char": "loaded",
             "model": "novice_c10b5b_male_lite.glb"
@@ -6126,20 +6126,20 @@
         },
         "final": {
           "perf": {
-            "fps": 25.751072961373385,
+            "fps": 17.953321364452403,
             "draws": 70,
-            "tris": 91101,
+            "tris": 91089,
             "meshes": 69,
             "textures": 29,
             "materials": 97,
             "geometries": 246,
             "contextLost": 0
           },
-          "report": "星願物語 星廢垃圾場（Lv11–20）預覽報告｜2026/11/28 下午12:41:10\n裝置：Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n畫質：低畫質（來源 url）｜模型 Lite｜陰影 腳底柔和陰影｜MSAA 1｜後製 關\n解析度：390×844（實際倍率 1.00，DPR 2）\n載入：頁面 0.74 秒（可走格網 203 ms、場景 427 ms）｜角色 loaded\n地圖：300×300 m｜可走面積 50,317 m²｜碰撞物 328\n地形：36 塊、28,800 面｜地標網格 91（131,556 面）\n分區載入中：central、entry、hills｜實例 1,080（27 個實例網格）｜粒子上限 0\n擺放總數：垃圾山 535、地面碎屑 180、垃圾堆物件 332、草叢 700、小花 200\n目前畫面：Draw Calls 70、三角形 91,101、FPS 25.8\n（尚未跑巡迴：上方按「巡迴：走完整條路線」）\nWebGL Context Lost：0 次"
+          "report": "星願物語 星廢垃圾場（Lv11–20）預覽報告｜2026/11/28 下午1:25:21\n裝置：Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n畫質：低畫質（來源 url）｜模型 Lite｜陰影 腳底柔和陰影｜MSAA 1｜後製 關\n解析度：390×844（實際倍率 1.00，DPR 2）\n載入：頁面 1.07 秒（可走格網 300 ms、場景 609 ms）｜角色 loaded\n地圖：300×300 m｜可走面積 50,317 m²｜碰撞物 328\n地形：36 塊、28,800 面｜地標網格 91（131,556 面）\n分區載入中：central、entry、hills｜實例 1,080（27 個實例網格）｜粒子上限 0\n擺放總數：垃圾山 535、地面碎屑 180、垃圾堆物件 332、草叢 700、小花 200\n目前畫面：Draw Calls 70、三角形 91,089、FPS 18.0\n（尚未跑巡迴：上方按「巡迴：走完整條路線」）\nWebGL Context Lost：0 次"
         }
       }
     }
   ],
-  "finishedAt": "2026-11-28T12:41:10.641Z",
+  "finishedAt": "2026-11-28T13:25:22.054Z",
   "failures": 0
 }
