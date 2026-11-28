@@ -1,0 +1,356 @@
+{
+  "browser": "chromium",
+  "note": "CI 軟體繪製（無 GPU）：只比較相對差異；iPhone 實機數字需另外量測",
+  "runs": [
+    {
+      "players": 3,
+      "remotes": 2,
+      "mode": "remote",
+      "fps": 9.6,
+      "low1": 2.6,
+      "drawCalls": {
+        "avg": 33,
+        "max": 36
+      },
+      "trianglesK": {
+        "avgK": 56,
+        "maxK": 63
+      },
+      "cpuMs": {
+        "frame": 2.74,
+        "render": 1.03,
+        "animations": 0.51,
+        "activeMeshes": 0.9,
+        "renderTargets": 0.14
+      },
+      "remoteTriangles": 58150,
+      "near": 1,
+      "far": 1,
+      "culled": 0,
+      "downKBs": 2.2,
+      "loaded": 2,
+      "errors": 0
+    },
+    {
+      "players": 3,
+      "remotes": 2,
+      "mode": "lite",
+      "fps": 8.3,
+      "low1": 2.2,
+      "drawCalls": {
+        "avg": 32,
+        "max": 49
+      },
+      "trianglesK": {
+        "avgK": 63,
+        "maxK": 118
+      },
+      "cpuMs": {
+        "frame": 3.49,
+        "render": 1.47,
+        "animations": 0.49,
+        "activeMeshes": 1.24,
+        "renderTargets": 0.14
+      },
+      "remoteTriangles": 0,
+      "near": 0,
+      "far": 0,
+      "culled": 0,
+      "downKBs": 2.2,
+      "loaded": 2,
+      "errors": 0
+    },
+    {
+      "players": 5,
+      "remotes": 4,
+      "mode": "remote",
+      "fps": 8.4,
+      "low1": 2.5,
+      "drawCalls": {
+        "avg": 34,
+        "max": 38
+      },
+      "trianglesK": {
+        "avgK": 59,
+        "maxK": 68
+      },
+      "cpuMs": {
+        "frame": 2.93,
+        "render": 0.94,
+        "animations": 0.62,
+        "activeMeshes": 1.1,
+        "renderTargets": 0.13
+      },
+      "remoteTriangles": 68648,
+      "near": 0,
+      "far": 4,
+      "culled": 0,
+      "downKBs": 2.2,
+      "loaded": 4,
+      "errors": 0
+    },
+    {
+      "players": 5,
+      "remotes": 4,
+      "mode": "lite",
+      "fps": 9.6,
+      "low1": 2.7,
+      "drawCalls": {
+        "avg": 41,
+        "max": 42
+      },
+      "trianglesK": {
+        "avgK": 62,
+        "maxK": 69
+      },
+      "cpuMs": {
+        "frame": 3.5,
+        "render": 1.1,
+        "animations": 0.59,
+        "activeMeshes": 1.53,
+        "renderTargets": 0.14
+      },
+      "remoteTriangles": 0,
+      "near": 0,
+      "far": 0,
+      "culled": 0,
+      "downKBs": 2.2,
+      "loaded": 4,
+      "errors": 0
+    },
+    {
+      "players": 9,
+      "remotes": 8,
+      "mode": "remote",
+      "fps": 7.4,
+      "low1": 2.5,
+      "drawCalls": {
+        "avg": 39,
+        "max": 44
+      },
+      "trianglesK": {
+        "avgK": 96,
+        "maxK": 107
+      },
+      "cpuMs": {
+        "frame": 3.65,
+        "render": 1.16,
+        "animations": 0.91,
+        "activeMeshes": 1.27,
+        "renderTargets": 0.14
+      },
+      "remoteTriangles": 143353,
+      "near": 1,
+      "far": 6,
+      "culled": 1,
+      "downKBs": 2.2,
+      "loaded": 8,
+      "errors": 0
+    },
+    {
+      "players": 9,
+      "remotes": 8,
+      "mode": "lite",
+      "fps": 5.3,
+      "low1": 2.3,
+      "drawCalls": {
+        "avg": 136,
+        "max": 144
+      },
+      "trianglesK": {
+        "avgK": 201,
+        "maxK": 211
+      },
+      "cpuMs": {
+        "frame": 5.83,
+        "render": 2.36,
+        "animations": 0.94,
+        "activeMeshes": 2.24,
+        "renderTargets": 0.14
+      },
+      "remoteTriangles": 0,
+      "near": 0,
+      "far": 0,
+      "culled": 0,
+      "downKBs": 2.2,
+      "loaded": 8,
+      "errors": 0
+    },
+    {
+      "players": 17,
+      "remotes": 16,
+      "mode": "remote",
+      "fps": 7.1,
+      "low1": 2.5,
+      "drawCalls": {
+        "avg": 43,
+        "max": 50
+      },
+      "trianglesK": {
+        "avgK": 112,
+        "maxK": 127
+      },
+      "cpuMs": {
+        "frame": 5.09,
+        "render": 1.61,
+        "animations": 1.41,
+        "activeMeshes": 1.76,
+        "renderTargets": 0.15
+      },
+      "remoteTriangles": 304475,
+      "near": 2,
+      "far": 13,
+      "culled": 1,
+      "downKBs": 2.2,
+      "loaded": 16,
+      "errors": 0
+    },
+    {
+      "players": 17,
+      "remotes": 16,
+      "mode": "lite",
+      "fps": 5.3,
+      "low1": 2.3,
+      "drawCalls": {
+        "avg": 128,
+        "max": 134
+      },
+      "trianglesK": {
+        "avgK": 178,
+        "maxK": 191
+      },
+      "cpuMs": {
+        "frame": 7.12,
+        "render": 2.12,
+        "animations": 1.44,
+        "activeMeshes": 3.27,
+        "renderTargets": 0.14
+      },
+      "remoteTriangles": 0,
+      "near": 0,
+      "far": 0,
+      "culled": 0,
+      "downKBs": 2.2,
+      "loaded": 16,
+      "errors": 0
+    },
+    {
+      "players": 33,
+      "remotes": 32,
+      "mode": "remote",
+      "fps": 6,
+      "low1": 2.4,
+      "drawCalls": {
+        "avg": 56,
+        "max": 63
+      },
+      "trianglesK": {
+        "avgK": 194,
+        "maxK": 206
+      },
+      "cpuMs": {
+        "frame": 6.53,
+        "render": 1.19,
+        "animations": 2.54,
+        "activeMeshes": 2.49,
+        "renderTargets": 0.14
+      },
+      "remoteTriangles": 617784,
+      "near": 6,
+      "far": 22,
+      "culled": 4,
+      "downKBs": 2.2,
+      "loaded": 32,
+      "errors": 0
+    },
+    {
+      "players": 33,
+      "remotes": 32,
+      "mode": "lite",
+      "fps": 5.1,
+      "low1": 2.2,
+      "drawCalls": {
+        "avg": 127,
+        "max": 132
+      },
+      "trianglesK": {
+        "avgK": 179,
+        "maxK": 187
+      },
+      "cpuMs": {
+        "frame": 10.55,
+        "render": 2.11,
+        "animations": 2.18,
+        "activeMeshes": 5.97,
+        "renderTargets": 0.15
+      },
+      "remoteTriangles": 0,
+      "near": 0,
+      "far": 0,
+      "culled": 0,
+      "downKBs": 2.1,
+      "loaded": 32,
+      "errors": 0
+    },
+    {
+      "players": 41,
+      "remotes": 40,
+      "mode": "remote",
+      "fps": 5.7,
+      "low1": 1.9,
+      "drawCalls": {
+        "avg": 57,
+        "max": 76
+      },
+      "trianglesK": {
+        "avgK": 229,
+        "maxK": 290
+      },
+      "cpuMs": {
+        "frame": 7.53,
+        "render": 1.8,
+        "animations": 2.61,
+        "activeMeshes": 2.84,
+        "renderTargets": 0.12
+      },
+      "remoteTriangles": 845464,
+      "near": 10,
+      "far": 26,
+      "culled": 4,
+      "downKBs": 2.2,
+      "loaded": 40,
+      "errors": 0
+    },
+    {
+      "players": 41,
+      "remotes": 40,
+      "mode": "lite",
+      "fps": 3.2,
+      "low1": 2.9,
+      "drawCalls": {
+        "avg": 289,
+        "max": 296
+      },
+      "trianglesK": {
+        "avgK": 375,
+        "maxK": 379
+      },
+      "cpuMs": {
+        "frame": 14.48,
+        "render": 4.22,
+        "animations": 2.62,
+        "activeMeshes": 7.32,
+        "renderTargets": 0.16
+      },
+      "remoteTriangles": 0,
+      "near": 0,
+      "far": 0,
+      "culled": 0,
+      "downKBs": 2.2,
+      "loaded": 40,
+      "errors": 0
+    }
+  ],
+  "startedAt": "2026-11-28T05:10:56.543Z",
+  "finishedAt": "2026-11-28T05:16:21.653Z"
+}
