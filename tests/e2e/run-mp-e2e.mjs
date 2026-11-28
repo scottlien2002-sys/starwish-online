@@ -553,9 +553,16 @@ try {
   await p4.click("#mpreg");
   await waitVillage(D);
   const acct1 = await p4.evaluate(() => ({ cid: window.__mpWorld.client.characterId, token: window.__mpWorld.client.token, auth: !!localStorage.getItem("starwish.mp85.auth"), name: window.__mpWorld.client.self?.name ?? null }));
-  await p4.goto(base.replace("&newgame=1", ""), { waitUntil: "load" });
+  // 重新整理：關掉舊分頁再開新分頁（同一個瀏覽器設定檔，localStorage 保留）。
+  // 先移除舊分頁的錯誤監聽：WebKit 會把「離開頁面時被中止的載入」回報成 access control 錯誤，不是遊戲錯誤
+  p4.removeAllListeners("pageerror");
+  await p4.close();
+  const p5 = await ctx4.newPage();
+  p5.on("pageerror", (e) => results.consoleErrors.push(`acct: ${e.message}`));
+  D.page = p5;
+  await p5.goto(base.replace("&newgame=1", ""), { waitUntil: "load" });
   await waitVillage(D);
-  const acct2 = await p4.evaluate(() => ({ cid: window.__mpWorld.client.characterId, dialog: !!document.getElementById("mp-login") }));
+  const acct2 = await p5.evaluate(() => ({ cid: window.__mpWorld.client.characterId, dialog: !!document.getElementById("mp-login") }));
   const am = await metrics();
   results.samples.account = { username: uname, first: acct1, reload: acct2, auth: am.auth };
   check("帳號登入（測試視窗）：密碼太短被擋、註冊後進入村莊；憑證只在本機、角色沒有訪客重連憑證", acct1.auth && acct1.token === "" && !!acct1.cid && am.auth.registered >= 1, results.samples.account);
