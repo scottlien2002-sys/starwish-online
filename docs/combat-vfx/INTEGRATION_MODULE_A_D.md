@@ -16,10 +16,14 @@ await fx.prewarm();                                   // 在載入畫面期間�
 canvas.addEventListener("pointerdown", () => fx.unlockAudio(), { capture: true, once: true });
 
 scene.onBeforeRenderObservable.add(() => {
+  const dt = engine.getDeltaTime() / 1000;
   fx.listener.copyFrom(localPlayer.position);         // 本地玩家位置（距離預算、音效左右聲道）
-  const shake = fx.update(engine.getDeltaTime() / 1000);
+  fx.advance(dt);                                     // ① 技能時間軸前進、觸發命中／投射物 hook
+  avatar.setSkillTime(handle.timeline.t);             // ② 角色動作用「同一個 t」設定這一格的姿勢（A 的 NoviceAvatar）
+  const shake = fx.updateVisuals(dt);                 // ③ 拖尾取樣（刀尖已是這一格的位置）、特效、傷害數字
   camera.target.addInPlace(shake);                     // 鏡頭震動（要不要加由 A 決定；不影響判定）
 });
+// 不需要動作同步時（只有特效），可以只呼叫 fx.update(dt)＝advance＋updateVisuals
 
 // 離開地圖
 fx.dispose();
@@ -42,7 +46,10 @@ fx.dispose();
 | 怪物重生 | `monsterRespawn(groundPos, scale, boss)` | 魔法陣＋光柱（與展示頁相同） |
 | 任意特效 | `spawn(owner, fxKey, point, { palette, yaw, scale, duration, follow })` | 職業特效、增益等 |
 | 畫質 | `setQuality("high" \| "medium" \| "low")`、`setEnvironment("dark" \| "bright")` | |
-| 診斷 | `stats()` | 特效數、粒子、預算、略過次數、音效、傷害數字 |
+| 重要戰鬥特效 | `zone(kind, center, radius, { owner, duration, margin })`、`statusCue(kind, follow)`、`launch(..., essential)`、`hit(..., { essential })`、`playSkill(..., hooks, { essential })` | 見第 3 節「重要戰鬥特效例外」 |
+| 畫面閃光／鏡頭震動 | `setScreenFlash(enabled, intensity 0～1)`、`setCameraShake(enabled, scale)` | 可調整、可關閉（設定頁由 A 決定放哪裡） |
+| 傷害數字類型 | `hit(..., { style })`：`normal`／`crit`／`heal`／`block`／`miss`（另有 `player`＝自己受傷） | 沿用現有樣式；數值由遊戲提供，名稱／傷害／冷卻未定案 |
+| 診斷 | `stats()`、`trailHead(id)` | 特效數、粒子、預算、略過次數、重要特效次數、音效、傷害數字；拖尾最新取樣 |
 
 六大職業擴充：
 - 職業套件、動畫命名、必要時間標記、6 種技能樣板與檢查器在 `classKits.ts`；職業特效家族在 `classes.ts`。
@@ -71,6 +78,13 @@ fx.dispose();
 - 其他玩家角色超過 14 m 改用遠距離模型（`CombatAvatar.setFar`；Stage 3）。
 - 粒子系統、特效網格都用物件池重複使用；`dispose()` 全部釋放。
 
+重要戰鬥特效例外（Stage 7.5 相容整合新增）：
+- 上面的 45%、粒子簡化、28 m／畫面外略過**照樣保留**，只對「會影響本地玩家」的特效開例外：不因施放者太遠、不在畫面內、其他玩家份額或特效上限而省略。
+- 適用：Boss 範圍預警（`zone("bossWarning")`，一律顯示）；敵方危險範圍、治療範圍（`zone("danger"|"heal")`，本地玩家在範圍內或邊緣 3 m 內才算）；飛向本地玩家的投射物（`launch(..., true)`；`playSkill` 的其他玩家投射物落點在本地玩家 1.5 m 內時自動判定）；必要狀態提示（`statusCue`）。
+- 次要層（餘燼、碎石等裝飾）**不在例外內**，照樣依壓力省略；其他玩家的重要特效仍只畫主層。
+- 重要特效計入「不受上限」組：不會擠掉別人，也不會被別人擠掉。次數見 `stats().essential`。
+- 不影響本地玩家的遠方危險範圍、投射物：依一般規則略過。
+
 ## 4. 預熱（`prewarm`）
 
 | 檢查項目 | 結果（CI，Chromium／WebKit） |
@@ -93,10 +107,11 @@ fx.dispose();
 
 ## 5. 需要 A 配合
 
-1. **新版 Tripo 男性初心者完成後**，提供以下內容，C 再做戰鬥動畫與特效相容性整合：
-   - 骨架名稱、武器掛點節點（劍根／劍尖）、法杖頭節點。
-   - 動作檔格式：`duration`、`marks`，或沿用 `novice_combat_<g>.json` 的格式。
-   - C 不會修改角色模型、骨架、蒙皮。
+1. **新版男性初心者 n75**：C 已用 A 分支上的 n75 資產（唯讀）做第一輪相容測試，見第 8 節。仍需 A 提供正式規格確認：
+   - 正式武器長度與握把位置（目前用 C 的展示短劍／法杖掛在 `Weapon_R`，+Y 刀身、+Z 手指）。
+   - 雙手武器的左手握點（`Weapon_L` 的用途）、正式雙手武器模型。
+   - 攻速範圍（C 測了 ×1.0／×1.3／×1.6）。
+   - C 不會修改角色模型、骨架、蒙皮、原生移動動畫。
 2. 在地圖載入流程中、載入畫面還沒關掉前呼叫 `fx.prewarm()`。離開地圖時呼叫 `fx.dispose()`。
 3. 戰鬥規則（傷害、暴擊、命中範圍、冷卻）由 A 決定；`onHit` 收到時間點後再呼叫 `fx.hit(...)`。
 4. 決定正式 HUD 是否沿用傷害數字與畫面閃光的 DOM（`hudRoot`）。
@@ -114,5 +129,27 @@ fx.dispose();
 4. mp81／mp82 改讀共用區（12 個 C 檔案的共用路徑見 `SHARED_ASSETS_HANDOVER_A_D.md`）。這 12 個檔案的內容由 C 保持不變，單元測試保護。
 
 ## 7. 未驗證
-- iPhone Safari 實機：預熱時間、1% Low 改善幅度、32 人多人實戰。
-- 正式技能、正式角色（新版 Tripo 男性初心者）的相容性：等 A 完成後進行。
+- iPhone Safari 實機：預熱時間、1% Low 改善幅度、32 人多人實戰、FPS。
+- 正式武器、正式雙手武器、正式技能（名稱、數值、冷卻未定案）。
+
+## 8. n75 相容性測試（`?lab=n75compat&lod=lite|hq`，CI 才取得 A 的資產）
+來源：A 的 `feature/render-stage75-novice`（461fb9e）`novice_n75_male_{lite,hq}.glb`＋`novice_n75_male.json`，CI 建置前唯讀取出，**不提交、不部署、不修改**。
+做法：只播 A 檔案內原有的 27 個動作；C 的展示短劍／法杖掛在 `Weapon_R`（+Y 刀身、+Z 手指）；特效全部經過 `CombatFx`；每格順序 `advance → goToFrame(同一個 t) → updateVisuals`；固定步長 1/60 秒；攻速 ×1.0／×1.3／×1.6。
+
+| 檢查 | 結果（Chromium lite／hq、WebKit lite） |
+|---|---|
+| 掛點 `Weapon_R`／`Weapon_L`／`R_Hand`／`L_Hand` | 都存在 |
+| 6 個 `Skill_*` 動作標記 | 與 C 的 `novice_combat_male.json` 完全一致 |
+| 拖尾沿著武器 | 拖尾最新取樣＝刀尖實際位置，誤差 0（技能＋A 的 10 個普通攻擊／施法動作） |
+| 高攻速拖尾 | 修正：攻速 ×1.6 時刀尖一格移動到 0.82 m，原本刀光是折線；新增補取樣（以刀根為軸插值，每格最多補 3 個），刀光每段 ≤ 0.21 m |
+| 特效從武器產生 | 修正：原本掛在武器上的特效用的是**上一格**的武器位置；改為在 `updateVisuals`（套上這一格姿勢後）才產生。法杖集氣、施法閃光到法杖頭距離 0 |
+| 投射物發射點 | 魔法彈、劍氣到右手 0.48～0.60 m（隕石從目標上空落下，設計如此） |
+| 動作與特效時間同步 | 命中 hook 實際時間＝標記／攻速（誤差 ≤ 1 格），A 的動作同一格到達標記，三種攻速都通過 |
+| 命中特效位置 | `fx.hit` 的命中特效都在目標命中點（誤差 0） |
+| 雙手武器穿模 | 刀尖不進入軀幹（技能拖尾期間＋10 個普通攻擊／施法動作）；`Skill_Whirlwind` 收招 1.24～1.26 秒刀尖經過頭部高度（1.30 m）、離身體中心 0.14 m 共 1～2 格 → **待 A 確認**（可能碰到頭髮或兜帽，C 不修改動作） |
+| 雙手握把 | 左手到 C 短劍握把：2H 揮砍 0.10～0.15 m、長柄 0.05～0.06 m、錘擊 0.25～0.48 m。C 的展示短劍是單手武器，**正式雙手武器未驗證** |
+| 重要特效例外 | Boss 預警、自己在危險／治療範圍、飛向自己的投射物、狀態提示：施放者 40 m 外＋畫面外仍顯示；不影響自己的遠方危險範圍／投射物、裝飾粒子照樣略過 |
+| 頁面錯誤 | 0 |
+
+門檻（拖尾誤差 1 cm、刀光每段 0.25 m、特效位置 5 cm、刀尖瞬移換算攻速 ×1 每格 0.6 m、軀幹圓柱半徑 0.15 m／高 0.45～1.35 m）都是 C 暫定，等 A 的正式規格再調整。
+截圖：`results/combat-vfx-<run>` 分支的 `combat-vfx/n75/`。
