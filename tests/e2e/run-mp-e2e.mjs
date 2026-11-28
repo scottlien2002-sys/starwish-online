@@ -451,7 +451,8 @@ try {
   const cb1 = (m1.combat ?? [])[0] ?? {};
   const [lA, lB] = await Promise.all([field(A), field(B).catch(() => ({ picksOk: 0, self: fldB.self }))]);
   const leftA = await A.page.evaluate(() => window.__mpWorld.client.loot.size);
-  const leftB = (await bInField()) ? await B.page.evaluate(() => window.__mpWorld.client.loot.size) : 0;
+  // B 可能在這一刻被打倒、自動回村（頁面重新載入）：評估失敗視同不在原野（回村後沒有原野掉落物）
+  const leftB = (await bInField()) ? await B.page.evaluate(() => window.__mpWorld.client.loot.size).catch(() => 0) : 0;
   results.samples.loot = { spawned: cb1.lootSpawned, picked: cb1.lootPicked, rejected: cb1.lootPickRejected, killsSettled: cb1.killsSettled, duplicateKillsBlocked: cb1.duplicateKillsBlocked, picksOk: { A: lA.picksOk, B: lB.picksOk }, gold: { A: lA.self?.gold, B: lB.self?.gold }, leftA, leftB, before: { spawned: cb0.lootSpawned, picked: cb0.lootPicked } };
   check("掉落物由伺服器產生、撿取後兩邊畫面都消失（每件只入帳一次）", cb1.lootSpawned >= 1 && cb1.lootPicked === cb1.lootSpawned && lA.picksOk + lB.picksOk === cb1.lootPicked && leftA === 0 && leftB === 0, results.samples.loot);
   check("擊殺只結算一次（伺服器沒有重複結算）", cb1.killsSettled >= 1 && cb1.duplicateKillsBlocked === 0, { killsSettled: cb1.killsSettled, dup: cb1.duplicateKillsBlocked });
