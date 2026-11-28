@@ -105,6 +105,8 @@ if (soakS > 0) {
       return { t: r?.seconds, mem: r?.memory, kills: i.kills ?? null, monsters: i.monsters.length };
     });
     await page.evaluate(() => window.__starwishPlay.perf?.reset());
+    // 長時間自動戰鬥時被怪物打倒會回到星芽村（換頁）→ 量測中斷。穩定性測試只看記憶體與錯誤，所以定時補血
+    await page.evaluate(() => setInterval(() => window.__starwishPlay.heal?.(), 1500));
     soak.samples.push(await sample());
     const p = page.evaluate((s) => window.__starwishPlay.bench(s), soakS);
     for (let t = 30; t < soakS; t += 30) {
