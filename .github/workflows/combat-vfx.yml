@@ -71,7 +71,8 @@ jobs:
 
       - name: Deploy preview (own folder only)
         id: deploy
-        if: steps.build.outcome == 'success' && steps.typecheck.outcome == 'success'
+        # 部署暫停：共用資產接入順序 D → C → B，由 A 統籌部署時機。.github/cvfx-deploy-hold 存在時只跑測試、不部署 gh-pages
+        if: steps.build.outcome == 'success' && steps.typecheck.outcome == 'success' && hashFiles('.github/cvfx-deploy-hold') == ''
         run: |
           DIR="$PREVIEW_DIR"
           # 預覽只放這頁需要的檔案：C1.0-B5b 男女、M004～M007、動作檔（其他舊版模型不放，控制 Pages 容量）
@@ -113,6 +114,10 @@ jobs:
             echo "push conflict, retry $attempt（重新 clone、重做全部步驟）"; sleep $((attempt * 7))
           done
           exit 1
+
+      - name: Deploy on hold (waiting for A)
+        if: hashFiles('.github/cvfx-deploy-hold') != ''
+        run: echo "::notice::部署暫停中（.github/cvfx-deploy-hold）：等 D 完成共用資產接入並由 A 確認後才部署 gh-pages；本次只跑測試" | tee -a test-results/combat-vfx/deploy-hold.txt
 
       - name: Verify public URL (GitHub Pages)
         id: verify
