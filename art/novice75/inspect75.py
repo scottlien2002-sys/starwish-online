@@ -146,6 +146,16 @@ for gi, gname in vg.items():
     per[gname] = {"n": int(sel.sum()), "w_sum": round(float(W[:, gi].sum()), 1), "z": [round(float(P[:, 2].min()), 3), round(float(P[:, 2].max()), 3)], "x": [round(float(P[:, 0].min()), 3), round(float(P[:, 0].max()), 3)], "y": [round(float(P[:, 1].min()), 3), round(float(P[:, 1].max()), 3)]}
 R["skin"]["perBone"] = per
 np.save(os.path.join(OUT, "verts.npy"), CO)
+_tris, _uvs = [], []
+_uvl = mesh.data.uv_layers.active.data
+mesh.data.calc_loop_triangles()
+for lt in mesh.data.loop_triangles:
+    _tris.append(list(lt.vertices))
+    _uvs.append([list(_uvl[li].uv) for li in lt.loops])
+np.save(os.path.join(OUT, "tris.npy"), np.array(_tris, dtype=np.int32))
+np.save(os.path.join(OUT, "tri_uvs.npy"), np.array(_uvs, dtype=np.float32))
+NRM = np.array([(mesh.matrix_world.to_3x3() @ v.normal).normalized() for v in mesh.data.vertices])
+np.save(os.path.join(OUT, "normals.npy"), NRM)
 np.save(os.path.join(OUT, "weights.npy"), W)
 json.dump(vg, open(os.path.join(OUT, "groups.json"), "w"))
 # 貼圖顏色（頂點 UV 取樣，給頭髮／披肩分區用）
