@@ -95,6 +95,8 @@ export interface RemotePlayer extends Pose {
 }
 
 export interface NetStats {
+  /** Stage 8.5：模擬延遲佇列中處理失敗的訊息數（只在 &lag= 測試時） */
+  lagQueueErrors?: number;
   state: ConnState;
   map: MapId | null;
   room: string;
@@ -270,7 +272,16 @@ export class NetClient {
     q.push({ at, fn });
     if (q.length > 1) return;
     const pump = (): void => {
-      while (q.length && q[0]!.at <= this.now() + 0.5) q.shift()!.fn();
+      while (q.length && q[0]!.at <= this.now() + 0.5) {
+        const it = q.shift()!;
+        try {
+          it.fn();
+        } catch (e) {
+          // 單一訊息處理失敗不能卡住整個佇列
+          this.stats.lagQueueErrors = (this.stats.lagQueueErrors ?? 0) + 1;
+          void e;
+        }
+      }
       if (q.length) setTimeout(pump, Math.max(0, q[0]!.at - this.now()));
     };
     setTimeout(pump, Math.max(0, at - this.now()));

@@ -114,7 +114,9 @@ async function scenario(n: number) {
 
   // 斷線重連：每 2 秒讓一位機器人斷線（自動重連）
   let drops = 0;
+  const dropUntil = performance.now() + (DURATION_S - 3) * 1000; // 最後 3 秒不再斷線（結束時檢查重連都完成）
   const dropTimer = setInterval(() => {
+    if (performance.now() > dropUntil) return;
     const s = sims[(drops * 7) % sims.length]!;
     if (s.c.state === "online") {
       s.c.dropConnection();
@@ -172,13 +174,14 @@ async function scenario(n: number) {
   clearInterval(junkTimer);
   clearInterval(dropTimer);
   // 讓斷線的機器人重連完成
-  const rdl = Date.now() + 10000;
+  const rdl = Date.now() + 20000;
   while (sims.some((s) => s.c.state !== "online") && Date.now() < rdl) {
     for (const s of sims) s.c.update(1 / 60, 0, 0);
     await sleep(16);
   }
   const final = await metrics();
   const onlineAtEnd = sims.filter((s) => s.c.state === "online").length;
+  const notOnline = sims.filter((s) => s.c.state !== "online").map((s) => ({ name: (s.c as unknown as { opts: { name?: string } }).opts.name ?? null, state: s.c.state, lagged: s.lagged, welcomes: s.welcomes, reconnects: s.c.stats.reconnects, lagQueueErrors: s.c.stats.lagQueueErrors ?? 0, map: s.c.stats.map }));
   const errs: Record<string, number> = {};
   for (const s of sims) for (const [k, v] of s.errs) errs[k] = (errs[k] ?? 0) + v;
   const sum = (f: (s: Sim) => number) => sims.reduce((a, s) => a + f(s), 0);
@@ -191,6 +194,7 @@ async function scenario(n: number) {
     joinMs,
     onlineAtStart,
     onlineAtEnd,
+    notOnline,
     laggedBots: sims.filter((s) => s.lagged).length,
     server: {
       cpuPctAvg: +(cpu.reduce((a, b) => a + b, 0) / Math.max(1, cpu.length)).toFixed(1),
