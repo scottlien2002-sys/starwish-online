@@ -1,0 +1,32 @@
+name: Verify all GitHub Pages previews (read-only)
+# 容量整理後的全預覽唯讀驗證：只讀公開網址，不建置、不部署、不改 gh-pages。結果推到 results/pages-all-<run id>（一般 push）。
+on:
+  push:
+    branches: [verify/pages-capacity]
+permissions:
+  contents: write
+concurrency:
+  group: verify-pages-all
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Verify
+        run: SHOTS_DIR=/tmp/shots node tests/e2e/verify-pages-all.mjs "https://scottlien2002-sys.github.io/starwish-online/"
+      - name: Push results
+        if: always()
+        run: |
+          cd /tmp/shots
+          git init -q && git checkout -q -b "results/pages-all-${GITHUB_RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -qm "Pages all-preview verify ${GITHUB_SHA::7}" || exit 0
+          git push -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" "results/pages-all-${GITHUB_RUN_ID}"

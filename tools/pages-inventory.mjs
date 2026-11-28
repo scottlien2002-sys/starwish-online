@@ -60,7 +60,7 @@ for (const t of tops) {
       f.remap = JSON.parse(readFileSync(rm, "utf8")).files ?? {};
     } catch {}
   }
-  f.owner = t.startsWith("preview-") ? OWNER(t, f.branch ?? "") : "main";
+  f.owner = t.startsWith("preview-") ? OWNER(t, f.branch ?? "") : t === "shared-assets" ? "共用" : "main";
   folders[t] = f;
 }
 // 依賴：asset-remap.json
@@ -77,6 +77,7 @@ for (const f of Object.values(folders)) {
 const textRefs = [];
 for (const t of tops) {
   for (const p of walk(join(pages, t))) {
+    if (t === "shared-assets") continue;
     if (!/\.(js|html|json)$/.test(p) || p.endsWith("asset-remap.json") || p.endsWith("preview.json") || statSync(p).size > 20e6) continue;
     const txt = readFileSync(p, "utf8");
     for (const m of new Set(txt.match(/preview-[a-z0-9-]+/g) ?? [])) if (m !== t && folders[m]) textRefs.push({ from: t, to: m, in: rel(p) });
