@@ -1,0 +1,190 @@
+TAP version 13
+# Subtest: 動作檔：男女都有 6 個技能片段、17 關節、每格四元數長度 1
+ok 1 - 動作檔：男女都有 6 個技能片段、17 關節、每格四元數長度 1
+  ---
+  duration_ms: 20.802561
+  type: 'test'
+  ...
+# Subtest: 每個技能的時間標記都能在動作檔找到，事件都在片段長度內
+ok 2 - 每個技能的時間標記都能在動作檔找到，事件都在片段長度內
+  ---
+  duration_ms: 7.204378
+  type: 'test'
+  ...
+# Subtest: 時間軸：命中事件只觸發一次、依序觸發，攻速 160 時命中提早為 1/1.6
+ok 3 - 時間軸：命中事件只觸發一次、依序觸發，攻速 160 時命中提早為 1/1.6
+  ---
+  duration_ms: 10.531125
+  type: 'test'
+  ...
+# Subtest: 打擊頓幀：時鐘停住，之後的命中時間順延
+ok 4 - 打擊頓幀：時鐘停住，之後的命中時間順延
+  ---
+  duration_ms: 3.903561
+  type: 'test'
+  ...
+# Subtest: 根運動：跳斬往前 1.2 m、旋風斬轉兩圈
+ok 5 - 根運動：跳斬往前 1.2 m、旋風斬轉兩圈
+  ---
+  duration_ms: 2.275534
+  type: 'test'
+  ...
+# Subtest: 三段品質：粒子與預算依序遞減，低畫質關閉 GlowLayer 與第二層細節
+ok 6 - 三段品質：粒子與預算依序遞減，低畫質關閉 GlowLayer 與第二層細節
+  ---
+  duration_ms: 0.270713
+  type: 'test'
+  ...
+# Subtest: 多人特效預算：自己的永遠允許；其他玩家受比例上限與距離限制；次要層在壓力下先被拒絕
+ok 7 - 多人特效預算：自己的永遠允許；其他玩家受比例上限與距離限制；次要層在壓力下先被拒絕
+  ---
+  duration_ms: 0.847468
+  type: 'test'
+  ...
+# Subtest: 傷害結算：同一次施放、同一段、同一目標只結算一次；強制暴擊
+ok 8 - 傷害結算：同一次施放、同一段、同一目標只結算一次；強制暴擊
+  ---
+  duration_ms: 0.412135
+  type: 'test'
+  ...
+# Subtest: 多人特效預算：其他玩家的 critical（命中閃光）也受份額限制，自己的 critical 不受限
+ok 9 - 多人特效預算：其他玩家的 critical（命中閃光）也受份額限制，自己的 critical 不受限
+  ---
+  duration_ms: 0.836433
+  type: 'test'
+  ...
+# Subtest: 動作檔 V2.1（Stage 3 旋風斬腳步修正）：命中標記沒變（動畫、特效、傷害同步的時間來源）
+ok 10 - 動作檔 V2.1（Stage 3 旋風斬腳步修正）：命中標記沒變（動畫、特效、傷害同步的時間來源）
+  ---
+  duration_ms: 6.060301
+  type: 'test'
+  ...
+# Subtest: 地形：技能根運動不能穿過岩石或場地邊界（跳躍也不行）
+ok 11 - 地形：技能根運動不能穿過岩石或場地邊界（跳躍也不行）
+  ---
+  duration_ms: 1.028663
+  type: 'test'
+  ...
+# Subtest: 怪物規則：Lv1～4 被動、Lv5 以上主動；Lv1～10 無屬性；被動怪被打才反擊
+ok 12 - 怪物規則：Lv1～4 被動、Lv5 以上主動；Lv1～10 無屬性；被動怪被打才反擊
+  ---
+  duration_ms: 0.898027
+  type: 'test'
+  ...
+# Subtest: 六大職業共用架構：六個職業都有動畫分類、特效家族、展示組合，且只用已存在的特效鍵值
+ok 13 - 六大職業共用架構：六個職業都有動畫分類、特效家族、展示組合，且只用已存在的特效鍵值
+  ---
+  duration_ms: 0.852747
+  type: 'test'
+  ...
+# Subtest: 其他玩家用的合併模型（remote LOD）：近距離 2 網格＋遠距離 2 網格、17 關節、動畫與 Lite 相同
+ok 14 - 其他玩家用的合併模型（remote LOD）：近距離 2 網格＋遠距離 2 網格、17 關節、動畫與 Lite 相同
+  ---
+  duration_ms: 10.214297
+  type: 'test'
+  ...
+# Subtest: Stage 3 職業套件：六職業齊全、片段命名一致、武器外觀一律未定案
+ok 15 - Stage 3 職業套件：六職業齊全、片段命名一致、武器外觀一律未定案
+  ---
+  duration_ms: 0.775115
+  type: 'test'
+  ...
+# Subtest: Stage 3 現有 6 個展示技能都通過檢查器（標記存在、拖尾先後、鍵值存在、時間在片段內）
+ok 16 - Stage 3 現有 6 個展示技能都通過檢查器（標記存在、拖尾先後、鍵值存在、時間在片段內）
+  ---
+  duration_ms: 6.558445
+  type: 'test'
+  ...
+# Subtest: Stage 3 技能樣板：六種樣板產生的草稿可通過檢查，名稱／傷害／冷卻／武器外觀標示未定案
+ok 17 - Stage 3 技能樣板：六種樣板產生的草稿可通過檢查，名稱／傷害／冷卻／武器外觀標示未定案
+  ---
+  duration_ms: 1.275451
+  type: 'test'
+  ...
+# Subtest: Stage 3 檢查器：抓得到常見錯誤（缺標記、拖尾倒置、未知特效、重複命中 id、數值超範圍）
+ok 18 - Stage 3 檢查器：抓得到常見錯誤（缺標記、拖尾倒置、未知特效、重複命中 id、數值超範圍）
+  ---
+  duration_ms: 0.440434
+  type: 'test'
+  ...
+# Subtest: Stage 3 音效 V2：18 種音效都有合成與長度設定、WAV 輸出格式正確、亂數可重現
+ok 19 - Stage 3 音效 V2：18 種音效都有合成與長度設定、WAV 輸出格式正確、亂數可重現
+  ---
+  duration_ms: 0.292114
+  type: 'test'
+  ...
+# Subtest: 共用資產：D 引用的 12 個 C 檔案內容不變（SHA-1 與 shared-assets 一致）
+ok 20 - 共用資產：D 引用的 12 個 C 檔案內容不變（SHA-1 與 shared-assets 一致）
+  ---
+  duration_ms: 101.990791
+  type: 'test'
+  ...
+# Subtest: 共用資產：一般建置的 asset-remap.json 是空清單（本機不受影響）
+ok 21 - 共用資產：一般建置的 asset-remap.json 是空清單（本機不受影響）
+  ---
+  duration_ms: 1.003664
+  type: 'test'
+  ...
+# Subtest: Move／Run 選擇：巡邏 0.6 m/s 播 Move 倍率 1、追擊 2.4 m/s 播 Run 倍率 1；Run 不是 Move 加速；含遲滯與倍率上限
+ok 22 - Move／Run 選擇：巡邏 0.6 m/s 播 Move 倍率 1、追擊 2.4 m/s 播 Run 倍率 1；Run 不是 Move 加速；含遲滯與倍率上限
+  ---
+  duration_ms: 1.732247
+  type: 'test'
+  ...
+# Subtest: Attack 命中時間：動畫第 0.50 秒，隨播放倍率換算
+ok 23 - Attack 命中時間：動畫第 0.50 秒，隨播放倍率換算
+  ---
+  duration_ms: 0.467869
+  type: 'test'
+  ...
+# Subtest: GLB extras 覆蓋規格預設並列出不一致
+ok 24 - GLB extras 覆蓋規格預設並列出不一致
+  ---
+  duration_ms: 0.490761
+  type: 'test'
+  ...
+# Subtest: 淡入淡出權重：總和保持 1，指定時間內完成；0 秒立即切換
+ok 25 - 淡入淡出權重：總和保持 1，指定時間內完成；0 秒立即切換
+  ---
+  duration_ms: 0.581193
+  type: 'test'
+  ...
+# Subtest: 通用註冊：風羽狐與測試替身用同一套動畫設定與資料驗證；死亡狀態含停住與淡出
+ok 26 - 通用註冊：風羽狐與測試替身用同一套動畫設定與資料驗證；死亡狀態含停住與淡出
+  ---
+  duration_ms: 0.951242
+  type: 'test'
+  ...
+# Subtest: AI：巡邏用 0.6 m/s、看到玩家主動追擊用 2.4 m/s、進入範圍攻擊；命中在攻擊第 0.50 秒且只結算一次
+ok 27 - AI：巡邏用 0.6 m/s、看到玩家主動追擊用 2.4 m/s、進入範圍攻擊；命中在攻擊第 0.50 秒且只結算一次
+  ---
+  duration_ms: 3.320001
+  type: 'test'
+  ...
+# Subtest: 死亡停止行動、淡出後才開始重生計時、重生回 Idle；普通攻擊不打斷攻擊
+ok 28 - 死亡停止行動、淡出後才開始重生計時、重生回 Idle；普通攻擊不打斷攻擊
+  ---
+  duration_ms: 3.361639
+  type: 'test'
+  ...
+# Subtest: 玩家近戰距離從怪物身體外緣算（風羽狐 0.45 m）；星露啵啵沒有設定 = 原本行為
+ok 29 - 玩家近戰距離從怪物身體外緣算（風羽狐 0.45 m）；星露啵啵沒有設定 = 原本行為
+  ---
+  duration_ms: 0.487357
+  type: 'test'
+  ...
+# Subtest: 怪物模型清單（manifest）與實際檔案一致：列出的都存在、monsters/ 底下的 GLB 都有列出
+ok 30 - 怪物模型清單（manifest）與實際檔案一致：列出的都存在、monsters/ 底下的 GLB 都有列出
+  ---
+  duration_ms: 2.069348
+  type: 'test'
+  ...
+1..30
+# tests 30
+# suites 0
+# pass 30
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 348.945262
