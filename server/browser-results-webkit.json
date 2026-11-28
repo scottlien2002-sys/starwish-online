@@ -1,0 +1,265 @@
+{
+  "checks": [
+    {
+      "name": "兩位玩家進入同一房間",
+      "ok": true,
+      "detail": {
+        "room": "village-1"
+      }
+    },
+    {
+      "name": "A 看見 B（小願、女）",
+      "ok": true
+    },
+    {
+      "name": "B 看見 A（阿星、男）",
+      "ok": true
+    },
+    {
+      "name": "B 看到 A 的 Run 動畫",
+      "ok": true,
+      "detail": {
+        "anim": 1
+      }
+    },
+    {
+      "name": "B 看到 A 朝東（yaw≈+90°）",
+      "ok": true,
+      "detail": {
+        "yaw": 1.571
+      }
+    },
+    {
+      "name": "A 停下後 B 看到 Idle",
+      "ok": true,
+      "detail": {
+        "anim": 0
+      }
+    },
+    {
+      "name": "B 畫面中的 A 位置＝伺服器位置（誤差 < 2 cm）",
+      "ok": true,
+      "detail": {
+        "errCm": 0
+      }
+    },
+    {
+      "name": "A 本地預測位置＝伺服器位置（誤差 < 2 cm）",
+      "ok": true
+    },
+    {
+      "name": "A 斷線時 B 看到 A 標示斷線中",
+      "ok": true
+    },
+    {
+      "name": "A 自動重連並接回同一角色",
+      "ok": true,
+      "detail": {
+        "pid": 1,
+        "resync": 534
+      }
+    },
+    {
+      "name": "B 看到 A 恢復連線",
+      "ok": true
+    },
+    {
+      "name": "A 重新整理頁面後用憑證接回同一角色",
+      "ok": true,
+      "detail": {
+        "pid": 1
+      }
+    },
+    {
+      "name": "A 看到 B 往南跑（Run、yaw≈180°）",
+      "ok": true,
+      "detail": {
+        "anim": 1,
+        "yaw": -3.141
+      }
+    },
+    {
+      "name": "診斷資訊有數值（RTT、封包量、FPS、人數）",
+      "ok": true,
+      "detail": {
+        "fps": 61,
+        "snaps": 20,
+        "down": 2390,
+        "rtt": 4,
+        "players": 2
+      }
+    },
+    {
+      "name": "伺服器 /metrics 顯示 2 位玩家",
+      "ok": true,
+      "detail": {
+        "players": 2,
+        "tick": {
+          "count": 201,
+          "avgMs": 0.194,
+          "maxMs": 1.926
+        }
+      }
+    },
+    {
+      "name": "瀏覽器沒有 JavaScript 錯誤",
+      "ok": true,
+      "detail": []
+    }
+  ],
+  "consoleErrors": [],
+  "browser": "webkit",
+  "diag": {
+    "A": {
+      "state": "online",
+      "map": "village",
+      "room": "village-1",
+      "pid": 1,
+      "rttMs": 4,
+      "rttAvgMs": 5,
+      "jitterMs": 1,
+      "bytesUpPerSec": 21,
+      "bytesDownPerSec": 2390,
+      "msgsUpPerSec": 1,
+      "msgsDownPerSec": 21,
+      "snapsPerSec": 20,
+      "players": 2,
+      "pendingInputs": 0,
+      "corrections": 0,
+      "lastCorrectionCm": 0,
+      "maxCorrectionCm": 0,
+      "snapCorrections": 0,
+      "reconnects": 0,
+      "lastResyncMs": 0,
+      "serverTick": 127,
+      "fps": 61,
+      "totalBytesUp": 137,
+      "totalBytesDown": 6167
+    },
+    "B": {
+      "state": "online",
+      "map": "village",
+      "room": "village-1",
+      "pid": 2,
+      "rttMs": 4,
+      "rttAvgMs": 4,
+      "jitterMs": 2,
+      "bytesUpPerSec": 261,
+      "bytesDownPerSec": 2257,
+      "msgsUpPerSec": 7,
+      "msgsDownPerSec": 21,
+      "snapsPerSec": 20,
+      "players": 2,
+      "pendingInputs": 0,
+      "corrections": 0,
+      "lastCorrectionCm": 0,
+      "maxCorrectionCm": 0,
+      "snapCorrections": 0,
+      "reconnects": 0,
+      "lastResyncMs": 0,
+      "serverTick": 127,
+      "fps": 62,
+      "totalBytesUp": 895,
+      "totalBytesDown": 15630
+    }
+  },
+  "serverMetrics": {
+    "uptimeS": 11,
+    "proto": 3,
+    "tickHz": 20,
+    "connections": 2,
+    "store": {
+      "kind": "memory",
+      "realm": "test"
+    },
+    "combat": [],
+    "players": 2,
+    "rooms": [
+      {
+        "key": "village-1",
+        "map": "village",
+        "players": 2,
+        "connected": 2,
+        "tick": 127
+      }
+    ],
+    "tick": {
+      "count": 201,
+      "avgMs": 0.194,
+      "maxMs": 1.926
+    },
+    "netPerSec": {
+      "bytesIn": 477,
+      "bytesOut": 4820,
+      "msgsIn": 13,
+      "msgsOut": 42
+    },
+    "totals": {
+      "ticks": 201,
+      "tickMsSum": 27.065452000002438,
+      "tickMsMax": 1.9264769999990676,
+      "bytesIn": 2078,
+      "bytesOut": 31961,
+      "msgsIn": 55,
+      "msgsOut": 263,
+      "badMessages": 0,
+      "rateLimited": 0,
+      "kicked": 0,
+      "replaced": 0,
+      "resumed": 2,
+      "graceExpired": 0,
+      "transfers": 0,
+      "persistOk": 4,
+      "persistConflict": 0,
+      "snapshotsSkippedBackpressure": 0,
+      "rejectedOrigin": 0,
+      "rejectedProtocol": 0,
+      "roanRejected": 0,
+      "actsIgnoredInCombatRoom": 0,
+      "autoRespawns": 0,
+      "progressSaved": 0,
+      "starterKits": 2
+    },
+    "ledgerEntries": 0,
+    "players_detail": [
+      {
+        "pid": 1,
+        "name": "阿星",
+        "room": "village-1",
+        "connected": true,
+        "queue": 0,
+        "ack": 79,
+        "stepsApplied": 79,
+        "stepsDropped": 0,
+        "staleEpochInputs": 0,
+        "duplicateSteps": 0,
+        "seqGaps": 0,
+        "illegalPositions": 0,
+        "speedViolations": 0,
+        "actsAccepted": 0,
+        "actsRejected": 0,
+        "stepsWhileDown": 0
+      },
+      {
+        "pid": 2,
+        "name": "小願",
+        "room": "village-1",
+        "connected": true,
+        "queue": 0,
+        "ack": 63,
+        "stepsApplied": 63,
+        "stepsDropped": 0,
+        "staleEpochInputs": 0,
+        "duplicateSteps": 0,
+        "seqGaps": 0,
+        "illegalPositions": 0,
+        "speedViolations": 0,
+        "actsAccepted": 0,
+        "actsRejected": 0,
+        "stepsWhileDown": 0
+      }
+    ]
+  },
+  "passed": 16,
+  "total": 16
+}
