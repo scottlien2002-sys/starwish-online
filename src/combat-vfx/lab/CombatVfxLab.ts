@@ -1252,11 +1252,17 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
   // 特效預熱（Stage 3.1）：每種特效先生成一次、等 shader 編譯完 → 第一次施放不卡頓（改善 1% Low）。&prewarm=0 可關掉比較
   const shaderCount = (): number => Object.keys((engine as unknown as { _compiledEffects?: Record<string, unknown> })._compiledEffects ?? {}).length;
   const prewarmOn = qs.get("prewarm") !== "0";
-  let prewarmStats: { ms: number; spawned: number; materials: number; meshes: number; systems: number; shadersBefore: number; shadersAfter: number } | null = null;
+  let prewarmStats: { ms: number; spawned: number; timeouts: number; materials: number; meshes: number; systems: number; shadersBefore: number; shadersAfter: number } | null = null;
   if (prewarmOn) {
     const before = shaderCount();
     const at = player.pos.add(new Vector3(0, 0, 2.5));
-    const r = await vfx.prewarm(at, FX_KEY_LIST, ["steel"]);
+    // 整體最多 8 秒（再慢也不擋開機）
+    const r = await Promise.race([
+      vfx.prewarm(at, FX_KEY_LIST, ["steel"]),
+      new Promise<{ ms: number; spawned: number; timeouts: number; materials: number; meshes: number; systems: number }>((res) => setTimeout(() => res({ ms: 8000, spawned: -1, timeouts: -1, materials: 0, meshes: 0, systems: 0 }), 8000)),
+    ]);
+    vfx.cancelPrewarm();
+    vfx.clear();
     prewarmStats = { ...r, shadersBefore: before, shadersAfter: shaderCount() };
   }
   if (!manual) {

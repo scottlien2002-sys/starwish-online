@@ -1032,7 +1032,7 @@ export class VfxSystem {
    * 第一次施放某個技能時就不會因為建立網格／粒子系統、編譯 shader 而卡一下。
    * 一次只放幾個（不受同時特效上限影響），每批都等 scene.whenReadyAsync() 再清掉。
    */
-  async prewarm(at: Vector3, keys: readonly FxKey[], palettes: readonly Palette[] = ["steel"]): Promise<{ ms: number; spawned: number; materials: number; meshes: number; systems: number }> {
+  async prewarm(at: Vector3, keys: readonly FxKey[], palettes: readonly Palette[] = ["steel"]): Promise<{ ms: number; spawned: number; timeouts: number; materials: number; meshes: number; systems: number }> {
     const t0 = performance.now();
     const projectile = new Set<FxKey>(["magicBolt", "swordWave", "meteor"]);
     const jobs: (() => void)[] = [];
@@ -1051,16 +1051,27 @@ export class VfxSystem {
       jobs.push(() => this.hitFx(at, ["hitFlash", "hitSpark"], true, { palette }));
     }
     let spawned = 0;
-    for (let i = 0; i < jobs.length; i += 4) {
+    let timeouts = 0;
+    this.prewarmCancelled = false;
+    for (let i = 0; i < jobs.length && !this.prewarmCancelled; i += 4) {
       for (const j of jobs.slice(i, i + 4)) {
         j();
         spawned++;
       }
-      await this.scene.whenReadyAsync();
+      // 最多等 1.5 秒（某些物件可能一直回報未就緒 → 不能讓載入卡住）
+      const ready = await Promise.race([this.scene.whenReadyAsync().then(() => true), new Promise<boolean>((r) => setTimeout(() => r(false), 1500))]);
+      if (!ready) timeouts++;
+      this.scene.render();
       this.clear();
     }
     this.budget.resetStats();
-    return { ms: Math.round(performance.now() - t0), spawned, materials: this.mats.size, meshes: this.stats.pooledMeshes, systems: this.stats.pooledSystems };
+    return { ms: Math.round(performance.now() - t0), spawned, timeouts, materials: this.mats.size, meshes: this.stats.pooledMeshes, systems: this.stats.pooledSystems };
+  }
+
+  private prewarmCancelled = false;
+  /** 預熱超時時由呼叫端中止 */
+  cancelPrewarm(): void {
+    this.prewarmCancelled = true;
   }
 
   /** 全部清除（換場景、測試用） */

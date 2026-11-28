@@ -67,7 +67,10 @@ jobs:
           # 除錯用：commit 訊息含 [perf-only] 時只跑效能案例（Chromium）
           CVFX_CASES: ${{ contains(github.event.head_commit.message, '[perf-only]') && 'perf' || '' }}
           CVFX_PERF_MODES: ${{ contains(github.event.head_commit.message, '[perf-only]') && 'stage3,stage3vis' || '' }}
-        run: node tests/e2e/run-combat-vfx-e2e.mjs dist ${{ contains(github.event.head_commit.message, '[perf-only]') && 'chromium' || 'chromium,webkit' }} 2>&1 | tee test-results/combat-vfx/e2e.txt; exit ${PIPESTATUS[0]}
+        # 除錯用：.github/cvfx-cases 存在時只跑檔案內列出的案例（逗號分隔）
+        run: |
+          if [ -f .github/cvfx-cases ]; then export CVFX_CASES=$(cat .github/cvfx-cases); fi
+          node tests/e2e/run-combat-vfx-e2e.mjs dist ${{ contains(github.event.head_commit.message, '[perf-only]') && 'chromium' || 'chromium,webkit' }} 2>&1 | tee test-results/combat-vfx/e2e.txt; exit ${PIPESTATUS[0]}
 
       - name: Deploy preview (own folder only)
         id: deploy

@@ -47,6 +47,7 @@ for (const name of browsers) {
     if (onlyCases.length && !onlyCases.includes(tcase.id)) continue;
     if (!onlyCases.length && name === "webkit" && tcase.id === "female-high") continue; // WebKit 跑兩組即可（時間）
     const run = { browser: name, case: tcase.id, checks: {}, errors: [], results: {} };
+    console.log(`[${new Date().toISOString()}] ${name} ${tcase.id} …`);
     const check = (k, ok, detail) => {
       run.checks[k] = { ok: !!ok, detail };
       if (!ok) failures++;
