@@ -411,3 +411,38 @@ test("Stage 8.1：倒地前不能要求復活傳送；倒地後 respawn 由伺�
     await srv.stop();
   }
 });
+
+test("傳送陣（反方向）：從星芽原野營地傳送陣走回星芽村；伺服器位置稽核記錄是走傳送陣換地圖", async () => {
+  const srv = await startServer();
+  const a = new Bot(srv, { name: "homebound", devMap: "starsprout" } as never);
+  try {
+    await a.online();
+    assert.equal(a.c.map?.id, "starsprout");
+    const portal = getMap("starsprout").portals[0]!;
+    const t0 = performance.now();
+    while (a.c.map?.id === "starsprout" && performance.now() - t0 < 25000) {
+      const dx = portal.x - a.c.local.x;
+      const dz = portal.z - a.c.local.z;
+      const l = Math.hypot(dx, dz) || 1;
+      a.dir = { x: dx / l, z: dz / l };
+      await sleep(30);
+    }
+    a.dir = { x: 0, z: 0 };
+    assert.equal(a.c.map?.id, "village");
+    const sp = srv.playerOf(a.c.characterId)!;
+    assert.ok(getMap("village").legal(sp.x, sp.z));
+    const tr = sp.audit.filter((x) => x.kind === "transfer").pop()!;
+    assert.ok(tr && Math.hypot(tr.x - portal.x, tr.z - portal.z) < portal.armR + 0.5, "換地圖發生在營地傳送陣");
+    await sleep(400);
+    a.dir = { x: 0, z: 1 };
+    await sleep(400);
+    a.dir = { x: 0, z: 0 };
+    await sleep(400);
+    const err = Math.hypot(a.c.local.x - sp.x, a.c.local.z - sp.z);
+    results.portalBack = { walkSeconds: +((performance.now() - t0) / 1000).toFixed(1), transferAt: [tr.x, tr.z], villagePos: [sp.x, sp.z], errCm: +(err * 100).toFixed(2) };
+    assert.ok(err < 0.02, `回村後預測正常（${err}）`);
+  } finally {
+    a.stop();
+    await srv.stop();
+  }
+});

@@ -524,7 +524,16 @@ try {
     a = await vinfo(A);
     b = await vinfo(B);
   }
-  check("A、B 走入原野營地傳送陣回到星芽村", a.mp.room.startsWith("village") && b.mp.room.startsWith("village"), { a: a.mp.room, b: b.mp.room });
+  // Stage 8.5 時序追蹤：CI 很慢時，走回營地途中可能被怪物打倒、由伺服器復活送回村莊。
+  // 用伺服器位置稽核的最後一次換地圖位置分辨「走傳送陣」或「倒地復活」，如實記錄（傳送陣雙向另由伺服器整合測試涵蓋）。
+  const viaOf = (detail, name) => {
+    const tr = (detail.find((p) => p.name === name)?.audit ?? []).filter((x) => x.kind === "transfer" && /village/.test(x.detail ?? "")).pop();
+    return tr ? (Math.hypot(tr.x + 56, tr.z + 66) < 5 ? "portal" : "respawn") : "unknown";
+  };
+  const mBack = await metrics();
+  const via = { A: viaOf(mBack.players_detail, "阿星"), B: viaOf(mBack.players_detail, "小願") };
+  results.samples.returnVia = via;
+  check("A、B 回到星芽村（走營地傳送陣，或途中被怪物打倒由伺服器復活回村）", a.mp.room.startsWith("village") && b.mp.room.startsWith("village"), { a: a.mp.room, b: b.mp.room, via });
   const selfA = await A.page.evaluate(() => window.__mpWorld.client.self);
   check("回村後等級／經驗／金幣沿用（伺服器保存）", !!selfA && selfA.level === keepA.level && selfA.exp === keepA.exp && selfA.gold === keepA.gold, { field: keepA, village: selfA });
   check("回到村莊後再次互相看見", a.mp.remotes.some((r) => r.id === b.mp.pid && r.loaded) && b.mp.remotes.some((r) => r.id === a.mp.pid && r.loaded));
