@@ -1,0 +1,372 @@
+{
+ "tool": "art/novice75/build75.py",
+ "source": "Starwish_Novice_Male_Rigged_V1_RAW.glb",
+ "source_check": {
+  "triangles": 9609,
+  "vertices": 6962,
+  "joints": 78,
+  "animations_in_file": 0,
+  "materials": 1,
+  "textures": 3,
+  "height_original": 0.9806,
+  "scale_to_1_25m": 1.2747,
+  "facing_original": "+X（轉 −90° 成 +Z）",
+  "influences_max": 4,
+  "unweighted_vertices": 0
+ },
+ "weights": {
+  "L_arm": {
+   "verts_changed": 886,
+   "weight_moved": 430.4
+  },
+  "R_arm": {
+   "verts_changed": 960,
+   "weight_moved": 458.3
+  },
+  "L_leg": {
+   "verts_changed": 1318,
+   "weight_moved": 648.0
+  },
+  "R_leg": {
+   "verts_changed": 1561,
+   "weight_moved": 834.3
+  },
+  "helper_Hair_Back": 297,
+  "helper_Hood": 240,
+  "helper_Hem_F": 833,
+  "helper_Hem_B": 816
+ },
+ "helpers": [
+  {
+   "name": "Hair_Back",
+   "parent": "Head",
+   "translation": [
+    -0.10203772171160991,
+    0.10490599716139049,
+    0.07482731339397075
+   ],
+   "rotation": [
+    0,
+    0,
+    0,
+    1
+   ],
+   "verts": 297
+  },
+  {
+   "name": "Hood",
+   "parent": "Spine02",
+   "translation": [
+    -0.04808916444145328,
+    0.08212007003964829,
+    -0.012761811590574292
+   ],
+   "rotation": [
+    0,
+    0,
+    0,
+    1
+   ],
+   "verts": 240
+  },
+  {
+   "name": "Hem_F",
+   "parent": "Pelvis",
+   "translation": [
+    0.030200916611378338,
+    -0.003336029288117092,
+    -0.0008780534104694
+   ],
+   "rotation": [
+    0,
+    0,
+    0,
+    1
+   ],
+   "verts": 833
+  },
+  {
+   "name": "Hem_B",
+   "parent": "Pelvis",
+   "translation": [
+    -0.02969031993341877,
+    -0.005141921793733013,
+    -0.004005118710925967
+   ],
+   "rotation": [
+    0,
+    0,
+    0,
+    1
+   ],
+   "verts": 816
+  }
+ ],
+ "sockets": [
+  {
+   "name": "Weapon_R",
+   "parent": "R_Hand"
+  },
+  {
+   "name": "Weapon_L",
+   "parent": "L_Hand"
+  }
+ ],
+ "retarget": {
+  "leg_ratio": 2.078
+ },
+ "clips": {
+  "Idle": {
+   "seconds": 3.0,
+   "loop": true,
+   "marks": {}
+  },
+  "Run": {
+   "seconds": 0.733,
+   "loop": true,
+   "marks": {}
+  },
+  "Attack": {
+   "seconds": 0.633,
+   "loop": false,
+   "marks": {
+    "hit": 0.25333333333333335
+   }
+  },
+  "Hurt": {
+   "seconds": 0.633,
+   "loop": false,
+   "marks": {}
+  },
+  "Death": {
+   "seconds": 2.0,
+   "loop": false,
+   "marks": {}
+  },
+  "Jump": {
+   "seconds": 1.267,
+   "loop": false,
+   "marks": {}
+  },
+  "Skill_TripleSlash": {
+   "seconds": 1.5,
+   "loop": false,
+   "marks": {
+    "hit1": 0.17,
+    "hit2": 0.5,
+    "hit3": 0.92,
+    "trail1": [
+     0.1,
+     0.27
+    ],
+    "trail2": [
+     0.4,
+     0.6
+    ],
+    "trail3": [
+     0.82,
+     1.04
+    ],
+    "wave": 0.9
+   }
+  },
+  "Skill_StaffCast": {
+   "seconds": 1.3,
+   "loop": false,
+   "marks": {
+    "circle": 0.05,
+    "gather": [
+     0.12,
+     0.55
+    ],
+    "release": 0.58
+   }
+  },
+  "Skill_LeapSlam": {
+   "seconds": 1.5,
+   "loop": false,
+   "marks": {
+    "takeoff": 0.28,
+    "apex": 0.54,
+    "hit": 0.8,
+    "trail": [
+     0.6,
+     0.84
+    ],
+    "land": 0.8
+   }
+  },
+  "Skill_Whirlwind": {
+   "seconds": 1.6,
+   "loop": false,
+   "marks": {
+    "hit1": 0.48,
+    "hit2": 0.76,
+    "hit3": 1.04,
+    "trail": [
+     0.22,
+     1.3
+    ]
+   }
+  },
+  "Skill_StarMeteor": {
+   "seconds": 1.7,
+   "loop": false,
+   "marks": {
+    "circle": 0.08,
+    "release": 0.72,
+    "impact": 1.2
+   }
+  },
+  "Skill_ChargeBurst": {
+   "seconds": 2.1,
+   "loop": false,
+   "marks": {
+    "charge": [
+     0.05,
+     1.1
+    ],
+    "release": 1.1,
+    "hit": 1.22,
+    "trail": [
+     1.08,
+     1.32
+    ]
+   }
+  },
+  "Walk": {
+   "seconds": 1.167,
+   "loop": true,
+   "marks": {}
+  },
+  "Wait": {
+   "seconds": 4.0,
+   "loop": true,
+   "marks": {}
+  },
+  "Attack_Unarmed": {
+   "seconds": 0.633,
+   "loop": false,
+   "marks": {
+    "hit": 0.248
+   }
+  },
+  "Attack_1H_Chop": {
+   "seconds": 0.633,
+   "loop": false,
+   "marks": {
+    "hit": 0.248
+   }
+  },
+  "Attack_1H_Thrust": {
+   "seconds": 0.633,
+   "loop": false,
+   "marks": {
+    "hit": 0.248
+   }
+  },
+  "Attack_2H_Slash": {
+   "seconds": 0.633,
+   "loop": false,
+   "marks": {
+    "hit": 0.248
+   }
+  },
+  "Attack_2H_Smash": {
+   "seconds": 0.733,
+   "loop": false,
+   "marks": {
+    "hit": 0.34
+   }
+  },
+  "Attack_Polearm_Thrust": {
+   "seconds": 0.633,
+   "loop": false,
+   "marks": {
+    "hit": 0.248
+   }
+  },
+  "Attack_Polearm_Swing": {
+   "seconds": 0.8,
+   "loop": false,
+   "marks": {
+    "hit": 0.38
+   }
+  },
+  "Attack_Hammer_Smash": {
+   "seconds": 0.8,
+   "loop": false,
+   "marks": {
+    "hit": 0.42
+   }
+  },
+  "Cast_Staff": {
+   "seconds": 0.633,
+   "loop": false,
+   "marks": {
+    "release": 0.248
+   }
+  },
+  "Cast_Heal": {
+   "seconds": 0.9,
+   "loop": false,
+   "marks": {
+    "release": 0.5
+   }
+  },
+  "Attack_Throw": {
+   "seconds": 0.633,
+   "loop": false,
+   "marks": {
+    "release": 0.248
+   }
+  },
+  "Block": {
+   "seconds": 0.4,
+   "loop": false,
+   "marks": {
+    "guard": 0.18
+   }
+  },
+  "Jump_Land": {
+   "seconds": 0.4,
+   "loop": false,
+   "marks": {
+    "land": 0.0
+   }
+  }
+ },
+ "groundSpeed": {
+  "Run": 4.064,
+  "Walk": 1.305
+ },
+ "preview": [
+  "clip_Idle.png",
+  "clip_Run.png",
+  "clip_Attack.png",
+  "clip_Hurt.png",
+  "clip_Death.png",
+  "clip_Jump.png",
+  "clip_Skill_TripleSlash.png",
+  "clip_Skill_StaffCast.png",
+  "clip_Skill_LeapSlam.png",
+  "clip_Skill_Whirlwind.png",
+  "clip_Skill_StarMeteor.png",
+  "clip_Skill_ChargeBurst.png",
+  "clip_Walk.png",
+  "clip_Wait.png",
+  "clip_Attack_Unarmed.png",
+  "clip_Attack_1H_Chop.png",
+  "clip_Attack_1H_Thrust.png",
+  "clip_Attack_2H_Slash.png",
+  "clip_Attack_2H_Smash.png",
+  "clip_Attack_Polearm_Thrust.png",
+  "clip_Attack_Polearm_Swing.png",
+  "clip_Attack_Hammer_Smash.png",
+  "clip_Cast_Staff.png",
+  "clip_Cast_Heal.png",
+  "clip_Attack_Throw.png",
+  "clip_Block.png",
+  "clip_Jump_Land.png"
+ ]
+}
