@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-11-28T09:38:28.680Z",
+  "startedAt": "2026-11-28T12:50:09.026Z",
   "note": "CI 軟體繪圖，不是 iPhone 實機 FPS；地標為正式 Tripo GLB 最佳化版",
   "runs": [
     {
@@ -21,12 +21,30 @@
         ],
         "loaded": [
           {
+            "model": "furnace",
+            "file": "jy_lm_furnace_hq.glb",
+            "tris": 11747,
+            "materials": 1,
+            "textures": 2,
+            "ms": 6123,
+            "lod": false
+          },
+          {
             "model": "tower",
             "file": "jy_lm_crane_tower_hq.glb",
             "tris": 9797,
             "materials": 1,
             "textures": 2,
-            "ms": 6118,
+            "ms": 6142,
+            "lod": false
+          },
+          {
+            "model": "boom",
+            "file": "jy_lm_crane_jib_hq.glb",
+            "tris": 6854,
+            "materials": 1,
+            "textures": 2,
+            "ms": 6169,
             "lod": false
           },
           {
@@ -35,7 +53,7 @@
             "tris": 2938,
             "materials": 1,
             "textures": 2,
-            "ms": 6148,
+            "ms": 7056,
             "lod": false
           },
           {
@@ -44,26 +62,8 @@
             "tris": 21554,
             "materials": 1,
             "textures": 2,
-            "ms": 6233,
+            "ms": 7106,
             "lod": true
-          },
-          {
-            "model": "boom",
-            "file": "jy_lm_crane_jib_hq.glb",
-            "tris": 6854,
-            "materials": 1,
-            "textures": 2,
-            "ms": 7555,
-            "lod": false
-          },
-          {
-            "model": "furnace",
-            "file": "jy_lm_furnace_hq.glb",
-            "tris": 11747,
-            "materials": 1,
-            "textures": 2,
-            "ms": 7584,
-            "lod": false
           },
           {
             "model": "reactor",
@@ -71,7 +71,7 @@
             "tris": 23491,
             "materials": 1,
             "textures": 2,
-            "ms": 8687,
+            "ms": 8096,
             "lod": true
           },
           {
@@ -80,7 +80,7 @@
             "tris": 6858,
             "materials": 1,
             "textures": 2,
-            "ms": 6596,
+            "ms": 7136,
             "lod": false
           },
           {
@@ -89,7 +89,7 @@
             "tris": 10825,
             "materials": 1,
             "textures": 2,
-            "ms": 6221,
+            "ms": 6935,
             "lod": false
           }
         ],
@@ -197,53 +197,53 @@
       "cranes": [
         {
           "id": "crane1",
-          "dYaw": 0.047,
-          "dDrop": 0.59,
-          "drop": 4.83,
+          "dYaw": 0.057,
+          "dDrop": 0.81,
+          "drop": 5.79,
           "range": [
             2.5,
-            16.4
+            15.9
           ],
-          "clawY": 23.24,
-          "sway": 0.03
+          "clawY": 22.29,
+          "sway": 0.04
         },
         {
           "id": "crane2",
-          "dYaw": 0.039,
-          "dDrop": 0.42,
-          "drop": 11.14,
+          "dYaw": 0.052,
+          "dDrop": 0.45,
+          "drop": 11.32,
           "range": [
             2.5,
-            13.1
+            12.6
           ],
-          "clawY": 12.92,
-          "sway": 0.26
+          "clawY": 12.74,
+          "sway": 0.24
         },
         {
           "id": "crane3",
-          "dYaw": 0.014,
-          "dDrop": 0.45,
-          "drop": 9.62,
+          "dYaw": 0.015,
+          "dDrop": 0.57,
+          "drop": 8.09,
           "range": [
             2.5,
-            11.4
+            10.4
           ],
-          "clawY": 6.54,
-          "sway": 0.07
+          "clawY": 8.07,
+          "sway": 0.14
         }
       ],
       "fx": {
         "groups": 4,
         "systems": 12,
         "running": 5,
-        "particles": 49
+        "particles": 90
       },
       "perf": {
-        "fps": 0.8167777030577394,
-        "draws": 64,
+        "fps": 1.0094722142773032,
+        "draws": 65,
         "tris": 167404,
         "meshes": 44,
-        "textures": 18,
+        "textures": 19,
         "materials": 47,
         "geometries": 211,
         "contextLost": 0
@@ -268,21 +268,12 @@
         ],
         "loaded": [
           {
-            "model": "furnace",
-            "file": "jy_lm_furnace_lite.glb",
-            "tris": 10307,
-            "materials": 1,
-            "textures": 2,
-            "ms": 1710,
-            "lod": false
-          },
-          {
             "model": "tower",
             "file": "jy_lm_crane_tower_lite.glb",
             "tris": 6105,
             "materials": 1,
             "textures": 2,
-            "ms": 1717,
+            "ms": 1641,
             "lod": false
           },
           {
@@ -291,16 +282,16 @@
             "tris": 6858,
             "materials": 1,
             "textures": 2,
-            "ms": 1738,
+            "ms": 1658,
             "lod": false
           },
           {
-            "model": "reactor",
-            "file": "jy_lm_reactor_lite.glb",
-            "tris": 10825,
+            "model": "furnace",
+            "file": "jy_lm_furnace_lite.glb",
+            "tris": 10307,
             "materials": 1,
             "textures": 2,
-            "ms": 1753,
+            "ms": 1668,
             "lod": false
           },
           {
@@ -309,7 +300,7 @@
             "tris": 1666,
             "materials": 1,
             "textures": 2,
-            "ms": 1764,
+            "ms": 1673,
             "lod": false
           },
           {
@@ -318,7 +309,16 @@
             "tris": 2648,
             "materials": 1,
             "textures": 2,
-            "ms": 2224,
+            "ms": 1680,
+            "lod": false
+          },
+          {
+            "model": "reactor",
+            "file": "jy_lm_reactor_lite.glb",
+            "tris": 10825,
+            "materials": 1,
+            "textures": 2,
+            "ms": 2008,
             "lod": false
           }
         ],
@@ -426,53 +426,53 @@
       "cranes": [
         {
           "id": "crane1",
-          "dYaw": 0.151,
-          "dDrop": 1.87,
-          "drop": 5.48,
+          "dYaw": 0.205,
+          "dDrop": 2.91,
+          "drop": 7.02,
           "range": [
             2.5,
-            16.4
+            15.9
           ],
-          "clawY": 22.6,
-          "sway": 0.02
+          "clawY": 21.05,
+          "sway": 0.09
         },
         {
           "id": "crane2",
-          "dYaw": 0.125,
-          "dDrop": 1.38,
-          "drop": 11.53,
+          "dYaw": 0.187,
+          "dDrop": 1.58,
+          "drop": 11.86,
           "range": [
             2.5,
-            13.1
+            12.6
           ],
-          "clawY": 12.53,
-          "sway": 0.26
+          "clawY": 12.21,
+          "sway": 0.19
         },
         {
           "id": "crane3",
-          "dYaw": 0.047,
-          "dDrop": 1.45,
-          "drop": 9.13,
+          "dYaw": 0.051,
+          "dDrop": 2.05,
+          "drop": 7.23,
           "range": [
             2.5,
-            11.4
+            10.4
           ],
-          "clawY": 7.04,
-          "sway": 0.12
+          "clawY": 8.93,
+          "sway": 0.13
         }
       ],
       "fx": {
         "groups": 4,
         "systems": 12,
         "running": 5,
-        "particles": 9
+        "particles": 46
       },
       "perf": {
-        "fps": 3.1420521790132176,
-        "draws": 84,
-        "tris": 97805,
+        "fps": 4.210467221512763,
+        "draws": 74,
+        "tris": 75235,
         "meshes": 60,
-        "textures": 18,
+        "textures": 19,
         "materials": 43,
         "geometries": 221,
         "contextLost": 0
@@ -497,12 +497,12 @@
         ],
         "loaded": [
           {
-            "model": "grab",
-            "file": "jy_lm_crane_claw_lite.glb",
-            "tris": 1666,
+            "model": "colossus",
+            "file": "jy_lm_colossus_lite.glb",
+            "tris": 6858,
             "materials": 1,
             "textures": 2,
-            "ms": 1325,
+            "ms": 1177,
             "lod": false
           },
           {
@@ -511,7 +511,7 @@
             "tris": 10307,
             "materials": 1,
             "textures": 2,
-            "ms": 1343,
+            "ms": 1188,
             "lod": false
           },
           {
@@ -520,7 +520,7 @@
             "tris": 6105,
             "materials": 1,
             "textures": 2,
-            "ms": 1351,
+            "ms": 1194,
             "lod": false
           },
           {
@@ -529,16 +529,16 @@
             "tris": 2648,
             "materials": 1,
             "textures": 2,
-            "ms": 1359,
+            "ms": 1200,
             "lod": false
           },
           {
-            "model": "colossus",
-            "file": "jy_lm_colossus_lite.glb",
-            "tris": 6858,
+            "model": "grab",
+            "file": "jy_lm_crane_claw_lite.glb",
+            "tris": 1666,
             "materials": 1,
             "textures": 2,
-            "ms": 1381,
+            "ms": 1205,
             "lod": false
           },
           {
@@ -547,7 +547,7 @@
             "tris": 10825,
             "materials": 1,
             "textures": 2,
-            "ms": 1763,
+            "ms": 1481,
             "lod": false
           }
         ],
@@ -655,49 +655,49 @@
       "cranes": [
         {
           "id": "crane1",
-          "dYaw": 0.195,
-          "dDrop": 2.69,
-          "drop": 6.54,
+          "dYaw": 0.287,
+          "dDrop": 4.54,
+          "drop": 8.92,
           "range": [
             2.5,
-            16.4
+            15.9
           ],
-          "clawY": 21.53,
-          "sway": 0.06
+          "clawY": 19.15,
+          "sway": 0.15
         },
         {
           "id": "crane2",
-          "dYaw": 0.171,
-          "dDrop": 1.67,
-          "drop": 12.06,
+          "dYaw": 0.283,
+          "dDrop": 1.91,
+          "drop": 12.39,
           "range": [
             2.5,
-            13.1
+            12.6
           ],
-          "clawY": 12.01,
-          "sway": 0.24
+          "clawY": 11.67,
+          "sway": 0.12
         },
         {
           "id": "crane3",
-          "dYaw": 0.054,
-          "dDrop": 2.07,
-          "drop": 8.32,
+          "dYaw": 0.057,
+          "dDrop": 3.14,
+          "drop": 5.95,
           "range": [
             2.5,
-            11.4
+            10.4
           ],
-          "clawY": 7.84,
-          "sway": 0.16
+          "clawY": 10.21,
+          "sway": 0.08
         }
       ],
       "fx": {
         "groups": 4,
         "systems": 8,
         "running": 3,
-        "particles": 5
+        "particles": 11
       },
       "perf": {
-        "fps": 4.009783872649164,
+        "fps": 6.355393610711083,
         "draws": 54,
         "tris": 47483,
         "meshes": 51,
@@ -739,7 +739,7 @@
           1,
           1
         ],
-        "halos": 81
+        "halos": 70
       }
     },
     {
@@ -747,9 +747,21 @@
       "ok": true,
       "detail": [
         [
+          "furnace",
+          "jy_lm_furnace_hq.glb",
+          11747,
+          false
+        ],
+        [
           "tower",
           "jy_lm_crane_tower_hq.glb",
           9797,
+          false
+        ],
+        [
+          "boom",
+          "jy_lm_crane_jib_hq.glb",
+          6854,
           false
         ],
         [
@@ -763,18 +775,6 @@
           "jy_lm_colossus_hq.glb",
           21554,
           true
-        ],
-        [
-          "boom",
-          "jy_lm_crane_jib_hq.glb",
-          6854,
-          false
-        ],
-        [
-          "furnace",
-          "jy_lm_furnace_hq.glb",
-          11747,
-          false
         ],
         [
           "reactor",
@@ -801,7 +801,15 @@
       "ok": true,
       "detail": [
         [
+          "jy_lm_furnace_hq.glb",
+          false
+        ],
+        [
           "jy_lm_crane_tower_hq.glb",
+          false
+        ],
+        [
+          "jy_lm_crane_jib_hq.glb",
           false
         ],
         [
@@ -811,14 +819,6 @@
         [
           "jy_lm_colossus_hq.glb",
           true
-        ],
-        [
-          "jy_lm_crane_jib_hq.glb",
-          false
-        ],
-        [
-          "jy_lm_furnace_hq.glb",
-          false
         ],
         [
           "jy_lm_reactor_hq.glb",
@@ -954,39 +954,39 @@
       "detail": [
         {
           "id": "crane1",
-          "dYaw": 0.047,
-          "dDrop": 0.59,
-          "drop": 4.83,
+          "dYaw": 0.057,
+          "dDrop": 0.81,
+          "drop": 5.79,
           "range": [
             2.5,
-            16.4
+            15.9
           ],
-          "clawY": 23.24,
-          "sway": 0.03
+          "clawY": 22.29,
+          "sway": 0.04
         },
         {
           "id": "crane2",
-          "dYaw": 0.039,
-          "dDrop": 0.42,
-          "drop": 11.14,
+          "dYaw": 0.052,
+          "dDrop": 0.45,
+          "drop": 11.32,
           "range": [
             2.5,
-            13.1
+            12.6
           ],
-          "clawY": 12.92,
-          "sway": 0.26
+          "clawY": 12.74,
+          "sway": 0.24
         },
         {
           "id": "crane3",
-          "dYaw": 0.014,
-          "dDrop": 0.45,
-          "drop": 9.62,
+          "dYaw": 0.015,
+          "dDrop": 0.57,
+          "drop": 8.09,
           "range": [
             2.5,
-            11.4
+            10.4
           ],
-          "clawY": 6.54,
-          "sway": 0.07
+          "clawY": 8.07,
+          "sway": 0.14
         }
       ]
     },
@@ -996,39 +996,39 @@
       "detail": [
         {
           "id": "crane1",
-          "dYaw": 0.047,
-          "dDrop": 0.59,
-          "drop": 4.83,
+          "dYaw": 0.057,
+          "dDrop": 0.81,
+          "drop": 5.79,
           "range": [
             2.5,
-            16.4
+            15.9
           ],
-          "clawY": 23.24,
-          "sway": 0.03
+          "clawY": 22.29,
+          "sway": 0.04
         },
         {
           "id": "crane2",
-          "dYaw": 0.039,
-          "dDrop": 0.42,
-          "drop": 11.14,
+          "dYaw": 0.052,
+          "dDrop": 0.45,
+          "drop": 11.32,
           "range": [
             2.5,
-            13.1
+            12.6
           ],
-          "clawY": 12.92,
-          "sway": 0.26
+          "clawY": 12.74,
+          "sway": 0.24
         },
         {
           "id": "crane3",
-          "dYaw": 0.014,
-          "dDrop": 0.45,
-          "drop": 9.62,
+          "dYaw": 0.015,
+          "dDrop": 0.57,
+          "drop": 8.09,
           "range": [
             2.5,
-            11.4
+            10.4
           ],
-          "clawY": 6.54,
-          "sway": 0.07
+          "clawY": 8.07,
+          "sway": 0.14
         }
       ]
     },
@@ -1039,7 +1039,7 @@
         "groups": 4,
         "systems": 12,
         "running": 5,
-        "particles": 49
+        "particles": 90
       }
     },
     {
@@ -1056,12 +1056,6 @@
       "ok": true,
       "detail": [
         [
-          "furnace",
-          "jy_lm_furnace_lite.glb",
-          10307,
-          false
-        ],
-        [
           "tower",
           "jy_lm_crane_tower_lite.glb",
           6105,
@@ -1074,9 +1068,9 @@
           false
         ],
         [
-          "reactor",
-          "jy_lm_reactor_lite.glb",
-          10825,
+          "furnace",
+          "jy_lm_furnace_lite.glb",
+          10307,
           false
         ],
         [
@@ -1090,6 +1084,12 @@
           "jy_lm_crane_jib_lite.glb",
           2648,
           false
+        ],
+        [
+          "reactor",
+          "jy_lm_reactor_lite.glb",
+          10825,
+          false
         ]
       ]
     },
@@ -1097,10 +1097,6 @@
       "name": "medium：載入對應畫質的檔案（高畫質＝HQ，巨像與反應爐另帶 Lite 遠距離 LOD）",
       "ok": true,
       "detail": [
-        [
-          "jy_lm_furnace_lite.glb",
-          false
-        ],
         [
           "jy_lm_crane_tower_lite.glb",
           false
@@ -1110,7 +1106,7 @@
           false
         ],
         [
-          "jy_lm_reactor_lite.glb",
+          "jy_lm_furnace_lite.glb",
           false
         ],
         [
@@ -1119,6 +1115,10 @@
         ],
         [
           "jy_lm_crane_jib_lite.glb",
+          false
+        ],
+        [
+          "jy_lm_reactor_lite.glb",
           false
         ]
       ]
@@ -1243,39 +1243,39 @@
       "detail": [
         {
           "id": "crane1",
-          "dYaw": 0.151,
-          "dDrop": 1.87,
-          "drop": 5.48,
+          "dYaw": 0.205,
+          "dDrop": 2.91,
+          "drop": 7.02,
           "range": [
             2.5,
-            16.4
+            15.9
           ],
-          "clawY": 22.6,
-          "sway": 0.02
+          "clawY": 21.05,
+          "sway": 0.09
         },
         {
           "id": "crane2",
-          "dYaw": 0.125,
-          "dDrop": 1.38,
-          "drop": 11.53,
+          "dYaw": 0.187,
+          "dDrop": 1.58,
+          "drop": 11.86,
           "range": [
             2.5,
-            13.1
+            12.6
           ],
-          "clawY": 12.53,
-          "sway": 0.26
+          "clawY": 12.21,
+          "sway": 0.19
         },
         {
           "id": "crane3",
-          "dYaw": 0.047,
-          "dDrop": 1.45,
-          "drop": 9.13,
+          "dYaw": 0.051,
+          "dDrop": 2.05,
+          "drop": 7.23,
           "range": [
             2.5,
-            11.4
+            10.4
           ],
-          "clawY": 7.04,
-          "sway": 0.12
+          "clawY": 8.93,
+          "sway": 0.13
         }
       ]
     },
@@ -1285,39 +1285,39 @@
       "detail": [
         {
           "id": "crane1",
-          "dYaw": 0.151,
-          "dDrop": 1.87,
-          "drop": 5.48,
+          "dYaw": 0.205,
+          "dDrop": 2.91,
+          "drop": 7.02,
           "range": [
             2.5,
-            16.4
+            15.9
           ],
-          "clawY": 22.6,
-          "sway": 0.02
+          "clawY": 21.05,
+          "sway": 0.09
         },
         {
           "id": "crane2",
-          "dYaw": 0.125,
-          "dDrop": 1.38,
-          "drop": 11.53,
+          "dYaw": 0.187,
+          "dDrop": 1.58,
+          "drop": 11.86,
           "range": [
             2.5,
-            13.1
+            12.6
           ],
-          "clawY": 12.53,
-          "sway": 0.26
+          "clawY": 12.21,
+          "sway": 0.19
         },
         {
           "id": "crane3",
-          "dYaw": 0.047,
-          "dDrop": 1.45,
-          "drop": 9.13,
+          "dYaw": 0.051,
+          "dDrop": 2.05,
+          "drop": 7.23,
           "range": [
             2.5,
-            11.4
+            10.4
           ],
-          "clawY": 7.04,
-          "sway": 0.12
+          "clawY": 8.93,
+          "sway": 0.13
         }
       ]
     },
@@ -1328,7 +1328,7 @@
         "groups": 4,
         "systems": 12,
         "running": 5,
-        "particles": 9
+        "particles": 46
       }
     },
     {
@@ -1345,9 +1345,9 @@
       "ok": true,
       "detail": [
         [
-          "grab",
-          "jy_lm_crane_claw_lite.glb",
-          1666,
+          "colossus",
+          "jy_lm_colossus_lite.glb",
+          6858,
           false
         ],
         [
@@ -1369,9 +1369,9 @@
           false
         ],
         [
-          "colossus",
-          "jy_lm_colossus_lite.glb",
-          6858,
+          "grab",
+          "jy_lm_crane_claw_lite.glb",
+          1666,
           false
         ],
         [
@@ -1387,7 +1387,7 @@
       "ok": true,
       "detail": [
         [
-          "jy_lm_crane_claw_lite.glb",
+          "jy_lm_colossus_lite.glb",
           false
         ],
         [
@@ -1403,7 +1403,7 @@
           false
         ],
         [
-          "jy_lm_colossus_lite.glb",
+          "jy_lm_crane_claw_lite.glb",
           false
         ],
         [
@@ -1532,39 +1532,39 @@
       "detail": [
         {
           "id": "crane1",
-          "dYaw": 0.195,
-          "dDrop": 2.69,
-          "drop": 6.54,
+          "dYaw": 0.287,
+          "dDrop": 4.54,
+          "drop": 8.92,
           "range": [
             2.5,
-            16.4
+            15.9
           ],
-          "clawY": 21.53,
-          "sway": 0.06
+          "clawY": 19.15,
+          "sway": 0.15
         },
         {
           "id": "crane2",
-          "dYaw": 0.171,
-          "dDrop": 1.67,
-          "drop": 12.06,
+          "dYaw": 0.283,
+          "dDrop": 1.91,
+          "drop": 12.39,
           "range": [
             2.5,
-            13.1
+            12.6
           ],
-          "clawY": 12.01,
-          "sway": 0.24
+          "clawY": 11.67,
+          "sway": 0.12
         },
         {
           "id": "crane3",
-          "dYaw": 0.054,
-          "dDrop": 2.07,
-          "drop": 8.32,
+          "dYaw": 0.057,
+          "dDrop": 3.14,
+          "drop": 5.95,
           "range": [
             2.5,
-            11.4
+            10.4
           ],
-          "clawY": 7.84,
-          "sway": 0.16
+          "clawY": 10.21,
+          "sway": 0.08
         }
       ]
     },
@@ -1574,39 +1574,39 @@
       "detail": [
         {
           "id": "crane1",
-          "dYaw": 0.195,
-          "dDrop": 2.69,
-          "drop": 6.54,
+          "dYaw": 0.287,
+          "dDrop": 4.54,
+          "drop": 8.92,
           "range": [
             2.5,
-            16.4
+            15.9
           ],
-          "clawY": 21.53,
-          "sway": 0.06
+          "clawY": 19.15,
+          "sway": 0.15
         },
         {
           "id": "crane2",
-          "dYaw": 0.171,
-          "dDrop": 1.67,
-          "drop": 12.06,
+          "dYaw": 0.283,
+          "dDrop": 1.91,
+          "drop": 12.39,
           "range": [
             2.5,
-            13.1
+            12.6
           ],
-          "clawY": 12.01,
-          "sway": 0.24
+          "clawY": 11.67,
+          "sway": 0.12
         },
         {
           "id": "crane3",
-          "dYaw": 0.054,
-          "dDrop": 2.07,
-          "drop": 8.32,
+          "dYaw": 0.057,
+          "dDrop": 3.14,
+          "drop": 5.95,
           "range": [
             2.5,
-            11.4
+            10.4
           ],
-          "clawY": 7.84,
-          "sway": 0.16
+          "clawY": 10.21,
+          "sway": 0.08
         }
       ]
     },
@@ -1617,7 +1617,7 @@
         "groups": 4,
         "systems": 8,
         "running": 3,
-        "particles": 5
+        "particles": 11
       }
     },
     {
@@ -1627,6 +1627,34 @@
         "errors": [],
         "bad": [],
         "glbReq": 6
+      }
+    },
+    {
+      "name": "資源釋放：地標網格、材質、貼圖、粒子全部釋放，之後繼續正常繪製",
+      "ok": true,
+      "detail": {
+        "before": {
+          "meshes": 254,
+          "materials": 47,
+          "textures": 19,
+          "geometries": 232,
+          "particles": 21,
+          "engineTextures": 36
+        },
+        "after": {
+          "meshes": 214,
+          "materials": 23,
+          "textures": 15,
+          "geometries": 214,
+          "particles": 9,
+          "engineTextures": 16
+        },
+        "released": {
+          "nodes": 7,
+          "containers": 8,
+          "materials": 9
+        },
+        "errors": []
       }
     },
     {
@@ -2217,32 +2245,32 @@
       {
         "id": "entry",
         "draws": 102,
-        "tris": 197945
+        "tris": 188544
       },
       {
         "id": "central",
         "draws": 95,
-        "tris": 207471
+        "tris": 188674
       },
       {
         "id": "recycle",
-        "draws": 112,
-        "tris": 209835
+        "draws": 117,
+        "tris": 163960
       },
       {
         "id": "factory",
-        "draws": 110,
-        "tris": 202732
+        "draws": 107,
+        "tris": 159298
       },
       {
         "id": "platform",
-        "draws": 83,
-        "tris": 126247
+        "draws": 79,
+        "tris": 91584
       },
       {
         "id": "core",
-        "draws": 71,
-        "tris": 197374
+        "draws": 75,
+        "tris": 159278
       }
     ],
     "v2look_halos": 0,
@@ -2250,35 +2278,59 @@
       {
         "id": "entry",
         "draws": 103,
-        "tris": 197945
+        "tris": 188544
       },
       {
         "id": "central",
         "draws": 96,
-        "tris": 207471
+        "tris": 188674
       },
       {
         "id": "recycle",
-        "draws": 113,
-        "tris": 209835
+        "draws": 118,
+        "tris": 163960
       },
       {
         "id": "factory",
-        "draws": 111,
-        "tris": 202732
+        "draws": 108,
+        "tris": 159298
       },
       {
         "id": "platform",
-        "draws": 84,
-        "tris": 126247
+        "draws": 80,
+        "tris": 91584
       },
       {
         "id": "core",
-        "draws": 72,
-        "tris": 197374
+        "draws": 76,
+        "tris": 159278
       }
     ],
-    "v3look_halos": 81
+    "v3look_halos": 70
   },
-  "finishedAt": "2026-11-28T09:49:32.105Z"
+  "dispose": {
+    "before": {
+      "meshes": 254,
+      "materials": 47,
+      "textures": 19,
+      "geometries": 232,
+      "particles": 21,
+      "engineTextures": 36
+    },
+    "after": {
+      "meshes": 214,
+      "materials": 23,
+      "textures": 15,
+      "geometries": 214,
+      "particles": 9,
+      "engineTextures": 16
+    },
+    "released": {
+      "nodes": 7,
+      "containers": 8,
+      "materials": 9
+    },
+    "fxAfter": null
+  },
+  "finishedAt": "2026-11-28T12:59:08.903Z"
 }
