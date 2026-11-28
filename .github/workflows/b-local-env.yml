@@ -1,0 +1,32 @@
+name: Claude B local dev env (read-only artifact)
+# 安裝 npm 套件（含 glTF 工具），把完整 node_modules 打包推到孤立分支 tools/b-node-modules（Claude B 本機建置與檢查用）；不部署、不改程式。
+on:
+  push:
+    branches: [tools/b-local-env]
+permissions:
+  contents: write
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npm install --no-audit --no-fund --no-save @gltf-transform/cli@4 @gltf-transform/core@4 @gltf-transform/extensions@4 @gltf-transform/functions@4 meshoptimizer sharp
+      - name: Pack node_modules (split < 90 MB)
+        run: |
+          mkdir -p /tmp/pack
+          tar czf - node_modules | split -b 90m - /tmp/pack/nm.tgz.part-
+          ls -la /tmp/pack
+      - name: Push to new orphan branch
+        run: |
+          cd /tmp/pack
+          git init -q -b b-nm
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add .
+          git commit -q -m "node_modules for Claude B local build"
+          git push "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" HEAD:refs/heads/tools/b-node-modules-${{ github.run_id }}
