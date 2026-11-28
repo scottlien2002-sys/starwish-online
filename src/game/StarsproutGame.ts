@@ -128,7 +128,7 @@ export interface PlayApi {
     /** Stage 7.3：戰鬥特效計數 */
     combatFx: { tier: string; hitFx: number; numbers: number; hurt: number; respawnFx: number; damageShown: number; knockbacks: number; knockSkipped: number } | null;
     pets: { enabled: boolean; mode: string; reason: string; items: Record<ItemId, number>; count: number; equipped: number | null; followerVisible: boolean; followerDist: number };
-    render: { p3: boolean; pipeline: boolean; charShadow: CharShadowMode; drawCalls: number; fps: number; contextLost: number };
+    render: { p3: boolean; pipeline: boolean; charShadow: CharShadowMode; drawCalls: number; fps: number; contextLost: number; triangles: number; veg: ReturnType<VegetationView["stats"]> | null };
   };
   setMove(x: number, y: number): void;
   press(a: "attack" | "jump"): void;
@@ -1326,7 +1326,7 @@ class StarsproutGame {
             followerVisible: self.follower.visible,
             followerDist: Math.hypot(fp.x - head.x, fp.y - head.y, fp.z - head.z),
           },
-          render: { p3: self.p3, pipeline: self.quality.postProcess, charShadow: self.charShadow, drawCalls: self.perf.drawCalls, fps: self.engine.getFps(), contextLost: self.contextLost },
+          render: { p3: self.p3, pipeline: self.quality.postProcess, charShadow: self.charShadow, drawCalls: self.perf.drawCalls, fps: self.engine.getFps(), contextLost: self.contextLost, triangles: Math.round(self.scene.getActiveIndices() / 3), veg: self.veg?.stats() ?? null },
         };
       },
       setMove: (x, y) => (self.input.moveOverride = x === 0 && y === 0 ? null : { x, y }),
