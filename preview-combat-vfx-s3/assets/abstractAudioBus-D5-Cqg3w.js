@@ -1,0 +1,1 @@
+import{Fr as e}from"./index-DTGWjsEe.js";var t=class extends e{constructor(e,t){super(e,t,3)}};export{t};
