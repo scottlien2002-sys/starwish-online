@@ -47,7 +47,7 @@ import {
   STEAM_VENTS,
   type Vec2,
 } from "./layout.ts";
-import { COLLIDERS, groundHeight, insideColliders, pipeSupports, plateauInside, STATIC_COLLIDERS } from "./terrain.ts";
+import { COLLIDERS, groundHeight, insideColliders, insideLandmark, pipeSupports, plateauInside, SCATTER_COLLIDERS } from "./terrain.ts";
 import { makeContactAO } from "../../world/contactAO.ts";
 import { GlowHalos } from "../../world/glowHalos.ts";
 import { polyDist, rng, smoothstep } from "./geom.ts";
@@ -107,6 +107,17 @@ const CHUNK = 50;
 const mix = (a: Rgb, b: Rgb, t: number): [number, number, number] => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
 
 /** 地形頂點色（依區域、路面、坡度、高度） */
+/** V3：被正式地標壓住的垃圾（垃圾堆、碎屑、道具）不畫；其他位置與 V2 完全相同 */
+function dropUnderLandmarks(r: ScatterResult): ScatterResult {
+  for (const m of r.junk.values()) {
+    for (const [t, list] of m) {
+      const keep = list.filter((it) => !insideLandmark(it.x, it.z, 0.3 * it.s));
+      if (keep.length !== list.length) m.set(t, keep);
+    }
+  }
+  return { ...r, piles: r.piles.filter((p) => !insideLandmark(p.x, p.z, p.r * 0.6)) };
+}
+
 /** V3：地面接觸陰影（垃圾堆、建築、機械、地標、道具的腳邊變暗；烘焙到頂點色） */
 const GROUND_AO = makeContactAO(
   COLLIDERS.map((c) => (c.kind === "circle" ? { x: c.x, z: c.z, r: c.r, k: c.r < 0.4 ? 0.4 : 1 } : { x: c.x, z: c.z, r: Math.min(c.hx, c.hz) * 1.05, k: 0.8 })),
@@ -226,7 +237,7 @@ export class JunkyardWorld {
     this.tierCfg = SCATTER_TIERS[tier];
     this.mats = createJunkMaterials(scene, tier);
     this.root = new TransformNode("jy_root", scene);
-    this.scatter = scatterAll(groundHeight, (x, z, p) => insideColliders(STATIC_COLLIDERS, x, z, p), this.tierCfg);
+    this.scatter = dropUnderLandmarks(scatterAll(groundHeight, (x, z, p) => insideColliders(SCATTER_COLLIDERS, x, z, p), this.tierCfg));
     this.buildTerrain();
     this.buildPavement();
     this.buildWater();
@@ -448,6 +459,7 @@ export class JunkyardWorld {
 
   /** V3：隱藏某地標的程序化網格（GLB 已取代）；回傳隱藏的網格數 */
   hideProcedural(key: string): number {
+    this.halos?.disableTag(key);
     const list = this.procParts.get(key) ?? [];
     for (const m of list) {
       m.setEnabled(false);
@@ -457,9 +469,12 @@ export class JunkyardWorld {
     return list.length;
   }
 
-  private halo(x: number, y: number, z: number, size: number, color: Rgb, o: { alpha?: number; pulse?: { speed: number; amp: number; phase?: number }; flicker?: { phase: number } } = {}): void {
-    this.halos?.add(new Vector3(x, y, z), { size, color: [color[0], color[1], color[2]], ...o });
+  halo(x: number, y: number, z: number, size: number, color: Rgb, o: { alpha?: number; pulse?: { speed: number; amp: number; phase?: number }; flicker?: { phase: number } } = {}, tag = ""): void {
+    this.halos?.add(new Vector3(x, y, z), { size, color: [color[0], color[1], color[2]], ...o }, tag);
   }
+
+  /** V3：每幀額外更新（地標 GLB 的吊車、特效） */
+  readonly updaters: ((dt: number, t: number, px: number, pz: number) => void)[] = [];
 
   private regProc(key: string, meshes: Mesh[]): void {
     const a = this.procParts.get(key) ?? [];
@@ -543,7 +558,7 @@ export class JunkyardWorld {
         const t = i / n;
         const x = r.a.x + (r.b.x - r.a.x) * t;
         const z = r.a.z + (r.b.z - r.a.z) * t;
-        if (insideColliders(STATIC_COLLIDERS, x, z, 0.3)) {
+        if ((insideColliders(SCATTER_COLLIDERS, x, z, 0.3) || insideLandmark(x, z, 1.3))) {
           prev = null;
           continue;
         }
@@ -696,7 +711,7 @@ export class JunkyardWorld {
     }
     this.regProc(`crane:${c.id}:tower`, this.addKit(k, this.zoneAt(c.x, c.z)));
     // 塔頂警示燈（旋轉軸上，不隨吊臂移動）
-    this.halo(c.x, gy + 1 + c.h + 2.9, c.z, 1.8, PAL.red, { alpha: 0.8, pulse: { speed: 4.2, amp: 0.9, phase: c.phase } });
+    this.halo(c.x, gy + 1 + c.h + 2.9, c.z, 1.8, PAL.red, { alpha: 0.8, pulse: { speed: 4.2, amp: 0.9, phase: c.phase } }, `crane:${c.id}:tower`);
     // 旋轉部分
     const swing = new TransformNode(`jy_${c.id}_swing`, this.scene);
     swing.parent = this.root;
@@ -869,8 +884,8 @@ export class JunkyardWorld {
       k.box(f.r * 1.1, 1.2, 0.3, f.x, f.y + 1.1, f.z - f.r * 1.08, PAL.orange, "glowOrange");
       k.cyl(0.9, 1.1, 6, f.x + f.r * 0.6, f.y + 5.6, f.z + f.r * 0.4, PAL.rust, "paint", 10);
       this.regProc(`furnace:${f.id}`, this.addKit(k, this.zoneAt(f.x, f.z)));
-      this.halo(f.x, f.y + 1.2, f.z - f.r * 1.25, f.r * 1.7, PAL.orange, { alpha: 0.65, pulse: { speed: 3.1, amp: 0.3 } });
-      this.halo(f.x, f.y + 3.9, f.z, f.r * 2.4, [1, 0.6, 0.25], { alpha: 0.45, pulse: { speed: 1.7, amp: 0.25, phase: 1 } });
+      this.halo(f.x, f.y + 1.2, f.z - f.r * 1.25, f.r * 1.7, PAL.orange, { alpha: 0.65, pulse: { speed: 3.1, amp: 0.3 } }, `furnace:${f.id}`);
+      this.halo(f.x, f.y + 3.9, f.z, f.r * 2.4, [1, 0.6, 0.25], { alpha: 0.45, pulse: { speed: 1.7, amp: 0.25, phase: 1 } }, `furnace:${f.id}`);
       if (this.tier !== "low") this.sparks(new Vector3(f.x, f.y + 3.6, f.z), this.tier === "high" ? 26 : 14);
     }
   }
@@ -940,10 +955,13 @@ export class JunkyardWorld {
     const kc = new Kit(this.scene, this.mats, "jy_reactor_glow");
     kc.cyl(R.r * 1.15, R.r * 1.15, 7.4, 0, 0, 0, PAL.orange, "glowOrange", 16, [0, 0, 0], coreNode);
     kc.sphere(R.r * 1.2, 0, 4.2, 0, PAL.gold, "glowOrange", 12, [1, 0.6, 1], coreNode);
-    for (const m of kc.bake()) this.landmarks.push({ mesh: m, zone: "core", caster: false });
+    for (const m of kc.bake()) {
+      this.landmarks.push({ mesh: m, zone: "core", caster: false });
+      this.regProc("reactor:reactor", [m]);
+    }
     this.anim.core = coreNode;
-    this.halo(R.x, y + 13, R.z, R.r * 3.2, [1, 0.72, 0.35], { alpha: 0.5, pulse: { speed: 2.2, amp: 0.2 } });
-    this.halo(R.x, y + 17.5, R.z, R.r * 1.8, PAL.gold, { alpha: 0.4, pulse: { speed: 2.2, amp: 0.25, phase: 0.6 } });
+    this.halo(R.x, y + 13, R.z, R.r * 3.2, [1, 0.72, 0.35], { alpha: 0.5, pulse: { speed: 2.2, amp: 0.2 } }, "reactor:reactor");
+    this.halo(R.x, y + 17.5, R.z, R.r * 1.8, PAL.gold, { alpha: 0.4, pulse: { speed: 2.2, amp: 0.25, phase: 0.6 } }, "reactor:reactor");
     for (let i = 0; i < 3; i++) {
       const rn = new TransformNode(`jy_reactor_ring${i}`, this.scene);
       rn.parent = this.root;
@@ -957,6 +975,7 @@ export class JunkyardWorld {
       }
       for (const m of kr.bake()) {
         m.receiveShadows = true;
+        this.regProc("reactor:reactor", [m]);
         this.landmarks.push({ mesh: m, zone: "core", caster: i === 0 });
       }
       this.anim.rings.push({ node: rn, speed: (i % 2 ? -1 : 1) * (0.25 + i * 0.12) });
@@ -996,7 +1015,7 @@ export class JunkyardWorld {
     node.computeWorldMatrix(true);
     for (const sx of [-2.6, 2.6]) {
       const w = Vector3.TransformCoordinates(new Vector3(sx, 4.6, -7.2), node.getWorldMatrix());
-      this.halo(w.x, w.y, w.z, 4.2, PAL.orange, { alpha: 0.7, pulse: { speed: 1.3, amp: 0.35 }, flicker: { phase: sx } });
+      this.halo(w.x, w.y, w.z, 4.2, PAL.orange, { alpha: 0.7, pulse: { speed: 1.3, amp: 0.35 }, flicker: { phase: sx } }, "colossus:colossus");
     }
   }
 
@@ -1055,7 +1074,7 @@ export class JunkyardWorld {
         const nz = (b.x - a.x) / L;
         const x = a.x + (b.x - a.x) * t + nx * 4.4;
         const z = a.z + (b.z - a.z) * t + nz * 4.4;
-        if (insideColliders(STATIC_COLLIDERS, x, z, 1) || polyDist(x, z, MAIN_ROUTE) < 3.8) continue;
+        if ((insideColliders(SCATTER_COLLIDERS, x, z, 1) || insideLandmark(x, z, 2)) || polyDist(x, z, MAIN_ROUTE) < 3.8) continue;
         if (DECKS.some((d) => Math.hypot(x - (d.a.x + d.b.x) / 2, z - (d.a.z + d.b.z) / 2) < Math.hypot(d.b.x - d.a.x, d.b.z - d.a.z) / 2 + d.w)) continue;
         const y = groundHeight(x, z);
         k.cyl(0.22, 0.3, 3.4, x, y + 1.7, z, PAL.ironDark, "metal", 6);
@@ -1193,7 +1212,7 @@ export class JunkyardWorld {
         const x = m.x + Math.cos(a) * rr;
         const z = m.z + Math.sin(a) * rr;
         if (Math.abs(x) > 140 || Math.abs(z) > 140) continue;
-        if (polyDist(x, z, MAIN_ROUTE) < 7 || insideColliders(STATIC_COLLIDERS, x, z, 3)) continue;
+        if (polyDist(x, z, MAIN_ROUTE) < 7 || (insideColliders(SCATTER_COLLIDERS, x, z, 3) || insideLandmark(x, z, 4))) continue;
         const k = kitFor(x, z);
         const c = paints[Math.floor(r() * paints.length)]!;
         const kind = Math.floor(r() * 5);
@@ -1548,6 +1567,7 @@ export class JunkyardWorld {
   update(dt: number, px: number, pz: number, py: number): void {
     this.t += dt;
     const t = this.t;
+    for (const u of this.updaters) u(dt, t, px, pz);
     for (const c of this.anim.cranes) {
       c.swing.rotation.y = c.def.phase + Math.sin(t * c.def.speed + c.def.phase) * c.def.swing;
       c.claw.position.y = -3.4 - (0.5 + 0.5 * Math.sin(t * c.def.speed * 2.2 + c.def.phase)) * 3;

@@ -31,6 +31,7 @@ import {
 import { lerp, polyDist, segDist, smoothstep } from "./geom.ts";
 import { pileColliders, propColliders } from "./scatter.ts";
 import { ColliderGrid } from "../../world/colliderGrid.ts";
+import { LANDMARK_FOOTPRINTS } from "./landmarkColliders.gen.ts";
 export { segDist, smoothstep };
 
 /** 高台內部的「到邊緣距離」（正＝在內部） */
@@ -185,13 +186,36 @@ export function insideColliders(list: readonly Collider[], x: number, z: number,
   return false;
 }
 
-/** 固定碰撞物（建築、吊車、反應爐…），不含垃圾堆 */
-export const STATIC_COLLIDERS: readonly Collider[] = buildColliders();
-/** 全部碰撞物＝固定＋垃圾堆（垃圾堆位置與畫質無關） */
+/**
+ * 6.9／V2 的固定碰撞物（含程序化地標的碰撞圓）：只用來決定垃圾堆、碎屑、道具的擺放，
+ * 讓 V3 換上正式地標後，其他地方的垃圾配置完全不變。
+ */
+export const SCATTER_COLLIDERS: readonly Collider[] = buildColliders();
+
+/** V3：四大地標依 GLB 實際外形產生的碰撞（取代 6.9 的程序化碰撞圓） */
+const LANDMARK_IDS = new Set(["colossus", "colossus-arm", "reactor", ...FURNACES.map((f) => f.id), ...CRANES.map((c) => c.id)]);
+export const LANDMARK_COLLIDERS: readonly Collider[] = Object.entries(LANDMARK_FOOTPRINTS).flatMap(([id, boxes]) =>
+  boxes.map((b, i): Collider => ({ kind: "box", id: `lm-${id}-${i}`, x: b[0], z: b[1], hx: b[2], hz: b[3], rot: 0 })),
+);
+const LM_GRID = new ColliderGrid(LANDMARK_COLLIDERS.map((c) => ({ x: c.x, z: c.z, bound: c.kind === "circle" ? c.r : Math.hypot(c.hx, c.hz) })), 8);
+const lmNear: number[] = [];
+/** 點（含半徑 pad）是否落在地標佔地內 */
+export function insideLandmark(x: number, z: number, pad: number): boolean {
+  for (const i of LM_GRID.query(x, z, pad, lmNear)) if (insideColliders([LANDMARK_COLLIDERS[i]!], x, z, pad)) return true;
+  return false;
+}
+
+/** 固定碰撞物（建築、吊車、反應爐…），不含垃圾堆；V3 地標用實際外形 */
+export const STATIC_COLLIDERS: readonly Collider[] = [...SCATTER_COLLIDERS.filter((c) => !LANDMARK_IDS.has(c.id)), ...LANDMARK_COLLIDERS];
+/** 全部碰撞物＝固定＋垃圾堆＋道具（位置與畫質無關；被地標壓住的垃圾堆、道具移除） */
 export const COLLIDERS: readonly Collider[] = [
   ...STATIC_COLLIDERS,
-  ...pileColliders(groundHeight, (x, z, pad) => insideColliders(STATIC_COLLIDERS, x, z, pad)).map((p): Collider => ({ kind: "circle", ...p })),
-  ...propColliders(groundHeight, (x, z, pad) => insideColliders(STATIC_COLLIDERS, x, z, pad)).map((p): Collider => ({ kind: "circle", ...p })),
+  ...pileColliders(groundHeight, (x, z, pad) => insideColliders(SCATTER_COLLIDERS, x, z, pad))
+    .filter((p) => !insideLandmark(p.x, p.z, p.r * 0.6))
+    .map((p): Collider => ({ kind: "circle", ...p })),
+  ...propColliders(groundHeight, (x, z, pad) => insideColliders(SCATTER_COLLIDERS, x, z, pad))
+    .filter((p) => !insideLandmark(p.x, p.z, p.r))
+    .map((p): Collider => ({ kind: "circle", ...p })),
 ];
 
 /** V2：全部碰撞物的空間格（每次只檢查附近的碰撞物） */

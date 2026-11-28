@@ -51,6 +51,18 @@ function main(): void {
         });
       return;
     }
+    // ?map=jylab：星廢垃圾場 V3 地標實驗場景（開發與 CI 截圖用）
+    if (map === "jylab") {
+      document.body.classList.add("map-mode");
+      void import("./maps/junkyard/LandmarkLab.ts")
+        .then((m) => m.startLandmarkLab(canvas))
+        .then(() => hideBoot())
+        .catch((err: unknown) => {
+          console.error(err);
+          fail(`地標實驗場景載入失敗：${err instanceof Error ? err.message : String(err)}`);
+        });
+      return;
+    }
     // ?map=junkyard：Stage 6.8＋6.9 星廢垃圾場（Lv11–20）；&quality=high|medium|low、&spawns=1、&autoplay=walk|tour
     if (map === "junkyard") {
       document.body.classList.add("map-mode");

@@ -42,6 +42,8 @@ interface HaloRec {
   o: HaloOptions;
   x: number;
   z: number;
+  tag: string;
+  off: boolean;
 }
 
 export class GlowHalos {
@@ -71,7 +73,20 @@ export class GlowHalos {
     return this.list.length;
   }
 
-  add(pos: Vector3, o: HaloOptions): Sprite | null {
+  /** 停用某標籤的全部光暈（例：程序化地標被 GLB 取代） */
+  disableTag(tag: string): number {
+    let n = 0;
+    for (const h of this.list) {
+      if (h.tag === tag && !h.off) {
+        h.off = true;
+        h.sprite.isVisible = false;
+        n++;
+      }
+    }
+    return n;
+  }
+
+  add(pos: Vector3, o: HaloOptions, tag = ""): Sprite | null {
     if (this.list.length >= this.manager.capacity) return null;
     const s = new Sprite(`halo${this.list.length}`, this.manager);
     s.position.copyFrom(pos);
@@ -79,7 +94,7 @@ export class GlowHalos {
     const a = o.alpha ?? 0.7;
     s.color = new Color4(o.color[0] * a, o.color[1] * a, o.color[2] * a, 1);
     s.isPickable = false;
-    this.list.push({ sprite: s, base: o.size, alpha: a, rgb: o.color, o, x: pos.x, z: pos.z });
+    this.list.push({ sprite: s, base: o.size, alpha: a, rgb: o.color, o, x: pos.x, z: pos.z, tag, off: false });
     return s;
   }
 
@@ -89,6 +104,7 @@ export class GlowHalos {
     const t = this.t;
     const md2 = this.maxDistIn * this.maxDistIn;
     for (const h of this.list) {
+      if (h.off) continue;
       const dx = h.x - px;
       const dz = h.z - pz;
       const vis = dx * dx + dz * dz < md2;

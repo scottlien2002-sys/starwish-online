@@ -122,6 +122,7 @@ class JunkyardPage {
   private shotHold = false;
   private lmReport: import("./JunkyardLandmarks.ts").LandmarkLoadReport | null = null;
   private lmNodes: Map<string, import("@babylonjs/core").TransformNode> | null = null;
+  private lmMod: typeof import("./JunkyardLandmarks.ts") | null = null;
   private pauseFlag = false;
   private reportBox!: HTMLTextAreaElement;
   private readonly t0 = performance.now();
@@ -195,15 +196,32 @@ class JunkyardPage {
     this.render = setupRendering(scene, this.camera.camera, this.quality, { hdr: preset.hdr });
     if (this.render.glow) this.render.glow.isEnabled = false;
     this.world.updateStreaming(this.pos.x, this.pos.z);
+    // V3：&jycol=1 顯示地標碰撞（半透明紅框，驗收截圖用）
+    if (params.get("jycol") === "1") {
+      void import("./terrain.ts").then((t) => {
+        const mat = new StandardMaterial("jy_col_dbg", scene);
+        mat.diffuseColor = new Color3(1, 0.2, 0.2);
+        mat.emissiveColor = new Color3(0.6, 0.1, 0.1);
+        mat.alpha = 0.35;
+        for (const c of t.LANDMARK_COLLIDERS) {
+          if (c.kind !== "box") continue;
+          const b = MeshBuilder.CreateBox(`dbg_${c.id}`, { width: c.hx * 2, depth: c.hz * 2, height: 2.4 }, scene);
+          b.position.set(c.x, t.groundHeight(c.x, c.z) + 1.2, c.z);
+          b.material = mat;
+          b.isPickable = false;
+        }
+      });
+    }
     // V3：大型地標 GLB（清單裡有檔案才載入；沒有時維持程序化地標）
     void import("./JunkyardLandmarks.ts")
-      .then((m) => m.loadLandmarks(this.world, { baseUrl: `${import.meta.env.BASE_URL}models/junkyard/`, lite: this.lite }).then((r) => ({ r, nodes: m.LANDMARK_NODES })))
-      .then(({ r, nodes }) => {
+      .then((m) => m.loadLandmarks(this.world, { baseUrl: `${import.meta.env.BASE_URL}models/junkyard/`, lite: this.lite, tier: this.tier }).then((r) => ({ r, nodes: m.LANDMARK_NODES, mod: m })))
+      .then(({ r, nodes, mod }) => {
         this.lmReport = r;
         this.lmNodes = nodes;
+        this.lmMod = mod;
       })
       .catch((e) => {
-        this.lmReport = { manifest: [], loaded: [], failed: [{ file: "*", error: String(e) }], hidden: 0 };
+        this.lmReport = { manifest: [], loaded: [], placed: [], failed: [{ file: "*", error: String(e) }], hidden: 0 };
       });
 
     if (params.get("char") !== "simple") {
@@ -731,7 +749,16 @@ class JunkyardPage {
           const b = n.getHierarchyBoundingVectors(true);
           boxes[k] = { min: [b.min.x, b.min.y, b.min.z], max: [b.max.x, b.max.y, b.max.z] };
         }
-        return { report: this.lmReport, boxes, procHidden: [...this.world.procParts.entries()].map(([k, ms]) => [k, ms.filter((m) => m.isEnabled()).length, ms.length]) };
+        const cranes: Record<string, unknown> = {};
+        for (const [id, r] of this.lmMod?.CRANE_RIGS ?? []) {
+          const w = (n: import("@babylonjs/core").TransformNode): number[] => {
+            n.computeWorldMatrix(true);
+            const p = n.getAbsolutePosition();
+            return [p.x, p.y, p.z];
+          };
+          cranes[id] = { pivot: w(r.swing), hang: w(r.hang), claw: w(r.claw), swingYaw: r.swing.rotation.y, drop: -r.claw.position.y, pivotY: r.pivotY, pulleyY: r.pulleyY, reach: r.reach, dropMin: r.dropMin, dropMax: r.dropMax };
+        }
+        return { report: this.lmReport, boxes, cranes, fx: this.lmMod?.LANDMARK_STATE.fx?.stats ?? null, procHidden: [...this.world.procParts.entries()].map(([k, ms]) => [k, ms.filter((m) => m.isEnabled()).length, ms.length]) };
       },
       portal: () => ({ armed: this.portal.isArmed, fired: this.portal.hasFired, log: this.portalLog.slice(), spec: JUNKYARD_ENTRY_PORTAL, links: JUNKYARD_LINKS }),
       charStats: () => this.char?.stats() ?? null,

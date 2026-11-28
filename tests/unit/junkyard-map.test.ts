@@ -158,9 +158,10 @@ test("橋、步道、階梯：兩端與地面高度相接（沒有落差），�
       assert.ok(!grid.walkable(sx, sz) || Math.abs(grid.height(sx, sz) - grid.height(mx, mz)) > 2);
     }
   }
-  // 推出碰撞：反應爐中心推出到半徑外
-  const p = pushOut(REACTOR.x, REACTOR.z + 0.1, 0.3);
-  assert.ok(Math.hypot(p.x - REACTOR.x, p.z - REACTOR.z) >= REACTOR.r + 0.29);
+  // 推出碰撞：站進反應爐（V3 正式模型）佔地內會被推到佔地外
+  const p = pushOut(22, 133.5, 0.3);
+  assert.ok(!insideColliders(COLLIDERS, p.x, p.z, 0.28), `推出後仍在碰撞內 (${p.x},${p.z})`);
+  void REACTOR;
 });
 
 test("雙向傳送接口（與 Claude A worldPortals 相同格式）：踩入觸發一次；抵達點都在對方觸發半徑外；原野端預設不開放", () => {
@@ -204,32 +205,31 @@ test("V2 高台地面道具：在高台頂面、避開主路線、怪物出生�
   assert.deepEqual(r.piles.map((p) => [p.x, p.z, p.r]), r2.piles.map((p) => [p.x, p.z, p.r]));
 });
 
-test("V3 地標資產槽：四個地標、檔名、預算與自動縮放置中", async () => {
-  const { LANDMARK_SLOTS, fitTransform, landmarkFile } = await import("../../src/maps/junkyard/landmarkSlots.ts");
-  assert.deepEqual(LANDMARK_SLOTS.map((s) => s.id), ["colossus", "furnace", "crane", "reactor"]);
-  for (const s of LANDMARK_SLOTS) {
-    assert.ok(s.placements.length >= 1);
-    for (const p of s.parts) {
-      assert.ok(p.liteTris < p.hqTris && p.liteTex <= p.hqTex, p.stem);
-      assert.match(landmarkFile(p, false), /^jy_lm_[a-z_]+_hq\.glb$/);
-      assert.match(landmarkFile(p, true), /_lite\.glb$/);
+test("V3 四大地標：等比縮放的最終尺寸合理、不擋主路線／出生區／Boss 廣場／傳送陣、碰撞依實際外形", async () => {
+  const { PLACEMENTS, CRANE_SPECS, MODELS, landmarkSize, landmarkFile } = await import("../../src/maps/junkyard/landmarkSlots.ts");
+  const { LANDMARK_COLLIDERS, insideLandmark } = await import("../../src/maps/junkyard/terrain.ts");
+  const { SPAWNS, ARENA, JUNKYARD_ENTRY_PORTAL } = await import("../../src/maps/junkyard/layout.ts");
+  for (const m of Object.values(MODELS)) {
+    assert.ok(m.liteTris < m.hqTris && m.liteTex <= m.hqTex && m.hqTex <= 2048, m.stem);
+    assert.match(landmarkFile(m, false), /^jy_lm_[a-z_]+_hq\.glb$/);
+  }
+  const size = Object.fromEntries(PLACEMENTS.map((p) => [p.id, landmarkSize(p)]));
+  // 尺寸範圍（公尺）：大型地標壯觀但不遮蔽畫面
+  assert.ok(size.colossus!.w > 22 && size.colossus!.w < 32 && size.colossus!.h < 17);
+  assert.ok(size.furnace1!.h > 7.5 && size.furnace1!.h < 11);
+  assert.ok(size.reactor!.h > 16 && size.reactor!.h < 27 && size.reactor!.w < 23);
+  for (const c of CRANE_SPECS) assert.ok(c.towerUnit > 12 && c.boomUnit / c.towerUnit > 0.85 && c.boomUnit / c.towerUnit < 1.1);
+  // 每座地標都有碰撞
+  for (const id of ["colossus", "furnace1", "furnace2", "reactor", "crane1", "crane2", "crane3"]) assert.ok(LANDMARK_COLLIDERS.some((c) => c.id.startsWith(`lm-${id}-`)), id);
+  // 不壓到怪物出生區、Boss 廣場中央（半徑 18 m 內）、傳送陣
+  for (const s of SPAWNS) {
+    if (s.id.startsWith("S14")) continue;
+    for (let a = 0; a < 24; a++) {
+      const x = s.x + Math.cos((a / 24) * Math.PI * 2) * s.r * 0.9;
+      const z = s.z + Math.sin((a / 24) * Math.PI * 2) * s.r * 0.9;
+      assert.ok(!insideLandmark(x, z, 0), `出生區 ${s.id} 被地標壓到`);
     }
   }
-  const total = LANDMARK_SLOTS.reduce((a, s) => a + s.parts.reduce((b, p) => b + p.hqTris * (s.id === "colossus" || s.id === "reactor" ? 1 : s.placements.length), 0), 0);
-  assert.ok(total <= 110000, `地標 HQ 三角面合計 ${total}`);
-  // 高度等比：任意原始大小 → 高度＝規格、底面＝−sink、前後左右置中
-  const part = LANDMARK_SLOTS.find((s) => s.id === "furnace")!.parts[0]!;
-  const f = fitTransform(part, { x: 3, y: -2, z: 10 }, { x: 5, y: 3, z: 14 });
-  assert.ok(Math.abs(f.s - 10 / 5) < 1e-9);
-  assert.ok(Math.abs(-2 * f.s + f.ty - -part.sink) < 1e-9);
-  assert.ok(Math.abs(4 * f.s + f.tx) < 1e-9 && Math.abs(12 * f.s + f.tz) < 1e-9);
-  // 吊臂：原點在旋轉軸（後端往前 7.5 m）
-  const jib = LANDMARK_SLOTS.find((s) => s.id === "crane")!.parts.find((p) => p.key === "jib")!;
-  const g = fitTransform(jib, { x: -1, y: 0, z: -5 }, { x: 1, y: 2, z: 7 });
-  assert.ok(Math.abs(g.s - 2) < 1e-9);
-  assert.ok(Math.abs(-5 * g.s + g.tz - -7.5) < 1e-9);
-  // 抓斗：原點在頂部
-  const claw = LANDMARK_SLOTS.find((s) => s.id === "crane")!.parts.find((p) => p.key === "claw")!;
-  const h = fitTransform(claw, { x: 0, y: 1, z: 0 }, { x: 1, y: 2.6, z: 1 });
-  assert.ok(Math.abs(2.6 * h.s + h.ty) < 1e-9);
+  for (let r = 0; r <= 18; r += 3) for (let a = 0; a < 16; a++) assert.ok(!insideLandmark(ARENA.x + Math.cos(a) * r, ARENA.z + Math.sin(a) * r, 0), "Boss 廣場被壓到");
+  assert.ok(!insideLandmark(JUNKYARD_ENTRY_PORTAL.x, JUNKYARD_ENTRY_PORTAL.z, 6));
 });

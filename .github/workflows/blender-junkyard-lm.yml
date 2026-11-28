@@ -3,6 +3,8 @@ name: Blender — Junkyard V3 landmarks (Tripo raw → HQ / Lite GLB)
 # 星廢垃圾場 V3（Claude B）：使用者交付的 Tripo 地標原檔（art/junkyard-lm/raw/*.glb，原檔不修改）
 # → 依 src/maps/junkyard/landmarkSlots.ts 的預算減面、縮小貼圖、輸出 HQ／Lite GLB。
 # raw 是空的時候跑自我測試（高面數球＋3000² 貼圖），確認流程可用。
+# ⚠ 已由 tools/junkyard-lm/process.mjs（gltf-transform＋meshoptimizer）取代：Tripo 原檔使用 EXT_meshopt_compression，Blender 無法匯入。
+#   保留此檔僅供紀錄；只在 dev/junkyard-v3 觸發，dev/junkyard-v3-lm 不會執行。
 # 只在 dev/junkyard-v3 執行；不部署。結果推到 art-junkyard-lm 分支（一般 push，不 force）。
 on:
   workflow_dispatch:

@@ -1,141 +1,167 @@
 /**
- * 星廢垃圾場 V3：大型地標 GLB 資產槽（純資料；規格見專案文件 Starwish_Junkyard_V3_Landmark_Asset_Spec）。
+ * 星廢垃圾場 V3：四大地標正式美術（Tripo GLB）的擺放資料（純資料，可單元測試）。
  *
- * 美術流程：ChatGPT 設定圖 → 使用者用 Tripo 生成靜態 GLB → Claude B 減面／壓貼圖 → public/models/junkyard/。
- * 遊戲端負責：擺放、縮放到規格尺寸、朝向、碰撞（沿用 terrain.ts 的碰撞，不從模型產生）、
- *   活動零件（吊車旋轉、抓斗升降、反應爐旋轉環）、發光、火焰、煙霧、粒子。
- *
- * 座標慣例（glTF）：+Y 向上、模型正面朝 +Z、單位公尺。Tripo 輸出的大小與原點不一定正確，
- * 載入時會依 size／fit／origin 自動縮放與置中，所以模型只要「造型比例」正確即可。
- * 若模型正面方向錯誤，調整 yawFix（弧度）即可，不必重新生成。
+ * 模型座標：Tripo 輸出的模型都在單位立方體內（最長邊約 0.98、中心在原點）。Babylon 載入後 x 與 glTF 相反。
+ * 遊戲端用「每單位幾公尺」（unit）等比縮放，**不拉伸、不壓扁**；底面中心落在擺放點（再往下 sink 公尺，接觸地面）。
+ * 正面：LM01／LM02／LM04 三個模型的正面都在模型 −X 方向（Babylon），yawFix＝π/2 把它轉到 +Z。
+ * 數值都在地標實驗場景（?map=jylab）用頂點分層統計、點選表面座標與截圖量測，見專案文件 Junkyard_V3_Landmarks_Report。
  */
-import { COLOSSUS, CRANES, FURNACES, REACTOR } from "./layout.ts";
+import { CRANES, FURNACES } from "./layout.ts";
+import { type CraneRigSpec } from "./craneSpec.ts";
 
-export interface LandmarkPart {
-  /** 零件代號（同一地標內唯一） */
-  key: string;
-  /** 檔名主幹：實際檔名 <stem>_hq.glb／<stem>_lite.glb */
+export interface LandmarkModel {
   stem: string;
-  /** 規格尺寸（公尺）：寬（X）、高（Y）、深（Z），以模型正面朝 +Z 時量測 */
-  size: { w: number; h: number; d: number };
-  /** 依哪個尺寸等比縮放：height＝高度、max＝最大邊 */
-  fit: "height" | "max";
-  /** 原點：bottom＝包圍盒底面中心、top＝頂面中心（吊鉤）、pivot＝底面中心（旋轉軸） */
-  origin: "bottom" | "top";
-  /** 底面低於原點多少公尺（埋入地面，避免浮空） */
-  sink: number;
-  /** 模型正面不是 +Z 時的修正（弧度） */
-  yawFix: number;
-  /** 原點不在前後中心時：原點到模型最後端（−Z）的距離（規格公尺）；例：吊臂的旋轉軸 */
-  zFromBack?: number;
-  /** 三角面預算 */
+  /** 交付的原始檔名（art/junkyard-lm/raw/） */
+  raw: string;
   hqTris: number;
   liteTris: number;
-  /** 貼圖（底色）最大解析度；法線貼圖只有 HQ，最大 1024 */
   hqTex: number;
   liteTex: number;
+  /** 模型正面轉到 +Z 的修正（弧度） */
+  yawFix: number;
+  /** 高畫質是否另載 Lite 做 70 m 外的距離切換（大型地標才需要） */
+  lod: boolean;
 }
+
+export const MODELS = {
+  colossus: { stem: "jy_lm_colossus", raw: "Starwish_Junkyard_LM01_RAW.glb", hqTris: 22000, liteTris: 7000, hqTex: 2048, liteTex: 1024, yawFix: Math.PI / 2, lod: true },
+  furnace: { stem: "jy_lm_furnace", raw: "Starwish_Junkyard_LM02.glb", hqTris: 12000, liteTris: 10500, hqTex: 1024, liteTex: 1024, yawFix: Math.PI / 2, lod: false },
+  tower: { stem: "jy_lm_crane_tower", raw: "Starwish_Junkyard_LM03_A_Tower.glb", hqTris: 10000, liteTris: 6200, hqTex: 1024, liteTex: 512, yawFix: 0, lod: false },
+  boom: { stem: "jy_lm_crane_jib", raw: "Starwish_Junkyard_LM03_B_Boom.glb", hqTris: 7000, liteTris: 2700, hqTex: 1024, liteTex: 512, yawFix: 0, lod: false },
+  grab: { stem: "jy_lm_crane_claw", raw: "Starwish_Junkyard_LM03_C_Grab.glb", hqTris: 3000, liteTris: 1700, hqTex: 1024, liteTex: 512, yawFix: 0, lod: false },
+  reactor: { stem: "jy_lm_reactor", raw: "Starwish_Junkyard_LM04.glb", hqTris: 24000, liteTris: 11000, hqTex: 2048, liteTex: 1024, yawFix: Math.PI / 2, lod: true },
+} as const satisfies Record<string, LandmarkModel>;
+
+export type ModelKey = keyof typeof MODELS;
+
+/** 模型包圍盒（Babylon 座標、未縮放；由處理後的 HQ 模型量測） */
+export const MODEL_BOUNDS: Record<ModelKey, { min: [number, number, number]; max: [number, number, number] }> = {
+  colossus: { min: [-0.341, -0.287, -0.49], max: [0.34, 0.286, 0.49] },
+  furnace: { min: [-0.433, -0.446, -0.49], max: [0.432, 0.446, 0.489] },
+  tower: { min: [-0.193, -0.489, -0.184], max: [0.192, 0.49, 0.184] },
+  boom: { min: [-0.181, -0.172, -0.49], max: [0.181, 0.172, 0.49] },
+  grab: { min: [-0.433, -0.49, -0.456], max: [0.433, 0.49, 0.457] },
+  reactor: { min: [-0.474, -0.43, -0.491], max: [0.473, 0.426, 0.491] },
+};
 
 export interface LandmarkPlacement {
   id: string;
-  /** 世界座標；y＝null 表示用地面高度 */
+  model: ModelKey;
   x: number;
   z: number;
+  /** null＝地面高度 */
   y: number | null;
-  /** 正面（+Z）在世界中的方向：0＝朝 +Z（北），π/2＝朝 +X（東） */
+  /** 正面（+Z，套用 yawFix 後）在世界中的方向：0＝北（+Z），π＝南 */
   yaw: number;
-  /** 相對規格尺寸的縮放 */
-  scale: number;
-}
-
-export interface LandmarkSlot {
-  id: "colossus" | "furnace" | "crane" | "reactor";
-  name: string;
-  parts: LandmarkPart[];
-  placements: LandmarkPlacement[];
-  /** 遊戲端碰撞（已在 terrain.ts；這裡只列出供報告與測試對照） */
-  colliders: string;
-  /** 遊戲端特效 */
-  effects: string[];
-}
-
-const p = (key: string, stem: string, size: LandmarkPart["size"], o: Partial<LandmarkPart> & Pick<LandmarkPart, "hqTris" | "liteTris" | "hqTex" | "liteTex">): LandmarkPart => ({
-  key,
-  stem,
-  size,
-  fit: "height",
-  origin: "bottom",
-  sink: 0,
-  yawFix: 0,
-  ...o,
-});
-
-/** GLB 巨像的臉朝向主路線「機械巨像遺骸前」(100, −34)：玩家沿路線走來時正面看到它 */
-const COLOSSUS_FACE = Math.atan2(100 - COLOSSUS.x, -34 - COLOSSUS.z);
-
-export const LANDMARK_SLOTS: readonly LandmarkSlot[] = [
-  {
-    id: "colossus",
-    name: "廢棄機械巨像",
-    parts: [p("main", "jy_lm_colossus", { w: 30, h: 13.5, d: 18 }, { fit: "max", sink: 1.5, hqTris: 20000, liteTris: 6500, hqTex: 2048, liteTex: 1024 })],
-    placements: [{ id: "colossus", x: COLOSSUS.x, z: COLOSSUS.z, y: null, yaw: COLOSSUS_FACE, scale: 1 }],
-    colliders: "頭部圓 r 9（中心）＋手臂圓 r 3.2",
-    effects: ["雙眼橘光脈動（偶爾閃爍）", "頸部裂縫冒蒸氣", "偶發火花"],
-  },
-  {
-    id: "furnace",
-    name: "廢鐵熔爐",
-    parts: [p("main", "jy_lm_furnace", { w: 8, h: 10, d: 8 }, { sink: 0.2, hqTris: 8000, liteTris: 2600, hqTex: 1024, liteTex: 512 })],
-    // 程序化熔爐的爐口朝本地 −Z（世界朝南）→ GLB 正面 +Z 轉半圈
-    placements: FURNACES.map((f) => ({ id: f.id, x: f.x, z: f.z, y: f.y, yaw: Math.PI, scale: f.r / 3.2 })),
-    colliders: "圓 r＝3.2（furnace1）／2.4（furnace2）",
-    effects: ["爐口與頂部熔池橘光脈動", "火星粒子（既有）", "煙囪灰煙", "熱浪閃爍（高畫質）"],
-  },
-  {
-    id: "crane",
-    name: "廢料回收吊車",
-    parts: [
-      p("tower", "jy_lm_crane_tower", { w: 4.4, h: 23, d: 4.4 }, { hqTris: 4000, liteTris: 1300, hqTex: 1024, liteTex: 512 }),
-      // 吊臂：原點＝旋轉軸（駕駛室底部中心），吊臂朝 +Z（軸前 16.5 m）、配重朝 −Z（軸後 7.5 m）；遊戲端轉 90° 對齊程式的 +X 吊臂
-      p("jib", "jy_lm_crane_jib", { w: 3.4, h: 4.2, d: 24 }, { fit: "max", zFromBack: 7.5, hqTris: 4500, liteTris: 1500, hqTex: 1024, liteTex: 512 }),
-      // 抓斗：原點＝頂部吊索掛點
-      p("claw", "jy_lm_crane_claw", { w: 2.6, h: 3.2, d: 2.6 }, { origin: "top", hqTris: 1500, liteTris: 500, hqTex: 512, liteTex: 256 }),
-    ],
-    placements: CRANES.map((c) => ({ id: c.id, x: c.x, z: c.z, y: c.y, yaw: 0, scale: c.h / 22 })),
-    colliders: "塔基圓 r 2.4（吊臂、抓斗在頭頂高度，不擋路）",
-    effects: ["吊臂緩慢來回旋轉（既有）", "抓斗升降（既有）", "塔頂警示燈閃爍", "駕駛室窗戶青色微光"],
-  },
-  {
-    id: "reactor",
-    name: "魔導核心反應爐",
-    parts: [p("shell", "jy_lm_reactor", { w: 17, h: 26, d: 17 }, { sink: 0.2, hqTris: 22000, liteTris: 7000, hqTex: 2048, liteTex: 1024 })],
-    // 反應爐北側背對地圖邊緣；正面（主要觀景面）朝南、面向戰鬥廣場
-    placements: [{ id: "reactor", x: REACTOR.x, z: REACTOR.z, y: REACTOR.y, yaw: Math.PI, scale: 1 }],
-    colliders: "圓 r 7.5（兩側排氣塔另有 r 1.8）",
-    effects: ["中央發光核心脈動（遊戲端，放在模型中空的核心艙）", "三道旋轉能量環（遊戲端）", "青色能量粒子上升", "排氣塔蒸氣（既有）"],
-  },
-];
-
-/** 高畫質：超過這個距離（公尺）改畫 Lite 模型（有 Lite 檔時） */
-export const LANDMARK_LOD_DISTANCE = 70;
-
-/** 依目前畫質的檔名 */
-export function landmarkFile(part: LandmarkPart, lite: boolean): string {
-  return `${part.stem}_${lite ? "lite" : "hq"}.glb`;
+  /** 公尺／模型單位（等比） */
+  unit: number;
+  /** 底面往地下多少公尺（自然接觸地面） */
+  sink: number;
 }
 
 /**
- * 依包圍盒算出縮放與位移（純數學，方便測試）。
- * @param min,max 模型原始包圍盒（已套用 yawFix 後的座標）
- * @returns 等比縮放 s，以及要加在「縮放後模型」上的位移，使原點落在規格位置
+ * 最終尺寸（寬×高×深，公尺）＝模型邊長 × unit（見 landmarkSize）。
+ * - 巨像：unit 26.5 → 26.0 × 15.2 × 18.0（躺臥的整具機器人，比預定 30×13.5×18 略短、略高：模型本身比例，不拉伸）
+ * - 熔爐：平台上 unit 10 → 9.8 × 8.9 × 8.7（含磚砌圓台）；工廠地面 unit 8.4 → 8.2 × 7.5 × 7.3（平台只有 16×14 m，且要讓出主路線）
+ * - 反應爐：unit 21 → 20.6 × 18.0 × 19.9（模型是寬而矮的拱門造型；若拉到 26 m 高會寬達 30 m、壓進 Boss 戰鬥廣場，所以以高 18 m 為準）
  */
-export function fitTransform(part: LandmarkPart, min: { x: number; y: number; z: number }, max: { x: number; y: number; z: number }): { s: number; tx: number; ty: number; tz: number } {
-  const w = max.x - min.x;
-  const h = max.y - min.y;
-  const d = max.z - min.z;
-  const s = part.fit === "height" ? part.size.h / Math.max(1e-6, h) : Math.max(part.size.w, part.size.h, part.size.d) / Math.max(1e-6, w, h, d);
-  const cx = ((min.x + max.x) / 2) * s;
-  const cz = part.zFromBack !== undefined ? min.z * s + part.zFromBack : ((min.z + max.z) / 2) * s;
-  const ty = part.origin === "top" ? -max.y * s : -min.y * s - part.sink;
-  return { s, tx: -cx, ty, tz: -cz };
+export const PLACEMENTS: readonly LandmarkPlacement[] = [
+  // 倒臥在東側垃圾山腳：背部埋進垃圾山（地面由 3 m 升到 17 m），正面朝西北的主路線；
+  // 底面高度取西側平地（約 3 m），所以任何地方都不會懸空；與主路線至少 9 m、與出生區 S10a 外緣約 4 m
+  { id: "colossus", model: "colossus", x: 104, z: -50, y: 2.9, yaw: Math.atan2(92 - 104, -38 - -50), unit: 26.5, sink: 0 },
+  // 爐口朝南、面向階梯與主路線
+  // 熔爐平台（16×14 m）的西北角：讓出平台東南側的主路線（階梯上 → 平台觀景點 F2）
+  { id: FURNACES[0]!.id, model: "furnace", x: -62.5, z: 92.4, y: FURNACES[0]!.y, yaw: Math.PI, unit: 10, sink: 0.05 },
+  { id: FURNACES[1]!.id, model: "furnace", x: FURNACES[1]!.x, z: FURNACES[1]!.z, y: FURNACES[1]!.y, yaw: Math.PI, unit: 8.4, sink: 0.05 },
+  // Boss 廣場北緣：中心北移 5.5 m（20.6 m 寬的基座才不會壓進戰鬥廣場），正面朝南
+  { id: "reactor", model: "reactor", x: 22, z: 133.5, y: 20, yaw: Math.PI, unit: 21, sink: 0.3 },
+];
+
+/** 吊車：塔身 unit 決定整座比例；吊臂、抓斗依塔頂旋轉盤與吊臂底座的實測尺寸配對（見 craneRig.ts） */
+export const CRANE_SPECS: readonly (CraneRigSpec & { x: number; z: number; y: number })[] = CRANES.map((c, i) => {
+  const k = c.h / 22; // crane1＝1、crane2＝0.82、crane3＝0.73（沿用 6.9 的比例）
+  return {
+    id: c.id,
+    x: c.x,
+    z: c.z,
+    y: c.y,
+    towerUnit: 20.4 * k,
+    boomUnit: 19 * k,
+    grabUnit: 3.7 * k,
+    seat: 0.12 * k,
+    // 吊臂朝 +X 方向為中心來回（與 6.9 相同的作業範圍）
+    swingCenter: -Math.PI / 2,
+    swingAmp: c.swing,
+    swingSpeed: c.speed,
+    phase: c.phase,
+    liftPeriod: [26, 31, 23][i] ?? 27,
+    groundClear: 0,
+  };
+});
+
+/** 高畫質：超過這個距離（公尺）改畫 Lite 模型 */
+export const LANDMARK_LOD_DISTANCE = 70;
+
+export function landmarkFile(m: LandmarkModel, lite: boolean): string {
+  return `${m.stem}_${lite ? "lite" : "hq"}.glb`;
 }
+
+/** 套用 yawFix 後的模型尺寸（寬 x、高 y、深 z；公尺） */
+export function landmarkSize(p: Pick<LandmarkPlacement, "model" | "unit">): { w: number; h: number; d: number } {
+  const b = MODEL_BOUNDS[p.model];
+  const ex = b.max[0] - b.min[0];
+  const ey = b.max[1] - b.min[1];
+  const ez = b.max[2] - b.min[2];
+  const q = Math.abs(Math.sin(MODELS[p.model].yawFix)) > 0.5;
+  return { w: (q ? ez : ex) * p.unit, h: ey * p.unit, d: (q ? ex : ez) * p.unit };
+}
+
+/**
+ * 模型座標（Babylon、未縮放）→ 世界座標。與 JunkyardLandmarks 的節點階層相同：
+ * place(位置、yaw) → fit(縮放 unit、底面中心對齊、下沉 sink) → yawFix → 模型
+ */
+export function modelToWorld(p: LandmarkPlacement, groundY: number, x: number, y: number, z: number): [number, number, number] {
+  const b = MODEL_BOUNDS[p.model];
+  const fx = MODELS[p.model].yawFix;
+  const rx = x * Math.cos(fx) + z * Math.sin(fx);
+  const rz = -x * Math.sin(fx) + z * Math.cos(fx);
+  const cx0 = (b.min[0] + b.max[0]) / 2;
+  const cz0 = (b.min[2] + b.max[2]) / 2;
+  const ccx = cx0 * Math.cos(fx) + cz0 * Math.sin(fx);
+  const ccz = -cx0 * Math.sin(fx) + cz0 * Math.cos(fx);
+  const lx = (rx - ccx) * p.unit;
+  const ly = (y - b.min[1]) * p.unit - p.sink;
+  const lz = (rz - ccz) * p.unit;
+  const c = Math.cos(p.yaw);
+  const s = Math.sin(p.yaw);
+  return [p.x + lx * c + lz * s, (p.y ?? groundY) + ly, p.z - lx * s + lz * c];
+}
+
+/** 特效錨點（模型座標，Babylon、未縮放；實驗場景點選模型表面取得） */
+export const ANCHORS = {
+  colossus: {
+    eyes: [
+      [-0.03, 0.157, 0.143],
+      [-0.039, 0.131, 0.083],
+    ] as [number, number, number][],
+    core: [-0.147, -0.104, 0.024] as [number, number, number],
+  },
+  furnace: {
+    /** 爐口：框面 x≈−0.2；開口 y −0.33～−0.18、z −0.2～−0.02；內部很深（到 x≈0.08） */
+    mouth: { face: -0.205, floor: -0.318, top: -0.18, z0: -0.2, z1: -0.022, back: 0.04 },
+    /** 煙囪開口（中心與半徑） */
+    chimneys: [
+      { x: 0.001, y: 0.446, z: 0.001, r: 0.1 },
+      { x: 0.291, y: 0.333, z: -0.209, r: 0.065 },
+    ],
+    /** 藍色排氣管（間歇蒸氣） */
+    vent: { x: 0.166, y: 0.379, z: -0.114 },
+  },
+  reactor: {
+    /** 中空核心艙：x −0.2～0.2、z −0.19～0.19、y −0.23～0.19 */
+    core: [0, -0.02, 0] as [number, number, number],
+    coreR: 0.05,
+    ringR: [0.095, 0.12, 0.145],
+    chamber: { x: 0.2, z: 0.19, y0: -0.23, y1: 0.19 },
+  },
+} as const;
