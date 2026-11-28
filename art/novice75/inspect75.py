@@ -32,6 +32,10 @@ def load(path):
     bpy.ops.import_scene.gltf(filepath=path)
     objs = [o for o in bpy.data.objects if o not in before]
     arm = next(o for o in objs if o.type == "ARMATURE")
+    # 匯入器替骨骼建立的顯示用形狀（Icosphere 等）不是角色網格 → 刪掉
+    for o in [o for o in objs if o.type == "MESH" and not any(m.type == "ARMATURE" for m in o.modifiers)]:
+        objs.remove(o)
+        bpy.data.objects.remove(o, do_unlink=True)
     meshes = [o for o in objs if o.type == "MESH"]
     return arm, meshes, objs
 
@@ -55,7 +59,9 @@ def cam_setup(sc, center, scale):
 
 def render(sc, center, scale, prefix, views=("front", "side", "back", "q34")):
     cam = cam_setup(sc, center, scale)
-    dirs = {"front": (0, -1, 0), "back": (0, 1, 0), "side": (1, 0, 0), "q34": (0.7, -0.7, 0.25), "top": (0, -0.05, 1), "left": (-1, 0, 0)}
+    F = FACING
+    S = Vector((-F.y, F.x, 0))
+    dirs = {"front": tuple(F), "back": tuple(-F), "side": tuple(S), "left": tuple(-S), "q34": tuple((F * 0.7 + S * 0.7 + Vector((0, 0, 0.25)))), "top": (0, 0, 1)}
     files = []
     for v in views:
         d = Vector(dirs[v]).normalized()
@@ -78,8 +84,12 @@ def world_tail(arm, name):
     return arm.matrix_world @ b.tail_local
 
 
+FACING = Vector((0, -1, 0))
 sc = reset()
 arm, meshes, objs = load(SRC)
+_t = ((arm.matrix_world @ arm.data.bones["L_ToeBase"].head_local) + (arm.matrix_world @ arm.data.bones["R_ToeBase"].head_local)) / 2
+_h = ((arm.matrix_world @ arm.data.bones["L_Foot"].head_local) + (arm.matrix_world @ arm.data.bones["R_Foot"].head_local)) / 2
+FACING = Vector((_t.x - _h.x, _t.y - _h.y, 0)).normalized()
 mesh = meshes[0]
 R["objects"] = [(o.name, o.type, [round(x, 4) for x in o.matrix_world.to_scale()]) for o in objs]
 mn, mx = bbox(meshes)
@@ -206,20 +216,24 @@ def pose(rots):
         bpy.context.view_layer.update()
 
 
-sideL = 1 if world_head(arm, "L_Hand").x > 0 else -1
-fwd = Vector((0, -1, 0)) if R["restPose"]["facing_hint_eye_y"] < 0 else Vector((0, 1, 0))
-R["facing"] = list(fwd)
-upz = R["restPose"]["L_upperarm_elev_deg"]
+toe = (world_head(arm, "L_ToeBase") + world_head(arm, "R_ToeBase")) / 2
+heel = (world_head(arm, "L_Foot") + world_head(arm, "R_Foot")) / 2
+fwd = Vector((toe.x - heel.x, toe.y - heel.y, 0)).normalized()
+R["facing"] = [round(v, 3) for v in fwd]
+R["leftSide"] = [round(v, 3) for v in (world_head(arm, "L_Upperarm") - world_head(arm, "R_Upperarm")).normalized()]
+side = Vector(R["leftSide"])
 TESTS = {
-    # 符號未知 → 正反各一張（檢查哪個方向是抬起／放下）
-    "armsY_pos": [("L_Upperarm", (0, 1, 0), 60), ("R_Upperarm", (0, 1, 0), 60)],
-    "armsY_neg": [("L_Upperarm", (0, 1, 0), -60), ("R_Upperarm", (0, 1, 0), -60)],
-    "R_raise_pos": [("R_Upperarm", (0, 1, 0), 110)],
-    "R_raise_neg": [("R_Upperarm", (0, 1, 0), -110)],
-    "R_forward_pos": [("R_Upperarm", (0, 0, 1), 80)],
-    "R_forward_neg": [("R_Upperarm", (0, 0, 1), -80)],
-    "R_forearm_bend": [("R_Forearm", (0, 0, 1), 90)],
-    "stride": [("L_Thigh", (1, 0, 0), 45), ("R_Thigh", (1, 0, 0), -35), ("L_Calf", (1, 0, 0), -40)],
+    # 繞「前方軸」轉：手臂往外側抬起（正負各一張，確認方向）
+    "armsOut_pos": [("L_Upperarm", tuple(fwd), 60), ("R_Upperarm", tuple(fwd), -60)],
+    "armsOut_neg": [("L_Upperarm", tuple(fwd), -60), ("R_Upperarm", tuple(fwd), 60)],
+    "R_raise_side": [("R_Upperarm", tuple(fwd), 110)],
+    "R_raise_side_neg": [("R_Upperarm", tuple(fwd), -110)],
+    # 繞「側向軸」轉：手臂往前抬（前刺、下劈預備）
+    "R_forward": [("R_Upperarm", tuple(side), -80)],
+    "R_forward_neg": [("R_Upperarm", tuple(side), 80)],
+    "R_overhead": [("R_Upperarm", tuple(side), -150)],
+    "R_forearm_bend": [("R_Upperarm", tuple(side), -40), ("R_Forearm", tuple(side), -90)],
+    "stride": [("L_Thigh", tuple(side), -45), ("R_Thigh", tuple(side), 35), ("L_Calf", tuple(side), 50)],
     "twist": [("Spine01", (0, 0, 1), 30), ("Spine02", (0, 0, 1), 15)],
 }
 R["renders"]["tests"] = {}
@@ -240,6 +254,7 @@ R["reference"] = {
     "actions": [a.name for a in bpy.data.actions],
     "rest_upperarm_elev_deg": round(math.degrees(math.asin(((arm2.matrix_world @ arm2.data.bones["forearm.L"].head_local) - (arm2.matrix_world @ arm2.data.bones["upper_arm.L"].head_local)).normalized().z)), 1),
 }
+FACING = Vector((0, -1, 0))
 c2 = (mn2 + mx2) / 2
 R["renders"]["reference"] = render(sc, c2, (mx2.z - mn2.z) * 1.25, "ref_c10b5b", ("front", "side"))
 json.dump(R, open(os.path.join(OUT, "inspect.json"), "w"), indent=1, ensure_ascii=False)
