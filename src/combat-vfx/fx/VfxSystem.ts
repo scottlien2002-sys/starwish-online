@@ -1098,9 +1098,13 @@ export class VfxSystem {
       f.mesh.dispose(false, false);
       for (const m of f.layers) m.dispose(false, false);
     }
-    for (const l of this.psPool.values()) for (const f of l) f.ps.dispose();
-    for (const { mat } of this.mats.values()) mat.dispose();
+    // 粒子貼圖是共用快取（textures.ts），不能跟著粒子系統一起刪（第二次進地圖會拿到已刪除的貼圖）
+    for (const l of this.psPool.values()) for (const f of l) f.ps.dispose(false);
+    for (const { mat } of this.mats.values()) mat.dispose(false, false);
     this.mats.clear();
+    this.meshPool.clear();
+    this.psPool.clear();
     this.glow?.dispose();
+    this.glow = null;
   }
 }

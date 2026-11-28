@@ -32,6 +32,8 @@ for (const name of browsers) {
     { id: "perf", url: "?lab=combat&q=medium&g=male&mute=1" },
     { id: "audio", url: "?lab=combat&q=low&g=male&mute=1&ai=0" },
     // 特效預熱（改善 1% Low）：載入後施放全部技能＋職業特效，不應再編譯新的 shader；cold＝關掉預熱對照
+    // 正式接入模組 CombatFx：預熱安全性、重複進出地圖不累積、低畫質不建高畫質資源
+    { id: "module", url: "?lab=combat&q=medium&g=male&mute=1&ai=0" },
     { id: "shader-warm", url: "?lab=combat&q=high&g=male&mute=1&ai=0" },
     { id: "shader-cold", url: "?lab=combat&q=high&g=male&mute=1&ai=0&prewarm=0" },
     // 手機介面：直向／橫向、Safe Area、開發者選單、縮放、統計數字（iPhone 實機回報的問題）
@@ -42,7 +44,7 @@ for (const name of browsers) {
     { id: "showcase-meadow", url: "?lab=combat&q=high&g=female&mute=1&manual=1&ai=0&env=meadow" },
   ]) {
     if ((tcase.id.startsWith("showcase") || tcase.id === "perf" || tcase.id === "shader-cold") && (remote || name !== "chromium")) continue;
-    if (remote && tcase.id === "shader-warm") continue;
+    if (remote && (tcase.id === "shader-warm" || tcase.id === "module")) continue;
     if (!onlyCases.length && name === "webkit" && (tcase.id === "meadow-high" || tcase.id === "rules")) continue;
     if (onlyCases.length && !onlyCases.includes(tcase.id)) continue;
     if (!onlyCases.length && name === "webkit" && tcase.id === "female-high") continue; // WebKit 跑兩組即可（時間）
@@ -288,6 +290,23 @@ for (const name of browsers) {
         const tierOn = await page.evaluate(() => document.querySelector('.cv-dev [data-tier="high"]').classList.contains("on"));
         check("選單：選單內的設定按鈕可以操作", tierOn, tierOn);
         await page.click(".cv-devbtn");
+      } else if (tcase.id === "module") {
+        const R = await page.evaluate(() => window.__cvfx.moduleLifecycle(4, "medium"));
+        const L = await page.evaluate(() => window.__cvfx.moduleLifecycle(2, "low"));
+        const H = await page.evaluate(() => window.__cvfx.moduleLifecycle(1, "high"));
+        run.results.module = { medium: R, low: L, high: H };
+        const pws = R.runs.map((r) => r.prewarm);
+        check("接入模組預熱：全部特效都生成過、而且全部回收（畫面上沒有殘留特效／投射物）", pws.every((p) => p.spawned >= 60 && p.leftoverActive === 0 && p.leftoverProjectiles === 0), pws);
+        check("接入模組預熱：不播音效、不顯示傷害數字、不扣怪物血量", pws.every((p) => p.audioPlayed === 0 && p.damageShown === 0) && R.hpAfter === R.hpBefore, { pws: pws.map((p) => [p.audioPlayed, p.damageShown]), hp: [R.hpBefore, R.hpAfter] });
+        check("接入模組預熱：預熱期間鏡頭只畫 1×1 像素（玩家看不到預熱特效），結束後恢復完整畫面", R.maxPrewarmViewportPx !== null && R.maxPrewarmViewportPx <= 2 && R.runs.every((r) => r.vpRestored), { maxPx: R.maxPrewarmViewportPx, frames: R.prewarmFrames });
+        check("接入模組預熱：耗時合理（CI 軟體繪圖 < 10 秒；iPhone 未驗證）", pws.every((p) => p.ms < 10000), pws.map((p) => p.ms));
+        check("接入模組：技能依動作檔時間觸發命中 hook（三連斬 3 次），不自行判定", R.runs.every((r) => r.hits === 3), R.runs.map((r) => r.hits));
+        check("接入模組：遠距離（> 28 m）的其他玩家特效不生成", R.runs.every((r) => r.culled.distance >= 1), R.runs.map((r) => r.culled));
+        const a0 = R.runs[0].after;
+        check("接入模組：重複進出地圖 4 次，網格、材質、粒子、發光層、節點數不累積（每次都回到相同數量）", R.runs.every((r) => JSON.stringify(r.after) === JSON.stringify(a0)) && R.end.meshes === R.base.meshes && R.end.particles === R.base.particles && R.end.layers === R.base.layers && R.end.materials === R.base.materials, { base: R.base, runs: R.runs.map((r) => r.after), end: R.end });
+        check("接入模組：釋放後 DOM（傷害數字、畫面閃光）全部移除", R.runs.every((r) => r.dom === 0), R.runs.map((r) => r.dom));
+        const pl = L.runs[0].prewarm, ph = H.runs[0].prewarm;
+        check("接入模組：低畫質預熱建立的網格／粒子／材質不多於高畫質（不預熱高畫質專用資源）", pl.pooledMeshes <= ph.pooledMeshes && pl.particleSystems <= ph.particleSystems && pl.materials <= ph.materials, { low: pl, high: ph });
       } else if (tcase.id.startsWith("shader-")) {
         const s0 = await page.evaluate(() => window.__cvfx.shaderCount());
         const k0 = await page.evaluate(() => window.__cvfx.shaderKeys());

@@ -20,6 +20,8 @@ import {
   SceneInstrumentation,
   StandardMaterial,
   Vector3,
+  Viewport,
+  TransformNode,
 } from "@babylonjs/core";
 import { CombatAvatar, type Gender, type Lod } from "../CombatAvatar.ts";
 import { SKILLS, type SkillDef, type HitSpec, type SkillEvent } from "../core/skills.ts";
@@ -37,6 +39,7 @@ import { ArenaTerrain, type CircleObstacle } from "../core/terrain.ts";
 import { behaviourForLevel, wantsTarget, onDamaged, type AggroState, type MonsterBehaviour } from "../core/monsterRules.ts";
 import { CLASS_VFX, type ClassDemoStep } from "../core/classes.ts";
 import { FX_KEY_LIST } from "../core/classKits.ts";
+import { CombatFx } from "../integration/CombatFx.ts";
 import { LAB_MONSTERS } from "./monsterSpecs.ts";
 import { RiggedMonsterVisual, riggedAssetAvailable } from "../../monsters/rigged/RiggedMonsterVisual.ts";
 import { BASE_POSE } from "../../monsters/anim/types.ts";
@@ -1265,7 +1268,9 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
   if (prewarmOn) {
     const before = shaderCount();
     const at = player.pos.add(new Vector3(0, 0, 2.5));
-    // 整體最多 15 秒（CI 軟體繪圖很慢；手機上不到 1 秒）
+    // 整體最多 15 秒（CI 軟體繪圖很慢；手機上不到 1 秒）。預熱期間鏡頭只畫 1×1 像素：玩家看不到預熱特效
+    const oldVp = cam.viewport;
+    cam.viewport = new Viewport(0, 0, 1 / Math.max(1, engine.getRenderWidth()), 1 / Math.max(1, engine.getRenderHeight()));
     const r = await Promise.race([
       vfx.prewarm(at, FX_KEY_LIST, ["steel"]),
       new Promise<{ ms: number; spawned: number; timeouts: number; materials: number; meshes: number; systems: number }>((res) => setTimeout(() => res({ ms: 15000, spawned: -1, timeouts: -1, materials: 0, meshes: 0, systems: 0 }), 15000)),
@@ -1286,7 +1291,7 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
     }
     player.trail.stop();
     for (const [m, v] of faded) m.visibility = v;
-    scene.render();
+    cam.viewport = oldVp;
     prewarmStats = { ...r, shadersBefore: before, shadersAfter: shaderCount() };
   }
   if (!manual) {
@@ -1327,6 +1332,61 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
     perfSnapshot,
     perfScene,
     perfMode,
+    /**
+     * 測試：正式接入模組 CombatFx 的生命週期（重複進出地圖 n 次）。
+     * 每次：建立 → 預熱（記錄預熱期間的鏡頭畫面大小）→ 播一個技能＋命中＋怪物死亡／重生 → 釋放。
+     * 回傳：每次的預熱報告、技能 hook 次數、資源數量（應回到起始值）、怪物血量（預熱不得扣血）。
+     */
+    moduleLifecycle: async (n = 4, tierArg: VfxTier = "medium") => {
+      const count = () => ({ meshes: scene.meshes.length, materials: scene.materials.length, textures: scene.textures.length, particles: scene.particleSystems.length, layers: scene.effectLayers.length, transforms: scene.transformNodes.length });
+      const hpSum = () => mons.reduce((a, m) => a + m.hp, 0);
+      const div = document.createElement("div");
+      div.style.cssText = "position:absolute;inset:0;pointer-events:none";
+      hudRoot.appendChild(div);
+      const base = count();
+      const hp0 = hpSum();
+      const runs: unknown[] = [];
+      const vpSizes: number[] = [];
+      const obs = scene.onBeforeRenderObservable.add(() => {
+        if (capturing) vpSizes.push(Math.max(cam.viewport.width * engine.getRenderWidth(), cam.viewport.height * engine.getRenderHeight()));
+      });
+      let capturing = false;
+      const skill = SKILLS.find((x) => x.id === "triple_slash")!;
+      const clip = player.av.clip(skill.clip)!;
+      for (let i = 0; i < n; i++) {
+        const fx = new CombatFx({ scene, camera: cam, hudRoot: div, tier: tierArg, env: envName === "meadow" ? "bright" : "dark" });
+        const wb = new TransformNode(`modTestBase${i}`, scene);
+        const wt = new TransformNode(`modTestTip${i}`, scene);
+        wt.position.y = 0.8;
+        const root = new TransformNode(`modTestRoot${i}`, scene);
+        wb.parent = root;
+        wt.parent = root;
+        fx.register({ id: "me", owner: "self", root, position: () => root.position, yaw: () => 0, weaponBase: wb, weaponTip: wt, target: () => new Vector3(0, 0.8, 2) });
+        fx.register({ id: "far", owner: "other", root, position: () => new Vector3(60, 0, 60), yaw: () => 0 });
+        capturing = true;
+        const pw = await fx.prewarm({ maxMs: 15000 });
+        capturing = false;
+        const vpRestored = cam.viewport.width === 1 && cam.viewport.height === 1;
+        let hits = 0;
+        fx.playSkill("me", skill, clip, 1, { onHit: () => hits++ });
+        for (let k = 0; k < 75; k++) fx.update(1 / 30);
+        fx.hit(new Vector3(0, 0.8, 2), ["hitFlash", "hitSpark"], { owner: "self", damage: 123, crit: true, sfx: "hit", shake: 0.2 });
+        fx.spawn("other", "slashArc", new Vector3(60, 0.5, 60));
+        fx.monsterDeath(new Vector3(0, 0, 2));
+        fx.monsterRespawn(new Vector3(0, 0, 2));
+        for (let k = 0; k < 30; k++) fx.update(1 / 30);
+        const st = fx.stats();
+        fx.dispose();
+        wb.dispose();
+        wt.dispose();
+        root.dispose();
+        runs.push({ prewarm: pw, vpRestored, hits, culled: st.culled, damageShown: st.damageShown, after: count(), dom: div.childElementCount });
+      }
+      scene.onBeforeRenderObservable.remove(obs);
+      const end = count();
+      div.remove();
+      return { base, end, runs, hpBefore: hp0, hpAfter: hpSum(), maxPrewarmViewportPx: vpSizes.length ? Math.max(...vpSizes) : null, prewarmFrames: vpSizes.length };
+    },
     /** 測試：已編譯的 shader 數、預熱結果 */
     shaderCount,
     /** 測試：已編譯 shader 的識別字串（找出還沒被預熱的） */

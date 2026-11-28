@@ -37,6 +37,11 @@ export class ScreenFx {
     if (this.enabled) this.hurtT = 0;
   }
 
+  dispose(): void {
+    this.crit.remove();
+    this.hurt.remove();
+  }
+
   update(dt: number): void {
     this.critT += dt;
     this.hurtT += dt;

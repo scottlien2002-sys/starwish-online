@@ -321,6 +321,16 @@ export class CombatAudio {
     if (resume && this.ctx.state === "suspended") void this.ctx.resume();
   }
 
+  /** 離開地圖：關掉 AudioContext，釋放緩衝 */
+  dispose(): void {
+    const c = this.ctx;
+    this.ctx = null;
+    this.bus = null;
+    this.master = null;
+    this.wet = null;
+    if (c) void c.close().catch(() => undefined);
+  }
+
   get ready(): boolean {
     return !!this.ctx && this.ctx.state === "running";
   }
