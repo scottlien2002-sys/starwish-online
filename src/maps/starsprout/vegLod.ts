@@ -129,3 +129,12 @@ export function shuffledOrder(n: number, seed: number): Uint32Array {
   }
   return a;
 }
+
+/** 每個實例固定的亂數鍵（0～1；同一個 index、seed 永遠相同）：密度 ρ 時只畫鍵 < ρ 的 → 走動時零星增減 */
+export function instKey(i: number, seed = 0): number {
+  let h = (Math.imul(i + 1, 0x9e3779b1) ^ Math.imul(seed + 0x85ebca6b, 0xc2b2ae35)) >>> 0;
+  h = Math.imul(h ^ (h >>> 16), 0x85ebca6b) >>> 0;
+  h = Math.imul(h ^ (h >>> 13), 0xc2b2ae35) >>> 0;
+  h = (h ^ (h >>> 16)) >>> 0;
+  return h / 4294967296;
+}

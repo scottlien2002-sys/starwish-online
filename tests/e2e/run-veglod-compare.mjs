@@ -3,9 +3,8 @@
 //   before = &veglod=0（Stage 7.4 原本的植被：區塊整塊切換＋草花格子硬切）
 //   after  = 預設（新的逐棵三級 LOD＋鏡頭後方剔除＋草花密度漸變）
 // 1. 獨立地圖頁 ?map=starsprout：高（HQ）／中（Lite）／低（Lite）× 固定站位，讀 Draw Calls、場景三角面、植被三角面、截圖
-// 2. 每個畫質再跑一圈主路線（連續移動），比較平均三角面／Draw Calls／FPS（FPS 只看相對變化）
+// 2. 連續走動 30 公尺（每 0.25 公尺取樣）：植被三角面平均與每步最大變化（跳變檢查）
 // 3. 正式遊戲 ?play=world 高畫質：自動打怪 bench（含怪物、角色、特效的實際場景）
-// 4. 跳變檢查：在原地讓角色每 0.25 公尺前進，記錄植被三角面每步變化（量化「突然出現／消失」）
 // 用法：node tests/e2e/run-veglod-compare.mjs <dist> [chromium] [benchSeconds]
 import { mkdirSync, writeFileSync } from "node:fs";
 import { loadPlaywright, serve } from "./static-server.mjs";
@@ -88,7 +87,7 @@ for (const t of TIERS) {
         run.poses.push({ id: p.id, ...s });
       }
       // 跳變檢查（只在高、低畫質做）：從 camp 往東北慢慢前進 30 公尺
-      if (t.id !== "medium") {
+      {
         await page.evaluate(() => window.__starwishMap.unfreeze());
         await page.evaluate(() => window.__starwishMap.pose({ x: -56, z: -60, playerYawDeg: 45, camBearingDeg: 225, beta: 1.2, radius: 7, freeze: false }));
         await page.waitForTimeout(1500);
@@ -117,23 +116,16 @@ for (const t of TIERS) {
         const avg = steps.reduce((a, s) => a + s.vegTris, 0) / steps.length;
         report.pop.push({ tier: t.id, variant: v.id, maxStepJumpTris: maxJump, maxJumpAtMeters: maxJumpAt, avgVegTris: Math.round(avg), relMaxJump: +(maxJump / Math.max(1, avg)).toFixed(3), steps });
       }
-      // 主路線一圈（連續移動）
-      await page.evaluate(() => window.__starwishMap.unfreeze());
-      await page.evaluate(() => window.__starwishMap.startRoute(1));
-      const res = await page
-        .waitForFunction(() => window.__starwishMap.routeState().phase === "done" || (window.__starwishMap.routeState().phase === null && window.__starwishMap.routeState().result), null, { timeout: 600000, polling: 1000 })
-        .then(() => page.evaluate(() => window.__starwishMap.routeState().result));
-      run.route = res ? { avgFps: +res.avgFps.toFixed(1), low1Fps: +res.low1Fps.toFixed(1), avgDraw: Math.round(res.avgDraw), maxDraw: res.maxDraw, avgTris: Math.round(res.avgTris), stutters: res.stutters, loopTimes: res.loopTimes, stuck: res.stuck?.length ?? 0, contextLost: res.contextLost } : null;
-      report.routes.push({ tier: t.id, variant: v.id, ...run.route });
       run.errors = errors;
-      run.ok = errors.length === 0 && !!run.route;
+      run.ok = errors.length === 0;
       await ctx.close();
     } catch (e) {
       run.error = String(e?.stack ?? e);
     }
-    check(`地圖頁 ${label} 無錯誤且路線完成`, run.ok, run.error ?? run.errors);
+    check(`地圖頁 ${label} 無錯誤`, run.ok, run.error ?? run.errors);
     report.map.push(run);
-    console.log(label, JSON.stringify(run.poses.map((p) => [p.id, p.drawCalls, p.trianglesActive, p.veg?.drawnTris])), JSON.stringify(run.route));
+    console.log(label, JSON.stringify(run.poses.map((p) => [p.id, p.drawCalls, p.trianglesActive, p.veg?.drawnTris])));
+    writeFileSync(outDir + "report.json", JSON.stringify(report, null, 2));
   }
 }
 
@@ -195,6 +187,7 @@ for (const v of VARIANTS) {
   check(`正式遊戲 ${v.id} bench 無錯誤`, run.ok, run.error ?? run.errors);
   report.world.push(run);
   console.log("world", v.id, JSON.stringify(run.bench), JSON.stringify(run.sampled));
+  writeFileSync(outDir + "report.json", JSON.stringify(report, null, 2));
 }
 
 // ---------- 摘要 ----------

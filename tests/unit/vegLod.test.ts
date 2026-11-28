@@ -74,3 +74,11 @@ test("數量平滑靠近目標；洗牌可重現且是完整排列", () => {
   const mean = head.reduce((x, y) => x + y, 0) / head.length;
   assert.ok(mean > 180 && mean < 320, `前段平均 ${mean}`);
 });
+
+test("instKey：可重現、0～1 均勻", async () => {
+  const { instKey } = await import("../../src/maps/starsprout/vegLod.ts");
+  assert.equal(instKey(7, 3), instKey(7, 3));
+  const bins = new Array(10).fill(0);
+  for (let i = 0; i < 20000; i++) bins[Math.floor(instKey(i, 101) * 10)]++;
+  for (const b of bins) assert.ok(b > 1700 && b < 2300, String(bins));
+});

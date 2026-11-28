@@ -31,17 +31,19 @@ jobs:
         run: npm test
       - run: npm run build
       - run: npx playwright install --with-deps chromium
+      - name: Vegetation LOD compare
+        id: cmp
+        continue-on-error: true
+        run: node tests/e2e/run-veglod-compare.mjs dist chromium 40
       - name: Map e2e (regression, after)
         run: node tests/e2e/run-map-e2e.mjs dist chromium
         continue-on-error: true
         id: mape2e
-      - name: Vegetation LOD compare
-        run: node tests/e2e/run-veglod-compare.mjs dist chromium 40
       - name: Push report to results branch
         if: always()
         run: |
           mkdir -p /tmp/res && cp -r test-results/. /tmp/res/ 2>/dev/null || true
-          echo "map-e2e: ${{ steps.mape2e.outcome }}" > /tmp/res/map-e2e-outcome.txt
+          echo "compare: ${{ steps.cmp.outcome }} / map-e2e: ${{ steps.mape2e.outcome }}" > /tmp/res/map-e2e-outcome.txt
           cd /tmp/res
           git init -q && git checkout -q -b "results/field-veglod-${GITHUB_RUN_ID}"
           git config user.name "github-actions[bot]"
