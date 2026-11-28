@@ -1300,7 +1300,6 @@ export async function startCombatVfxLab(canvas: HTMLCanvasElement, hudRoot: HTML
     /** 測試：已編譯的 shader 數、預熱結果 */
     shaderCount,
     prewarm: () => prewarmStats,
-    setEnv: (e: "dark" | "meadow") => setEnv(e),
     /** 測試：鏡頭距離、HUD 的開發者選單 */
     camRadius: () => cam.radius,
     setDevMenu: (on: boolean) => hud.setDev(on),
