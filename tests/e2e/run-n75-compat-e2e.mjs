@@ -21,7 +21,7 @@ const ONE_HANDED = ["Attack", "Attack_1H_Chop", "Attack_1H_Thrust"];
 for (const name of browsers) {
   const browser = await pw[name].launch({ args: name === "chromium" ? ["--use-gl=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] : [] });
   for (const lod of name === "chromium" ? ["lite", "hq"] : ["lite"]) {
-    const run = { browser: name, case: `n75-${lod}`, checks: {}, errors: [], results: {} };
+    const run = { browser: name, case: `n75-${lod}`, checks: {}, errors: [], warnings: [], results: {} };
     const check = (k, ok, detail) => {
       run.checks[k] = { ok: !!ok, detail };
       if (!ok) failures++;
@@ -62,8 +62,12 @@ for (const name of browsers) {
             check(`${tag}：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）`, r.tipJumpMax / rate <= 0.6, { raw: +r.tipJumpMax.toFixed(3), perRate1: +(r.tipJumpMax / rate).toFixed(3) });
             check(`${tag}：刀光呈弧線（補取樣後每段 ≤ 0.25 m）`, r.chordMax <= 0.25, +r.chordMax.toFixed(3));
             run.results.torso = run.results.torso ?? {};
-            if (r.insideFrames) run.results.torso[tag] = r.inside;
+            if (r.insideFrames) {
+              run.results.torso[tag] = r.inside;
+              run.warnings.push(`${tag}：刀尖靠近頭肩（軀幹圓柱內）${r.insideFrames} 格：${JSON.stringify(r.inside)}`);
+            }
           }
+          if (r.hitFxCount) check(`${tag}：命中特效出現在目標命中點（≤ 5 cm）`, r.hitFxErr <= 0.05, { n: r.hitFxCount, err: +r.hitFxErr.toFixed(3) });
           if (r.hits.length) {
             const bad = r.hits.filter((h) => Math.abs(h.wall - h.expect) > FRAME + 1e-6 || Math.abs(h.animT - h.mark) > rate * FRAME + 1e-6);
             check(`${tag}：命中特效時間＝標記／攻速，且與動作同一格`, bad.length === 0, r.hits.map((h) => ({ mark: +h.mark.toFixed(3), wall: +h.wall.toFixed(3), expect: +h.expect.toFixed(3), animT: +h.animT.toFixed(3), tip: +h.tipToTarget.toFixed(2) })));
@@ -87,6 +91,7 @@ for (const name of browsers) {
         run.results.basic[clip] = r;
         check(`${clip}：拖尾沿著刀尖移動（誤差 ≤ 1 cm）`, r.trailErrMax <= 0.01, +r.trailErrMax.toFixed(4));
         check(`${clip}：武器不穿進軀幹`, r.insideFrames === 0, r.insideFrames);
+        if (TWO_HANDED.includes(clip)) run.results.twoHandGrip = { ...(run.results.twoHandGrip ?? {}), [clip]: { lhandToGripAtHit: +r.lhandToGripAtHit.toFixed(3), lhandToGripMin: +r.lhandToGripMin.toFixed(3) } };
       }
       // 重要戰鬥特效例外（施放者 40 m 外、鏡頭背後）
       const ess = await page.evaluate(() => window.__n75.essentialCheck());
@@ -116,6 +121,7 @@ const lines = [];
 for (const r of report.runs) {
   lines.push(`## ${r.browser} / ${r.case}`);
   for (const [k, v] of Object.entries(r.checks)) lines.push(`- ${v.ok ? "✅" : "❌"} ${k}${v.ok ? "" : `  ${JSON.stringify(v.detail)?.slice(0, 300)}`}`);
+  for (const w of r.warnings ?? []) lines.push(`- ⚠️ ${w}`);
   if (r.errors.length) lines.push(`- errors: ${r.errors.slice(0, 5).join(" | ")}`);
 }
 writeFileSync(`${outDir}summary.md`, lines.join("\n") + "\n");

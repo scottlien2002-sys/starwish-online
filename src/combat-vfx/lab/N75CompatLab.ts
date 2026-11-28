@@ -153,8 +153,15 @@ export async function startN75CompatLab(canvas: HTMLCanvasElement, hudRoot: HTML
     const inside: { t: number; axis: number; y: number }[] = [];
     let trailFrames = 0;
     let prevTip: Vector3 | null = null;
+    const spawns: { key: string; at: Vector3; t: number }[] = [];
+    fx.vfx.onSpawn = (key, at) => spawns.push({ key, at: at.clone(), t: wall });
+    const HIT_KEYS = ["hitFlash", "hitSpark", "hitRing", "critBurst", "boltImpact"];
     const h = fx.playSkill("me", skill, clip, rate, {
-      onHit: (_hit, t) => pending.push({ mark: t, wall }),
+      // 模擬遊戲：命中時在目標命中點呼叫 fx.hit（不給傷害數字）
+      onHit: (_hit, t) => {
+        pending.push({ mark: t, wall });
+        fx.hit(targetPoint, ["hitSpark", "hitFlash"], { owner: "self" });
+      },
       onProjectile: (ev, vis, t) => {
         const from = vis ? vis.pos.clone() : abs(weapon.focus);
         projectiles.push({ mark: t, fx: ev.fx, fromToHand: Vector3.Distance(from, abs(rHand)) });
@@ -191,11 +198,16 @@ export async function startN75CompatLab(canvas: HTMLCanvasElement, hudRoot: HTML
         scene.render();
         h.cancel();
         g.stop();
+        fx.vfx.onSpawn = null;
         return { skillId, rate, stopped: t };
       }
     }
     g.stop();
-    return { skillId, rate, duration: dur, wall, trailFrames, trailErrMax, tipJumpMax, chordMax, insideFrames, inside, hits, projectiles };
+    fx.vfx.onSpawn = null;
+    // 命中類特效到目標命中點（或其地面投影）的最大距離
+    const hitFx = spawns.filter((s) => HIT_KEYS.includes(s.key));
+    const hitFxErr = hitFx.reduce((m, s) => Math.max(m, Math.min(Vector3.Distance(s.at, targetPoint), Vector3.Distance(s.at, new Vector3(targetPoint.x, 0, targetPoint.z)))), 0);
+    return { skillId, rate, duration: dur, wall, hitFxCount: hitFx.length, hitFxErr, trailFrames, trailErrMax, tipJumpMax, chordMax, insideFrames, inside, hits, projectiles };
   };
 
   /** A 的普通攻擊／雙手武器動作：只播 A 的動作＋C 的拖尾（basicSwing），量測刀尖是否穿進身體、左手與握把距離 */
@@ -241,7 +253,16 @@ export async function startN75CompatLab(canvas: HTMLCanvasElement, hudRoot: HTML
   };
 
   /** 停在某個時間點畫一格（截圖用） */
-  const pose = (skillId: string, t: number) => run(skillId, 1, t);
+  const pose = (skillId: string, t: number) => {
+    for (let i = 0; i < 180; i++) {
+      fx.advance(1 / 60);
+      fx.updateVisuals(1 / 60);
+    }
+    cam.radius = 3.2;
+    cam.alpha = -Math.PI / 2 - 0.9;
+    cam.target.set(0, 0.75, 0.6);
+    return run(skillId, 1, t);
+  };
 
   /**
    * 重要戰鬥特效（瀏覽器實測）：本地玩家在原點，施放者在 40 m 外、鏡頭背後。

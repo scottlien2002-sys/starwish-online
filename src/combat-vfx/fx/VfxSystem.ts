@@ -323,7 +323,11 @@ export class VfxSystem {
 
   // ------------------------------------------------------------------ 公開：生成特效
 
+  /** 測試／除錯用觀察者：每次要求生成特效時呼叫（是否核准由預算決定） */
+  onSpawn: ((key: FxKey, at: Vector3, owner: VfxOwner) => void) | null = null;
+
   spawn(key: FxKey, at: Vector3, opt: SpawnOptions = {}): void {
+    this.onSpawn?.(key, at, opt.owner ?? "self");
     const pal = PALETTES[opt.palette ?? "steel"];
     const owner = opt.owner ?? "self";
     const lite = (owner !== "self" && this.remoteSimplify) || !this.q.secondary;   // 其他玩家／低畫質：只畫主層
