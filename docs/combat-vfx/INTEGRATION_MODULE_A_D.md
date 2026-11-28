@@ -1,7 +1,7 @@
 # Combat VFX 正式接入模組（給 Claude A、Claude D）
 
 作者：Claude C　分支：`feature/combat-vfx-stage3`　入口：`src/combat-vfx/integration/index.ts`
-穩定備份：`backup/combat-vfx-stage3.1-stable`（142fa71）　部署：暫停中（`.github/cvfx-deploy-hold`）
+穩定備份：Stage 3.1 `backup/combat-vfx-stage3.1-stable`（142fa71）、接入模組 `backup/combat-vfx-integration-ready`（556fee8，CI 340/340）　部署：暫停中（`.github/cvfx-deploy-hold`）
 
 > 只負責**畫面與音效**：不扣血、不判斷命中與暴擊、不送網路封包。這些由 A 的戰鬥規則或 D 的伺服器結果決定，再呼叫本模組畫出來。
 > 技能名稱、數值、正式技能配置**未定案**。`SKILLS` 是 6 個展示技能；`classKits.ts` 的樣板只是草稿。
@@ -75,7 +75,7 @@ fx.dispose();
 
 | 檢查項目 | 結果（CI，Chromium／WebKit） |
 |---|---|
-| 等待時間 | 中畫質 0.7～1.4 秒（CI 無 GPU 軟體繪圖；iPhone **未驗證**，預期更短）；最長 4 秒保護 |
+| 等待時間 | 中畫質 0.9～2.1 秒（CI 無 GPU 軟體繪圖；iPhone **未驗證**，預期更短）；最長 4 秒保護 |
 | 預熱特效被看到 | 預熱期間鏡頭只畫 1×1 像素，結束後恢復；請在載入畫面期間呼叫 |
 | 傷害判定 | 不呼叫任何 hook、不扣血（測試：怪物總血量前後相同） |
 | 音效、網路 | 不播音效（0 次）、不顯示傷害數字（0 次）；本模組本來就不送網路事件 |
