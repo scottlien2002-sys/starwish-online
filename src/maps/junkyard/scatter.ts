@@ -28,6 +28,8 @@ export interface Inst {
   s: number;
   /** 顏色倍率（實例色） */
   c: [number, number, number];
+  /** 地面小碎屑（可依距離漸變減少；垃圾山／垃圾堆本體不標） */
+  small?: true;
 }
 
 export interface Pile extends Vec2 {
@@ -190,7 +192,7 @@ export function scatterAll(h: HeightFn, blocked: BlockFn, tier: ScatterTier): Sc
     if (blocked(x, z, 0.6)) continue;
     const s = 0.45 + r2() * 0.45;
     const type = FLAT[Math.floor(r2() * FLAT.length)]!;
-    push(type, { x, y: h(x, z) - 0.03, z, rx: (r2() - 0.5) * 0.25, ry: r2() * Math.PI * 2, rz: (r2() - 0.5) * 0.25, s, c: TINTS[Math.floor(r2() * TINTS.length)]! });
+    push(type, { x, y: h(x, z) - 0.03, z, rx: (r2() - 0.5) * 0.25, ry: r2() * Math.PI * 2, rz: (r2() - 0.5) * 0.25, s, c: TINTS[Math.floor(r2() * TINTS.length)]!, small: true });
     counts.debris++;
   }
 

@@ -51,6 +51,27 @@ import { groundHeight, insideColliders, pipeSupports, plateauInside, STATIC_COLL
 import { polyDist, rng, smoothstep } from "./geom.ts";
 import { createJunkMaterials, type JunkMaterials, Kit, junkSource, type JunkType, PAL, type Rgb } from "./junkKit.ts";
 import { cellOf, type Inst, SCATTER_TIERS, type ScatterResult, STREAM_CELLS, scatterAll } from "./scatter.ts";
+import { compactInto, type FadeRule, type FadeSet, makeFadeSet, selectFade } from "../../world/lodKit.ts";
+
+/** 距離密度漸變（草叢、小花、地面碎屑）；網址 &jyfade=0 關閉（對照用） */
+const FADE_RULES: Record<"high" | "medium" | "low", { tuft: FadeRule; flower: FadeRule; debris: FadeRule }> = {
+  high: { tuft: { full: 18, end: 48, floor: 0.3, cut: 80 }, flower: { full: 18, end: 48, floor: 0.2, cut: 75 }, debris: { full: 28, end: 70, floor: 0.35, cut: 110 } },
+  medium: { tuft: { full: 14, end: 40, floor: 0.3, cut: 65 }, flower: { full: 14, end: 40, floor: 0.2, cut: 60 }, debris: { full: 22, end: 58, floor: 0.3, cut: 90 } },
+  low: { tuft: { full: 10, end: 32, floor: 0.3, cut: 50 }, flower: { full: 10, end: 32, floor: 0.2, cut: 46 }, debris: { full: 16, end: 45, floor: 0.3, cut: 70 } },
+};
+
+interface FadeMesh {
+  mesh: Mesh;
+  set: FadeSet;
+  rule: FadeRule;
+  mats: Float32Array;
+  cols: Float32Array;
+  liveM: Float32Array;
+  liveC: Float32Array;
+  idx: Uint32Array;
+  shown: number;
+  tris: number;
+}
 
 export type JyTier = "high" | "medium" | "low";
 
@@ -65,6 +86,7 @@ export interface JunkyardStats {
   particles: number;
   buildMs: number;
   scatter: ScatterResult["counts"];
+  fade: { on: boolean; meshes: number; total: number; shown: number; tris: number; trisFull: number };
 }
 
 interface CellView {
@@ -72,6 +94,7 @@ interface CellView {
   meshes: Mesh[];
   particles: ParticleSystem[];
   instances: number;
+  fades: FadeMesh[];
 }
 
 const CHUNK = 50;
@@ -151,6 +174,11 @@ export class JunkyardWorld {
   } = { cranes: [], gears: [], rings: [], core: null, crystals: null, beltTex: null, waterTex: null };
   private ambient: ParticleSystem | null = null;
   private casterTimer = 0;
+  private fadeTimer = 0;
+  private fadeX = Infinity;
+  private fadeZ = Infinity;
+  /** 距離密度漸變是否開啟（&jyfade=0 關閉） */
+  readonly fadeOn = typeof location === "undefined" || new URLSearchParams(location.search).get("jyfade") !== "0";
   private t = 0;
   readonly buildMs: number;
   /** 分區載入／釋放紀錄（報告用） */
@@ -1194,7 +1222,10 @@ export class JunkyardWorld {
     return m!;
   }
 
-  private instanceMesh(src: Mesh, name: string, list: readonly Inst[], material: StandardMaterialLike): Mesh {
+  private instanceMesh(src: Mesh, name: string, listIn: readonly Inst[], material: StandardMaterialLike, fade?: { view: CellView; rule: FadeRule; all: boolean }): Mesh {
+    // 漸變時：固定的大件在前、可漸變的小碎屑在後（同一個網格、Draw Calls 不變）
+    const list = fade && !fade.all ? [...listIn.filter((i) => !i.small), ...listIn.filter((i) => i.small)] : listIn;
+    const fixed = fade ? (fade.all ? 0 : listIn.filter((i) => !i.small).length) : list.length;
     const m = src.clone(name, this.root, true, false) as Mesh;
     m.makeGeometryUnique?.();
     m.setEnabled(true);
@@ -1219,9 +1250,23 @@ export class JunkyardWorld {
       cols[i * 4 + 2] = it.c[2];
       cols[i * 4 + 3] = 1;
     }
-    m.thinInstanceSetBuffer("matrix", mats, 16, true);
-    m.thinInstanceSetBuffer("color", cols, 4, true);
-    m.thinInstanceRefreshBoundingInfo(false);
+    if (fade && fixed < list.length) {
+      // 先用完整清單算包圍盒（之後只改數量，不必每次重算）
+      m.thinInstanceSetBuffer("matrix", mats, 16, true);
+      m.thinInstanceRefreshBoundingInfo(false);
+      const liveM = new Float32Array(mats);
+      const liveC = new Float32Array(cols);
+      m.thinInstanceSetBuffer("matrix", liveM, 16, false);
+      m.thinInstanceSetBuffer("color", liveC, 4, false);
+      m.thinInstanceRefreshBoundingInfo(false);
+      const f: FadeMesh = { mesh: m, set: makeFadeSet(list, fixed, list.length * 7 + name.length), rule: fade.rule, mats, cols, liveM, liveC, idx: new Uint32Array(list.length), shown: list.length, tris: m.getTotalIndices() / 3 };
+      fade.view.fades.push(f);
+      if (Number.isFinite(this.fadeX) && !this.fadeHold) this.applyFade(f, this.fadeX, this.fadeZ);
+    } else {
+      m.thinInstanceSetBuffer("matrix", mats, 16, true);
+      m.thinInstanceSetBuffer("color", cols, 4, true);
+      m.thinInstanceRefreshBoundingInfo(false);
+    }
     m.freezeWorldMatrix();
     m.alwaysSelectAsActiveMesh = false;
     return m;
@@ -1230,24 +1275,25 @@ export class JunkyardWorld {
   private loadCell(id: string): void {
     if (this.cells.has(id)) return;
     const t0 = performance.now();
-    const view: CellView = { id, meshes: [], particles: [], instances: 0 };
+    const view: CellView = { id, meshes: [], particles: [], instances: 0, fades: [] };
+    const rules = FADE_RULES[this.tier];
     const junk = this.scatter.junk.get(id);
     if (junk) {
       for (const [type, list] of junk) {
         if (!list.length) continue;
         const src = this.source(`junk_${type}`, () => junkSource(this.scene, this.mats, type as JunkType, this.lite));
-        view.meshes.push(this.instanceMesh(src, `jy_junk_${id}_${type}`, list, this.mats.paint));
+        view.meshes.push(this.instanceMesh(src, `jy_junk_${id}_${type}`, list, this.mats.paint, this.fadeOn ? { view, rule: rules.debris, all: false } : undefined));
         view.instances += list.length;
       }
     }
     const tl = this.scatter.tufts.get(id);
     if (tl?.length) {
-      view.meshes.push(this.instanceMesh(this.source("tuft", () => this.tuftSource()), `jy_tufts_${id}`, tl, this.mats.foliage));
+      view.meshes.push(this.instanceMesh(this.source("tuft", () => this.tuftSource()), `jy_tufts_${id}`, tl, this.mats.foliage, this.fadeOn ? { view, rule: rules.tuft, all: true } : undefined));
       view.instances += tl.length;
     }
     const fl = this.scatter.flowers.get(id);
     if (fl?.length) {
-      view.meshes.push(this.instanceMesh(this.source("flower", () => this.flowerSource()), `jy_flowers_${id}`, fl, this.mats.foliage));
+      view.meshes.push(this.instanceMesh(this.source("flower", () => this.flowerSource()), `jy_flowers_${id}`, fl, this.mats.foliage, this.fadeOn ? { view, rule: rules.flower, all: true } : undefined));
       view.instances += fl.length;
     }
     if (this.tier !== "low") {
@@ -1269,6 +1315,60 @@ export class JunkyardWorld {
     for (const p of v.particles) p.dispose(false);
     this.cells.delete(id);
     this.streamLog.push({ t: performance.now() / 1000, cell: id, op: "unload", ms: performance.now() - t0 });
+  }
+
+  private applyFade(f: FadeMesh, px: number, pz: number): void {
+    const n = selectFade(f.set, px, pz, f.rule, f.idx);
+    compactInto(f.mats, f.liveM, f.idx, n, 16);
+    compactInto(f.cols, f.liveC, f.idx, n, 4);
+    f.mesh.thinInstanceCount = n;
+    f.mesh.thinInstanceBufferUpdated("matrix");
+    f.mesh.thinInstanceBufferUpdated("color");
+    f.mesh.setEnabled(n > 0);
+    f.shown = n;
+  }
+
+  private fadeHold = false;
+  /** 俯視全圖：全部小物件都顯示、暫停漸變；關閉時依角色位置重算 */
+  setFadeOverview(on: boolean, px: number, pz: number): void {
+    this.fadeHold = on;
+    if (on) {
+      for (const v of this.cells.values()) {
+        for (const f of v.fades) {
+          f.liveM.set(f.mats);
+          f.liveC.set(f.cols);
+          f.mesh.thinInstanceCount = f.set.xs.length;
+          f.mesh.thinInstanceBufferUpdated("matrix");
+          f.mesh.thinInstanceBufferUpdated("color");
+          f.mesh.setEnabled(true);
+          f.shown = f.set.xs.length;
+        }
+      }
+    } else this.updateFades(px, pz, true);
+  }
+
+  /** 漸變統計（報告用） */
+  fadeStats(): { on: boolean; meshes: number; total: number; shown: number; tris: number; trisFull: number } {
+    let meshes = 0, total = 0, shown = 0, tris = 0, trisFull = 0;
+    for (const v of this.cells.values()) {
+      for (const f of v.fades) {
+        meshes++;
+        total += f.set.xs.length;
+        shown += f.shown;
+        tris += f.shown * f.tris;
+        trisFull += f.set.xs.length * f.tris;
+      }
+    }
+    return { on: this.fadeOn, meshes, total, shown, tris: Math.round(tris), trisFull: Math.round(trisFull) };
+  }
+
+  /** 小物件距離密度漸變：角色移動 1.5 公尺或每 0.25 秒更新一次 */
+  updateFades(px: number, pz: number, force = false): void {
+    if (!this.fadeOn || this.fadeHold) return;
+    if (!force && Math.hypot(px - this.fadeX, pz - this.fadeZ) < 1.5) return;
+    this.fadeX = px;
+    this.fadeZ = pz;
+    for (const v of this.cells.values()) for (const f of v.fades) this.applyFade(f, px, pz);
   }
 
   /** 分區載入：區域邊緣距離 < 載入距離就建立；> 釋放距離就釋放（遲滯避免來回） */
@@ -1326,6 +1426,11 @@ export class JunkyardWorld {
       cr.mesh.thinInstanceBufferUpdated("matrix");
     }
     if (this.ambient) (this.ambient.emitter as Vector3).set(px, py, pz);
+    this.fadeTimer -= dt;
+    if (this.fadeTimer <= 0) {
+      this.fadeTimer = 0.25;
+      this.updateFades(px, pz);
+    }
     this.casterTimer -= dt;
     if (this.casterTimer <= 0) {
       this.casterTimer = 0.5;
@@ -1389,6 +1494,7 @@ export class JunkyardWorld {
       particles: this.particleCount + [...this.cells.values()].reduce((a, v) => a + v.particles.reduce((b, p) => b + p.getCapacity(), 0), 0),
       buildMs: Math.round(this.buildMs),
       scatter: this.scatter.counts,
+      fade: this.fadeStats(),
     };
   }
 

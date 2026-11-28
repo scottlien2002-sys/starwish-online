@@ -262,6 +262,7 @@ class JunkyardPage {
     this.pos.set(x, this.grid.height(x, z), z);
     this.yaw = yaw;
     this.world.updateStreaming(x, z);
+    this.world.updateFades(x, z, true);
     this.camera.snap(this.pos, this.alphaBehind(yaw), TUNING.camera.defaultBeta, TUNING.camera.distance);
   }
 
@@ -557,6 +558,7 @@ class JunkyardPage {
       document.body.classList.add("jy-topview");
       // 俯視時全部分區都載入（看完整地圖）
       for (const zn of STREAM_CELLS) this.world.updateStreaming(zn.x, zn.z);
+      this.world.setFadeOverview(true, this.pos.x, this.pos.z);
     } else if (!on && this.topCam) {
       this.topCam.dispose();
       this.topCam = null;
@@ -566,6 +568,7 @@ class JunkyardPage {
       document.body.classList.remove("jy-topview");
       this.world.updateStreaming(this.pos.x, this.pos.z, true);
       this.world.updateStreaming(this.pos.x, this.pos.z);
+      this.world.setFadeOverview(false, this.pos.x, this.pos.z);
     }
   }
 
