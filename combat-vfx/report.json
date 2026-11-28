@@ -1,0 +1,6048 @@
+{
+  "startedAt": "2026-11-28T07:54:29.850Z",
+  "note": "FPS 為 CI 軟體繪圖（無 GPU）數字，不代表 iPhone 效能",
+  "runs": [
+    {
+      "browser": "chromium",
+      "case": "male-medium",
+      "checks": {
+        "載入：6 隻骨骼動畫怪物（M002～M007）且檔案檢查通過": {
+          "ok": true,
+          "detail": [
+            {
+              "l": "M002 苔角獸",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M003 雲絨鳥",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M004 風羽狐",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M005 星雲咩咩",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M006 胡蘿蔔大王",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M007 王冠重錘兔",
+              "ok": true,
+              "e": []
+            }
+          ]
+        },
+        "載入：初心者 C1.0-B5b（非 Tripo 組裝）": {
+          "ok": true,
+          "detail": {
+            "triangles": 40381,
+            "gender": "male"
+          }
+        },
+        "施放 1. triple_slash": {
+          "ok": true,
+          "detail": null
+        },
+        "triple_slash：至少一次命中結算": {
+          "ok": true,
+          "detail": [
+            {
+              "hit": "s1",
+              "targets": 1,
+              "dmg": [
+                30
+              ]
+            },
+            {
+              "hit": "s2",
+              "targets": 2,
+              "dmg": [
+                38,
+                62
+              ]
+            },
+            {
+              "hit": "s3",
+              "targets": 2,
+              "dmg": [
+                93,
+                91
+              ]
+            },
+            {
+              "hit": "wave",
+              "targets": 1,
+              "dmg": [
+                23
+              ]
+            }
+          ]
+        },
+        "triple_slash：命中當格動作時間＝時間軸時間（誤差 ≤ 1 格 1/30 s），傷害數字同一格顯示": {
+          "ok": true,
+          "detail": [
+            {
+              "hit": "s1",
+              "kind": "melee",
+              "clipT": 0.17,
+              "animT": 0.17,
+              "same": true
+            },
+            {
+              "hit": "s2",
+              "kind": "melee",
+              "clipT": 0.5,
+              "animT": 0.5,
+              "same": true
+            },
+            {
+              "hit": "s3",
+              "kind": "melee",
+              "clipT": 0.92,
+              "animT": 0.92,
+              "same": true
+            },
+            {
+              "hit": "wave",
+              "kind": "projectile",
+              "clipT": 0.9,
+              "animT": 0.92,
+              "same": true
+            }
+          ]
+        },
+        "施放 2. staff_cast": {
+          "ok": true,
+          "detail": null
+        },
+        "staff_cast：至少一次命中結算": {
+          "ok": true,
+          "detail": [
+            {
+              "hit": "bolt",
+              "targets": 1,
+              "dmg": [
+                88
+              ]
+            }
+          ]
+        },
+        "staff_cast：命中當格動作時間＝時間軸時間（誤差 ≤ 1 格 1/30 s），傷害數字同一格顯示": {
+          "ok": true,
+          "detail": [
+            {
+              "hit": "bolt",
+              "kind": "projectile",
+              "clipT": 0.58,
+              "animT": 0.8000000000000002,
+              "same": true
+            }
+          ]
+        },
+        "施放 3. leap_slam": {
+          "ok": true,
+          "detail": null
+        },
+        "leap_slam：至少一次命中結算": {
+          "ok": true,
+          "detail": [
+            {
+              "hit": "slam",
+              "targets": 3,
+              "dmg": [
+                84,
+                118,
+                87
+              ]
+            }
+          ]
+        },
+        "leap_slam：命中當格動作時間＝時間軸時間（誤差 ≤ 1 格 1/30 s），傷害數字同一格顯示": {
+          "ok": true,
+          "detail": [
+            {
+              "hit": "slam",
+              "kind": "melee",
+              "clipT": 0.8,
+              "animT": 0.8,
+              "same": true
+            }
+          ]
+        },
+        "施放 4. whirlwind": {
+          "ok": true,
+          "detail": null
+        },
+        "whirlwind：至少一次命中結算": {
+          "ok": true,
+          "detail": [
+            {
+              "hit": "w1",
+              "targets": 4,
+              "dmg": [
+                27,
+                49,
+                25,
+                30
+              ]
+            },
+            {
+              "hit": "w2",
+              "targets": 4,
+              "dmg": [
+                25,
+                30,
+                41,
+                30
+              ]
+            },
+            {
+              "hit": "w3",
+              "targets": 4,
+              "dmg": [
+                60,
+                43,
+                43,
+                41
+              ]
+            }
+          ]
+        },
+        "whirlwind：命中當格動作時間＝時間軸時間（誤差 ≤ 1 格 1/30 s），傷害數字同一格顯示": {
+          "ok": true,
+          "detail": [
+            {
+              "hit": "w1",
+              "kind": "melee",
+              "clipT": 0.48,
+              "animT": 0.4799999999999999,
+              "same": true
+            },
+            {
+              "hit": "w2",
+              "kind": "melee",
+              "clipT": 0.76,
+              "animT": 0.76,
+              "same": true
+            },
+            {
+              "hit": "w3",
+              "kind": "melee",
+              "clipT": 1.04,
+              "animT": 1.04,
+              "same": true
+            }
+          ]
+        },
+        "施放 5. star_meteor": {
+          "ok": true,
+          "detail": null
+        },
+        "star_meteor：至少一次命中結算": {
+          "ok": true,
+          "detail": [
+            {
+              "hit": "meteor",
+              "targets": 4,
+              "dmg": [
+                90,
+                99,
+                102,
+                100
+              ]
+            }
+          ]
+        },
+        "star_meteor：命中當格動作時間＝時間軸時間（誤差 ≤ 1 格 1/30 s），傷害數字同一格顯示": {
+          "ok": true,
+          "detail": [
+            {
+              "hit": "meteor",
+              "kind": "projectile",
+              "clipT": 0.72,
+              "animT": 1.3500000000000005,
+              "same": true
+            }
+          ]
+        },
+        "施放 6. charge_burst": {
+          "ok": true,
+          "detail": null
+        },
+        "charge_burst：至少一次命中結算": {
+          "ok": true,
+          "detail": [
+            {
+              "hit": "burst",
+              "targets": 3,
+              "dmg": [
+                180,
+                173,
+                184
+              ]
+            }
+          ]
+        },
+        "charge_burst：命中當格動作時間＝時間軸時間（誤差 ≤ 1 格 1/30 s），傷害數字同一格顯示": {
+          "ok": true,
+          "detail": [
+            {
+              "hit": "burst",
+              "kind": "melee",
+              "clipT": 1.22,
+              "animT": 1.22,
+              "same": true
+            }
+          ]
+        },
+        "攻速 250 → 依上限 160 播放（命中間隔 ≥ 0.33/1.6）": {
+          "ok": true,
+          "detail": {
+            "gap": 0.30000000000000426
+          }
+        },
+        "三段品質都能運作（每段都有生成特效）": {
+          "ok": true,
+          "detail": {
+            "high": {
+              "fps": 5.266577279912682,
+              "draws": 70,
+              "particles": 46
+            },
+            "medium": {
+              "fps": 5.265304965153809,
+              "draws": 75,
+              "particles": 1
+            },
+            "low": {
+              "fps": 5.344135283811369,
+              "draws": 52,
+              "particles": 22
+            }
+          }
+        },
+        "沒有頁面錯誤": {
+          "ok": true,
+          "detail": []
+        },
+        "沒有失敗的網路請求（模型、貼圖、動作檔全部載入）": {
+          "ok": true,
+          "detail": []
+        }
+      },
+      "errors": [],
+      "results": {
+        "loadMs": 2825,
+        "loaded": {
+          "tier": "medium",
+          "gender": "male",
+          "monsters": [
+            {
+              "idx": 0,
+              "label": "M002 苔角獸",
+              "level": 3,
+              "behaviour": "passive",
+              "angry": 0,
+              "moving": false,
+              "hp": 600,
+              "state": "idle",
+              "pos": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "home": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "check": {
+                "file": "monsters/m002/M002_MossHornBeast_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 0.64,
+                  "Run": 0.44,
+                  "Attack": 1.3,
+                  "Hurt": 0.45,
+                  "Death": 0.8,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 335
+              }
+            },
+            {
+              "idx": 1,
+              "label": "M003 雲絨鳥",
+              "level": 5,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 750,
+              "state": "idle",
+              "pos": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "home": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "check": {
+                "file": "monsters/m003/M003_CloudFluffBird_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 19,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 1.25,
+                  "Move": 0.8,
+                  "Run": 0.5,
+                  "Attack": 1.1,
+                  "Hurt": 0.45,
+                  "Death": 1,
+                  "Respawn": 0.9
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 335
+              }
+            },
+            {
+              "idx": 2,
+              "label": "M004 風羽狐",
+              "level": 7,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 900,
+              "state": "idle",
+              "pos": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "home": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "check": {
+                "file": "monsters/m004/M004_WindfeatherFox_Rig_V1_1_Lite.glb",
+                "ok": true,
+                "joints": 32,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2,
+                  "Move": 0.8,
+                  "Run": 0.38,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.7,
+                  "Respawn": 0.5
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 334
+              }
+            },
+            {
+              "idx": 3,
+              "label": "M005 星雲咩咩",
+              "level": 8,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1100,
+              "state": "idle",
+              "pos": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "home": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "check": {
+                "file": "monsters/m005/M005_NebulaSheep_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.6,
+                  "Run": 0.42,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.75,
+                  "Respawn": 0.6
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 334
+              }
+            },
+            {
+              "idx": 4,
+              "label": "M006 胡蘿蔔大王",
+              "level": 9,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1800,
+              "state": "idle",
+              "pos": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "home": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "check": {
+                "file": "monsters/m006/M006_CarrotKing_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.9,
+                  "Run": 0.5,
+                  "Attack": 1.3,
+                  "Hurt": 0.5,
+                  "Death": 0.9,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 334
+              }
+            },
+            {
+              "idx": 5,
+              "label": "M007 王冠重錘兔",
+              "level": 10,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 4200,
+              "state": "idle",
+              "pos": [
+                0,
+                10
+              ],
+              "home": [
+                0,
+                10
+              ],
+              "check": {
+                "file": "monsters/m007/M007_CrownHammerRabbit_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 29,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 1.1,
+                  "Run": 0.62,
+                  "Attack": 2,
+                  "Hurt": 0.6,
+                  "Death": 1.6,
+                  "Respawn": 1.1
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 334
+              }
+            }
+          ],
+          "vfx": {
+            "meshFx": 0,
+            "particles": 0,
+            "projectiles": 0,
+            "spawned": 53,
+            "materials": 27,
+            "pooledMeshes": 44,
+            "pooledSystems": 40
+          },
+          "budget": {
+            "active": 0,
+            "activeRemote": 0,
+            "activeCritical": 0,
+            "particles": 0,
+            "granted": 0,
+            "denied": 0,
+            "scaled": 0,
+            "deniedBy": {}
+          },
+          "damageShown": 0,
+          "audioPlayed": 0,
+          "triangles": 40381,
+          "ghosts": 0,
+          "player": {
+            "x": 0,
+            "z": 0,
+            "yaw": 0
+          },
+          "demoStats": {
+            "attack": 40,
+            "critRate": 0.2,
+            "critMult": 1.6,
+            "spread": 0.1,
+            "note": "展示用測試值（不是正式平衡）"
+          }
+        },
+        "triple_slash": [
+          {
+            "skill": "triple_slash",
+            "hit": "s1",
+            "clipT": 0.17,
+            "animT": 0.17,
+            "realT": 0.9000000000000002,
+            "targets": 1,
+            "damage": [
+              30
+            ],
+            "crit": false,
+            "shownSameFrame": true,
+            "kind": "melee"
+          },
+          {
+            "skill": "triple_slash",
+            "hit": "s2",
+            "clipT": 0.5,
+            "animT": 0.5,
+            "realT": 1.3000000000000005,
+            "targets": 2,
+            "damage": [
+              38,
+              62
+            ],
+            "crit": true,
+            "shownSameFrame": true,
+            "kind": "melee"
+          },
+          {
+            "skill": "triple_slash",
+            "hit": "s3",
+            "clipT": 0.92,
+            "animT": 0.92,
+            "realT": 1.800000000000001,
+            "targets": 2,
+            "damage": [
+              93,
+              91
+            ],
+            "crit": true,
+            "shownSameFrame": true,
+            "kind": "melee"
+          },
+          {
+            "skill": "triple_slash",
+            "hit": "wave",
+            "clipT": 0.9,
+            "animT": 0.92,
+            "realT": 1.800000000000001,
+            "targets": 1,
+            "damage": [
+              23
+            ],
+            "crit": false,
+            "shownSameFrame": true,
+            "kind": "projectile"
+          }
+        ],
+        "staff_cast": [
+          {
+            "skill": "staff_cast",
+            "hit": "bolt",
+            "clipT": 0.58,
+            "animT": 0.8000000000000002,
+            "realT": 3.7999999999999945,
+            "targets": 1,
+            "damage": [
+              88
+            ],
+            "crit": true,
+            "shownSameFrame": true,
+            "kind": "projectile"
+          }
+        ],
+        "leap_slam": [
+          {
+            "skill": "leap_slam",
+            "hit": "slam",
+            "clipT": 0.8,
+            "animT": 0.8,
+            "realT": 5.699999999999988,
+            "targets": 3,
+            "damage": [
+              84,
+              118,
+              87
+            ],
+            "crit": true,
+            "shownSameFrame": true,
+            "kind": "melee"
+          }
+        ],
+        "whirlwind": [
+          {
+            "skill": "whirlwind",
+            "hit": "w1",
+            "clipT": 0.48,
+            "animT": 0.4799999999999999,
+            "realT": 7.549999999999981,
+            "targets": 4,
+            "damage": [
+              27,
+              49,
+              25,
+              30
+            ],
+            "crit": true,
+            "shownSameFrame": true,
+            "kind": "melee"
+          },
+          {
+            "skill": "whirlwind",
+            "hit": "w2",
+            "clipT": 0.76,
+            "animT": 0.76,
+            "realT": 7.89999999999998,
+            "targets": 4,
+            "damage": [
+              25,
+              30,
+              41,
+              30
+            ],
+            "crit": true,
+            "shownSameFrame": true,
+            "kind": "melee"
+          },
+          {
+            "skill": "whirlwind",
+            "hit": "w3",
+            "clipT": 1.04,
+            "animT": 1.04,
+            "realT": 8.249999999999982,
+            "targets": 4,
+            "damage": [
+              60,
+              43,
+              43,
+              41
+            ],
+            "crit": true,
+            "shownSameFrame": true,
+            "kind": "melee"
+          }
+        ],
+        "star_meteor": [
+          {
+            "skill": "star_meteor",
+            "hit": "meteor",
+            "clipT": 0.72,
+            "animT": 1.3500000000000005,
+            "realT": 10.750000000000018,
+            "targets": 4,
+            "damage": [
+              90,
+              99,
+              102,
+              100
+            ],
+            "crit": false,
+            "shownSameFrame": true,
+            "kind": "projectile"
+          }
+        ],
+        "charge_burst": [
+          {
+            "skill": "charge_burst",
+            "hit": "burst",
+            "clipT": 1.22,
+            "animT": 1.22,
+            "realT": 12.950000000000049,
+            "targets": 3,
+            "damage": [
+              180,
+              173,
+              184
+            ],
+            "crit": true,
+            "shownSameFrame": true,
+            "kind": "melee"
+          }
+        ],
+        "aspd250": [
+          {
+            "skill": "triple_slash",
+            "hit": "s1",
+            "clipT": 0.17,
+            "animT": 0.17,
+            "realT": 15.300000000000082,
+            "targets": 3,
+            "damage": [
+              31,
+              30,
+              35
+            ],
+            "crit": false,
+            "shownSameFrame": true,
+            "kind": "melee"
+          },
+          {
+            "skill": "triple_slash",
+            "hit": "s2",
+            "clipT": 0.5,
+            "animT": 0.5,
+            "realT": 15.600000000000087,
+            "targets": 3,
+            "damage": [
+              37,
+              36,
+              37
+            ],
+            "crit": false,
+            "shownSameFrame": true,
+            "kind": "melee"
+          },
+          {
+            "skill": "triple_slash",
+            "hit": "s3",
+            "clipT": 0.92,
+            "animT": 0.92,
+            "realT": 15.950000000000092,
+            "targets": 3,
+            "damage": [
+              62,
+              62,
+              58
+            ],
+            "crit": false,
+            "shownSameFrame": true,
+            "kind": "melee"
+          },
+          {
+            "skill": "triple_slash",
+            "hit": "wave",
+            "clipT": 0.9,
+            "animT": 0.92,
+            "realT": 15.950000000000092,
+            "targets": 1,
+            "damage": [
+              23
+            ],
+            "crit": false,
+            "shownSameFrame": true,
+            "kind": "projectile"
+          },
+          {
+            "skill": "triple_slash",
+            "hit": "wave",
+            "clipT": 0.9,
+            "animT": 0.92,
+            "realT": 15.950000000000092,
+            "targets": 1,
+            "damage": [
+              23
+            ],
+            "crit": false,
+            "shownSameFrame": true,
+            "kind": "projectile"
+          }
+        ],
+        "tiers": {
+          "high": {
+            "perf": {
+              "fps": 5.104645227156864,
+              "avg10s": 5.266577279912682,
+              "low1": 2.518891752200232,
+              "draws": 70,
+              "frames": 381
+            },
+            "vfx": {
+              "meshFx": 14,
+              "particles": 46,
+              "projectiles": 0,
+              "spawned": 213,
+              "materials": 67,
+              "pooledMeshes": 52,
+              "pooledSystems": 90
+            },
+            "budget": {
+              "active": 24,
+              "activeRemote": 0,
+              "activeCritical": 8,
+              "particles": 388,
+              "granted": 396,
+              "denied": 42,
+              "scaled": 0,
+              "deniedBy": {
+                "secondary-pressure": 42
+              }
+            }
+          },
+          "medium": {
+            "perf": {
+              "fps": 5.200208008320385,
+              "avg10s": 5.265304965153809,
+              "low1": 2.776235477687108,
+              "draws": 75,
+              "frames": 444
+            },
+            "vfx": {
+              "meshFx": 12,
+              "particles": 1,
+              "projectiles": 0,
+              "spawned": 238,
+              "materials": 67,
+              "pooledMeshes": 52,
+              "pooledSystems": 90
+            },
+            "budget": {
+              "active": 23,
+              "activeRemote": 0,
+              "activeCritical": 11,
+              "particles": 160,
+              "granted": 460,
+              "denied": 47,
+              "scaled": 0,
+              "deniedBy": {
+                "secondary-pressure": 47
+              }
+            }
+          },
+          "low": {
+            "perf": {
+              "fps": 6.207324643078889,
+              "avg10s": 5.344135283811369,
+              "low1": 2.9666548376495694,
+              "draws": 52,
+              "frames": 514
+            },
+            "vfx": {
+              "meshFx": 2,
+              "particles": 22,
+              "projectiles": 0,
+              "spawned": 261,
+              "materials": 67,
+              "pooledMeshes": 54,
+              "pooledSystems": 90
+            },
+            "budget": {
+              "active": 3,
+              "activeRemote": 0,
+              "activeCritical": 0,
+              "particles": 35,
+              "granted": 523,
+              "denied": 67,
+              "scaled": 0,
+              "deniedBy": {
+                "secondary-pressure": 67
+              }
+            }
+          }
+        },
+        "final": {
+          "tier": "low",
+          "gender": "male",
+          "monsters": [
+            {
+              "idx": 0,
+              "label": "M002 苔角獸",
+              "level": 3,
+              "behaviour": "passive",
+              "angry": 0,
+              "moving": false,
+              "hp": 600,
+              "state": "idle",
+              "pos": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "home": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "check": {
+                "file": "monsters/m002/M002_MossHornBeast_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 0.64,
+                  "Run": 0.44,
+                  "Attack": 1.3,
+                  "Hurt": 0.45,
+                  "Death": 0.8,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 335
+              }
+            },
+            {
+              "idx": 1,
+              "label": "M003 雲絨鳥",
+              "level": 5,
+              "behaviour": "aggressive",
+              "angry": 6.400000000000006,
+              "moving": false,
+              "hp": 392,
+              "state": "idle",
+              "pos": [
+                -4.490491027352519,
+                5.266620717528644
+              ],
+              "home": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "check": {
+                "file": "monsters/m003/M003_CloudFluffBird_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 19,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 1.25,
+                  "Move": 0.8,
+                  "Run": 0.5,
+                  "Attack": 1.1,
+                  "Hurt": 0.45,
+                  "Death": 1,
+                  "Respawn": 0.9
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 335
+              }
+            },
+            {
+              "idx": 2,
+              "label": "M004 風羽狐",
+              "level": 7,
+              "behaviour": "aggressive",
+              "angry": 4.400000000000013,
+              "moving": false,
+              "hp": 0,
+              "state": "dead",
+              "pos": [
+                -2.785520068189468,
+                3.836654534582423
+              ],
+              "home": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "check": {
+                "file": "monsters/m004/M004_WindfeatherFox_Rig_V1_1_Lite.glb",
+                "ok": true,
+                "joints": 32,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2,
+                  "Move": 0.8,
+                  "Run": 0.38,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.7,
+                  "Respawn": 0.5
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 334
+              }
+            },
+            {
+              "idx": 3,
+              "label": "M005 星雲咩咩",
+              "level": 8,
+              "behaviour": "aggressive",
+              "angry": 6.400000000000006,
+              "moving": false,
+              "hp": 910,
+              "state": "idle",
+              "pos": [
+                -0.6546601091645721,
+                5.663361007740729
+              ],
+              "home": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "check": {
+                "file": "monsters/m005/M005_NebulaSheep_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.6,
+                  "Run": 0.42,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.75,
+                  "Respawn": 0.6
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 334
+              }
+            },
+            {
+              "idx": 4,
+              "label": "M006 胡蘿蔔大王",
+              "level": 9,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1800,
+              "state": "idle",
+              "pos": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "home": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "check": {
+                "file": "monsters/m006/M006_CarrotKing_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.9,
+                  "Run": 0.5,
+                  "Attack": 1.3,
+                  "Hurt": 0.5,
+                  "Death": 0.9,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 334
+              }
+            },
+            {
+              "idx": 5,
+              "label": "M007 王冠重錘兔",
+              "level": 10,
+              "behaviour": "aggressive",
+              "angry": 6.400000000000006,
+              "moving": false,
+              "hp": 3113,
+              "state": "attack",
+              "pos": [
+                -1.772830401289654,
+                5.605758167596695
+              ],
+              "home": [
+                0,
+                10
+              ],
+              "check": {
+                "file": "monsters/m007/M007_CrownHammerRabbit_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 29,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 1.1,
+                  "Run": 0.62,
+                  "Attack": 2,
+                  "Hurt": 0.6,
+                  "Death": 1.6,
+                  "Respawn": 1.1
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 334
+              }
+            }
+          ],
+          "vfx": {
+            "meshFx": 3,
+            "particles": 16,
+            "projectiles": 0,
+            "spawned": 261,
+            "materials": 67,
+            "pooledMeshes": 54,
+            "pooledSystems": 90
+          },
+          "budget": {
+            "active": 4,
+            "activeRemote": 0,
+            "activeCritical": 1,
+            "particles": 35,
+            "granted": 525,
+            "denied": 68,
+            "scaled": 0,
+            "deniedBy": {
+              "secondary-pressure": 68
+            }
+          },
+          "damageShown": 88,
+          "audioPlayed": 0,
+          "triangles": 40381,
+          "ghosts": 0,
+          "player": {
+            "x": -2.5710378466611656,
+            "z": 5.6500255784264946,
+            "yaw": 1.626198103599544
+          },
+          "demoStats": {
+            "attack": 40,
+            "critRate": 0.2,
+            "critMult": 1.6,
+            "spread": 0.1,
+            "note": "展示用測試值（不是正式平衡）"
+          }
+        }
+      }
+    },
+    {
+      "browser": "chromium",
+      "case": "module",
+      "checks": {
+        "載入：6 隻骨骼動畫怪物（M002～M007）且檔案檢查通過": {
+          "ok": true,
+          "detail": [
+            {
+              "l": "M002 苔角獸",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M003 雲絨鳥",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M004 風羽狐",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M005 星雲咩咩",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M006 胡蘿蔔大王",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M007 王冠重錘兔",
+              "ok": true,
+              "e": []
+            }
+          ]
+        },
+        "載入：初心者 C1.0-B5b（非 Tripo 組裝）": {
+          "ok": true,
+          "detail": {
+            "triangles": 40381,
+            "gender": "male"
+          }
+        },
+        "接入模組預熱：全部特效都生成過、而且全部回收（畫面上沒有殘留特效／投射物）": {
+          "ok": true,
+          "detail": [
+            {
+              "ms": 1001,
+              "spawned": 66,
+              "leftoverActive": 0,
+              "leftoverProjectiles": 0,
+              "audioPlayed": 0,
+              "damageShown": 0,
+              "tier": "medium",
+              "materials": 27,
+              "pooledMeshes": 44,
+              "particleSystems": 40
+            },
+            {
+              "ms": 1408,
+              "spawned": 66,
+              "leftoverActive": 0,
+              "leftoverProjectiles": 0,
+              "audioPlayed": 0,
+              "damageShown": 0,
+              "tier": "medium",
+              "materials": 27,
+              "pooledMeshes": 44,
+              "particleSystems": 40
+            },
+            {
+              "ms": 1405,
+              "spawned": 66,
+              "leftoverActive": 0,
+              "leftoverProjectiles": 0,
+              "audioPlayed": 0,
+              "damageShown": 0,
+              "tier": "medium",
+              "materials": 27,
+              "pooledMeshes": 44,
+              "particleSystems": 40
+            },
+            {
+              "ms": 1413,
+              "spawned": 66,
+              "leftoverActive": 0,
+              "leftoverProjectiles": 0,
+              "audioPlayed": 0,
+              "damageShown": 0,
+              "tier": "medium",
+              "materials": 27,
+              "pooledMeshes": 44,
+              "particleSystems": 40
+            }
+          ]
+        },
+        "接入模組預熱：不播音效、不顯示傷害數字、不扣怪物血量": {
+          "ok": true,
+          "detail": {
+            "pws": [
+              [
+                0,
+                0
+              ],
+              [
+                0,
+                0
+              ],
+              [
+                0,
+                0
+              ],
+              [
+                0,
+                0
+              ]
+            ],
+            "hp": [
+              9350,
+              9350
+            ]
+          }
+        },
+        "接入模組預熱：預熱期間鏡頭只畫 1×1 像素（玩家看不到預熱特效），結束後恢復完整畫面": {
+          "ok": true,
+          "detail": {
+            "maxPx": 1,
+            "frames": 58
+          }
+        },
+        "接入模組預熱：耗時合理（CI 軟體繪圖 < 10 秒；iPhone 未驗證）": {
+          "ok": true,
+          "detail": [
+            1001,
+            1408,
+            1405,
+            1413
+          ]
+        },
+        "接入模組：技能依動作檔時間觸發命中 hook（三連斬 3 次），不自行判定": {
+          "ok": true,
+          "detail": [
+            3,
+            3,
+            3,
+            3
+          ]
+        },
+        "接入模組：遠距離（> 28 m）的其他玩家特效不生成": {
+          "ok": true,
+          "detail": [
+            {
+              "distance": 1,
+              "offscreen": 0
+            },
+            {
+              "distance": 1,
+              "offscreen": 0
+            },
+            {
+              "distance": 1,
+              "offscreen": 0
+            },
+            {
+              "distance": 1,
+              "offscreen": 0
+            }
+          ]
+        },
+        "接入模組：重複進出地圖 4 次，網格、材質、粒子、發光層、節點數不累積（每次都回到相同數量）": {
+          "ok": true,
+          "detail": {
+            "base": {
+              "meshes": 163,
+              "materials": 96,
+              "textures": 61,
+              "particles": 37,
+              "layers": 1,
+              "transforms": 229
+            },
+            "runs": [
+              {
+                "meshes": 163,
+                "materials": 96,
+                "textures": 60,
+                "particles": 37,
+                "layers": 1,
+                "transforms": 229
+              },
+              {
+                "meshes": 163,
+                "materials": 96,
+                "textures": 60,
+                "particles": 37,
+                "layers": 1,
+                "transforms": 229
+              },
+              {
+                "meshes": 163,
+                "materials": 96,
+                "textures": 60,
+                "particles": 37,
+                "layers": 1,
+                "transforms": 229
+              },
+              {
+                "meshes": 163,
+                "materials": 96,
+                "textures": 60,
+                "particles": 37,
+                "layers": 1,
+                "transforms": 229
+              }
+            ],
+            "end": {
+              "meshes": 163,
+              "materials": 96,
+              "textures": 60,
+              "particles": 37,
+              "layers": 1,
+              "transforms": 229
+            }
+          }
+        },
+        "接入模組：釋放後 DOM（傷害數字、畫面閃光）全部移除": {
+          "ok": true,
+          "detail": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "接入模組：低畫質預熱建立的網格／粒子／材質不多於高畫質（不預熱高畫質專用資源）": {
+          "ok": true,
+          "detail": {
+            "low": {
+              "ms": 823,
+              "spawned": 66,
+              "leftoverActive": 0,
+              "leftoverProjectiles": 0,
+              "audioPlayed": 0,
+              "damageShown": 0,
+              "tier": "low",
+              "materials": 24,
+              "pooledMeshes": 32,
+              "particleSystems": 19
+            },
+            "high": {
+              "ms": 1005,
+              "spawned": 66,
+              "leftoverActive": 0,
+              "leftoverProjectiles": 0,
+              "audioPlayed": 0,
+              "damageShown": 0,
+              "tier": "high",
+              "materials": 27,
+              "pooledMeshes": 46,
+              "particleSystems": 48
+            }
+          }
+        },
+        "沒有頁面錯誤": {
+          "ok": true,
+          "detail": []
+        },
+        "沒有失敗的網路請求（模型、貼圖、動作檔全部載入）": {
+          "ok": true,
+          "detail": []
+        }
+      },
+      "errors": [],
+      "results": {
+        "loadMs": 2657,
+        "loaded": {
+          "tier": "medium",
+          "gender": "male",
+          "monsters": [
+            {
+              "idx": 0,
+              "label": "M002 苔角獸",
+              "level": 3,
+              "behaviour": "passive",
+              "angry": 0,
+              "moving": false,
+              "hp": 600,
+              "state": "idle",
+              "pos": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "home": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "check": {
+                "file": "monsters/m002/M002_MossHornBeast_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 0.64,
+                  "Run": 0.44,
+                  "Attack": 1.3,
+                  "Hurt": 0.45,
+                  "Death": 0.8,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 304
+              }
+            },
+            {
+              "idx": 1,
+              "label": "M003 雲絨鳥",
+              "level": 5,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 750,
+              "state": "idle",
+              "pos": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "home": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "check": {
+                "file": "monsters/m003/M003_CloudFluffBird_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 19,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 1.25,
+                  "Move": 0.8,
+                  "Run": 0.5,
+                  "Attack": 1.1,
+                  "Hurt": 0.45,
+                  "Death": 1,
+                  "Respawn": 0.9
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 304
+              }
+            },
+            {
+              "idx": 2,
+              "label": "M004 風羽狐",
+              "level": 7,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 900,
+              "state": "idle",
+              "pos": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "home": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "check": {
+                "file": "monsters/m004/M004_WindfeatherFox_Rig_V1_1_Lite.glb",
+                "ok": true,
+                "joints": 32,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2,
+                  "Move": 0.8,
+                  "Run": 0.38,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.7,
+                  "Respawn": 0.5
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 304
+              }
+            },
+            {
+              "idx": 3,
+              "label": "M005 星雲咩咩",
+              "level": 8,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1100,
+              "state": "idle",
+              "pos": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "home": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "check": {
+                "file": "monsters/m005/M005_NebulaSheep_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.6,
+                  "Run": 0.42,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.75,
+                  "Respawn": 0.6
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 303
+              }
+            },
+            {
+              "idx": 4,
+              "label": "M006 胡蘿蔔大王",
+              "level": 9,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1800,
+              "state": "idle",
+              "pos": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "home": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "check": {
+                "file": "monsters/m006/M006_CarrotKing_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.9,
+                  "Run": 0.5,
+                  "Attack": 1.3,
+                  "Hurt": 0.5,
+                  "Death": 0.9,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 303
+              }
+            },
+            {
+              "idx": 5,
+              "label": "M007 王冠重錘兔",
+              "level": 10,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 4200,
+              "state": "idle",
+              "pos": [
+                0,
+                10
+              ],
+              "home": [
+                0,
+                10
+              ],
+              "check": {
+                "file": "monsters/m007/M007_CrownHammerRabbit_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 29,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 1.1,
+                  "Run": 0.62,
+                  "Attack": 2,
+                  "Hurt": 0.6,
+                  "Death": 1.6,
+                  "Respawn": 1.1
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 303
+              }
+            }
+          ],
+          "vfx": {
+            "meshFx": 0,
+            "particles": 0,
+            "projectiles": 0,
+            "spawned": 53,
+            "materials": 27,
+            "pooledMeshes": 44,
+            "pooledSystems": 40
+          },
+          "budget": {
+            "active": 0,
+            "activeRemote": 0,
+            "activeCritical": 0,
+            "particles": 0,
+            "granted": 0,
+            "denied": 0,
+            "scaled": 0,
+            "deniedBy": {}
+          },
+          "damageShown": 0,
+          "audioPlayed": 0,
+          "triangles": 40381,
+          "ghosts": 0,
+          "player": {
+            "x": 0,
+            "z": 0,
+            "yaw": 0
+          },
+          "demoStats": {
+            "attack": 40,
+            "critRate": 0.2,
+            "critMult": 1.6,
+            "spread": 0.1,
+            "note": "展示用測試值（不是正式平衡）"
+          }
+        },
+        "module": {
+          "medium": {
+            "base": {
+              "meshes": 163,
+              "materials": 96,
+              "textures": 61,
+              "particles": 37,
+              "layers": 1,
+              "transforms": 229
+            },
+            "end": {
+              "meshes": 163,
+              "materials": 96,
+              "textures": 60,
+              "particles": 37,
+              "layers": 1,
+              "transforms": 229
+            },
+            "runs": [
+              {
+                "prewarm": {
+                  "ms": 1001,
+                  "spawned": 66,
+                  "leftoverActive": 0,
+                  "leftoverProjectiles": 0,
+                  "audioPlayed": 0,
+                  "damageShown": 0,
+                  "tier": "medium",
+                  "materials": 27,
+                  "pooledMeshes": 44,
+                  "particleSystems": 40
+                },
+                "vpRestored": true,
+                "hits": 3,
+                "culled": {
+                  "distance": 1,
+                  "offscreen": 0
+                },
+                "damageShown": 1,
+                "after": {
+                  "meshes": 163,
+                  "materials": 96,
+                  "textures": 60,
+                  "particles": 37,
+                  "layers": 1,
+                  "transforms": 229
+                },
+                "dom": 0
+              },
+              {
+                "prewarm": {
+                  "ms": 1408,
+                  "spawned": 66,
+                  "leftoverActive": 0,
+                  "leftoverProjectiles": 0,
+                  "audioPlayed": 0,
+                  "damageShown": 0,
+                  "tier": "medium",
+                  "materials": 27,
+                  "pooledMeshes": 44,
+                  "particleSystems": 40
+                },
+                "vpRestored": true,
+                "hits": 3,
+                "culled": {
+                  "distance": 1,
+                  "offscreen": 0
+                },
+                "damageShown": 1,
+                "after": {
+                  "meshes": 163,
+                  "materials": 96,
+                  "textures": 60,
+                  "particles": 37,
+                  "layers": 1,
+                  "transforms": 229
+                },
+                "dom": 0
+              },
+              {
+                "prewarm": {
+                  "ms": 1405,
+                  "spawned": 66,
+                  "leftoverActive": 0,
+                  "leftoverProjectiles": 0,
+                  "audioPlayed": 0,
+                  "damageShown": 0,
+                  "tier": "medium",
+                  "materials": 27,
+                  "pooledMeshes": 44,
+                  "particleSystems": 40
+                },
+                "vpRestored": true,
+                "hits": 3,
+                "culled": {
+                  "distance": 1,
+                  "offscreen": 0
+                },
+                "damageShown": 1,
+                "after": {
+                  "meshes": 163,
+                  "materials": 96,
+                  "textures": 60,
+                  "particles": 37,
+                  "layers": 1,
+                  "transforms": 229
+                },
+                "dom": 0
+              },
+              {
+                "prewarm": {
+                  "ms": 1413,
+                  "spawned": 66,
+                  "leftoverActive": 0,
+                  "leftoverProjectiles": 0,
+                  "audioPlayed": 0,
+                  "damageShown": 0,
+                  "tier": "medium",
+                  "materials": 27,
+                  "pooledMeshes": 44,
+                  "particleSystems": 40
+                },
+                "vpRestored": true,
+                "hits": 3,
+                "culled": {
+                  "distance": 1,
+                  "offscreen": 0
+                },
+                "damageShown": 1,
+                "after": {
+                  "meshes": 163,
+                  "materials": 96,
+                  "textures": 60,
+                  "particles": 37,
+                  "layers": 1,
+                  "transforms": 229
+                },
+                "dom": 0
+              }
+            ],
+            "hpBefore": 9350,
+            "hpAfter": 9350,
+            "maxPrewarmViewportPx": 1,
+            "prewarmFrames": 58
+          },
+          "low": {
+            "base": {
+              "meshes": 163,
+              "materials": 96,
+              "textures": 60,
+              "particles": 37,
+              "layers": 1,
+              "transforms": 229
+            },
+            "end": {
+              "meshes": 163,
+              "materials": 96,
+              "textures": 76,
+              "particles": 37,
+              "layers": 1,
+              "transforms": 229
+            },
+            "runs": [
+              {
+                "prewarm": {
+                  "ms": 823,
+                  "spawned": 66,
+                  "leftoverActive": 0,
+                  "leftoverProjectiles": 0,
+                  "audioPlayed": 0,
+                  "damageShown": 0,
+                  "tier": "low",
+                  "materials": 24,
+                  "pooledMeshes": 32,
+                  "particleSystems": 19
+                },
+                "vpRestored": true,
+                "hits": 3,
+                "culled": {
+                  "distance": 1,
+                  "offscreen": 0
+                },
+                "damageShown": 1,
+                "after": {
+                  "meshes": 163,
+                  "materials": 96,
+                  "textures": 76,
+                  "particles": 37,
+                  "layers": 1,
+                  "transforms": 229
+                },
+                "dom": 0
+              },
+              {
+                "prewarm": {
+                  "ms": 1209,
+                  "spawned": 66,
+                  "leftoverActive": 0,
+                  "leftoverProjectiles": 0,
+                  "audioPlayed": 0,
+                  "damageShown": 0,
+                  "tier": "low",
+                  "materials": 24,
+                  "pooledMeshes": 32,
+                  "particleSystems": 19
+                },
+                "vpRestored": true,
+                "hits": 3,
+                "culled": {
+                  "distance": 1,
+                  "offscreen": 0
+                },
+                "damageShown": 1,
+                "after": {
+                  "meshes": 163,
+                  "materials": 96,
+                  "textures": 76,
+                  "particles": 37,
+                  "layers": 1,
+                  "transforms": 229
+                },
+                "dom": 0
+              }
+            ],
+            "hpBefore": 9350,
+            "hpAfter": 9350,
+            "maxPrewarmViewportPx": 1,
+            "prewarmFrames": 26
+          },
+          "high": {
+            "base": {
+              "meshes": 163,
+              "materials": 96,
+              "textures": 76,
+              "particles": 37,
+              "layers": 1,
+              "transforms": 229
+            },
+            "end": {
+              "meshes": 163,
+              "materials": 96,
+              "textures": 95,
+              "particles": 37,
+              "layers": 1,
+              "transforms": 229
+            },
+            "runs": [
+              {
+                "prewarm": {
+                  "ms": 1005,
+                  "spawned": 66,
+                  "leftoverActive": 0,
+                  "leftoverProjectiles": 0,
+                  "audioPlayed": 0,
+                  "damageShown": 0,
+                  "tier": "high",
+                  "materials": 27,
+                  "pooledMeshes": 46,
+                  "particleSystems": 48
+                },
+                "vpRestored": true,
+                "hits": 3,
+                "culled": {
+                  "distance": 1,
+                  "offscreen": 0
+                },
+                "damageShown": 1,
+                "after": {
+                  "meshes": 163,
+                  "materials": 96,
+                  "textures": 95,
+                  "particles": 37,
+                  "layers": 1,
+                  "transforms": 229
+                },
+                "dom": 0
+              }
+            ],
+            "hpBefore": 9350,
+            "hpAfter": 9350,
+            "maxPrewarmViewportPx": 1,
+            "prewarmFrames": 11
+          }
+        },
+        "final": {
+          "tier": "medium",
+          "gender": "male",
+          "monsters": [
+            {
+              "idx": 0,
+              "label": "M002 苔角獸",
+              "level": 3,
+              "behaviour": "passive",
+              "angry": 0,
+              "moving": false,
+              "hp": 600,
+              "state": "idle",
+              "pos": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "home": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "check": {
+                "file": "monsters/m002/M002_MossHornBeast_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 0.64,
+                  "Run": 0.44,
+                  "Attack": 1.3,
+                  "Hurt": 0.45,
+                  "Death": 0.8,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 304
+              }
+            },
+            {
+              "idx": 1,
+              "label": "M003 雲絨鳥",
+              "level": 5,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 750,
+              "state": "idle",
+              "pos": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "home": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "check": {
+                "file": "monsters/m003/M003_CloudFluffBird_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 19,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 1.25,
+                  "Move": 0.8,
+                  "Run": 0.5,
+                  "Attack": 1.1,
+                  "Hurt": 0.45,
+                  "Death": 1,
+                  "Respawn": 0.9
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 304
+              }
+            },
+            {
+              "idx": 2,
+              "label": "M004 風羽狐",
+              "level": 7,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 900,
+              "state": "idle",
+              "pos": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "home": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "check": {
+                "file": "monsters/m004/M004_WindfeatherFox_Rig_V1_1_Lite.glb",
+                "ok": true,
+                "joints": 32,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2,
+                  "Move": 0.8,
+                  "Run": 0.38,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.7,
+                  "Respawn": 0.5
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 304
+              }
+            },
+            {
+              "idx": 3,
+              "label": "M005 星雲咩咩",
+              "level": 8,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1100,
+              "state": "idle",
+              "pos": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "home": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "check": {
+                "file": "monsters/m005/M005_NebulaSheep_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.6,
+                  "Run": 0.42,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.75,
+                  "Respawn": 0.6
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 303
+              }
+            },
+            {
+              "idx": 4,
+              "label": "M006 胡蘿蔔大王",
+              "level": 9,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1800,
+              "state": "idle",
+              "pos": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "home": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "check": {
+                "file": "monsters/m006/M006_CarrotKing_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.9,
+                  "Run": 0.5,
+                  "Attack": 1.3,
+                  "Hurt": 0.5,
+                  "Death": 0.9,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 303
+              }
+            },
+            {
+              "idx": 5,
+              "label": "M007 王冠重錘兔",
+              "level": 10,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 4200,
+              "state": "idle",
+              "pos": [
+                0,
+                10
+              ],
+              "home": [
+                0,
+                10
+              ],
+              "check": {
+                "file": "monsters/m007/M007_CrownHammerRabbit_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 29,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 1.1,
+                  "Run": 0.62,
+                  "Attack": 2,
+                  "Hurt": 0.6,
+                  "Death": 1.6,
+                  "Respawn": 1.1
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 303
+              }
+            }
+          ],
+          "vfx": {
+            "meshFx": 0,
+            "particles": 0,
+            "projectiles": 0,
+            "spawned": 53,
+            "materials": 27,
+            "pooledMeshes": 44,
+            "pooledSystems": 40
+          },
+          "budget": {
+            "active": 0,
+            "activeRemote": 0,
+            "activeCritical": 0,
+            "particles": 0,
+            "granted": 0,
+            "denied": 0,
+            "scaled": 0,
+            "deniedBy": {}
+          },
+          "damageShown": 0,
+          "audioPlayed": 0,
+          "triangles": 40381,
+          "ghosts": 0,
+          "player": {
+            "x": 0,
+            "z": 0,
+            "yaw": 0
+          },
+          "demoStats": {
+            "attack": 40,
+            "critRate": 0.2,
+            "critMult": 1.6,
+            "spread": 0.1,
+            "note": "展示用測試值（不是正式平衡）"
+          }
+        }
+      }
+    },
+    {
+      "browser": "chromium",
+      "case": "shader-warm",
+      "checks": {
+        "載入：6 隻骨骼動畫怪物（M002～M007）且檔案檢查通過": {
+          "ok": true,
+          "detail": [
+            {
+              "l": "M002 苔角獸",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M003 雲絨鳥",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M004 風羽狐",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M005 星雲咩咩",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M006 胡蘿蔔大王",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M007 王冠重錘兔",
+              "ok": true,
+              "e": []
+            }
+          ]
+        },
+        "載入：初心者 C1.0-B5b（非 Tripo 組裝）": {
+          "ok": true,
+          "detail": {
+            "triangles": 199965,
+            "gender": "male"
+          }
+        },
+        "特效預熱：載入時已預先生成全部特效與投射物（沒有超時）": {
+          "ok": true,
+          "detail": {
+            "ms": 1488,
+            "spawned": 66,
+            "timeouts": 0,
+            "materials": 27,
+            "meshes": 46,
+            "systems": 48,
+            "shadersBefore": 1,
+            "shadersAfter": 19
+          }
+        },
+        "特效預熱：施放 6 個技能＋6 種職業特效＋白天場景時，新編譯的 shader ≤ 3（關閉預熱時約 10）": {
+          "ok": true,
+          "detail": {
+            "beforeCasts": 19,
+            "afterCasts": 22,
+            "newDuringPlay": 3,
+            "prewarm": {
+              "ms": 1488,
+              "spawned": 66,
+              "timeouts": 0,
+              "materials": 27,
+              "meshes": 46,
+              "systems": 48,
+              "shadersBefore": 1,
+              "shadersAfter": 19
+            },
+            "newKeys": [
+              "default+default: SCENE_MRT_COUNT VIGNETTEBLENDMODEMULTIPLY TONEMAPPING SAMPLER3DGREENDEPTH SAMPLER3DBGRMAP DIFFUSEDIRECTUV AMBIENTDIRECTUV OPACITYDIRECTUV EMISSIVEDIRECTUV SPECULARDIRECTUV BUMPDIRECTUV FOG NUM_BONE_INFLUENCERS BonesPerMesh LIGHTMAPDIRECTUV NUM_MORPH_INFLUENCERS ALPHABLEND CAMERA_PERSPECTIVE AREALIGHTSUPPORTED CLUSTLIGHT_SLICES CLUSTLIGHT_BATCH TEXTURE_REPETITION_MODE",
+              "default+default: SCENE_MRT_COUNT VIGNETTEBLENDMODEMULTIPLY TONEMAPPING SAMPLER3DGREENDEPTH SAMPLER3DBGRMAP DIFFUSEDIRECTUV AMBIENTDIRECTUV OPACITYDIRECTUV EMISSIVEDIRECTUV SPECULARDIRECTUV BUMPDIRECTUV FOG NUM_BONE_INFLUENCERS BonesPerMesh LIGHTMAPDIRECTUV NUM_MORPH_INFLUENCERS NONUNIFORMSCALING ALPHABLEND CAMERA_PERSPECTIVE AREALIGHTSUPPORTED CLUSTLIGHT_SLICES CLUSTLIGHT_BATCH TEXTURE_REPETITION_MODE",
+              "default+default: MAINUV1 UV1 SCENE_MRT_COUNT VIGNETTEBLENDMODEMULTIPLY TONEMAPPING SAMPLER3DGREENDEPTH SAMPLER3DBGRMAP DIFFUSE DIFFUSEDIRECTUV AMBIENTDIRECTUV OPACITYDIRECTUV EMISSIVEDIRECTUV SPECULARDIRECTUV BUMPDIRECTUV FOG SPECULARTERM NORMAL NUM_BONE_INFLUENCERS BonesPerMesh LIGHTMAPDIRECTUV NUM_MORPH_INFLUENCERS ALPHABLEND CAMERA_PERSPECTIVE AREALIGHTSUPPORTED CLUSTLIGHT_SLICES CLUSTLIGHT_BATCH TEXTURE_REPETITION_MODE LIGHT0 HEMILIGHT0 LIGHT1 DIRLIGHT1 LIGHTCOUNT MAXLIGHTCOUNT"
+            ]
+          }
+        },
+        "沒有頁面錯誤": {
+          "ok": true,
+          "detail": []
+        },
+        "沒有失敗的網路請求（模型、貼圖、動作檔全部載入）": {
+          "ok": true,
+          "detail": []
+        }
+      },
+      "errors": [],
+      "results": {
+        "loadMs": 3979,
+        "loaded": {
+          "tier": "high",
+          "gender": "male",
+          "monsters": [
+            {
+              "idx": 0,
+              "label": "M002 苔角獸",
+              "level": 3,
+              "behaviour": "passive",
+              "angry": 0,
+              "moving": false,
+              "hp": 600,
+              "state": "idle",
+              "pos": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "home": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "check": {
+                "file": "monsters/m002/M002_MossHornBeast_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 0.64,
+                  "Run": 0.44,
+                  "Attack": 1.3,
+                  "Hurt": 0.45,
+                  "Death": 0.8,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1458
+              }
+            },
+            {
+              "idx": 1,
+              "label": "M003 雲絨鳥",
+              "level": 5,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 750,
+              "state": "idle",
+              "pos": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "home": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "check": {
+                "file": "monsters/m003/M003_CloudFluffBird_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 19,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 1.25,
+                  "Move": 0.8,
+                  "Run": 0.5,
+                  "Attack": 1.1,
+                  "Hurt": 0.45,
+                  "Death": 1,
+                  "Respawn": 0.9
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1457
+              }
+            },
+            {
+              "idx": 2,
+              "label": "M004 風羽狐",
+              "level": 7,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 900,
+              "state": "idle",
+              "pos": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "home": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "check": {
+                "file": "monsters/m004/M004_WindfeatherFox_Rig_V1_1_HQ.glb",
+                "ok": true,
+                "joints": 32,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2,
+                  "Move": 0.8,
+                  "Run": 0.38,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.7,
+                  "Respawn": 0.5
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1457
+              }
+            },
+            {
+              "idx": 3,
+              "label": "M005 星雲咩咩",
+              "level": 8,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1100,
+              "state": "idle",
+              "pos": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "home": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "check": {
+                "file": "monsters/m005/M005_NebulaSheep_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.6,
+                  "Run": 0.42,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.75,
+                  "Respawn": 0.6
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1457
+              }
+            },
+            {
+              "idx": 4,
+              "label": "M006 胡蘿蔔大王",
+              "level": 9,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1800,
+              "state": "idle",
+              "pos": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "home": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "check": {
+                "file": "monsters/m006/M006_CarrotKing_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.9,
+                  "Run": 0.5,
+                  "Attack": 1.3,
+                  "Hurt": 0.5,
+                  "Death": 0.9,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1457
+              }
+            },
+            {
+              "idx": 5,
+              "label": "M007 王冠重錘兔",
+              "level": 10,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 4200,
+              "state": "idle",
+              "pos": [
+                0,
+                10
+              ],
+              "home": [
+                0,
+                10
+              ],
+              "check": {
+                "file": "monsters/m007/M007_CrownHammerRabbit_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 29,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 1.1,
+                  "Run": 0.62,
+                  "Attack": 2,
+                  "Hurt": 0.6,
+                  "Death": 1.6,
+                  "Respawn": 1.1
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1456
+              }
+            }
+          ],
+          "vfx": {
+            "meshFx": 0,
+            "particles": 0,
+            "projectiles": 0,
+            "spawned": 62,
+            "materials": 27,
+            "pooledMeshes": 46,
+            "pooledSystems": 48
+          },
+          "budget": {
+            "active": 0,
+            "activeRemote": 0,
+            "activeCritical": 0,
+            "particles": 0,
+            "granted": 0,
+            "denied": 0,
+            "scaled": 0,
+            "deniedBy": {}
+          },
+          "damageShown": 0,
+          "audioPlayed": 0,
+          "triangles": 199965,
+          "ghosts": 0,
+          "player": {
+            "x": 0,
+            "z": 0,
+            "yaw": 0
+          },
+          "demoStats": {
+            "attack": 40,
+            "critRate": 0.2,
+            "critMult": 1.6,
+            "spread": 0.1,
+            "note": "展示用測試值（不是正式平衡）"
+          }
+        },
+        "shaders": {
+          "beforeCasts": 19,
+          "afterCasts": 22,
+          "newDuringPlay": 3,
+          "prewarm": {
+            "ms": 1488,
+            "spawned": 66,
+            "timeouts": 0,
+            "materials": 27,
+            "meshes": 46,
+            "systems": 48,
+            "shadersBefore": 1,
+            "shadersAfter": 19
+          },
+          "newKeys": [
+            "default+default: SCENE_MRT_COUNT VIGNETTEBLENDMODEMULTIPLY TONEMAPPING SAMPLER3DGREENDEPTH SAMPLER3DBGRMAP DIFFUSEDIRECTUV AMBIENTDIRECTUV OPACITYDIRECTUV EMISSIVEDIRECTUV SPECULARDIRECTUV BUMPDIRECTUV FOG NUM_BONE_INFLUENCERS BonesPerMesh LIGHTMAPDIRECTUV NUM_MORPH_INFLUENCERS ALPHABLEND CAMERA_PERSPECTIVE AREALIGHTSUPPORTED CLUSTLIGHT_SLICES CLUSTLIGHT_BATCH TEXTURE_REPETITION_MODE",
+            "default+default: SCENE_MRT_COUNT VIGNETTEBLENDMODEMULTIPLY TONEMAPPING SAMPLER3DGREENDEPTH SAMPLER3DBGRMAP DIFFUSEDIRECTUV AMBIENTDIRECTUV OPACITYDIRECTUV EMISSIVEDIRECTUV SPECULARDIRECTUV BUMPDIRECTUV FOG NUM_BONE_INFLUENCERS BonesPerMesh LIGHTMAPDIRECTUV NUM_MORPH_INFLUENCERS NONUNIFORMSCALING ALPHABLEND CAMERA_PERSPECTIVE AREALIGHTSUPPORTED CLUSTLIGHT_SLICES CLUSTLIGHT_BATCH TEXTURE_REPETITION_MODE",
+            "default+default: MAINUV1 UV1 SCENE_MRT_COUNT VIGNETTEBLENDMODEMULTIPLY TONEMAPPING SAMPLER3DGREENDEPTH SAMPLER3DBGRMAP DIFFUSE DIFFUSEDIRECTUV AMBIENTDIRECTUV OPACITYDIRECTUV EMISSIVEDIRECTUV SPECULARDIRECTUV BUMPDIRECTUV FOG SPECULARTERM NORMAL NUM_BONE_INFLUENCERS BonesPerMesh LIGHTMAPDIRECTUV NUM_MORPH_INFLUENCERS ALPHABLEND CAMERA_PERSPECTIVE AREALIGHTSUPPORTED CLUSTLIGHT_SLICES CLUSTLIGHT_BATCH TEXTURE_REPETITION_MODE LIGHT0 HEMILIGHT0 LIGHT1 DIRLIGHT1 LIGHTCOUNT MAXLIGHTCOUNT"
+          ]
+        },
+        "final": {
+          "tier": "high",
+          "gender": "male",
+          "monsters": [
+            {
+              "idx": 0,
+              "label": "M002 苔角獸",
+              "level": 3,
+              "behaviour": "passive",
+              "angry": 3.550000000000016,
+              "moving": false,
+              "hp": 181,
+              "state": "idle",
+              "pos": [
+                -5.865326975241981,
+                2.9327123850887946
+              ],
+              "home": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "check": {
+                "file": "monsters/m002/M002_MossHornBeast_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 0.64,
+                  "Run": 0.44,
+                  "Attack": 1.3,
+                  "Hurt": 0.45,
+                  "Death": 0.8,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1458
+              }
+            },
+            {
+              "idx": 1,
+              "label": "M003 雲絨鳥",
+              "level": 5,
+              "behaviour": "aggressive",
+              "angry": 1.8000000000000211,
+              "moving": false,
+              "hp": 601,
+              "state": "idle",
+              "pos": [
+                -3.2889756935443692,
+                5.668232951082859
+              ],
+              "home": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "check": {
+                "file": "monsters/m003/M003_CloudFluffBird_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 19,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 1.25,
+                  "Move": 0.8,
+                  "Run": 0.5,
+                  "Attack": 1.1,
+                  "Hurt": 0.45,
+                  "Death": 1,
+                  "Respawn": 0.9
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1457
+              }
+            },
+            {
+              "idx": 2,
+              "label": "M004 風羽狐",
+              "level": 7,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 900,
+              "state": "idle",
+              "pos": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "home": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "check": {
+                "file": "monsters/m004/M004_WindfeatherFox_Rig_V1_1_HQ.glb",
+                "ok": true,
+                "joints": 32,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2,
+                  "Move": 0.8,
+                  "Run": 0.38,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.7,
+                  "Respawn": 0.5
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1457
+              }
+            },
+            {
+              "idx": 3,
+              "label": "M005 星雲咩咩",
+              "level": 8,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1100,
+              "state": "idle",
+              "pos": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "home": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "check": {
+                "file": "monsters/m005/M005_NebulaSheep_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.6,
+                  "Run": 0.42,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.75,
+                  "Respawn": 0.6
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1457
+              }
+            },
+            {
+              "idx": 4,
+              "label": "M006 胡蘿蔔大王",
+              "level": 9,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1800,
+              "state": "idle",
+              "pos": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "home": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "check": {
+                "file": "monsters/m006/M006_CarrotKing_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.9,
+                  "Run": 0.5,
+                  "Attack": 1.3,
+                  "Hurt": 0.5,
+                  "Death": 0.9,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1457
+              }
+            },
+            {
+              "idx": 5,
+              "label": "M007 王冠重錘兔",
+              "level": 10,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 4200,
+              "state": "idle",
+              "pos": [
+                0,
+                10
+              ],
+              "home": [
+                0,
+                10
+              ],
+              "check": {
+                "file": "monsters/m007/M007_CrownHammerRabbit_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 29,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 1.1,
+                  "Run": 0.62,
+                  "Attack": 2,
+                  "Hurt": 0.6,
+                  "Death": 1.6,
+                  "Respawn": 1.1
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1456
+              }
+            }
+          ],
+          "vfx": {
+            "meshFx": 3,
+            "particles": 174,
+            "projectiles": 0,
+            "spawned": 150,
+            "materials": 81,
+            "pooledMeshes": 47,
+            "pooledSystems": 63
+          },
+          "budget": {
+            "active": 13,
+            "activeRemote": 0,
+            "activeCritical": 0,
+            "particles": 542,
+            "granted": 175,
+            "denied": 1,
+            "scaled": 0,
+            "deniedBy": {
+              "secondary-pressure": 1
+            }
+          },
+          "damageShown": 5,
+          "audioPlayed": 0,
+          "triangles": 199965,
+          "ghosts": 0,
+          "player": {
+            "x": -2.2840065001842613,
+            "z": 1.2496801660749295,
+            "yaw": -1.1314785294852538
+          },
+          "demoStats": {
+            "attack": 40,
+            "critRate": 0.2,
+            "critMult": 1.6,
+            "spread": 0.1,
+            "note": "展示用測試值（不是正式平衡）"
+          }
+        }
+      }
+    },
+    {
+      "browser": "webkit",
+      "case": "male-medium",
+      "checks": {
+        "載入：6 隻骨骼動畫怪物（M002～M007）且檔案檢查通過": {
+          "ok": true,
+          "detail": [
+            {
+              "l": "M002 苔角獸",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M003 雲絨鳥",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M004 風羽狐",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M005 星雲咩咩",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M006 胡蘿蔔大王",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M007 王冠重錘兔",
+              "ok": true,
+              "e": []
+            }
+          ]
+        },
+        "載入：初心者 C1.0-B5b（非 Tripo 組裝）": {
+          "ok": true,
+          "detail": {
+            "triangles": 40381,
+            "gender": "male"
+          }
+        },
+        "施放 1. triple_slash": {
+          "ok": true,
+          "detail": null
+        },
+        "triple_slash：至少一次命中結算": {
+          "ok": true,
+          "detail": [
+            {
+              "hit": "s1",
+              "targets": 1,
+              "dmg": [
+                30
+              ]
+            },
+            {
+              "hit": "s2",
+              "targets": 2,
+              "dmg": [
+                38,
+                62
+              ]
+            },
+            {
+              "hit": "s3",
+              "targets": 2,
+              "dmg": [
+                93,
+                91
+              ]
+            },
+            {
+              "hit": "wave",
+              "targets": 1,
+              "dmg": [
+                23
+              ]
+            }
+          ]
+        },
+        "triple_slash：命中當格動作時間＝時間軸時間（誤差 ≤ 1 格 1/30 s），傷害數字同一格顯示": {
+          "ok": true,
+          "detail": [
+            {
+              "hit": "s1",
+              "kind": "melee",
+              "clipT": 0.17,
+              "animT": 0.17,
+              "same": true
+            },
+            {
+              "hit": "s2",
+              "kind": "melee",
+              "clipT": 0.5,
+              "animT": 0.5,
+              "same": true
+            },
+            {
+              "hit": "s3",
+              "kind": "melee",
+              "clipT": 0.92,
+              "animT": 0.92,
+              "same": true
+            },
+            {
+              "hit": "wave",
+              "kind": "projectile",
+              "clipT": 0.9,
+              "animT": 0.92,
+              "same": true
+            }
+          ]
+        },
+        "施放 2. staff_cast": {
+          "ok": true,
+          "detail": null
+        },
+        "staff_cast：至少一次命中結算": {
+          "ok": true,
+          "detail": [
+            {
+              "hit": "bolt",
+              "targets": 1,
+              "dmg": [
+                88
+              ]
+            }
+          ]
+        },
+        "staff_cast：命中當格動作時間＝時間軸時間（誤差 ≤ 1 格 1/30 s），傷害數字同一格顯示": {
+          "ok": true,
+          "detail": [
+            {
+              "hit": "bolt",
+              "kind": "projectile",
+              "clipT": 0.58,
+              "animT": 0.8000000000000002,
+              "same": true
+            }
+          ]
+        },
+        "施放 3. leap_slam": {
+          "ok": true,
+          "detail": null
+        },
+        "leap_slam：至少一次命中結算": {
+          "ok": true,
+          "detail": [
+            {
+              "hit": "slam",
+              "targets": 3,
+              "dmg": [
+                84,
+                118,
+                87
+              ]
+            }
+          ]
+        },
+        "leap_slam：命中當格動作時間＝時間軸時間（誤差 ≤ 1 格 1/30 s），傷害數字同一格顯示": {
+          "ok": true,
+          "detail": [
+            {
+              "hit": "slam",
+              "kind": "melee",
+              "clipT": 0.8,
+              "animT": 0.8,
+              "same": true
+            }
+          ]
+        },
+        "施放 4. whirlwind": {
+          "ok": true,
+          "detail": null
+        },
+        "whirlwind：至少一次命中結算": {
+          "ok": true,
+          "detail": [
+            {
+              "hit": "w1",
+              "targets": 4,
+              "dmg": [
+                27,
+                49,
+                25,
+                30
+              ]
+            },
+            {
+              "hit": "w2",
+              "targets": 4,
+              "dmg": [
+                25,
+                30,
+                41,
+                30
+              ]
+            },
+            {
+              "hit": "w3",
+              "targets": 4,
+              "dmg": [
+                60,
+                43,
+                43,
+                41
+              ]
+            }
+          ]
+        },
+        "whirlwind：命中當格動作時間＝時間軸時間（誤差 ≤ 1 格 1/30 s），傷害數字同一格顯示": {
+          "ok": true,
+          "detail": [
+            {
+              "hit": "w1",
+              "kind": "melee",
+              "clipT": 0.48,
+              "animT": 0.4799999999999999,
+              "same": true
+            },
+            {
+              "hit": "w2",
+              "kind": "melee",
+              "clipT": 0.76,
+              "animT": 0.76,
+              "same": true
+            },
+            {
+              "hit": "w3",
+              "kind": "melee",
+              "clipT": 1.04,
+              "animT": 1.04,
+              "same": true
+            }
+          ]
+        },
+        "施放 5. star_meteor": {
+          "ok": true,
+          "detail": null
+        },
+        "star_meteor：至少一次命中結算": {
+          "ok": true,
+          "detail": [
+            {
+              "hit": "meteor",
+              "targets": 4,
+              "dmg": [
+                90,
+                99,
+                102,
+                100
+              ]
+            }
+          ]
+        },
+        "star_meteor：命中當格動作時間＝時間軸時間（誤差 ≤ 1 格 1/30 s），傷害數字同一格顯示": {
+          "ok": true,
+          "detail": [
+            {
+              "hit": "meteor",
+              "kind": "projectile",
+              "clipT": 0.72,
+              "animT": 1.3500000000000005,
+              "same": true
+            }
+          ]
+        },
+        "施放 6. charge_burst": {
+          "ok": true,
+          "detail": null
+        },
+        "charge_burst：至少一次命中結算": {
+          "ok": true,
+          "detail": [
+            {
+              "hit": "burst",
+              "targets": 3,
+              "dmg": [
+                180,
+                173,
+                184
+              ]
+            }
+          ]
+        },
+        "charge_burst：命中當格動作時間＝時間軸時間（誤差 ≤ 1 格 1/30 s），傷害數字同一格顯示": {
+          "ok": true,
+          "detail": [
+            {
+              "hit": "burst",
+              "kind": "melee",
+              "clipT": 1.22,
+              "animT": 1.22,
+              "same": true
+            }
+          ]
+        },
+        "攻速 250 → 依上限 160 播放（命中間隔 ≥ 0.33/1.6）": {
+          "ok": true,
+          "detail": {
+            "gap": 0.30000000000000426
+          }
+        },
+        "三段品質都能運作（每段都有生成特效）": {
+          "ok": true,
+          "detail": {
+            "high": {
+              "fps": 3.704878656726564,
+              "draws": 54,
+              "particles": 0
+            },
+            "medium": {
+              "fps": 3.7024367668068496,
+              "draws": 56,
+              "particles": 0
+            },
+            "low": {
+              "fps": 3.735156596214197,
+              "draws": 58,
+              "particles": 0
+            }
+          }
+        },
+        "沒有頁面錯誤": {
+          "ok": true,
+          "detail": []
+        },
+        "沒有失敗的網路請求（模型、貼圖、動作檔全部載入）": {
+          "ok": true,
+          "detail": []
+        }
+      },
+      "errors": [],
+      "results": {
+        "loadMs": 5408,
+        "loaded": {
+          "tier": "medium",
+          "gender": "male",
+          "monsters": [
+            {
+              "idx": 0,
+              "label": "M002 苔角獸",
+              "level": 3,
+              "behaviour": "passive",
+              "angry": 0,
+              "moving": false,
+              "hp": 600,
+              "state": "idle",
+              "pos": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "home": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "check": {
+                "file": "monsters/m002/M002_MossHornBeast_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 0.64,
+                  "Run": 0.44,
+                  "Attack": 1.3,
+                  "Hurt": 0.45,
+                  "Death": 0.8,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 393
+              }
+            },
+            {
+              "idx": 1,
+              "label": "M003 雲絨鳥",
+              "level": 5,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 750,
+              "state": "idle",
+              "pos": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "home": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "check": {
+                "file": "monsters/m003/M003_CloudFluffBird_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 19,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 1.25,
+                  "Move": 0.8,
+                  "Run": 0.5,
+                  "Attack": 1.1,
+                  "Hurt": 0.45,
+                  "Death": 1,
+                  "Respawn": 0.9
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 428
+              }
+            },
+            {
+              "idx": 2,
+              "label": "M004 風羽狐",
+              "level": 7,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 900,
+              "state": "idle",
+              "pos": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "home": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "check": {
+                "file": "monsters/m004/M004_WindfeatherFox_Rig_V1_1_Lite.glb",
+                "ok": true,
+                "joints": 32,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2,
+                  "Move": 0.8,
+                  "Run": 0.38,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.7,
+                  "Respawn": 0.5
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 460
+              }
+            },
+            {
+              "idx": 3,
+              "label": "M005 星雲咩咩",
+              "level": 8,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1100,
+              "state": "idle",
+              "pos": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "home": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "check": {
+                "file": "monsters/m005/M005_NebulaSheep_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.6,
+                  "Run": 0.42,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.75,
+                  "Respawn": 0.6
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 492
+              }
+            },
+            {
+              "idx": 4,
+              "label": "M006 胡蘿蔔大王",
+              "level": 9,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1800,
+              "state": "idle",
+              "pos": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "home": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "check": {
+                "file": "monsters/m006/M006_CarrotKing_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.9,
+                  "Run": 0.5,
+                  "Attack": 1.3,
+                  "Hurt": 0.5,
+                  "Death": 0.9,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 556
+              }
+            },
+            {
+              "idx": 5,
+              "label": "M007 王冠重錘兔",
+              "level": 10,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 4200,
+              "state": "idle",
+              "pos": [
+                0,
+                10
+              ],
+              "home": [
+                0,
+                10
+              ],
+              "check": {
+                "file": "monsters/m007/M007_CrownHammerRabbit_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 29,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 1.1,
+                  "Run": 0.62,
+                  "Attack": 2,
+                  "Hurt": 0.6,
+                  "Death": 1.6,
+                  "Respawn": 1.1
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 524
+              }
+            }
+          ],
+          "vfx": {
+            "meshFx": 0,
+            "particles": 0,
+            "projectiles": 0,
+            "spawned": 53,
+            "materials": 27,
+            "pooledMeshes": 44,
+            "pooledSystems": 40
+          },
+          "budget": {
+            "active": 0,
+            "activeRemote": 0,
+            "activeCritical": 0,
+            "particles": 0,
+            "granted": 0,
+            "denied": 0,
+            "scaled": 0,
+            "deniedBy": {}
+          },
+          "damageShown": 0,
+          "audioPlayed": 0,
+          "triangles": 40381,
+          "ghosts": 0,
+          "player": {
+            "x": 0,
+            "z": 0,
+            "yaw": 0
+          },
+          "demoStats": {
+            "attack": 40,
+            "critRate": 0.2,
+            "critMult": 1.6,
+            "spread": 0.1,
+            "note": "展示用測試值（不是正式平衡）"
+          }
+        },
+        "triple_slash": [
+          {
+            "skill": "triple_slash",
+            "hit": "s1",
+            "clipT": 0.17,
+            "animT": 0.17,
+            "realT": 0.7000000000000001,
+            "targets": 1,
+            "damage": [
+              30
+            ],
+            "crit": false,
+            "shownSameFrame": true,
+            "kind": "melee"
+          },
+          {
+            "skill": "triple_slash",
+            "hit": "s2",
+            "clipT": 0.5,
+            "animT": 0.5,
+            "realT": 1.1000000000000003,
+            "targets": 2,
+            "damage": [
+              38,
+              62
+            ],
+            "crit": true,
+            "shownSameFrame": true,
+            "kind": "melee"
+          },
+          {
+            "skill": "triple_slash",
+            "hit": "s3",
+            "clipT": 0.92,
+            "animT": 0.92,
+            "realT": 1.6000000000000008,
+            "targets": 2,
+            "damage": [
+              93,
+              91
+            ],
+            "crit": true,
+            "shownSameFrame": true,
+            "kind": "melee"
+          },
+          {
+            "skill": "triple_slash",
+            "hit": "wave",
+            "clipT": 0.9,
+            "animT": 0.92,
+            "realT": 1.6000000000000008,
+            "targets": 1,
+            "damage": [
+              23
+            ],
+            "crit": false,
+            "shownSameFrame": true,
+            "kind": "projectile"
+          }
+        ],
+        "staff_cast": [
+          {
+            "skill": "staff_cast",
+            "hit": "bolt",
+            "clipT": 0.58,
+            "animT": 0.8000000000000002,
+            "realT": 3.349999999999996,
+            "targets": 1,
+            "damage": [
+              88
+            ],
+            "crit": true,
+            "shownSameFrame": true,
+            "kind": "projectile"
+          }
+        ],
+        "leap_slam": [
+          {
+            "skill": "leap_slam",
+            "hit": "slam",
+            "clipT": 0.8,
+            "animT": 0.8,
+            "realT": 4.99999999999999,
+            "targets": 3,
+            "damage": [
+              84,
+              118,
+              87
+            ],
+            "crit": true,
+            "shownSameFrame": true,
+            "kind": "melee"
+          }
+        ],
+        "whirlwind": [
+          {
+            "skill": "whirlwind",
+            "hit": "w1",
+            "clipT": 0.48,
+            "animT": 0.4799999999999999,
+            "realT": 6.5999999999999845,
+            "targets": 4,
+            "damage": [
+              27,
+              49,
+              25,
+              30
+            ],
+            "crit": true,
+            "shownSameFrame": true,
+            "kind": "melee"
+          },
+          {
+            "skill": "whirlwind",
+            "hit": "w2",
+            "clipT": 0.76,
+            "animT": 0.76,
+            "realT": 6.949999999999983,
+            "targets": 4,
+            "damage": [
+              25,
+              30,
+              41,
+              30
+            ],
+            "crit": true,
+            "shownSameFrame": true,
+            "kind": "melee"
+          },
+          {
+            "skill": "whirlwind",
+            "hit": "w3",
+            "clipT": 1.04,
+            "animT": 1.04,
+            "realT": 7.299999999999982,
+            "targets": 4,
+            "damage": [
+              60,
+              43,
+              43,
+              41
+            ],
+            "crit": true,
+            "shownSameFrame": true,
+            "kind": "melee"
+          }
+        ],
+        "star_meteor": [
+          {
+            "skill": "star_meteor",
+            "hit": "meteor",
+            "clipT": 0.72,
+            "animT": 1.3500000000000005,
+            "realT": 9.55,
+            "targets": 4,
+            "damage": [
+              90,
+              99,
+              102,
+              100
+            ],
+            "crit": false,
+            "shownSameFrame": true,
+            "kind": "projectile"
+          }
+        ],
+        "charge_burst": [
+          {
+            "skill": "charge_burst",
+            "hit": "burst",
+            "clipT": 1.22,
+            "animT": 1.22,
+            "realT": 11.500000000000028,
+            "targets": 3,
+            "damage": [
+              180,
+              173,
+              184
+            ],
+            "crit": true,
+            "shownSameFrame": true,
+            "kind": "melee"
+          }
+        ],
+        "aspd250": [
+          {
+            "skill": "triple_slash",
+            "hit": "s1",
+            "clipT": 0.17,
+            "animT": 0.17,
+            "realT": 13.350000000000055,
+            "targets": 2,
+            "damage": [
+              31,
+              30
+            ],
+            "crit": false,
+            "shownSameFrame": true,
+            "kind": "melee"
+          },
+          {
+            "skill": "triple_slash",
+            "hit": "s2",
+            "clipT": 0.5,
+            "animT": 0.5,
+            "realT": 13.650000000000059,
+            "targets": 2,
+            "damage": [
+              39,
+              37
+            ],
+            "crit": false,
+            "shownSameFrame": true,
+            "kind": "melee"
+          },
+          {
+            "skill": "triple_slash",
+            "hit": "s3",
+            "clipT": 0.92,
+            "animT": 0.92,
+            "realT": 14.000000000000064,
+            "targets": 1,
+            "damage": [
+              61
+            ],
+            "crit": false,
+            "shownSameFrame": true,
+            "kind": "melee"
+          },
+          {
+            "skill": "triple_slash",
+            "hit": "wave",
+            "clipT": 0.9,
+            "animT": 0.92,
+            "realT": 14.000000000000064,
+            "targets": 1,
+            "damage": [
+              25
+            ],
+            "crit": false,
+            "shownSameFrame": true,
+            "kind": "projectile"
+          }
+        ],
+        "tiers": {
+          "high": {
+            "perf": {
+              "fps": 3.883495145631068,
+              "avg10s": 3.704878656726564,
+              "low1": 1.525940996948118,
+              "draws": 54,
+              "frames": 327
+            },
+            "vfx": {
+              "meshFx": 0,
+              "particles": 0,
+              "projectiles": 0,
+              "spawned": 194,
+              "materials": 67,
+              "pooledMeshes": 52,
+              "pooledSystems": 85
+            },
+            "budget": {
+              "active": 9,
+              "activeRemote": 0,
+              "activeCritical": 2,
+              "particles": 344,
+              "granted": 346,
+              "denied": 44,
+              "scaled": 0,
+              "deniedBy": {
+                "secondary-pressure": 44
+              }
+            }
+          },
+          "medium": {
+            "perf": {
+              "fps": 3.846153846153846,
+              "avg10s": 3.7024367668068496,
+              "low1": 1.525940996948118,
+              "draws": 56,
+              "frames": 368
+            },
+            "vfx": {
+              "meshFx": 0,
+              "particles": 0,
+              "projectiles": 0,
+              "spawned": 207,
+              "materials": 67,
+              "pooledMeshes": 52,
+              "pooledSystems": 86
+            },
+            "budget": {
+              "active": 1,
+              "activeRemote": 0,
+              "activeCritical": 0,
+              "particles": 12,
+              "granted": 378,
+              "denied": 45,
+              "scaled": 0,
+              "deniedBy": {
+                "secondary-pressure": 45
+              }
+            }
+          },
+          "low": {
+            "perf": {
+              "fps": 3.745318352059925,
+              "avg10s": 3.735156596214197,
+              "low1": 1.6481252575195715,
+              "draws": 58,
+              "frames": 413
+            },
+            "vfx": {
+              "meshFx": 4,
+              "particles": 0,
+              "projectiles": 0,
+              "spawned": 228,
+              "materials": 67,
+              "pooledMeshes": 52,
+              "pooledSystems": 86
+            },
+            "budget": {
+              "active": 13,
+              "activeRemote": 0,
+              "activeCritical": 9,
+              "particles": 78,
+              "granted": 421,
+              "denied": 48,
+              "scaled": 0,
+              "deniedBy": {
+                "secondary-pressure": 48
+              }
+            }
+          }
+        },
+        "final": {
+          "tier": "low",
+          "gender": "male",
+          "monsters": [
+            {
+              "idx": 0,
+              "label": "M002 苔角獸",
+              "level": 3,
+              "behaviour": "passive",
+              "angry": 7.8500000000000005,
+              "moving": true,
+              "hp": 357,
+              "state": "idle",
+              "pos": [
+                -4.900163627166613,
+                2.351988146128516
+              ],
+              "home": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "check": {
+                "file": "monsters/m002/M002_MossHornBeast_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 0.64,
+                  "Run": 0.44,
+                  "Attack": 1.3,
+                  "Hurt": 0.45,
+                  "Death": 0.8,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 393
+              }
+            },
+            {
+              "idx": 1,
+              "label": "M003 雲絨鳥",
+              "level": 5,
+              "behaviour": "aggressive",
+              "angry": 7.8500000000000005,
+              "moving": false,
+              "hp": 684,
+              "state": "attack",
+              "pos": [
+                -3.41437274585034,
+                5.65284293273182
+              ],
+              "home": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "check": {
+                "file": "monsters/m003/M003_CloudFluffBird_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 19,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 1.25,
+                  "Move": 0.8,
+                  "Run": 0.5,
+                  "Attack": 1.1,
+                  "Hurt": 0.45,
+                  "Death": 1,
+                  "Respawn": 0.9
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 428
+              }
+            },
+            {
+              "idx": 2,
+              "label": "M004 風羽狐",
+              "level": 7,
+              "behaviour": "aggressive",
+              "angry": 7.8500000000000005,
+              "moving": false,
+              "hp": 122,
+              "state": "attack",
+              "pos": [
+                -2.1056592025984235,
+                3.3509073504499467
+              ],
+              "home": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "check": {
+                "file": "monsters/m004/M004_WindfeatherFox_Rig_V1_1_Lite.glb",
+                "ok": true,
+                "joints": 32,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2,
+                  "Move": 0.8,
+                  "Run": 0.38,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.7,
+                  "Respawn": 0.5
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 460
+              }
+            },
+            {
+              "idx": 3,
+              "label": "M005 星雲咩咩",
+              "level": 8,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1100,
+              "state": "idle",
+              "pos": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "home": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "check": {
+                "file": "monsters/m005/M005_NebulaSheep_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.6,
+                  "Run": 0.42,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.75,
+                  "Respawn": 0.6
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 492
+              }
+            },
+            {
+              "idx": 4,
+              "label": "M006 胡蘿蔔大王",
+              "level": 9,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1800,
+              "state": "idle",
+              "pos": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "home": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "check": {
+                "file": "monsters/m006/M006_CarrotKing_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.9,
+                  "Run": 0.5,
+                  "Attack": 1.3,
+                  "Hurt": 0.5,
+                  "Death": 0.9,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 556
+              }
+            },
+            {
+              "idx": 5,
+              "label": "M007 王冠重錘兔",
+              "level": 10,
+              "behaviour": "aggressive",
+              "angry": 7.8500000000000005,
+              "moving": false,
+              "hp": 3271,
+              "state": "attack",
+              "pos": [
+                -2.0253010926526565,
+                6.007712501411501
+              ],
+              "home": [
+                0,
+                10
+              ],
+              "check": {
+                "file": "monsters/m007/M007_CrownHammerRabbit_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 29,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 1.1,
+                  "Run": 0.62,
+                  "Attack": 2,
+                  "Hurt": 0.6,
+                  "Death": 1.6,
+                  "Respawn": 1.1
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 524
+              }
+            }
+          ],
+          "vfx": {
+            "meshFx": 0,
+            "particles": 0,
+            "projectiles": 0,
+            "spawned": 228,
+            "materials": 67,
+            "pooledMeshes": 52,
+            "pooledSystems": 86
+          },
+          "budget": {
+            "active": 9,
+            "activeRemote": 0,
+            "activeCritical": 5,
+            "particles": 78,
+            "granted": 421,
+            "denied": 48,
+            "scaled": 0,
+            "deniedBy": {
+              "secondary-pressure": 48
+            }
+          },
+          "damageShown": 75,
+          "audioPlayed": 0,
+          "triangles": 40381,
+          "ghosts": 0,
+          "player": {
+            "x": -3.806307529813378,
+            "z": 4.161540473630944,
+            "yaw": -12.075407202584913
+          },
+          "demoStats": {
+            "attack": 40,
+            "critRate": 0.2,
+            "critMult": 1.6,
+            "spread": 0.1,
+            "note": "展示用測試值（不是正式平衡）"
+          }
+        }
+      }
+    },
+    {
+      "browser": "webkit",
+      "case": "module",
+      "checks": {
+        "載入：6 隻骨骼動畫怪物（M002～M007）且檔案檢查通過": {
+          "ok": true,
+          "detail": [
+            {
+              "l": "M002 苔角獸",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M003 雲絨鳥",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M004 風羽狐",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M005 星雲咩咩",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M006 胡蘿蔔大王",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M007 王冠重錘兔",
+              "ok": true,
+              "e": []
+            }
+          ]
+        },
+        "載入：初心者 C1.0-B5b（非 Tripo 組裝）": {
+          "ok": true,
+          "detail": {
+            "triangles": 40381,
+            "gender": "male"
+          }
+        },
+        "接入模組預熱：全部特效都生成過、而且全部回收（畫面上沒有殘留特效／投射物）": {
+          "ok": true,
+          "detail": [
+            {
+              "ms": 724,
+              "spawned": 66,
+              "leftoverActive": 0,
+              "leftoverProjectiles": 0,
+              "audioPlayed": 0,
+              "damageShown": 0,
+              "tier": "medium",
+              "materials": 27,
+              "pooledMeshes": 44,
+              "particleSystems": 40
+            },
+            {
+              "ms": 698,
+              "spawned": 66,
+              "leftoverActive": 0,
+              "leftoverProjectiles": 0,
+              "audioPlayed": 0,
+              "damageShown": 0,
+              "tier": "medium",
+              "materials": 27,
+              "pooledMeshes": 44,
+              "particleSystems": 40
+            },
+            {
+              "ms": 703,
+              "spawned": 66,
+              "leftoverActive": 0,
+              "leftoverProjectiles": 0,
+              "audioPlayed": 0,
+              "damageShown": 0,
+              "tier": "medium",
+              "materials": 27,
+              "pooledMeshes": 44,
+              "particleSystems": 40
+            },
+            {
+              "ms": 693,
+              "spawned": 66,
+              "leftoverActive": 0,
+              "leftoverProjectiles": 0,
+              "audioPlayed": 0,
+              "damageShown": 0,
+              "tier": "medium",
+              "materials": 27,
+              "pooledMeshes": 44,
+              "particleSystems": 40
+            }
+          ]
+        },
+        "接入模組預熱：不播音效、不顯示傷害數字、不扣怪物血量": {
+          "ok": true,
+          "detail": {
+            "pws": [
+              [
+                0,
+                0
+              ],
+              [
+                0,
+                0
+              ],
+              [
+                0,
+                0
+              ],
+              [
+                0,
+                0
+              ]
+            ],
+            "hp": [
+              9350,
+              9350
+            ]
+          }
+        },
+        "接入模組預熱：預熱期間鏡頭只畫 1×1 像素（玩家看不到預熱特效），結束後恢復完整畫面": {
+          "ok": true,
+          "detail": {
+            "maxPx": 1,
+            "frames": 44
+          }
+        },
+        "接入模組預熱：耗時合理（CI 軟體繪圖 < 10 秒；iPhone 未驗證）": {
+          "ok": true,
+          "detail": [
+            724,
+            698,
+            703,
+            693
+          ]
+        },
+        "接入模組：技能依動作檔時間觸發命中 hook（三連斬 3 次），不自行判定": {
+          "ok": true,
+          "detail": [
+            3,
+            3,
+            3,
+            3
+          ]
+        },
+        "接入模組：遠距離（> 28 m）的其他玩家特效不生成": {
+          "ok": true,
+          "detail": [
+            {
+              "distance": 1,
+              "offscreen": 0
+            },
+            {
+              "distance": 1,
+              "offscreen": 0
+            },
+            {
+              "distance": 1,
+              "offscreen": 0
+            },
+            {
+              "distance": 1,
+              "offscreen": 0
+            }
+          ]
+        },
+        "接入模組：重複進出地圖 4 次，網格、材質、粒子、發光層、節點數不累積（每次都回到相同數量）": {
+          "ok": true,
+          "detail": {
+            "base": {
+              "meshes": 163,
+              "materials": 96,
+              "textures": 61,
+              "particles": 37,
+              "layers": 1,
+              "transforms": 229
+            },
+            "runs": [
+              {
+                "meshes": 163,
+                "materials": 96,
+                "textures": 60,
+                "particles": 37,
+                "layers": 1,
+                "transforms": 229
+              },
+              {
+                "meshes": 163,
+                "materials": 96,
+                "textures": 60,
+                "particles": 37,
+                "layers": 1,
+                "transforms": 229
+              },
+              {
+                "meshes": 163,
+                "materials": 96,
+                "textures": 60,
+                "particles": 37,
+                "layers": 1,
+                "transforms": 229
+              },
+              {
+                "meshes": 163,
+                "materials": 96,
+                "textures": 60,
+                "particles": 37,
+                "layers": 1,
+                "transforms": 229
+              }
+            ],
+            "end": {
+              "meshes": 163,
+              "materials": 96,
+              "textures": 60,
+              "particles": 37,
+              "layers": 1,
+              "transforms": 229
+            }
+          }
+        },
+        "接入模組：釋放後 DOM（傷害數字、畫面閃光）全部移除": {
+          "ok": true,
+          "detail": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "接入模組：低畫質預熱建立的網格／粒子／材質不多於高畫質（不預熱高畫質專用資源）": {
+          "ok": true,
+          "detail": {
+            "low": {
+              "ms": 647,
+              "spawned": 66,
+              "leftoverActive": 0,
+              "leftoverProjectiles": 0,
+              "audioPlayed": 0,
+              "damageShown": 0,
+              "tier": "low",
+              "materials": 24,
+              "pooledMeshes": 32,
+              "particleSystems": 19
+            },
+            "high": {
+              "ms": 1506,
+              "spawned": 66,
+              "leftoverActive": 0,
+              "leftoverProjectiles": 0,
+              "audioPlayed": 0,
+              "damageShown": 0,
+              "tier": "high",
+              "materials": 27,
+              "pooledMeshes": 46,
+              "particleSystems": 48
+            }
+          }
+        },
+        "沒有頁面錯誤": {
+          "ok": true,
+          "detail": []
+        },
+        "沒有失敗的網路請求（模型、貼圖、動作檔全部載入）": {
+          "ok": true,
+          "detail": []
+        }
+      },
+      "errors": [],
+      "results": {
+        "loadMs": 2521,
+        "loaded": {
+          "tier": "medium",
+          "gender": "male",
+          "monsters": [
+            {
+              "idx": 0,
+              "label": "M002 苔角獸",
+              "level": 3,
+              "behaviour": "passive",
+              "angry": 0,
+              "moving": false,
+              "hp": 600,
+              "state": "idle",
+              "pos": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "home": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "check": {
+                "file": "monsters/m002/M002_MossHornBeast_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 0.64,
+                  "Run": 0.44,
+                  "Attack": 1.3,
+                  "Hurt": 0.45,
+                  "Death": 0.8,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 297
+              }
+            },
+            {
+              "idx": 1,
+              "label": "M003 雲絨鳥",
+              "level": 5,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 750,
+              "state": "idle",
+              "pos": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "home": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "check": {
+                "file": "monsters/m003/M003_CloudFluffBird_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 19,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 1.25,
+                  "Move": 0.8,
+                  "Run": 0.5,
+                  "Attack": 1.1,
+                  "Hurt": 0.45,
+                  "Death": 1,
+                  "Respawn": 0.9
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 334
+              }
+            },
+            {
+              "idx": 2,
+              "label": "M004 風羽狐",
+              "level": 7,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 900,
+              "state": "idle",
+              "pos": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "home": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "check": {
+                "file": "monsters/m004/M004_WindfeatherFox_Rig_V1_1_Lite.glb",
+                "ok": true,
+                "joints": 32,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2,
+                  "Move": 0.8,
+                  "Run": 0.38,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.7,
+                  "Respawn": 0.5
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 366
+              }
+            },
+            {
+              "idx": 3,
+              "label": "M005 星雲咩咩",
+              "level": 8,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1100,
+              "state": "idle",
+              "pos": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "home": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "check": {
+                "file": "monsters/m005/M005_NebulaSheep_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.6,
+                  "Run": 0.42,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.75,
+                  "Respawn": 0.6
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 396
+              }
+            },
+            {
+              "idx": 4,
+              "label": "M006 胡蘿蔔大王",
+              "level": 9,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1800,
+              "state": "idle",
+              "pos": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "home": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "check": {
+                "file": "monsters/m006/M006_CarrotKing_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.9,
+                  "Run": 0.5,
+                  "Attack": 1.3,
+                  "Hurt": 0.5,
+                  "Death": 0.9,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 429
+              }
+            },
+            {
+              "idx": 5,
+              "label": "M007 王冠重錘兔",
+              "level": 10,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 4200,
+              "state": "idle",
+              "pos": [
+                0,
+                10
+              ],
+              "home": [
+                0,
+                10
+              ],
+              "check": {
+                "file": "monsters/m007/M007_CrownHammerRabbit_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 29,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 1.1,
+                  "Run": 0.62,
+                  "Attack": 2,
+                  "Hurt": 0.6,
+                  "Death": 1.6,
+                  "Respawn": 1.1
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 460
+              }
+            }
+          ],
+          "vfx": {
+            "meshFx": 0,
+            "particles": 0,
+            "projectiles": 0,
+            "spawned": 53,
+            "materials": 27,
+            "pooledMeshes": 44,
+            "pooledSystems": 40
+          },
+          "budget": {
+            "active": 0,
+            "activeRemote": 0,
+            "activeCritical": 0,
+            "particles": 0,
+            "granted": 0,
+            "denied": 0,
+            "scaled": 0,
+            "deniedBy": {}
+          },
+          "damageShown": 0,
+          "audioPlayed": 0,
+          "triangles": 40381,
+          "ghosts": 0,
+          "player": {
+            "x": 0,
+            "z": 0,
+            "yaw": 0
+          },
+          "demoStats": {
+            "attack": 40,
+            "critRate": 0.2,
+            "critMult": 1.6,
+            "spread": 0.1,
+            "note": "展示用測試值（不是正式平衡）"
+          }
+        },
+        "module": {
+          "medium": {
+            "base": {
+              "meshes": 163,
+              "materials": 96,
+              "textures": 61,
+              "particles": 37,
+              "layers": 1,
+              "transforms": 229
+            },
+            "end": {
+              "meshes": 163,
+              "materials": 96,
+              "textures": 60,
+              "particles": 37,
+              "layers": 1,
+              "transforms": 229
+            },
+            "runs": [
+              {
+                "prewarm": {
+                  "ms": 724,
+                  "spawned": 66,
+                  "leftoverActive": 0,
+                  "leftoverProjectiles": 0,
+                  "audioPlayed": 0,
+                  "damageShown": 0,
+                  "tier": "medium",
+                  "materials": 27,
+                  "pooledMeshes": 44,
+                  "particleSystems": 40
+                },
+                "vpRestored": true,
+                "hits": 3,
+                "culled": {
+                  "distance": 1,
+                  "offscreen": 0
+                },
+                "damageShown": 1,
+                "after": {
+                  "meshes": 163,
+                  "materials": 96,
+                  "textures": 60,
+                  "particles": 37,
+                  "layers": 1,
+                  "transforms": 229
+                },
+                "dom": 0
+              },
+              {
+                "prewarm": {
+                  "ms": 698,
+                  "spawned": 66,
+                  "leftoverActive": 0,
+                  "leftoverProjectiles": 0,
+                  "audioPlayed": 0,
+                  "damageShown": 0,
+                  "tier": "medium",
+                  "materials": 27,
+                  "pooledMeshes": 44,
+                  "particleSystems": 40
+                },
+                "vpRestored": true,
+                "hits": 3,
+                "culled": {
+                  "distance": 1,
+                  "offscreen": 0
+                },
+                "damageShown": 1,
+                "after": {
+                  "meshes": 163,
+                  "materials": 96,
+                  "textures": 60,
+                  "particles": 37,
+                  "layers": 1,
+                  "transforms": 229
+                },
+                "dom": 0
+              },
+              {
+                "prewarm": {
+                  "ms": 703,
+                  "spawned": 66,
+                  "leftoverActive": 0,
+                  "leftoverProjectiles": 0,
+                  "audioPlayed": 0,
+                  "damageShown": 0,
+                  "tier": "medium",
+                  "materials": 27,
+                  "pooledMeshes": 44,
+                  "particleSystems": 40
+                },
+                "vpRestored": true,
+                "hits": 3,
+                "culled": {
+                  "distance": 1,
+                  "offscreen": 0
+                },
+                "damageShown": 1,
+                "after": {
+                  "meshes": 163,
+                  "materials": 96,
+                  "textures": 60,
+                  "particles": 37,
+                  "layers": 1,
+                  "transforms": 229
+                },
+                "dom": 0
+              },
+              {
+                "prewarm": {
+                  "ms": 693,
+                  "spawned": 66,
+                  "leftoverActive": 0,
+                  "leftoverProjectiles": 0,
+                  "audioPlayed": 0,
+                  "damageShown": 0,
+                  "tier": "medium",
+                  "materials": 27,
+                  "pooledMeshes": 44,
+                  "particleSystems": 40
+                },
+                "vpRestored": true,
+                "hits": 3,
+                "culled": {
+                  "distance": 1,
+                  "offscreen": 0
+                },
+                "damageShown": 1,
+                "after": {
+                  "meshes": 163,
+                  "materials": 96,
+                  "textures": 60,
+                  "particles": 37,
+                  "layers": 1,
+                  "transforms": 229
+                },
+                "dom": 0
+              }
+            ],
+            "hpBefore": 9350,
+            "hpAfter": 9350,
+            "maxPrewarmViewportPx": 1,
+            "prewarmFrames": 44
+          },
+          "low": {
+            "base": {
+              "meshes": 163,
+              "materials": 96,
+              "textures": 60,
+              "particles": 37,
+              "layers": 1,
+              "transforms": 229
+            },
+            "end": {
+              "meshes": 163,
+              "materials": 96,
+              "textures": 76,
+              "particles": 37,
+              "layers": 1,
+              "transforms": 229
+            },
+            "runs": [
+              {
+                "prewarm": {
+                  "ms": 647,
+                  "spawned": 66,
+                  "leftoverActive": 0,
+                  "leftoverProjectiles": 0,
+                  "audioPlayed": 0,
+                  "damageShown": 0,
+                  "tier": "low",
+                  "materials": 24,
+                  "pooledMeshes": 32,
+                  "particleSystems": 19
+                },
+                "vpRestored": true,
+                "hits": 3,
+                "culled": {
+                  "distance": 1,
+                  "offscreen": 0
+                },
+                "damageShown": 1,
+                "after": {
+                  "meshes": 163,
+                  "materials": 96,
+                  "textures": 76,
+                  "particles": 37,
+                  "layers": 1,
+                  "transforms": 229
+                },
+                "dom": 0
+              },
+              {
+                "prewarm": {
+                  "ms": 611,
+                  "spawned": 66,
+                  "leftoverActive": 0,
+                  "leftoverProjectiles": 0,
+                  "audioPlayed": 0,
+                  "damageShown": 0,
+                  "tier": "low",
+                  "materials": 24,
+                  "pooledMeshes": 32,
+                  "particleSystems": 19
+                },
+                "vpRestored": true,
+                "hits": 3,
+                "culled": {
+                  "distance": 1,
+                  "offscreen": 0
+                },
+                "damageShown": 1,
+                "after": {
+                  "meshes": 163,
+                  "materials": 96,
+                  "textures": 76,
+                  "particles": 37,
+                  "layers": 1,
+                  "transforms": 229
+                },
+                "dom": 0
+              }
+            ],
+            "hpBefore": 9350,
+            "hpAfter": 9350,
+            "maxPrewarmViewportPx": 1,
+            "prewarmFrames": 22
+          },
+          "high": {
+            "base": {
+              "meshes": 163,
+              "materials": 96,
+              "textures": 76,
+              "particles": 37,
+              "layers": 1,
+              "transforms": 229
+            },
+            "end": {
+              "meshes": 163,
+              "materials": 96,
+              "textures": 95,
+              "particles": 37,
+              "layers": 1,
+              "transforms": 229
+            },
+            "runs": [
+              {
+                "prewarm": {
+                  "ms": 1506,
+                  "spawned": 66,
+                  "leftoverActive": 0,
+                  "leftoverProjectiles": 0,
+                  "audioPlayed": 0,
+                  "damageShown": 0,
+                  "tier": "high",
+                  "materials": 27,
+                  "pooledMeshes": 46,
+                  "particleSystems": 48
+                },
+                "vpRestored": true,
+                "hits": 3,
+                "culled": {
+                  "distance": 1,
+                  "offscreen": 0
+                },
+                "damageShown": 1,
+                "after": {
+                  "meshes": 163,
+                  "materials": 96,
+                  "textures": 95,
+                  "particles": 37,
+                  "layers": 1,
+                  "transforms": 229
+                },
+                "dom": 0
+              }
+            ],
+            "hpBefore": 9350,
+            "hpAfter": 9350,
+            "maxPrewarmViewportPx": 1,
+            "prewarmFrames": 11
+          }
+        },
+        "final": {
+          "tier": "medium",
+          "gender": "male",
+          "monsters": [
+            {
+              "idx": 0,
+              "label": "M002 苔角獸",
+              "level": 3,
+              "behaviour": "passive",
+              "angry": 0,
+              "moving": false,
+              "hp": 600,
+              "state": "idle",
+              "pos": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "home": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "check": {
+                "file": "monsters/m002/M002_MossHornBeast_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 0.64,
+                  "Run": 0.44,
+                  "Attack": 1.3,
+                  "Hurt": 0.45,
+                  "Death": 0.8,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 297
+              }
+            },
+            {
+              "idx": 1,
+              "label": "M003 雲絨鳥",
+              "level": 5,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 750,
+              "state": "idle",
+              "pos": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "home": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "check": {
+                "file": "monsters/m003/M003_CloudFluffBird_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 19,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 1.25,
+                  "Move": 0.8,
+                  "Run": 0.5,
+                  "Attack": 1.1,
+                  "Hurt": 0.45,
+                  "Death": 1,
+                  "Respawn": 0.9
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 334
+              }
+            },
+            {
+              "idx": 2,
+              "label": "M004 風羽狐",
+              "level": 7,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 900,
+              "state": "idle",
+              "pos": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "home": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "check": {
+                "file": "monsters/m004/M004_WindfeatherFox_Rig_V1_1_Lite.glb",
+                "ok": true,
+                "joints": 32,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2,
+                  "Move": 0.8,
+                  "Run": 0.38,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.7,
+                  "Respawn": 0.5
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 366
+              }
+            },
+            {
+              "idx": 3,
+              "label": "M005 星雲咩咩",
+              "level": 8,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1100,
+              "state": "idle",
+              "pos": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "home": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "check": {
+                "file": "monsters/m005/M005_NebulaSheep_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.6,
+                  "Run": 0.42,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.75,
+                  "Respawn": 0.6
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 396
+              }
+            },
+            {
+              "idx": 4,
+              "label": "M006 胡蘿蔔大王",
+              "level": 9,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1800,
+              "state": "idle",
+              "pos": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "home": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "check": {
+                "file": "monsters/m006/M006_CarrotKing_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.9,
+                  "Run": 0.5,
+                  "Attack": 1.3,
+                  "Hurt": 0.5,
+                  "Death": 0.9,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 429
+              }
+            },
+            {
+              "idx": 5,
+              "label": "M007 王冠重錘兔",
+              "level": 10,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 4200,
+              "state": "idle",
+              "pos": [
+                0,
+                10
+              ],
+              "home": [
+                0,
+                10
+              ],
+              "check": {
+                "file": "monsters/m007/M007_CrownHammerRabbit_Rig_V1_Lite.glb",
+                "ok": true,
+                "joints": 29,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 1.1,
+                  "Run": 0.62,
+                  "Attack": 2,
+                  "Hurt": 0.6,
+                  "Death": 1.6,
+                  "Respawn": 1.1
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 460
+              }
+            }
+          ],
+          "vfx": {
+            "meshFx": 0,
+            "particles": 0,
+            "projectiles": 0,
+            "spawned": 53,
+            "materials": 27,
+            "pooledMeshes": 44,
+            "pooledSystems": 40
+          },
+          "budget": {
+            "active": 0,
+            "activeRemote": 0,
+            "activeCritical": 0,
+            "particles": 0,
+            "granted": 0,
+            "denied": 0,
+            "scaled": 0,
+            "deniedBy": {}
+          },
+          "damageShown": 0,
+          "audioPlayed": 0,
+          "triangles": 40381,
+          "ghosts": 0,
+          "player": {
+            "x": 0,
+            "z": 0,
+            "yaw": 0
+          },
+          "demoStats": {
+            "attack": 40,
+            "critRate": 0.2,
+            "critMult": 1.6,
+            "spread": 0.1,
+            "note": "展示用測試值（不是正式平衡）"
+          }
+        }
+      }
+    },
+    {
+      "browser": "webkit",
+      "case": "shader-warm",
+      "checks": {
+        "載入：6 隻骨骼動畫怪物（M002～M007）且檔案檢查通過": {
+          "ok": true,
+          "detail": [
+            {
+              "l": "M002 苔角獸",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M003 雲絨鳥",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M004 風羽狐",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M005 星雲咩咩",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M006 胡蘿蔔大王",
+              "ok": true,
+              "e": []
+            },
+            {
+              "l": "M007 王冠重錘兔",
+              "ok": true,
+              "e": []
+            }
+          ]
+        },
+        "載入：初心者 C1.0-B5b（非 Tripo 組裝）": {
+          "ok": true,
+          "detail": {
+            "triangles": 199965,
+            "gender": "male"
+          }
+        },
+        "特效預熱：載入時已預先生成全部特效與投射物（沒有超時）": {
+          "ok": true,
+          "detail": {
+            "ms": 1055,
+            "spawned": 66,
+            "timeouts": 0,
+            "materials": 27,
+            "meshes": 46,
+            "systems": 48,
+            "shadersBefore": 1,
+            "shadersAfter": 19
+          }
+        },
+        "特效預熱：施放 6 個技能＋6 種職業特效＋白天場景時，新編譯的 shader ≤ 3（關閉預熱時約 10）": {
+          "ok": true,
+          "detail": {
+            "beforeCasts": 19,
+            "afterCasts": 22,
+            "newDuringPlay": 3,
+            "prewarm": {
+              "ms": 1055,
+              "spawned": 66,
+              "timeouts": 0,
+              "materials": 27,
+              "meshes": 46,
+              "systems": 48,
+              "shadersBefore": 1,
+              "shadersAfter": 19
+            },
+            "newKeys": [
+              "default+default: SCENE_MRT_COUNT VIGNETTEBLENDMODEMULTIPLY TONEMAPPING SAMPLER3DGREENDEPTH SAMPLER3DBGRMAP DIFFUSEDIRECTUV AMBIENTDIRECTUV OPACITYDIRECTUV EMISSIVEDIRECTUV SPECULARDIRECTUV BUMPDIRECTUV FOG NUM_BONE_INFLUENCERS BonesPerMesh LIGHTMAPDIRECTUV NUM_MORPH_INFLUENCERS ALPHABLEND CAMERA_PERSPECTIVE AREALIGHTSUPPORTED CLUSTLIGHT_SLICES CLUSTLIGHT_BATCH TEXTURE_REPETITION_MODE",
+              "default+default: SCENE_MRT_COUNT VIGNETTEBLENDMODEMULTIPLY TONEMAPPING SAMPLER3DGREENDEPTH SAMPLER3DBGRMAP DIFFUSEDIRECTUV AMBIENTDIRECTUV OPACITYDIRECTUV EMISSIVEDIRECTUV SPECULARDIRECTUV BUMPDIRECTUV FOG NUM_BONE_INFLUENCERS BonesPerMesh LIGHTMAPDIRECTUV NUM_MORPH_INFLUENCERS NONUNIFORMSCALING ALPHABLEND CAMERA_PERSPECTIVE AREALIGHTSUPPORTED CLUSTLIGHT_SLICES CLUSTLIGHT_BATCH TEXTURE_REPETITION_MODE",
+              "default+default: MAINUV1 UV1 SCENE_MRT_COUNT VIGNETTEBLENDMODEMULTIPLY TONEMAPPING SAMPLER3DGREENDEPTH SAMPLER3DBGRMAP DIFFUSE DIFFUSEDIRECTUV AMBIENTDIRECTUV OPACITYDIRECTUV EMISSIVEDIRECTUV SPECULARDIRECTUV BUMPDIRECTUV FOG SPECULARTERM NORMAL NUM_BONE_INFLUENCERS BonesPerMesh LIGHTMAPDIRECTUV NUM_MORPH_INFLUENCERS ALPHABLEND CAMERA_PERSPECTIVE AREALIGHTSUPPORTED CLUSTLIGHT_SLICES CLUSTLIGHT_BATCH TEXTURE_REPETITION_MODE LIGHT0 HEMILIGHT0 LIGHT1 DIRLIGHT1 LIGHTCOUNT MAXLIGHTCOUNT"
+            ]
+          }
+        },
+        "沒有頁面錯誤": {
+          "ok": true,
+          "detail": []
+        },
+        "沒有失敗的網路請求（模型、貼圖、動作檔全部載入）": {
+          "ok": true,
+          "detail": []
+        }
+      },
+      "errors": [],
+      "results": {
+        "loadMs": 3558,
+        "loaded": {
+          "tier": "high",
+          "gender": "male",
+          "monsters": [
+            {
+              "idx": 0,
+              "label": "M002 苔角獸",
+              "level": 3,
+              "behaviour": "passive",
+              "angry": 0,
+              "moving": false,
+              "hp": 600,
+              "state": "idle",
+              "pos": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "home": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "check": {
+                "file": "monsters/m002/M002_MossHornBeast_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 0.64,
+                  "Run": 0.44,
+                  "Attack": 1.3,
+                  "Hurt": 0.45,
+                  "Death": 0.8,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 534
+              }
+            },
+            {
+              "idx": 1,
+              "label": "M003 雲絨鳥",
+              "level": 5,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 750,
+              "state": "idle",
+              "pos": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "home": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "check": {
+                "file": "monsters/m003/M003_CloudFluffBird_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 19,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 1.25,
+                  "Move": 0.8,
+                  "Run": 0.5,
+                  "Attack": 1.1,
+                  "Hurt": 0.45,
+                  "Death": 1,
+                  "Respawn": 0.9
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 671
+              }
+            },
+            {
+              "idx": 2,
+              "label": "M004 風羽狐",
+              "level": 7,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 900,
+              "state": "idle",
+              "pos": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "home": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "check": {
+                "file": "monsters/m004/M004_WindfeatherFox_Rig_V1_1_HQ.glb",
+                "ok": true,
+                "joints": 32,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2,
+                  "Move": 0.8,
+                  "Run": 0.38,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.7,
+                  "Respawn": 0.5
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 946
+              }
+            },
+            {
+              "idx": 3,
+              "label": "M005 星雲咩咩",
+              "level": 8,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1100,
+              "state": "idle",
+              "pos": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "home": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "check": {
+                "file": "monsters/m005/M005_NebulaSheep_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.6,
+                  "Run": 0.42,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.75,
+                  "Respawn": 0.6
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 808
+              }
+            },
+            {
+              "idx": 4,
+              "label": "M006 胡蘿蔔大王",
+              "level": 9,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1800,
+              "state": "idle",
+              "pos": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "home": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "check": {
+                "file": "monsters/m006/M006_CarrotKing_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.9,
+                  "Run": 0.5,
+                  "Attack": 1.3,
+                  "Hurt": 0.5,
+                  "Death": 0.9,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1084
+              }
+            },
+            {
+              "idx": 5,
+              "label": "M007 王冠重錘兔",
+              "level": 10,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 4200,
+              "state": "idle",
+              "pos": [
+                0,
+                10
+              ],
+              "home": [
+                0,
+                10
+              ],
+              "check": {
+                "file": "monsters/m007/M007_CrownHammerRabbit_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 29,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 1.1,
+                  "Run": 0.62,
+                  "Attack": 2,
+                  "Hurt": 0.6,
+                  "Death": 1.6,
+                  "Respawn": 1.1
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1222
+              }
+            }
+          ],
+          "vfx": {
+            "meshFx": 0,
+            "particles": 0,
+            "projectiles": 0,
+            "spawned": 62,
+            "materials": 27,
+            "pooledMeshes": 46,
+            "pooledSystems": 48
+          },
+          "budget": {
+            "active": 0,
+            "activeRemote": 0,
+            "activeCritical": 0,
+            "particles": 0,
+            "granted": 0,
+            "denied": 0,
+            "scaled": 0,
+            "deniedBy": {}
+          },
+          "damageShown": 0,
+          "audioPlayed": 0,
+          "triangles": 199965,
+          "ghosts": 0,
+          "player": {
+            "x": 0,
+            "z": 0,
+            "yaw": 0
+          },
+          "demoStats": {
+            "attack": 40,
+            "critRate": 0.2,
+            "critMult": 1.6,
+            "spread": 0.1,
+            "note": "展示用測試值（不是正式平衡）"
+          }
+        },
+        "shaders": {
+          "beforeCasts": 19,
+          "afterCasts": 22,
+          "newDuringPlay": 3,
+          "prewarm": {
+            "ms": 1055,
+            "spawned": 66,
+            "timeouts": 0,
+            "materials": 27,
+            "meshes": 46,
+            "systems": 48,
+            "shadersBefore": 1,
+            "shadersAfter": 19
+          },
+          "newKeys": [
+            "default+default: SCENE_MRT_COUNT VIGNETTEBLENDMODEMULTIPLY TONEMAPPING SAMPLER3DGREENDEPTH SAMPLER3DBGRMAP DIFFUSEDIRECTUV AMBIENTDIRECTUV OPACITYDIRECTUV EMISSIVEDIRECTUV SPECULARDIRECTUV BUMPDIRECTUV FOG NUM_BONE_INFLUENCERS BonesPerMesh LIGHTMAPDIRECTUV NUM_MORPH_INFLUENCERS ALPHABLEND CAMERA_PERSPECTIVE AREALIGHTSUPPORTED CLUSTLIGHT_SLICES CLUSTLIGHT_BATCH TEXTURE_REPETITION_MODE",
+            "default+default: SCENE_MRT_COUNT VIGNETTEBLENDMODEMULTIPLY TONEMAPPING SAMPLER3DGREENDEPTH SAMPLER3DBGRMAP DIFFUSEDIRECTUV AMBIENTDIRECTUV OPACITYDIRECTUV EMISSIVEDIRECTUV SPECULARDIRECTUV BUMPDIRECTUV FOG NUM_BONE_INFLUENCERS BonesPerMesh LIGHTMAPDIRECTUV NUM_MORPH_INFLUENCERS NONUNIFORMSCALING ALPHABLEND CAMERA_PERSPECTIVE AREALIGHTSUPPORTED CLUSTLIGHT_SLICES CLUSTLIGHT_BATCH TEXTURE_REPETITION_MODE",
+            "default+default: MAINUV1 UV1 SCENE_MRT_COUNT VIGNETTEBLENDMODEMULTIPLY TONEMAPPING SAMPLER3DGREENDEPTH SAMPLER3DBGRMAP DIFFUSE DIFFUSEDIRECTUV AMBIENTDIRECTUV OPACITYDIRECTUV EMISSIVEDIRECTUV SPECULARDIRECTUV BUMPDIRECTUV FOG SPECULARTERM NORMAL NUM_BONE_INFLUENCERS BonesPerMesh LIGHTMAPDIRECTUV NUM_MORPH_INFLUENCERS ALPHABLEND CAMERA_PERSPECTIVE AREALIGHTSUPPORTED CLUSTLIGHT_SLICES CLUSTLIGHT_BATCH TEXTURE_REPETITION_MODE LIGHT0 HEMILIGHT0 LIGHT1 DIRLIGHT1 LIGHTCOUNT MAXLIGHTCOUNT"
+          ]
+        },
+        "final": {
+          "tier": "high",
+          "gender": "male",
+          "monsters": [
+            {
+              "idx": 0,
+              "label": "M002 苔角獸",
+              "level": 3,
+              "behaviour": "passive",
+              "angry": 5.500000000000009,
+              "moving": false,
+              "hp": 181,
+              "state": "idle",
+              "pos": [
+                -5.865326976363342,
+                2.932712382634733
+              ],
+              "home": [
+                -4.857570063326495,
+                2.7863978681936707
+              ],
+              "check": {
+                "file": "monsters/m002/M002_MossHornBeast_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 0.64,
+                  "Run": 0.44,
+                  "Attack": 1.3,
+                  "Hurt": 0.45,
+                  "Death": 0.8,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 534
+              }
+            },
+            {
+              "idx": 1,
+              "label": "M003 雲絨鳥",
+              "level": 5,
+              "behaviour": "aggressive",
+              "angry": 3.800000000000015,
+              "moving": false,
+              "hp": 601,
+              "state": "idle",
+              "pos": [
+                -3.288975693580914,
+                5.668232951106399
+              ],
+              "home": [
+                -3.4805426603753125,
+                5.370830735492186
+              ],
+              "check": {
+                "file": "monsters/m003/M003_CloudFluffBird_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 19,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 1.25,
+                  "Move": 0.8,
+                  "Run": 0.5,
+                  "Attack": 1.1,
+                  "Hurt": 0.45,
+                  "Death": 1,
+                  "Respawn": 0.9
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 671
+              }
+            },
+            {
+              "idx": 2,
+              "label": "M004 風羽狐",
+              "level": 7,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 900,
+              "state": "idle",
+              "pos": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "home": [
+                -0.5590671332222381,
+                5.572023325556944
+              ],
+              "check": {
+                "file": "monsters/m004/M004_WindfeatherFox_Rig_V1_1_HQ.glb",
+                "ok": true,
+                "joints": 32,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2,
+                  "Move": 0.8,
+                  "Run": 0.38,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.7,
+                  "Respawn": 0.5
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 946
+              }
+            },
+            {
+              "idx": 3,
+              "label": "M005 星雲咩咩",
+              "level": 8,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1100,
+              "state": "idle",
+              "pos": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "home": [
+                2.344144186150703,
+                5.955248780238811
+              ],
+              "check": {
+                "file": "monsters/m005/M005_NebulaSheep_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.6,
+                  "Run": 0.42,
+                  "Attack": 1.2,
+                  "Hurt": 0.45,
+                  "Death": 0.75,
+                  "Respawn": 0.6
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 808
+              }
+            },
+            {
+              "idx": 4,
+              "label": "M006 胡蘿蔔大王",
+              "level": 9,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 1800,
+              "state": "idle",
+              "pos": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "home": [
+                4.207170268785638,
+                3.695905616955901
+              ],
+              "check": {
+                "file": "monsters/m006/M006_CarrotKing_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 26,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.4,
+                  "Move": 0.9,
+                  "Run": 0.5,
+                  "Attack": 1.3,
+                  "Hurt": 0.5,
+                  "Death": 0.9,
+                  "Respawn": 0.7
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1084
+              }
+            },
+            {
+              "idx": 5,
+              "label": "M007 王冠重錘兔",
+              "level": 10,
+              "behaviour": "aggressive",
+              "angry": 0,
+              "moving": false,
+              "hp": 4200,
+              "state": "idle",
+              "pos": [
+                0,
+                10
+              ],
+              "home": [
+                0,
+                10
+              ],
+              "check": {
+                "file": "monsters/m007/M007_CrownHammerRabbit_Rig_V1_HQ.glb",
+                "ok": true,
+                "joints": 29,
+                "skeletons": 1,
+                "skinnedMeshes": 1,
+                "clips": {
+                  "Idle": 2.8,
+                  "Move": 1.1,
+                  "Run": 0.62,
+                  "Attack": 2,
+                  "Hurt": 0.6,
+                  "Death": 1.6,
+                  "Respawn": 1.1
+                },
+                "extras": true,
+                "fixture": false,
+                "notes": [],
+                "errors": [],
+                "loadMs": 1222
+              }
+            }
+          ],
+          "vfx": {
+            "meshFx": 13,
+            "particles": 331,
+            "projectiles": 0,
+            "spawned": 150,
+            "materials": 81,
+            "pooledMeshes": 47,
+            "pooledSystems": 63
+          },
+          "budget": {
+            "active": 32,
+            "activeRemote": 0,
+            "activeCritical": 1,
+            "particles": 840,
+            "granted": 175,
+            "denied": 1,
+            "scaled": 0,
+            "deniedBy": {
+              "secondary-pressure": 1
+            }
+          },
+          "damageShown": 5,
+          "audioPlayed": 0,
+          "triangles": 199965,
+          "ghosts": 0,
+          "player": {
+            "x": -2.2840065006296886,
+            "z": 1.2496801652513203,
+            "yaw": -1.1314785299308145
+          },
+          "demoStats": {
+            "attack": 40,
+            "critRate": 0.2,
+            "critMult": 1.6,
+            "spread": 0.1,
+            "note": "展示用測試值（不是正式平衡）"
+          }
+        }
+      }
+    }
+  ],
+  "failures": 0,
+  "finishedAt": "2026-11-28T08:03:10.818Z"
+}
