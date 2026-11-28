@@ -1,0 +1,5790 @@
+{
+  "startedAt": "2026-11-28T00:12:13.755Z",
+  "note": "CI 軟體繪圖：FPS 不代表 iPhone 實機",
+  "runs": [
+    {
+      "browser": "chromium",
+      "mode": "high-portrait",
+      "checks": {
+        "畫質 high：模型 HQ、即時陰影 開": {
+          "ok": true,
+          "detail": {
+            "tier": "high",
+            "source": "url",
+            "lite": false,
+            "shadows": true
+          }
+        },
+        "正式初心者角色載入（男、HQ）": {
+          "ok": true,
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "z": -124,
+            "yaw": 0,
+            "walkable": true,
+            "char": "loaded",
+            "model": "novice_c10b5b_male_hq.glb"
+          }
+        },
+        "抵達點（入口傳送陣北側 10 m）可走": {
+          "ok": true,
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "z": -124,
+            "yaw": 0,
+            "walkable": true,
+            "char": "loaded",
+            "model": "novice_c10b5b_male_hq.glb"
+          }
+        },
+        "沒有跳躍按鈕（一般移動不跳躍）": {
+          "ok": true,
+          "detail": null
+        },
+        "主路線 32 點全部可達（一般移動、不跳躍、不卡住）": {
+          "ok": true,
+          "detail": {
+            "reached": 32,
+            "stuckAt": null,
+            "maxSlope": 26.565051164879115,
+            "time": 141.99999999999451
+          }
+        },
+        "地形 36 塊、入口分區已載入、有實例化垃圾與植被": {
+          "ok": true,
+          "detail": {
+            "chunks": 36,
+            "cells": [
+              "entry",
+              "hills",
+              "central"
+            ],
+            "inst": 3183,
+            "im": 27
+          }
+        },
+        "各區 Draw Calls ≤ 160（最高 111）": {
+          "ok": true,
+          "detail": [
+            [
+              "entry",
+              100
+            ],
+            [
+              "hills",
+              81
+            ],
+            [
+              "colossus",
+              72
+            ],
+            [
+              "central",
+              100
+            ],
+            [
+              "recycle",
+              111
+            ],
+            [
+              "walkway",
+              89
+            ],
+            [
+              "bridge",
+              90
+            ],
+            [
+              "factory",
+              97
+            ],
+            [
+              "platform",
+              92
+            ],
+            [
+              "core",
+              82
+            ]
+          ]
+        },
+        "各區場景三角面（不含玩家角色）≤ 250,000（最高 150,872）": {
+          "ok": true,
+          "detail": [
+            [
+              "entry",
+              142430,
+              345561
+            ],
+            [
+              "hills",
+              114230,
+              317361
+            ],
+            [
+              "colossus",
+              99984,
+              303115
+            ],
+            [
+              "central",
+              150872,
+              354003
+            ],
+            [
+              "recycle",
+              112184,
+              315315
+            ],
+            [
+              "walkway",
+              85000,
+              288131
+            ],
+            [
+              "bridge",
+              76974,
+              280105
+            ],
+            [
+              "factory",
+              66250,
+              269381
+            ],
+            [
+              "platform",
+              66300,
+              269431
+            ],
+            [
+              "core",
+              114354,
+              317485
+            ]
+          ]
+        },
+        "分區載入與釋放：走遠的區域會釋放（有 unload 紀錄），Boss 區時入口區已釋放": {
+          "ok": true,
+          "detail": {
+            "ops": 8,
+            "unloads": [
+              "entry",
+              "hills"
+            ],
+            "lastCells": [
+              "central",
+              "recycle",
+              "factory",
+              "core"
+            ]
+          }
+        },
+        "入口傳送陣：走入觸發傳送回星芽原野（沒有按鈕），只觸發一次": {
+          "ok": true,
+          "detail": {
+            "p1": {
+              "armed": false,
+              "fired": true,
+              "log": [
+                {
+                  "t": 188.49,
+                  "map": "starsprout",
+                  "x": 0,
+                  "z": -133.5
+                }
+              ],
+              "spec": {
+                "id": "junkyard-entry",
+                "x": 0,
+                "z": -134,
+                "visualR": 3,
+                "triggerR": 2.4
+              },
+              "links": [
+                {
+                  "id": "field-north",
+                  "x": 0,
+                  "z": 82,
+                  "visualR": 3,
+                  "triggerR": 2.4,
+                  "open": false,
+                  "to": {
+                    "map": "junkyard",
+                    "x": 0,
+                    "z": -124,
+                    "yaw": 0
+                  },
+                  "label": "往 星廢垃圾場（Lv11–20）"
+                },
+                {
+                  "id": "junkyard-entry",
+                  "x": 0,
+                  "z": -134,
+                  "visualR": 3,
+                  "triggerR": 2.4,
+                  "open": true,
+                  "to": {
+                    "map": "starsprout",
+                    "x": 0,
+                    "z": 75,
+                    "yaw": 3.141592653589793
+                  },
+                  "label": "往 星芽原野（Lv1–10）"
+                }
+              ]
+            },
+            "p2": 1
+          }
+        },
+        "巡迴（實際步行）會沿路線前進": {
+          "ok": true,
+          "detail": {
+            "sm": {
+              "done": false,
+              "stops": 0,
+              "idx": 3
+            },
+            "pos": [
+              5.775324927910533,
+              -101.96333736461374
+            ]
+          }
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": {
+            "fps": 1.2848736112657733,
+            "draws": 92,
+            "tris": 328931,
+            "meshes": 84,
+            "textures": 38,
+            "materials": 98,
+            "geometries": 231,
+            "contextLost": 0
+          }
+        },
+        "同一個模型／貼圖沒有重複下載、沒有 4xx/5xx": {
+          "ok": true,
+          "detail": {
+            "dup": [],
+            "badResp": []
+          }
+        },
+        "沒有 JS 錯誤": {
+          "ok": true,
+          "detail": []
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "chromium_high-portrait_00_arrival.png",
+        "chromium_high-portrait_stop_entry.png",
+        "chromium_high-portrait_stop_hills.png",
+        "chromium_high-portrait_stop_colossus.png",
+        "chromium_high-portrait_stop_central.png",
+        "chromium_high-portrait_stop_recycle.png",
+        "chromium_high-portrait_stop_walkway.png",
+        "chromium_high-portrait_stop_bridge.png",
+        "chromium_high-portrait_stop_factory.png",
+        "chromium_high-portrait_stop_platform.png",
+        "chromium_high-portrait_stop_core.png",
+        "chromium_high-portrait_spawns_hills.png",
+        "chromium_high-portrait_spawns_recycle.png",
+        "chromium_high-portrait_topdown.png",
+        "chromium_high-portrait_topdown_spawns.png"
+      ],
+      "results": {
+        "loadSec": 11.382,
+        "tier": {
+          "tier": "high",
+          "source": "url",
+          "lite": false,
+          "shadows": true
+        },
+        "routeSim": {
+          "reached": [
+            "E0",
+            "E1",
+            "H0",
+            "H1",
+            "H2",
+            "H3",
+            "H4",
+            "H5",
+            "H6",
+            "C0",
+            "C1",
+            "R0",
+            "R1",
+            "R2",
+            "R3",
+            "R3b",
+            "R4",
+            "R5",
+            "R6",
+            "R7",
+            "F0",
+            "F1",
+            "F1s",
+            "F1t",
+            "F2",
+            "F2t",
+            "F3",
+            "F4",
+            "F5",
+            "F6",
+            "K0",
+            "K1"
+          ],
+          "stuckAt": null,
+          "time": 141.99999999999451,
+          "distance": 709.9999999999826,
+          "maxStep": 0.08333333328897652,
+          "maxSlopeDeg": 26.565051164879115,
+          "maxSlopeAt": {
+            "x": -60.00024499015775,
+            "z": 76.49189781207536
+          },
+          "minY": -0.4172529456356321,
+          "maxY": 20
+        },
+        "walkableArea": 50317.25,
+        "stats0": {
+          "terrainChunks": 36,
+          "terrainTris": 73728,
+          "landmarkMeshes": 105,
+          "landmarkTris": 75652,
+          "loadedCells": [
+            "entry",
+            "hills",
+            "central"
+          ],
+          "instances": 3183,
+          "instanceMeshes": 27,
+          "particles": 122,
+          "buildMs": 596,
+          "scatter": {
+            "mound": 1751,
+            "debris": 520,
+            "pileItems": 332,
+            "tufts": 2400,
+            "flowers": 700
+          },
+          "fade": {
+            "on": true,
+            "meshes": 18,
+            "total": 2665,
+            "shown": 852,
+            "tris": 49506,
+            "trisFull": 72114
+          }
+        },
+        "stops": [
+          {
+            "id": "entry",
+            "label": "入口（傳送陣）",
+            "draws": 100,
+            "tris": 345561,
+            "sceneTris": 142430,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 14,
+                "tris": 28672
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 19,
+                "tris": 27034
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 21,
+                "tris": 83064
+              },
+              "草叢小花": {
+                "meshes": 6,
+                "tris": 1968
+              }
+            },
+            "cells": [
+              "entry",
+              "hills",
+              "central"
+            ]
+          },
+          {
+            "id": "hills",
+            "label": "廢棄山丘區",
+            "draws": 81,
+            "tris": 317361,
+            "sceneTris": 114230,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 8,
+                "tris": 16384
+              },
+              "地標與機械": {
+                "meshes": 11,
+                "tris": 15428
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 18,
+                "tris": 77422
+              },
+              "草叢小花": {
+                "meshes": 6,
+                "tris": 2820
+              }
+            },
+            "cells": [
+              "entry",
+              "hills",
+              "central"
+            ]
+          },
+          {
+            "id": "colossus",
+            "label": "機械巨像遺骸",
+            "draws": 72,
+            "tris": 303115,
+            "sceneTris": 99984,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 4,
+                "tris": 8192
+              },
+              "地標與機械": {
+                "meshes": 11,
+                "tris": 15544
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 13,
+                "tris": 67496
+              },
+              "草叢小花": {
+                "meshes": 4,
+                "tris": 2580
+              }
+            },
+            "cells": [
+              "entry",
+              "hills",
+              "central"
+            ]
+          },
+          {
+            "id": "central",
+            "label": "中央窪地",
+            "draws": 100,
+            "tris": 354003,
+            "sceneTris": 150872,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 11,
+                "tris": 22528
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 17,
+                "tris": 36682
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 20,
+                "tris": 85150
+              },
+              "草叢小花": {
+                "meshes": 7,
+                "tris": 3420
+              }
+            },
+            "cells": [
+              "entry",
+              "hills",
+              "central",
+              "recycle"
+            ]
+          },
+          {
+            "id": "recycle",
+            "label": "回收處理區",
+            "draws": 111,
+            "tris": 315315,
+            "sceneTris": 112184,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 5,
+                "tris": 10240
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 15,
+                "tris": 11480
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 23,
+                "tris": 82802
+              },
+              "草叢小花": {
+                "meshes": 8,
+                "tris": 2010
+              }
+            },
+            "cells": [
+              "entry",
+              "hills",
+              "central",
+              "recycle",
+              "factory"
+            ]
+          },
+          {
+            "id": "walkway",
+            "label": "高架金屬步道",
+            "draws": 89,
+            "tris": 288131,
+            "sceneTris": 85000,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 9,
+                "tris": 18432
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 16,
+                "tris": 11408
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 14,
+                "tris": 49698
+              },
+              "草叢小花": {
+                "meshes": 4,
+                "tris": 1338
+              }
+            },
+            "cells": [
+              "hills",
+              "central",
+              "recycle",
+              "factory"
+            ]
+          },
+          {
+            "id": "bridge",
+            "label": "魔法運河大橋",
+            "draws": 90,
+            "tris": 280105,
+            "sceneTris": 76974,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 8,
+                "tris": 16384
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 14,
+                "tris": 10836
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 11,
+                "tris": 44244
+              },
+              "草叢小花": {
+                "meshes": 4,
+                "tris": 786
+              }
+            },
+            "cells": [
+              "hills",
+              "central",
+              "recycle",
+              "factory"
+            ]
+          },
+          {
+            "id": "factory",
+            "label": "廢棄工廠區",
+            "draws": 97,
+            "tris": 269381,
+            "sceneTris": 66250,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 5,
+                "tris": 10240
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 16,
+                "tris": 9596
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 10,
+                "tris": 39180
+              },
+              "草叢小花": {
+                "meshes": 3,
+                "tris": 678
+              }
+            },
+            "cells": [
+              "hills",
+              "central",
+              "recycle",
+              "factory",
+              "core"
+            ]
+          },
+          {
+            "id": "platform",
+            "label": "熔爐上方平台",
+            "draws": 92,
+            "tris": 269431,
+            "sceneTris": 66300,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 5,
+                "tris": 10240
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 16,
+                "tris": 10004
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 10,
+                "tris": 40698
+              },
+              "草叢小花": {
+                "meshes": 2,
+                "tris": 774
+              }
+            },
+            "cells": [
+              "central",
+              "recycle",
+              "factory",
+              "core"
+            ]
+          },
+          {
+            "id": "core",
+            "label": "核心熔煉場（Boss）",
+            "draws": 82,
+            "tris": 317485,
+            "sceneTris": 114354,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 4,
+                "tris": 8192
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 18,
+                "tris": 39640
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 8,
+                "tris": 48464
+              },
+              "草叢小花": {
+                "meshes": 3,
+                "tris": 360
+              }
+            },
+            "cells": [
+              "central",
+              "recycle",
+              "factory",
+              "core"
+            ]
+          }
+        ],
+        "streamLog": 8,
+        "walk": {
+          "sm": {
+            "done": false,
+            "stops": 0,
+            "idx": 3
+          },
+          "pos": {
+            "x": 5.775324927910533,
+            "y": 0.009579607664969481,
+            "z": -101.96333736461374,
+            "yaw": 1.1751941275919373,
+            "walkable": true,
+            "char": "loaded",
+            "model": "novice_c10b5b_male_hq.glb"
+          }
+        },
+        "final": {
+          "perf": {
+            "fps": 1.2848736112657733,
+            "draws": 92,
+            "tris": 328931,
+            "meshes": 84,
+            "textures": 38,
+            "materials": 98,
+            "geometries": 231,
+            "contextLost": 0
+          },
+          "report": "星願物語 星廢垃圾場（Lv11–20）預覽報告｜2026/11/28 上午12:16:22\n裝置：Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n畫質：高畫質（來源 url）｜模型 HQ｜陰影 即時（附近大型地標）｜MSAA 4｜後製 開\n解析度：390×844（實際倍率 1.00，DPR 2）\n載入：頁面 1.05 秒（可走格網 318 ms、場景 596 ms）｜角色 loaded\n地圖：300×300 m｜可走面積 50,317 m²｜碰撞物 105\n地形：36 塊、73,728 面｜地標網格 105（75,652 面）\n分區載入中：central、recycle、hills、entry｜實例 4,043（36 個實例網格）｜粒子上限 174\n擺放總數：垃圾山 1751、地面碎屑 520、垃圾堆物件 332、草叢 2400、小花 700\n目前畫面：Draw Calls 95、三角形 334,307、FPS 1.4\n（尚未跑巡迴：上方按「巡迴：走完整條路線」）\nWebGL Context Lost：0 次"
+        }
+      }
+    },
+    {
+      "browser": "chromium",
+      "mode": "medium-portrait",
+      "checks": {
+        "畫質 medium：模型 LITE、即時陰影 開": {
+          "ok": true,
+          "detail": {
+            "tier": "medium",
+            "source": "url",
+            "lite": true,
+            "shadows": true
+          }
+        },
+        "正式初心者角色載入（女、LITE）": {
+          "ok": true,
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "z": -124,
+            "yaw": 0,
+            "walkable": true,
+            "char": "loaded",
+            "model": "novice_c10b5b_female_lite.glb"
+          }
+        },
+        "抵達點（入口傳送陣北側 10 m）可走": {
+          "ok": true,
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "z": -124,
+            "yaw": 0,
+            "walkable": true,
+            "char": "loaded",
+            "model": "novice_c10b5b_female_lite.glb"
+          }
+        },
+        "沒有跳躍按鈕（一般移動不跳躍）": {
+          "ok": true,
+          "detail": null
+        },
+        "主路線 32 點全部可達（一般移動、不跳躍、不卡住）": {
+          "ok": true,
+          "detail": {
+            "reached": 32,
+            "stuckAt": null,
+            "maxSlope": 26.565051164879115,
+            "time": 141.99999999999451
+          }
+        },
+        "地形 36 塊、入口分區已載入、有實例化垃圾與植被": {
+          "ok": true,
+          "detail": {
+            "chunks": 36,
+            "cells": [
+              "entry",
+              "hills"
+            ],
+            "inst": 1303,
+            "im": 18
+          }
+        },
+        "各區 Draw Calls ≤ 120（最高 93）": {
+          "ok": true,
+          "detail": [
+            [
+              "entry",
+              91
+            ],
+            [
+              "hills",
+              76
+            ],
+            [
+              "colossus",
+              70
+            ],
+            [
+              "central",
+              88
+            ],
+            [
+              "recycle",
+              93
+            ],
+            [
+              "walkway",
+              88
+            ],
+            [
+              "bridge",
+              85
+            ],
+            [
+              "factory",
+              88
+            ],
+            [
+              "platform",
+              87
+            ],
+            [
+              "core",
+              77
+            ]
+          ]
+        },
+        "各區場景三角面（不含玩家角色）≤ 100,000（最高 82,370）": {
+          "ok": true,
+          "detail": [
+            [
+              "entry",
+              76450,
+              119571
+            ],
+            [
+              "hills",
+              58944,
+              102065
+            ],
+            [
+              "colossus",
+              53700,
+              96821
+            ],
+            [
+              "central",
+              82370,
+              125491
+            ],
+            [
+              "recycle",
+              44868,
+              87989
+            ],
+            [
+              "walkway",
+              51986,
+              95107
+            ],
+            [
+              "bridge",
+              47308,
+              90429
+            ],
+            [
+              "factory",
+              40220,
+              83341
+            ],
+            [
+              "platform",
+              35920,
+              79041
+            ],
+            [
+              "core",
+              78556,
+              121677
+            ]
+          ]
+        },
+        "分區載入與釋放：走遠的區域會釋放（有 unload 紀錄），Boss 區時入口區已釋放": {
+          "ok": true,
+          "detail": {
+            "ops": 8,
+            "unloads": [
+              "entry",
+              "hills"
+            ],
+            "lastCells": [
+              "central",
+              "recycle",
+              "factory",
+              "core"
+            ]
+          }
+        },
+        "入口傳送陣：走入觸發傳送回星芽原野（沒有按鈕），只觸發一次": {
+          "ok": true,
+          "detail": {
+            "p1": {
+              "armed": false,
+              "fired": true,
+              "log": [
+                {
+                  "t": 63.429,
+                  "map": "starsprout",
+                  "x": 0,
+                  "z": -133.5
+                }
+              ],
+              "spec": {
+                "id": "junkyard-entry",
+                "x": 0,
+                "z": -134,
+                "visualR": 3,
+                "triggerR": 2.4
+              },
+              "links": [
+                {
+                  "id": "field-north",
+                  "x": 0,
+                  "z": 82,
+                  "visualR": 3,
+                  "triggerR": 2.4,
+                  "open": false,
+                  "to": {
+                    "map": "junkyard",
+                    "x": 0,
+                    "z": -124,
+                    "yaw": 0
+                  },
+                  "label": "往 星廢垃圾場（Lv11–20）"
+                },
+                {
+                  "id": "junkyard-entry",
+                  "x": 0,
+                  "z": -134,
+                  "visualR": 3,
+                  "triggerR": 2.4,
+                  "open": true,
+                  "to": {
+                    "map": "starsprout",
+                    "x": 0,
+                    "z": 75,
+                    "yaw": 3.141592653589793
+                  },
+                  "label": "往 星芽原野（Lv1–10）"
+                }
+              ]
+            },
+            "p2": 1
+          }
+        },
+        "巡迴（實際步行）會沿路線前進": {
+          "ok": true,
+          "detail": {
+            "sm": {
+              "done": false,
+              "stops": 1,
+              "idx": 5
+            },
+            "pos": [
+              63.4019146220084,
+              -77.15163966251743
+            ]
+          }
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": {
+            "fps": 8.949880668257748,
+            "draws": 80,
+            "tris": 105689,
+            "meshes": 78,
+            "textures": 27,
+            "materials": 76,
+            "geometries": 222,
+            "contextLost": 0
+          }
+        },
+        "同一個模型／貼圖沒有重複下載、沒有 4xx/5xx": {
+          "ok": true,
+          "detail": {
+            "dup": [],
+            "badResp": []
+          }
+        },
+        "沒有 JS 錯誤": {
+          "ok": true,
+          "detail": []
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "chromium_medium-portrait_00_arrival.png",
+        "chromium_medium-portrait_stop_entry.png",
+        "chromium_medium-portrait_stop_hills.png",
+        "chromium_medium-portrait_stop_colossus.png",
+        "chromium_medium-portrait_stop_central.png",
+        "chromium_medium-portrait_stop_recycle.png",
+        "chromium_medium-portrait_stop_walkway.png",
+        "chromium_medium-portrait_stop_bridge.png",
+        "chromium_medium-portrait_stop_factory.png",
+        "chromium_medium-portrait_stop_platform.png",
+        "chromium_medium-portrait_stop_core.png",
+        "chromium_medium-portrait_spawns_hills.png",
+        "chromium_medium-portrait_spawns_recycle.png"
+      ],
+      "results": {
+        "loadSec": 4.361,
+        "tier": {
+          "tier": "medium",
+          "source": "url",
+          "lite": true,
+          "shadows": true
+        },
+        "routeSim": {
+          "reached": [
+            "E0",
+            "E1",
+            "H0",
+            "H1",
+            "H2",
+            "H3",
+            "H4",
+            "H5",
+            "H6",
+            "C0",
+            "C1",
+            "R0",
+            "R1",
+            "R2",
+            "R3",
+            "R3b",
+            "R4",
+            "R5",
+            "R6",
+            "R7",
+            "F0",
+            "F1",
+            "F1s",
+            "F1t",
+            "F2",
+            "F2t",
+            "F3",
+            "F4",
+            "F5",
+            "F6",
+            "K0",
+            "K1"
+          ],
+          "stuckAt": null,
+          "time": 141.99999999999451,
+          "distance": 709.9999999999826,
+          "maxStep": 0.08333333328897652,
+          "maxSlopeDeg": 26.565051164879115,
+          "maxSlopeAt": {
+            "x": -60.00024499015775,
+            "z": 76.49189781207536
+          },
+          "minY": -0.4172529456356321,
+          "maxY": 20
+        },
+        "walkableArea": 50317.25,
+        "stats0": {
+          "terrainChunks": 36,
+          "terrainTris": 45000,
+          "landmarkMeshes": 105,
+          "landmarkTris": 75480,
+          "loadedCells": [
+            "entry",
+            "hills"
+          ],
+          "instances": 1303,
+          "instanceMeshes": 18,
+          "particles": 64,
+          "buildMs": 480,
+          "scatter": {
+            "mound": 854,
+            "debris": 300,
+            "pileItems": 332,
+            "tufts": 1300,
+            "flowers": 400
+          },
+          "fade": {
+            "on": true,
+            "meshes": 12,
+            "total": 1054,
+            "shown": 356,
+            "tris": 16116,
+            "trisFull": 23574
+          }
+        },
+        "stops": [
+          {
+            "id": "entry",
+            "label": "入口（傳送陣）",
+            "draws": 91,
+            "tris": 119571,
+            "sceneTris": 76450,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43121
+              },
+              "地形": {
+                "meshes": 14,
+                "tris": 17500
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 19,
+                "tris": 26862
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 14,
+                "tris": 29670
+              },
+              "草叢小花": {
+                "meshes": 4,
+                "tris": 726
+              }
+            },
+            "cells": [
+              "entry",
+              "hills"
+            ]
+          },
+          {
+            "id": "hills",
+            "label": "廢棄山丘區",
+            "draws": 76,
+            "tris": 102065,
+            "sceneTris": 58944,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43121
+              },
+              "地形": {
+                "meshes": 8,
+                "tris": 10000
+              },
+              "地標與機械": {
+                "meshes": 11,
+                "tris": 15428
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 16,
+                "tris": 31422
+              },
+              "草叢小花": {
+                "meshes": 4,
+                "tris": 1086
+              }
+            },
+            "cells": [
+              "entry",
+              "hills",
+              "central"
+            ]
+          },
+          {
+            "id": "colossus",
+            "label": "機械巨像遺骸",
+            "draws": 70,
+            "tris": 96821,
+            "sceneTris": 53700,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43121
+              },
+              "地形": {
+                "meshes": 4,
+                "tris": 5000
+              },
+              "地標與機械": {
+                "meshes": 11,
+                "tris": 15372
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 12,
+                "tris": 26362
+              },
+              "草叢小花": {
+                "meshes": 3,
+                "tris": 966
+              }
+            },
+            "cells": [
+              "hills",
+              "central"
+            ]
+          },
+          {
+            "id": "central",
+            "label": "中央窪地",
+            "draws": 88,
+            "tris": 125491,
+            "sceneTris": 82370,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43121
+              },
+              "地形": {
+                "meshes": 11,
+                "tris": 13750
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 17,
+                "tris": 36510
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 14,
+                "tris": 28638
+              },
+              "草叢小花": {
+                "meshes": 4,
+                "tris": 588
+              }
+            },
+            "cells": [
+              "hills",
+              "central",
+              "recycle"
+            ]
+          },
+          {
+            "id": "recycle",
+            "label": "回收處理區",
+            "draws": 93,
+            "tris": 87989,
+            "sceneTris": 44868,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43121
+              },
+              "地形": {
+                "meshes": 5,
+                "tris": 6250
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 16,
+                "tris": 11752
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 16,
+                "tris": 22462
+              },
+              "草叢小花": {
+                "meshes": 3,
+                "tris": 204
+              }
+            },
+            "cells": [
+              "hills",
+              "central",
+              "recycle",
+              "factory"
+            ]
+          },
+          {
+            "id": "walkway",
+            "label": "高架金屬步道",
+            "draws": 88,
+            "tris": 95107,
+            "sceneTris": 51986,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43121
+              },
+              "地形": {
+                "meshes": 9,
+                "tris": 11250
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 16,
+                "tris": 11236
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 14,
+                "tris": 24700
+              },
+              "草叢小花": {
+                "meshes": 2,
+                "tris": 420
+              }
+            },
+            "cells": [
+              "central",
+              "recycle",
+              "factory"
+            ]
+          },
+          {
+            "id": "bridge",
+            "label": "魔法運河大橋",
+            "draws": 85,
+            "tris": 90429,
+            "sceneTris": 47308,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43121
+              },
+              "地形": {
+                "meshes": 8,
+                "tris": 10000
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 14,
+                "tris": 10664
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 11,
+                "tris": 21960
+              },
+              "草叢小花": {
+                "meshes": 3,
+                "tris": 228
+              }
+            },
+            "cells": [
+              "central",
+              "recycle",
+              "factory"
+            ]
+          },
+          {
+            "id": "factory",
+            "label": "廢棄工廠區",
+            "draws": 88,
+            "tris": 83341,
+            "sceneTris": 40220,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43121
+              },
+              "地形": {
+                "meshes": 5,
+                "tris": 6250
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 16,
+                "tris": 9424
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 10,
+                "tris": 19648
+              },
+              "草叢小花": {
+                "meshes": 2,
+                "tris": 174
+              }
+            },
+            "cells": [
+              "central",
+              "recycle",
+              "factory",
+              "core"
+            ]
+          },
+          {
+            "id": "platform",
+            "label": "熔爐上方平台",
+            "draws": 87,
+            "tris": 79041,
+            "sceneTris": 35920,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43121
+              },
+              "地形": {
+                "meshes": 5,
+                "tris": 6250
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 16,
+                "tris": 9832
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 8,
+                "tris": 15330
+              },
+              "草叢小花": {
+                "meshes": 2,
+                "tris": 264
+              }
+            },
+            "cells": [
+              "central",
+              "recycle",
+              "factory",
+              "core"
+            ]
+          },
+          {
+            "id": "core",
+            "label": "核心熔煉場（Boss）",
+            "draws": 77,
+            "tris": 121677,
+            "sceneTris": 78556,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43121
+              },
+              "地形": {
+                "meshes": 4,
+                "tris": 5000
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 18,
+                "tris": 39468
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 7,
+                "tris": 19078
+              },
+              "草叢小花": {
+                "meshes": 2,
+                "tris": 294
+              }
+            },
+            "cells": [
+              "central",
+              "recycle",
+              "factory",
+              "core"
+            ]
+          }
+        ],
+        "streamLog": 8,
+        "walk": {
+          "sm": {
+            "done": false,
+            "stops": 1,
+            "idx": 5
+          },
+          "pos": {
+            "x": 63.4019146220084,
+            "y": 3.0076875080395036,
+            "z": -77.15163966251743,
+            "yaw": 0.48084114536063494,
+            "walkable": true,
+            "char": "loaded",
+            "model": "novice_c10b5b_female_lite.glb"
+          }
+        },
+        "final": {
+          "perf": {
+            "fps": 8.949880668257748,
+            "draws": 80,
+            "tris": 105689,
+            "meshes": 78,
+            "textures": 27,
+            "materials": 76,
+            "geometries": 222,
+            "contextLost": 0
+          },
+          "report": "星願物語 星廢垃圾場（Lv11–20）預覽報告｜2026/11/28 上午12:17:54\n裝置：Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n畫質：中畫質（來源 url）｜模型 Lite｜陰影 即時（附近大型地標）｜MSAA 2｜後製 開\n解析度：390×844（實際倍率 1.00，DPR 2）\n載入：頁面 0.91 秒（可走格網 315 ms、場景 480 ms）｜角色 loaded\n地圖：300×300 m｜可走面積 50,317 m²｜碰撞物 105\n地形：36 塊、45,000 面｜地標網格 105（75,480 面）\n分區載入中：central、entry、hills｜實例 1,774（27 個實例網格）｜粒子上限 64\n擺放總數：垃圾山 854、地面碎屑 300、垃圾堆物件 332、草叢 1300、小花 400\n目前畫面：Draw Calls 80、三角形 105,689、FPS 8.9\n（尚未跑巡迴：上方按「巡迴：走完整條路線」）\nWebGL Context Lost：0 次"
+        }
+      }
+    },
+    {
+      "browser": "chromium",
+      "mode": "low-portrait",
+      "checks": {
+        "畫質 low：模型 LITE、即時陰影 關（腳底陰影）": {
+          "ok": true,
+          "detail": {
+            "tier": "low",
+            "source": "url",
+            "lite": true,
+            "shadows": false
+          }
+        },
+        "正式初心者角色載入（男、LITE）": {
+          "ok": true,
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "z": -124,
+            "yaw": 0,
+            "walkable": true,
+            "char": "loaded",
+            "model": "novice_c10b5b_male_lite.glb"
+          }
+        },
+        "抵達點（入口傳送陣北側 10 m）可走": {
+          "ok": true,
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "z": -124,
+            "yaw": 0,
+            "walkable": true,
+            "char": "loaded",
+            "model": "novice_c10b5b_male_lite.glb"
+          }
+        },
+        "沒有跳躍按鈕（一般移動不跳躍）": {
+          "ok": true,
+          "detail": null
+        },
+        "主路線 32 點全部可達（一般移動、不跳躍、不卡住）": {
+          "ok": true,
+          "detail": {
+            "reached": 32,
+            "stuckAt": null,
+            "maxSlope": 26.565051164879115,
+            "time": 141.99999999999451
+          }
+        },
+        "地形 36 塊、入口分區已載入、有實例化垃圾與植被": {
+          "ok": true,
+          "detail": {
+            "chunks": 36,
+            "cells": [
+              "entry",
+              "hills"
+            ],
+            "inst": 805,
+            "im": 18
+          }
+        },
+        "各區 Draw Calls ≤ 100（最高 84）": {
+          "ok": true,
+          "detail": [
+            [
+              "entry",
+              84
+            ],
+            [
+              "hills",
+              74
+            ],
+            [
+              "colossus",
+              62
+            ],
+            [
+              "central",
+              81
+            ],
+            [
+              "recycle",
+              73
+            ],
+            [
+              "walkway",
+              70
+            ],
+            [
+              "bridge",
+              71
+            ],
+            [
+              "factory",
+              66
+            ],
+            [
+              "platform",
+              64
+            ],
+            [
+              "core",
+              67
+            ]
+          ]
+        },
+        "各區場景三角面（不含玩家角色）≤ 100,000（最高 68,454）": {
+          "ok": true,
+          "detail": [
+            [
+              "entry",
+              50930,
+              94477
+            ],
+            [
+              "hills",
+              45720,
+              89267
+            ],
+            [
+              "colossus",
+              37722,
+              81269
+            ],
+            [
+              "central",
+              68454,
+              112001
+            ],
+            [
+              "recycle",
+              36940,
+              80487
+            ],
+            [
+              "walkway",
+              27542,
+              71089
+            ],
+            [
+              "bridge",
+              33018,
+              76565
+            ],
+            [
+              "factory",
+              27304,
+              70851
+            ],
+            [
+              "platform",
+              23920,
+              67467
+            ],
+            [
+              "core",
+              55612,
+              99159
+            ]
+          ]
+        },
+        "分區載入與釋放：走遠的區域會釋放（有 unload 紀錄），Boss 區時入口區已釋放": {
+          "ok": true,
+          "detail": {
+            "ops": 9,
+            "unloads": [
+              "entry",
+              "hills",
+              "recycle"
+            ],
+            "lastCells": [
+              "central",
+              "factory",
+              "core"
+            ]
+          }
+        },
+        "入口傳送陣：走入觸發傳送回星芽原野（沒有按鈕），只觸發一次": {
+          "ok": true,
+          "detail": {
+            "p1": {
+              "armed": false,
+              "fired": true,
+              "log": [
+                {
+                  "t": 55.79389999999991,
+                  "map": "starsprout",
+                  "x": 0,
+                  "z": -133.5
+                }
+              ],
+              "spec": {
+                "id": "junkyard-entry",
+                "x": 0,
+                "z": -134,
+                "visualR": 3,
+                "triggerR": 2.4
+              },
+              "links": [
+                {
+                  "id": "field-north",
+                  "x": 0,
+                  "z": 82,
+                  "visualR": 3,
+                  "triggerR": 2.4,
+                  "open": false,
+                  "to": {
+                    "map": "junkyard",
+                    "x": 0,
+                    "z": -124,
+                    "yaw": 0
+                  },
+                  "label": "往 星廢垃圾場（Lv11–20）"
+                },
+                {
+                  "id": "junkyard-entry",
+                  "x": 0,
+                  "z": -134,
+                  "visualR": 3,
+                  "triggerR": 2.4,
+                  "open": true,
+                  "to": {
+                    "map": "starsprout",
+                    "x": 0,
+                    "z": 75,
+                    "yaw": 3.141592653589793
+                  },
+                  "label": "往 星芽原野（Lv1–10）"
+                }
+              ]
+            },
+            "p2": 1
+          }
+        },
+        "巡迴（實際步行）會沿路線前進": {
+          "ok": true,
+          "detail": {
+            "sm": {
+              "done": false,
+              "stops": 1,
+              "idx": 5
+            },
+            "pos": [
+              68.21581075371128,
+              -67.33872332396079
+            ]
+          }
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": {
+            "fps": 9.58803413340144,
+            "draws": 68,
+            "tris": 84899,
+            "meshes": 69,
+            "textures": 24,
+            "materials": 76,
+            "geometries": 222,
+            "contextLost": 0
+          }
+        },
+        "同一個模型／貼圖沒有重複下載、沒有 4xx/5xx": {
+          "ok": true,
+          "detail": {
+            "dup": [],
+            "badResp": []
+          }
+        },
+        "沒有 JS 錯誤": {
+          "ok": true,
+          "detail": []
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "chromium_low-portrait_00_arrival.png",
+        "chromium_low-portrait_stop_entry.png",
+        "chromium_low-portrait_stop_hills.png",
+        "chromium_low-portrait_stop_colossus.png",
+        "chromium_low-portrait_stop_central.png",
+        "chromium_low-portrait_stop_recycle.png",
+        "chromium_low-portrait_stop_walkway.png",
+        "chromium_low-portrait_stop_bridge.png",
+        "chromium_low-portrait_stop_factory.png",
+        "chromium_low-portrait_stop_platform.png",
+        "chromium_low-portrait_stop_core.png",
+        "chromium_low-portrait_spawns_hills.png",
+        "chromium_low-portrait_spawns_recycle.png"
+      ],
+      "results": {
+        "loadSec": 3.579,
+        "tier": {
+          "tier": "low",
+          "source": "url",
+          "lite": true,
+          "shadows": false
+        },
+        "routeSim": {
+          "reached": [
+            "E0",
+            "E1",
+            "H0",
+            "H1",
+            "H2",
+            "H3",
+            "H4",
+            "H5",
+            "H6",
+            "C0",
+            "C1",
+            "R0",
+            "R1",
+            "R2",
+            "R3",
+            "R3b",
+            "R4",
+            "R5",
+            "R6",
+            "R7",
+            "F0",
+            "F1",
+            "F1s",
+            "F1t",
+            "F2",
+            "F2t",
+            "F3",
+            "F4",
+            "F5",
+            "F6",
+            "K0",
+            "K1"
+          ],
+          "stuckAt": null,
+          "time": 141.99999999999451,
+          "distance": 709.9999999999826,
+          "maxStep": 0.08333333328897652,
+          "maxSlopeDeg": 26.565051164879115,
+          "maxSlopeAt": {
+            "x": -60.00024499015775,
+            "z": 76.49189781207536
+          },
+          "minY": -0.4172529456356321,
+          "maxY": 20
+        },
+        "walkableArea": 50317.25,
+        "stats0": {
+          "terrainChunks": 36,
+          "terrainTris": 28800,
+          "landmarkMeshes": 105,
+          "landmarkTris": 75480,
+          "loadedCells": [
+            "entry",
+            "hills"
+          ],
+          "instances": 805,
+          "instanceMeshes": 18,
+          "particles": 0,
+          "buildMs": 453,
+          "scatter": {
+            "mound": 535,
+            "debris": 180,
+            "pileItems": 332,
+            "tufts": 700,
+            "flowers": 200
+          },
+          "fade": {
+            "on": true,
+            "meshes": 12,
+            "total": 600,
+            "shown": 185,
+            "tris": 10474,
+            "trisFull": 14994
+          }
+        },
+        "stops": [
+          {
+            "id": "entry",
+            "label": "入口（傳送陣）",
+            "draws": 84,
+            "tris": 94477,
+            "sceneTris": 50930,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43547
+              },
+              "地形": {
+                "meshes": 12,
+                "tris": 9600
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 18,
+                "tris": 18276
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 14,
+                "tris": 22444
+              },
+              "草叢小花": {
+                "meshes": 4,
+                "tris": 222
+              }
+            },
+            "cells": [
+              "entry",
+              "hills"
+            ]
+          },
+          {
+            "id": "hills",
+            "label": "廢棄山丘區",
+            "draws": 74,
+            "tris": 89267,
+            "sceneTris": 45720,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43547
+              },
+              "地形": {
+                "meshes": 8,
+                "tris": 6400
+              },
+              "地標與機械": {
+                "meshes": 11,
+                "tris": 15428
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 15,
+                "tris": 23130
+              },
+              "草叢小花": {
+                "meshes": 5,
+                "tris": 474
+              }
+            },
+            "cells": [
+              "entry",
+              "hills",
+              "central"
+            ]
+          },
+          {
+            "id": "colossus",
+            "label": "機械巨像遺骸",
+            "draws": 62,
+            "tris": 81269,
+            "sceneTris": 37722,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43547
+              },
+              "地形": {
+                "meshes": 4,
+                "tris": 3200
+              },
+              "地標與機械": {
+                "meshes": 11,
+                "tris": 15372
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 10,
+                "tris": 18448
+              },
+              "草叢小花": {
+                "meshes": 2,
+                "tris": 414
+              }
+            },
+            "cells": [
+              "hills",
+              "central"
+            ]
+          },
+          {
+            "id": "central",
+            "label": "中央窪地",
+            "draws": 81,
+            "tris": 112001,
+            "sceneTris": 68454,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43547
+              },
+              "地形": {
+                "meshes": 11,
+                "tris": 8800
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 17,
+                "tris": 36510
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 13,
+                "tris": 22390
+              },
+              "草叢小花": {
+                "meshes": 4,
+                "tris": 366
+              }
+            },
+            "cells": [
+              "hills",
+              "central",
+              "recycle"
+            ]
+          },
+          {
+            "id": "recycle",
+            "label": "回收處理區",
+            "draws": 73,
+            "tris": 80487,
+            "sceneTris": 36940,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43547
+              },
+              "地形": {
+                "meshes": 5,
+                "tris": 4000
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 16,
+                "tris": 11752
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 12,
+                "tris": 20626
+              },
+              "草叢小花": {
+                "meshes": 4,
+                "tris": 174
+              }
+            },
+            "cells": [
+              "hills",
+              "central",
+              "recycle"
+            ]
+          },
+          {
+            "id": "walkway",
+            "label": "高架金屬步道",
+            "draws": 70,
+            "tris": 71089,
+            "sceneTris": 27542,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43547
+              },
+              "地形": {
+                "meshes": 9,
+                "tris": 7200
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 16,
+                "tris": 11236
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 7,
+                "tris": 8574
+              },
+              "草叢小花": {
+                "meshes": 2,
+                "tris": 144
+              }
+            },
+            "cells": [
+              "central",
+              "recycle"
+            ]
+          },
+          {
+            "id": "bridge",
+            "label": "魔法運河大橋",
+            "draws": 71,
+            "tris": 76565,
+            "sceneTris": 33018,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43547
+              },
+              "地形": {
+                "meshes": 8,
+                "tris": 6400
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 14,
+                "tris": 10664
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 10,
+                "tris": 15416
+              },
+              "草叢小花": {
+                "meshes": 3,
+                "tris": 150
+              }
+            },
+            "cells": [
+              "central",
+              "recycle",
+              "factory"
+            ]
+          },
+          {
+            "id": "factory",
+            "label": "廢棄工廠區",
+            "draws": 66,
+            "tris": 70851,
+            "sceneTris": 27304,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43547
+              },
+              "地形": {
+                "meshes": 5,
+                "tris": 4000
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 16,
+                "tris": 9424
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 8,
+                "tris": 13426
+              },
+              "草叢小花": {
+                "meshes": 1,
+                "tris": 66
+              }
+            },
+            "cells": [
+              "central",
+              "recycle",
+              "factory"
+            ]
+          },
+          {
+            "id": "platform",
+            "label": "熔爐上方平台",
+            "draws": 64,
+            "tris": 67467,
+            "sceneTris": 23920,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43547
+              },
+              "地形": {
+                "meshes": 5,
+                "tris": 4000
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 16,
+                "tris": 9832
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 6,
+                "tris": 9646
+              },
+              "草叢小花": {
+                "meshes": 1,
+                "tris": 54
+              }
+            },
+            "cells": [
+              "central",
+              "recycle",
+              "factory",
+              "core"
+            ]
+          },
+          {
+            "id": "core",
+            "label": "核心熔煉場（Boss）",
+            "draws": 67,
+            "tris": 99159,
+            "sceneTris": 55612,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43547
+              },
+              "地形": {
+                "meshes": 4,
+                "tris": 3200
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 18,
+                "tris": 39468
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 7,
+                "tris": 12406
+              },
+              "草叢小花": {
+                "meshes": 2,
+                "tris": 150
+              }
+            },
+            "cells": [
+              "central",
+              "factory",
+              "core"
+            ]
+          }
+        ],
+        "streamLog": 9,
+        "walk": {
+          "sm": {
+            "done": false,
+            "stops": 1,
+            "idx": 5
+          },
+          "pos": {
+            "x": 68.21581075371128,
+            "y": 3.3346589340989476,
+            "z": -67.33872332396079,
+            "yaw": 0.4868057792423915,
+            "walkable": true,
+            "char": "loaded",
+            "model": "novice_c10b5b_male_lite.glb"
+          }
+        },
+        "final": {
+          "perf": {
+            "fps": 9.58803413340144,
+            "draws": 68,
+            "tris": 84899,
+            "meshes": 69,
+            "textures": 24,
+            "materials": 76,
+            "geometries": 222,
+            "contextLost": 0
+          },
+          "report": "星願物語 星廢垃圾場（Lv11–20）預覽報告｜2026/11/28 上午12:19:17\n裝置：Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n畫質：低畫質（來源 url）｜模型 Lite｜陰影 腳底柔和陰影｜MSAA 1｜後製 關\n解析度：390×844（實際倍率 1.00，DPR 2）\n載入：頁面 0.87 秒（可走格網 318 ms、場景 453 ms）｜角色 loaded\n地圖：300×300 m｜可走面積 50,317 m²｜碰撞物 105\n地形：36 塊、28,800 面｜地標網格 105（75,480 面）\n分區載入中：central、entry、hills｜實例 1,083（27 個實例網格）｜粒子上限 0\n擺放總數：垃圾山 535、地面碎屑 180、垃圾堆物件 332、草叢 700、小花 200\n目前畫面：Draw Calls 68、三角形 84,899、FPS 9.6\n（尚未跑巡迴：上方按「巡迴：走完整條路線」）\nWebGL Context Lost：0 次"
+        }
+      }
+    },
+    {
+      "browser": "chromium",
+      "mode": "high-landscape",
+      "checks": {
+        "畫質 high：模型 HQ、即時陰影 開": {
+          "ok": true,
+          "detail": {
+            "tier": "high",
+            "source": "url",
+            "lite": false,
+            "shadows": true
+          }
+        },
+        "正式初心者角色載入（男、HQ）": {
+          "ok": true,
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "z": -124,
+            "yaw": 0,
+            "walkable": true,
+            "char": "loaded",
+            "model": "novice_c10b5b_male_hq.glb"
+          }
+        },
+        "抵達點（入口傳送陣北側 10 m）可走": {
+          "ok": true,
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "z": -124,
+            "yaw": 0,
+            "walkable": true,
+            "char": "loaded",
+            "model": "novice_c10b5b_male_hq.glb"
+          }
+        },
+        "沒有跳躍按鈕（一般移動不跳躍）": {
+          "ok": true,
+          "detail": null
+        },
+        "主路線 32 點全部可達（一般移動、不跳躍、不卡住）": {
+          "ok": true,
+          "detail": {
+            "reached": 32,
+            "stuckAt": null,
+            "maxSlope": 26.565051164879115,
+            "time": 141.99999999999451
+          }
+        },
+        "地形 36 塊、入口分區已載入、有實例化垃圾與植被": {
+          "ok": true,
+          "detail": {
+            "chunks": 36,
+            "cells": [
+              "entry",
+              "hills",
+              "central"
+            ],
+            "inst": 3183,
+            "im": 27
+          }
+        },
+        "各區 Draw Calls ≤ 160（最高 138）": {
+          "ok": true,
+          "detail": [
+            [
+              "entry",
+              120
+            ],
+            [
+              "hills",
+              98
+            ],
+            [
+              "colossus",
+              74
+            ],
+            [
+              "central",
+              116
+            ],
+            [
+              "recycle",
+              138
+            ],
+            [
+              "walkway",
+              126
+            ],
+            [
+              "bridge",
+              115
+            ],
+            [
+              "factory",
+              126
+            ],
+            [
+              "platform",
+              99
+            ],
+            [
+              "core",
+              94
+            ]
+          ]
+        },
+        "各區場景三角面（不含玩家角色）≤ 250,000（最高 174,250）": {
+          "ok": true,
+          "detail": [
+            [
+              "entry",
+              173090,
+              376221
+            ],
+            [
+              "hills",
+              144038,
+              347169
+            ],
+            [
+              "colossus",
+              104080,
+              307211
+            ],
+            [
+              "central",
+              174250,
+              377381
+            ],
+            [
+              "recycle",
+              157290,
+              360421
+            ],
+            [
+              "walkway",
+              136216,
+              339347
+            ],
+            [
+              "bridge",
+              124772,
+              327903
+            ],
+            [
+              "factory",
+              149934,
+              353065
+            ],
+            [
+              "platform",
+              92714,
+              295845
+            ],
+            [
+              "core",
+              150000,
+              353131
+            ]
+          ]
+        },
+        "分區載入與釋放：走遠的區域會釋放（有 unload 紀錄），Boss 區時入口區已釋放": {
+          "ok": true,
+          "detail": {
+            "ops": 8,
+            "unloads": [
+              "entry",
+              "hills"
+            ],
+            "lastCells": [
+              "central",
+              "recycle",
+              "factory",
+              "core"
+            ]
+          }
+        },
+        "入口傳送陣：走入觸發傳送回星芽原野（沒有按鈕），只觸發一次": {
+          "ok": true,
+          "detail": {
+            "p1": {
+              "armed": false,
+              "fired": true,
+              "log": [
+                {
+                  "t": 184.93229999999994,
+                  "map": "starsprout",
+                  "x": 0,
+                  "z": -133.5
+                }
+              ],
+              "spec": {
+                "id": "junkyard-entry",
+                "x": 0,
+                "z": -134,
+                "visualR": 3,
+                "triggerR": 2.4
+              },
+              "links": [
+                {
+                  "id": "field-north",
+                  "x": 0,
+                  "z": 82,
+                  "visualR": 3,
+                  "triggerR": 2.4,
+                  "open": false,
+                  "to": {
+                    "map": "junkyard",
+                    "x": 0,
+                    "z": -124,
+                    "yaw": 0
+                  },
+                  "label": "往 星廢垃圾場（Lv11–20）"
+                },
+                {
+                  "id": "junkyard-entry",
+                  "x": 0,
+                  "z": -134,
+                  "visualR": 3,
+                  "triggerR": 2.4,
+                  "open": true,
+                  "to": {
+                    "map": "starsprout",
+                    "x": 0,
+                    "z": 75,
+                    "yaw": 3.141592653589793
+                  },
+                  "label": "往 星芽原野（Lv1–10）"
+                }
+              ]
+            },
+            "p2": 1
+          }
+        },
+        "巡迴（實際步行）會沿路線前進": {
+          "ok": true,
+          "detail": {
+            "sm": {
+              "done": false,
+              "stops": 0,
+              "idx": 3
+            },
+            "pos": [
+              2.4223057246645,
+              -103.78255553647486
+            ]
+          }
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": {
+            "fps": 1.7369353512662433,
+            "draws": 116,
+            "tris": 384677,
+            "meshes": 110,
+            "textures": 27,
+            "materials": 76,
+            "geometries": 231,
+            "contextLost": 0
+          }
+        },
+        "同一個模型／貼圖沒有重複下載、沒有 4xx/5xx": {
+          "ok": true,
+          "detail": {
+            "dup": [],
+            "badResp": []
+          }
+        },
+        "沒有 JS 錯誤": {
+          "ok": true,
+          "detail": []
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "chromium_high-landscape_00_arrival.png",
+        "chromium_high-landscape_stop_entry.png",
+        "chromium_high-landscape_stop_hills.png",
+        "chromium_high-landscape_stop_colossus.png",
+        "chromium_high-landscape_stop_central.png",
+        "chromium_high-landscape_stop_recycle.png",
+        "chromium_high-landscape_stop_walkway.png",
+        "chromium_high-landscape_stop_bridge.png",
+        "chromium_high-landscape_stop_factory.png",
+        "chromium_high-landscape_stop_platform.png",
+        "chromium_high-landscape_stop_core.png",
+        "chromium_high-landscape_spawns_hills.png",
+        "chromium_high-landscape_spawns_recycle.png"
+      ],
+      "results": {
+        "loadSec": 11.596,
+        "tier": {
+          "tier": "high",
+          "source": "url",
+          "lite": false,
+          "shadows": true
+        },
+        "routeSim": {
+          "reached": [
+            "E0",
+            "E1",
+            "H0",
+            "H1",
+            "H2",
+            "H3",
+            "H4",
+            "H5",
+            "H6",
+            "C0",
+            "C1",
+            "R0",
+            "R1",
+            "R2",
+            "R3",
+            "R3b",
+            "R4",
+            "R5",
+            "R6",
+            "R7",
+            "F0",
+            "F1",
+            "F1s",
+            "F1t",
+            "F2",
+            "F2t",
+            "F3",
+            "F4",
+            "F5",
+            "F6",
+            "K0",
+            "K1"
+          ],
+          "stuckAt": null,
+          "time": 141.99999999999451,
+          "distance": 709.9999999999826,
+          "maxStep": 0.08333333328897652,
+          "maxSlopeDeg": 26.565051164879115,
+          "maxSlopeAt": {
+            "x": -60.00024499015775,
+            "z": 76.49189781207536
+          },
+          "minY": -0.4172529456356321,
+          "maxY": 20
+        },
+        "walkableArea": 50317.25,
+        "stats0": {
+          "terrainChunks": 36,
+          "terrainTris": 73728,
+          "landmarkMeshes": 105,
+          "landmarkTris": 75652,
+          "loadedCells": [
+            "entry",
+            "hills",
+            "central"
+          ],
+          "instances": 3183,
+          "instanceMeshes": 27,
+          "particles": 122,
+          "buildMs": 580,
+          "scatter": {
+            "mound": 1751,
+            "debris": 520,
+            "pileItems": 332,
+            "tufts": 2400,
+            "flowers": 700
+          },
+          "fade": {
+            "on": true,
+            "meshes": 18,
+            "total": 2665,
+            "shown": 852,
+            "tris": 49506,
+            "trisFull": 72114
+          }
+        },
+        "stops": [
+          {
+            "id": "entry",
+            "label": "入口（傳送陣）",
+            "draws": 120,
+            "tris": 376221,
+            "sceneTris": 173090,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 26,
+                "tris": 53248
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 27,
+                "tris": 33118
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 21,
+                "tris": 83064
+              },
+              "草叢小花": {
+                "meshes": 6,
+                "tris": 1968
+              }
+            },
+            "cells": [
+              "entry",
+              "hills",
+              "central"
+            ]
+          },
+          {
+            "id": "hills",
+            "label": "廢棄山丘區",
+            "draws": 98,
+            "tris": 347169,
+            "sceneTris": 144038,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 16,
+                "tris": 32768
+              },
+              "地標與機械": {
+                "meshes": 17,
+                "tris": 21368
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 21,
+                "tris": 84906
+              },
+              "草叢小花": {
+                "meshes": 6,
+                "tris": 2820
+              }
+            },
+            "cells": [
+              "entry",
+              "hills",
+              "central"
+            ]
+          },
+          {
+            "id": "colossus",
+            "label": "機械巨像遺骸",
+            "draws": 74,
+            "tris": 307211,
+            "sceneTris": 104080,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 6,
+                "tris": 12288
+              },
+              "地標與機械": {
+                "meshes": 11,
+                "tris": 15544
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 13,
+                "tris": 67496
+              },
+              "草叢小花": {
+                "meshes": 4,
+                "tris": 2580
+              }
+            },
+            "cells": [
+              "entry",
+              "hills",
+              "central"
+            ]
+          },
+          {
+            "id": "central",
+            "label": "中央窪地",
+            "draws": 116,
+            "tris": 377381,
+            "sceneTris": 174250,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 18,
+                "tris": 36864
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 22,
+                "tris": 38158
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 23,
+                "tris": 92698
+              },
+              "草叢小花": {
+                "meshes": 8,
+                "tris": 3438
+              }
+            },
+            "cells": [
+              "entry",
+              "hills",
+              "central",
+              "recycle"
+            ]
+          },
+          {
+            "id": "recycle",
+            "label": "回收處理區",
+            "draws": 138,
+            "tris": 360421,
+            "sceneTris": 157290,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 9,
+                "tris": 18432
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 28,
+                "tris": 14296
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 31,
+                "tris": 116858
+              },
+              "草叢小花": {
+                "meshes": 10,
+                "tris": 2052
+              }
+            },
+            "cells": [
+              "entry",
+              "hills",
+              "central",
+              "recycle",
+              "factory"
+            ]
+          },
+          {
+            "id": "walkway",
+            "label": "高架金屬步道",
+            "draws": 126,
+            "tris": 339347,
+            "sceneTris": 136216,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 15,
+                "tris": 30720
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 35,
+                "tris": 39466
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 20,
+                "tris": 58700
+              },
+              "草叢小花": {
+                "meshes": 4,
+                "tris": 1338
+              }
+            },
+            "cells": [
+              "hills",
+              "central",
+              "recycle",
+              "factory"
+            ]
+          },
+          {
+            "id": "bridge",
+            "label": "魔法運河大橋",
+            "draws": 115,
+            "tris": 327903,
+            "sceneTris": 124772,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 13,
+                "tris": 26624
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 26,
+                "tris": 37106
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 17,
+                "tris": 55058
+              },
+              "草叢小花": {
+                "meshes": 6,
+                "tris": 1260
+              }
+            },
+            "cells": [
+              "hills",
+              "central",
+              "recycle",
+              "factory"
+            ]
+          },
+          {
+            "id": "factory",
+            "label": "廢棄工廠區",
+            "draws": 126,
+            "tris": 353065,
+            "sceneTris": 149934,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 9,
+                "tris": 18432
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 35,
+                "tris": 40698
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 16,
+                "tris": 83630
+              },
+              "草叢小花": {
+                "meshes": 4,
+                "tris": 690
+              }
+            },
+            "cells": [
+              "hills",
+              "central",
+              "recycle",
+              "factory",
+              "core"
+            ]
+          },
+          {
+            "id": "platform",
+            "label": "熔爐上方平台",
+            "draws": 99,
+            "tris": 295845,
+            "sceneTris": 92714,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 6,
+                "tris": 12288
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 20,
+                "tris": 10700
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 12,
+                "tris": 64368
+              },
+              "草叢小花": {
+                "meshes": 2,
+                "tris": 774
+              }
+            },
+            "cells": [
+              "central",
+              "recycle",
+              "factory",
+              "core"
+            ]
+          },
+          {
+            "id": "core",
+            "label": "核心熔煉場（Boss）",
+            "draws": 94,
+            "tris": 353131,
+            "sceneTris": 150000,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 7,
+                "tris": 14336
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 20,
+                "tris": 39928
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 15,
+                "tris": 77678
+              },
+              "草叢小花": {
+                "meshes": 3,
+                "tris": 360
+              }
+            },
+            "cells": [
+              "central",
+              "recycle",
+              "factory",
+              "core"
+            ]
+          }
+        ],
+        "streamLog": 8,
+        "walk": {
+          "sm": {
+            "done": false,
+            "stops": 0,
+            "idx": 3
+          },
+          "pos": {
+            "x": 2.4223057246645,
+            "y": 0.0000773070966846956,
+            "z": -103.78255553647486,
+            "yaw": 1.163201662990949,
+            "walkable": true,
+            "char": "loaded",
+            "model": "novice_c10b5b_male_hq.glb"
+          }
+        },
+        "final": {
+          "perf": {
+            "fps": 1.7369353512662433,
+            "draws": 116,
+            "tris": 384677,
+            "meshes": 110,
+            "textures": 27,
+            "materials": 76,
+            "geometries": 231,
+            "contextLost": 0
+          },
+          "report": "星願物語 星廢垃圾場（Lv11–20）預覽報告｜2026/11/28 上午12:22:55\n裝置：Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n畫質：高畫質（來源 url）｜模型 HQ｜陰影 即時（附近大型地標）｜MSAA 4｜後製 開\n解析度：844×390（實際倍率 1.00，DPR 2）\n載入：頁面 1.02 秒（可走格網 315 ms、場景 580 ms）｜角色 loaded\n地圖：300×300 m｜可走面積 50,317 m²｜碰撞物 105\n地形：36 塊、73,728 面｜地標網格 105（75,652 面）\n分區載入中：central、entry、hills、recycle｜實例 4,043（36 個實例網格）｜粒子上限 174\n擺放總數：垃圾山 1751、地面碎屑 520、垃圾堆物件 332、草叢 2400、小花 700\n目前畫面：Draw Calls 116、三角形 382,953、FPS 1.8\n（尚未跑巡迴：上方按「巡迴：走完整條路線」）\nWebGL Context Lost：0 次"
+        }
+      }
+    },
+    {
+      "browser": "webkit",
+      "mode": "high-portrait",
+      "checks": {
+        "畫質 high：模型 HQ、即時陰影 開": {
+          "ok": true,
+          "detail": {
+            "tier": "high",
+            "source": "url",
+            "lite": false,
+            "shadows": true
+          }
+        },
+        "正式初心者角色載入（男、HQ）": {
+          "ok": true,
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "z": -124,
+            "yaw": 0,
+            "walkable": true,
+            "char": "loaded",
+            "model": "novice_c10b5b_male_hq.glb"
+          }
+        },
+        "抵達點（入口傳送陣北側 10 m）可走": {
+          "ok": true,
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "z": -124,
+            "yaw": 0,
+            "walkable": true,
+            "char": "loaded",
+            "model": "novice_c10b5b_male_hq.glb"
+          }
+        },
+        "沒有跳躍按鈕（一般移動不跳躍）": {
+          "ok": true,
+          "detail": null
+        },
+        "主路線 32 點全部可達（一般移動、不跳躍、不卡住）": {
+          "ok": true,
+          "detail": {
+            "reached": 32,
+            "stuckAt": null,
+            "maxSlope": 26.565051164879115,
+            "time": 141.99999999999451
+          }
+        },
+        "地形 36 塊、入口分區已載入、有實例化垃圾與植被": {
+          "ok": true,
+          "detail": {
+            "chunks": 36,
+            "cells": [
+              "entry",
+              "hills",
+              "central"
+            ],
+            "inst": 3183,
+            "im": 27
+          }
+        },
+        "各區 Draw Calls ≤ 160（最高 111）": {
+          "ok": true,
+          "detail": [
+            [
+              "entry",
+              100
+            ],
+            [
+              "hills",
+              81
+            ],
+            [
+              "colossus",
+              72
+            ],
+            [
+              "central",
+              100
+            ],
+            [
+              "recycle",
+              111
+            ],
+            [
+              "walkway",
+              95
+            ],
+            [
+              "bridge",
+              90
+            ],
+            [
+              "factory",
+              97
+            ],
+            [
+              "platform",
+              92
+            ],
+            [
+              "core",
+              82
+            ]
+          ]
+        },
+        "各區場景三角面（不含玩家角色）≤ 250,000（最高 150,872）": {
+          "ok": true,
+          "detail": [
+            [
+              "entry",
+              142430,
+              345561
+            ],
+            [
+              "hills",
+              114230,
+              317361
+            ],
+            [
+              "colossus",
+              99984,
+              303115
+            ],
+            [
+              "central",
+              150872,
+              354003
+            ],
+            [
+              "recycle",
+              112184,
+              315315
+            ],
+            [
+              "walkway",
+              86868,
+              289999
+            ],
+            [
+              "bridge",
+              76974,
+              280105
+            ],
+            [
+              "factory",
+              66250,
+              269381
+            ],
+            [
+              "platform",
+              66300,
+              269431
+            ],
+            [
+              "core",
+              114354,
+              317485
+            ]
+          ]
+        },
+        "分區載入與釋放：走遠的區域會釋放（有 unload 紀錄），Boss 區時入口區已釋放": {
+          "ok": true,
+          "detail": {
+            "ops": 8,
+            "unloads": [
+              "entry",
+              "hills"
+            ],
+            "lastCells": [
+              "central",
+              "recycle",
+              "factory",
+              "core"
+            ]
+          }
+        },
+        "入口傳送陣：走入觸發傳送回星芽原野（沒有按鈕），只觸發一次": {
+          "ok": true,
+          "detail": {
+            "p1": {
+              "armed": false,
+              "fired": true,
+              "log": [
+                {
+                  "t": 44.414,
+                  "map": "starsprout",
+                  "x": 0,
+                  "z": -133.5
+                }
+              ],
+              "spec": {
+                "id": "junkyard-entry",
+                "x": 0,
+                "z": -134,
+                "visualR": 3,
+                "triggerR": 2.4
+              },
+              "links": [
+                {
+                  "id": "field-north",
+                  "x": 0,
+                  "z": 82,
+                  "visualR": 3,
+                  "triggerR": 2.4,
+                  "open": false,
+                  "to": {
+                    "map": "junkyard",
+                    "x": 0,
+                    "z": -124,
+                    "yaw": 0
+                  },
+                  "label": "往 星廢垃圾場（Lv11–20）"
+                },
+                {
+                  "id": "junkyard-entry",
+                  "x": 0,
+                  "z": -134,
+                  "visualR": 3,
+                  "triggerR": 2.4,
+                  "open": true,
+                  "to": {
+                    "map": "starsprout",
+                    "x": 0,
+                    "z": 75,
+                    "yaw": 3.141592653589793
+                  },
+                  "label": "往 星芽原野（Lv1–10）"
+                }
+              ]
+            },
+            "p2": 1
+          }
+        },
+        "巡迴（實際步行）會沿路線前進": {
+          "ok": true,
+          "detail": {
+            "sm": {
+              "done": false,
+              "stops": 1,
+              "idx": 5
+            },
+            "pos": [
+              64.88499131320641,
+              -74.82330037799198
+            ]
+          }
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": {
+            "fps": 9.113001215066788,
+            "draws": 85,
+            "tris": 319593,
+            "meshes": 81,
+            "textures": 27,
+            "materials": 76,
+            "geometries": 231,
+            "contextLost": 0
+          }
+        },
+        "同一個模型／貼圖沒有重複下載、沒有 4xx/5xx": {
+          "ok": true,
+          "detail": {
+            "dup": [],
+            "badResp": []
+          }
+        },
+        "沒有 JS 錯誤": {
+          "ok": true,
+          "detail": []
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "webkit_high-portrait_00_arrival.png",
+        "webkit_high-portrait_stop_entry.png",
+        "webkit_high-portrait_stop_hills.png",
+        "webkit_high-portrait_stop_colossus.png",
+        "webkit_high-portrait_stop_central.png",
+        "webkit_high-portrait_stop_recycle.png",
+        "webkit_high-portrait_stop_walkway.png",
+        "webkit_high-portrait_stop_bridge.png",
+        "webkit_high-portrait_stop_factory.png",
+        "webkit_high-portrait_stop_platform.png",
+        "webkit_high-portrait_stop_core.png",
+        "webkit_high-portrait_spawns_hills.png",
+        "webkit_high-portrait_spawns_recycle.png"
+      ],
+      "results": {
+        "loadSec": 7.426,
+        "tier": {
+          "tier": "high",
+          "source": "url",
+          "lite": false,
+          "shadows": true
+        },
+        "routeSim": {
+          "reached": [
+            "E0",
+            "E1",
+            "H0",
+            "H1",
+            "H2",
+            "H3",
+            "H4",
+            "H5",
+            "H6",
+            "C0",
+            "C1",
+            "R0",
+            "R1",
+            "R2",
+            "R3",
+            "R3b",
+            "R4",
+            "R5",
+            "R6",
+            "R7",
+            "F0",
+            "F1",
+            "F1s",
+            "F1t",
+            "F2",
+            "F2t",
+            "F3",
+            "F4",
+            "F5",
+            "F6",
+            "K0",
+            "K1"
+          ],
+          "stuckAt": null,
+          "time": 141.99999999999451,
+          "distance": 709.9999999999826,
+          "maxStep": 0.08333333328897652,
+          "maxSlopeDeg": 26.565051164879115,
+          "maxSlopeAt": {
+            "x": -60.00024499015775,
+            "z": 76.49189781207536
+          },
+          "minY": -0.4172529456356321,
+          "maxY": 20
+        },
+        "walkableArea": 50317.25,
+        "stats0": {
+          "terrainChunks": 36,
+          "terrainTris": 73728,
+          "landmarkMeshes": 105,
+          "landmarkTris": 75652,
+          "loadedCells": [
+            "entry",
+            "hills",
+            "central"
+          ],
+          "instances": 3183,
+          "instanceMeshes": 27,
+          "particles": 122,
+          "buildMs": 1156,
+          "scatter": {
+            "mound": 1751,
+            "debris": 520,
+            "pileItems": 332,
+            "tufts": 2400,
+            "flowers": 700
+          },
+          "fade": {
+            "on": true,
+            "meshes": 18,
+            "total": 2665,
+            "shown": 852,
+            "tris": 49506,
+            "trisFull": 72114
+          }
+        },
+        "stops": [
+          {
+            "id": "entry",
+            "label": "入口（傳送陣）",
+            "draws": 100,
+            "tris": 345561,
+            "sceneTris": 142430,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 14,
+                "tris": 28672
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 19,
+                "tris": 27034
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 21,
+                "tris": 83064
+              },
+              "草叢小花": {
+                "meshes": 6,
+                "tris": 1968
+              }
+            },
+            "cells": [
+              "entry",
+              "hills",
+              "central"
+            ]
+          },
+          {
+            "id": "hills",
+            "label": "廢棄山丘區",
+            "draws": 81,
+            "tris": 317361,
+            "sceneTris": 114230,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 8,
+                "tris": 16384
+              },
+              "地標與機械": {
+                "meshes": 11,
+                "tris": 15428
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 18,
+                "tris": 77422
+              },
+              "草叢小花": {
+                "meshes": 6,
+                "tris": 2820
+              }
+            },
+            "cells": [
+              "entry",
+              "hills",
+              "central"
+            ]
+          },
+          {
+            "id": "colossus",
+            "label": "機械巨像遺骸",
+            "draws": 72,
+            "tris": 303115,
+            "sceneTris": 99984,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 4,
+                "tris": 8192
+              },
+              "地標與機械": {
+                "meshes": 11,
+                "tris": 15544
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 13,
+                "tris": 67496
+              },
+              "草叢小花": {
+                "meshes": 4,
+                "tris": 2580
+              }
+            },
+            "cells": [
+              "entry",
+              "hills",
+              "central"
+            ]
+          },
+          {
+            "id": "central",
+            "label": "中央窪地",
+            "draws": 100,
+            "tris": 354003,
+            "sceneTris": 150872,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 11,
+                "tris": 22528
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 17,
+                "tris": 36682
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 20,
+                "tris": 85150
+              },
+              "草叢小花": {
+                "meshes": 7,
+                "tris": 3420
+              }
+            },
+            "cells": [
+              "entry",
+              "hills",
+              "central",
+              "recycle"
+            ]
+          },
+          {
+            "id": "recycle",
+            "label": "回收處理區",
+            "draws": 111,
+            "tris": 315315,
+            "sceneTris": 112184,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 5,
+                "tris": 10240
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 15,
+                "tris": 11480
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 23,
+                "tris": 82802
+              },
+              "草叢小花": {
+                "meshes": 8,
+                "tris": 2010
+              }
+            },
+            "cells": [
+              "entry",
+              "hills",
+              "central",
+              "recycle",
+              "factory"
+            ]
+          },
+          {
+            "id": "walkway",
+            "label": "高架金屬步道",
+            "draws": 95,
+            "tris": 289999,
+            "sceneTris": 86868,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 9,
+                "tris": 18432
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 16,
+                "tris": 11408
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 14,
+                "tris": 49698
+              },
+              "草叢小花": {
+                "meshes": 4,
+                "tris": 1338
+              }
+            },
+            "cells": [
+              "hills",
+              "central",
+              "recycle",
+              "factory"
+            ]
+          },
+          {
+            "id": "bridge",
+            "label": "魔法運河大橋",
+            "draws": 90,
+            "tris": 280105,
+            "sceneTris": 76974,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 8,
+                "tris": 16384
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 14,
+                "tris": 10836
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 11,
+                "tris": 44244
+              },
+              "草叢小花": {
+                "meshes": 4,
+                "tris": 786
+              }
+            },
+            "cells": [
+              "hills",
+              "central",
+              "recycle",
+              "factory"
+            ]
+          },
+          {
+            "id": "factory",
+            "label": "廢棄工廠區",
+            "draws": 97,
+            "tris": 269381,
+            "sceneTris": 66250,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 5,
+                "tris": 10240
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 16,
+                "tris": 9596
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 10,
+                "tris": 39180
+              },
+              "草叢小花": {
+                "meshes": 3,
+                "tris": 678
+              }
+            },
+            "cells": [
+              "hills",
+              "central",
+              "recycle",
+              "factory",
+              "core"
+            ]
+          },
+          {
+            "id": "platform",
+            "label": "熔爐上方平台",
+            "draws": 92,
+            "tris": 269431,
+            "sceneTris": 66300,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 5,
+                "tris": 10240
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 16,
+                "tris": 10004
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 10,
+                "tris": 40698
+              },
+              "草叢小花": {
+                "meshes": 2,
+                "tris": 774
+              }
+            },
+            "cells": [
+              "central",
+              "recycle",
+              "factory",
+              "core"
+            ]
+          },
+          {
+            "id": "core",
+            "label": "核心熔煉場（Boss）",
+            "draws": 82,
+            "tris": 317485,
+            "sceneTris": 114354,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 203131
+              },
+              "地形": {
+                "meshes": 4,
+                "tris": 8192
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 18,
+                "tris": 39640
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 8,
+                "tris": 48464
+              },
+              "草叢小花": {
+                "meshes": 3,
+                "tris": 360
+              }
+            },
+            "cells": [
+              "central",
+              "recycle",
+              "factory",
+              "core"
+            ]
+          }
+        ],
+        "streamLog": 8,
+        "walk": {
+          "sm": {
+            "done": false,
+            "stops": 1,
+            "idx": 5
+          },
+          "pos": {
+            "x": 64.88499131320641,
+            "y": 2.8646160413984125,
+            "z": -74.82330037799198,
+            "yaw": 0.47612210310030134,
+            "walkable": true,
+            "char": "loaded",
+            "model": "novice_c10b5b_male_hq.glb"
+          }
+        },
+        "final": {
+          "perf": {
+            "fps": 9.113001215066788,
+            "draws": 85,
+            "tris": 319593,
+            "meshes": 81,
+            "textures": 27,
+            "materials": 76,
+            "geometries": 231,
+            "contextLost": 0
+          },
+          "report": "星願物語 星廢垃圾場（Lv11–20）預覽報告｜2026/11/28 上午12:24:12\n裝置：Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n畫質：高畫質（來源 url）｜模型 HQ｜陰影 即時（附近大型地標）｜MSAA 4｜後製 開\n解析度：390×844（實際倍率 1.00，DPR 2）\n載入：頁面 1.67 秒（可走格網 317 ms、場景 1156 ms）｜角色 loaded\n地圖：300×300 m｜可走面積 50,317 m²｜碰撞物 105\n地形：36 塊、73,728 面｜地標網格 105（75,652 面）\n分區載入中：central、entry、hills、recycle｜實例 4,043（36 個實例網格）｜粒子上限 174\n擺放總數：垃圾山 1751、地面碎屑 520、垃圾堆物件 332、草叢 2400、小花 700\n目前畫面：Draw Calls 85、三角形 319,593、FPS 9.1\n（尚未跑巡迴：上方按「巡迴：走完整條路線」）\nWebGL Context Lost：0 次"
+        }
+      }
+    },
+    {
+      "browser": "webkit",
+      "mode": "medium-portrait",
+      "checks": {
+        "畫質 medium：模型 LITE、即時陰影 開": {
+          "ok": true,
+          "detail": {
+            "tier": "medium",
+            "source": "url",
+            "lite": true,
+            "shadows": true
+          }
+        },
+        "正式初心者角色載入（女、LITE）": {
+          "ok": true,
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "z": -124,
+            "yaw": 0,
+            "walkable": true,
+            "char": "loaded",
+            "model": "novice_c10b5b_female_lite.glb"
+          }
+        },
+        "抵達點（入口傳送陣北側 10 m）可走": {
+          "ok": true,
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "z": -124,
+            "yaw": 0,
+            "walkable": true,
+            "char": "loaded",
+            "model": "novice_c10b5b_female_lite.glb"
+          }
+        },
+        "沒有跳躍按鈕（一般移動不跳躍）": {
+          "ok": true,
+          "detail": null
+        },
+        "主路線 32 點全部可達（一般移動、不跳躍、不卡住）": {
+          "ok": true,
+          "detail": {
+            "reached": 32,
+            "stuckAt": null,
+            "maxSlope": 26.565051164879115,
+            "time": 141.99999999999451
+          }
+        },
+        "地形 36 塊、入口分區已載入、有實例化垃圾與植被": {
+          "ok": true,
+          "detail": {
+            "chunks": 36,
+            "cells": [
+              "entry",
+              "hills"
+            ],
+            "inst": 1303,
+            "im": 18
+          }
+        },
+        "各區 Draw Calls ≤ 120（最高 92）": {
+          "ok": true,
+          "detail": [
+            [
+              "entry",
+              91
+            ],
+            [
+              "hills",
+              76
+            ],
+            [
+              "colossus",
+              70
+            ],
+            [
+              "central",
+              88
+            ],
+            [
+              "recycle",
+              92
+            ],
+            [
+              "walkway",
+              88
+            ],
+            [
+              "bridge",
+              85
+            ],
+            [
+              "factory",
+              88
+            ],
+            [
+              "platform",
+              87
+            ],
+            [
+              "core",
+              77
+            ]
+          ]
+        },
+        "各區場景三角面（不含玩家角色）≤ 100,000（最高 82,370）": {
+          "ok": true,
+          "detail": [
+            [
+              "entry",
+              76450,
+              119571
+            ],
+            [
+              "hills",
+              58944,
+              102065
+            ],
+            [
+              "colossus",
+              53700,
+              96821
+            ],
+            [
+              "central",
+              82370,
+              125491
+            ],
+            [
+              "recycle",
+              44424,
+              87545
+            ],
+            [
+              "walkway",
+              51986,
+              95107
+            ],
+            [
+              "bridge",
+              47308,
+              90429
+            ],
+            [
+              "factory",
+              40220,
+              83341
+            ],
+            [
+              "platform",
+              35920,
+              79041
+            ],
+            [
+              "core",
+              78556,
+              121677
+            ]
+          ]
+        },
+        "分區載入與釋放：走遠的區域會釋放（有 unload 紀錄），Boss 區時入口區已釋放": {
+          "ok": true,
+          "detail": {
+            "ops": 8,
+            "unloads": [
+              "entry",
+              "hills"
+            ],
+            "lastCells": [
+              "central",
+              "recycle",
+              "factory",
+              "core"
+            ]
+          }
+        },
+        "入口傳送陣：走入觸發傳送回星芽原野（沒有按鈕），只觸發一次": {
+          "ok": true,
+          "detail": {
+            "p1": {
+              "armed": false,
+              "fired": true,
+              "log": [
+                {
+                  "t": 29.064,
+                  "map": "starsprout",
+                  "x": 0,
+                  "z": -133.5
+                }
+              ],
+              "spec": {
+                "id": "junkyard-entry",
+                "x": 0,
+                "z": -134,
+                "visualR": 3,
+                "triggerR": 2.4
+              },
+              "links": [
+                {
+                  "id": "field-north",
+                  "x": 0,
+                  "z": 82,
+                  "visualR": 3,
+                  "triggerR": 2.4,
+                  "open": false,
+                  "to": {
+                    "map": "junkyard",
+                    "x": 0,
+                    "z": -124,
+                    "yaw": 0
+                  },
+                  "label": "往 星廢垃圾場（Lv11–20）"
+                },
+                {
+                  "id": "junkyard-entry",
+                  "x": 0,
+                  "z": -134,
+                  "visualR": 3,
+                  "triggerR": 2.4,
+                  "open": true,
+                  "to": {
+                    "map": "starsprout",
+                    "x": 0,
+                    "z": 75,
+                    "yaw": 3.141592653589793
+                  },
+                  "label": "往 星芽原野（Lv1–10）"
+                }
+              ]
+            },
+            "p2": 1
+          }
+        },
+        "巡迴（實際步行）會沿路線前進": {
+          "ok": true,
+          "detail": {
+            "sm": {
+              "done": false,
+              "stops": 1,
+              "idx": 5
+            },
+            "pos": [
+              69.3256550463792,
+              -65.24295690677205
+            ]
+          }
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": {
+            "fps": 17.162471395881028,
+            "draws": 76,
+            "tris": 100115,
+            "meshes": 74,
+            "textures": 27,
+            "materials": 76,
+            "geometries": 222,
+            "contextLost": 0
+          }
+        },
+        "同一個模型／貼圖沒有重複下載、沒有 4xx/5xx": {
+          "ok": true,
+          "detail": {
+            "dup": [],
+            "badResp": []
+          }
+        },
+        "沒有 JS 錯誤": {
+          "ok": true,
+          "detail": []
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "webkit_medium-portrait_00_arrival.png",
+        "webkit_medium-portrait_stop_entry.png",
+        "webkit_medium-portrait_stop_hills.png",
+        "webkit_medium-portrait_stop_colossus.png",
+        "webkit_medium-portrait_stop_central.png",
+        "webkit_medium-portrait_stop_recycle.png",
+        "webkit_medium-portrait_stop_walkway.png",
+        "webkit_medium-portrait_stop_bridge.png",
+        "webkit_medium-portrait_stop_factory.png",
+        "webkit_medium-portrait_stop_platform.png",
+        "webkit_medium-portrait_stop_core.png",
+        "webkit_medium-portrait_spawns_hills.png",
+        "webkit_medium-portrait_spawns_recycle.png"
+      ],
+      "results": {
+        "loadSec": 3.264,
+        "tier": {
+          "tier": "medium",
+          "source": "url",
+          "lite": true,
+          "shadows": true
+        },
+        "routeSim": {
+          "reached": [
+            "E0",
+            "E1",
+            "H0",
+            "H1",
+            "H2",
+            "H3",
+            "H4",
+            "H5",
+            "H6",
+            "C0",
+            "C1",
+            "R0",
+            "R1",
+            "R2",
+            "R3",
+            "R3b",
+            "R4",
+            "R5",
+            "R6",
+            "R7",
+            "F0",
+            "F1",
+            "F1s",
+            "F1t",
+            "F2",
+            "F2t",
+            "F3",
+            "F4",
+            "F5",
+            "F6",
+            "K0",
+            "K1"
+          ],
+          "stuckAt": null,
+          "time": 141.99999999999451,
+          "distance": 709.9999999999826,
+          "maxStep": 0.08333333328897652,
+          "maxSlopeDeg": 26.565051164879115,
+          "maxSlopeAt": {
+            "x": -60.00024499015775,
+            "z": 76.49189781207536
+          },
+          "minY": -0.4172529456356321,
+          "maxY": 20
+        },
+        "walkableArea": 50317.25,
+        "stats0": {
+          "terrainChunks": 36,
+          "terrainTris": 45000,
+          "landmarkMeshes": 105,
+          "landmarkTris": 75480,
+          "loadedCells": [
+            "entry",
+            "hills"
+          ],
+          "instances": 1303,
+          "instanceMeshes": 18,
+          "particles": 64,
+          "buildMs": 612,
+          "scatter": {
+            "mound": 854,
+            "debris": 300,
+            "pileItems": 332,
+            "tufts": 1300,
+            "flowers": 400
+          },
+          "fade": {
+            "on": true,
+            "meshes": 12,
+            "total": 1054,
+            "shown": 356,
+            "tris": 16116,
+            "trisFull": 23574
+          }
+        },
+        "stops": [
+          {
+            "id": "entry",
+            "label": "入口（傳送陣）",
+            "draws": 91,
+            "tris": 119571,
+            "sceneTris": 76450,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43121
+              },
+              "地形": {
+                "meshes": 14,
+                "tris": 17500
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 19,
+                "tris": 26862
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 14,
+                "tris": 29670
+              },
+              "草叢小花": {
+                "meshes": 4,
+                "tris": 726
+              }
+            },
+            "cells": [
+              "entry",
+              "hills"
+            ]
+          },
+          {
+            "id": "hills",
+            "label": "廢棄山丘區",
+            "draws": 76,
+            "tris": 102065,
+            "sceneTris": 58944,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43121
+              },
+              "地形": {
+                "meshes": 8,
+                "tris": 10000
+              },
+              "地標與機械": {
+                "meshes": 11,
+                "tris": 15428
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 16,
+                "tris": 31422
+              },
+              "草叢小花": {
+                "meshes": 4,
+                "tris": 1086
+              }
+            },
+            "cells": [
+              "entry",
+              "hills",
+              "central"
+            ]
+          },
+          {
+            "id": "colossus",
+            "label": "機械巨像遺骸",
+            "draws": 70,
+            "tris": 96821,
+            "sceneTris": 53700,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43121
+              },
+              "地形": {
+                "meshes": 4,
+                "tris": 5000
+              },
+              "地標與機械": {
+                "meshes": 11,
+                "tris": 15372
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 12,
+                "tris": 26362
+              },
+              "草叢小花": {
+                "meshes": 3,
+                "tris": 966
+              }
+            },
+            "cells": [
+              "hills",
+              "central"
+            ]
+          },
+          {
+            "id": "central",
+            "label": "中央窪地",
+            "draws": 88,
+            "tris": 125491,
+            "sceneTris": 82370,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43121
+              },
+              "地形": {
+                "meshes": 11,
+                "tris": 13750
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 17,
+                "tris": 36510
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 14,
+                "tris": 28638
+              },
+              "草叢小花": {
+                "meshes": 4,
+                "tris": 588
+              }
+            },
+            "cells": [
+              "hills",
+              "central",
+              "recycle"
+            ]
+          },
+          {
+            "id": "recycle",
+            "label": "回收處理區",
+            "draws": 92,
+            "tris": 87545,
+            "sceneTris": 44424,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43121
+              },
+              "地形": {
+                "meshes": 5,
+                "tris": 6250
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 15,
+                "tris": 11308
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 16,
+                "tris": 22462
+              },
+              "草叢小花": {
+                "meshes": 3,
+                "tris": 204
+              }
+            },
+            "cells": [
+              "hills",
+              "central",
+              "recycle",
+              "factory"
+            ]
+          },
+          {
+            "id": "walkway",
+            "label": "高架金屬步道",
+            "draws": 88,
+            "tris": 95107,
+            "sceneTris": 51986,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43121
+              },
+              "地形": {
+                "meshes": 9,
+                "tris": 11250
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 16,
+                "tris": 11236
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 14,
+                "tris": 24700
+              },
+              "草叢小花": {
+                "meshes": 2,
+                "tris": 420
+              }
+            },
+            "cells": [
+              "central",
+              "recycle",
+              "factory"
+            ]
+          },
+          {
+            "id": "bridge",
+            "label": "魔法運河大橋",
+            "draws": 85,
+            "tris": 90429,
+            "sceneTris": 47308,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43121
+              },
+              "地形": {
+                "meshes": 8,
+                "tris": 10000
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 14,
+                "tris": 10664
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 11,
+                "tris": 21960
+              },
+              "草叢小花": {
+                "meshes": 3,
+                "tris": 228
+              }
+            },
+            "cells": [
+              "central",
+              "recycle",
+              "factory"
+            ]
+          },
+          {
+            "id": "factory",
+            "label": "廢棄工廠區",
+            "draws": 88,
+            "tris": 83341,
+            "sceneTris": 40220,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43121
+              },
+              "地形": {
+                "meshes": 5,
+                "tris": 6250
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 16,
+                "tris": 9424
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 10,
+                "tris": 19648
+              },
+              "草叢小花": {
+                "meshes": 2,
+                "tris": 174
+              }
+            },
+            "cells": [
+              "central",
+              "recycle",
+              "factory",
+              "core"
+            ]
+          },
+          {
+            "id": "platform",
+            "label": "熔爐上方平台",
+            "draws": 87,
+            "tris": 79041,
+            "sceneTris": 35920,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43121
+              },
+              "地形": {
+                "meshes": 5,
+                "tris": 6250
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 16,
+                "tris": 9832
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 8,
+                "tris": 15330
+              },
+              "草叢小花": {
+                "meshes": 2,
+                "tris": 264
+              }
+            },
+            "cells": [
+              "central",
+              "recycle",
+              "factory",
+              "core"
+            ]
+          },
+          {
+            "id": "core",
+            "label": "核心熔煉場（Boss）",
+            "draws": 77,
+            "tris": 121677,
+            "sceneTris": 78556,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43121
+              },
+              "地形": {
+                "meshes": 4,
+                "tris": 5000
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 18,
+                "tris": 39468
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 7,
+                "tris": 19078
+              },
+              "草叢小花": {
+                "meshes": 2,
+                "tris": 294
+              }
+            },
+            "cells": [
+              "central",
+              "recycle",
+              "factory",
+              "core"
+            ]
+          }
+        ],
+        "streamLog": 8,
+        "walk": {
+          "sm": {
+            "done": false,
+            "stops": 1,
+            "idx": 5
+          },
+          "pos": {
+            "x": 69.3256550463792,
+            "y": 4.1877506207185,
+            "z": -65.24295690677205,
+            "yaw": 0.4872602303895529,
+            "walkable": true,
+            "char": "loaded",
+            "model": "novice_c10b5b_female_lite.glb"
+          }
+        },
+        "final": {
+          "perf": {
+            "fps": 17.162471395881028,
+            "draws": 76,
+            "tris": 100115,
+            "meshes": 74,
+            "textures": 27,
+            "materials": 76,
+            "geometries": 222,
+            "contextLost": 0
+          },
+          "report": "星願物語 星廢垃圾場（Lv11–20）預覽報告｜2026/11/28 上午12:25:07\n裝置：Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n畫質：中畫質（來源 url）｜模型 Lite｜陰影 即時（附近大型地標）｜MSAA 2｜後製 開\n解析度：390×844（實際倍率 1.00，DPR 2）\n載入：頁面 1.09 秒（可走格網 304 ms、場景 612 ms）｜角色 loaded\n地圖：300×300 m｜可走面積 50,317 m²｜碰撞物 105\n地形：36 塊、45,000 面｜地標網格 105（75,480 面）\n分區載入中：central、entry、hills｜實例 1,774（27 個實例網格）｜粒子上限 64\n擺放總數：垃圾山 854、地面碎屑 300、垃圾堆物件 332、草叢 1300、小花 400\n目前畫面：Draw Calls 76、三角形 100,115、FPS 17.2\n（尚未跑巡迴：上方按「巡迴：走完整條路線」）\nWebGL Context Lost：0 次"
+        }
+      }
+    },
+    {
+      "browser": "webkit",
+      "mode": "low-portrait",
+      "checks": {
+        "畫質 low：模型 LITE、即時陰影 關（腳底陰影）": {
+          "ok": true,
+          "detail": {
+            "tier": "low",
+            "source": "url",
+            "lite": true,
+            "shadows": false
+          }
+        },
+        "正式初心者角色載入（男、LITE）": {
+          "ok": true,
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "z": -124,
+            "yaw": 0,
+            "walkable": true,
+            "char": "loaded",
+            "model": "novice_c10b5b_male_lite.glb"
+          }
+        },
+        "抵達點（入口傳送陣北側 10 m）可走": {
+          "ok": true,
+          "detail": {
+            "x": 0,
+            "y": 0,
+            "z": -124,
+            "yaw": 0,
+            "walkable": true,
+            "char": "loaded",
+            "model": "novice_c10b5b_male_lite.glb"
+          }
+        },
+        "沒有跳躍按鈕（一般移動不跳躍）": {
+          "ok": true,
+          "detail": null
+        },
+        "主路線 32 點全部可達（一般移動、不跳躍、不卡住）": {
+          "ok": true,
+          "detail": {
+            "reached": 32,
+            "stuckAt": null,
+            "maxSlope": 26.565051164879115,
+            "time": 141.99999999999451
+          }
+        },
+        "地形 36 塊、入口分區已載入、有實例化垃圾與植被": {
+          "ok": true,
+          "detail": {
+            "chunks": 36,
+            "cells": [
+              "entry",
+              "hills"
+            ],
+            "inst": 805,
+            "im": 18
+          }
+        },
+        "各區 Draw Calls ≤ 100（最高 84）": {
+          "ok": true,
+          "detail": [
+            [
+              "entry",
+              84
+            ],
+            [
+              "hills",
+              74
+            ],
+            [
+              "colossus",
+              62
+            ],
+            [
+              "central",
+              81
+            ],
+            [
+              "recycle",
+              72
+            ],
+            [
+              "walkway",
+              70
+            ],
+            [
+              "bridge",
+              71
+            ],
+            [
+              "factory",
+              66
+            ],
+            [
+              "platform",
+              64
+            ],
+            [
+              "core",
+              67
+            ]
+          ]
+        },
+        "各區場景三角面（不含玩家角色）≤ 100,000（最高 68,454）": {
+          "ok": true,
+          "detail": [
+            [
+              "entry",
+              50930,
+              94477
+            ],
+            [
+              "hills",
+              45720,
+              89267
+            ],
+            [
+              "colossus",
+              37722,
+              81269
+            ],
+            [
+              "central",
+              68454,
+              112001
+            ],
+            [
+              "recycle",
+              36496,
+              80043
+            ],
+            [
+              "walkway",
+              27542,
+              71089
+            ],
+            [
+              "bridge",
+              33018,
+              76565
+            ],
+            [
+              "factory",
+              27304,
+              70851
+            ],
+            [
+              "platform",
+              23920,
+              67467
+            ],
+            [
+              "core",
+              55612,
+              99159
+            ]
+          ]
+        },
+        "分區載入與釋放：走遠的區域會釋放（有 unload 紀錄），Boss 區時入口區已釋放": {
+          "ok": true,
+          "detail": {
+            "ops": 9,
+            "unloads": [
+              "entry",
+              "hills",
+              "recycle"
+            ],
+            "lastCells": [
+              "central",
+              "factory",
+              "core"
+            ]
+          }
+        },
+        "入口傳送陣：走入觸發傳送回星芽原野（沒有按鈕），只觸發一次": {
+          "ok": true,
+          "detail": {
+            "p1": {
+              "armed": false,
+              "fired": true,
+              "log": [
+                {
+                  "t": 28.596,
+                  "map": "starsprout",
+                  "x": 0,
+                  "z": -133.5
+                }
+              ],
+              "spec": {
+                "id": "junkyard-entry",
+                "x": 0,
+                "z": -134,
+                "visualR": 3,
+                "triggerR": 2.4
+              },
+              "links": [
+                {
+                  "id": "field-north",
+                  "x": 0,
+                  "z": 82,
+                  "visualR": 3,
+                  "triggerR": 2.4,
+                  "open": false,
+                  "to": {
+                    "map": "junkyard",
+                    "x": 0,
+                    "z": -124,
+                    "yaw": 0
+                  },
+                  "label": "往 星廢垃圾場（Lv11–20）"
+                },
+                {
+                  "id": "junkyard-entry",
+                  "x": 0,
+                  "z": -134,
+                  "visualR": 3,
+                  "triggerR": 2.4,
+                  "open": true,
+                  "to": {
+                    "map": "starsprout",
+                    "x": 0,
+                    "z": 75,
+                    "yaw": 3.141592653589793
+                  },
+                  "label": "往 星芽原野（Lv1–10）"
+                }
+              ]
+            },
+            "p2": 1
+          }
+        },
+        "巡迴（實際步行）會沿路線前進": {
+          "ok": true,
+          "detail": {
+            "sm": {
+              "done": false,
+              "stops": 1,
+              "idx": 5
+            },
+            "pos": [
+              69.34860090299085,
+              -65.1909565450409
+            ]
+          }
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": {
+            "fps": 17.846519928613912,
+            "draws": 68,
+            "tris": 84905,
+            "meshes": 69,
+            "textures": 24,
+            "materials": 76,
+            "geometries": 222,
+            "contextLost": 0
+          }
+        },
+        "同一個模型／貼圖沒有重複下載、沒有 4xx/5xx": {
+          "ok": true,
+          "detail": {
+            "dup": [],
+            "badResp": []
+          }
+        },
+        "沒有 JS 錯誤": {
+          "ok": true,
+          "detail": []
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "webkit_low-portrait_00_arrival.png",
+        "webkit_low-portrait_stop_entry.png",
+        "webkit_low-portrait_stop_hills.png",
+        "webkit_low-portrait_stop_colossus.png",
+        "webkit_low-portrait_stop_central.png",
+        "webkit_low-portrait_stop_recycle.png",
+        "webkit_low-portrait_stop_walkway.png",
+        "webkit_low-portrait_stop_bridge.png",
+        "webkit_low-portrait_stop_factory.png",
+        "webkit_low-portrait_stop_platform.png",
+        "webkit_low-portrait_stop_core.png",
+        "webkit_low-portrait_spawns_hills.png",
+        "webkit_low-portrait_spawns_recycle.png"
+      ],
+      "results": {
+        "loadSec": 3.288,
+        "tier": {
+          "tier": "low",
+          "source": "url",
+          "lite": true,
+          "shadows": false
+        },
+        "routeSim": {
+          "reached": [
+            "E0",
+            "E1",
+            "H0",
+            "H1",
+            "H2",
+            "H3",
+            "H4",
+            "H5",
+            "H6",
+            "C0",
+            "C1",
+            "R0",
+            "R1",
+            "R2",
+            "R3",
+            "R3b",
+            "R4",
+            "R5",
+            "R6",
+            "R7",
+            "F0",
+            "F1",
+            "F1s",
+            "F1t",
+            "F2",
+            "F2t",
+            "F3",
+            "F4",
+            "F5",
+            "F6",
+            "K0",
+            "K1"
+          ],
+          "stuckAt": null,
+          "time": 141.99999999999451,
+          "distance": 709.9999999999826,
+          "maxStep": 0.08333333328897652,
+          "maxSlopeDeg": 26.565051164879115,
+          "maxSlopeAt": {
+            "x": -60.00024499015775,
+            "z": 76.49189781207536
+          },
+          "minY": -0.4172529456356321,
+          "maxY": 20
+        },
+        "walkableArea": 50317.25,
+        "stats0": {
+          "terrainChunks": 36,
+          "terrainTris": 28800,
+          "landmarkMeshes": 105,
+          "landmarkTris": 75480,
+          "loadedCells": [
+            "entry",
+            "hills"
+          ],
+          "instances": 805,
+          "instanceMeshes": 18,
+          "particles": 0,
+          "buildMs": 538,
+          "scatter": {
+            "mound": 535,
+            "debris": 180,
+            "pileItems": 332,
+            "tufts": 700,
+            "flowers": 200
+          },
+          "fade": {
+            "on": true,
+            "meshes": 12,
+            "total": 600,
+            "shown": 185,
+            "tris": 10474,
+            "trisFull": 14994
+          }
+        },
+        "stops": [
+          {
+            "id": "entry",
+            "label": "入口（傳送陣）",
+            "draws": 84,
+            "tris": 94477,
+            "sceneTris": 50930,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43547
+              },
+              "地形": {
+                "meshes": 12,
+                "tris": 9600
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 18,
+                "tris": 18276
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 14,
+                "tris": 22444
+              },
+              "草叢小花": {
+                "meshes": 4,
+                "tris": 222
+              }
+            },
+            "cells": [
+              "entry",
+              "hills"
+            ]
+          },
+          {
+            "id": "hills",
+            "label": "廢棄山丘區",
+            "draws": 74,
+            "tris": 89267,
+            "sceneTris": 45720,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43547
+              },
+              "地形": {
+                "meshes": 8,
+                "tris": 6400
+              },
+              "地標與機械": {
+                "meshes": 11,
+                "tris": 15428
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 15,
+                "tris": 23130
+              },
+              "草叢小花": {
+                "meshes": 5,
+                "tris": 474
+              }
+            },
+            "cells": [
+              "entry",
+              "hills",
+              "central"
+            ]
+          },
+          {
+            "id": "colossus",
+            "label": "機械巨像遺骸",
+            "draws": 62,
+            "tris": 81269,
+            "sceneTris": 37722,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43547
+              },
+              "地形": {
+                "meshes": 4,
+                "tris": 3200
+              },
+              "地標與機械": {
+                "meshes": 11,
+                "tris": 15372
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 10,
+                "tris": 18448
+              },
+              "草叢小花": {
+                "meshes": 2,
+                "tris": 414
+              }
+            },
+            "cells": [
+              "hills",
+              "central"
+            ]
+          },
+          {
+            "id": "central",
+            "label": "中央窪地",
+            "draws": 81,
+            "tris": 112001,
+            "sceneTris": 68454,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43547
+              },
+              "地形": {
+                "meshes": 11,
+                "tris": 8800
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 17,
+                "tris": 36510
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 13,
+                "tris": 22390
+              },
+              "草叢小花": {
+                "meshes": 4,
+                "tris": 366
+              }
+            },
+            "cells": [
+              "hills",
+              "central",
+              "recycle"
+            ]
+          },
+          {
+            "id": "recycle",
+            "label": "回收處理區",
+            "draws": 72,
+            "tris": 80043,
+            "sceneTris": 36496,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43547
+              },
+              "地形": {
+                "meshes": 5,
+                "tris": 4000
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 15,
+                "tris": 11308
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 12,
+                "tris": 20626
+              },
+              "草叢小花": {
+                "meshes": 4,
+                "tris": 174
+              }
+            },
+            "cells": [
+              "hills",
+              "central",
+              "recycle"
+            ]
+          },
+          {
+            "id": "walkway",
+            "label": "高架金屬步道",
+            "draws": 70,
+            "tris": 71089,
+            "sceneTris": 27542,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43547
+              },
+              "地形": {
+                "meshes": 9,
+                "tris": 7200
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 16,
+                "tris": 11236
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 7,
+                "tris": 8574
+              },
+              "草叢小花": {
+                "meshes": 2,
+                "tris": 144
+              }
+            },
+            "cells": [
+              "central",
+              "recycle"
+            ]
+          },
+          {
+            "id": "bridge",
+            "label": "魔法運河大橋",
+            "draws": 71,
+            "tris": 76565,
+            "sceneTris": 33018,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43547
+              },
+              "地形": {
+                "meshes": 8,
+                "tris": 6400
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 14,
+                "tris": 10664
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 10,
+                "tris": 15416
+              },
+              "草叢小花": {
+                "meshes": 3,
+                "tris": 150
+              }
+            },
+            "cells": [
+              "central",
+              "recycle",
+              "factory"
+            ]
+          },
+          {
+            "id": "factory",
+            "label": "廢棄工廠區",
+            "draws": 66,
+            "tris": 70851,
+            "sceneTris": 27304,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43547
+              },
+              "地形": {
+                "meshes": 5,
+                "tris": 4000
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 16,
+                "tris": 9424
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 8,
+                "tris": 13426
+              },
+              "草叢小花": {
+                "meshes": 1,
+                "tris": 66
+              }
+            },
+            "cells": [
+              "central",
+              "recycle",
+              "factory"
+            ]
+          },
+          {
+            "id": "platform",
+            "label": "熔爐上方平台",
+            "draws": 64,
+            "tris": 67467,
+            "sceneTris": 23920,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43547
+              },
+              "地形": {
+                "meshes": 5,
+                "tris": 4000
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 16,
+                "tris": 9832
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 6,
+                "tris": 9646
+              },
+              "草叢小花": {
+                "meshes": 1,
+                "tris": 54
+              }
+            },
+            "cells": [
+              "central",
+              "recycle",
+              "factory",
+              "core"
+            ]
+          },
+          {
+            "id": "core",
+            "label": "核心熔煉場（Boss）",
+            "draws": 67,
+            "tris": 99159,
+            "sceneTris": 55612,
+            "breakdown": {
+              "角色與其他": {
+                "meshes": 35,
+                "tris": 43547
+              },
+              "地形": {
+                "meshes": 4,
+                "tris": 3200
+              },
+              "水面": {
+                "meshes": 1,
+                "tris": 100
+              },
+              "地標與機械": {
+                "meshes": 18,
+                "tris": 39468
+              },
+              "漂浮水晶": {
+                "meshes": 1,
+                "tris": 288
+              },
+              "實例化垃圾": {
+                "meshes": 7,
+                "tris": 12406
+              },
+              "草叢小花": {
+                "meshes": 2,
+                "tris": 150
+              }
+            },
+            "cells": [
+              "central",
+              "factory",
+              "core"
+            ]
+          }
+        ],
+        "streamLog": 9,
+        "walk": {
+          "sm": {
+            "done": false,
+            "stops": 1,
+            "idx": 5
+          },
+          "pos": {
+            "x": 69.34860090299085,
+            "y": 4.21162876498863,
+            "z": -65.1909565450409,
+            "yaw": 0.487362495067404,
+            "walkable": true,
+            "char": "loaded",
+            "model": "novice_c10b5b_male_lite.glb"
+          }
+        },
+        "final": {
+          "perf": {
+            "fps": 17.846519928613912,
+            "draws": 68,
+            "tris": 84905,
+            "meshes": 69,
+            "textures": 24,
+            "materials": 76,
+            "geometries": 222,
+            "contextLost": 0
+          },
+          "report": "星願物語 星廢垃圾場（Lv11–20）預覽報告｜2026/11/28 上午12:26:03\n裝置：Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15\n畫質：低畫質（來源 url）｜模型 Lite｜陰影 腳底柔和陰影｜MSAA 1｜後製 關\n解析度：390×844（實際倍率 1.00，DPR 2）\n載入：頁面 0.98 秒（可走格網 308 ms、場景 538 ms）｜角色 loaded\n地圖：300×300 m｜可走面積 50,317 m²｜碰撞物 105\n地形：36 塊、28,800 面｜地標網格 105（75,480 面）\n分區載入中：central、entry、hills｜實例 1,083（27 個實例網格）｜粒子上限 0\n擺放總數：垃圾山 535、地面碎屑 180、垃圾堆物件 332、草叢 700、小花 200\n目前畫面：Draw Calls 68、三角形 84,905、FPS 17.8\n（尚未跑巡迴：上方按「巡迴：走完整條路線」）\nWebGL Context Lost：0 次"
+        }
+      }
+    }
+  ],
+  "finishedAt": "2026-11-28T00:26:03.329Z",
+  "failures": 0
+}
