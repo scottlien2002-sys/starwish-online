@@ -153,7 +153,8 @@ for (const q of ["high", "medium", "low"]) {
   check(`${q}：抓斗在升降範圍內、跟著吊臂（擺動 < 1.5 m）`, cr.every((c) => c.drop >= c.range[0] - 0.01 && c.drop <= c.range[1] + 0.01 && c.sway < 1.5), cr);
   // 特效：熔爐附近應有粒子在跑；遠離時停止
   await page.evaluate(() => window.__starwishJunkyard.teleport(-62.5, 81.4, 0));
-  await page.waitForTimeout(1800);
+  // CI 軟體繪圖幀率很低，鏡頭跟隨與 0.25 秒一次的距離／畫面判定需要多幾幀；最多等 20 秒
+  await page.waitForFunction(() => (window.__starwishJunkyard.landmarks().fx?.running ?? 0) > 0, null, { timeout: 20000 }).catch(() => {});
   const fxNear = (await page.evaluate(() => window.__starwishJunkyard.landmarks())).fx;
   run.fx = fxNear;
   check(`${q}：地標特效 4 組、熔爐附近粒子運作中`, fxNear && fxNear.groups === 4 && fxNear.running > 0 && fxNear.particles > 0, fxNear);
