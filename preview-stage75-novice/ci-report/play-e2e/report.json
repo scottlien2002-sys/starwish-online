@@ -1,0 +1,3325 @@
+{
+  "startedAt": "2026-11-28T02:56:39.709Z",
+  "runs": [
+    {
+      "browser": "webkit",
+      "label": "male hq",
+      "checks": {
+        "啟動（地圖＋角色＋怪物）": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "male hq：c10b5a GLB、6 隻星露啵啵、寵物＝測試設定": {
+          "ok": false,
+          "detail": {
+            "file": "novice_c10b5a_male_hq.glb",
+            "monsters": 27,
+            "pets": {
+              "enabled": true,
+              "mode": "preview",
+              "reason": "",
+              "items": {
+                "seed": 0,
+                "egg": 0,
+                "birdEgg": 0,
+                "monsterMaterial": 0,
+                "shopFeed": 0
+              },
+              "count": 0,
+              "equipped": null,
+              "followerVisible": false,
+              "followerDist": 85.09475166556066
+            }
+          }
+        },
+        "預設渲染：P3-2（無 HDR 管線）＋腳下柔邊陰影": {
+          "ok": true,
+          "detail": {
+            "p3": true,
+            "pipeline": false,
+            "charShadow": "blob",
+            "drawCalls": 138,
+            "fps": 0.2968239833778569,
+            "contextLost": 0
+          }
+        },
+        "移動 5 m/s、Run 動作、跑步倍率依速度": {
+          "ok": true,
+          "detail": {
+            "speed": 5.000000000000001,
+            "runRate": 2.2123893805309742,
+            "slide": 0,
+            "state": "Run"
+          }
+        },
+        "B5a 跨步加大：5 m/s 跑步倍率 ≤ 2.4、滑步 < 0.1 m/s": {
+          "ok": true,
+          "detail": {
+            "speed": 5.000000000000001,
+            "runRate": 2.2123893805309742,
+            "slide": 0,
+            "state": "Run"
+          }
+        },
+        "移動後在原地之外、貼地": {
+          "ok": true,
+          "detail": {
+            "from": [
+              -56,
+              2,
+              -64
+            ],
+            "to": [
+              -52.345998886435474,
+              2,
+              -59.88924874723984
+            ]
+          }
+        },
+        "跳躍": {
+          "ok": true,
+          "detail": null
+        },
+        "攻擊命中、擊倒 3 隻星露啵啵": {
+          "ok": true,
+          "detail": {
+            "attacks": 25,
+            "ms": 46249,
+            "kills": 3,
+            "hits": 9,
+            "drops": 4,
+            "picked": 4,
+            "loot": 0,
+            "hp": 76,
+            "attack": {
+              "interval": 0.5,
+              "hitAt": 0.2,
+              "attackSpeed": 100,
+              "damage": 20
+            }
+          }
+        },
+        "攻擊 0.5 秒一下、0.2 秒命中（攻速 100）": {
+          "ok": true,
+          "detail": {
+            "interval": 0.5,
+            "hitAt": 0.2,
+            "attackSpeed": 100,
+            "damage": 20
+          }
+        },
+        "擊倒後掉落（測試掉落率），走近自動撿起放進背包": {
+          "ok": true,
+          "detail": {
+            "attacks": 25,
+            "ms": 46249,
+            "kills": 3,
+            "hits": 9,
+            "drops": 4,
+            "picked": 4,
+            "loot": 0,
+            "hp": 76,
+            "attack": {
+              "interval": 0.5,
+              "hitAt": 0.2,
+              "attackSpeed": 100,
+              "damage": 20
+            }
+          }
+        },
+        "背包數量＝撿到的數量（掉落不重複計算）": {
+          "ok": true,
+          "detail": {
+            "items": {
+              "seed": 1,
+              "egg": 1,
+              "birdEgg": 0,
+              "monsterMaterial": 2,
+              "shopFeed": 0
+            },
+            "picked": 4
+          }
+        },
+        "被擊倒的怪物進入死亡／等待重生": {
+          "ok": true,
+          "detail": [
+            "move",
+            "move",
+            "dead",
+            "dead",
+            "dead",
+            "move",
+            "idle",
+            "move",
+            "move",
+            "idle",
+            "move",
+            "idle",
+            "idle",
+            "move",
+            "move",
+            "move",
+            "move",
+            "idle",
+            "idle",
+            "move",
+            "idle",
+            "move",
+            "idle",
+            "move",
+            "move",
+            "idle",
+            "idle"
+          ]
+        },
+        "寵物：孵化、餵食、進化、鑑定成功": {
+          "ok": true,
+          "detail": {
+            "id": 1,
+            "hatched": 1,
+            "fed": [
+              true,
+              true,
+              true
+            ],
+            "evo": true,
+            "appr": true,
+            "again": false,
+            "first": "[{\"stat\":\"attackSpeed\",\"value\":4}]",
+            "second": "[{\"stat\":\"attackSpeed\",\"value\":4}]",
+            "after": {
+              "pets": {
+                "enabled": true,
+                "mode": "preview",
+                "reason": "",
+                "items": {
+                  "seed": 1,
+                  "egg": 1,
+                  "birdEgg": 0,
+                  "monsterMaterial": 2,
+                  "shopFeed": 3
+                },
+                "count": 1,
+                "equipped": 1,
+                "followerVisible": true,
+                "followerDist": 60.97524701603968
+              },
+              "stats": {
+                "attack": 100,
+                "attackSpeed": 102.5,
+                "defense": 50,
+                "maxHp": 100
+              },
+              "attack": {
+                "interval": 0.48780487804878053,
+                "hitAt": 0.19512195121951223,
+                "attackSpeed": 102.5,
+                "damage": 20
+              }
+            },
+            "follower": {
+              "enabled": true,
+              "mode": "preview",
+              "reason": "",
+              "items": {
+                "seed": 1,
+                "egg": 1,
+                "birdEgg": 0,
+                "monsterMaterial": 2,
+                "shopFeed": 3
+              },
+              "count": 1,
+              "equipped": 1,
+              "followerVisible": true,
+              "followerDist": 0.4050686911750624
+            }
+          }
+        },
+        "寵物方案 A：再鑑定拒絕、詞條不變": {
+          "ok": true,
+          "detail": {
+            "first": "[{\"stat\":\"attackSpeed\",\"value\":4}]",
+            "second": "[{\"stat\":\"attackSpeed\",\"value\":4}]"
+          }
+        },
+        "寵物裝備後在頭部附近跟隨（≤ 0.8 m）": {
+          "ok": true,
+          "detail": {
+            "enabled": true,
+            "mode": "preview",
+            "reason": "",
+            "items": {
+              "seed": 1,
+              "egg": 1,
+              "birdEgg": 0,
+              "monsterMaterial": 2,
+              "shopFeed": 3
+            },
+            "count": 1,
+            "equipped": 1,
+            "followerVisible": true,
+            "followerDist": 0.4050686911750624
+          }
+        },
+        "寵物加成反映到角色屬性；攻速 ≤ 160 且同步到攻擊動作": {
+          "ok": true,
+          "detail": {
+            "stats": {
+              "attack": 100,
+              "attackSpeed": 102.5,
+              "defense": 50,
+              "maxHp": 100
+            },
+            "attack": {
+              "interval": 0.48780487804878053,
+              "hitAt": 0.19512195121951223,
+              "attackSpeed": 102.5,
+              "damage": 20
+            }
+          }
+        },
+        "寵物商人鑑定：孵化前鑑定個體、不能重鑑、另一顆不受影響、孵化後詞條相同": {
+          "ok": true,
+          "detail": {
+            "target": "item:2",
+            "r1": {
+              "ok": true,
+              "affixes": [
+                {
+                  "stat": "maxHp",
+                  "value": -5
+                }
+              ]
+            },
+            "r2": {
+              "ok": false,
+              "affixes": null
+            },
+            "other": null,
+            "petAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]",
+            "itemAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]"
+          }
+        },
+        "重新載入：寵物、詞條、裝備、背包保留": {
+          "ok": true,
+          "detail": {
+            "reload": "[{\"stat\":\"attackSpeed\",\"value\":4}]",
+            "first": "[{\"stat\":\"attackSpeed\",\"value\":4}]",
+            "equipped": 1
+          }
+        },
+        "實玩效能測試流程（自動打怪、報告欄位、Context Lost 0）": {
+          "ok": true,
+          "detail": {
+            "seconds": 11.5,
+            "avgFps": 0.8666262241095416,
+            "low1Fps": 0.8064516129032259,
+            "minFps": 0.8064516129032259,
+            "avgDraw": 130.5,
+            "kills": 0,
+            "contextLost": 0,
+            "first30": 0.8666262241095416,
+            "last30": 0.8666262241095416,
+            "quality": "high",
+            "gender": "male",
+            "lod": "hq",
+            "charShadow": "blob"
+          }
+        },
+        "&pets=official：缺正式數值 → 寵物停用並提示、遊戲照常": {
+          "ok": false,
+          "detail": {
+            "enabled": false,
+            "mode": "official",
+            "reason": "寵物系統尚未開放：正式設定還缺 鑑定條數機率、鑑定屬性機率、鑑定數值機率、孵化時間、時間成長經驗、各階段經驗、進化餵食次數、各階段加成倍率、飼料經驗、掉落率、鑑定費用、飼料價格、飽食度與死亡復活規則",
+            "items": {
+              "seed": 0,
+              "egg": 0,
+              "birdEgg": 0,
+              "monsterMaterial": 0,
+              "shopFeed": 0
+            },
+            "count": 0,
+            "equipped": null,
+            "followerVisible": false,
+            "followerDist": 85.0971710225571
+          }
+        },
+        "&charshadow=realtime 可載入": {
+          "ok": true,
+          "detail": {
+            "p3": true,
+            "pipeline": false,
+            "charShadow": "realtime",
+            "drawCalls": 163,
+            "fps": 0.7983394539358135,
+            "contextLost": 0
+          }
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": {
+            "p3": true,
+            "pipeline": false,
+            "charShadow": "realtime",
+            "drawCalls": 163,
+            "fps": 0.7983394539358135,
+            "contextLost": 0
+          }
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "play-e2e/webkit_male_hq_spawn.png",
+        "play-e2e/webkit_male_hq_zone01.png",
+        "play-e2e/webkit_male_hq_fight.png",
+        "play-e2e/webkit_male_hq_pet.png"
+      ],
+      "results": {
+        "start": {
+          "gender": "male",
+          "lod": "hq",
+          "file": "novice_c10b5a_male_hq.glb",
+          "avatarModel": {
+            "modular": false,
+            "weapon": null,
+            "bones": 17,
+            "triangles": 199965,
+            "parts": [],
+            "clips": [
+              "Attack",
+              "Hurt",
+              "Idle",
+              "Jump",
+              "Run"
+            ],
+            "attackClips": [],
+            "allClips": [
+              "Attack",
+              "Hurt",
+              "Idle",
+              "Jump",
+              "Run"
+            ],
+            "version": "c10b5a",
+            "sockets": {
+              "R": false,
+              "L": false
+            },
+            "secondary": [],
+            "loco": "Run"
+          },
+          "state": "Idle",
+          "pos": [
+            -56,
+            2,
+            -64
+          ],
+          "hp": 100,
+          "maxHp": 100,
+          "down": false,
+          "speed": 0,
+          "runRate": 0.8,
+          "slide": -1.8079999999999998,
+          "attack": {
+            "interval": 0.5,
+            "hitAt": 0.2,
+            "attackSpeed": 100,
+            "damage": 20
+          },
+          "stats": {
+            "attack": 100,
+            "attackSpeed": 100,
+            "defense": 50,
+            "maxHp": 100
+          },
+          "kills": 0,
+          "hits": 0,
+          "gameTime": 0.1,
+          "drops": 0,
+          "picked": 0,
+          "loot": 0,
+          "monsters": [
+            {
+              "id": "star_dew_bobo#1",
+              "kind": "star_dew_bobo",
+              "level": 1,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 60,
+              "maxHp": 60,
+              "x": -19.03,
+              "z": -49.9,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "tier": "far",
+              "stride": 4,
+              "visualUpdates": 1
+            },
+            {
+              "id": "star_dew_bobo#2",
+              "kind": "star_dew_bobo",
+              "level": 1,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 60,
+              "maxHp": 60,
+              "x": -22.99,
+              "z": -43.9,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "tier": "far",
+              "stride": 4,
+              "visualUpdates": 1
+            },
+            {
+              "id": "star_dew_bobo#3",
+              "kind": "star_dew_bobo",
+              "level": 1,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 60,
+              "maxHp": 60,
+              "x": -28.31,
+              "z": -48.74,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "tier": "mid",
+              "stride": 2,
+              "visualUpdates": 1
+            },
+            {
+              "id": "star_dew_bobo#4",
+              "kind": "star_dew_bobo",
+              "level": 1,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 60,
+              "maxHp": 60,
+              "x": -31.52,
+              "z": -55.18,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "tier": "mid",
+              "stride": 2,
+              "visualUpdates": 1
+            },
+            {
+              "id": "star_dew_bobo#5",
+              "kind": "star_dew_bobo",
+              "level": 1,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 60,
+              "maxHp": 60,
+              "x": -24.67,
+              "z": -57.36,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "tier": "mid",
+              "stride": 2,
+              "visualUpdates": 1
+            },
+            {
+              "id": "star_dew_bobo#6",
+              "kind": "star_dew_bobo",
+              "level": 1,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 60,
+              "maxHp": 60,
+              "x": -17.49,
+              "z": -56.92,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "tier": "far",
+              "stride": 4,
+              "visualUpdates": 1
+            },
+            {
+              "id": "moss_horn_beast#1",
+              "kind": "moss_horn_beast",
+              "level": 3,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 90,
+              "maxHp": 90,
+              "x": -57.96,
+              "z": -28.29,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 6.0431599617004395,
+                "lod": "hq",
+                "fixture": false,
+                "visible": true,
+                "animMode": "manual",
+                "shadow": false,
+                "manualSteps": 2
+              },
+              "tier": "far",
+              "stride": 4,
+              "visualUpdates": 1
+            },
+            {
+              "id": "moss_horn_beast#2",
+              "kind": "moss_horn_beast",
+              "level": 3,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 90,
+              "maxHp": 90,
+              "x": -62.57,
+              "z": -23.39,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 6.1081929206848145,
+                "lod": "hq",
+                "fixture": false,
+                "visible": true,
+                "animMode": "manual",
+                "shadow": false,
+                "manualSteps": 2
+              },
+              "tier": "far",
+              "stride": 4,
+              "visualUpdates": 1
+            },
+            {
+              "id": "moss_horn_beast#3",
+              "kind": "moss_horn_beast",
+              "level": 3,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 90,
+              "maxHp": 90,
+              "x": -66.27,
+              "z": -29.01,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 6.088670253753662,
+                "lod": "hq",
+                "fixture": false,
+                "visible": true,
+                "animMode": "manual",
+                "shadow": false,
+                "manualSteps": 2
+              },
+              "tier": "offscreen",
+              "stride": 0,
+              "visualUpdates": 1
+            },
+            {
+              "id": "moss_horn_beast#4",
+              "kind": "moss_horn_beast",
+              "level": 3,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 90,
+              "maxHp": 90,
+              "x": -65.42,
+              "z": -35.68,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 6.086259365081787,
+                "lod": "hq",
+                "fixture": false,
+                "visible": true,
+                "animMode": "manual",
+                "shadow": false,
+                "manualSteps": 2
+              },
+              "tier": "offscreen",
+              "stride": 0,
+              "visualUpdates": 1
+            },
+            {
+              "id": "moss_horn_beast#5",
+              "kind": "moss_horn_beast",
+              "level": 3,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 90,
+              "maxHp": 90,
+              "x": -59.13,
+              "z": -33.32,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 6.014789581298828,
+                "lod": "hq",
+                "fixture": false,
+                "visible": true,
+                "animMode": "manual",
+                "shadow": false,
+                "manualSteps": 2
+              },
+              "tier": "mid",
+              "stride": 2,
+              "visualUpdates": 1
+            },
+            {
+              "id": "cloud_fluff_bird#6",
+              "kind": "cloud_fluff_bird",
+              "level": 5,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 110,
+              "maxHp": 110,
+              "x": 17.11,
+              "z": -10.69,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 8.869110107421875,
+                "lod": "hq",
+                "fixture": false,
+                "visible": true,
+                "animMode": "manual",
+                "shadow": false,
+                "manualSteps": 2
+              },
+              "tier": "offscreen",
+              "stride": 0,
+              "visualUpdates": 1
+            },
+            {
+              "id": "cloud_fluff_bird#7",
+              "kind": "cloud_fluff_bird",
+              "level": 5,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 110,
+              "maxHp": 110,
+              "x": 13.56,
+              "z": -6.92,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 8.966165542602539,
+                "lod": "hq",
+                "fixture": false,
+                "visible": true,
+                "animMode": "manual",
+                "shadow": false,
+                "manualSteps": 2
+              },
+              "tier": "offscreen",
+              "stride": 0,
+              "visualUpdates": 1
+            },
+            {
+              "id": "cloud_fluff_bird#8",
+              "kind": "cloud_fluff_bird",
+              "level": 5,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 110,
+              "maxHp": 110,
+              "x": 10.71,
+              "z": -11.24,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 8.869022369384766,
+                "lod": "hq",
+                "fixture": false,
+                "visible": true,
+                "animMode": "manual",
+                "shadow": false,
+                "manualSteps": 2
+              },
+              "tier": "offscreen",
+              "stride": 0,
+              "visualUpdates": 1
+            },
+            {
+              "id": "cloud_fluff_bird#9",
+              "kind": "cloud_fluff_bird",
+              "level": 5,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 110,
+              "maxHp": 110,
+              "x": 11.37,
+              "z": -16.37,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 8.67324161529541,
+                "lod": "hq",
+                "fixture": false,
+                "visible": true,
+                "animMode": "manual",
+                "shadow": false,
+                "manualSteps": 2
+              },
+              "tier": "offscreen",
+              "stride": 0,
+              "visualUpdates": 1
+            },
+            {
+              "id": "cloud_fluff_bird#10",
+              "kind": "cloud_fluff_bird",
+              "level": 5,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 110,
+              "maxHp": 110,
+              "x": 16.21,
+              "z": -14.55,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 8.87000560760498,
+                "lod": "hq",
+                "fixture": false,
+                "visible": true,
+                "animMode": "manual",
+                "shadow": false,
+                "manualSteps": 2
+              },
+              "tier": "offscreen",
+              "stride": 0,
+              "visualUpdates": 1
+            },
+            {
+              "id": "windfeather_fox#11",
+              "kind": "windfeather_fox",
+              "level": 7,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 140,
+              "maxHp": 140,
+              "x": 55.42,
+              "z": 25.45,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 14.266136169433594,
+                "lod": "hq",
+                "fixture": false,
+                "visible": true,
+                "animMode": "manual",
+                "shadow": false,
+                "manualSteps": 2
+              },
+              "tier": "offscreen",
+              "stride": 0,
+              "visualUpdates": 1
+            },
+            {
+              "id": "windfeather_fox#12",
+              "kind": "windfeather_fox",
+              "level": 7,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 140,
+              "maxHp": 140,
+              "x": 49.82,
+              "z": 29.17,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 14.316329002380371,
+                "lod": "hq",
+                "fixture": false,
+                "visible": true,
+                "animMode": "manual",
+                "shadow": false,
+                "manualSteps": 2
+              },
+              "tier": "offscreen",
+              "stride": 0,
+              "visualUpdates": 1
+            },
+            {
+              "id": "windfeather_fox#13",
+              "kind": "windfeather_fox",
+              "level": 7,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 140,
+              "maxHp": 140,
+              "x": 48.58,
+              "z": 22.55,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 14.40424633026123,
+                "lod": "hq",
+                "fixture": false,
+                "visible": true,
+                "animMode": "manual",
+                "shadow": false,
+                "manualSteps": 2
+              },
+              "tier": "offscreen",
+              "stride": 0,
+              "visualUpdates": 1
+            },
+            {
+              "id": "windfeather_fox#14",
+              "kind": "windfeather_fox",
+              "level": 7,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 140,
+              "maxHp": 140,
+              "x": 54.18,
+              "z": 18.83,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 14.346588134765625,
+                "lod": "hq",
+                "fixture": false,
+                "visible": true,
+                "animMode": "manual",
+                "shadow": false,
+                "manualSteps": 2
+              },
+              "tier": "offscreen",
+              "stride": 0,
+              "visualUpdates": 1
+            },
+            {
+              "id": "nebula_sheep#15",
+              "kind": "nebula_sheep",
+              "level": 8,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 170,
+              "maxHp": 170,
+              "x": -40.27,
+              "z": 47.58,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 12.687384605407715,
+                "lod": "hq",
+                "fixture": false,
+                "visible": true,
+                "animMode": "manual",
+                "shadow": false,
+                "manualSteps": 2
+              },
+              "tier": "offscreen",
+              "stride": 0,
+              "visualUpdates": 1
+            },
+            {
+              "id": "nebula_sheep#16",
+              "kind": "nebula_sheep",
+              "level": 8,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 170,
+              "maxHp": 170,
+              "x": -46.38,
+              "z": 51.64,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 12.668142318725586,
+                "lod": "hq",
+                "fixture": false,
+                "visible": true,
+                "animMode": "manual",
+                "shadow": false,
+                "manualSteps": 2
+              },
+              "tier": "offscreen",
+              "stride": 0,
+              "visualUpdates": 1
+            },
+            {
+              "id": "nebula_sheep#17",
+              "kind": "nebula_sheep",
+              "level": 8,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 170,
+              "maxHp": 170,
+              "x": -47.73,
+              "z": 44.42,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 12.882447242736816,
+                "lod": "hq",
+                "fixture": false,
+                "visible": true,
+                "animMode": "manual",
+                "shadow": false,
+                "manualSteps": 2
+              },
+              "tier": "offscreen",
+              "stride": 0,
+              "visualUpdates": 1
+            },
+            {
+              "id": "nebula_sheep#18",
+              "kind": "nebula_sheep",
+              "level": 8,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 170,
+              "maxHp": 170,
+              "x": -41.62,
+              "z": 40.36,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 12.804991722106934,
+                "lod": "hq",
+                "fixture": false,
+                "visible": true,
+                "animMode": "manual",
+                "shadow": false,
+                "manualSteps": 2
+              },
+              "tier": "offscreen",
+              "stride": 0,
+              "visualUpdates": 1
+            },
+            {
+              "id": "carrot_king#19",
+              "kind": "carrot_king",
+              "level": 9,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 320,
+              "maxHp": 320,
+              "x": -9.67,
+              "z": 35.49,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 12.285308837890625,
+                "lod": "hq",
+                "fixture": false,
+                "visible": true,
+                "animMode": "manual",
+                "shadow": false,
+                "manualSteps": 2
+              },
+              "tier": "offscreen",
+              "stride": 0,
+              "visualUpdates": 1
+            },
+            {
+              "id": "carrot_king#20",
+              "kind": "carrot_king",
+              "level": 9,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 320,
+              "maxHp": 320,
+              "x": -15.52,
+              "z": 33.01,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 12.239665985107422,
+                "lod": "hq",
+                "fixture": false,
+                "visible": true,
+                "animMode": "manual",
+                "shadow": false,
+                "manualSteps": 2
+              },
+              "tier": "offscreen",
+              "stride": 0,
+              "visualUpdates": 1
+            },
+            {
+              "id": "crown_hammer_rabbit#21",
+              "kind": "crown_hammer_rabbit",
+              "level": 10,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 900,
+              "maxHp": 900,
+              "x": 0,
+              "z": 66,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 19.950000762939453,
+                "lod": "hq",
+                "fixture": false,
+                "visible": true,
+                "animMode": "manual",
+                "shadow": false,
+                "manualSteps": 2
+              },
+              "tier": "offscreen",
+              "stride": 0,
+              "visualUpdates": 1
+            }
+          ],
+          "foxStatus": "M004 風羽狐 HQ",
+          "fieldMonsters": [
+            {
+              "zone": "02",
+              "zoneName": "苔葉林緣",
+              "monster": "苔角獸",
+              "delivered": true,
+              "count": 5,
+              "status": "M002 苔角獸 Rig V1.0 HQ"
+            },
+            {
+              "zone": "03",
+              "zoneName": "微風花丘",
+              "monster": "雲絨鳥",
+              "delivered": true,
+              "count": 5,
+              "status": "M003 雲絨鳥 Rig V1.0 HQ"
+            },
+            {
+              "zone": "04",
+              "zoneName": "羽風高地",
+              "monster": "風羽狐",
+              "delivered": true,
+              "count": 4,
+              "status": "M004 風羽狐 Rig V1.1 HQ"
+            },
+            {
+              "zone": "05",
+              "zoneName": "星雲花田",
+              "monster": "星雲咩咩",
+              "delivered": true,
+              "count": 4,
+              "status": "M005 星雲咩咩 Rig V1.0 HQ"
+            },
+            {
+              "zone": "06",
+              "zoneName": "胡蘿蔔園",
+              "monster": "胡蘿蔔大王",
+              "delivered": true,
+              "count": 2,
+              "status": "M006 胡蘿蔔大王 Rig V1.0 HQ"
+            },
+            {
+              "zone": "07",
+              "zoneName": "王冠遺跡",
+              "monster": "王冠重錘兔",
+              "delivered": true,
+              "count": 1,
+              "status": "M007 王冠重錘兔 Rig V1.0 HQ"
+            }
+          ],
+          "monsterDetail": {
+            "on": true,
+            "near": 0,
+            "mid": 4,
+            "far": 5,
+            "hidden": 0,
+            "offscreen": 18
+          },
+          "combatFx": null,
+          "pets": {
+            "enabled": true,
+            "mode": "preview",
+            "reason": "",
+            "items": {
+              "seed": 0,
+              "egg": 0,
+              "birdEgg": 0,
+              "monsterMaterial": 0,
+              "shopFeed": 0
+            },
+            "count": 0,
+            "equipped": null,
+            "followerVisible": false,
+            "followerDist": 85.09475166556066
+          },
+          "render": {
+            "p3": true,
+            "pipeline": false,
+            "charShadow": "blob",
+            "drawCalls": 138,
+            "fps": 0.2968239833778569,
+            "contextLost": 0
+          }
+        },
+        "move": {
+          "speed": 5.000000000000001,
+          "runRate": 2.2123893805309742,
+          "slide": 0,
+          "state": "Run"
+        },
+        "fight": {
+          "attacks": 25,
+          "ms": 46249,
+          "kills": 3,
+          "hits": 9,
+          "drops": 4,
+          "picked": 4,
+          "loot": 0,
+          "hp": 76,
+          "attack": {
+            "interval": 0.5,
+            "hitAt": 0.2,
+            "attackSpeed": 100,
+            "damage": 20
+          }
+        },
+        "monsterStates": [
+          "move",
+          "move",
+          "dead",
+          "dead",
+          "dead",
+          "move",
+          "idle",
+          "move",
+          "move",
+          "idle",
+          "move",
+          "idle",
+          "idle",
+          "move",
+          "move",
+          "move",
+          "move",
+          "idle",
+          "idle",
+          "move",
+          "idle",
+          "move",
+          "idle",
+          "move",
+          "move",
+          "idle",
+          "idle"
+        ],
+        "pet": {
+          "id": 1,
+          "hatched": 1,
+          "fed": [
+            true,
+            true,
+            true
+          ],
+          "evo": true,
+          "appr": true,
+          "again": false,
+          "first": "[{\"stat\":\"attackSpeed\",\"value\":4}]",
+          "second": "[{\"stat\":\"attackSpeed\",\"value\":4}]",
+          "after": {
+            "pets": {
+              "enabled": true,
+              "mode": "preview",
+              "reason": "",
+              "items": {
+                "seed": 1,
+                "egg": 1,
+                "birdEgg": 0,
+                "monsterMaterial": 2,
+                "shopFeed": 3
+              },
+              "count": 1,
+              "equipped": 1,
+              "followerVisible": true,
+              "followerDist": 60.97524701603968
+            },
+            "stats": {
+              "attack": 100,
+              "attackSpeed": 102.5,
+              "defense": 50,
+              "maxHp": 100
+            },
+            "attack": {
+              "interval": 0.48780487804878053,
+              "hitAt": 0.19512195121951223,
+              "attackSpeed": 102.5,
+              "damage": 20
+            }
+          },
+          "follower": {
+            "enabled": true,
+            "mode": "preview",
+            "reason": "",
+            "items": {
+              "seed": 1,
+              "egg": 1,
+              "birdEgg": 0,
+              "monsterMaterial": 2,
+              "shopFeed": 3
+            },
+            "count": 1,
+            "equipped": 1,
+            "followerVisible": true,
+            "followerDist": 0.4050686911750624
+          }
+        },
+        "itemAppraisal": {
+          "target": "item:2",
+          "r1": {
+            "ok": true,
+            "affixes": [
+              {
+                "stat": "maxHp",
+                "value": -5
+              }
+            ]
+          },
+          "r2": {
+            "ok": false,
+            "affixes": null
+          },
+          "other": null,
+          "petAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]",
+          "itemAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]"
+        },
+        "bench": {
+          "seconds": 11.5,
+          "avgFps": 0.8666262241095416,
+          "low1Fps": 0.8064516129032259,
+          "minFps": 0.8064516129032259,
+          "avgDraw": 130.5,
+          "kills": 0,
+          "contextLost": 0,
+          "first30": 0.8666262241095416,
+          "last30": 0.8666262241095416,
+          "quality": "high",
+          "gender": "male",
+          "lod": "hq",
+          "charShadow": "blob"
+        },
+        "drawRealtime": 163,
+        "end": {
+          "render": {
+            "p3": true,
+            "pipeline": false,
+            "charShadow": "realtime",
+            "drawCalls": 163,
+            "fps": 0.7983394539358135,
+            "contextLost": 0
+          }
+        }
+      },
+      "ok": false
+    },
+    {
+      "browser": "webkit",
+      "label": "female lite",
+      "checks": {
+        "啟動（地圖＋角色＋怪物）": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "female lite：c10b5a GLB、6 隻星露啵啵、寵物＝測試設定": {
+          "ok": false,
+          "detail": {
+            "file": "novice_c10b5a_female_lite.glb",
+            "monsters": 27,
+            "pets": {
+              "enabled": true,
+              "mode": "preview",
+              "reason": "",
+              "items": {
+                "seed": 0,
+                "egg": 0,
+                "birdEgg": 0,
+                "monsterMaterial": 0,
+                "shopFeed": 0
+              },
+              "count": 0,
+              "equipped": null,
+              "followerVisible": false,
+              "followerDist": 85.08967250789152
+            }
+          }
+        },
+        "預設渲染：P3-2（無 HDR 管線）＋腳下柔邊陰影": {
+          "ok": true,
+          "detail": {
+            "p3": true,
+            "pipeline": false,
+            "charShadow": "blob",
+            "drawCalls": 1,
+            "fps": 60,
+            "contextLost": 0
+          }
+        },
+        "移動 5 m/s、Run 動作、跑步倍率依速度": {
+          "ok": true,
+          "detail": {
+            "speed": 5.000000000000001,
+            "runRate": 2.074688796680498,
+            "slide": 0,
+            "state": "Run"
+          }
+        },
+        "B5a 跨步加大：5 m/s 跑步倍率 ≤ 2.4、滑步 < 0.1 m/s": {
+          "ok": true,
+          "detail": {
+            "speed": 5.000000000000001,
+            "runRate": 2.074688796680498,
+            "slide": 0,
+            "state": "Run"
+          }
+        },
+        "移動後在原地之外、貼地": {
+          "ok": true,
+          "detail": {
+            "from": [
+              -56,
+              2,
+              -64
+            ],
+            "to": [
+              -52.345998886435474,
+              2,
+              -59.88924874723984
+            ]
+          }
+        },
+        "跳躍": {
+          "ok": true,
+          "detail": null
+        },
+        "攻擊命中、擊倒 3 隻星露啵啵": {
+          "ok": true,
+          "detail": {
+            "attacks": 25,
+            "ms": 17149,
+            "kills": 3,
+            "hits": 9,
+            "drops": 4,
+            "picked": 4,
+            "loot": 0,
+            "hp": 76,
+            "attack": {
+              "interval": 0.5,
+              "hitAt": 0.2,
+              "attackSpeed": 100,
+              "damage": 20
+            }
+          }
+        },
+        "攻擊 0.5 秒一下、0.2 秒命中（攻速 100）": {
+          "ok": true,
+          "detail": {
+            "interval": 0.5,
+            "hitAt": 0.2,
+            "attackSpeed": 100,
+            "damage": 20
+          }
+        },
+        "擊倒後掉落（測試掉落率），走近自動撿起放進背包": {
+          "ok": true,
+          "detail": {
+            "attacks": 25,
+            "ms": 17149,
+            "kills": 3,
+            "hits": 9,
+            "drops": 4,
+            "picked": 4,
+            "loot": 0,
+            "hp": 76,
+            "attack": {
+              "interval": 0.5,
+              "hitAt": 0.2,
+              "attackSpeed": 100,
+              "damage": 20
+            }
+          }
+        },
+        "背包數量＝撿到的數量（掉落不重複計算）": {
+          "ok": true,
+          "detail": {
+            "items": {
+              "seed": 1,
+              "egg": 1,
+              "birdEgg": 0,
+              "monsterMaterial": 2,
+              "shopFeed": 0
+            },
+            "picked": 4
+          }
+        },
+        "被擊倒的怪物進入死亡／等待重生": {
+          "ok": true,
+          "detail": [
+            "move",
+            "move",
+            "dead",
+            "dead",
+            "dead",
+            "move",
+            "idle",
+            "move",
+            "move",
+            "idle",
+            "move",
+            "idle",
+            "idle",
+            "move",
+            "move",
+            "move",
+            "move",
+            "idle",
+            "idle",
+            "move",
+            "idle",
+            "move",
+            "idle",
+            "move",
+            "move",
+            "idle",
+            "idle"
+          ]
+        },
+        "寵物：孵化、餵食、進化、鑑定成功": {
+          "ok": true,
+          "detail": {
+            "id": 1,
+            "hatched": 1,
+            "fed": [
+              true,
+              true,
+              true
+            ],
+            "evo": true,
+            "appr": true,
+            "again": false,
+            "first": "[{\"stat\":\"attackSpeed\",\"value\":4}]",
+            "second": "[{\"stat\":\"attackSpeed\",\"value\":4}]",
+            "after": {
+              "pets": {
+                "enabled": true,
+                "mode": "preview",
+                "reason": "",
+                "items": {
+                  "seed": 1,
+                  "egg": 1,
+                  "birdEgg": 0,
+                  "monsterMaterial": 2,
+                  "shopFeed": 3
+                },
+                "count": 1,
+                "equipped": 1,
+                "followerVisible": true,
+                "followerDist": 60.9748278646892
+              },
+              "stats": {
+                "attack": 100,
+                "attackSpeed": 102.5,
+                "defense": 50,
+                "maxHp": 100
+              },
+              "attack": {
+                "interval": 0.48780487804878053,
+                "hitAt": 0.19512195121951223,
+                "attackSpeed": 102.5,
+                "damage": 20
+              }
+            },
+            "follower": {
+              "enabled": true,
+              "mode": "preview",
+              "reason": "",
+              "items": {
+                "seed": 1,
+                "egg": 1,
+                "birdEgg": 0,
+                "monsterMaterial": 2,
+                "shopFeed": 3
+              },
+              "count": 1,
+              "equipped": 1,
+              "followerVisible": true,
+              "followerDist": 0.4230523749993351
+            }
+          }
+        },
+        "寵物方案 A：再鑑定拒絕、詞條不變": {
+          "ok": true,
+          "detail": {
+            "first": "[{\"stat\":\"attackSpeed\",\"value\":4}]",
+            "second": "[{\"stat\":\"attackSpeed\",\"value\":4}]"
+          }
+        },
+        "寵物裝備後在頭部附近跟隨（≤ 0.8 m）": {
+          "ok": true,
+          "detail": {
+            "enabled": true,
+            "mode": "preview",
+            "reason": "",
+            "items": {
+              "seed": 1,
+              "egg": 1,
+              "birdEgg": 0,
+              "monsterMaterial": 2,
+              "shopFeed": 3
+            },
+            "count": 1,
+            "equipped": 1,
+            "followerVisible": true,
+            "followerDist": 0.4230523749993351
+          }
+        },
+        "寵物加成反映到角色屬性；攻速 ≤ 160 且同步到攻擊動作": {
+          "ok": true,
+          "detail": {
+            "stats": {
+              "attack": 100,
+              "attackSpeed": 102.5,
+              "defense": 50,
+              "maxHp": 100
+            },
+            "attack": {
+              "interval": 0.48780487804878053,
+              "hitAt": 0.19512195121951223,
+              "attackSpeed": 102.5,
+              "damage": 20
+            }
+          }
+        },
+        "寵物商人鑑定：孵化前鑑定個體、不能重鑑、另一顆不受影響、孵化後詞條相同": {
+          "ok": true,
+          "detail": {
+            "target": "item:2",
+            "r1": {
+              "ok": true,
+              "affixes": [
+                {
+                  "stat": "maxHp",
+                  "value": -5
+                }
+              ]
+            },
+            "r2": {
+              "ok": false,
+              "affixes": null
+            },
+            "other": null,
+            "petAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]",
+            "itemAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]"
+          }
+        },
+        "重新載入：寵物、詞條、裝備、背包保留": {
+          "ok": true,
+          "detail": {
+            "reload": "[{\"stat\":\"attackSpeed\",\"value\":4}]",
+            "first": "[{\"stat\":\"attackSpeed\",\"value\":4}]",
+            "equipped": 1
+          }
+        },
+        "實玩效能測試流程（自動打怪、報告欄位、Context Lost 0）": {
+          "ok": true,
+          "detail": {
+            "seconds": 10.5,
+            "avgFps": 2.952943417793866,
+            "low1Fps": 2.6109660574412534,
+            "minFps": 2.6109660574412534,
+            "avgDraw": 114,
+            "kills": 1,
+            "contextLost": 0,
+            "first30": 2.952943417793865,
+            "last30": 2.9529434177938656,
+            "quality": "medium",
+            "gender": "female",
+            "lod": "lite",
+            "charShadow": "blob"
+          }
+        },
+        "沒有 WebGL Context Lost": {
+          "ok": true,
+          "detail": {
+            "p3": true,
+            "pipeline": false,
+            "charShadow": "blob",
+            "drawCalls": 109,
+            "fps": 2.9542097488921715,
+            "contextLost": 0
+          }
+        }
+      },
+      "errors": [],
+      "screenshots": [
+        "play-e2e/webkit_female_lite_spawn.png",
+        "play-e2e/webkit_female_lite_zone01.png",
+        "play-e2e/webkit_female_lite_fight.png",
+        "play-e2e/webkit_female_lite_pet.png"
+      ],
+      "results": {
+        "start": {
+          "gender": "female",
+          "lod": "lite",
+          "file": "novice_c10b5a_female_lite.glb",
+          "avatarModel": {
+            "modular": false,
+            "weapon": null,
+            "bones": 17,
+            "triangles": 39955,
+            "parts": [],
+            "clips": [
+              "Attack",
+              "Hurt",
+              "Idle",
+              "Jump",
+              "Run"
+            ],
+            "attackClips": [],
+            "allClips": [
+              "Attack",
+              "Hurt",
+              "Idle",
+              "Jump",
+              "Run"
+            ],
+            "version": "c10b5a",
+            "sockets": {
+              "R": false,
+              "L": false
+            },
+            "secondary": [],
+            "loco": "Run"
+          },
+          "state": "Idle",
+          "pos": [
+            -56,
+            2,
+            -64
+          ],
+          "hp": 100,
+          "maxHp": 100,
+          "down": false,
+          "speed": 0,
+          "runRate": 1,
+          "slide": -1.9280000000000002,
+          "attack": {
+            "interval": 0.5,
+            "hitAt": 0.2,
+            "attackSpeed": 100,
+            "damage": 20
+          },
+          "stats": {
+            "attack": 100,
+            "attackSpeed": 100,
+            "defense": 50,
+            "maxHp": 100
+          },
+          "kills": 0,
+          "hits": 0,
+          "gameTime": 0,
+          "drops": 0,
+          "picked": 0,
+          "loot": 0,
+          "monsters": [
+            {
+              "id": "star_dew_bobo#1",
+              "kind": "star_dew_bobo",
+              "level": 1,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 60,
+              "maxHp": 60,
+              "x": -19.03,
+              "z": -49.9,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "tier": null,
+              "stride": 1,
+              "visualUpdates": 0
+            },
+            {
+              "id": "star_dew_bobo#2",
+              "kind": "star_dew_bobo",
+              "level": 1,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 60,
+              "maxHp": 60,
+              "x": -22.99,
+              "z": -43.9,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "tier": null,
+              "stride": 1,
+              "visualUpdates": 0
+            },
+            {
+              "id": "star_dew_bobo#3",
+              "kind": "star_dew_bobo",
+              "level": 1,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 60,
+              "maxHp": 60,
+              "x": -28.31,
+              "z": -48.74,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "tier": null,
+              "stride": 1,
+              "visualUpdates": 0
+            },
+            {
+              "id": "star_dew_bobo#4",
+              "kind": "star_dew_bobo",
+              "level": 1,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 60,
+              "maxHp": 60,
+              "x": -31.52,
+              "z": -55.18,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "tier": null,
+              "stride": 1,
+              "visualUpdates": 0
+            },
+            {
+              "id": "star_dew_bobo#5",
+              "kind": "star_dew_bobo",
+              "level": 1,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 60,
+              "maxHp": 60,
+              "x": -24.67,
+              "z": -57.36,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "tier": null,
+              "stride": 1,
+              "visualUpdates": 0
+            },
+            {
+              "id": "star_dew_bobo#6",
+              "kind": "star_dew_bobo",
+              "level": 1,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 60,
+              "maxHp": 60,
+              "x": -17.49,
+              "z": -56.92,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "tier": null,
+              "stride": 1,
+              "visualUpdates": 0
+            },
+            {
+              "id": "moss_horn_beast#1",
+              "kind": "moss_horn_beast",
+              "level": 3,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 90,
+              "maxHp": 90,
+              "x": -57.96,
+              "z": -28.29,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 1.399999976158142,
+                "lod": "lite",
+                "fixture": false,
+                "visible": true,
+                "animMode": "auto",
+                "shadow": true,
+                "manualSteps": 0
+              },
+              "tier": null,
+              "stride": 1,
+              "visualUpdates": 0
+            },
+            {
+              "id": "moss_horn_beast#2",
+              "kind": "moss_horn_beast",
+              "level": 3,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 90,
+              "maxHp": 90,
+              "x": -62.57,
+              "z": -23.39,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 1.399999976158142,
+                "lod": "lite",
+                "fixture": false,
+                "visible": true,
+                "animMode": "auto",
+                "shadow": true,
+                "manualSteps": 0
+              },
+              "tier": null,
+              "stride": 1,
+              "visualUpdates": 0
+            },
+            {
+              "id": "moss_horn_beast#3",
+              "kind": "moss_horn_beast",
+              "level": 3,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 90,
+              "maxHp": 90,
+              "x": -66.27,
+              "z": -29.01,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 1.399999976158142,
+                "lod": "lite",
+                "fixture": false,
+                "visible": true,
+                "animMode": "auto",
+                "shadow": true,
+                "manualSteps": 0
+              },
+              "tier": null,
+              "stride": 1,
+              "visualUpdates": 0
+            },
+            {
+              "id": "moss_horn_beast#4",
+              "kind": "moss_horn_beast",
+              "level": 3,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 90,
+              "maxHp": 90,
+              "x": -65.42,
+              "z": -35.68,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 1.399999976158142,
+                "lod": "lite",
+                "fixture": false,
+                "visible": true,
+                "animMode": "auto",
+                "shadow": true,
+                "manualSteps": 0
+              },
+              "tier": null,
+              "stride": 1,
+              "visualUpdates": 0
+            },
+            {
+              "id": "moss_horn_beast#5",
+              "kind": "moss_horn_beast",
+              "level": 3,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 90,
+              "maxHp": 90,
+              "x": -59.13,
+              "z": -33.32,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 1.399999976158142,
+                "lod": "lite",
+                "fixture": false,
+                "visible": true,
+                "animMode": "auto",
+                "shadow": true,
+                "manualSteps": 0
+              },
+              "tier": null,
+              "stride": 1,
+              "visualUpdates": 0
+            },
+            {
+              "id": "cloud_fluff_bird#6",
+              "kind": "cloud_fluff_bird",
+              "level": 5,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 110,
+              "maxHp": 110,
+              "x": 17.11,
+              "z": -10.69,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 1.5499999523162842,
+                "lod": "lite",
+                "fixture": false,
+                "visible": true,
+                "animMode": "auto",
+                "shadow": true,
+                "manualSteps": 0
+              },
+              "tier": null,
+              "stride": 1,
+              "visualUpdates": 0
+            },
+            {
+              "id": "cloud_fluff_bird#7",
+              "kind": "cloud_fluff_bird",
+              "level": 5,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 110,
+              "maxHp": 110,
+              "x": 13.56,
+              "z": -6.92,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 1.5499999523162842,
+                "lod": "lite",
+                "fixture": false,
+                "visible": true,
+                "animMode": "auto",
+                "shadow": true,
+                "manualSteps": 0
+              },
+              "tier": null,
+              "stride": 1,
+              "visualUpdates": 0
+            },
+            {
+              "id": "cloud_fluff_bird#8",
+              "kind": "cloud_fluff_bird",
+              "level": 5,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 110,
+              "maxHp": 110,
+              "x": 10.71,
+              "z": -11.24,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 1.5499999523162842,
+                "lod": "lite",
+                "fixture": false,
+                "visible": true,
+                "animMode": "auto",
+                "shadow": true,
+                "manualSteps": 0
+              },
+              "tier": null,
+              "stride": 1,
+              "visualUpdates": 0
+            },
+            {
+              "id": "cloud_fluff_bird#9",
+              "kind": "cloud_fluff_bird",
+              "level": 5,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 110,
+              "maxHp": 110,
+              "x": 11.37,
+              "z": -16.37,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 1.5499999523162842,
+                "lod": "lite",
+                "fixture": false,
+                "visible": true,
+                "animMode": "auto",
+                "shadow": true,
+                "manualSteps": 0
+              },
+              "tier": null,
+              "stride": 1,
+              "visualUpdates": 0
+            },
+            {
+              "id": "cloud_fluff_bird#10",
+              "kind": "cloud_fluff_bird",
+              "level": 5,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 110,
+              "maxHp": 110,
+              "x": 16.21,
+              "z": -14.55,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 1.5499999523162842,
+                "lod": "lite",
+                "fixture": false,
+                "visible": true,
+                "animMode": "auto",
+                "shadow": true,
+                "manualSteps": 0
+              },
+              "tier": null,
+              "stride": 1,
+              "visualUpdates": 0
+            },
+            {
+              "id": "windfeather_fox#11",
+              "kind": "windfeather_fox",
+              "level": 7,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 140,
+              "maxHp": 140,
+              "x": 55.42,
+              "z": 25.45,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 1.2000000476837158,
+                "lod": "lite",
+                "fixture": false,
+                "visible": true,
+                "animMode": "auto",
+                "shadow": true,
+                "manualSteps": 0
+              },
+              "tier": null,
+              "stride": 1,
+              "visualUpdates": 0
+            },
+            {
+              "id": "windfeather_fox#12",
+              "kind": "windfeather_fox",
+              "level": 7,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 140,
+              "maxHp": 140,
+              "x": 49.82,
+              "z": 29.17,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 1.2000000476837158,
+                "lod": "lite",
+                "fixture": false,
+                "visible": true,
+                "animMode": "auto",
+                "shadow": true,
+                "manualSteps": 0
+              },
+              "tier": null,
+              "stride": 1,
+              "visualUpdates": 0
+            },
+            {
+              "id": "windfeather_fox#13",
+              "kind": "windfeather_fox",
+              "level": 7,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 140,
+              "maxHp": 140,
+              "x": 48.58,
+              "z": 22.55,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 1.2000000476837158,
+                "lod": "lite",
+                "fixture": false,
+                "visible": true,
+                "animMode": "auto",
+                "shadow": true,
+                "manualSteps": 0
+              },
+              "tier": null,
+              "stride": 1,
+              "visualUpdates": 0
+            },
+            {
+              "id": "windfeather_fox#14",
+              "kind": "windfeather_fox",
+              "level": 7,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 140,
+              "maxHp": 140,
+              "x": 54.18,
+              "z": 18.83,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 1.2000000476837158,
+                "lod": "lite",
+                "fixture": false,
+                "visible": true,
+                "animMode": "auto",
+                "shadow": true,
+                "manualSteps": 0
+              },
+              "tier": null,
+              "stride": 1,
+              "visualUpdates": 0
+            },
+            {
+              "id": "nebula_sheep#15",
+              "kind": "nebula_sheep",
+              "level": 8,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 170,
+              "maxHp": 170,
+              "x": -40.27,
+              "z": 47.58,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 1.2999999523162842,
+                "lod": "lite",
+                "fixture": false,
+                "visible": true,
+                "animMode": "auto",
+                "shadow": true,
+                "manualSteps": 0
+              },
+              "tier": null,
+              "stride": 1,
+              "visualUpdates": 0
+            },
+            {
+              "id": "nebula_sheep#16",
+              "kind": "nebula_sheep",
+              "level": 8,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 170,
+              "maxHp": 170,
+              "x": -46.38,
+              "z": 51.64,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 1.2999999523162842,
+                "lod": "lite",
+                "fixture": false,
+                "visible": true,
+                "animMode": "auto",
+                "shadow": true,
+                "manualSteps": 0
+              },
+              "tier": null,
+              "stride": 1,
+              "visualUpdates": 0
+            },
+            {
+              "id": "nebula_sheep#17",
+              "kind": "nebula_sheep",
+              "level": 8,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 170,
+              "maxHp": 170,
+              "x": -47.73,
+              "z": 44.42,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 1.2999999523162842,
+                "lod": "lite",
+                "fixture": false,
+                "visible": true,
+                "animMode": "auto",
+                "shadow": true,
+                "manualSteps": 0
+              },
+              "tier": null,
+              "stride": 1,
+              "visualUpdates": 0
+            },
+            {
+              "id": "nebula_sheep#18",
+              "kind": "nebula_sheep",
+              "level": 8,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 170,
+              "maxHp": 170,
+              "x": -41.62,
+              "z": 40.36,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 1.2999999523162842,
+                "lod": "lite",
+                "fixture": false,
+                "visible": true,
+                "animMode": "auto",
+                "shadow": true,
+                "manualSteps": 0
+              },
+              "tier": null,
+              "stride": 1,
+              "visualUpdates": 0
+            },
+            {
+              "id": "carrot_king#19",
+              "kind": "carrot_king",
+              "level": 9,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 320,
+              "maxHp": 320,
+              "x": -9.67,
+              "z": 35.49,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 1.850000023841858,
+                "lod": "lite",
+                "fixture": false,
+                "visible": true,
+                "animMode": "auto",
+                "shadow": true,
+                "manualSteps": 0
+              },
+              "tier": null,
+              "stride": 1,
+              "visualUpdates": 0
+            },
+            {
+              "id": "carrot_king#20",
+              "kind": "carrot_king",
+              "level": 9,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 320,
+              "maxHp": 320,
+              "x": -15.52,
+              "z": 33.01,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 1.850000023841858,
+                "lod": "lite",
+                "fixture": false,
+                "visible": true,
+                "animMode": "auto",
+                "shadow": true,
+                "manualSteps": 0
+              },
+              "tier": null,
+              "stride": 1,
+              "visualUpdates": 0
+            },
+            {
+              "id": "crown_hammer_rabbit#21",
+              "kind": "crown_hammer_rabbit",
+              "level": 10,
+              "aggressive": true,
+              "provoked": false,
+              "state": "idle",
+              "mode": "idle",
+              "hp": 900,
+              "maxHp": 900,
+              "x": 0,
+              "z": 66,
+              "speed": 0,
+              "attacks": {
+                "started": 0,
+                "resolved": 0,
+                "cancelled": 0,
+                "duplicatesBlocked": 0,
+                "lastResolvedId": null,
+                "lastCancelledId": null
+              },
+              "rig": {
+                "clip": "idle",
+                "ratio": 1,
+                "weights": {
+                  "idle": 1
+                },
+                "hpBar": false,
+                "hpBarY": 2.950000047683716,
+                "lod": "lite",
+                "fixture": false,
+                "visible": true,
+                "animMode": "auto",
+                "shadow": true,
+                "manualSteps": 0
+              },
+              "tier": null,
+              "stride": 1,
+              "visualUpdates": 0
+            }
+          ],
+          "foxStatus": "M004 風羽狐 Lite",
+          "fieldMonsters": [
+            {
+              "zone": "02",
+              "zoneName": "苔葉林緣",
+              "monster": "苔角獸",
+              "delivered": true,
+              "count": 5,
+              "status": "M002 苔角獸 Rig V1.0 Lite"
+            },
+            {
+              "zone": "03",
+              "zoneName": "微風花丘",
+              "monster": "雲絨鳥",
+              "delivered": true,
+              "count": 5,
+              "status": "M003 雲絨鳥 Rig V1.0 Lite"
+            },
+            {
+              "zone": "04",
+              "zoneName": "羽風高地",
+              "monster": "風羽狐",
+              "delivered": true,
+              "count": 4,
+              "status": "M004 風羽狐 Rig V1.1 Lite"
+            },
+            {
+              "zone": "05",
+              "zoneName": "星雲花田",
+              "monster": "星雲咩咩",
+              "delivered": true,
+              "count": 4,
+              "status": "M005 星雲咩咩 Rig V1.0 Lite"
+            },
+            {
+              "zone": "06",
+              "zoneName": "胡蘿蔔園",
+              "monster": "胡蘿蔔大王",
+              "delivered": true,
+              "count": 2,
+              "status": "M006 胡蘿蔔大王 Rig V1.0 Lite"
+            },
+            {
+              "zone": "07",
+              "zoneName": "王冠遺跡",
+              "monster": "王冠重錘兔",
+              "delivered": true,
+              "count": 1,
+              "status": "M007 王冠重錘兔 Rig V1.0 Lite"
+            }
+          ],
+          "monsterDetail": {
+            "on": true,
+            "near": 0,
+            "mid": 0,
+            "far": 0,
+            "hidden": 0,
+            "offscreen": 0
+          },
+          "combatFx": null,
+          "pets": {
+            "enabled": true,
+            "mode": "preview",
+            "reason": "",
+            "items": {
+              "seed": 0,
+              "egg": 0,
+              "birdEgg": 0,
+              "monsterMaterial": 0,
+              "shopFeed": 0
+            },
+            "count": 0,
+            "equipped": null,
+            "followerVisible": false,
+            "followerDist": 85.08967250789152
+          },
+          "render": {
+            "p3": true,
+            "pipeline": false,
+            "charShadow": "blob",
+            "drawCalls": 1,
+            "fps": 60,
+            "contextLost": 0
+          }
+        },
+        "move": {
+          "speed": 5.000000000000001,
+          "runRate": 2.074688796680498,
+          "slide": 0,
+          "state": "Run"
+        },
+        "fight": {
+          "attacks": 25,
+          "ms": 17149,
+          "kills": 3,
+          "hits": 9,
+          "drops": 4,
+          "picked": 4,
+          "loot": 0,
+          "hp": 76,
+          "attack": {
+            "interval": 0.5,
+            "hitAt": 0.2,
+            "attackSpeed": 100,
+            "damage": 20
+          }
+        },
+        "monsterStates": [
+          "move",
+          "move",
+          "dead",
+          "dead",
+          "dead",
+          "move",
+          "idle",
+          "move",
+          "move",
+          "idle",
+          "move",
+          "idle",
+          "idle",
+          "move",
+          "move",
+          "move",
+          "move",
+          "idle",
+          "idle",
+          "move",
+          "idle",
+          "move",
+          "idle",
+          "move",
+          "move",
+          "idle",
+          "idle"
+        ],
+        "pet": {
+          "id": 1,
+          "hatched": 1,
+          "fed": [
+            true,
+            true,
+            true
+          ],
+          "evo": true,
+          "appr": true,
+          "again": false,
+          "first": "[{\"stat\":\"attackSpeed\",\"value\":4}]",
+          "second": "[{\"stat\":\"attackSpeed\",\"value\":4}]",
+          "after": {
+            "pets": {
+              "enabled": true,
+              "mode": "preview",
+              "reason": "",
+              "items": {
+                "seed": 1,
+                "egg": 1,
+                "birdEgg": 0,
+                "monsterMaterial": 2,
+                "shopFeed": 3
+              },
+              "count": 1,
+              "equipped": 1,
+              "followerVisible": true,
+              "followerDist": 60.9748278646892
+            },
+            "stats": {
+              "attack": 100,
+              "attackSpeed": 102.5,
+              "defense": 50,
+              "maxHp": 100
+            },
+            "attack": {
+              "interval": 0.48780487804878053,
+              "hitAt": 0.19512195121951223,
+              "attackSpeed": 102.5,
+              "damage": 20
+            }
+          },
+          "follower": {
+            "enabled": true,
+            "mode": "preview",
+            "reason": "",
+            "items": {
+              "seed": 1,
+              "egg": 1,
+              "birdEgg": 0,
+              "monsterMaterial": 2,
+              "shopFeed": 3
+            },
+            "count": 1,
+            "equipped": 1,
+            "followerVisible": true,
+            "followerDist": 0.4230523749993351
+          }
+        },
+        "itemAppraisal": {
+          "target": "item:2",
+          "r1": {
+            "ok": true,
+            "affixes": [
+              {
+                "stat": "maxHp",
+                "value": -5
+              }
+            ]
+          },
+          "r2": {
+            "ok": false,
+            "affixes": null
+          },
+          "other": null,
+          "petAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]",
+          "itemAffixes": "[{\"stat\":\"maxHp\",\"value\":-5}]"
+        },
+        "bench": {
+          "seconds": 10.5,
+          "avgFps": 2.952943417793866,
+          "low1Fps": 2.6109660574412534,
+          "minFps": 2.6109660574412534,
+          "avgDraw": 114,
+          "kills": 1,
+          "contextLost": 0,
+          "first30": 2.952943417793865,
+          "last30": 2.9529434177938656,
+          "quality": "medium",
+          "gender": "female",
+          "lod": "lite",
+          "charShadow": "blob"
+        },
+        "end": {
+          "render": {
+            "p3": true,
+            "pipeline": false,
+            "charShadow": "blob",
+            "drawCalls": 109,
+            "fps": 2.9542097488921715,
+            "contextLost": 0
+          }
+        }
+      },
+      "ok": false
+    }
+  ],
+  "finishedAt": "2026-11-28T03:00:35.908Z",
+  "characterVersion": "c10b5a",
+  "failures": 2
+}
