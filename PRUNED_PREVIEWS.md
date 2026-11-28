@@ -46,3 +46,12 @@
 - 2026-11-27：移除 /preview-village-final64/（使用者核准：B 只留最新及必要驗收版本；保留 npc67、art66；原始碼分支保留）
 
 - 2026-11-27：/preview-stage72-world/ 精簡為其他預覽仍引用的檔案（Stage 7.3 取代；原始碼 backup/stage72-world-final）
+
+
+# 2026-11-28 容量整理（使用者核准方案①②；執行：Claude A；整理前備份分支 `backup/gh-pages-20261128-pre-trim` = gh-pages `898f5e7`）
+
+| 資料夾 | 移除內容 | 檔案數 | 保留 | 還原 |
+|---|---|---|---|---|
+| preview-village-npc67（B） | ci-report 內 CI 測試截圖（map-e2e、village-e2e） | 198 | 遊戲檔案、JSON 報告全部保留 | 備份分支或 gh-pages `898f5e7` |
+| preview-village-art66（B） | ci-report 內 CI 測試截圖（map-e2e、village-e2e） | 198 | 遊戲檔案、JSON 報告全部保留 | 同上 |
+| preview-stage71-world（A） | 遊戲本體（不再提供遊玩） | 777 | preview-mp81／mp82 引用的 15 個檔案、preview.json、說明頁 | 分支 feature/render-stage71-world `edbd6740` 重新部署 |
