@@ -407,6 +407,28 @@ try {
   check("畫面分級不影響伺服器結果：A 開啟怪物距離分級、B 關閉，兩邊看到的血量一致", fiA.detail?.on === true && fiB.detail?.on === false, { A: fiA.detail, B: fiB.detail });
   check("兩人都拿到經驗（伺服器結算，擊殺只結算一次）", fldA.self?.exp > 0 && fldB.self?.exp > 0, { A: fldA.self, B: fldB.self });
   await shot(A, "05_field_coop_kill_A");
+  // 伺服器判定 B 被怪物打倒（B 傷害最高 → 怪物反擊 B，屬正常規則；CI 畫面很慢時戰鬥拉長就會發生）
+  // → B 在村莊復活：等 B 上線後走回原野，回程路線重新記錄
+  const bInField = async () => (await B.page.evaluate(() => window.__mpWorld?.client?.stats?.map ?? "reloading").catch(() => "reloading")) === "starsprout";
+  async function ensureBInField(when) {
+    // 倒地中（還在原野、3 秒後回村）：等它回村再處理
+    for (let i = 0; i < 80; i++) {
+      const down = await B.page.evaluate(() => !!(window.__mpWorld?.client?.down || window.__mpWorld?.client?.self?.down)).catch(() => false);
+      if (!down || !(await bInField())) break;
+      await sleep(500);
+    }
+    if (await bInField()) return;
+    ((results.samples.bDownedByServer ??= [])).push({ when, monsterHits: fldB.monsterHitsTaken });
+    B.recording = false;
+    await waitVillage(B);
+    await toSouth(B);
+    await waitField(B);
+    fb = await finfo(B);
+    B.trail = [{ x: -56, z: -64 }, { x: fb.pos[0], z: fb.pos[2] }];
+    B.recording = true;
+    for (let i = 0; i < 100 && !(await finfo(A)).mp.remotes.some((r) => r.id === fb.mp.pid && r.loaded); i++) await sleep(300);
+    await B.page.waitForFunction(() => window.__mpWorld?.client?.state === "online", null, { timeout: 60000 });
+  }
   // ---------- 掉落物：伺服器產生（UUID、歸屬＝傷害最高者）；歸屬者靠近自動撿（伺服器判定） ----------
   const m0 = await metrics();
   const cb0 = (m0.combat ?? [])[0] ?? {};
@@ -416,7 +438,8 @@ try {
     const left = await A.page.evaluate(() => [...window.__mpWorld.client.loot.values()].map((l) => ({ uid: l.uid, x: l.x, z: l.z, o: l.ownerPid })));
     if (!left.length) break;
     const l = left[0];
-    const P = l.o === pidA ? A : B;
+    // 歸屬者是 B 但 B 已被打倒回村：A 等 30 秒歸屬時間結束後撿（伺服器規則）
+    const P = l.o === pidA || !(await bInField()) ? A : B;
     await walk(P, [{ x: l.x, z: l.z }], async () => {
       const i = await finfo(P).catch(() => null);
       return i ? [i.pos[0], i.pos[2]] : null;
@@ -426,20 +449,22 @@ try {
   await sleep(600);
   const m1 = await metrics();
   const cb1 = (m1.combat ?? [])[0] ?? {};
-  const [lA, lB] = await Promise.all([field(A), field(B)]);
+  const [lA, lB] = await Promise.all([field(A), field(B).catch(() => ({ picksOk: 0, self: fldB.self }))]);
   const leftA = await A.page.evaluate(() => window.__mpWorld.client.loot.size);
-  const leftB = await B.page.evaluate(() => window.__mpWorld.client.loot.size);
+  const leftB = (await bInField()) ? await B.page.evaluate(() => window.__mpWorld.client.loot.size) : 0;
   results.samples.loot = { spawned: cb1.lootSpawned, picked: cb1.lootPicked, rejected: cb1.lootPickRejected, killsSettled: cb1.killsSettled, duplicateKillsBlocked: cb1.duplicateKillsBlocked, picksOk: { A: lA.picksOk, B: lB.picksOk }, gold: { A: lA.self?.gold, B: lB.self?.gold }, leftA, leftB, before: { spawned: cb0.lootSpawned, picked: cb0.lootPicked } };
   check("掉落物由伺服器產生、撿取後兩邊畫面都消失（每件只入帳一次）", cb1.lootSpawned >= 1 && cb1.lootPicked === cb1.lootSpawned && lA.picksOk + lB.picksOk === cb1.lootPicked && leftA === 0 && leftB === 0, results.samples.loot);
   check("擊殺只結算一次（伺服器沒有重複結算）", cb1.killsSettled >= 1 && cb1.duplicateKillsBlocked === 0, { killsSettled: cb1.killsSettled, dup: cb1.duplicateKillsBlocked });
   check("撿到的金幣由伺服器入帳（起始 100 金幣以上）", (lA.self?.gold ?? 0) + (lB.self?.gold ?? 0) > 200, results.samples.loot.gold);
   mark("lootDone");
+  await ensureBInField("before-respawn-check");
   // ---------- 重生同步 ----------
   const tR = Date.now();
   let rA2 = null, rB2 = null;
   while (Date.now() - tR < 40000) {
     [rA2, rB2] = await Promise.all([monOf(A, targetId).catch(() => null), monOf(B, targetId).catch(() => null)]);
-    if (rA2 && rB2 && rA2.hp === rA2.maxHp && rB2.hp === rB2.maxHp && rA2.state !== "dead" && rB2.state !== "dead") break;
+    // 兩個瀏覽器是先後讀取：怪物走動中位置會差一點 → 等兩邊都看到它停下（idle）再比位置
+    if (rA2 && rB2 && rA2.hp === rA2.maxHp && rB2.hp === rB2.maxHp && rA2.state === "idle" && rB2.state === "idle" && Math.hypot(rA2.x - rB2.x, rA2.z - rB2.z) < 0.5) break;
     await sleep(300);
   }
   mark("respawned");
@@ -452,6 +477,8 @@ try {
     return (await A.page.evaluate(() => window.__mpWorld.client.down)) === false;
   })());
   void mHits;
+  await ensureBInField("before-reconnect");
+  await B.page.waitForFunction(() => window.__mpWorld?.client?.state === "online", null, { timeout: 60000 });
   // ---------- 斷線重連（B） ----------
   await B.page.evaluate(() => window.__mpWorld.client.dropConnection());
   let sawOff = false;
