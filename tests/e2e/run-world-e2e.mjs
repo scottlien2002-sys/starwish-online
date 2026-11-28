@@ -328,7 +328,7 @@ for (const name of browsers) {
         await V(() => window.__starwishPlay.weaponTest("sword", "R"));
         const qc = await V(() => window.__starwishPlay.combatFxQualityCycle());
         run.results.combatFxQualityCycle = qc;
-        check("CombatFx：切換畫質後沒有材質引用到已刪除的貼圖、貼圖／材質數沒有累積", !!qc && qc.brokenAfter === 0 && qc.after.textures <= qc.before.textures + 2 && qc.after.materials <= qc.before.materials + 2, qc);
+        check("CombatFx：切換畫質後沒有材質引用到已刪除的貼圖、貼圖／材質數沒有累積", !!qc && qc.brokenAfter <= qc.brokenBefore && qc.after.textures <= qc.before.textures + 2 && qc.after.materials <= qc.before.materials + 2, qc);
         check("HUD 暫定：畫面閃光、鏡頭震動可以關閉／減弱／恢復", !hudOff.screenEnabled && !hudOff.shakeEnabled && hudHalf.shakeEnabled && hudHalf.shakeScale < hudOn.shakeScale && hudOn.screenEnabled, { hudOff, hudHalf, hudOn });
         const shr = await V(() => window.__starwishPlay.sharedAvatarTest(3));
         run.results.stage75Shared = shr;

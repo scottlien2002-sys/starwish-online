@@ -1139,7 +1139,26 @@ class StarsproutGame {
         if (this.testWeapon?.kind !== kind) this.equipTestWeapon(kind, "R");
       },
       // C 的 CombatFx：依動作檔時間播放特效、拖尾、投射物外觀、施放音效、震動；命中時間通知 FieldSkills 判定
-      startFx: (def, clip, rate, hooks) => fx.playSkill(def, clip, rate, { onHit: hooks.onHit, onProjectile: (ev, vis, t) => hooks.onProjectile(ev, vis, t), onEnd: hooks.onEnd }),
+      startFx: (def, clip, rate, hooks) =>
+        fx.playSkill(def, clip, rate, {
+          onHit: hooks.onHit,
+          // C 的投射物外觀用 Babylon Vector3；FieldSkills 不依賴 Babylon → 這裡轉接
+          onProjectile: (ev, vis, t) =>
+            hooks.onProjectile(
+              ev,
+              vis
+                ? {
+                    get alive() {
+                      return vis.alive;
+                    },
+                    steer: (p, k) => vis.steer(new Vector3(p.x, p.y, p.z), k),
+                    dispose: (burst) => vis.dispose(burst),
+                  }
+                : null,
+              t,
+            ),
+          onEnd: hooks.onEnd,
+        }),
       focus: () => {
         const f = this.testWeapon?.focus;
         if (!f) return null;
@@ -1677,8 +1696,9 @@ class StarsproutGame {
         if (!fx) return null;
         const sc = self.scene;
         const count = () => ({ textures: sc.textures.length, materials: sc.materials.length, meshes: sc.meshes.length, particleSystems: sc.particleSystems.length });
-        const broken = () =>
-          sc.materials.reduce((n, m) => n + m.getActiveTextures().filter((t) => !t.getInternalTexture()).length, 0);
+        const brokenList = () => sc.materials.flatMap((m) => m.getActiveTextures().filter((t) => !t.getInternalTexture()).map((t) => `${m.name}:${t.name}`));
+        const broken = () => brokenList().length;
+        const brokenBefore = brokenList();
         const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
         const tier0 = fx.fx.tier;
         fx.basicSwing(false, 0.3);
@@ -1692,7 +1712,7 @@ class StarsproutGame {
           rounds.push({ tier: t, ...count(), broken: broken() });
         }
         const after = count();
-        return { tier0, before, after, rounds, brokenAfter: broken(), trail: !!self.testWeapon };
+        return { tier0, before, after, rounds, brokenBefore: brokenBefore.length, brokenBeforeList: brokenBefore.slice(0, 8), brokenAfter: broken(), brokenAfterList: brokenList().slice(0, 8), trail: !!self.testWeapon };
       },
       combatText: (kind, value) => {
         if (!self.fx) return false;
