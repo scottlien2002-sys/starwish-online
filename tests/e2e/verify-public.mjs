@@ -35,7 +35,7 @@ console.log(`公開網址已更新：${JSON.stringify(live)}（等待 ${Math.rou
 let fails = 0;
 const html = await (await fetch(`${base}?t=${Date.now()}`, { cache: "no-store" })).text();
 const assets = [...html.matchAll(/(?:src|href)="(\.\/assets\/[^"]+)"/g)].map((m) => m[1]);
-const urls = [...assets.map((a) => new URL(a, base).href), ...["male", "female"].flatMap((g) => ["hq", "lite"].map((l) => `${base}models/novice_c10b5b_${g}_${l}.glb`)), `${base}models/village-p3/portals_hq.glb`, `${base}models/village-p3/portals_lite.glb`];
+const urls = [...assets.map((a) => new URL(a, base).href), ...["hq", "lite"].flatMap((l) => [`${base}models/novice_c10b5b_female_${l}.glb`, `${base}models/novice_n75_male_${l}.glb`]), `${base}models/village-p3/portals_hq.glb`, `${base}models/village-p3/portals_lite.glb`];
 // Stage 7.4：共用資產（asset-remap.json）→ 檢查實際讀取的那個網址
 const remap = await fetch(`${base}asset-remap.json?t=${Date.now()}`, { cache: "no-store" }).then((r) => (r.ok ? r.json() : { files: {} })).catch(() => ({ files: {} }));
 const remapFiles = remap.files ?? {};
@@ -72,7 +72,7 @@ for (const [name, vp] of [["webkit", { width: 393, height: 852 }], ["chromium", 
     await page.waitForFunction(() => window.__starwishWorld?.ready === true && !!window.__starwishWorld.info().interact && /^(loaded|部分|error)/.test(window.__starwishWorld.info().art), null, { timeout: 300000 });
     const i = await page.evaluate(() => window.__starwishWorld.info());
     const am = i.avatarModel;
-    const ok = i.map === "village" && i.art === "loaded" && errs.length === 0 && bad.length === 0 && am?.modular === false && /^novice_c10b5b_/.test(i.file) && (i.npcs?.ids.length ?? 0) >= 7 && i.npcs?.board && i.npcs?.merchant;
+    const ok = i.map === "village" && i.art === "loaded" && errs.length === 0 && bad.length === 0 && am?.modular === false && /^novice_n75_male_/.test(i.file) && (i.npcs?.ids.length ?? 0) >= 7 && i.npcs?.board && i.npcs?.merchant;
     if (!ok) fails++;
     console.log(`${ok ? "✓" : "✗"} ${name} ${vp.width}×${vp.height}：星芽村載入、美術 ${i.art}、角色 ${i.file}（骨骼 ${am?.bones}、三角形 ${am?.triangles}）、NPC ${i.npcs?.ids.length}＋洛恩 ${i.npcs?.merchant}＋佈告欄 ${i.npcs?.board}、錯誤 ${errs.length}、失敗請求 ${bad.length}`);
     for (const e of [...errs, ...bad]) console.log(`   ! ${e}`);
