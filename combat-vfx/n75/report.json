@@ -1,0 +1,4610 @@
+{
+  "startedAt": "2026-11-28T10:52:49.096Z",
+  "note": "門檻為 C 暫定，等 A 的正式規格；FPS 未量測",
+  "runs": [
+    {
+      "browser": "chromium",
+      "case": "n75-lite",
+      "checks": {
+        "A 的 n75 資產已取得（CI 唯讀）": {
+          "ok": true,
+          "detail": "n75"
+        },
+        "掛點：Weapon_R、Weapon_L、R_Hand、L_Hand 存在": {
+          "ok": true,
+          "detail": {
+            "weaponR": true,
+            "weaponL": true,
+            "rHand": true,
+            "lHand": true
+          }
+        },
+        "技能動作標記：A 的 json 與 C 的 novice_combat_male.json 一致": {
+          "ok": true,
+          "detail": []
+        },
+        "triple_slash 攻速×1：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "triple_slash 攻速×1：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.525,
+            "perRate1": 0.525
+          }
+        },
+        "triple_slash 攻速×1：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.164
+        },
+        "triple_slash 攻速×1：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 9,
+            "err": 0
+          }
+        },
+        "triple_slash 攻速×1：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 0.17,
+              "wall": 0.167,
+              "expect": 0.17,
+              "animT": 0.17,
+              "tip": 0.37
+            },
+            {
+              "mark": 0.5,
+              "wall": 0.5,
+              "expect": 0.5,
+              "animT": 0.5,
+              "tip": 1.45
+            },
+            {
+              "mark": 0.92,
+              "wall": 0.933,
+              "expect": 0.92,
+              "animT": 0.92,
+              "tip": 0.31
+            }
+          ]
+        },
+        "triple_slash 攻速×1：投射物從武器／手部發射（≤ 0.9 m）": {
+          "ok": true,
+          "detail": [
+            0.57
+          ]
+        },
+        "triple_slash 攻速×1.3：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "triple_slash 攻速×1.3：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.618,
+            "perRate1": 0.475
+          }
+        },
+        "triple_slash 攻速×1.3：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.155
+        },
+        "triple_slash 攻速×1.3：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 9,
+            "err": 0
+          }
+        },
+        "triple_slash 攻速×1.3：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 0.17,
+              "wall": 0.117,
+              "expect": 0.131,
+              "animT": 0.17,
+              "tip": 0.37
+            },
+            {
+              "mark": 0.5,
+              "wall": 0.383,
+              "expect": 0.385,
+              "animT": 0.5,
+              "tip": 1.45
+            },
+            {
+              "mark": 0.92,
+              "wall": 0.717,
+              "expect": 0.708,
+              "animT": 0.92,
+              "tip": 0.31
+            }
+          ]
+        },
+        "triple_slash 攻速×1.3：投射物從武器／手部發射（≤ 0.9 m）": {
+          "ok": true,
+          "detail": [
+            0.48
+          ]
+        },
+        "triple_slash 攻速×1.6：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "triple_slash 攻速×1.6：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.819,
+            "perRate1": 0.512
+          }
+        },
+        "triple_slash 攻速×1.6：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.207
+        },
+        "triple_slash 攻速×1.6：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 9,
+            "err": 0
+          }
+        },
+        "triple_slash 攻速×1.6：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 0.17,
+              "wall": 0.1,
+              "expect": 0.106,
+              "animT": 0.17,
+              "tip": 0.37
+            },
+            {
+              "mark": 0.5,
+              "wall": 0.317,
+              "expect": 0.313,
+              "animT": 0.5,
+              "tip": 1.45
+            },
+            {
+              "mark": 0.92,
+              "wall": 0.583,
+              "expect": 0.575,
+              "animT": 0.92,
+              "tip": 0.31
+            }
+          ]
+        },
+        "triple_slash 攻速×1.6：投射物從武器／手部發射（≤ 0.9 m）": {
+          "ok": true,
+          "detail": [
+            0.57
+          ]
+        },
+        "staff_cast 攻速×1：武器上的特效從武器發射點產生（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 2,
+            "err": 0
+          }
+        },
+        "staff_cast 攻速×1：投射物從武器／手部發射（≤ 0.9 m）": {
+          "ok": true,
+          "detail": [
+            0.6
+          ]
+        },
+        "staff_cast 攻速×1.3：武器上的特效從武器發射點產生（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 2,
+            "err": 0
+          }
+        },
+        "staff_cast 攻速×1.3：投射物從武器／手部發射（≤ 0.9 m）": {
+          "ok": true,
+          "detail": [
+            0.6
+          ]
+        },
+        "staff_cast 攻速×1.6：武器上的特效從武器發射點產生（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 2,
+            "err": 0
+          }
+        },
+        "staff_cast 攻速×1.6：投射物從武器／手部發射（≤ 0.9 m）": {
+          "ok": true,
+          "detail": [
+            0.6
+          ]
+        },
+        "leap_slam 攻速×1：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "leap_slam 攻速×1：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.478,
+            "perRate1": 0.478
+          }
+        },
+        "leap_slam 攻速×1：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.161
+        },
+        "leap_slam 攻速×1：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 3,
+            "err": 0
+          }
+        },
+        "leap_slam 攻速×1：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 0.8,
+              "wall": 0.783,
+              "expect": 0.8,
+              "animT": 0.8,
+              "tip": 1.23
+            }
+          ]
+        },
+        "leap_slam 攻速×1.3：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "leap_slam 攻速×1.3：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.616,
+            "perRate1": 0.474
+          }
+        },
+        "leap_slam 攻速×1.3：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.158
+        },
+        "leap_slam 攻速×1.3：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 3,
+            "err": 0
+          }
+        },
+        "leap_slam 攻速×1.3：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 0.8,
+              "wall": 0.6,
+              "expect": 0.615,
+              "animT": 0.8,
+              "tip": 1.23
+            }
+          ]
+        },
+        "leap_slam 攻速×1.6：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "leap_slam 攻速×1.6：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.747,
+            "perRate1": 0.467
+          }
+        },
+        "leap_slam 攻速×1.6：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.189
+        },
+        "leap_slam 攻速×1.6：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 3,
+            "err": 0
+          }
+        },
+        "leap_slam 攻速×1.6：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 0.8,
+              "wall": 0.483,
+              "expect": 0.5,
+              "animT": 0.8,
+              "tip": 1.23
+            }
+          ]
+        },
+        "whirlwind 攻速×1：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "whirlwind 攻速×1：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.342,
+            "perRate1": 0.342
+          }
+        },
+        "whirlwind 攻速×1：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.125
+        },
+        "whirlwind 攻速×1：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 9,
+            "err": 0
+          }
+        },
+        "whirlwind 攻速×1：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 0.48,
+              "wall": 0.467,
+              "expect": 0.48,
+              "animT": 0.48,
+              "tip": 1.51
+            },
+            {
+              "mark": 0.76,
+              "wall": 0.75,
+              "expect": 0.76,
+              "animT": 0.76,
+              "tip": 1.17
+            },
+            {
+              "mark": 1.04,
+              "wall": 1.033,
+              "expect": 1.04,
+              "animT": 1.04,
+              "tip": 1.25
+            }
+          ]
+        },
+        "whirlwind 攻速×1.3：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "whirlwind 攻速×1.3：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.433,
+            "perRate1": 0.333
+          }
+        },
+        "whirlwind 攻速×1.3：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.145
+        },
+        "whirlwind 攻速×1.3：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 9,
+            "err": 0
+          }
+        },
+        "whirlwind 攻速×1.3：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 0.48,
+              "wall": 0.367,
+              "expect": 0.369,
+              "animT": 0.48,
+              "tip": 1.51
+            },
+            {
+              "mark": 0.76,
+              "wall": 0.583,
+              "expect": 0.585,
+              "animT": 0.76,
+              "tip": 1.17
+            },
+            {
+              "mark": 1.04,
+              "wall": 0.8,
+              "expect": 0.8,
+              "animT": 1.04,
+              "tip": 1.25
+            }
+          ]
+        },
+        "whirlwind 攻速×1.6：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "whirlwind 攻速×1.6：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.518,
+            "perRate1": 0.324
+          }
+        },
+        "whirlwind 攻速×1.6：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.139
+        },
+        "whirlwind 攻速×1.6：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 9,
+            "err": 0
+          }
+        },
+        "whirlwind 攻速×1.6：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 0.48,
+              "wall": 0.283,
+              "expect": 0.3,
+              "animT": 0.48,
+              "tip": 1.51
+            },
+            {
+              "mark": 0.76,
+              "wall": 0.467,
+              "expect": 0.475,
+              "animT": 0.76,
+              "tip": 1.17
+            },
+            {
+              "mark": 1.04,
+              "wall": 0.65,
+              "expect": 0.65,
+              "animT": 1.04,
+              "tip": 1.25
+            }
+          ]
+        },
+        "star_meteor 攻速×1：武器上的特效從武器發射點產生（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 1,
+            "err": 0
+          }
+        },
+        "star_meteor 攻速×1.3：武器上的特效從武器發射點產生（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 1,
+            "err": 0
+          }
+        },
+        "star_meteor 攻速×1.6：武器上的特效從武器發射點產生（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 1,
+            "err": 0
+          }
+        },
+        "charge_burst 攻速×1：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "charge_burst 攻速×1：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.311,
+            "perRate1": 0.311
+          }
+        },
+        "charge_burst 攻速×1：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.163
+        },
+        "charge_burst 攻速×1：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 3,
+            "err": 0
+          }
+        },
+        "charge_burst 攻速×1：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 1.22,
+              "wall": 1.217,
+              "expect": 1.22,
+              "animT": 1.22,
+              "tip": 0.82
+            }
+          ]
+        },
+        "charge_burst 攻速×1.3：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "charge_burst 攻速×1.3：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.373,
+            "perRate1": 0.287
+          }
+        },
+        "charge_burst 攻速×1.3：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.136
+        },
+        "charge_burst 攻速×1.3：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 3,
+            "err": 0
+          }
+        },
+        "charge_burst 攻速×1.3：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 1.22,
+              "wall": 0.933,
+              "expect": 0.938,
+              "animT": 1.22,
+              "tip": 0.82
+            }
+          ]
+        },
+        "charge_burst 攻速×1.6：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "charge_burst 攻速×1.6：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.419,
+            "perRate1": 0.262
+          }
+        },
+        "charge_burst 攻速×1.6：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.157
+        },
+        "charge_burst 攻速×1.6：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 3,
+            "err": 0
+          }
+        },
+        "charge_burst 攻速×1.6：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 1.22,
+              "wall": 0.75,
+              "expect": 0.762,
+              "animT": 1.22,
+              "tip": 0.82
+            }
+          ]
+        },
+        "Attack：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_1H_Chop：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_1H_Chop：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_1H_Thrust：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_1H_Thrust：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_2H_Slash：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_2H_Slash：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_2H_Smash：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_2H_Smash：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_Polearm_Thrust：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_Polearm_Thrust：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_Polearm_Swing：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_Polearm_Swing：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_Hammer_Smash：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_Hammer_Smash：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "Cast_Staff：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Cast_Staff：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "Cast_Heal：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Cast_Heal：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "重要特效：Boss 範圍預警（遠＋畫面外）照樣顯示": {
+          "ok": true,
+          "detail": {
+            "decorCulled": true,
+            "bossWarning": true,
+            "dangerOnMe": true,
+            "dangerFarAway": false,
+            "healOnMe": true,
+            "projectileToMe": true,
+            "projectileElsewhere": false,
+            "statusCue": true,
+            "essentialCount": 5,
+            "budget": {
+              "active": 38,
+              "activeRemote": 1,
+              "activeCritical": 10,
+              "particles": 1526,
+              "granted": 340,
+              "denied": 28,
+              "scaled": 0,
+              "deniedBy": {
+                "secondary-pressure": 26,
+                "distance": 2
+              }
+            }
+          }
+        },
+        "重要特效：自己在敵方危險範圍內 → 顯示": {
+          "ok": true
+        },
+        "重要特效：自己在治療範圍內 → 顯示": {
+          "ok": true
+        },
+        "重要特效：飛向自己的投射物（遠＋畫面外）→ 顯示": {
+          "ok": true
+        },
+        "重要特效：必要狀態提示 → 顯示": {
+          "ok": true
+        },
+        "一般規則：不影響自己的遠方危險範圍／投射物 → 省略": {
+          "ok": true
+        },
+        "一般規則：遠方其他玩家的裝飾粒子 → 省略": {
+          "ok": true
+        },
+        "沒有頁面錯誤": {
+          "ok": true,
+          "detail": []
+        }
+      },
+      "errors": [],
+      "warnings": [
+        "whirlwind 攻速×1：刀尖靠近頭肩（軀幹圓柱內）2 格：[{\"t\":1.24,\"axis\":0.136,\"y\":1.305},{\"t\":1.257,\"axis\":0.138,\"y\":1.308}]",
+        "whirlwind 攻速×1.3：刀尖靠近頭肩（軀幹圓柱內）2 格：[{\"t\":1.235,\"axis\":0.143,\"y\":1.302},{\"t\":1.257,\"axis\":0.138,\"y\":1.308}]",
+        "whirlwind 攻速×1.6：刀尖靠近頭肩（軀幹圓柱內）1 格：[{\"t\":1.253,\"axis\":0.134,\"y\":1.308}]"
+      ],
+      "results": {
+        "info": {
+          "available": true,
+          "version": "n75",
+          "clips": 27,
+          "sockets": {
+            "weaponR": true,
+            "weaponL": true,
+            "rHand": true,
+            "lHand": true
+          }
+        },
+        "skills": {
+          "triple_slash@1": {
+            "skillId": "triple_slash",
+            "rate": 1,
+            "duration": 1.5,
+            "wall": 1.5333333333333328,
+            "hitFxCount": 9,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 37,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.5246026086861807,
+            "chordMax": 0.16378006797879857,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [
+              {
+                "mark": 0.17,
+                "wall": 0.16666666666666666,
+                "expect": 0.17,
+                "animT": 0.17,
+                "tipToTarget": 0.3670938412802096,
+                "tipAxis": 0.8622648176057462
+              },
+              {
+                "mark": 0.5,
+                "wall": 0.49999999999999994,
+                "expect": 0.5,
+                "animT": 0.5,
+                "tipToTarget": 1.4478099366243506,
+                "tipAxis": 0.6481128672307992
+              },
+              {
+                "mark": 0.92,
+                "wall": 0.9333333333333346,
+                "expect": 0.92,
+                "animT": 0.92,
+                "tipToTarget": 0.30979590284982167,
+                "tipAxis": 0.9364184000039879
+              }
+            ],
+            "projectiles": [
+              {
+                "mark": 0.9,
+                "fx": "swordWave",
+                "fromToHand": 0.572482696813129
+              }
+            ]
+          },
+          "triple_slash@1.3": {
+            "skillId": "triple_slash",
+            "rate": 1.3,
+            "duration": 1.5,
+            "wall": 1.183333333333334,
+            "hitFxCount": 9,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 29,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.6176018374301655,
+            "chordMax": 0.1553264993271457,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [
+              {
+                "mark": 0.17,
+                "wall": 0.11666666666666665,
+                "expect": 0.13076923076923078,
+                "animT": 0.17,
+                "tipToTarget": 0.3670938412802096,
+                "tipAxis": 0.8622648176057462
+              },
+              {
+                "mark": 0.5,
+                "wall": 0.3833333333333333,
+                "expect": 0.3846153846153846,
+                "animT": 0.5,
+                "tipToTarget": 1.4478099366243506,
+                "tipAxis": 0.6481128672307992
+              },
+              {
+                "mark": 0.92,
+                "wall": 0.7166666666666672,
+                "expect": 0.7076923076923077,
+                "animT": 0.92,
+                "tipToTarget": 0.30979590284982167,
+                "tipAxis": 0.9364184000039879
+              }
+            ],
+            "projectiles": [
+              {
+                "mark": 0.9,
+                "fx": "swordWave",
+                "fromToHand": 0.4845464001857614
+              }
+            ]
+          },
+          "triple_slash@1.6": {
+            "skillId": "triple_slash",
+            "rate": 1.6,
+            "duration": 1.5,
+            "wall": 0.966666666666668,
+            "hitFxCount": 9,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 24,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.8190597663596,
+            "chordMax": 0.20690645069510671,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [
+              {
+                "mark": 0.17,
+                "wall": 0.09999999999999999,
+                "expect": 0.10625,
+                "animT": 0.17,
+                "tipToTarget": 0.3670938412802096,
+                "tipAxis": 0.8622648176057462
+              },
+              {
+                "mark": 0.5,
+                "wall": 0.31666666666666665,
+                "expect": 0.3125,
+                "animT": 0.5,
+                "tipToTarget": 1.4478099366243506,
+                "tipAxis": 0.6481128672307992
+              },
+              {
+                "mark": 0.92,
+                "wall": 0.5833333333333335,
+                "expect": 0.575,
+                "animT": 0.92,
+                "tipToTarget": 0.30979590284982167,
+                "tipAxis": 0.9364184000039879
+              }
+            ],
+            "projectiles": [
+              {
+                "mark": 0.9,
+                "fx": "swordWave",
+                "fromToHand": 0.5724826968131264
+              }
+            ]
+          },
+          "staff_cast@1": {
+            "skillId": "staff_cast",
+            "rate": 1,
+            "duration": 1.3,
+            "wall": 1.3000000000000003,
+            "hitFxCount": 0,
+            "hitFxErr": 0,
+            "weaponFxCount": 2,
+            "weaponFxErr": 0,
+            "trailFrames": 0,
+            "trailErrMax": 0,
+            "tipJumpMax": 0,
+            "chordMax": 0,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [],
+            "projectiles": [
+              {
+                "mark": 0.58,
+                "fx": "magicBolt",
+                "fromToHand": 0.601282584832629
+              }
+            ]
+          },
+          "staff_cast@1.3": {
+            "skillId": "staff_cast",
+            "rate": 1.3,
+            "duration": 1.3,
+            "wall": 1.0000000000000013,
+            "hitFxCount": 0,
+            "hitFxErr": 0,
+            "weaponFxCount": 2,
+            "weaponFxErr": 0,
+            "trailFrames": 0,
+            "trailErrMax": 0,
+            "tipJumpMax": 0,
+            "chordMax": 0,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [],
+            "projectiles": [
+              {
+                "mark": 0.58,
+                "fx": "magicBolt",
+                "fromToHand": 0.6012825052553724
+              }
+            ]
+          },
+          "staff_cast@1.6": {
+            "skillId": "staff_cast",
+            "rate": 1.6,
+            "duration": 1.3,
+            "wall": 0.8166666666666675,
+            "hitFxCount": 0,
+            "hitFxErr": 0,
+            "weaponFxCount": 2,
+            "weaponFxErr": 0,
+            "trailFrames": 0,
+            "trailErrMax": 0,
+            "tipJumpMax": 0,
+            "chordMax": 0,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [],
+            "projectiles": [
+              {
+                "mark": 0.58,
+                "fx": "magicBolt",
+                "fromToHand": 0.6012823763798583
+              }
+            ]
+          },
+          "leap_slam@1": {
+            "skillId": "leap_slam",
+            "rate": 1,
+            "duration": 1.5,
+            "wall": 1.4999999999999996,
+            "hitFxCount": 3,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 15,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.4775701083605055,
+            "chordMax": 0.16108727488766733,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [
+              {
+                "mark": 0.8,
+                "wall": 0.7833333333333341,
+                "expect": 0.8,
+                "animT": 0.8,
+                "tipToTarget": 1.233426272800848,
+                "tipAxis": 0.676503051202586
+              }
+            ],
+            "projectiles": []
+          },
+          "leap_slam@1.3": {
+            "skillId": "leap_slam",
+            "rate": 1.3,
+            "duration": 1.5,
+            "wall": 1.1666666666666674,
+            "hitFxCount": 3,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 12,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.6156039911231216,
+            "chordMax": 0.15849800931098126,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [
+              {
+                "mark": 0.8,
+                "wall": 0.6000000000000002,
+                "expect": 0.6153846153846154,
+                "animT": 0.8,
+                "tipToTarget": 1.233426272800848,
+                "tipAxis": 0.676503051202586
+              }
+            ],
+            "projectiles": []
+          },
+          "leap_slam@1.6": {
+            "skillId": "leap_slam",
+            "rate": 1.6,
+            "duration": 1.5,
+            "wall": 0.9500000000000013,
+            "hitFxCount": 3,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 9,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.7470742686159115,
+            "chordMax": 0.18949333717257,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [
+              {
+                "mark": 0.8,
+                "wall": 0.4833333333333333,
+                "expect": 0.5,
+                "animT": 0.8,
+                "tipToTarget": 1.233426272800848,
+                "tipAxis": 0.676503051202586
+              }
+            ],
+            "projectiles": []
+          },
+          "whirlwind@1": {
+            "skillId": "whirlwind",
+            "rate": 1,
+            "duration": 1.6,
+            "wall": 1.6166666666666658,
+            "hitFxCount": 9,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 65,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.34197234312351715,
+            "chordMax": 0.1250621519988501,
+            "insideFrames": 2,
+            "inside": [
+              {
+                "t": 1.24,
+                "axis": 0.136,
+                "y": 1.305
+              },
+              {
+                "t": 1.257,
+                "axis": 0.138,
+                "y": 1.308
+              }
+            ],
+            "hits": [
+              {
+                "mark": 0.48,
+                "wall": 0.4666666666666666,
+                "expect": 0.48,
+                "animT": 0.48,
+                "tipToTarget": 1.5061296373987823,
+                "tipAxis": 0.17989357266802236
+              },
+              {
+                "mark": 0.76,
+                "wall": 0.7500000000000007,
+                "expect": 0.76,
+                "animT": 0.76,
+                "tipToTarget": 1.1745137182561483,
+                "tipAxis": 0.1802184823336564
+              },
+              {
+                "mark": 1.04,
+                "wall": 1.0333333333333345,
+                "expect": 1.04,
+                "animT": 1.04,
+                "tipToTarget": 1.2499939108812896,
+                "tipAxis": 0.18042241728460012
+              }
+            ],
+            "projectiles": []
+          },
+          "whirlwind@1.3": {
+            "skillId": "whirlwind",
+            "rate": 1.3,
+            "duration": 1.6,
+            "wall": 1.2500000000000004,
+            "hitFxCount": 9,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 50,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.4333367332160385,
+            "chordMax": 0.14517387732282566,
+            "insideFrames": 2,
+            "inside": [
+              {
+                "t": 1.235,
+                "axis": 0.143,
+                "y": 1.302
+              },
+              {
+                "t": 1.257,
+                "axis": 0.138,
+                "y": 1.308
+              }
+            ],
+            "hits": [
+              {
+                "mark": 0.48,
+                "wall": 0.36666666666666664,
+                "expect": 0.3692307692307692,
+                "animT": 0.48,
+                "tipToTarget": 1.5061296373987823,
+                "tipAxis": 0.17989357266802236
+              },
+              {
+                "mark": 0.76,
+                "wall": 0.5833333333333335,
+                "expect": 0.5846153846153846,
+                "animT": 0.76,
+                "tipToTarget": 1.1745137182561483,
+                "tipAxis": 0.1802184823336564
+              },
+              {
+                "mark": 1.04,
+                "wall": 0.8000000000000008,
+                "expect": 0.8,
+                "animT": 1.04,
+                "tipToTarget": 1.2499939108812896,
+                "tipAxis": 0.18042241728460012
+              }
+            ],
+            "projectiles": []
+          },
+          "whirlwind@1.6": {
+            "skillId": "whirlwind",
+            "rate": 1.6,
+            "duration": 1.6,
+            "wall": 1.016666666666668,
+            "hitFxCount": 9,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 41,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.5183802741753676,
+            "chordMax": 0.13859100653807174,
+            "insideFrames": 1,
+            "inside": [
+              {
+                "t": 1.253,
+                "axis": 0.134,
+                "y": 1.308
+              }
+            ],
+            "hits": [
+              {
+                "mark": 0.48,
+                "wall": 0.2833333333333333,
+                "expect": 0.3,
+                "animT": 0.48,
+                "tipToTarget": 1.5061296373987823,
+                "tipAxis": 0.17989357266802236
+              },
+              {
+                "mark": 0.76,
+                "wall": 0.4666666666666666,
+                "expect": 0.475,
+                "animT": 0.76,
+                "tipToTarget": 1.1745137182561483,
+                "tipAxis": 0.1802184823336564
+              },
+              {
+                "mark": 1.04,
+                "wall": 0.6500000000000004,
+                "expect": 0.65,
+                "animT": 1.04,
+                "tipToTarget": 1.2499939108812896,
+                "tipAxis": 0.18042241728460012
+              }
+            ],
+            "projectiles": []
+          },
+          "star_meteor@1": {
+            "skillId": "star_meteor",
+            "rate": 1,
+            "duration": 1.7,
+            "wall": 1.6999999999999988,
+            "hitFxCount": 0,
+            "hitFxErr": 0,
+            "weaponFxCount": 1,
+            "weaponFxErr": 0,
+            "trailFrames": 0,
+            "trailErrMax": 0,
+            "tipJumpMax": 0,
+            "chordMax": 0,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [],
+            "projectiles": [
+              {
+                "mark": 0.72,
+                "fx": "meteor",
+                "fromToHand": 8.736775167378672
+              }
+            ]
+          },
+          "star_meteor@1.3": {
+            "skillId": "star_meteor",
+            "rate": 1.3,
+            "duration": 1.7,
+            "wall": 1.3166666666666669,
+            "hitFxCount": 0,
+            "hitFxErr": 0,
+            "weaponFxCount": 1,
+            "weaponFxErr": 0,
+            "trailFrames": 0,
+            "trailErrMax": 0,
+            "tipJumpMax": 0,
+            "chordMax": 0,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [],
+            "projectiles": [
+              {
+                "mark": 0.72,
+                "fx": "meteor",
+                "fromToHand": 8.737268227751379
+              }
+            ]
+          },
+          "star_meteor@1.6": {
+            "skillId": "star_meteor",
+            "rate": 1.6,
+            "duration": 1.7,
+            "wall": 1.0666666666666678,
+            "hitFxCount": 0,
+            "hitFxErr": 0,
+            "weaponFxCount": 1,
+            "weaponFxErr": 0,
+            "trailFrames": 0,
+            "trailErrMax": 0,
+            "tipJumpMax": 0,
+            "chordMax": 0,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [],
+            "projectiles": [
+              {
+                "mark": 0.72,
+                "fx": "meteor",
+                "fromToHand": 8.716023386838048
+              }
+            ]
+          },
+          "charge_burst@1": {
+            "skillId": "charge_burst",
+            "rate": 1,
+            "duration": 2.1,
+            "wall": 2.116666666666664,
+            "hitFxCount": 3,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 15,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.31149674319167897,
+            "chordMax": 0.163235914748252,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [
+              {
+                "mark": 1.22,
+                "wall": 1.2166666666666672,
+                "expect": 1.22,
+                "animT": 1.22,
+                "tipToTarget": 0.820629246897528,
+                "tipAxis": 0.36958013842897774
+              }
+            ],
+            "projectiles": []
+          },
+          "charge_burst@1.3": {
+            "skillId": "charge_burst",
+            "rate": 1.3,
+            "duration": 2.1,
+            "wall": 1.6333333333333324,
+            "hitFxCount": 3,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 12,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.3732220589743665,
+            "chordMax": 0.13613874995068434,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [
+              {
+                "mark": 1.22,
+                "wall": 0.9333333333333346,
+                "expect": 0.9384615384615385,
+                "animT": 1.22,
+                "tipToTarget": 0.820629246897528,
+                "tipAxis": 0.36958013842897774
+              }
+            ],
+            "projectiles": []
+          },
+          "charge_burst@1.6": {
+            "skillId": "charge_burst",
+            "rate": 1.6,
+            "duration": 2.1,
+            "wall": 1.3166666666666669,
+            "hitFxCount": 3,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 10,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.4190831648516506,
+            "chordMax": 0.15715936081466134,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [
+              {
+                "mark": 1.22,
+                "wall": 0.7500000000000007,
+                "expect": 0.7625,
+                "animT": 1.22,
+                "tipToTarget": 0.820629246897528,
+                "tipAxis": 0.36958013842897774
+              }
+            ],
+            "projectiles": []
+          }
+        },
+        "torso": {
+          "whirlwind 攻速×1": [
+            {
+              "t": 1.24,
+              "axis": 0.136,
+              "y": 1.305
+            },
+            {
+              "t": 1.257,
+              "axis": 0.138,
+              "y": 1.308
+            }
+          ],
+          "whirlwind 攻速×1.3": [
+            {
+              "t": 1.235,
+              "axis": 0.143,
+              "y": 1.302
+            },
+            {
+              "t": 1.257,
+              "axis": 0.138,
+              "y": 1.308
+            }
+          ],
+          "whirlwind 攻速×1.6": [
+            {
+              "t": 1.253,
+              "axis": 0.134,
+              "y": 1.308
+            }
+          ]
+        },
+        "basic": {
+          "Attack": {
+            "clipName": "Attack",
+            "seconds": 0.6333333333333333,
+            "hitT": 0.25333333333333335,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.4068603749832944,
+            "lhandToGripAtHit": 0.565662924735294,
+            "tipToTargetAtHit": 1.768628846092308
+          },
+          "Attack_1H_Chop": {
+            "clipName": "Attack_1H_Chop",
+            "seconds": 0.6333333333333333,
+            "hitT": 0.248,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.24944281752863345,
+            "lhandToGripAtHit": 0.4781536488282737,
+            "tipToTargetAtHit": 1.5563854934516743
+          },
+          "Attack_1H_Thrust": {
+            "clipName": "Attack_1H_Thrust",
+            "seconds": 0.6333333333333333,
+            "hitT": 0.248,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.24944281752863345,
+            "lhandToGripAtHit": 0.4328890751816167,
+            "tipToTargetAtHit": 1.339717685097638
+          },
+          "Attack_2H_Slash": {
+            "clipName": "Attack_2H_Slash",
+            "seconds": 0.6333333333333333,
+            "hitT": 0.248,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.10497586166806269,
+            "lhandToGripAtHit": 0.14459406748763662,
+            "tipToTargetAtHit": 1.5468016046246422
+          },
+          "Attack_2H_Smash": {
+            "clipName": "Attack_2H_Smash",
+            "seconds": 0.7333333333333333,
+            "hitT": 0.34,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.13504892273880706,
+            "lhandToGripAtHit": 0.1572121526813098,
+            "tipToTargetAtHit": 1.6923804132854663
+          },
+          "Attack_Polearm_Thrust": {
+            "clipName": "Attack_Polearm_Thrust",
+            "seconds": 0.6333333333333333,
+            "hitT": 0.248,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.05276807936986629,
+            "lhandToGripAtHit": 0.060308479051849245,
+            "tipToTargetAtHit": 1.426225261717596
+          },
+          "Attack_Polearm_Swing": {
+            "clipName": "Attack_Polearm_Swing",
+            "seconds": 0.8,
+            "hitT": 0.38,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.04604874814909168,
+            "lhandToGripAtHit": 0.04604874814909168,
+            "tipToTargetAtHit": 1.5747471377011975
+          },
+          "Attack_Hammer_Smash": {
+            "clipName": "Attack_Hammer_Smash",
+            "seconds": 0.8,
+            "hitT": 0.42,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.24944281752863345,
+            "lhandToGripAtHit": 0.4751450776836479,
+            "tipToTargetAtHit": 1.5687311681696106
+          },
+          "Cast_Staff": {
+            "clipName": "Cast_Staff",
+            "seconds": 0.6333333333333333,
+            "hitT": 0.25333333333333335,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.2838103621634974,
+            "lhandToGripAtHit": 0.4522773371864876,
+            "tipToTargetAtHit": 1.7292374719650654
+          },
+          "Cast_Heal": {
+            "clipName": "Cast_Heal",
+            "seconds": 0.9,
+            "hitT": 0.36000000000000004,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.2022891230815217,
+            "lhandToGripAtHit": 0.3156363604797706,
+            "tipToTargetAtHit": 1.6495186225858276
+          }
+        },
+        "twoHandGrip": {
+          "Attack_2H_Slash": {
+            "lhandToGripAtHit": 0.145,
+            "lhandToGripMin": 0.105
+          },
+          "Attack_2H_Smash": {
+            "lhandToGripAtHit": 0.157,
+            "lhandToGripMin": 0.135
+          },
+          "Attack_Polearm_Thrust": {
+            "lhandToGripAtHit": 0.06,
+            "lhandToGripMin": 0.053
+          },
+          "Attack_Polearm_Swing": {
+            "lhandToGripAtHit": 0.046,
+            "lhandToGripMin": 0.046
+          },
+          "Attack_Hammer_Smash": {
+            "lhandToGripAtHit": 0.475,
+            "lhandToGripMin": 0.249
+          }
+        },
+        "essential": {
+          "decorCulled": true,
+          "bossWarning": true,
+          "dangerOnMe": true,
+          "dangerFarAway": false,
+          "healOnMe": true,
+          "projectileToMe": true,
+          "projectileElsewhere": false,
+          "statusCue": true,
+          "essentialCount": 5,
+          "budget": {
+            "active": 38,
+            "activeRemote": 1,
+            "activeCritical": 10,
+            "particles": 1526,
+            "granted": 340,
+            "denied": 28,
+            "scaled": 0,
+            "deniedBy": {
+              "secondary-pressure": 26,
+              "distance": 2
+            }
+          }
+        }
+      }
+    },
+    {
+      "browser": "chromium",
+      "case": "n75-hq",
+      "checks": {
+        "A 的 n75 資產已取得（CI 唯讀）": {
+          "ok": true,
+          "detail": "n75"
+        },
+        "掛點：Weapon_R、Weapon_L、R_Hand、L_Hand 存在": {
+          "ok": true,
+          "detail": {
+            "weaponR": true,
+            "weaponL": true,
+            "rHand": true,
+            "lHand": true
+          }
+        },
+        "技能動作標記：A 的 json 與 C 的 novice_combat_male.json 一致": {
+          "ok": true,
+          "detail": []
+        },
+        "triple_slash 攻速×1：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "triple_slash 攻速×1：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.525,
+            "perRate1": 0.525
+          }
+        },
+        "triple_slash 攻速×1：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.164
+        },
+        "triple_slash 攻速×1：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 9,
+            "err": 0
+          }
+        },
+        "triple_slash 攻速×1：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 0.17,
+              "wall": 0.167,
+              "expect": 0.17,
+              "animT": 0.17,
+              "tip": 0.37
+            },
+            {
+              "mark": 0.5,
+              "wall": 0.5,
+              "expect": 0.5,
+              "animT": 0.5,
+              "tip": 1.45
+            },
+            {
+              "mark": 0.92,
+              "wall": 0.933,
+              "expect": 0.92,
+              "animT": 0.92,
+              "tip": 0.31
+            }
+          ]
+        },
+        "triple_slash 攻速×1：投射物從武器／手部發射（≤ 0.9 m）": {
+          "ok": true,
+          "detail": [
+            0.57
+          ]
+        },
+        "triple_slash 攻速×1.3：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "triple_slash 攻速×1.3：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.618,
+            "perRate1": 0.475
+          }
+        },
+        "triple_slash 攻速×1.3：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.155
+        },
+        "triple_slash 攻速×1.3：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 9,
+            "err": 0
+          }
+        },
+        "triple_slash 攻速×1.3：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 0.17,
+              "wall": 0.117,
+              "expect": 0.131,
+              "animT": 0.17,
+              "tip": 0.37
+            },
+            {
+              "mark": 0.5,
+              "wall": 0.383,
+              "expect": 0.385,
+              "animT": 0.5,
+              "tip": 1.45
+            },
+            {
+              "mark": 0.92,
+              "wall": 0.717,
+              "expect": 0.708,
+              "animT": 0.92,
+              "tip": 0.31
+            }
+          ]
+        },
+        "triple_slash 攻速×1.3：投射物從武器／手部發射（≤ 0.9 m）": {
+          "ok": true,
+          "detail": [
+            0.48
+          ]
+        },
+        "triple_slash 攻速×1.6：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "triple_slash 攻速×1.6：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.819,
+            "perRate1": 0.512
+          }
+        },
+        "triple_slash 攻速×1.6：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.207
+        },
+        "triple_slash 攻速×1.6：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 9,
+            "err": 0
+          }
+        },
+        "triple_slash 攻速×1.6：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 0.17,
+              "wall": 0.1,
+              "expect": 0.106,
+              "animT": 0.17,
+              "tip": 0.37
+            },
+            {
+              "mark": 0.5,
+              "wall": 0.317,
+              "expect": 0.313,
+              "animT": 0.5,
+              "tip": 1.45
+            },
+            {
+              "mark": 0.92,
+              "wall": 0.583,
+              "expect": 0.575,
+              "animT": 0.92,
+              "tip": 0.31
+            }
+          ]
+        },
+        "triple_slash 攻速×1.6：投射物從武器／手部發射（≤ 0.9 m）": {
+          "ok": true,
+          "detail": [
+            0.57
+          ]
+        },
+        "staff_cast 攻速×1：武器上的特效從武器發射點產生（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 2,
+            "err": 0
+          }
+        },
+        "staff_cast 攻速×1：投射物從武器／手部發射（≤ 0.9 m）": {
+          "ok": true,
+          "detail": [
+            0.6
+          ]
+        },
+        "staff_cast 攻速×1.3：武器上的特效從武器發射點產生（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 2,
+            "err": 0
+          }
+        },
+        "staff_cast 攻速×1.3：投射物從武器／手部發射（≤ 0.9 m）": {
+          "ok": true,
+          "detail": [
+            0.6
+          ]
+        },
+        "staff_cast 攻速×1.6：武器上的特效從武器發射點產生（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 2,
+            "err": 0
+          }
+        },
+        "staff_cast 攻速×1.6：投射物從武器／手部發射（≤ 0.9 m）": {
+          "ok": true,
+          "detail": [
+            0.6
+          ]
+        },
+        "leap_slam 攻速×1：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "leap_slam 攻速×1：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.478,
+            "perRate1": 0.478
+          }
+        },
+        "leap_slam 攻速×1：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.161
+        },
+        "leap_slam 攻速×1：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 3,
+            "err": 0
+          }
+        },
+        "leap_slam 攻速×1：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 0.8,
+              "wall": 0.783,
+              "expect": 0.8,
+              "animT": 0.8,
+              "tip": 1.23
+            }
+          ]
+        },
+        "leap_slam 攻速×1.3：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "leap_slam 攻速×1.3：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.616,
+            "perRate1": 0.474
+          }
+        },
+        "leap_slam 攻速×1.3：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.158
+        },
+        "leap_slam 攻速×1.3：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 3,
+            "err": 0
+          }
+        },
+        "leap_slam 攻速×1.3：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 0.8,
+              "wall": 0.6,
+              "expect": 0.615,
+              "animT": 0.8,
+              "tip": 1.23
+            }
+          ]
+        },
+        "leap_slam 攻速×1.6：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "leap_slam 攻速×1.6：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.747,
+            "perRate1": 0.467
+          }
+        },
+        "leap_slam 攻速×1.6：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.189
+        },
+        "leap_slam 攻速×1.6：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 3,
+            "err": 0
+          }
+        },
+        "leap_slam 攻速×1.6：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 0.8,
+              "wall": 0.483,
+              "expect": 0.5,
+              "animT": 0.8,
+              "tip": 1.23
+            }
+          ]
+        },
+        "whirlwind 攻速×1：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "whirlwind 攻速×1：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.342,
+            "perRate1": 0.342
+          }
+        },
+        "whirlwind 攻速×1：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.125
+        },
+        "whirlwind 攻速×1：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 9,
+            "err": 0
+          }
+        },
+        "whirlwind 攻速×1：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 0.48,
+              "wall": 0.467,
+              "expect": 0.48,
+              "animT": 0.48,
+              "tip": 1.51
+            },
+            {
+              "mark": 0.76,
+              "wall": 0.75,
+              "expect": 0.76,
+              "animT": 0.76,
+              "tip": 1.17
+            },
+            {
+              "mark": 1.04,
+              "wall": 1.033,
+              "expect": 1.04,
+              "animT": 1.04,
+              "tip": 1.25
+            }
+          ]
+        },
+        "whirlwind 攻速×1.3：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "whirlwind 攻速×1.3：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.433,
+            "perRate1": 0.333
+          }
+        },
+        "whirlwind 攻速×1.3：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.145
+        },
+        "whirlwind 攻速×1.3：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 9,
+            "err": 0
+          }
+        },
+        "whirlwind 攻速×1.3：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 0.48,
+              "wall": 0.367,
+              "expect": 0.369,
+              "animT": 0.48,
+              "tip": 1.51
+            },
+            {
+              "mark": 0.76,
+              "wall": 0.583,
+              "expect": 0.585,
+              "animT": 0.76,
+              "tip": 1.17
+            },
+            {
+              "mark": 1.04,
+              "wall": 0.8,
+              "expect": 0.8,
+              "animT": 1.04,
+              "tip": 1.25
+            }
+          ]
+        },
+        "whirlwind 攻速×1.6：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "whirlwind 攻速×1.6：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.518,
+            "perRate1": 0.324
+          }
+        },
+        "whirlwind 攻速×1.6：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.139
+        },
+        "whirlwind 攻速×1.6：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 9,
+            "err": 0
+          }
+        },
+        "whirlwind 攻速×1.6：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 0.48,
+              "wall": 0.283,
+              "expect": 0.3,
+              "animT": 0.48,
+              "tip": 1.51
+            },
+            {
+              "mark": 0.76,
+              "wall": 0.467,
+              "expect": 0.475,
+              "animT": 0.76,
+              "tip": 1.17
+            },
+            {
+              "mark": 1.04,
+              "wall": 0.65,
+              "expect": 0.65,
+              "animT": 1.04,
+              "tip": 1.25
+            }
+          ]
+        },
+        "star_meteor 攻速×1：武器上的特效從武器發射點產生（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 1,
+            "err": 0
+          }
+        },
+        "star_meteor 攻速×1.3：武器上的特效從武器發射點產生（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 1,
+            "err": 0
+          }
+        },
+        "star_meteor 攻速×1.6：武器上的特效從武器發射點產生（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 1,
+            "err": 0
+          }
+        },
+        "charge_burst 攻速×1：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "charge_burst 攻速×1：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.311,
+            "perRate1": 0.311
+          }
+        },
+        "charge_burst 攻速×1：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.163
+        },
+        "charge_burst 攻速×1：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 3,
+            "err": 0
+          }
+        },
+        "charge_burst 攻速×1：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 1.22,
+              "wall": 1.217,
+              "expect": 1.22,
+              "animT": 1.22,
+              "tip": 0.82
+            }
+          ]
+        },
+        "charge_burst 攻速×1.3：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "charge_burst 攻速×1.3：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.373,
+            "perRate1": 0.287
+          }
+        },
+        "charge_burst 攻速×1.3：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.136
+        },
+        "charge_burst 攻速×1.3：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 3,
+            "err": 0
+          }
+        },
+        "charge_burst 攻速×1.3：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 1.22,
+              "wall": 0.933,
+              "expect": 0.938,
+              "animT": 1.22,
+              "tip": 0.82
+            }
+          ]
+        },
+        "charge_burst 攻速×1.6：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "charge_burst 攻速×1.6：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.419,
+            "perRate1": 0.262
+          }
+        },
+        "charge_burst 攻速×1.6：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.157
+        },
+        "charge_burst 攻速×1.6：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 3,
+            "err": 0
+          }
+        },
+        "charge_burst 攻速×1.6：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 1.22,
+              "wall": 0.75,
+              "expect": 0.762,
+              "animT": 1.22,
+              "tip": 0.82
+            }
+          ]
+        },
+        "Attack：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_1H_Chop：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_1H_Chop：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_1H_Thrust：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_1H_Thrust：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_2H_Slash：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_2H_Slash：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_2H_Smash：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_2H_Smash：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_Polearm_Thrust：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_Polearm_Thrust：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_Polearm_Swing：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_Polearm_Swing：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_Hammer_Smash：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_Hammer_Smash：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "Cast_Staff：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Cast_Staff：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "Cast_Heal：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Cast_Heal：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "重要特效：Boss 範圍預警（遠＋畫面外）照樣顯示": {
+          "ok": true,
+          "detail": {
+            "decorCulled": true,
+            "bossWarning": true,
+            "dangerOnMe": true,
+            "dangerFarAway": false,
+            "healOnMe": true,
+            "projectileToMe": true,
+            "projectileElsewhere": false,
+            "statusCue": true,
+            "essentialCount": 5,
+            "budget": {
+              "active": 38,
+              "activeRemote": 1,
+              "activeCritical": 10,
+              "particles": 1526,
+              "granted": 340,
+              "denied": 28,
+              "scaled": 0,
+              "deniedBy": {
+                "secondary-pressure": 26,
+                "distance": 2
+              }
+            }
+          }
+        },
+        "重要特效：自己在敵方危險範圍內 → 顯示": {
+          "ok": true
+        },
+        "重要特效：自己在治療範圍內 → 顯示": {
+          "ok": true
+        },
+        "重要特效：飛向自己的投射物（遠＋畫面外）→ 顯示": {
+          "ok": true
+        },
+        "重要特效：必要狀態提示 → 顯示": {
+          "ok": true
+        },
+        "一般規則：不影響自己的遠方危險範圍／投射物 → 省略": {
+          "ok": true
+        },
+        "一般規則：遠方其他玩家的裝飾粒子 → 省略": {
+          "ok": true
+        },
+        "沒有頁面錯誤": {
+          "ok": true,
+          "detail": []
+        }
+      },
+      "errors": [],
+      "warnings": [
+        "whirlwind 攻速×1：刀尖靠近頭肩（軀幹圓柱內）2 格：[{\"t\":1.24,\"axis\":0.136,\"y\":1.305},{\"t\":1.257,\"axis\":0.138,\"y\":1.308}]",
+        "whirlwind 攻速×1.3：刀尖靠近頭肩（軀幹圓柱內）2 格：[{\"t\":1.235,\"axis\":0.143,\"y\":1.302},{\"t\":1.257,\"axis\":0.138,\"y\":1.308}]",
+        "whirlwind 攻速×1.6：刀尖靠近頭肩（軀幹圓柱內）1 格：[{\"t\":1.253,\"axis\":0.134,\"y\":1.308}]"
+      ],
+      "results": {
+        "info": {
+          "available": true,
+          "version": "n75",
+          "clips": 27,
+          "sockets": {
+            "weaponR": true,
+            "weaponL": true,
+            "rHand": true,
+            "lHand": true
+          }
+        },
+        "skills": {
+          "triple_slash@1": {
+            "skillId": "triple_slash",
+            "rate": 1,
+            "duration": 1.5,
+            "wall": 1.5333333333333328,
+            "hitFxCount": 9,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 37,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.5246026086861807,
+            "chordMax": 0.16378006797879857,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [
+              {
+                "mark": 0.17,
+                "wall": 0.16666666666666666,
+                "expect": 0.17,
+                "animT": 0.17,
+                "tipToTarget": 0.3670938412802096,
+                "tipAxis": 0.8622648176057462
+              },
+              {
+                "mark": 0.5,
+                "wall": 0.49999999999999994,
+                "expect": 0.5,
+                "animT": 0.5,
+                "tipToTarget": 1.4478099366243506,
+                "tipAxis": 0.6481128672307992
+              },
+              {
+                "mark": 0.92,
+                "wall": 0.9333333333333346,
+                "expect": 0.92,
+                "animT": 0.92,
+                "tipToTarget": 0.30979590284982167,
+                "tipAxis": 0.9364184000039879
+              }
+            ],
+            "projectiles": [
+              {
+                "mark": 0.9,
+                "fx": "swordWave",
+                "fromToHand": 0.572482696813129
+              }
+            ]
+          },
+          "triple_slash@1.3": {
+            "skillId": "triple_slash",
+            "rate": 1.3,
+            "duration": 1.5,
+            "wall": 1.183333333333334,
+            "hitFxCount": 9,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 29,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.6176018374301655,
+            "chordMax": 0.1553264993271457,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [
+              {
+                "mark": 0.17,
+                "wall": 0.11666666666666665,
+                "expect": 0.13076923076923078,
+                "animT": 0.17,
+                "tipToTarget": 0.3670938412802096,
+                "tipAxis": 0.8622648176057462
+              },
+              {
+                "mark": 0.5,
+                "wall": 0.3833333333333333,
+                "expect": 0.3846153846153846,
+                "animT": 0.5,
+                "tipToTarget": 1.4478099366243506,
+                "tipAxis": 0.6481128672307992
+              },
+              {
+                "mark": 0.92,
+                "wall": 0.7166666666666672,
+                "expect": 0.7076923076923077,
+                "animT": 0.92,
+                "tipToTarget": 0.30979590284982167,
+                "tipAxis": 0.9364184000039879
+              }
+            ],
+            "projectiles": [
+              {
+                "mark": 0.9,
+                "fx": "swordWave",
+                "fromToHand": 0.4845464001857614
+              }
+            ]
+          },
+          "triple_slash@1.6": {
+            "skillId": "triple_slash",
+            "rate": 1.6,
+            "duration": 1.5,
+            "wall": 0.966666666666668,
+            "hitFxCount": 9,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 24,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.8190597663596,
+            "chordMax": 0.20690645069510671,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [
+              {
+                "mark": 0.17,
+                "wall": 0.09999999999999999,
+                "expect": 0.10625,
+                "animT": 0.17,
+                "tipToTarget": 0.3670938412802096,
+                "tipAxis": 0.8622648176057462
+              },
+              {
+                "mark": 0.5,
+                "wall": 0.31666666666666665,
+                "expect": 0.3125,
+                "animT": 0.5,
+                "tipToTarget": 1.4478099366243506,
+                "tipAxis": 0.6481128672307992
+              },
+              {
+                "mark": 0.92,
+                "wall": 0.5833333333333335,
+                "expect": 0.575,
+                "animT": 0.92,
+                "tipToTarget": 0.30979590284982167,
+                "tipAxis": 0.9364184000039879
+              }
+            ],
+            "projectiles": [
+              {
+                "mark": 0.9,
+                "fx": "swordWave",
+                "fromToHand": 0.5724826968131264
+              }
+            ]
+          },
+          "staff_cast@1": {
+            "skillId": "staff_cast",
+            "rate": 1,
+            "duration": 1.3,
+            "wall": 1.3000000000000003,
+            "hitFxCount": 0,
+            "hitFxErr": 0,
+            "weaponFxCount": 2,
+            "weaponFxErr": 0,
+            "trailFrames": 0,
+            "trailErrMax": 0,
+            "tipJumpMax": 0,
+            "chordMax": 0,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [],
+            "projectiles": [
+              {
+                "mark": 0.58,
+                "fx": "magicBolt",
+                "fromToHand": 0.601282584832629
+              }
+            ]
+          },
+          "staff_cast@1.3": {
+            "skillId": "staff_cast",
+            "rate": 1.3,
+            "duration": 1.3,
+            "wall": 1.0000000000000013,
+            "hitFxCount": 0,
+            "hitFxErr": 0,
+            "weaponFxCount": 2,
+            "weaponFxErr": 0,
+            "trailFrames": 0,
+            "trailErrMax": 0,
+            "tipJumpMax": 0,
+            "chordMax": 0,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [],
+            "projectiles": [
+              {
+                "mark": 0.58,
+                "fx": "magicBolt",
+                "fromToHand": 0.6012825052553724
+              }
+            ]
+          },
+          "staff_cast@1.6": {
+            "skillId": "staff_cast",
+            "rate": 1.6,
+            "duration": 1.3,
+            "wall": 0.8166666666666675,
+            "hitFxCount": 0,
+            "hitFxErr": 0,
+            "weaponFxCount": 2,
+            "weaponFxErr": 0,
+            "trailFrames": 0,
+            "trailErrMax": 0,
+            "tipJumpMax": 0,
+            "chordMax": 0,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [],
+            "projectiles": [
+              {
+                "mark": 0.58,
+                "fx": "magicBolt",
+                "fromToHand": 0.6012823763798583
+              }
+            ]
+          },
+          "leap_slam@1": {
+            "skillId": "leap_slam",
+            "rate": 1,
+            "duration": 1.5,
+            "wall": 1.4999999999999996,
+            "hitFxCount": 3,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 15,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.4775701083605055,
+            "chordMax": 0.16108727488766733,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [
+              {
+                "mark": 0.8,
+                "wall": 0.7833333333333341,
+                "expect": 0.8,
+                "animT": 0.8,
+                "tipToTarget": 1.233426272800848,
+                "tipAxis": 0.676503051202586
+              }
+            ],
+            "projectiles": []
+          },
+          "leap_slam@1.3": {
+            "skillId": "leap_slam",
+            "rate": 1.3,
+            "duration": 1.5,
+            "wall": 1.1666666666666674,
+            "hitFxCount": 3,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 12,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.6156039911231216,
+            "chordMax": 0.15849800931098126,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [
+              {
+                "mark": 0.8,
+                "wall": 0.6000000000000002,
+                "expect": 0.6153846153846154,
+                "animT": 0.8,
+                "tipToTarget": 1.233426272800848,
+                "tipAxis": 0.676503051202586
+              }
+            ],
+            "projectiles": []
+          },
+          "leap_slam@1.6": {
+            "skillId": "leap_slam",
+            "rate": 1.6,
+            "duration": 1.5,
+            "wall": 0.9500000000000013,
+            "hitFxCount": 3,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 9,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.7470742686159115,
+            "chordMax": 0.18949333717257,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [
+              {
+                "mark": 0.8,
+                "wall": 0.4833333333333333,
+                "expect": 0.5,
+                "animT": 0.8,
+                "tipToTarget": 1.233426272800848,
+                "tipAxis": 0.676503051202586
+              }
+            ],
+            "projectiles": []
+          },
+          "whirlwind@1": {
+            "skillId": "whirlwind",
+            "rate": 1,
+            "duration": 1.6,
+            "wall": 1.6166666666666658,
+            "hitFxCount": 9,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 65,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.34197234312351715,
+            "chordMax": 0.1250621519988501,
+            "insideFrames": 2,
+            "inside": [
+              {
+                "t": 1.24,
+                "axis": 0.136,
+                "y": 1.305
+              },
+              {
+                "t": 1.257,
+                "axis": 0.138,
+                "y": 1.308
+              }
+            ],
+            "hits": [
+              {
+                "mark": 0.48,
+                "wall": 0.4666666666666666,
+                "expect": 0.48,
+                "animT": 0.48,
+                "tipToTarget": 1.5061296373987823,
+                "tipAxis": 0.17989357266802236
+              },
+              {
+                "mark": 0.76,
+                "wall": 0.7500000000000007,
+                "expect": 0.76,
+                "animT": 0.76,
+                "tipToTarget": 1.1745137182561483,
+                "tipAxis": 0.1802184823336564
+              },
+              {
+                "mark": 1.04,
+                "wall": 1.0333333333333345,
+                "expect": 1.04,
+                "animT": 1.04,
+                "tipToTarget": 1.2499939108812896,
+                "tipAxis": 0.18042241728460012
+              }
+            ],
+            "projectiles": []
+          },
+          "whirlwind@1.3": {
+            "skillId": "whirlwind",
+            "rate": 1.3,
+            "duration": 1.6,
+            "wall": 1.2500000000000004,
+            "hitFxCount": 9,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 50,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.4333367332160385,
+            "chordMax": 0.14517387732282566,
+            "insideFrames": 2,
+            "inside": [
+              {
+                "t": 1.235,
+                "axis": 0.143,
+                "y": 1.302
+              },
+              {
+                "t": 1.257,
+                "axis": 0.138,
+                "y": 1.308
+              }
+            ],
+            "hits": [
+              {
+                "mark": 0.48,
+                "wall": 0.36666666666666664,
+                "expect": 0.3692307692307692,
+                "animT": 0.48,
+                "tipToTarget": 1.5061296373987823,
+                "tipAxis": 0.17989357266802236
+              },
+              {
+                "mark": 0.76,
+                "wall": 0.5833333333333335,
+                "expect": 0.5846153846153846,
+                "animT": 0.76,
+                "tipToTarget": 1.1745137182561483,
+                "tipAxis": 0.1802184823336564
+              },
+              {
+                "mark": 1.04,
+                "wall": 0.8000000000000008,
+                "expect": 0.8,
+                "animT": 1.04,
+                "tipToTarget": 1.2499939108812896,
+                "tipAxis": 0.18042241728460012
+              }
+            ],
+            "projectiles": []
+          },
+          "whirlwind@1.6": {
+            "skillId": "whirlwind",
+            "rate": 1.6,
+            "duration": 1.6,
+            "wall": 1.016666666666668,
+            "hitFxCount": 9,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 41,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.5183802741753676,
+            "chordMax": 0.13859100653807174,
+            "insideFrames": 1,
+            "inside": [
+              {
+                "t": 1.253,
+                "axis": 0.134,
+                "y": 1.308
+              }
+            ],
+            "hits": [
+              {
+                "mark": 0.48,
+                "wall": 0.2833333333333333,
+                "expect": 0.3,
+                "animT": 0.48,
+                "tipToTarget": 1.5061296373987823,
+                "tipAxis": 0.17989357266802236
+              },
+              {
+                "mark": 0.76,
+                "wall": 0.4666666666666666,
+                "expect": 0.475,
+                "animT": 0.76,
+                "tipToTarget": 1.1745137182561483,
+                "tipAxis": 0.1802184823336564
+              },
+              {
+                "mark": 1.04,
+                "wall": 0.6500000000000004,
+                "expect": 0.65,
+                "animT": 1.04,
+                "tipToTarget": 1.2499939108812896,
+                "tipAxis": 0.18042241728460012
+              }
+            ],
+            "projectiles": []
+          },
+          "star_meteor@1": {
+            "skillId": "star_meteor",
+            "rate": 1,
+            "duration": 1.7,
+            "wall": 1.6999999999999988,
+            "hitFxCount": 0,
+            "hitFxErr": 0,
+            "weaponFxCount": 1,
+            "weaponFxErr": 0,
+            "trailFrames": 0,
+            "trailErrMax": 0,
+            "tipJumpMax": 0,
+            "chordMax": 0,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [],
+            "projectiles": [
+              {
+                "mark": 0.72,
+                "fx": "meteor",
+                "fromToHand": 8.736775167378672
+              }
+            ]
+          },
+          "star_meteor@1.3": {
+            "skillId": "star_meteor",
+            "rate": 1.3,
+            "duration": 1.7,
+            "wall": 1.3166666666666669,
+            "hitFxCount": 0,
+            "hitFxErr": 0,
+            "weaponFxCount": 1,
+            "weaponFxErr": 0,
+            "trailFrames": 0,
+            "trailErrMax": 0,
+            "tipJumpMax": 0,
+            "chordMax": 0,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [],
+            "projectiles": [
+              {
+                "mark": 0.72,
+                "fx": "meteor",
+                "fromToHand": 8.737268227751379
+              }
+            ]
+          },
+          "star_meteor@1.6": {
+            "skillId": "star_meteor",
+            "rate": 1.6,
+            "duration": 1.7,
+            "wall": 1.0666666666666678,
+            "hitFxCount": 0,
+            "hitFxErr": 0,
+            "weaponFxCount": 1,
+            "weaponFxErr": 0,
+            "trailFrames": 0,
+            "trailErrMax": 0,
+            "tipJumpMax": 0,
+            "chordMax": 0,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [],
+            "projectiles": [
+              {
+                "mark": 0.72,
+                "fx": "meteor",
+                "fromToHand": 8.716023386838048
+              }
+            ]
+          },
+          "charge_burst@1": {
+            "skillId": "charge_burst",
+            "rate": 1,
+            "duration": 2.1,
+            "wall": 2.116666666666664,
+            "hitFxCount": 3,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 15,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.31149674319167897,
+            "chordMax": 0.163235914748252,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [
+              {
+                "mark": 1.22,
+                "wall": 1.2166666666666672,
+                "expect": 1.22,
+                "animT": 1.22,
+                "tipToTarget": 0.820629246897528,
+                "tipAxis": 0.36958013842897774
+              }
+            ],
+            "projectiles": []
+          },
+          "charge_burst@1.3": {
+            "skillId": "charge_burst",
+            "rate": 1.3,
+            "duration": 2.1,
+            "wall": 1.6333333333333324,
+            "hitFxCount": 3,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 12,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.3732220589743665,
+            "chordMax": 0.13613874995068434,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [
+              {
+                "mark": 1.22,
+                "wall": 0.9333333333333346,
+                "expect": 0.9384615384615385,
+                "animT": 1.22,
+                "tipToTarget": 0.820629246897528,
+                "tipAxis": 0.36958013842897774
+              }
+            ],
+            "projectiles": []
+          },
+          "charge_burst@1.6": {
+            "skillId": "charge_burst",
+            "rate": 1.6,
+            "duration": 2.1,
+            "wall": 1.3166666666666669,
+            "hitFxCount": 3,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 10,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.4190831648516506,
+            "chordMax": 0.15715936081466134,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [
+              {
+                "mark": 1.22,
+                "wall": 0.7500000000000007,
+                "expect": 0.7625,
+                "animT": 1.22,
+                "tipToTarget": 0.820629246897528,
+                "tipAxis": 0.36958013842897774
+              }
+            ],
+            "projectiles": []
+          }
+        },
+        "torso": {
+          "whirlwind 攻速×1": [
+            {
+              "t": 1.24,
+              "axis": 0.136,
+              "y": 1.305
+            },
+            {
+              "t": 1.257,
+              "axis": 0.138,
+              "y": 1.308
+            }
+          ],
+          "whirlwind 攻速×1.3": [
+            {
+              "t": 1.235,
+              "axis": 0.143,
+              "y": 1.302
+            },
+            {
+              "t": 1.257,
+              "axis": 0.138,
+              "y": 1.308
+            }
+          ],
+          "whirlwind 攻速×1.6": [
+            {
+              "t": 1.253,
+              "axis": 0.134,
+              "y": 1.308
+            }
+          ]
+        },
+        "basic": {
+          "Attack": {
+            "clipName": "Attack",
+            "seconds": 0.6333333333333333,
+            "hitT": 0.25333333333333335,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.4068603749832944,
+            "lhandToGripAtHit": 0.565662924735294,
+            "tipToTargetAtHit": 1.768628846092308
+          },
+          "Attack_1H_Chop": {
+            "clipName": "Attack_1H_Chop",
+            "seconds": 0.6333333333333333,
+            "hitT": 0.248,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.24944281752863345,
+            "lhandToGripAtHit": 0.4781536488282737,
+            "tipToTargetAtHit": 1.5563854934516743
+          },
+          "Attack_1H_Thrust": {
+            "clipName": "Attack_1H_Thrust",
+            "seconds": 0.6333333333333333,
+            "hitT": 0.248,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.24944281752863345,
+            "lhandToGripAtHit": 0.4328890751816167,
+            "tipToTargetAtHit": 1.339717685097638
+          },
+          "Attack_2H_Slash": {
+            "clipName": "Attack_2H_Slash",
+            "seconds": 0.6333333333333333,
+            "hitT": 0.248,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.10497586166806269,
+            "lhandToGripAtHit": 0.14459406748763662,
+            "tipToTargetAtHit": 1.5468016046246422
+          },
+          "Attack_2H_Smash": {
+            "clipName": "Attack_2H_Smash",
+            "seconds": 0.7333333333333333,
+            "hitT": 0.34,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.13504892273880706,
+            "lhandToGripAtHit": 0.1572121526813098,
+            "tipToTargetAtHit": 1.6923804132854663
+          },
+          "Attack_Polearm_Thrust": {
+            "clipName": "Attack_Polearm_Thrust",
+            "seconds": 0.6333333333333333,
+            "hitT": 0.248,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.05276807936986629,
+            "lhandToGripAtHit": 0.060308479051849245,
+            "tipToTargetAtHit": 1.426225261717596
+          },
+          "Attack_Polearm_Swing": {
+            "clipName": "Attack_Polearm_Swing",
+            "seconds": 0.8,
+            "hitT": 0.38,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.04604874814909168,
+            "lhandToGripAtHit": 0.04604874814909168,
+            "tipToTargetAtHit": 1.5747471377011975
+          },
+          "Attack_Hammer_Smash": {
+            "clipName": "Attack_Hammer_Smash",
+            "seconds": 0.8,
+            "hitT": 0.42,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.24944281752863345,
+            "lhandToGripAtHit": 0.4751450776836479,
+            "tipToTargetAtHit": 1.5687311681696106
+          },
+          "Cast_Staff": {
+            "clipName": "Cast_Staff",
+            "seconds": 0.6333333333333333,
+            "hitT": 0.25333333333333335,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.2838103621634974,
+            "lhandToGripAtHit": 0.4522773371864876,
+            "tipToTargetAtHit": 1.7292374719650654
+          },
+          "Cast_Heal": {
+            "clipName": "Cast_Heal",
+            "seconds": 0.9,
+            "hitT": 0.36000000000000004,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.2022891230815217,
+            "lhandToGripAtHit": 0.3156363604797706,
+            "tipToTargetAtHit": 1.6495186225858276
+          }
+        },
+        "twoHandGrip": {
+          "Attack_2H_Slash": {
+            "lhandToGripAtHit": 0.145,
+            "lhandToGripMin": 0.105
+          },
+          "Attack_2H_Smash": {
+            "lhandToGripAtHit": 0.157,
+            "lhandToGripMin": 0.135
+          },
+          "Attack_Polearm_Thrust": {
+            "lhandToGripAtHit": 0.06,
+            "lhandToGripMin": 0.053
+          },
+          "Attack_Polearm_Swing": {
+            "lhandToGripAtHit": 0.046,
+            "lhandToGripMin": 0.046
+          },
+          "Attack_Hammer_Smash": {
+            "lhandToGripAtHit": 0.475,
+            "lhandToGripMin": 0.249
+          }
+        },
+        "essential": {
+          "decorCulled": true,
+          "bossWarning": true,
+          "dangerOnMe": true,
+          "dangerFarAway": false,
+          "healOnMe": true,
+          "projectileToMe": true,
+          "projectileElsewhere": false,
+          "statusCue": true,
+          "essentialCount": 5,
+          "budget": {
+            "active": 38,
+            "activeRemote": 1,
+            "activeCritical": 10,
+            "particles": 1526,
+            "granted": 340,
+            "denied": 28,
+            "scaled": 0,
+            "deniedBy": {
+              "secondary-pressure": 26,
+              "distance": 2
+            }
+          }
+        }
+      }
+    },
+    {
+      "browser": "webkit",
+      "case": "n75-lite",
+      "checks": {
+        "A 的 n75 資產已取得（CI 唯讀）": {
+          "ok": true,
+          "detail": "n75"
+        },
+        "掛點：Weapon_R、Weapon_L、R_Hand、L_Hand 存在": {
+          "ok": true,
+          "detail": {
+            "weaponR": true,
+            "weaponL": true,
+            "rHand": true,
+            "lHand": true
+          }
+        },
+        "技能動作標記：A 的 json 與 C 的 novice_combat_male.json 一致": {
+          "ok": true,
+          "detail": []
+        },
+        "triple_slash 攻速×1：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "triple_slash 攻速×1：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.525,
+            "perRate1": 0.525
+          }
+        },
+        "triple_slash 攻速×1：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.164
+        },
+        "triple_slash 攻速×1：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 9,
+            "err": 0
+          }
+        },
+        "triple_slash 攻速×1：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 0.17,
+              "wall": 0.167,
+              "expect": 0.17,
+              "animT": 0.17,
+              "tip": 0.37
+            },
+            {
+              "mark": 0.5,
+              "wall": 0.5,
+              "expect": 0.5,
+              "animT": 0.5,
+              "tip": 1.45
+            },
+            {
+              "mark": 0.92,
+              "wall": 0.933,
+              "expect": 0.92,
+              "animT": 0.92,
+              "tip": 0.31
+            }
+          ]
+        },
+        "triple_slash 攻速×1：投射物從武器／手部發射（≤ 0.9 m）": {
+          "ok": true,
+          "detail": [
+            0.57
+          ]
+        },
+        "triple_slash 攻速×1.3：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "triple_slash 攻速×1.3：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.618,
+            "perRate1": 0.475
+          }
+        },
+        "triple_slash 攻速×1.3：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.155
+        },
+        "triple_slash 攻速×1.3：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 9,
+            "err": 0
+          }
+        },
+        "triple_slash 攻速×1.3：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 0.17,
+              "wall": 0.117,
+              "expect": 0.131,
+              "animT": 0.17,
+              "tip": 0.37
+            },
+            {
+              "mark": 0.5,
+              "wall": 0.383,
+              "expect": 0.385,
+              "animT": 0.5,
+              "tip": 1.45
+            },
+            {
+              "mark": 0.92,
+              "wall": 0.717,
+              "expect": 0.708,
+              "animT": 0.92,
+              "tip": 0.31
+            }
+          ]
+        },
+        "triple_slash 攻速×1.3：投射物從武器／手部發射（≤ 0.9 m）": {
+          "ok": true,
+          "detail": [
+            0.48
+          ]
+        },
+        "triple_slash 攻速×1.6：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "triple_slash 攻速×1.6：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.819,
+            "perRate1": 0.512
+          }
+        },
+        "triple_slash 攻速×1.6：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.207
+        },
+        "triple_slash 攻速×1.6：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 9,
+            "err": 0
+          }
+        },
+        "triple_slash 攻速×1.6：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 0.17,
+              "wall": 0.1,
+              "expect": 0.106,
+              "animT": 0.17,
+              "tip": 0.37
+            },
+            {
+              "mark": 0.5,
+              "wall": 0.317,
+              "expect": 0.313,
+              "animT": 0.5,
+              "tip": 1.45
+            },
+            {
+              "mark": 0.92,
+              "wall": 0.583,
+              "expect": 0.575,
+              "animT": 0.92,
+              "tip": 0.31
+            }
+          ]
+        },
+        "triple_slash 攻速×1.6：投射物從武器／手部發射（≤ 0.9 m）": {
+          "ok": true,
+          "detail": [
+            0.57
+          ]
+        },
+        "staff_cast 攻速×1：武器上的特效從武器發射點產生（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 2,
+            "err": 0
+          }
+        },
+        "staff_cast 攻速×1：投射物從武器／手部發射（≤ 0.9 m）": {
+          "ok": true,
+          "detail": [
+            0.6
+          ]
+        },
+        "staff_cast 攻速×1.3：武器上的特效從武器發射點產生（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 2,
+            "err": 0
+          }
+        },
+        "staff_cast 攻速×1.3：投射物從武器／手部發射（≤ 0.9 m）": {
+          "ok": true,
+          "detail": [
+            0.6
+          ]
+        },
+        "staff_cast 攻速×1.6：武器上的特效從武器發射點產生（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 2,
+            "err": 0
+          }
+        },
+        "staff_cast 攻速×1.6：投射物從武器／手部發射（≤ 0.9 m）": {
+          "ok": true,
+          "detail": [
+            0.6
+          ]
+        },
+        "leap_slam 攻速×1：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "leap_slam 攻速×1：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.478,
+            "perRate1": 0.478
+          }
+        },
+        "leap_slam 攻速×1：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.161
+        },
+        "leap_slam 攻速×1：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 3,
+            "err": 0
+          }
+        },
+        "leap_slam 攻速×1：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 0.8,
+              "wall": 0.783,
+              "expect": 0.8,
+              "animT": 0.8,
+              "tip": 1.23
+            }
+          ]
+        },
+        "leap_slam 攻速×1.3：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "leap_slam 攻速×1.3：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.616,
+            "perRate1": 0.474
+          }
+        },
+        "leap_slam 攻速×1.3：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.158
+        },
+        "leap_slam 攻速×1.3：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 3,
+            "err": 0
+          }
+        },
+        "leap_slam 攻速×1.3：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 0.8,
+              "wall": 0.6,
+              "expect": 0.615,
+              "animT": 0.8,
+              "tip": 1.23
+            }
+          ]
+        },
+        "leap_slam 攻速×1.6：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "leap_slam 攻速×1.6：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.747,
+            "perRate1": 0.467
+          }
+        },
+        "leap_slam 攻速×1.6：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.189
+        },
+        "leap_slam 攻速×1.6：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 3,
+            "err": 0
+          }
+        },
+        "leap_slam 攻速×1.6：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 0.8,
+              "wall": 0.483,
+              "expect": 0.5,
+              "animT": 0.8,
+              "tip": 1.23
+            }
+          ]
+        },
+        "whirlwind 攻速×1：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "whirlwind 攻速×1：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.342,
+            "perRate1": 0.342
+          }
+        },
+        "whirlwind 攻速×1：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.125
+        },
+        "whirlwind 攻速×1：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 9,
+            "err": 0
+          }
+        },
+        "whirlwind 攻速×1：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 0.48,
+              "wall": 0.467,
+              "expect": 0.48,
+              "animT": 0.48,
+              "tip": 1.51
+            },
+            {
+              "mark": 0.76,
+              "wall": 0.75,
+              "expect": 0.76,
+              "animT": 0.76,
+              "tip": 1.17
+            },
+            {
+              "mark": 1.04,
+              "wall": 1.033,
+              "expect": 1.04,
+              "animT": 1.04,
+              "tip": 1.25
+            }
+          ]
+        },
+        "whirlwind 攻速×1.3：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "whirlwind 攻速×1.3：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.433,
+            "perRate1": 0.333
+          }
+        },
+        "whirlwind 攻速×1.3：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.145
+        },
+        "whirlwind 攻速×1.3：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 9,
+            "err": 0
+          }
+        },
+        "whirlwind 攻速×1.3：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 0.48,
+              "wall": 0.367,
+              "expect": 0.369,
+              "animT": 0.48,
+              "tip": 1.51
+            },
+            {
+              "mark": 0.76,
+              "wall": 0.583,
+              "expect": 0.585,
+              "animT": 0.76,
+              "tip": 1.17
+            },
+            {
+              "mark": 1.04,
+              "wall": 0.8,
+              "expect": 0.8,
+              "animT": 1.04,
+              "tip": 1.25
+            }
+          ]
+        },
+        "whirlwind 攻速×1.6：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "whirlwind 攻速×1.6：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.518,
+            "perRate1": 0.324
+          }
+        },
+        "whirlwind 攻速×1.6：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.139
+        },
+        "whirlwind 攻速×1.6：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 9,
+            "err": 0
+          }
+        },
+        "whirlwind 攻速×1.6：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 0.48,
+              "wall": 0.283,
+              "expect": 0.3,
+              "animT": 0.48,
+              "tip": 1.51
+            },
+            {
+              "mark": 0.76,
+              "wall": 0.467,
+              "expect": 0.475,
+              "animT": 0.76,
+              "tip": 1.17
+            },
+            {
+              "mark": 1.04,
+              "wall": 0.65,
+              "expect": 0.65,
+              "animT": 1.04,
+              "tip": 1.25
+            }
+          ]
+        },
+        "star_meteor 攻速×1：武器上的特效從武器發射點產生（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 1,
+            "err": 0
+          }
+        },
+        "star_meteor 攻速×1.3：武器上的特效從武器發射點產生（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 1,
+            "err": 0
+          }
+        },
+        "star_meteor 攻速×1.6：武器上的特效從武器發射點產生（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 1,
+            "err": 0
+          }
+        },
+        "charge_burst 攻速×1：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "charge_burst 攻速×1：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.311,
+            "perRate1": 0.311
+          }
+        },
+        "charge_burst 攻速×1：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.163
+        },
+        "charge_burst 攻速×1：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 3,
+            "err": 0
+          }
+        },
+        "charge_burst 攻速×1：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 1.22,
+              "wall": 1.217,
+              "expect": 1.22,
+              "animT": 1.22,
+              "tip": 0.82
+            }
+          ]
+        },
+        "charge_burst 攻速×1.3：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "charge_burst 攻速×1.3：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.373,
+            "perRate1": 0.287
+          }
+        },
+        "charge_burst 攻速×1.3：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.136
+        },
+        "charge_burst 攻速×1.3：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 3,
+            "err": 0
+          }
+        },
+        "charge_burst 攻速×1.3：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 1.22,
+              "wall": 0.933,
+              "expect": 0.938,
+              "animT": 1.22,
+              "tip": 0.82
+            }
+          ]
+        },
+        "charge_burst 攻速×1.6：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "charge_burst 攻速×1.6：拖尾期間刀尖沒有瞬移（換算攻速×1 每格 ≤ 0.6 m）": {
+          "ok": true,
+          "detail": {
+            "raw": 0.419,
+            "perRate1": 0.262
+          }
+        },
+        "charge_burst 攻速×1.6：刀光呈弧線（補取樣後每段 ≤ 0.25 m）": {
+          "ok": true,
+          "detail": 0.157
+        },
+        "charge_burst 攻速×1.6：命中特效出現在目標命中點（≤ 5 cm）": {
+          "ok": true,
+          "detail": {
+            "n": 3,
+            "err": 0
+          }
+        },
+        "charge_burst 攻速×1.6：命中特效時間＝標記／攻速，且與動作同一格": {
+          "ok": true,
+          "detail": [
+            {
+              "mark": 1.22,
+              "wall": 0.75,
+              "expect": 0.762,
+              "animT": 1.22,
+              "tip": 0.82
+            }
+          ]
+        },
+        "Attack：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_1H_Chop：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_1H_Chop：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_1H_Thrust：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_1H_Thrust：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_2H_Slash：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_2H_Slash：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_2H_Smash：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_2H_Smash：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_Polearm_Thrust：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_Polearm_Thrust：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_Polearm_Swing：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_Polearm_Swing：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_Hammer_Smash：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Attack_Hammer_Smash：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "Cast_Staff：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Cast_Staff：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "Cast_Heal：拖尾沿著刀尖移動（誤差 ≤ 1 cm）": {
+          "ok": true,
+          "detail": 0
+        },
+        "Cast_Heal：武器不穿進軀幹": {
+          "ok": true,
+          "detail": 0
+        },
+        "重要特效：Boss 範圍預警（遠＋畫面外）照樣顯示": {
+          "ok": true,
+          "detail": {
+            "decorCulled": true,
+            "bossWarning": true,
+            "dangerOnMe": true,
+            "dangerFarAway": false,
+            "healOnMe": true,
+            "projectileToMe": true,
+            "projectileElsewhere": false,
+            "statusCue": true,
+            "essentialCount": 5,
+            "budget": {
+              "active": 38,
+              "activeRemote": 1,
+              "activeCritical": 10,
+              "particles": 1526,
+              "granted": 340,
+              "denied": 28,
+              "scaled": 0,
+              "deniedBy": {
+                "secondary-pressure": 26,
+                "distance": 2
+              }
+            }
+          }
+        },
+        "重要特效：自己在敵方危險範圍內 → 顯示": {
+          "ok": true
+        },
+        "重要特效：自己在治療範圍內 → 顯示": {
+          "ok": true
+        },
+        "重要特效：飛向自己的投射物（遠＋畫面外）→ 顯示": {
+          "ok": true
+        },
+        "重要特效：必要狀態提示 → 顯示": {
+          "ok": true
+        },
+        "一般規則：不影響自己的遠方危險範圍／投射物 → 省略": {
+          "ok": true
+        },
+        "一般規則：遠方其他玩家的裝飾粒子 → 省略": {
+          "ok": true
+        },
+        "沒有頁面錯誤": {
+          "ok": true,
+          "detail": []
+        }
+      },
+      "errors": [],
+      "warnings": [
+        "whirlwind 攻速×1：刀尖靠近頭肩（軀幹圓柱內）2 格：[{\"t\":1.24,\"axis\":0.136,\"y\":1.305},{\"t\":1.257,\"axis\":0.138,\"y\":1.308}]",
+        "whirlwind 攻速×1.3：刀尖靠近頭肩（軀幹圓柱內）2 格：[{\"t\":1.235,\"axis\":0.143,\"y\":1.302},{\"t\":1.257,\"axis\":0.138,\"y\":1.308}]",
+        "whirlwind 攻速×1.6：刀尖靠近頭肩（軀幹圓柱內）1 格：[{\"t\":1.253,\"axis\":0.134,\"y\":1.308}]"
+      ],
+      "results": {
+        "info": {
+          "available": true,
+          "version": "n75",
+          "clips": 27,
+          "sockets": {
+            "weaponR": true,
+            "weaponL": true,
+            "rHand": true,
+            "lHand": true
+          }
+        },
+        "skills": {
+          "triple_slash@1": {
+            "skillId": "triple_slash",
+            "rate": 1,
+            "duration": 1.5,
+            "wall": 1.5333333333333328,
+            "hitFxCount": 9,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 37,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.5246026086861807,
+            "chordMax": 0.16378006797879857,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [
+              {
+                "mark": 0.17,
+                "wall": 0.16666666666666666,
+                "expect": 0.17,
+                "animT": 0.17,
+                "tipToTarget": 0.3670938412802096,
+                "tipAxis": 0.8622648176057462
+              },
+              {
+                "mark": 0.5,
+                "wall": 0.49999999999999994,
+                "expect": 0.5,
+                "animT": 0.5,
+                "tipToTarget": 1.4478099366243506,
+                "tipAxis": 0.6481128672307992
+              },
+              {
+                "mark": 0.92,
+                "wall": 0.9333333333333346,
+                "expect": 0.92,
+                "animT": 0.92,
+                "tipToTarget": 0.30979590284982167,
+                "tipAxis": 0.9364184000039877
+              }
+            ],
+            "projectiles": [
+              {
+                "mark": 0.9,
+                "fx": "swordWave",
+                "fromToHand": 0.572482696813129
+              }
+            ]
+          },
+          "triple_slash@1.3": {
+            "skillId": "triple_slash",
+            "rate": 1.3,
+            "duration": 1.5,
+            "wall": 1.183333333333334,
+            "hitFxCount": 9,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 29,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.6176018374301655,
+            "chordMax": 0.1553264993271457,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [
+              {
+                "mark": 0.17,
+                "wall": 0.11666666666666665,
+                "expect": 0.13076923076923078,
+                "animT": 0.17,
+                "tipToTarget": 0.3670938412802096,
+                "tipAxis": 0.8622648176057462
+              },
+              {
+                "mark": 0.5,
+                "wall": 0.3833333333333333,
+                "expect": 0.3846153846153846,
+                "animT": 0.5,
+                "tipToTarget": 1.4478099366243506,
+                "tipAxis": 0.6481128672307992
+              },
+              {
+                "mark": 0.92,
+                "wall": 0.7166666666666672,
+                "expect": 0.7076923076923077,
+                "animT": 0.92,
+                "tipToTarget": 0.30979590284982167,
+                "tipAxis": 0.9364184000039877
+              }
+            ],
+            "projectiles": [
+              {
+                "mark": 0.9,
+                "fx": "swordWave",
+                "fromToHand": 0.4845464001857614
+              }
+            ]
+          },
+          "triple_slash@1.6": {
+            "skillId": "triple_slash",
+            "rate": 1.6,
+            "duration": 1.5,
+            "wall": 0.966666666666668,
+            "hitFxCount": 9,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 24,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.8190597663596,
+            "chordMax": 0.20690645069510671,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [
+              {
+                "mark": 0.17,
+                "wall": 0.09999999999999999,
+                "expect": 0.10625,
+                "animT": 0.17,
+                "tipToTarget": 0.3670938412802096,
+                "tipAxis": 0.8622648176057462
+              },
+              {
+                "mark": 0.5,
+                "wall": 0.31666666666666665,
+                "expect": 0.3125,
+                "animT": 0.5,
+                "tipToTarget": 1.4478099366243506,
+                "tipAxis": 0.6481128672307992
+              },
+              {
+                "mark": 0.92,
+                "wall": 0.5833333333333335,
+                "expect": 0.575,
+                "animT": 0.92,
+                "tipToTarget": 0.30979590284982167,
+                "tipAxis": 0.9364184000039877
+              }
+            ],
+            "projectiles": [
+              {
+                "mark": 0.9,
+                "fx": "swordWave",
+                "fromToHand": 0.5724826968131264
+              }
+            ]
+          },
+          "staff_cast@1": {
+            "skillId": "staff_cast",
+            "rate": 1,
+            "duration": 1.3,
+            "wall": 1.3000000000000003,
+            "hitFxCount": 0,
+            "hitFxErr": 0,
+            "weaponFxCount": 2,
+            "weaponFxErr": 0,
+            "trailFrames": 0,
+            "trailErrMax": 0,
+            "tipJumpMax": 0,
+            "chordMax": 0,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [],
+            "projectiles": [
+              {
+                "mark": 0.58,
+                "fx": "magicBolt",
+                "fromToHand": 0.601282584832629
+              }
+            ]
+          },
+          "staff_cast@1.3": {
+            "skillId": "staff_cast",
+            "rate": 1.3,
+            "duration": 1.3,
+            "wall": 1.0000000000000013,
+            "hitFxCount": 0,
+            "hitFxErr": 0,
+            "weaponFxCount": 2,
+            "weaponFxErr": 0,
+            "trailFrames": 0,
+            "trailErrMax": 0,
+            "tipJumpMax": 0,
+            "chordMax": 0,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [],
+            "projectiles": [
+              {
+                "mark": 0.58,
+                "fx": "magicBolt",
+                "fromToHand": 0.6012825052553724
+              }
+            ]
+          },
+          "staff_cast@1.6": {
+            "skillId": "staff_cast",
+            "rate": 1.6,
+            "duration": 1.3,
+            "wall": 0.8166666666666675,
+            "hitFxCount": 0,
+            "hitFxErr": 0,
+            "weaponFxCount": 2,
+            "weaponFxErr": 0,
+            "trailFrames": 0,
+            "trailErrMax": 0,
+            "tipJumpMax": 0,
+            "chordMax": 0,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [],
+            "projectiles": [
+              {
+                "mark": 0.58,
+                "fx": "magicBolt",
+                "fromToHand": 0.6012823763798583
+              }
+            ]
+          },
+          "leap_slam@1": {
+            "skillId": "leap_slam",
+            "rate": 1,
+            "duration": 1.5,
+            "wall": 1.4999999999999996,
+            "hitFxCount": 3,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 15,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.4775701083605055,
+            "chordMax": 0.16108727488766733,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [
+              {
+                "mark": 0.8,
+                "wall": 0.7833333333333341,
+                "expect": 0.8,
+                "animT": 0.8,
+                "tipToTarget": 1.233426272800848,
+                "tipAxis": 0.6765030512025861
+              }
+            ],
+            "projectiles": []
+          },
+          "leap_slam@1.3": {
+            "skillId": "leap_slam",
+            "rate": 1.3,
+            "duration": 1.5,
+            "wall": 1.1666666666666674,
+            "hitFxCount": 3,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 12,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.6156039911231216,
+            "chordMax": 0.15849800931098126,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [
+              {
+                "mark": 0.8,
+                "wall": 0.6000000000000002,
+                "expect": 0.6153846153846154,
+                "animT": 0.8,
+                "tipToTarget": 1.233426272800848,
+                "tipAxis": 0.6765030512025861
+              }
+            ],
+            "projectiles": []
+          },
+          "leap_slam@1.6": {
+            "skillId": "leap_slam",
+            "rate": 1.6,
+            "duration": 1.5,
+            "wall": 0.9500000000000013,
+            "hitFxCount": 3,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 9,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.7470742686159115,
+            "chordMax": 0.18949333717257,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [
+              {
+                "mark": 0.8,
+                "wall": 0.4833333333333333,
+                "expect": 0.5,
+                "animT": 0.8,
+                "tipToTarget": 1.233426272800848,
+                "tipAxis": 0.6765030512025861
+              }
+            ],
+            "projectiles": []
+          },
+          "whirlwind@1": {
+            "skillId": "whirlwind",
+            "rate": 1,
+            "duration": 1.6,
+            "wall": 1.6166666666666658,
+            "hitFxCount": 9,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 65,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.34197234312351715,
+            "chordMax": 0.1250621519988501,
+            "insideFrames": 2,
+            "inside": [
+              {
+                "t": 1.24,
+                "axis": 0.136,
+                "y": 1.305
+              },
+              {
+                "t": 1.257,
+                "axis": 0.138,
+                "y": 1.308
+              }
+            ],
+            "hits": [
+              {
+                "mark": 0.48,
+                "wall": 0.4666666666666666,
+                "expect": 0.48,
+                "animT": 0.48,
+                "tipToTarget": 1.5061296373987823,
+                "tipAxis": 0.17989357266802236
+              },
+              {
+                "mark": 0.76,
+                "wall": 0.7500000000000007,
+                "expect": 0.76,
+                "animT": 0.76,
+                "tipToTarget": 1.1745137182561483,
+                "tipAxis": 0.1802184823336564
+              },
+              {
+                "mark": 1.04,
+                "wall": 1.0333333333333345,
+                "expect": 1.04,
+                "animT": 1.04,
+                "tipToTarget": 1.2499939108812896,
+                "tipAxis": 0.1804224172846001
+              }
+            ],
+            "projectiles": []
+          },
+          "whirlwind@1.3": {
+            "skillId": "whirlwind",
+            "rate": 1.3,
+            "duration": 1.6,
+            "wall": 1.2500000000000004,
+            "hitFxCount": 9,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 50,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.4333367332160385,
+            "chordMax": 0.14517387732282566,
+            "insideFrames": 2,
+            "inside": [
+              {
+                "t": 1.235,
+                "axis": 0.143,
+                "y": 1.302
+              },
+              {
+                "t": 1.257,
+                "axis": 0.138,
+                "y": 1.308
+              }
+            ],
+            "hits": [
+              {
+                "mark": 0.48,
+                "wall": 0.36666666666666664,
+                "expect": 0.3692307692307692,
+                "animT": 0.48,
+                "tipToTarget": 1.5061296373987823,
+                "tipAxis": 0.17989357266802236
+              },
+              {
+                "mark": 0.76,
+                "wall": 0.5833333333333335,
+                "expect": 0.5846153846153846,
+                "animT": 0.76,
+                "tipToTarget": 1.1745137182561483,
+                "tipAxis": 0.1802184823336564
+              },
+              {
+                "mark": 1.04,
+                "wall": 0.8000000000000008,
+                "expect": 0.8,
+                "animT": 1.04,
+                "tipToTarget": 1.2499939108812896,
+                "tipAxis": 0.1804224172846001
+              }
+            ],
+            "projectiles": []
+          },
+          "whirlwind@1.6": {
+            "skillId": "whirlwind",
+            "rate": 1.6,
+            "duration": 1.6,
+            "wall": 1.016666666666668,
+            "hitFxCount": 9,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 41,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.5183802741753676,
+            "chordMax": 0.13859100653807174,
+            "insideFrames": 1,
+            "inside": [
+              {
+                "t": 1.253,
+                "axis": 0.134,
+                "y": 1.308
+              }
+            ],
+            "hits": [
+              {
+                "mark": 0.48,
+                "wall": 0.2833333333333333,
+                "expect": 0.3,
+                "animT": 0.48,
+                "tipToTarget": 1.5061296373987823,
+                "tipAxis": 0.17989357266802236
+              },
+              {
+                "mark": 0.76,
+                "wall": 0.4666666666666666,
+                "expect": 0.475,
+                "animT": 0.76,
+                "tipToTarget": 1.1745137182561483,
+                "tipAxis": 0.1802184823336564
+              },
+              {
+                "mark": 1.04,
+                "wall": 0.6500000000000004,
+                "expect": 0.65,
+                "animT": 1.04,
+                "tipToTarget": 1.2499939108812896,
+                "tipAxis": 0.1804224172846001
+              }
+            ],
+            "projectiles": []
+          },
+          "star_meteor@1": {
+            "skillId": "star_meteor",
+            "rate": 1,
+            "duration": 1.7,
+            "wall": 1.6999999999999988,
+            "hitFxCount": 0,
+            "hitFxErr": 0,
+            "weaponFxCount": 1,
+            "weaponFxErr": 0,
+            "trailFrames": 0,
+            "trailErrMax": 0,
+            "tipJumpMax": 0,
+            "chordMax": 0,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [],
+            "projectiles": [
+              {
+                "mark": 0.72,
+                "fx": "meteor",
+                "fromToHand": 8.736775167378672
+              }
+            ]
+          },
+          "star_meteor@1.3": {
+            "skillId": "star_meteor",
+            "rate": 1.3,
+            "duration": 1.7,
+            "wall": 1.3166666666666669,
+            "hitFxCount": 0,
+            "hitFxErr": 0,
+            "weaponFxCount": 1,
+            "weaponFxErr": 0,
+            "trailFrames": 0,
+            "trailErrMax": 0,
+            "tipJumpMax": 0,
+            "chordMax": 0,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [],
+            "projectiles": [
+              {
+                "mark": 0.72,
+                "fx": "meteor",
+                "fromToHand": 8.737268227751379
+              }
+            ]
+          },
+          "star_meteor@1.6": {
+            "skillId": "star_meteor",
+            "rate": 1.6,
+            "duration": 1.7,
+            "wall": 1.0666666666666678,
+            "hitFxCount": 0,
+            "hitFxErr": 0,
+            "weaponFxCount": 1,
+            "weaponFxErr": 0,
+            "trailFrames": 0,
+            "trailErrMax": 0,
+            "tipJumpMax": 0,
+            "chordMax": 0,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [],
+            "projectiles": [
+              {
+                "mark": 0.72,
+                "fx": "meteor",
+                "fromToHand": 8.716023386838048
+              }
+            ]
+          },
+          "charge_burst@1": {
+            "skillId": "charge_burst",
+            "rate": 1,
+            "duration": 2.1,
+            "wall": 2.116666666666664,
+            "hitFxCount": 3,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 15,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.31149674319167897,
+            "chordMax": 0.163235914748252,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [
+              {
+                "mark": 1.22,
+                "wall": 1.2166666666666672,
+                "expect": 1.22,
+                "animT": 1.22,
+                "tipToTarget": 0.820629246897528,
+                "tipAxis": 0.36958013842897774
+              }
+            ],
+            "projectiles": []
+          },
+          "charge_burst@1.3": {
+            "skillId": "charge_burst",
+            "rate": 1.3,
+            "duration": 2.1,
+            "wall": 1.6333333333333324,
+            "hitFxCount": 3,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 12,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.3732220589743665,
+            "chordMax": 0.13613874995068434,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [
+              {
+                "mark": 1.22,
+                "wall": 0.9333333333333346,
+                "expect": 0.9384615384615385,
+                "animT": 1.22,
+                "tipToTarget": 0.820629246897528,
+                "tipAxis": 0.36958013842897774
+              }
+            ],
+            "projectiles": []
+          },
+          "charge_burst@1.6": {
+            "skillId": "charge_burst",
+            "rate": 1.6,
+            "duration": 2.1,
+            "wall": 1.3166666666666669,
+            "hitFxCount": 3,
+            "hitFxErr": 0,
+            "weaponFxCount": 0,
+            "weaponFxErr": 0,
+            "trailFrames": 10,
+            "trailErrMax": 0,
+            "tipJumpMax": 0.4190831648516506,
+            "chordMax": 0.15715936081466134,
+            "insideFrames": 0,
+            "inside": [],
+            "hits": [
+              {
+                "mark": 1.22,
+                "wall": 0.7500000000000007,
+                "expect": 0.7625,
+                "animT": 1.22,
+                "tipToTarget": 0.820629246897528,
+                "tipAxis": 0.36958013842897774
+              }
+            ],
+            "projectiles": []
+          }
+        },
+        "torso": {
+          "whirlwind 攻速×1": [
+            {
+              "t": 1.24,
+              "axis": 0.136,
+              "y": 1.305
+            },
+            {
+              "t": 1.257,
+              "axis": 0.138,
+              "y": 1.308
+            }
+          ],
+          "whirlwind 攻速×1.3": [
+            {
+              "t": 1.235,
+              "axis": 0.143,
+              "y": 1.302
+            },
+            {
+              "t": 1.257,
+              "axis": 0.138,
+              "y": 1.308
+            }
+          ],
+          "whirlwind 攻速×1.6": [
+            {
+              "t": 1.253,
+              "axis": 0.134,
+              "y": 1.308
+            }
+          ]
+        },
+        "basic": {
+          "Attack": {
+            "clipName": "Attack",
+            "seconds": 0.6333333333333333,
+            "hitT": 0.25333333333333335,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.4068603749832944,
+            "lhandToGripAtHit": 0.565662924735294,
+            "tipToTargetAtHit": 1.768628846092308
+          },
+          "Attack_1H_Chop": {
+            "clipName": "Attack_1H_Chop",
+            "seconds": 0.6333333333333333,
+            "hitT": 0.248,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.24944281752863345,
+            "lhandToGripAtHit": 0.4781536488282737,
+            "tipToTargetAtHit": 1.5563854934516743
+          },
+          "Attack_1H_Thrust": {
+            "clipName": "Attack_1H_Thrust",
+            "seconds": 0.6333333333333333,
+            "hitT": 0.248,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.24944281752863345,
+            "lhandToGripAtHit": 0.4328890751816167,
+            "tipToTargetAtHit": 1.339717685097638
+          },
+          "Attack_2H_Slash": {
+            "clipName": "Attack_2H_Slash",
+            "seconds": 0.6333333333333333,
+            "hitT": 0.248,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.10497586166806269,
+            "lhandToGripAtHit": 0.14459406748763662,
+            "tipToTargetAtHit": 1.5468016046246422
+          },
+          "Attack_2H_Smash": {
+            "clipName": "Attack_2H_Smash",
+            "seconds": 0.7333333333333333,
+            "hitT": 0.34,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.13504892273880706,
+            "lhandToGripAtHit": 0.1572121526813098,
+            "tipToTargetAtHit": 1.6923804132854663
+          },
+          "Attack_Polearm_Thrust": {
+            "clipName": "Attack_Polearm_Thrust",
+            "seconds": 0.6333333333333333,
+            "hitT": 0.248,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.05276807936986629,
+            "lhandToGripAtHit": 0.060308479051849245,
+            "tipToTargetAtHit": 1.426225261717596
+          },
+          "Attack_Polearm_Swing": {
+            "clipName": "Attack_Polearm_Swing",
+            "seconds": 0.8,
+            "hitT": 0.38,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.04604874814909168,
+            "lhandToGripAtHit": 0.04604874814909168,
+            "tipToTargetAtHit": 1.5747471377011975
+          },
+          "Attack_Hammer_Smash": {
+            "clipName": "Attack_Hammer_Smash",
+            "seconds": 0.8,
+            "hitT": 0.42,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.24944281752863345,
+            "lhandToGripAtHit": 0.4751450776836479,
+            "tipToTargetAtHit": 1.5687311681696106
+          },
+          "Cast_Staff": {
+            "clipName": "Cast_Staff",
+            "seconds": 0.6333333333333333,
+            "hitT": 0.25333333333333335,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.2838103621634974,
+            "lhandToGripAtHit": 0.4522773371864876,
+            "tipToTargetAtHit": 1.7292374719650654
+          },
+          "Cast_Heal": {
+            "clipName": "Cast_Heal",
+            "seconds": 0.9,
+            "hitT": 0.36000000000000004,
+            "trailErrMax": 0,
+            "insideFrames": 0,
+            "lhandToGripMin": 0.2022891230815217,
+            "lhandToGripAtHit": 0.3156363604797706,
+            "tipToTargetAtHit": 1.6495186225858276
+          }
+        },
+        "twoHandGrip": {
+          "Attack_2H_Slash": {
+            "lhandToGripAtHit": 0.145,
+            "lhandToGripMin": 0.105
+          },
+          "Attack_2H_Smash": {
+            "lhandToGripAtHit": 0.157,
+            "lhandToGripMin": 0.135
+          },
+          "Attack_Polearm_Thrust": {
+            "lhandToGripAtHit": 0.06,
+            "lhandToGripMin": 0.053
+          },
+          "Attack_Polearm_Swing": {
+            "lhandToGripAtHit": 0.046,
+            "lhandToGripMin": 0.046
+          },
+          "Attack_Hammer_Smash": {
+            "lhandToGripAtHit": 0.475,
+            "lhandToGripMin": 0.249
+          }
+        },
+        "essential": {
+          "decorCulled": true,
+          "bossWarning": true,
+          "dangerOnMe": true,
+          "dangerFarAway": false,
+          "healOnMe": true,
+          "projectileToMe": true,
+          "projectileElsewhere": false,
+          "statusCue": true,
+          "essentialCount": 5,
+          "budget": {
+            "active": 38,
+            "activeRemote": 1,
+            "activeCritical": 10,
+            "particles": 1526,
+            "granted": 340,
+            "denied": 28,
+            "scaled": 0,
+            "deniedBy": {
+              "secondary-pressure": 26,
+              "distance": 2
+            }
+          }
+        }
+      }
+    }
+  ],
+  "failures": 0,
+  "finishedAt": "2026-11-28T10:53:06.915Z"
+}
